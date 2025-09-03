@@ -44,16 +44,17 @@ const DEFAULT_BLIND_LEVELS: BlindLevel[] = [
   { level: 5, smallBlind: 300, bigBlind: 600, duration: 12 },
   { level: 6, smallBlind: 400, bigBlind: 800, duration: 12 },
   { level: 7, smallBlind: 500, bigBlind: 1000, duration: 16 },
-  { level: 8, smallBlind: 1500, bigBlind: 3000, duration: 16 },
-  { level: 9, smallBlind: 2000, bigBlind: 4000, duration: 16 },
-  { level: 10, smallBlind: 3000, bigBlind: 6000, duration: 16 },
-  { level: 11, smallBlind: 4000, bigBlind: 8000, duration: 16 },
-  { level: 12, smallBlind: 5000, bigBlind: 10000, duration: 10 },
-  { level: 13, smallBlind: 6000, bigBlind: 12000, duration: 10 },
-  { level: 14, smallBlind: 7000, bigBlind: 14000, duration: 10 },
-  { level: 15, smallBlind: 8000, bigBlind: 16000, duration: 10 },
-  { level: 16, smallBlind: 9000, bigBlind: 18000, duration: 10 },
-  { level: 17, smallBlind: 10000, bigBlind: 20000, duration: 10 }
+  { level: 8, smallBlind: 600, bigBlind: 1200, duration: 16 },
+  { level: 9, smallBlind: 800, bigBlind: 1600, duration: 16 },
+  { level: 10, smallBlind: 1000, bigBlind: 2000, duration: 16 },
+  { level: 11, smallBlind: 1500, bigBlind: 3000, duration: 16 },
+  { level: 12, smallBlind: 2000, bigBlind: 4000, duration: 10 },
+  { level: 13, smallBlind: 3000, bigBlind: 6000, duration: 10 },
+  { level: 14, smallBlind: 4000, bigBlind: 8000, duration: 10 },
+  { level: 15, smallBlind: 5000, bigBlind: 10000, duration: 10 },
+  { level: 16, smallBlind: 6000, bigBlind: 12000, duration: 10 },
+  { level: 17, smallBlind: 8000, bigBlind: 16000, duration: 10 },
+  { level: 18, smallBlind: 10000, bigBlind: 20000, duration: 0 }
 ]
 
 export default function TournamentForm({ tournamentId }: { tournamentId?: string }) {
@@ -583,12 +584,16 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                           />
                         </td>
                         <td className="py-2">
-                          <Input
-                            type="number"
-                            value={blind.duration}
-                            onChange={(e) => updateBlindLevel(index, 'duration', parseInt(e.target.value))}
-                            className="w-16 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-sm"
-                          />
+                          {blind.duration === 0 ? (
+                            <span className="text-sm text-poker-cyan font-medium">Sin límite</span>
+                          ) : (
+                            <Input
+                              type="number"
+                              value={blind.duration}
+                              onChange={(e) => updateBlindLevel(index, 'duration', parseInt(e.target.value))}
+                              className="w-16 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-sm"
+                            />
+                          )}
                         </td>
                         <td className="py-2 text-right">
                           {formData.blindLevels.length > 1 && (
