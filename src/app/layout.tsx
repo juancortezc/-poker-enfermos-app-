@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from '@/contexts/AuthContext'
+import { PlayerSearchProvider } from '@/contexts/PlayerSearchContext'
 import { AppLayout } from '@/components/AppLayout'
 
 const geistSans = Geist({
@@ -18,8 +19,14 @@ export const metadata: Metadata = {
   title: "Poker Enfermos",
   description: "Aplicación para gestión de torneos de poker",
   manifest: "/manifest.json",
-  themeColor: "#16a34a",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+  themeColor: "#16a34a"
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false
 };
 
 export default function RootLayout({
@@ -33,9 +40,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
       >
         <AuthProvider>
-          <AppLayout>
-            {children}
-          </AppLayout>
+          <PlayerSearchProvider>
+            <AppLayout>
+              {children}
+            </AppLayout>
+          </PlayerSearchProvider>
         </AuthProvider>
       </body>
     </html>

@@ -58,18 +58,13 @@ export default function PlayerList({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {players.map((player, index) => (
-        <div 
+        <PlayerCard
           key={player.id}
-          className={`animate-stagger animate-stagger-${Math.min(index + 1, 4)}`}
-        >
-          <PlayerCard
-            player={player}
-            canEdit={canEdit}
-            onEdit={() => onEditPlayer(player)}
-          />
-        </div>
+          player={player}
+          canEdit={canEdit}
+        />
       ))}
     </div>
   )

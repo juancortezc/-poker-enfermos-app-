@@ -3,9 +3,13 @@
 import { useAuth } from '@/contexts/AuthContext'
 import MobileNavbar from './MobileNavbar'
 import LoginForm from './LoginForm'
-import { LogOut, User } from 'lucide-react'
+import { LogOut, User, Search, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { UserRole } from '@prisma/client'
+import { usePathname } from 'next/navigation'
+import { usePlayerSearch } from '@/contexts/PlayerSearchContext'
 
 function LogoutButton() {
   const { logout } = useAuth()
@@ -29,6 +33,10 @@ function LogoutButton() {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
+  const pathname = usePathname()
+  const { searchTerm, setSearchTerm, showAddButton, onAddClick } = usePlayerSearch()
+  
+  const isPlayersPage = pathname === '/players'
 
   if (loading) {
     return (
@@ -79,7 +87,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-poker-text">
-                  Poker Enfermos
+                  Enfermos
                 </h1>
                 <div className="flex items-center gap-2">
                   <User size={14} className="text-poker-muted" />
@@ -105,6 +113,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <span className="text-xs text-poker-muted">En vivo</span>
           </div>
+
+          {/* Search and Add Button - Only on Players Page */}
+          {isPlayersPage && (
+            <div className="flex items-center space-x-3 mt-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Buscar por nombre o alias..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-poker-card/50 border-white/10 text-white placeholder:text-gray-400 focus:border-poker-red focus:ring-poker-red/30 h-12"
+                />
+              </div>
+              {showAddButton && onAddClick && (
+                <Button 
+                  onClick={onAddClick}
+                  className="bg-poker-red hover:bg-red-700 text-white h-12 px-6 font-medium"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Agregar
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </header>
 

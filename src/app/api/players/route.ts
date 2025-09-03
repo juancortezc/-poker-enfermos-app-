@@ -93,7 +93,8 @@ export async function POST(req: NextRequest) {
       phone,
       email,
       inviterId,
-      photoUrl
+      photoUrl,
+      joinYear
     } = data
 
     // Validaciones básicas
@@ -122,8 +123,8 @@ export async function POST(req: NextRequest) {
       data: {
         firstName,
         lastName,
-        joinDate: new Date().getFullYear().toString(),
-        joinYear: new Date().getFullYear(),
+        joinDate: (joinYear || new Date().getFullYear()).toString(),
+        joinYear: joinYear || new Date().getFullYear(),
         role,
         aliases,
         pin,

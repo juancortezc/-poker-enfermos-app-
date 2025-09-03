@@ -79,7 +79,8 @@ export async function PUT(
       role,
       inviterId,
       photoUrl,
-      isActive
+      isActive,
+      joinYear
     } = data
 
     // Validaciones básicas
@@ -130,6 +131,10 @@ export async function PUT(
     if (role !== undefined) updateData.role = role
     if (photoUrl !== undefined) updateData.photoUrl = photoUrl
     if (isActive !== undefined) updateData.isActive = isActive
+    if (joinYear !== undefined) {
+      updateData.joinYear = joinYear
+      updateData.joinDate = joinYear.toString()
+    }
 
     // Manejar inviterId según el rol
     if (role !== undefined) {
