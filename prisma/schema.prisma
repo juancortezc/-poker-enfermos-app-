@@ -19,6 +19,11 @@ enum UserRole {
   Invitado
 }
 
+enum TournamentStatus {
+  ACTIVO
+  FINALIZADO
+}
+
 enum GameDateStatus {
   pending
   in_progress
@@ -70,6 +75,7 @@ model Player {
   eliminationsGiven Elimination[] @relation("EliminatorPlayer")
   tournamentRankings TournamentRanking[]
   timerActions      TimerAction[]
+  tournamentParticipants TournamentParticipant[]
   
   // Relación para invitados
   inviter           Player?  @relation("PlayerInviter", fields: [inviterId], references: [id])
@@ -79,25 +85,32 @@ model Player {
 }
 
 model Tournament {
-  id              Int      @id @default(autoincrement())
+  id              Int               @id @default(autoincrement())
   name            String
-  status          String
-  participantIds  String[] @map("participant_ids")
-  blindLevels     Json?    @map("blind_levels")
+  number          Int               @unique // Torneo 28, 29, etc.
+  status          TournamentStatus  @default(ACTIVO)
+  participantIds  String[]          @map("participant_ids")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
 
+  // Relaciones
   gameDates           GameDate[]
   tournamentRankings  TournamentRanking[]
+  blindLevels         BlindLevel[]
+  tournamentParticipants TournamentParticipant[]
 
   @@map("tournaments")
 }
 
 model GameDate {
   id           Int            @id @default(autoincrement())
-  dateNumber   Int            @map("date_number")
-  date         String
-  status       GameDateStatus
+  dateNumber   Int            @map("date_number") // 1 al 12
+  scheduledDate DateTime      @map("scheduled_date") // día/mes/año
+  status       GameDateStatus @default(pending)
   playerIds    String[]       @map("player_ids")
   startTime    String?        @map("start_time")
+  playersMin   Int            @default(9) @map("players_min")
+  playersMax   Int            @default(24) @map("players_max")
   tournamentId Int            @map("tournament_id")
 
   tournament         Tournament          @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
@@ -188,4 +201,32 @@ model TimerAction {
   player     Player     @relation(fields: [performedBy], references: [id])
 
   @@map("timer_actions")
+}
+
+model BlindLevel {
+  id           Int @id @default(autoincrement())
+  tournamentId Int @map("tournament_id")
+  level        Int // 1-17
+  smallBlind   Int @map("small_blind")
+  bigBlind     Int @map("big_blind") 
+  duration     Int // en minutos
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, level])
+  @@map("blind_levels")
+}
+
+model TournamentParticipant {
+  id           Int     @id @default(autoincrement())
+  tournamentId Int     @map("tournament_id")
+  playerId     String  @map("player_id")
+  confirmed    Boolean @default(false)
+  joinedAt     DateTime @default(now()) @map("joined_at")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  player     Player     @relation(fields: [playerId], references: [id])
+
+  @@unique([tournamentId, playerId])
+  @@map("tournament_participants")
 }

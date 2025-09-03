@@ -44,7 +44,6 @@ export default function LoginForm() {
                 width={120}
                 height={120}
                 className="w-full h-full object-contain filter drop-shadow-lg"
-                style={{ filter: 'brightness(0) invert(1)' }}
                 priority
               />
             </div>

@@ -110,12 +110,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   width={32}
                   height={32}
                   className="w-full h-full object-contain"
-                  style={{ filter: 'brightness(0) invert(1)' }}
                 />
               </div>
               <div>
                 <h1 className="text-lg font-bold text-poker-text">
-                  Enfermos
+                  Poker de Enfermos
                 </h1>
                 <div className="flex items-center gap-2">
                   <User size={14} className="text-poker-muted" />
