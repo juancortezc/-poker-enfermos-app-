@@ -3,6 +3,9 @@
 import { useAuth } from '@/contexts/AuthContext'
 import MobileNavbar from './MobileNavbar'
 import LoginForm from './LoginForm'
+import { LogOut, User } from 'lucide-react'
+import Image from 'next/image'
+import { UserRole } from '@prisma/client'
 
 function LogoutButton() {
   const { logout } = useAuth()
@@ -16,9 +19,10 @@ function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="text-gray-500 hover:text-red-600 transition-colors"
+      className="text-poker-muted hover:text-poker-red transition-smooth p-2 rounded-lg hover:bg-poker-red/10"
+      title="Cerrar sesión"
     >
-      Salir
+      <LogOut size={20} />
     </button>
   )
 }
@@ -28,10 +32,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+      <div className="min-h-screen flex items-center justify-center bg-poker-dark">
+        <div className="text-center animate-enter">
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 rounded-full border-4 border-poker-card"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-poker-red border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-poker-muted">Cargando...</p>
         </div>
       </div>
     )
@@ -41,27 +48,74 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return <LoginForm />
   }
 
+  const getRoleBadgeColor = (role: UserRole) => {
+    switch (role) {
+      case UserRole.Comision:
+        return 'bg-poker-red text-white'
+      case UserRole.Enfermo:
+        return 'bg-poker-green text-white'
+      case UserRole.Invitado:
+        return 'bg-poker-cyan text-poker-dark'
+    }
+  }
+
   return (
-    <div className="min-h-screen pb-16">
-      <header className="bg-white shadow-sm border-b border-gray-200 p-4 sticky top-0 z-40">
-        <div className="max-w-md mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="text-2xl">🃏</div>
-            <div>
-              <h1 className="text-lg font-bold text-green-800">Poker Enfermos</h1>
-              <p className="text-sm text-gray-600">
-                {user.firstName} {user.lastName} ({user.role})
-              </p>
+    <div className="min-h-screen bg-poker-dark pb-20">
+      {/* Header */}
+      <header className="bg-poker-card shadow-lg border-b border-white/10 sticky top-0 z-40">
+        <div className="max-w-md mx-auto p-4">
+          <div className="flex justify-between items-center">
+            {/* Logo y usuario */}
+            <div className="flex items-center space-x-3">
+              <div className="relative w-10 h-10 bg-poker-dark rounded-lg p-1.5 shadow-inner">
+                <Image
+                  src="https://storage.googleapis.com/poker-enfermos/logo.png"
+                  alt="Poker Logo"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain"
+                  style={{ filter: 'brightness(0) invert(1)' }}
+                />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-poker-text">
+                  Poker Enfermos
+                </h1>
+                <div className="flex items-center gap-2">
+                  <User size={14} className="text-poker-muted" />
+                  <span className="text-sm text-poker-muted">
+                    {user.firstName} {user.lastName}
+                  </span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRoleBadgeColor(user.role)}`}>
+                    {user.role}
+                  </span>
+                </div>
+              </div>
             </div>
+
+            {/* Botón logout */}
+            <LogoutButton />
           </div>
-          <LogoutButton />
+
+          {/* Indicador de conexión en vivo */}
+          <div className="flex items-center justify-end mt-2 space-x-2">
+            <div className="relative flex items-center">
+              <div className="w-2 h-2 bg-poker-cyan rounded-full animate-pulse"></div>
+              <div className="absolute w-2 h-2 bg-poker-cyan rounded-full animate-ping"></div>
+            </div>
+            <span className="text-xs text-poker-muted">En vivo</span>
+          </div>
         </div>
       </header>
 
+      {/* Contenido principal */}
       <main className="max-w-md mx-auto p-4">
-        {children}
+        <div className="animate-enter">
+          {children}
+        </div>
       </main>
 
+      {/* Navbar móvil */}
       <MobileNavbar />
     </div>
   )

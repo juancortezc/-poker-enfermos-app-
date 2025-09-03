@@ -32,9 +32,9 @@ export default function MobileNavbar() {
   )
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-1 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-poker-card border-t border-white/10 px-2 py-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
       <div className="flex justify-around items-center max-w-md mx-auto">
-        {filteredItems.map((item) => {
+        {filteredItems.map((item, index) => {
           const Icon = item.icon
           const isActive = pathname === item.href
           
@@ -42,14 +42,25 @@ export default function MobileNavbar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center p-2 rounded-lg transition-colors ${
-                isActive 
-                  ? 'text-green-600 bg-green-50' 
-                  : 'text-gray-600 hover:text-green-600 hover:bg-gray-50'
-              }`}
+              className={`
+                flex flex-col items-center p-2 rounded-xl min-w-[60px] 
+                transition-all duration-200 transform active:scale-95
+                ${isActive 
+                  ? 'text-white bg-poker-red shadow-lg shadow-poker-red/30' 
+                  : 'text-poker-muted hover:text-poker-text hover:bg-white/5'
+                }
+                animate-stagger animate-stagger-${index + 1}
+              `}
             >
-              <Icon size={20} />
-              <span className="text-xs mt-1 font-medium">{item.label}</span>
+              <div className="relative">
+                <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                {isActive && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-poker-cyan rounded-full animate-pulse" />
+                )}
+              </div>
+              <span className={`text-xs mt-1 font-medium ${isActive ? 'font-bold' : ''}`}>
+                {item.label}
+              </span>
             </Link>
           )
         })}

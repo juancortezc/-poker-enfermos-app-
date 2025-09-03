@@ -1,43 +1,67 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Trophy, Users, Clock, Calendar } from 'lucide-react'
+import { Trophy, Users, Clock, Calendar, TrendingUp, Activity, DollarSign, BarChart3 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const [liveStats, setLiveStats] = useState({
+    activePlayers: 23,
+    pot: 2300,
+    currentBlind: '50/100',
+    timeElapsed: '01:24:35'
+  })
+
+  // Simulación de actualización en vivo cada 3 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveStats(prev => ({
+        ...prev,
+        pot: prev.pot + Math.floor(Math.random() * 100),
+        timeElapsed: new Date().toLocaleTimeString()
+      }))
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const quickActions = [
     {
       title: 'Timer Activo',
-      description: 'Ver o controlar el timer del torneo',
+      description: 'Control de blinds',
       href: '/timer',
       icon: Clock,
-      color: 'bg-blue-500',
+      gradient: 'from-poker-red to-red-700',
+      stats: 'Nivel 4',
     },
     {
       title: 'Rankings',
-      description: 'Ver posiciones y estadísticas',
+      description: 'Tabla de posiciones',
       href: '/rankings',
       icon: Trophy,
-      color: 'bg-yellow-500',
+      gradient: 'from-yellow-500 to-yellow-600',
+      stats: 'Top 10',
     },
     {
       title: 'Jugadores',
-      description: 'Gestionar jugadores del grupo',
+      description: 'Gestión del grupo',
       href: '/players',
       icon: Users,
-      color: 'bg-green-500',
+      gradient: 'from-poker-green to-green-600',
+      stats: '29 activos',
       adminOnly: true,
     },
     {
       title: 'Fechas',
-      description: 'Administrar fechas de torneos',
+      description: 'Calendario torneo',
       href: '/dates',
       icon: Calendar,
-      color: 'bg-purple-500',
+      gradient: 'from-purple-500 to-purple-600',
+      stats: 'Fecha 11/12',
       adminOnly: true,
     },
   ]
@@ -48,11 +72,12 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Header con saludo */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-2xl font-bold text-poker-text mb-2 animate-enter">
           ¡Bienvenido, {user?.firstName}!
         </h2>
-        <p className="text-gray-600">
+        <p className="text-poker-muted animate-enter animate-stagger-1">
           {user?.role === 'Comision' 
             ? 'Panel de administración del torneo'
             : 'Dashboard del jugador'
@@ -60,24 +85,39 @@ export default function Dashboard() {
         </p>
       </div>
 
+      {/* Cards de acciones rápidas */}
       <div className="grid grid-cols-2 gap-4">
-        {filteredActions.map((action) => {
+        {filteredActions.map((action, index) => {
           const Icon = action.icon
           return (
             <Link key={action.href} href={action.href}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardHeader className="pb-2">
-                  <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center mb-2`}>
+              <Card className={`
+                bg-poker-card border-white/10 hover:border-poker-red/50 
+                transition-all duration-200 cursor-pointer h-full
+                hover:shadow-xl hover:shadow-black/30 hover:-translate-y-1
+                animate-stagger animate-stagger-${index + 1}
+              `}>
+                <CardHeader className="pb-3">
+                  <div className={`
+                    w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} 
+                    flex items-center justify-center mb-3 shadow-lg
+                  `}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <CardTitle className="text-sm font-semibold">
+                  <CardTitle className="text-base font-bold text-poker-text">
                     {action.title}
                   </CardTitle>
+                  <p className="text-xs text-poker-muted mt-1">
+                    {action.description}
+                  </p>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <CardDescription className="text-xs">
-                    {action.description}
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-poker-cyan font-semibold">
+                      {action.stats}
+                    </span>
+                    <div className="w-2 h-2 bg-poker-cyan rounded-full animate-pulse" />
+                  </div>
                 </CardContent>
               </Card>
             </Link>
@@ -85,45 +125,84 @@ export default function Dashboard() {
         })}
       </div>
 
-      <Card>
+      {/* Stats en vivo */}
+      <Card className="bg-poker-card border-poker-cyan/20 relative overflow-hidden animate-enter animate-stagger-3">
+        <div className="absolute top-0 right-0 p-4">
+          <div className="relative">
+            <div className="w-3 h-3 bg-poker-cyan rounded-full animate-ping absolute"></div>
+            <div className="w-3 h-3 bg-poker-cyan rounded-full"></div>
+          </div>
+        </div>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-yellow-500" />
-            Torneo Actual
+          <CardTitle className="flex items-center gap-2 text-poker-text">
+            <Activity className="w-5 h-5 text-poker-cyan" />
+            Estado del Torneo en Vivo
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Estado:</span>
-              <span className="text-sm font-medium text-green-600">Activo</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-poker-muted mb-1">Jugadores Activos</p>
+                <p className="text-2xl font-bold text-poker-text animate-live-pulse">
+                  {liveStats.activePlayers}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-poker-muted mb-1">Blinds Actuales</p>
+                <p className="text-lg font-semibold text-poker-cyan">
+                  {liveStats.currentBlind}
+                </p>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Jugadores:</span>
-              <span className="text-sm font-medium">23</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Próxima Fecha:</span>
-              <span className="text-sm font-medium">Fecha 12</span>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-poker-muted mb-1">Pozo Total</p>
+                <p className="text-2xl font-bold text-poker-green animate-live-pulse">
+                  ${liveStats.pot}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-poker-muted mb-1">Tiempo</p>
+                <p className="text-lg font-mono text-poker-text">
+                  {liveStats.timeElapsed}
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Acciones rápidas solo para Comision */}
       {user?.role === 'Comision' && (
-        <Card className="border-orange-200 bg-orange-50">
+        <Card className="bg-poker-red/10 border-poker-red/30 animate-enter animate-stagger-4">
           <CardHeader>
-            <CardTitle className="text-orange-800">Acciones Rápidas</CardTitle>
+            <CardTitle className="text-poker-red flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Centro de Control
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start bg-poker-dark hover:bg-poker-red hover:text-white border-poker-red/30 text-poker-text transition-smooth"
+            >
+              <TrendingUp className="w-4 h-4 mr-2" />
               Iniciar nueva fecha
             </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start bg-poker-dark hover:bg-poker-red hover:text-white border-poker-red/30 text-poker-text transition-smooth"
+            >
+              <Activity className="w-4 h-4 mr-2" />
               Registrar eliminación
             </Button>
-            <Button variant="outline" size="sm" className="w-full justify-start">
-              Ver estadísticas
+            <Button 
+              variant="outline" 
+              className="w-full justify-start bg-poker-dark hover:bg-poker-red hover:text-white border-poker-red/30 text-poker-text transition-smooth"
+            >
+              <DollarSign className="w-4 h-4 mr-2" />
+              Gestionar buy-ins
             </Button>
           </CardContent>
         </Card>
