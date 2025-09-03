@@ -1,0 +1,1 @@
+// Service worker placeholder - será generado por next-pwa

@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  Comision
+  Enfermo
+  Invitado
+}
+
+enum GameDateStatus {
+  pending
+  in_progress
+  completed
+  cancelled
+}
+
+enum TimerStatus {
+  inactive
+  active
+  paused
+  completed
+}
+
+enum TimerActionType {
+  start
+  pause
+  resume
+  stop
+  level_up
+  level_down
+  reset
+}
+
+model Player {
+  id                String   @id @default(cuid())
+  firstName         String   @map("first_name")
+  lastName          String   @map("last_name")
+  joinDate          String   @map("join_date")
+  photoUrl          String?  @map("photo_url")
+  isTemporary       Boolean? @map("is_temporary")
+  inviterId         String?  @map("inviter_id")
+  role              UserRole
+  adminKey          String?  @map("admin_key")
+  aliases           String[]
+  joinYear          Int?     @map("join_year")
+  lastVictoryDate   String?  @map("last_victory_date")
+
+  gameResults       GameResult[]
+  eliminations      Elimination[] @relation("EliminatedPlayer")
+  eliminationsGiven Elimination[] @relation("EliminatorPlayer")
+  tournamentRankings TournamentRanking[]
+  timerActions      TimerAction[]
+
+  @@map("players")
+}
+
+model Tournament {
+  id              Int      @id @default(autoincrement())
+  name            String
+  status          String
+  participantIds  String[] @map("participant_ids")
+  blindLevels     Json?    @map("blind_levels")
+
+  gameDates           GameDate[]
+  tournamentRankings  TournamentRanking[]
+
+  @@map("tournaments")
+}
+
+model GameDate {
+  id           Int            @id @default(autoincrement())
+  dateNumber   Int            @map("date_number")
+  date         String
+  status       GameDateStatus
+  playerIds    String[]       @map("player_ids")
+  startTime    String?        @map("start_time")
+  tournamentId Int            @map("tournament_id")
+
+  tournament         Tournament          @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  gameResults        GameResult[]
+  eliminations       Elimination[]
+  timerStates        TimerState[]
+  tournamentRankings TournamentRanking[]
+
+  @@map("game_dates")
+}
+
+model GameResult {
+  id         Int @id @default(autoincrement())
+  playerId   String @map("player_id")
+  points     Int
+  gameDateId Int @map("game_date_id")
+
+  gameDate GameDate @relation(fields: [gameDateId], references: [id], onDelete: Cascade)
+  player   Player   @relation(fields: [playerId], references: [id])
+
+  @@map("game_results")
+}
+
+model Elimination {
+  id                  Int    @id @default(autoincrement())
+  position            Int
+  points              Int
+  eliminatedPlayerId  String @map("eliminated_player_id")
+  eliminatorPlayerId  String @map("eliminator_player_id")
+  eliminationTime     String @map("elimination_time")
+  gameDateId          Int    @map("game_date_id")
+
+  gameDate         GameDate @relation(fields: [gameDateId], references: [id], onDelete: Cascade)
+  eliminatedPlayer Player   @relation("EliminatedPlayer", fields: [eliminatedPlayerId], references: [id])
+  eliminatorPlayer Player   @relation("EliminatorPlayer", fields: [eliminatorPlayerId], references: [id])
+
+  @@map("eliminations")
+}
+
+model TournamentRanking {
+  id                   Int   @id @default(autoincrement())
+  tournamentId         Int   @map("tournament_id")
+  gameDateId           Int   @map("game_date_id")
+  playerId             String @map("player_id")
+  rankingPosition      Int   @map("ranking_position")
+  accumulatedPoints    Int   @map("accumulated_points")
+  eliminationPositions Int[] @map("elimination_positions")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  gameDate   GameDate   @relation(fields: [gameDateId], references: [id], onDelete: Cascade)
+  player     Player     @relation(fields: [playerId], references: [id])
+
+  @@unique([tournamentId, gameDateId, playerId])
+  @@map("tournament_rankings")
+}
+
+model TimerState {
+  id             Int           @id @default(autoincrement())
+  gameDateId     Int           @unique @map("game_date_id")
+  status         TimerStatus   @default(inactive)
+  currentLevel   Int           @default(1) @map("current_level")
+  timeRemaining  Int           @default(0) @map("time_remaining")
+  totalElapsed   Int           @default(0) @map("total_elapsed")
+  startTime      DateTime?     @map("start_time")
+  pausedAt       DateTime?     @map("paused_at")
+  pausedDuration Int           @default(0) @map("paused_duration")
+  levelStartTime DateTime?     @map("level_start_time")
+  blindLevels    Json?         @map("blind_levels")
+  lastUpdated    DateTime      @default(now()) @map("last_updated")
+
+  gameDate     GameDate      @relation(fields: [gameDateId], references: [id], onDelete: Cascade)
+  timerActions TimerAction[]
+
+  @@map("timer_states")
+}
+
+model TimerAction {
+  id            Int               @id @default(autoincrement())
+  timerStateId  Int               @map("timer_state_id")
+  actionType    TimerActionType   @map("action_type")
+  performedBy   String            @map("performed_by")
+  performedAt   DateTime          @default(now()) @map("performed_at")
+  fromLevel     Int?              @map("from_level")
+  toLevel       Int?              @map("to_level")
+  metadata      Json?
+
+  timerState TimerState @relation(fields: [timerStateId], references: [id], onDelete: Cascade)
+  player     Player     @relation(fields: [performedBy], references: [id])
+
+  @@map("timer_actions")
+}
