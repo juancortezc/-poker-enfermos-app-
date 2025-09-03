@@ -56,12 +56,24 @@ model Player {
   aliases           String[]
   joinYear          Int?     @map("join_year")
   lastVictoryDate   String?  @map("last_victory_date")
+  
+  // Nuevos campos
+  pin               String?  @db.Char(4)
+  birthDate         String?  @map("birth_date")
+  phone             String?
+  email             String?
+  isActive          Boolean  @default(true) @map("is_active")
 
+  // Relaciones
   gameResults       GameResult[]
   eliminations      Elimination[] @relation("EliminatedPlayer")
   eliminationsGiven Elimination[] @relation("EliminatorPlayer")
   tournamentRankings TournamentRanking[]
   timerActions      TimerAction[]
+  
+  // Relación para invitados
+  inviter           Player?  @relation("PlayerInviter", fields: [inviterId], references: [id])
+  invitees          Player[] @relation("PlayerInviter")
 
   @@map("players")
 }
