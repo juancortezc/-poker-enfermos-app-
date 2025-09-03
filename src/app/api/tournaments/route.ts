@@ -62,16 +62,28 @@ export async function POST(req: NextRequest) {
     try {
       const data = await req.json()
       const {
-        name,
+        number,
         gameDates, // Array de 12 fechas
         participantIds, // Array de IDs de jugadores
         blindLevels // Array de niveles de blinds
       } = data
 
       // Validaciones
-      if (!name || !name.trim()) {
+      if (!number || number < 1) {
         return NextResponse.json(
-          { error: 'El nombre del torneo es obligatorio' },
+          { error: 'El número del torneo es obligatorio' },
+          { status: 400 }
+        )
+      }
+
+      // Verificar que el número no esté en uso
+      const existingTournament = await prisma.tournament.findUnique({
+        where: { number }
+      })
+      
+      if (existingTournament) {
+        return NextResponse.json(
+          { error: `Ya existe un torneo con el número ${number}` },
           { status: 400 }
         )
       }
@@ -90,17 +102,11 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      // Obtener el siguiente número de torneo
-      const lastTournament = await prisma.tournament.findFirst({
-        orderBy: { number: 'desc' }
-      })
-      const tournamentNumber = lastTournament ? lastTournament.number + 1 : 28
-
       // Crear el torneo
       const tournament = await prisma.tournament.create({
         data: {
-          name: name.trim(),
-          number: tournamentNumber,
+          name: `Torneo ${number}`,
+          number,
           participantIds,
           gameDates: {
             create: gameDates.map((date: any, index: number) => ({

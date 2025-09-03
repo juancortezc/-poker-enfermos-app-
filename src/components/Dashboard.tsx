@@ -56,7 +56,7 @@ export default function Dashboard() {
       stats: 'Top 10',
     },
     {
-      title: 'Jugadores',
+      title: 'Enfermos',
       description: 'Gestión del grupo',
       href: '/players',
       icon: Users,

@@ -16,7 +16,6 @@ const navItems = [
   { href: '/', label: 'Inicio', icon: HomeIcon, roles: ['all'] },
   { href: '/timer', label: 'Timer', icon: TimerIcon, roles: ['all'] },
   { href: '/rankings', label: 'Rankings', icon: TrophyIcon, roles: ['all'] },
-  { href: '/tournaments', label: 'Torneos', icon: TrophyIcon, roles: ['Comision'] },
   { href: '/admin', label: 'Admin', icon: SettingsIcon, roles: ['Comision'] },
 ]
 

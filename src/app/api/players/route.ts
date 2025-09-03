@@ -5,7 +5,7 @@ import { withAuth, withComisionAuth } from '@/lib/api-auth'
 
 // GET /api/players - Lista de jugadores con filtros
 export async function GET(req: NextRequest) {
-  return withAuth(req, async (req) => {
+  return withAuth(req, async (req, user) => {
   try {
     const { searchParams } = new URL(req.url)
     const roleParam = searchParams.get('role')
