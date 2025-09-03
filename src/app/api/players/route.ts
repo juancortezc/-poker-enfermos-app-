@@ -8,14 +8,20 @@ export async function GET(req: NextRequest) {
   return withAuth(req, async (req) => {
   try {
     const { searchParams } = new URL(req.url)
-    const role = searchParams.get('role') as UserRole | null
+    const roleParam = searchParams.get('role')
     const search = searchParams.get('search')
     const includeInactive = searchParams.get('includeInactive') === 'true'
 
     const where: Record<string, unknown> = {}
     
-    if (role) {
-      where.role = role
+    if (roleParam) {
+      // Handle multiple roles separated by comma
+      const roles = roleParam.split(',').map(r => r.trim() as UserRole)
+      if (roles.length === 1) {
+        where.role = roles[0]
+      } else {
+        where.role = { in: roles }
+      }
     }
     
     if (!includeInactive) {

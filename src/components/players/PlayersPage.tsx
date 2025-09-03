@@ -158,27 +158,29 @@ export default function PlayersPage() {
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex space-x-0">
-        <button
-          onClick={() => setActiveTab('enfermos')}
-          className={`px-6 py-3 font-medium rounded-l-lg transition-all ${
-            activeTab === 'enfermos'
-              ? 'bg-poker-red text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
-        >
-          Enfermos ({enfermosCount})
-        </button>
-        <button
-          onClick={() => setActiveTab('invitados')}
-          className={`px-6 py-3 font-medium rounded-r-lg transition-all ${
-            activeTab === 'invitados'
-              ? 'bg-poker-red text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-          }`}
-        >
-          Invitados ({invitadosCount})
-        </button>
+      <div className="flex justify-center">
+        <div className="flex space-x-0">
+          <button
+            onClick={() => setActiveTab('enfermos')}
+            className={`px-6 py-3 font-medium rounded-l-lg transition-all ${
+              activeTab === 'enfermos'
+                ? 'bg-poker-red text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Enfermos ({enfermosCount})
+          </button>
+          <button
+            onClick={() => setActiveTab('invitados')}
+            className={`px-6 py-3 font-medium rounded-r-lg transition-all ${
+              activeTab === 'invitados'
+                ? 'bg-poker-red text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Invitados ({invitadosCount})
+          </button>
+        </div>
       </div>
 
       {/* Players List */}

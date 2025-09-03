@@ -3,13 +3,14 @@
 import { useAuth } from '@/contexts/AuthContext'
 import MobileNavbar from './MobileNavbar'
 import LoginForm from './LoginForm'
-import { LogOut, User, Search, Plus } from 'lucide-react'
+import { LogOut, User, Search, Plus, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import { UserRole } from '@prisma/client'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { usePlayerSearch } from '@/contexts/PlayerSearchContext'
+import { useState, useRef, useEffect } from 'react'
 
 function LogoutButton() {
   const { logout } = useAuth()
@@ -34,9 +35,36 @@ function LogoutButton() {
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
   const pathname = usePathname()
-  const { searchTerm, setSearchTerm, showAddButton, onAddClick } = usePlayerSearch()
+  const router = useRouter()
+  const { searchTerm, setSearchTerm, showAddButton } = usePlayerSearch()
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   
   const isPlayersPage = pathname === '/players'
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleAddClick = () => {
+    setShowDropdown(!showDropdown)
+  }
+
+  const handlePlayerTypeSelect = (type: 'enfermo' | 'invitado') => {
+    setShowDropdown(false)
+    if (type === 'enfermo') {
+      router.push('/players/new')
+    } else {
+      router.push('/players/new?type=invitado')
+    }
+  }
 
   if (loading) {
     return (
@@ -127,14 +155,38 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   className="pl-10 bg-poker-card/50 border-white/10 text-white placeholder:text-gray-400 focus:border-poker-red focus:ring-poker-red/30 h-12"
                 />
               </div>
-              {showAddButton && onAddClick && (
-                <Button 
-                  onClick={onAddClick}
-                  className="bg-poker-red hover:bg-red-700 text-white h-12 px-6 font-medium"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Agregar
-                </Button>
+              {showAddButton && (
+                <div className="relative" ref={dropdownRef}>
+                  <Button 
+                    onClick={handleAddClick}
+                    className="bg-poker-red hover:bg-red-700 text-white h-12 px-6 font-medium"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Agregar
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </Button>
+                  
+                  {showDropdown && (
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-poker-card border border-white/10 rounded-lg shadow-lg z-50">
+                      <div className="py-1">
+                        <button
+                          onClick={() => handlePlayerTypeSelect('invitado')}
+                          className="w-full text-left px-4 py-2 text-white hover:bg-poker-red/20 transition-colors"
+                        >
+                          <div className="font-medium">Invitado</div>
+                          <div className="text-sm text-gray-400">Invitado por un Enfermo</div>
+                        </button>
+                        <button
+                          onClick={() => handlePlayerTypeSelect('enfermo')}
+                          className="w-full text-left px-4 py-2 text-white hover:bg-poker-red/20 transition-colors"
+                        >
+                          <div className="font-medium">Enfermo/Comisión</div>
+                          <div className="text-sm text-gray-400">Miembro del grupo</div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           )}
