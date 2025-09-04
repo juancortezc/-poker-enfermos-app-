@@ -5,7 +5,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { UserRole, TournamentStatus } from '@prisma/client'
 import { Button } from '@/components/ui/button'
-import { Plus, Trophy, Calendar, Users, Clock } from 'lucide-react'
+import ProgressBar, { CircularProgress } from '@/components/ui/ProgressBar'
+import LoadingState, { CardSkeleton } from '@/components/ui/LoadingState'
+import { Plus, Trophy, Calendar, Users, Clock, Target, CheckCircle } from 'lucide-react'
 import { canCRUD } from '@/lib/auth'
 
 interface Tournament {
@@ -105,8 +107,13 @@ export default function TournamentsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-poker-red"></div>
+      <div className="space-y-6">
+        <LoadingState message="Cargando torneos..." size="md" />
+        <div className="grid gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     )
   }
@@ -179,57 +186,111 @@ export default function TournamentsPage() {
             )}
           </div>
         ) : (
-          tournaments.map((tournament) => (
-            <div
-              key={tournament.id}
-              onClick={() => handleTournamentClick(tournament.id)}
-              className="bg-poker-card border border-white/10 rounded-lg p-6 hover:bg-poker-card/80 cursor-pointer transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-xl font-bold text-white">
-                      Torneo {tournament.number}
-                    </h3>
-                    {getStatusBadge(tournament.status)}
-                  </div>
-                  
-                  <h4 className="text-lg text-poker-text mb-3">
-                    {tournament.name}
-                  </h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="flex items-center space-x-2 text-poker-muted">
-                      <Users className="w-4 h-4" />
-                      <span>{tournament._count.tournamentParticipants} participantes</span>
+          tournaments.map((tournament) => {
+            const completedDates = tournament.gameDates.filter(d => d.status === 'completed').length
+            const totalDates = tournament.gameDates.length || 12
+            // const progressPercentage = (completedDates / totalDates) * 100 // Para uso futuro
+            const nextDate = tournament.gameDates.find(d => d.status === 'pending')
+            
+            return (
+              <div
+                key={tournament.id}
+                onClick={() => handleTournamentClick(tournament.id)}
+                className="bg-poker-card border border-white/10 rounded-lg p-6 hover:bg-poker-card/80 cursor-pointer transition-all group hover:border-white/20"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h3 className="text-xl font-bold text-white group-hover:text-poker-cyan transition-colors">
+                        Torneo {tournament.number}
+                      </h3>
+                      {getStatusBadge(tournament.status)}
                     </div>
                     
-                    <div className="flex items-center space-x-2 text-poker-muted">
-                      <Calendar className="w-4 h-4" />
-                      <span>12 fechas programadas</span>
+                    <h4 className="text-lg text-poker-text mb-4">
+                      {tournament.name}
+                    </h4>
+
+                    {/* Progress section para torneos activos */}
+                    {tournament.status === 'ACTIVO' && (
+                      <div className="mb-4 space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-poker-text">Progreso del torneo</span>
+                          <span className="text-poker-cyan font-medium">{completedDates}/{totalDates} fechas</span>
+                        </div>
+                        <ProgressBar 
+                          value={completedDates} 
+                          max={totalDates} 
+                          color={completedDates === totalDates ? 'green' : 'cyan'}
+                          size="md"
+                        />
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm mb-4">
+                      <div className="flex items-center space-x-2 text-poker-muted">
+                        <Users className="w-4 h-4 text-poker-cyan" />
+                        <span>{tournament._count.tournamentParticipants} participantes</span>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 text-poker-muted">
+                        <Calendar className="w-4 h-4 text-green-400" />
+                        <span>{completedDates}/{totalDates} fechas</span>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 text-poker-muted">
+                        <Clock className="w-4 h-4 text-yellow-400" />
+                        <span>{formatDate(tournament.createdAt)}</span>
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-2 text-poker-muted">
-                      <Clock className="w-4 h-4" />
-                      <span>Creado: {formatDate(tournament.createdAt)}</span>
-                    </div>
+
+                    {/* Próxima fecha o estado de finalización */}
+                    {tournament.status === 'ACTIVO' ? (
+                      nextDate ? (
+                        <div className="p-3 bg-gradient-to-r from-poker-cyan/10 to-poker-red/10 rounded-lg border border-poker-cyan/20">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <Target className="w-4 h-4 text-poker-cyan" />
+                            <span className="text-sm font-medium text-poker-cyan">Próxima fecha</span>
+                          </div>
+                          <p className="text-sm text-white">
+                            Fecha {nextDate.dateNumber} • {formatDate(nextDate.scheduledDate)}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                          <div className="flex items-center space-x-2">
+                            <CheckCircle className="w-4 h-4 text-green-400" />
+                            <span className="text-sm font-medium text-green-400">Todas las fechas completadas</span>
+                          </div>
+                        </div>
+                      )
+                    ) : (
+                      <div className="p-3 bg-gray-500/10 rounded-lg border border-gray-500/20">
+                        <div className="flex items-center space-x-2">
+                          <Trophy className="w-4 h-4 text-gray-400" />
+                          <span className="text-sm font-medium text-gray-400">Torneo finalizado</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Próxima fecha */}
-                  {tournament.gameDates.length > 0 && (
-                    <div className="mt-4 p-3 bg-poker-dark/50 rounded-lg">
-                      <p className="text-sm text-poker-cyan font-medium">
-                        Próxima fecha: {tournament.gameDates.find(d => d.status === 'pending')
-                          ? `Fecha ${tournament.gameDates.find(d => d.status === 'pending')?.dateNumber} - ${formatDate(tournament.gameDates.find(d => d.status === 'pending')?.scheduledDate || '')}`
-                          : 'Todas las fechas completadas'
-                        }
-                      </p>
+                  {/* Circular progress para vista rápida */}
+                  {tournament.status === 'ACTIVO' && (
+                    <div className="ml-4 flex-shrink-0">
+                      <CircularProgress
+                        value={completedDates}
+                        max={totalDates}
+                        size={60}
+                        strokeWidth={6}
+                        color={completedDates === totalDates ? 'green' : 'cyan'}
+                        showValue
+                      />
                     </div>
                   )}
                 </div>
               </div>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>
