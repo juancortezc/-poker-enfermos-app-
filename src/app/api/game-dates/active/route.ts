@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
         where: {
           OR: [
             { status: 'pending' },
-            { status: 'active' }
+            { status: 'in_progress' }
           ]
         },
         include: {

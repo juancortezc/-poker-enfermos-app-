@@ -52,23 +52,38 @@ export async function GET(request: NextRequest) {
         )
       }
 
-      // Obtener la fecha programada desde el torneo
-      const scheduledGameDate = activeTournament.gameDates.find(
-        gd => gd.dateNumber === nextDateNumber
-      )
+      // Get all active players for additional selection
+      const allActivePlayers = await prisma.player.findMany({
+        where: {
+          isActive: true,
+          OR: [
+            { role: 'Comision' },
+            { role: 'Enfermo' }
+          ]
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          photoUrl: true,
+          isActive: true
+        }
+      })
 
-      // Si no existe en la tabla gameDates, obtener de la definición del torneo
-      let scheduledDate
-      if (scheduledGameDate) {
-        scheduledDate = scheduledGameDate.scheduledDate
-      } else {
-        // Buscar en las fechas programadas del torneo
-        // Por ahora, usar fecha actual + días para el siguiente martes
-        const today = new Date()
-        const daysUntilTuesday = (2 + 7 - today.getDay()) % 7
-        scheduledDate = new Date(today)
-        scheduledDate.setDate(today.getDate() + daysUntilTuesday + ((nextDateNumber - 1) * 15))
-      }
+      // Calculate next scheduled date (Tuesdays, 15 days apart)
+      const today = new Date()
+      const daysUntilTuesday = (2 + 7 - today.getDay()) % 7
+      const scheduledDate = new Date(today)
+      scheduledDate.setDate(today.getDate() + daysUntilTuesday + ((nextDateNumber - 1) * 15))
+
+      const registeredPlayers = activeTournament.tournamentParticipants
+        .filter(tp => tp.player.isActive)
+        .map(tp => tp.player)
+
+      // Get players not registered in tournament
+      const registeredPlayerIds = registeredPlayers.map(p => p.id)
+      const availableAdditionalPlayers = allActivePlayers.filter(p => !registeredPlayerIds.includes(p.id))
 
       return NextResponse.json({
         tournament: {
@@ -78,11 +93,10 @@ export async function GET(request: NextRequest) {
         },
         nextDate: {
           dateNumber: nextDateNumber,
-          scheduledDate: scheduledDate
+          scheduledDate: scheduledDate.toISOString().split('T')[0]
         },
-        registeredPlayers: activeTournament.tournamentParticipants
-          .filter(tp => tp.player.isActive)
-          .map(tp => tp.player)
+        registeredPlayers: registeredPlayers,
+        additionalPlayers: availableAdditionalPlayers
       })
     } catch (error) {
       console.error('Error getting next available game date:', error)

@@ -1,7 +1,7 @@
-import TournamentForm from '@/components/tournaments/TournamentForm'
+import TournamentStartPage from '@/components/tournaments/TournamentStartPage'
 
 export default function NewTournament() {
-  return <TournamentForm />
+  return <TournamentStartPage />
 }
 
 export const metadata = {

@@ -10,10 +10,10 @@ import { Label } from '@/components/ui/label'
 import { DatePicker } from '@/components/ui/date-picker'
 import { ValidationSummary, FieldValidation } from '@/components/ui/ValidationMessage'
 import LoadingState, { FormSkeleton } from '@/components/ui/LoadingState'
-import { useFormDraft, useFormValidation } from '@/hooks/useFormDraft'
+import { useFormValidation } from '@/hooks/useFormDraft'
 import { validateTournamentForm, validateTournamentNumber } from '@/lib/tournament-validation'
 import { TOURNAMENT_PRESETS, getPresetById } from '@/lib/tournament-presets'
-import { ArrowLeft, Save, Loader2, Calendar, Users, Clock, Plus, X, Check, AlertCircle, Target, Cloud, CloudOff } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Calendar, Users, Clock, Plus, X, Check, AlertCircle, Target } from 'lucide-react'
 
 interface Player {
   id: string
@@ -62,7 +62,12 @@ const DEFAULT_BLIND_LEVELS: BlindLevel[] = [
   { level: 18, smallBlind: 10000, bigBlind: 20000, duration: 0 }
 ]
 
-export default function TournamentForm({ tournamentId }: { tournamentId?: string }) {
+interface TournamentFormProps {
+  tournamentId?: string
+  initialTournamentNumber?: number
+}
+
+export default function TournamentForm({ tournamentId, initialTournamentNumber }: TournamentFormProps) {
   const { user } = useAuth()
   const router = useRouter()
   const [availablePlayers, setAvailablePlayers] = useState<Player[]>([])
@@ -76,7 +81,6 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
   const [showSaveConfirm, setShowSaveConfirm] = useState(false)
   const [pendingFormData, setPendingFormData] = useState<FormData | null>(null)
   const [numberValidationError, setNumberValidationError] = useState<string>('')
-  const [showDraftModal, setShowDraftModal] = useState(false)
   const [selectedPreset, setSelectedPreset] = useState<string>('standard')
   const [showPresetModal, setShowPresetModal] = useState(false)
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
@@ -118,23 +122,13 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
   }
 
   const [formData, setFormData] = useState<FormData>({
-    tournamentNumber: 28,
+    tournamentNumber: initialTournamentNumber || 28,
     gameDates: generateInitialDates(),
     participantIds: [],
     blindLevels: DEFAULT_BLIND_LEVELS
   })
 
-  // Form draft y validation
-  const draftKey = isEditing ? `edit-${tournamentId}` : 'new-tournament'
-  const { saveDraft, loadDraft, clearDraft, hasDraft, lastSaved, isAutoSaving } = useFormDraft(
-    formData,
-    {
-      key: draftKey,
-      autosaveInterval: 30000,
-      onSave: (data) => console.log('Draft saved:', data),
-      onRestore: (data) => console.log('Draft restored:', data)
-    }
-  )
+  // Form validation only
 
   const { isValid, errors, warnings, isValidating, validateWithDebounce } = useFormValidation(
     formData,
@@ -149,12 +143,6 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
     }
   }, [user, router])
 
-  // Verificar draft al montar componente
-  useEffect(() => {
-    if (hasDraft && !isEditing) {
-      setShowDraftModal(true)
-    }
-  }, [hasDraft, isEditing])
 
   // Cargar jugadores disponibles (Enfermos y Comisión activos)
   useEffect(() => {
@@ -169,10 +157,16 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
       if (isEditing) {
         fetchTournamentData()
       } else {
-        fetchNextTournamentNumber()
+        // Si no se proporcionó número inicial, obtener el siguiente
+        if (!initialTournamentNumber) {
+          fetchNextTournamentNumber()
+        } else {
+          setTournamentNumber(initialTournamentNumber)
+          setInitialLoading(false)
+        }
       }
     }
-  }, [user?.adminKey, isEditing])
+  }, [user?.adminKey, isEditing, initialTournamentNumber])
 
   const fetchNextTournamentNumber = async () => {
     if (!user?.adminKey) {
@@ -353,12 +347,9 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
     const newData = { ...formData, [field]: value }
     setFormData(newData)
     
-    // Auto-save draft
-    saveDraft(newData)
-    
     // Validate with debounce
     validateWithDebounce(newData)
-  }, [formData, saveDraft, validateWithDebounce])
+  }, [formData, validateWithDebounce])
 
   // Validación de número de torneo
   const validateTournamentNumberDebounced = useCallback(async (number: number) => {
@@ -382,20 +373,6 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
     }
   }, [updateFormData])
 
-  // Restaurar draft
-  const restoreDraft = useCallback(() => {
-    const draft = loadDraft()
-    if (draft) {
-      setFormData(draft)
-      setShowDraftModal(false)
-    }
-  }, [loadDraft])
-
-  // Descartar draft
-  const discardDraft = useCallback(() => {
-    clearDraft()
-    setShowDraftModal(false)
-  }, [clearDraft])
 
   // Restaurar blinds con confirmación
   const handleRestoreBlinds = useCallback(() => {
@@ -509,20 +486,6 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
             <h1 className="text-xl font-bold text-white">
               {isEditing ? `Editar Torneo ${tournamentNumber}` : `Nuevo Torneo ${tournamentNumber}`}
             </h1>
-            {/* Indicador de auto-guardado */}
-            <div className="flex items-center space-x-2 text-xs text-poker-muted">
-              {isAutoSaving ? (
-                <>
-                  <Cloud className="w-3 h-3 animate-pulse" />
-                  <span>Guardando...</span>
-                </>
-              ) : hasDraft && lastSaved ? (
-                <>
-                  <CloudOff className="w-3 h-3 text-poker-cyan" />
-                  <span>Guardado {new Date(lastSaved).toLocaleTimeString()}</span>
-                </>
-              ) : null}
-            </div>
           </div>
         </div>
 
@@ -595,7 +558,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                   </p>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                   {formData.gameDates.map((gameDate, index) => (
                     <div key={index} className="bg-poker-card border-2 border-poker-red/40 rounded-xl p-4 hover:border-poker-red/60 transition-all duration-200 hover:shadow-lg hover:shadow-poker-red/10">
                       <div className="text-center space-y-3">
@@ -740,16 +703,16 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
               {/* Validación de blinds */}
               <FieldValidation errors={[...errors, ...warnings]} field="blindLevels" />
               
-              {/* Vista desktop: tabla */}
+              {/* Tabla compacta para desktop */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/10">
-                      <th className="text-left py-1 text-poker-text text-xs">Nivel</th>
-                      <th className="text-left py-1 text-poker-text text-xs">Small Blind</th>
-                      <th className="text-left py-1 text-poker-text text-xs">Big Blind</th>
-                      <th className="text-left py-1 text-poker-text text-xs">Tiempo (min)</th>
-                      <th className="text-right py-1 text-poker-text text-xs">Acción</th>
+                      <th className="text-left py-1 px-1 text-poker-text text-xs w-12">Niv</th>
+                      <th className="text-left py-1 px-1 text-poker-text text-xs">Small</th>
+                      <th className="text-left py-1 px-1 text-poker-text text-xs">Big</th>
+                      <th className="text-left py-1 px-1 text-poker-text text-xs">Min</th>
+                      <th className="text-right py-1 px-1 text-poker-text text-xs w-8"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -763,42 +726,42 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                         <tr key={blind.level} className={`border-b border-white/5 ${
                           hasError ? 'bg-red-500/5' : ''
                         }`}>
-                          <td className="py-1 text-white font-medium text-sm">{blind.level}</td>
-                          <td className="py-1">
+                          <td className="py-1 px-1 text-white font-medium text-xs">{blind.level}</td>
+                          <td className="py-1 px-1">
                             <Input
                               type="number"
                               value={blind.smallBlind}
                               onChange={(e) => updateBlindLevel(index, 'smallBlind', parseInt(e.target.value))}
-                              className={`w-16 h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
+                              className={`w-12 sm:w-16 h-6 sm:h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
                                 fieldErrors.some(e => e.field.includes('smallBlind')) ? 'border-red-500/50' : ''
                               }`}
                             />
                           </td>
-                          <td className="py-1">
+                          <td className="py-1 px-1">
                             <Input
                               type="number"
                               value={blind.bigBlind}
                               onChange={(e) => updateBlindLevel(index, 'bigBlind', parseInt(e.target.value))}
-                              className={`w-16 h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
+                              className={`w-12 sm:w-16 h-6 sm:h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
                                 fieldErrors.some(e => e.field.includes('bigBlind')) ? 'border-red-500/50' : ''
                               }`}
                             />
                           </td>
-                          <td className="py-1">
+                          <td className="py-1 px-1">
                             {blind.duration === 0 ? (
-                              <span className="text-xs text-poker-cyan font-medium">Sin límite</span>
+                              <span className="text-xs text-poker-cyan font-medium">∞</span>
                             ) : (
                               <Input
                                 type="number"
                                 value={blind.duration}
                                 onChange={(e) => updateBlindLevel(index, 'duration', parseInt(e.target.value))}
-                                className={`w-12 h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
+                                className={`w-8 sm:w-12 h-6 sm:h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
                                   fieldErrors.some(e => e.field.includes('duration')) ? 'border-red-500/50' : ''
                                 }`}
                               />
                             )}
                           </td>
-                          <td className="py-1 text-right">
+                          <td className="py-1 px-1 text-right">
                             {formData.blindLevels.length > 1 && (
                               <Button
                                 type="button"
@@ -815,9 +778,9 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                                     updateFormData('blindLevels', newBlinds)
                                   }
                                 }}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 w-6 h-6 p-0"
                               >
-                                <X className="w-4 h-4" />
+                                <X className="w-3 h-3" />
                               </Button>
                             )}
                           </td>
@@ -976,8 +939,8 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">{isEditing ? 'Actualizar Torneo' : 'Crear Torneo'}</span>
-                    <span className="sm:hidden">{isEditing ? 'Actualizar' : 'Crear'}</span>
+                    <span className="hidden sm:inline">{isEditing ? 'Actualizar Torneo' : activeTab === 'dates' ? 'Crear Torneo' : 'Guardar y Continuar'}</span>
+                    <span className="sm:hidden">{isEditing ? 'Actualizar' : activeTab === 'dates' ? 'Crear' : 'Guardar'}</span>
                   </>
                 )}
               </Button>
@@ -1072,7 +1035,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                   setShowSaveConfirm(false)
                   setPendingFormData(null)
                   // Solo guardamos los cambios, sin navegar automáticamente
-                  saveDraft(formData)
+                  // Draft functionality removed
                 }}
                 className="flex-1 bg-poker-red hover:bg-red-700 text-white"
               >
@@ -1084,48 +1047,6 @@ Sí, guardar
         </div>
       )}
 
-      {/* Modal para restaurar draft */}
-      {showDraftModal && (
-        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
-          <div className="bg-poker-card border border-white/10 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-              <Cloud className="w-5 h-5 mr-2 text-poker-cyan" />
-              Borrador encontrado
-            </h3>
-            <p className="text-poker-muted mb-4">
-              El sistema guardó automáticamente tu progreso mientras completabas el formulario. ¿Deseas recuperar estos datos y continuar desde donde te quedaste?
-            </p>
-            <div className="bg-poker-cyan/10 border border-poker-cyan/20 rounded-lg p-3 mb-4">
-              <p className="text-xs text-poker-cyan">
-                💾 Los borradores se guardan automáticamente cada 30 segundos para evitar pérdida de datos
-              </p>
-            </div>
-            {lastSaved && (
-              <p className="text-xs text-poker-cyan mb-6">
-                Guardado el {lastSaved.toLocaleString()}
-              </p>
-            )}
-            <div className="flex space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={discardDraft}
-                className="flex-1 border-white/20 text-white hover:bg-white/5"
-              >
-Empezar de nuevo
-              </Button>
-              <Button
-                type="button"
-                onClick={restoreDraft}
-                className="flex-1 bg-poker-cyan hover:bg-cyan-600 text-white"
-              >
-                <Check className="w-4 h-4 mr-2" />
-Recuperar borrador
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal de presets detallado */}
       {showPresetModal && (

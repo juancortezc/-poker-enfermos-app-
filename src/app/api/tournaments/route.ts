@@ -88,6 +88,24 @@ export async function POST(req: NextRequest) {
         )
       }
 
+      // Verificar restricción de un solo torneo activo
+      const activeTournament = await prisma.tournament.findFirst({
+        where: { status: 'ACTIVO' }
+      })
+
+      // Verificar restricción de un solo torneo próximo
+      const nextTournament = await prisma.tournament.findFirst({
+        where: { status: 'PROXIMO' }
+      })
+
+      // Los nuevos torneos siempre se crean como PROXIMO
+      if (nextTournament) {
+        return NextResponse.json(
+          { error: 'Ya existe un torneo próximo. Complete o cancele el torneo actual antes de crear uno nuevo.' },
+          { status: 400 }
+        )
+      }
+
       if (!gameDates || gameDates.length !== 12) {
         return NextResponse.json(
           { error: 'Debe programar exactamente 12 fechas' },
@@ -107,6 +125,7 @@ export async function POST(req: NextRequest) {
         data: {
           name: `Torneo ${number}`,
           number,
+          status: 'PROXIMO', // Los nuevos torneos se crean como próximos
           participantIds,
           gameDates: {
             create: gameDates.map((date: any, index: number) => ({
@@ -158,7 +177,7 @@ export async function POST(req: NextRequest) {
   })
 }
 
-// Niveles de blinds por defecto según la especificación
+// Niveles de blinds por defecto según la especificación (18 niveles)
 function getDefaultBlindLevels() {
   return [
     { level: 1, smallBlind: 50, bigBlind: 100, duration: 12 },
@@ -168,15 +187,16 @@ function getDefaultBlindLevels() {
     { level: 5, smallBlind: 300, bigBlind: 600, duration: 12 },
     { level: 6, smallBlind: 400, bigBlind: 800, duration: 12 },
     { level: 7, smallBlind: 500, bigBlind: 1000, duration: 16 },
-    { level: 8, smallBlind: 1500, bigBlind: 3000, duration: 16 },
-    { level: 9, smallBlind: 2000, bigBlind: 4000, duration: 16 },
-    { level: 10, smallBlind: 3000, bigBlind: 6000, duration: 16 },
-    { level: 11, smallBlind: 4000, bigBlind: 8000, duration: 16 },
-    { level: 12, smallBlind: 5000, bigBlind: 10000, duration: 10 },
-    { level: 13, smallBlind: 6000, bigBlind: 12000, duration: 10 },
-    { level: 14, smallBlind: 7000, bigBlind: 14000, duration: 10 },
-    { level: 15, smallBlind: 8000, bigBlind: 16000, duration: 10 },
-    { level: 16, smallBlind: 9000, bigBlind: 18000, duration: 10 },
-    { level: 17, smallBlind: 10000, bigBlind: 20000, duration: 10 }
+    { level: 8, smallBlind: 600, bigBlind: 1200, duration: 16 },
+    { level: 9, smallBlind: 800, bigBlind: 1600, duration: 16 },
+    { level: 10, smallBlind: 1000, bigBlind: 2000, duration: 16 },
+    { level: 11, smallBlind: 1500, bigBlind: 3000, duration: 16 },
+    { level: 12, smallBlind: 2000, bigBlind: 4000, duration: 16 },
+    { level: 13, smallBlind: 3000, bigBlind: 6000, duration: 10 },
+    { level: 14, smallBlind: 4000, bigBlind: 8000, duration: 10 },
+    { level: 15, smallBlind: 5000, bigBlind: 10000, duration: 10 },
+    { level: 16, smallBlind: 6000, bigBlind: 12000, duration: 10 },
+    { level: 17, smallBlind: 8000, bigBlind: 16000, duration: 10 },
+    { level: 18, smallBlind: 10000, bigBlind: 20000, duration: 0 } // Sin límite para el último nivel
   ]
 }

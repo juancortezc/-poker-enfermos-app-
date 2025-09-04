@@ -151,46 +151,66 @@ export default function TournamentDetails({ tournamentId }: TournamentDetailsPro
     <div className="min-h-screen bg-poker-dark pb-safe">
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push('/tournaments')}
-              className="text-poker-muted hover:text-white hover:bg-white/10"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                Torneo {tournament.number}
-                {getStatusBadge(tournament.status)}
-              </h1>
-              <p className="text-poker-muted">{tournament.name}</p>
+        <div className="bg-poker-card border border-white/10 rounded-lg p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Navigation and Title */}
+            <div className="flex flex-col space-y-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/tournaments')}
+                className="text-poker-muted hover:text-white hover:bg-white/10 self-start"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver a Torneos
+              </Button>
+              
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                  <h1 className="text-3xl font-bold text-white">
+                    Torneo {tournament.number}
+                  </h1>
+                  {getStatusBadge(tournament.status)}
+                </div>
+                <p className="text-lg text-poker-text">{tournament.name}</p>
+                <div className="flex items-center gap-4 text-sm text-poker-muted">
+                  <span className="flex items-center gap-1">
+                    <Users className="w-4 h-4" />
+                    {tournament.tournamentParticipants.length} participantes
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    {tournament.gameDates.length} fechas
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    {tournament.blindLevels.length} niveles de blinds
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {canEdit && (
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                onClick={handleEdit}
-                className="border-white/20 text-white hover:bg-white/5"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Editar
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowDeleteModal(true)}
-                className="border-red-500/50 text-red-400 hover:bg-red-500/10"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar
-              </Button>
-            </div>
-          )}
+            {/* Action Buttons */}
+            {canEdit && (
+              <div className="flex flex-row lg:flex-col gap-2 lg:items-end">
+                <Button
+                  onClick={handleEdit}
+                  className="flex-1 lg:flex-none bg-poker-red hover:bg-red-700 text-white"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar Torneo
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="flex-1 lg:flex-none border-red-500/50 text-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Eliminar
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

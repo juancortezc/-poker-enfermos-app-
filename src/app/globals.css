@@ -142,6 +142,30 @@
     touch-action: manipulation;
   }
   
+  /* Efectos de presión para todos los botones */
+  button:active, 
+  .button:active,
+  [role="button"]:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease-in-out;
+  }
+  
+  /* Efectos hover mejorados */
+  button:hover:not(:disabled), 
+  .button:hover:not(:disabled),
+  [role="button"]:hover:not(:disabled) {
+    transform: translateY(-1px);
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  /* Estado deshabilitado */
+  button:disabled,
+  .button:disabled,
+  [role="button"]:disabled {
+    transform: none;
+    cursor: not-allowed;
+  }
+  
   /* Texto con mejor legibilidad */
   h1, h2, h3, h4, h5, h6 {
     @apply text-poker-text;

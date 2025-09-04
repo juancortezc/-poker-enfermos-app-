@@ -6,6 +6,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/ui/date-picker'
 import { ArrowLeft, Save, Loader2, Calendar, Users, UserPlus, Trophy } from 'lucide-react'
 import PlayerSelector from './PlayerSelector'
 import GuestSelector from './GuestSelector'
@@ -31,6 +34,13 @@ interface NextDate {
   scheduledDate: string
 }
 
+interface AvailableDate {
+  id: number
+  dateNumber: number
+  scheduledDate: string
+  status: string
+}
+
 interface ActiveDate {
   id: number
   dateNumber: number
@@ -54,11 +64,17 @@ export default function GameDateForm() {
   // Data states
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [nextDate, setNextDate] = useState<NextDate | null>(null)
+  const [availableDates, setAvailableDates] = useState<AvailableDate[]>([])
   const [activeDate, setActiveDate] = useState<ActiveDate | null>(null)
   const [registeredPlayers, setRegisteredPlayers] = useState<Player[]>([])
+  const [additionalPlayers, setAdditionalPlayers] = useState<Player[]>([])
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [selectedGuests, setSelectedGuests] = useState<string[]>([])
   const [createdGameDate, setCreatedGameDate] = useState<any>(null)
+
+  // Editable date info states
+  const [editableDateNumber, setEditableDateNumber] = useState<number>(1)
+  const [editableScheduledDate, setEditableScheduledDate] = useState<string>('')
 
   // Verificar permisos
   useEffect(() => {
@@ -98,23 +114,32 @@ export default function GameDateForm() {
         }
       }
 
-      // Si no hay fecha activa, obtener próxima disponible
-      const nextResponse = await fetch('/api/game-dates/next-available', {
+      // Si no hay fecha activa, obtener fechas disponibles del torneo
+      const availableResponse = await fetch('/api/game-dates/available-dates', {
         headers: {
           'Authorization': `Bearer ${user?.adminKey}`,
           'Content-Type': 'application/json'
         }
       })
 
-      if (nextResponse.ok) {
-        const nextData = await nextResponse.json()
-        setTournament(nextData.tournament)
-        setNextDate(nextData.nextDate)
-        setRegisteredPlayers(nextData.registeredPlayers)
-        setSelectedPlayers(nextData.registeredPlayers.map((p: Player) => p.id))
+      if (availableResponse.ok) {
+        const availableData = await availableResponse.json()
+        setTournament(availableData.tournament)
+        setAvailableDates(availableData.availableDates)
+        setRegisteredPlayers(availableData.registeredPlayers)
+        setAdditionalPlayers(availableData.additionalPlayers || [])
+        setSelectedPlayers(availableData.registeredPlayers.map((p: Player) => p.id))
+        
+        // Initialize with first available date if any
+        if (availableData.availableDates.length > 0) {
+          const firstDate = availableData.availableDates[0]
+          setEditableDateNumber(firstDate.dateNumber)
+          setEditableScheduledDate(firstDate.scheduledDate)
+        }
+        
         setCurrentStep('date-info')
       } else {
-        const errorData = await nextResponse.json()
+        const errorData = await availableResponse.json()
         setError(errorData.error || 'Error al cargar datos')
       }
     } catch (err) {
@@ -190,7 +215,19 @@ export default function GameDateForm() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/admin')}
+            onClick={() => {
+              if (currentStep === 'date-info' || currentStep === 'loading') {
+                router.push('/admin')
+              } else if (currentStep === 'select-players') {
+                setCurrentStep('date-info')
+              } else if (currentStep === 'add-guests') {
+                setCurrentStep('select-players')
+              } else if (currentStep === 'confirm') {
+                setCurrentStep('add-guests')
+              } else if (currentStep === 'summary') {
+                router.push('/admin')
+              }
+            }}
             className="text-poker-muted hover:text-white hover:bg-white/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -209,50 +246,77 @@ export default function GameDateForm() {
         )}
 
         {/* Step 1: Date Info */}
-        {currentStep === 'date-info' && tournament && nextDate && (
+        {currentStep === 'date-info' && tournament && (
           <Card className="bg-poker-card border-white/10">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
                 <Calendar className="w-5 h-5" />
-                Información de la Fecha
+                Configurar Fecha
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-poker-muted mb-1">Torneo</p>
-                  <p className="text-lg font-semibold text-white">
-                    Torneo {tournament.number}
-                  </p>
+                  <Label className="text-poker-text mb-2">Torneo</Label>
+                  <div className="p-3 bg-poker-dark/50 rounded border border-white/10">
+                    <span className="text-white font-semibold">Torneo {tournament.number}</span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-poker-muted mb-1">Número de Fecha</p>
-                  <p className="text-lg font-semibold text-poker-cyan">
-                    Fecha {nextDate.dateNumber}
-                  </p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-sm text-poker-muted mb-1">Fecha Programada</p>
-                  <p className="text-lg font-semibold text-white">
-                    {new Date(nextDate.scheduledDate).toLocaleDateString('es-ES', {
-                      weekday: 'long',
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                  </p>
-                </div>
+                {availableDates.length > 0 ? (
+                  <div className="md:col-span-2">
+                    <Label className="text-poker-text mb-2">Seleccionar Fecha</Label>
+                    <select
+                      value={`${editableDateNumber}-${editableScheduledDate}`}
+                      onChange={(e) => {
+                        const [dateNum, schedDate] = e.target.value.split('-')
+                        setEditableDateNumber(parseInt(dateNum))
+                        setEditableScheduledDate(schedDate)
+                      }}
+                      className="w-full p-3 bg-poker-dark/50 border border-white/10 rounded-md text-white focus:border-poker-red focus:outline-none"
+                    >
+                      <option value="">Seleccionar fecha disponible...</option>
+                      {availableDates.map((date) => (
+                        <option key={date.id} value={`${date.dateNumber}-${date.scheduledDate}`}>
+                          Fecha {date.dateNumber} - {new Date(date.scheduledDate).toLocaleDateString('es-ES')} ({date.status})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="md:col-span-2">
+                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-center">
+                      <p className="text-yellow-400">No hay fechas disponibles para jugar en este torneo.</p>
+                      <p className="text-yellow-300 text-sm mt-1">Todas las fechas han sido completadas o no hay fechas creadas.</p>
+                    </div>
+                  </div>
+                )}
               </div>
               
-              <div className="pt-4">
-                <Button
-                  onClick={() => setCurrentStep('select-players')}
-                  className="w-full bg-poker-red hover:bg-red-700 text-white"
-                >
-                  Continuar a Selección de Jugadores
-                  <Users className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
+              {availableDates.length > 0 && (
+                <div className="pt-4">
+                  <Button
+                    onClick={() => {
+                      // Validate date selection
+                      if (!editableDateNumber || !editableScheduledDate) {
+                        setError('Debe seleccionar una fecha')
+                        return
+                      }
+                      // Update nextDate with selected values
+                      setNextDate({
+                        dateNumber: editableDateNumber,
+                        scheduledDate: editableScheduledDate
+                      })
+                      setError('')
+                      setCurrentStep('select-players')
+                    }}
+                    className="w-full bg-poker-red hover:bg-red-700 text-white"
+                    disabled={!editableDateNumber || !editableScheduledDate}
+                  >
+                    Continuar a Selección de Jugadores
+                    <Users className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -261,6 +325,7 @@ export default function GameDateForm() {
         {currentStep === 'select-players' && (
           <PlayerSelector
             players={registeredPlayers}
+            additionalPlayers={additionalPlayers}
             selectedPlayers={selectedPlayers}
             onPlayersChange={setSelectedPlayers}
             onNext={() => setCurrentStep('add-guests')}
@@ -272,6 +337,7 @@ export default function GameDateForm() {
         {currentStep === 'add-guests' && tournament && (
           <GuestSelector
             tournamentId={tournament.id}
+            selectedPlayers={selectedPlayers}
             selectedGuests={selectedGuests}
             onGuestsChange={setSelectedGuests}
             onNext={() => setCurrentStep('confirm')}
@@ -333,7 +399,7 @@ export default function GameDateForm() {
           <GameDateSummary
             gameDate={activeDate || createdGameDate}
             onEdit={() => {
-              // TODO: Implementar edición
+              // Permitir editar regresando al paso de selección de jugadores
               setCurrentStep('select-players')
             }}
           />

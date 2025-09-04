@@ -16,6 +16,7 @@ interface Player {
 
 interface PlayerSelectorProps {
   players: Player[]
+  additionalPlayers?: Player[]
   selectedPlayers: string[]
   onPlayersChange: (playerIds: string[]) => void
   onNext: () => void
@@ -24,6 +25,7 @@ interface PlayerSelectorProps {
 
 export default function PlayerSelector({
   players,
+  additionalPlayers = [],
   selectedPlayers,
   onPlayersChange,
   onNext,
@@ -38,11 +40,16 @@ export default function PlayerSelector({
   }
 
   const selectAll = () => {
-    onPlayersChange(players.map(p => p.id))
+    const allPlayerIds = [...players.map(p => p.id), ...additionalPlayers.map(p => p.id)]
+    onPlayersChange(allPlayerIds)
   }
 
   const deselectAll = () => {
     onPlayersChange([])
+  }
+
+  const selectTournamentPlayers = () => {
+    onPlayersChange(players.map(p => p.id))
   }
 
   return (
@@ -50,72 +57,100 @@ export default function PlayerSelector({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
           <Users className="w-5 h-5" />
-          Seleccionar Jugadores ({selectedPlayers.length} de {players.length})
+          Seleccionar Jugadores ({selectedPlayers.length} de {players.length + additionalPlayers.length})
         </CardTitle>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={selectTournamentPlayers}
+            className="bg-poker-red/10 border-poker-red/30 text-poker-red hover:bg-poker-red/20 hover:border-poker-red/50 px-4 py-2"
+          >
+            Registrados
+          </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={selectAll}
-            className="border-white/20 text-poker-text hover:bg-white/5"
+            className="bg-poker-green/10 border-poker-green/30 text-poker-green hover:bg-poker-green/20 hover:border-poker-green/50 px-4 py-2"
           >
-            Seleccionar Todos
+            Todos
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={deselectAll}
-            className="border-white/20 text-poker-text hover:bg-white/5"
+            className="bg-gray-600/10 border-gray-400/30 text-gray-300 hover:bg-gray-600/20 hover:border-gray-400/50 px-4 py-2"
           >
-            Deseleccionar Todos
+            Ninguno
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="bg-poker-dark/30 p-3 rounded-lg">
-          <p className="text-xs text-poker-muted">
-            💡 Todos los jugadores registrados en el torneo están seleccionados por defecto. 
-            Desmarca solo los que no pueden asistir a esta fecha.
-          </p>
+      <CardContent className="space-y-6">
+
+        {/* Jugadores del Torneo */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-white">
+            Jugadores del Torneo ({players.length})
+          </h3>
+          <div className="bg-poker-dark/30 rounded-lg overflow-hidden">
+            <div className="grid grid-cols-2 gap-px bg-white/10">
+              {players.map((player) => (
+                <label
+                  key={player.id}
+                  className={`flex items-center px-2 py-1 cursor-pointer transition-all ${
+                    selectedPlayers.includes(player.id)
+                      ? 'bg-poker-red/30'
+                      : 'bg-poker-dark/50 hover:bg-poker-dark/70'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPlayers.includes(player.id)}
+                    onChange={() => togglePlayer(player.id)}
+                    className="mr-2 rounded border-gray-400 text-poker-red focus:ring-poker-red w-3 h-3"
+                  />
+                  <span className="text-white text-xs truncate">
+                    {player.firstName} {player.lastName}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-          {players.map((player) => (
-            <label
-              key={player.id}
-              className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all border ${
-                selectedPlayers.includes(player.id)
-                  ? 'bg-poker-red/20 border-poker-red'
-                  : 'bg-poker-dark/50 border-white/10 hover:border-white/20'
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={selectedPlayers.includes(player.id)}
-                onChange={() => togglePlayer(player.id)}
-                className="rounded border-gray-300 text-poker-red focus:ring-poker-red"
-              />
-              <div className="flex items-center space-x-2">
-                {player.photoUrl ? (
-                  <img
-                    src={player.photoUrl}
-                    alt={`${player.firstName} ${player.lastName}`}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                    <span className="text-xs text-gray-300">
-                      {player.firstName[0]}{player.lastName[0]}
+        {/* Jugadores Adicionales */}
+        {additionalPlayers.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-white">
+              Otros Jugadores Activos ({additionalPlayers.length})
+            </h3>
+            <div className="bg-poker-dark/30 rounded-lg overflow-hidden">
+              <div className="grid grid-cols-2 gap-px bg-white/10">
+                {additionalPlayers.map((player) => (
+                  <label
+                    key={player.id}
+                    className={`flex items-center px-2 py-1 cursor-pointer transition-all ${
+                      selectedPlayers.includes(player.id)
+                        ? 'bg-poker-green/30'
+                        : 'bg-poker-dark/50 hover:bg-poker-dark/70'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPlayers.includes(player.id)}
+                      onChange={() => togglePlayer(player.id)}
+                      className="mr-2 rounded border-gray-400 text-poker-green focus:ring-poker-green w-3 h-3"
+                    />
+                    <span className="text-white text-xs truncate">
+                      {player.firstName} {player.lastName}
                     </span>
-                  </div>
-                )}
-                <span className="text-white font-medium">
-                  {player.firstName} {player.lastName}
-                </span>
+                  </label>
+                ))}
               </div>
-            </label>
-          ))}
-        </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex space-x-4 pt-4">
           <Button

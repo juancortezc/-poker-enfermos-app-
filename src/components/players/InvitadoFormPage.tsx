@@ -35,6 +35,19 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
   const [error, setError] = useState('')
   const currentYear = new Date().getFullYear()
   const isEditing = !!invitadoId
+  
+  // Get returnTo from URL params
+  const [returnTo, setReturnTo] = useState<string>('/players')
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const returnToParam = params.get('returnTo')
+      if (returnToParam) {
+        setReturnTo(returnToParam)
+      }
+    }
+  }, [])
 
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -162,7 +175,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/players')}
+            onClick={() => router.push(returnTo)}
             className="text-poker-muted hover:text-white hover:bg-white/10"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

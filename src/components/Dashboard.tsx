@@ -11,29 +11,21 @@ export default function Dashboard() {
 
   const quickActions = [
     {
-      title: 'Torneos',
-      description: 'Gestión de torneos',
-      href: '/tournaments',
-      icon: Trophy,
-      gradient: 'from-poker-red to-red-700',
-      stats: 'Torneo 28',
-      adminOnly: true,
-    },
-    {
-      title: 'Timer Activo',
-      description: 'Control de blinds',
-      href: '/timer',
-      icon: Clock,
-      gradient: 'from-blue-500 to-blue-600',
-      stats: 'Nivel 4',
-    },
-    {
       title: 'Fecha',
       description: 'Crear noche de juego',
       href: '/game-dates/new',
       icon: Calendar,
       gradient: 'from-yellow-500 to-yellow-600',
       stats: 'Próxima fecha',
+    },
+    {
+      title: 'Torneos',
+      description: 'Gestión de torneos',
+      href: '/tournaments/overview',
+      icon: Trophy,
+      gradient: 'from-poker-red to-red-700',
+      stats: 'Torneo 28',
+      adminOnly: true,
     },
     {
       title: 'Enfermos',
@@ -43,6 +35,14 @@ export default function Dashboard() {
       gradient: 'from-poker-green to-green-600',
       stats: '29 activos',
       adminOnly: true,
+    },
+    {
+      title: 'Timer Activo',
+      description: 'Control de blinds',
+      href: '/timer',
+      icon: Clock,
+      gradient: 'from-blue-500 to-blue-600',
+      stats: 'Nivel 4',
     },
   ]
 

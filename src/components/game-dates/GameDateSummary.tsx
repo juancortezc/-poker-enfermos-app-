@@ -110,13 +110,13 @@ export default function GameDateSummary({ gameDate, onEdit }: GameDateSummaryPro
             
             <div className="text-right">
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                gameDate.status === 'active' 
+                gameDate.status === 'in_progress' 
                   ? 'bg-green-500/20 text-green-400'
                   : gameDate.status === 'pending'
                   ? 'bg-yellow-500/20 text-yellow-400' 
                   : 'bg-gray-500/20 text-gray-400'
               }`}>
-                {gameDate.status === 'active' && '🟢 Activa'}
+                {gameDate.status === 'in_progress' && '🟢 En Progreso'}
                 {gameDate.status === 'pending' && '🟡 Pendiente'}
                 {gameDate.status === 'completed' && '✅ Completada'}
               </span>

@@ -20,6 +20,7 @@ enum UserRole {
 }
 
 enum TournamentStatus {
+  PROXIMO
   ACTIVO
   FINALIZADO
 }
@@ -88,7 +89,7 @@ model Tournament {
   id              Int               @id @default(autoincrement())
   name            String
   number          Int               @unique // Torneo 28, 29, etc.
-  status          TournamentStatus  @default(ACTIVO)
+  status          TournamentStatus  @default(PROXIMO)
   participantIds  String[]          @map("participant_ids")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UserPlus, ChevronLeft, ChevronRight, Users, ExternalLink } from 'lucide-react'
 import { UserRole } from '@prisma/client'
+import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 
 interface Player {
@@ -21,6 +22,7 @@ interface Player {
 
 interface GuestSelectorProps {
   tournamentId: number
+  selectedPlayers: string[]
   selectedGuests: string[]
   onGuestsChange: (guestIds: string[]) => void
   onNext: () => void
@@ -29,11 +31,13 @@ interface GuestSelectorProps {
 
 export default function GuestSelector({
   tournamentId,
+  selectedPlayers,
   selectedGuests,
   onGuestsChange,
   onNext,
   onBack
 }: GuestSelectorProps) {
+  const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [groupMembers, setGroupMembers] = useState<Player[]>([])
   const [externalGuests, setExternalGuests] = useState<Player[]>([])
@@ -42,15 +46,52 @@ export default function GuestSelector({
     loadAvailableGuests()
   }, [tournamentId])
 
+  // Prevent auto-scroll to bottom when component mounts
+  useEffect(() => {
+    const preventScroll = (e: Event) => {
+      e.preventDefault()
+      return false
+    }
+    
+    // Store current scroll position
+    const currentScrollY = window.scrollY
+    
+    // After component mounts, restore scroll position
+    const timer = setTimeout(() => {
+      window.scrollTo(0, currentScrollY)
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [])
+
   const loadAvailableGuests = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/players/available-guests?tournamentId=${tournamentId}`)
+      console.log('Loading guests for tournament:', tournamentId)
+      console.log('User admin key:', user?.adminKey ? 'Present' : 'Missing')
+      
+      if (!user?.adminKey) {
+        console.error('No admin key available')
+        setLoading(false)
+        return
+      }
+      
+      const response = await fetch(`/api/players/available-guests?tournamentId=${tournamentId}`, {
+        headers: {
+          'Authorization': `Bearer ${user.adminKey}`,
+          'Content-Type': 'application/json'
+        }
+      })
       
       if (response.ok) {
         const data = await response.json()
-        setGroupMembers(data.groupMembers)
-        setExternalGuests(data.externalGuests)
+        console.log('Guests loaded successfully:', data)
+        setGroupMembers(data.groupMembers || [])
+        setExternalGuests(data.externalGuests || [])
+      } else {
+        console.error('Failed to load guests:', response.status, response.statusText)
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
       }
     } catch (error) {
       console.error('Error loading guests:', error)
@@ -60,11 +101,41 @@ export default function GuestSelector({
   }
 
   const toggleGuest = (guestId: string) => {
+    console.log('Toggle guest called:', guestId)
+    console.log('Current selectedGuests:', selectedGuests)
+    
     if (selectedGuests.includes(guestId)) {
-      onGuestsChange(selectedGuests.filter(id => id !== guestId))
+      const newGuests = selectedGuests.filter(id => id !== guestId)
+      console.log('Removing guest, new array:', newGuests)
+      onGuestsChange(newGuests)
     } else {
-      onGuestsChange([...selectedGuests, guestId])
+      const newGuests = [...selectedGuests, guestId]
+      console.log('Adding guest, new array:', newGuests)
+      onGuestsChange(newGuests)
     }
+  }
+
+  // Filter invitados whose inviter is playing
+  const getAvailableInvitados = (invitados: Player[]) => {
+    return invitados.filter(invitado => {
+      // If no inviter info, allow selection (for backward compatibility)
+      if (!invitado.inviter) return true
+      
+      // Find the inviter in the available players data
+      const allPlayers = [...groupMembers, ...externalGuests]
+      const inviter = allPlayers.find(p => 
+        p.firstName === invitado.inviter?.firstName && 
+        p.lastName === invitado.inviter?.lastName
+      )
+      
+      // If inviter found, check if they're selected to play
+      if (inviter) {
+        return selectedPlayers.includes(inviter.id)
+      }
+      
+      // If inviter not found in current data, allow selection
+      return true
+    })
   }
 
   if (loading) {
@@ -82,96 +153,89 @@ export default function GuestSelector({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
           <UserPlus className="w-5 h-5" />
-          Agregar Invitados ({selectedGuests.length} seleccionados)
+          Invitados ({selectedGuests.length})
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="bg-poker-dark/30 p-3 rounded-lg">
-          <p className="text-xs text-poker-muted">
-            💡 Puedes invitar miembros del grupo que no están registrados en el torneo 
-            o invitados externos ya registrados en el sistema.
-          </p>
-        </div>
+      <CardContent className="space-y-4">
 
         {/* Miembros del Grupo */}
         {groupMembers.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Miembros del Grupo ({groupMembers.length})
+            <h3 className="text-sm font-medium text-white">
+              Del Grupo ({getAvailableInvitados(groupMembers).length} de {groupMembers.length})
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto">
-              {groupMembers.map((member) => (
-                <label
-                  key={member.id}
-                  className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all border ${
-                    selectedGuests.includes(member.id)
-                      ? 'bg-poker-red/20 border-poker-red'
-                      : 'bg-poker-dark/50 border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedGuests.includes(member.id)}
-                    onChange={() => toggleGuest(member.id)}
-                    className="rounded border-gray-300 text-poker-red focus:ring-poker-red"
-                  />
-                  <div className="flex items-center space-x-2">
-                    {member.photoUrl ? (
-                      <img
-                        src={member.photoUrl}
-                        alt={`${member.firstName} ${member.lastName}`}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                        <span className="text-xs text-gray-300">
-                          {member.firstName[0]}{member.lastName[0]}
-                        </span>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-white font-medium">
+            {getAvailableInvitados(groupMembers).length > 0 ? (
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                {getAvailableInvitados(groupMembers).map((member) => (
+                  <label
+                    key={member.id}
+                    className={`flex items-center space-x-2 p-2 rounded cursor-pointer transition-all border ${
+                      selectedGuests.includes(member.id)
+                        ? 'bg-poker-red/20 border-poker-red'
+                        : 'bg-poker-dark/50 border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedGuests.includes(member.id)}
+                      onChange={() => toggleGuest(member.id)}
+                      className="rounded border-gray-300 text-poker-red focus:ring-poker-red"
+                    />
+                    <div className="flex items-center space-x-2 min-w-0">
+                      {member.photoUrl ? (
+                        <img
+                          src={member.photoUrl}
+                          alt={`${member.firstName} ${member.lastName}`}
+                          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs text-gray-300">
+                            {member.firstName[0]}{member.lastName[0]}
+                          </span>
+                        </div>
+                      )}
+                      <span className="text-white text-sm truncate">
                         {member.firstName} {member.lastName}
-                      </p>
-                      <p className="text-xs text-poker-cyan">
-                        {member.role === UserRole.Comision ? 'Comisión' : 'Enfermo'}
-                      </p>
+                      </span>
                     </div>
-                  </div>
-                </label>
-              ))}
-            </div>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-poker-muted">
+                <p className="text-sm">Sus invitadores no están confirmados para jugar</p>
+              </div>
+            )}
           </div>
         )}
 
         {/* Invitados Externos */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <ExternalLink className="w-4 h-4" />
-              Invitados Externos ({externalGuests.length})
+            <h3 className="text-sm font-medium text-white">
+              Externos ({getAvailableInvitados(externalGuests).length} de {externalGuests.length})
             </h3>
-            <Link href="/players/new">
+            <Link href="/players/new?type=invitado&returnTo=/game-dates/new" target="_blank" rel="noopener noreferrer">
               <Button
                 variant="outline"
                 size="sm"
                 className="border-poker-cyan/30 text-poker-cyan hover:bg-poker-cyan/10"
               >
                 <UserPlus className="w-3 h-3 mr-1" />
-                Nuevo Invitado
+                Nuevo
               </Button>
             </Link>
           </div>
 
-          {externalGuests.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto">
-              {externalGuests.map((guest) => (
+          {getAvailableInvitados(externalGuests).length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+              {getAvailableInvitados(externalGuests).map((guest) => (
                 <label
                   key={guest.id}
-                  className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all border ${
+                  className={`flex items-center space-x-2 p-2 rounded cursor-pointer transition-all border ${
                     selectedGuests.includes(guest.id)
-                      ? 'bg-poker-red/20 border-poker-red'
+                      ? 'bg-poker-cyan/20 border-poker-cyan'
                       : 'bg-poker-dark/50 border-white/10 hover:border-white/20'
                   }`}
                 >
@@ -179,49 +243,36 @@ export default function GuestSelector({
                     type="checkbox"
                     checked={selectedGuests.includes(guest.id)}
                     onChange={() => toggleGuest(guest.id)}
-                    className="rounded border-gray-300 text-poker-red focus:ring-poker-red"
+                    className="rounded border-gray-300 text-poker-cyan focus:ring-poker-cyan"
                   />
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 min-w-0">
                     {guest.photoUrl ? (
                       <img
                         src={guest.photoUrl}
                         alt={`${guest.firstName} ${guest.lastName}`}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                      <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
                         <span className="text-xs text-gray-300">
                           {guest.firstName[0]}{guest.lastName[0]}
                         </span>
                       </div>
                     )}
-                    <div>
-                      <p className="text-white font-medium">
-                        {guest.firstName} {guest.lastName}
-                      </p>
-                      {guest.inviter && (
-                        <p className="text-xs text-poker-muted">
-                          Invitado por {guest.inviter.firstName}
-                        </p>
-                      )}
-                    </div>
+                    <span className="text-white text-sm truncate">
+                      {guest.firstName} {guest.lastName}
+                    </span>
                   </div>
                 </label>
               ))}
             </div>
           ) : (
-            <div className="text-center py-6 text-poker-muted">
-              <UserPlus className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No hay invitados externos registrados</p>
-              <Link href="/players/new">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 border-poker-cyan/30 text-poker-cyan hover:bg-poker-cyan/10"
-                >
-                  Crear Nuevo Invitado
-                </Button>
-              </Link>
+            <div className="text-center py-4 text-poker-muted">
+              <p className="text-sm">
+                {externalGuests.length === 0 
+                  ? 'No hay externos registrados' 
+                  : 'No hay invitados disponibles (sus invitadores no están confirmados)'}
+              </p>
             </div>
           )}
         </div>

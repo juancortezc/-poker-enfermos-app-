@@ -125,6 +125,12 @@ export async function POST(req: NextRequest) {
       finalPhotoUrl = 'https://storage.googleapis.com/poker-enfermos/pato.png'
     }
 
+    // Generar adminKey para usuarios Comision
+    let adminKey = null
+    if (role === UserRole.Comision) {
+      adminKey = `admin_${firstName.toLowerCase()}_${Math.random().toString(36).substring(2, 15)}`
+    }
+
     const newPlayer = await prisma.player.create({
       data: {
         firstName,
@@ -139,6 +145,7 @@ export async function POST(req: NextRequest) {
         email,
         inviterId: role === UserRole.Invitado ? inviterId : null,
         photoUrl: finalPhotoUrl,
+        adminKey: adminKey,
         isActive: true
       },
       include: {
