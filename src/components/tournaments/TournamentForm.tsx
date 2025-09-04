@@ -79,6 +79,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
   const [showDraftModal, setShowDraftModal] = useState(false)
   const [selectedPreset, setSelectedPreset] = useState<string>('standard')
   const [showPresetModal, setShowPresetModal] = useState(false)
+  const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
   
   const isEditing = !!tournamentId
   const [activeTab, setActiveTab] = useState<'participants' | 'blinds' | 'dates'>('participants')
@@ -110,7 +111,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
         dateNumber: i + 1,
         scheduledDate: currentDate.toISOString().split('T')[0]
       })
-      currentDate.setDate(currentDate.getDate() + 15)
+      currentDate.setDate(currentDate.getDate() + 14)
     }
     
     return dates
@@ -254,6 +255,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
   const fetchAvailablePlayers = async () => {
     try {
       setLoadingMessage('Cargando lista de jugadores...')
+      console.log('Fetching players with adminKey:', !!user?.adminKey)
       const response = await fetch('/api/players?role=Enfermo,Comision', {
         headers: {
           'Authorization': `Bearer ${user?.adminKey}`,
@@ -261,9 +263,12 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
         }
       })
 
+      console.log('Players API response status:', response.status)
       if (response.ok) {
         const data = await response.json()
+        console.log('Raw players data:', data.length, 'players')
         const activePlayers = data.filter((p: Player) => p.isActive)
+        console.log('Active players:', activePlayers.length, 'active players')
         setAvailablePlayers(activePlayers)
         
         // Seleccionar todos por defecto solo en nuevo torneo
@@ -273,6 +278,8 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
             participantIds: activePlayers.map((p: Player) => p.id)
           }))
         }
+      } else {
+        console.error('Failed to fetch players:', response.status, response.statusText)
       }
     } catch (err) {
       console.error('Error fetching players:', err)
@@ -389,6 +396,12 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
     clearDraft()
     setShowDraftModal(false)
   }, [clearDraft])
+
+  // Restaurar blinds con confirmación
+  const handleRestoreBlinds = useCallback(() => {
+    updateFormData('blindLevels', DEFAULT_BLIND_LEVELS)
+    setShowRestoreConfirm(false)
+  }, [updateFormData])
 
 
   // Función para generar todas las fechas automáticamente
@@ -573,68 +586,56 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Tab: Fechas */}
           {activeTab === 'dates' && (
-            <div className="space-y-6 bg-poker-card p-6 rounded-lg border border-white/10">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="flex items-center space-x-2">
-                  <Label className="text-poker-text font-medium">Número:</Label>
-                  <div className="space-y-1">
-                    <Input
-                      type="number"
-                      value={formData.tournamentNumber}
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value)
-                        updateFormData('tournamentNumber', value)
-                        validateTournamentNumberDebounced(value)
-                      }}
-                      className={`w-20 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red ${
-                        numberValidationError ? 'border-red-500/50' : ''
-                      }`}
-                      min="1"
-                      max="999"
-                      required
-                    />
-                    {numberValidationError && (
-                      <p className="text-xs text-red-400 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        {numberValidationError}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-6 bg-poker-card p-4 sm:p-6 rounded-lg border border-white/10">
 
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-full">
                 <div className="bg-poker-dark/30 p-3 rounded-lg border border-white/5">
                   <p className="text-xs text-poker-muted mb-2">
                     💡 Las fechas se generan automáticamente cada 15 días en martes. Solo configura la primera fecha.
                   </p>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {formData.gameDates.map((gameDate, index) => (
-                    <div key={index} className="space-y-2 p-3 bg-poker-dark/20 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
-                      <Label className="text-poker-text flex items-center justify-between text-sm font-medium">
-                        <span>Fecha {gameDate.dateNumber}</span>
-                        {index === 0 && (
-                          <span className="text-xs text-poker-cyan bg-poker-cyan/10 px-2 py-1 rounded-full">Principal</span>
-                        )}
-                      </Label>
-                      <DatePicker
-                        value={gameDate.scheduledDate}
-                        onChange={(value) => updateGameDate(index, value)}
-                        placeholder={index === 0 ? "Fecha inicial" : "Auto"}
-                        required={index === 0}
-                        className="w-full"
-                      />
-                      {gameDate.scheduledDate && (
-                        <div className="text-xs text-poker-muted mt-1">
-                          {new Date(gameDate.scheduledDate).toLocaleDateString('es-ES', { 
-                            weekday: 'short', 
-                            day: 'numeric', 
-                            month: 'short' 
-                          })}
+                    <div key={index} className="bg-poker-card border-2 border-poker-red/40 rounded-xl p-4 hover:border-poker-red/60 transition-all duration-200 hover:shadow-lg hover:shadow-poker-red/10">
+                      <div className="text-center space-y-3">
+                        <div className="flex items-center justify-center space-x-2">
+                          <span className="text-xs text-poker-muted font-medium">Fecha {gameDate.dateNumber}</span>
+                          {index === 0 && (
+                            <div className="w-2 h-2 bg-poker-red rounded-full"></div>
+                          )}
                         </div>
-                      )}
+                        
+                        {/* Fecha prominente */}
+                        {gameDate.scheduledDate ? (
+                          <div className="space-y-1">
+                            <div className="text-2xl sm:text-3xl font-bold text-white">
+                              {new Date(gameDate.scheduledDate + 'T12:00:00').getDate()}
+                            </div>
+                            <div className="text-lg sm:text-xl font-semibold text-orange-400">
+                              {new Date(gameDate.scheduledDate + 'T12:00:00').toLocaleDateString('es-ES', { 
+                                month: 'short'
+                              }).toUpperCase()}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <div className="text-2xl sm:text-3xl font-bold text-poker-muted">--</div>
+                            <div className="text-lg sm:text-xl font-semibold text-poker-muted">---</div>
+                          </div>
+                        )}
+                        
+                        {/* Selector de fecha (menos prominente) */}
+                        <div className="mt-3">
+                          <DatePicker
+                            value={gameDate.scheduledDate}
+                            onChange={(value) => updateGameDate(index, value)}
+                            placeholder={index === 0 ? "Seleccionar fecha" : "Auto"}
+                            required={index === 0}
+                            className="w-full text-sm opacity-80 hover:opacity-100 transition-opacity"
+                          />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -649,12 +650,23 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                 <h3 className="text-lg font-semibold text-white">
                   Participantes ({formData.participantIds.length})
                 </h3>
+                <p className="text-xs text-poker-muted">
+                  Jugadores disponibles: {availablePlayers.length}
+                </p>
               </div>
               
+              {/* Debug info */}
+              {availablePlayers.length === 0 && (
+                <div className="text-center py-4 text-poker-muted">
+                  Cargando participantes...
+                </div>
+              )}
+              
               {/* Listado estilo Excel - 3 columnas */}
-              <div className="max-h-96 overflow-y-auto border border-white/10 rounded-lg">
-                <div className="grid grid-cols-3 gap-0 divide-x divide-white/5">
-                  {availablePlayers.map((player) => (
+              {availablePlayers.length > 0 && (
+                <div className="max-h-96 overflow-y-auto border border-white/10 rounded-lg">
+                  <div className="grid grid-cols-3 gap-0 divide-x divide-white/5">
+                    {availablePlayers.map((player) => (
                     <label
                       key={player.id}
                       className={`flex flex-col p-2 sm:p-3 cursor-pointer transition-all border-b border-white/5 hover:bg-poker-dark/30 min-h-[50px] border-l-2 ${
@@ -682,83 +694,47 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                       )}
                     </label>
                   ))}
-                  {/* Rellenar celdas vacías para completar la grilla */}
-                  {Array.from({ length: (3 - (availablePlayers.length % 3)) % 3 }).map((_, i) => (
-                    <div key={`empty-${i}`} className="p-2 sm:p-3 min-h-[50px] bg-poker-card border-b border-white/5 border-l-2 border-l-gray-600" />
-                  ))}
+                    {/* Rellenar celdas vacías para completar la grilla */}
+                    {Array.from({ length: (3 - (availablePlayers.length % 3)) % 3 }).map((_, i) => (
+                      <div key={`empty-${i}`} className="p-2 sm:p-3 min-h-[50px] bg-poker-card border-b border-white/5 border-l-2 border-l-gray-600" />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
           {/* Tab: Blinds */}
           {activeTab === 'blinds' && (
-            <div className="space-y-6 bg-poker-card p-6 rounded-lg border border-white/10">
-              {/* Selector de Presets */}
-              <div className="bg-poker-dark/30 p-4 rounded-lg border border-white/5">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-white">Presets de Blinds</h4>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPresetModal(true)}
-                    className="text-xs border-white/20 text-poker-text hover:bg-white/5"
-                  >
-                    Ver todos
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                  {TOURNAMENT_PRESETS.map((preset) => (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => loadPreset(preset.id)}
-                      className={`p-2 rounded-md text-xs border transition-all text-left ${
-                        selectedPreset === preset.id
-                          ? 'bg-poker-red/20 border-poker-red text-white'
-                          : 'bg-poker-dark/50 border-white/10 text-poker-muted hover:border-white/20'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1 mb-1">
-                        <span>{preset.icon}</span>
-                        <span className="font-medium">{preset.name}</span>
-                      </div>
-                      <div className="text-xs opacity-80">{preset.estimatedDuration}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Estructura de Blinds</h3>
-                <div className="flex space-x-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => updateFormData('blindLevels', DEFAULT_BLIND_LEVELS)}
-                    className="text-xs border-white/20 text-poker-text hover:bg-white/5"
-                  >
-                    Restaurar
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      const lastLevel = formData.blindLevels[formData.blindLevels.length - 1]
-                      const newBlind: BlindLevel = {
-                        level: lastLevel.level + 1,
-                        smallBlind: lastLevel.bigBlind,
-                        bigBlind: lastLevel.bigBlind * 2,
-                        duration: 10
-                      }
-                      updateFormData('blindLevels', [...formData.blindLevels, newBlind])
-                    }}
-                    className="bg-green-600 hover:bg-green-700 text-white text-sm"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Agregar Nivel
-                  </Button>
-                </div>
+            <div className="bg-poker-card p-6 rounded-lg border border-white/10">
+              <div className="flex items-center justify-end space-x-2 mb-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowRestoreConfirm(true)}
+                  className="px-3 py-1 text-xs border-gray-500/50 text-gray-400 hover:bg-gray-500/10 hover:text-gray-300"
+                >
+                  Restaurar
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    const lastLevel = formData.blindLevels[formData.blindLevels.length - 1]
+                    const newBlind: BlindLevel = {
+                      level: lastLevel.level + 1,
+                      smallBlind: lastLevel.bigBlind,
+                      bigBlind: lastLevel.bigBlind * 2,
+                      duration: 10
+                    }
+                    updateFormData('blindLevels', [...formData.blindLevels, newBlind])
+                  }}
+                  className="px-3 py-1 text-xs bg-gray-600/50 hover:bg-gray-600/70 text-white"
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Agregar
+                </Button>
               </div>
 
               {/* Validación de blinds */}
@@ -769,11 +745,11 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/10">
-                      <th className="text-left py-2 text-poker-text">Nivel</th>
-                      <th className="text-left py-2 text-poker-text">Small Blind</th>
-                      <th className="text-left py-2 text-poker-text">Big Blind</th>
-                      <th className="text-left py-2 text-poker-text">Tiempo (min)</th>
-                      <th className="text-right py-2 text-poker-text">Acción</th>
+                      <th className="text-left py-1 text-poker-text text-xs">Nivel</th>
+                      <th className="text-left py-1 text-poker-text text-xs">Small Blind</th>
+                      <th className="text-left py-1 text-poker-text text-xs">Big Blind</th>
+                      <th className="text-left py-1 text-poker-text text-xs">Tiempo (min)</th>
+                      <th className="text-right py-1 text-poker-text text-xs">Acción</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -787,42 +763,42 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                         <tr key={blind.level} className={`border-b border-white/5 ${
                           hasError ? 'bg-red-500/5' : ''
                         }`}>
-                          <td className="py-2 text-white font-medium">{blind.level}</td>
-                          <td className="py-2">
+                          <td className="py-1 text-white font-medium text-sm">{blind.level}</td>
+                          <td className="py-1">
                             <Input
                               type="number"
                               value={blind.smallBlind}
                               onChange={(e) => updateBlindLevel(index, 'smallBlind', parseInt(e.target.value))}
-                              className={`w-20 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-sm ${
+                              className={`w-16 h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
                                 fieldErrors.some(e => e.field.includes('smallBlind')) ? 'border-red-500/50' : ''
                               }`}
                             />
                           </td>
-                          <td className="py-2">
+                          <td className="py-1">
                             <Input
                               type="number"
                               value={blind.bigBlind}
                               onChange={(e) => updateBlindLevel(index, 'bigBlind', parseInt(e.target.value))}
-                              className={`w-20 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-sm ${
+                              className={`w-16 h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
                                 fieldErrors.some(e => e.field.includes('bigBlind')) ? 'border-red-500/50' : ''
                               }`}
                             />
                           </td>
-                          <td className="py-2">
+                          <td className="py-1">
                             {blind.duration === 0 ? (
-                              <span className="text-sm text-poker-cyan font-medium">Sin límite</span>
+                              <span className="text-xs text-poker-cyan font-medium">Sin límite</span>
                             ) : (
                               <Input
                                 type="number"
                                 value={blind.duration}
                                 onChange={(e) => updateBlindLevel(index, 'duration', parseInt(e.target.value))}
-                                className={`w-16 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-sm ${
+                                className={`w-12 h-8 bg-poker-dark/50 border-white/10 text-white focus:border-poker-red text-xs ${
                                   fieldErrors.some(e => e.field.includes('duration')) ? 'border-red-500/50' : ''
                                 }`}
                               />
                             )}
                           </td>
-                          <td className="py-2 text-right">
+                          <td className="py-1 text-right">
                             {formData.blindLevels.length > 1 && (
                               <Button
                                 type="button"
@@ -853,7 +829,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
               </div>
 
               {/* Vista móvil: cards */}
-              <div className="sm:hidden space-y-3 max-h-96 overflow-y-auto">
+              <div className="sm:hidden space-y-2 max-h-96 overflow-y-auto">
                 {formData.blindLevels.map((blind, index) => {
                   const fieldErrors = [...errors, ...warnings].filter(e => 
                     e.field.startsWith(`blindLevel-${index}`) || e.field === 'blindLevels'
@@ -861,11 +837,11 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                   const hasError = fieldErrors.some(e => e.type === 'error')
                   
                   return (
-                    <div key={blind.level} className={`p-4 bg-poker-dark/30 rounded-lg border ${
+                    <div key={blind.level} className={`p-3 bg-poker-dark/30 rounded-lg border ${
                       hasError ? 'border-red-500/50' : 'border-white/10'
                     }`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-white font-medium">Nivel {blind.level}</h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-white font-medium text-sm">Nivel {blind.level}</h4>
                         {formData.blindLevels.length > 1 && (
                           <Button
                             type="button"
@@ -884,37 +860,37 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                             }}
                             className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3 h-3" />
                           </Button>
                         )}
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <Label className="text-xs text-poker-muted mb-1 block">Small Blind</Label>
+                          <Label className="text-xs text-poker-muted mb-1 block">Small</Label>
                           <Input
                             type="number"
                             value={blind.smallBlind}
                             onChange={(e) => updateBlindLevel(index, 'smallBlind', parseInt(e.target.value))}
-                            className={`bg-poker-dark/50 border-white/10 text-white focus:border-poker-red ${
+                            className={`h-8 text-xs bg-poker-dark/50 border-white/10 text-white focus:border-poker-red ${
                               fieldErrors.some(e => e.field.includes('smallBlind')) ? 'border-red-500/50' : ''
                             }`}
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-poker-muted mb-1 block">Big Blind</Label>
+                          <Label className="text-xs text-poker-muted mb-1 block">Big</Label>
                           <Input
                             type="number"
                             value={blind.bigBlind}
                             onChange={(e) => updateBlindLevel(index, 'bigBlind', parseInt(e.target.value))}
-                            className={`bg-poker-dark/50 border-white/10 text-white focus:border-poker-red ${
+                            className={`h-8 text-xs bg-poker-dark/50 border-white/10 text-white focus:border-poker-red ${
                               fieldErrors.some(e => e.field.includes('bigBlind')) ? 'border-red-500/50' : ''
                             }`}
                           />
                         </div>
                         <div className="col-span-2">
-                          <Label className="text-xs text-poker-muted mb-1 block">Tiempo (minutos)</Label>
+                          <Label className="text-xs text-poker-muted mb-1 block">Tiempo (min)</Label>
                           {blind.duration === 0 ? (
-                            <div className="bg-poker-dark/50 border border-white/10 rounded-md px-3 py-2 text-poker-cyan font-medium">
+                            <div className="bg-poker-dark/50 border border-white/10 rounded-md px-2 py-1 text-poker-cyan font-medium text-xs h-8 flex items-center">
                               Sin límite
                             </div>
                           ) : (
@@ -922,7 +898,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                               type="number"
                               value={blind.duration}
                               onChange={(e) => updateBlindLevel(index, 'duration', parseInt(e.target.value))}
-                              className={`bg-poker-dark/50 border-white/10 text-white focus:border-poker-red ${
+                              className={`h-8 text-xs bg-poker-dark/50 border-white/10 text-white focus:border-poker-red ${
                                 fieldErrors.some(e => e.field.includes('duration')) ? 'border-red-500/50' : ''
                               }`}
                             />
@@ -961,11 +937,14 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/tournaments')}
+                onClick={activeTab === 'dates' ? () => {
+                  const resetDates = generateInitialDates()
+                  updateFormData('gameDates', resetDates)
+                } : () => router.push('/tournaments')}
                 className="w-full sm:flex-1 border-white/20 text-poker-text hover:bg-white/5 text-sm py-2.5"
                 disabled={loading}
               >
-                Cancelar
+                {activeTab === 'dates' ? 'Reset' : 'Cancelar'}
               </Button>
               <Button
                 type="submit"
@@ -1007,26 +986,17 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
 
           {/* Botones para tabs Participantes y Blinds */}
           {(activeTab === 'participants' || activeTab === 'blinds') && (
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setActiveTab('dates')}
-                className="w-full sm:flex-1 border-white/20 text-poker-text hover:bg-white/5 text-xs sm:text-sm py-2"
-              >
-                Ir a Fechas
-              </Button>
+            <div className="flex justify-center">
               <Button
                 type="button"
                 onClick={() => {
                   setPendingFormData(formData)
                   setShowSaveConfirm(true)
                 }}
-                className="w-full sm:flex-1 bg-poker-red hover:bg-red-700 text-white text-xs sm:text-sm py-2"
+                className="px-6 bg-poker-red hover:bg-red-700 text-white text-sm py-2"
               >
-                <Save className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Guardar y Crear</span>
-                <span className="sm:hidden">Crear</span>
+                <Save className="w-4 h-4 mr-2" />
+                Guardar Cambios
               </Button>
             </div>
           )}
@@ -1082,7 +1052,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
               Confirmar cambios
             </h3>
             <p className="text-poker-muted mb-6">
-              ¿Deseas guardar los cambios realizados y crear el torneo con esta configuración?
+              ¿Deseas guardar los cambios realizados? Podrás crear el torneo más tarde desde el tab "Fechas".
             </p>
             <div className="flex space-x-3">
               <Button
@@ -1101,14 +1071,13 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                 onClick={() => {
                   setShowSaveConfirm(false)
                   setPendingFormData(null)
-                  setActiveTab('dates')
-                  // El formulario ya tiene los cambios aplicados
-                  // Solo navegamos a configuración para crear el torneo
+                  // Solo guardamos los cambios, sin navegar automáticamente
+                  saveDraft(formData)
                 }}
                 className="flex-1 bg-poker-red hover:bg-red-700 text-white"
               >
                 <Check className="w-4 h-4 mr-2" />
-                Sí, continuar
+Sí, guardar
               </Button>
             </div>
           </div>
@@ -1124,8 +1093,13 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
               Borrador encontrado
             </h3>
             <p className="text-poker-muted mb-4">
-              Se encontró un borrador guardado automáticamente. ¿Deseas continuar desde donde te quedaste?
+              El sistema guardó automáticamente tu progreso mientras completabas el formulario. ¿Deseas recuperar estos datos y continuar desde donde te quedaste?
             </p>
+            <div className="bg-poker-cyan/10 border border-poker-cyan/20 rounded-lg p-3 mb-4">
+              <p className="text-xs text-poker-cyan">
+                💾 Los borradores se guardan automáticamente cada 30 segundos para evitar pérdida de datos
+              </p>
+            </div>
             {lastSaved && (
               <p className="text-xs text-poker-cyan mb-6">
                 Guardado el {lastSaved.toLocaleString()}
@@ -1138,7 +1112,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                 onClick={discardDraft}
                 className="flex-1 border-white/20 text-white hover:bg-white/5"
               >
-                Descartar
+Empezar de nuevo
               </Button>
               <Button
                 type="button"
@@ -1146,7 +1120,7 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                 className="flex-1 bg-poker-cyan hover:bg-cyan-600 text-white"
               >
                 <Check className="w-4 h-4 mr-2" />
-                Continuar
+Recuperar borrador
               </Button>
             </div>
           </div>
@@ -1203,6 +1177,38 @@ export default function TournamentForm({ tournamentId }: { tournamentId?: string
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación para restaurar blinds */}
+      {showRestoreConfirm && (
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4">
+          <div className="bg-poker-card border border-white/10 rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-white mb-4">
+              Restaurar Blinds
+            </h3>
+            <p className="text-poker-muted mb-6">
+              ¿Seguro que deseas restaurar los blinds a la configuración por defecto? Se perderán todos los cambios realizados.
+            </p>
+            <div className="flex space-x-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowRestoreConfirm(false)}
+                className="flex-1 border-white/20 text-white hover:bg-white/5"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={handleRestoreBlinds}
+                className="flex-1 bg-poker-red hover:bg-red-700 text-white"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Confirmar
+              </Button>
             </div>
           </div>
         </div>
