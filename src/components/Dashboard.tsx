@@ -5,15 +5,37 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Trophy, Users, Clock, Calendar } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import TournamentRankingTable from './tournaments/TournamentRankingTable'
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const [activeTournamentId, setActiveTournamentId] = useState<number | null>(null)
+
+  // Obtener torneo activo
+  useEffect(() => {
+    async function fetchActiveTournament() {
+      try {
+        const response = await fetch('/api/tournaments/active')
+        if (response.ok) {
+          const tournament = await response.json()
+          if (tournament) {
+            setActiveTournamentId(tournament.id)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching active tournament:', error)
+      }
+    }
+
+    fetchActiveTournament()
+  }, [])
 
   const quickActions = [
     {
       title: 'Fecha',
       description: 'Crear noche de juego',
-      href: '/game-dates/config',
+      href: '/tournaments/simple',
       icon: Calendar,
       gradient: 'from-yellow-500 to-yellow-600',
       stats: 'Próxima fecha',
@@ -21,7 +43,7 @@ export default function Dashboard() {
     {
       title: 'Torneos',
       description: 'Gestión de torneos',
-      href: '/tournaments/overview',
+      href: '/tournaments/simple',
       icon: Trophy,
       gradient: 'from-poker-red to-red-700',
       stats: 'Torneo 28',
@@ -92,6 +114,21 @@ export default function Dashboard() {
         })}
       </div>
 
+      {/* Widget de Ranking */}
+      {activeTournamentId && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-white">Ranking del Torneo</h2>
+            <Link 
+              href="/ranking"
+              className="text-poker-accent hover:text-poker-accent-hover text-sm font-medium transition-colors"
+            >
+              Ver completo →
+            </Link>
+          </div>
+          <TournamentRankingTable tournamentId={activeTournamentId} compact />
+        </div>
+      )}
 
     </div>
   )

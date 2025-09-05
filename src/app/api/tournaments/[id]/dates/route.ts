@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withAuth, withComisionAuth } from '@/lib/api-auth'
+import { parseToUTCNoon } from '@/lib/date-utils'
 
 // GET /api/tournaments/[id]/dates - Obtener fechas de un torneo
 export async function GET(
@@ -140,7 +141,7 @@ export async function POST(
         data: {
           tournamentId,
           dateNumber,
-          scheduledDate: new Date(scheduledDate),
+          scheduledDate: parseToUTCNoon(scheduledDate),
           playersMin,
           playersMax,
           playerIds: []

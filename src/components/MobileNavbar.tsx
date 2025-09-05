@@ -17,7 +17,7 @@ import {
 const navItems = [
   { href: '/', label: 'Inicio', icon: HomeIcon, roles: ['all'] },
   { href: '/timer', label: 'Timer', icon: TimerIcon, roles: ['all'] },
-  { href: '/rankings', label: 'Rankings', icon: TrophyIcon, roles: ['all'] },
+  { href: '/ranking', label: 'Ranking', icon: TrophyIcon, roles: ['all'] },
   { href: '/admin', label: 'Admin', icon: SettingsIcon, roles: ['Comision'] },
 ]
 
@@ -28,20 +28,13 @@ export default function MobileNavbar() {
 
   // Check for active game date
   useEffect(() => {
-    if (!user?.adminKey) return
-
     const checkActiveGameDate = async () => {
       try {
-        const response = await fetch('/api/game-dates/active', {
-          headers: {
-            'Authorization': `Bearer ${user.adminKey}`,
-            'Content-Type': 'application/json'
-          }
-        })
+        const response = await fetch('/api/game-dates/active')
         
         if (response.ok) {
           const data = await response.json()
-          setHasActiveGameDate(!!data.activeDate)
+          setHasActiveGameDate(!!data)
         }
       } catch (error) {
         console.error('Error checking active game date:', error)
@@ -53,7 +46,7 @@ export default function MobileNavbar() {
     const interval = setInterval(checkActiveGameDate, 30000)
     
     return () => clearInterval(interval)
-  }, [user?.adminKey])
+  }, [])
 
   if (!user) return null
 
@@ -64,7 +57,7 @@ export default function MobileNavbar() {
   if (hasActiveGameDate && canCRUD(user.role)) {
     // Insert Registro after Timer (index 2)
     dynamicNavItems.splice(2, 0, {
-      href: '/game-dates/registro',
+      href: '/registro',
       label: 'Registro',
       icon: ClipboardListIcon,
       roles: ['Comision']

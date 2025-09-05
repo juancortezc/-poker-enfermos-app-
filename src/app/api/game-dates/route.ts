@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withComisionAuth } from '@/lib/api-auth'
+import { parseToUTCNoon } from '@/lib/date-utils'
 
 // POST - Crear nueva fecha de juego
 export async function POST(request: NextRequest) {
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
         data: {
           tournamentId: parseInt(tournamentId),
           dateNumber: parseInt(dateNumber),
-          scheduledDate: new Date(scheduledDate),
+          scheduledDate: parseToUTCNoon(scheduledDate),
           playerIds: playerIds,
           status: 'pending',
           playersMin: Math.min(9, totalParticipants),

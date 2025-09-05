@@ -7,6 +7,7 @@ import { TournamentStatus, UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Edit, Trash2, Calendar, Users, Clock, Trophy } from 'lucide-react'
 import { canCRUD } from '@/lib/auth'
+import TournamentRepairTool from '@/components/admin/TournamentRepairTool'
 
 interface Tournament {
   id: number
@@ -262,7 +263,7 @@ export default function TournamentDetails({ tournamentId }: TournamentDetailsPro
               
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead>
+                  <thead className="sm:table-header-group hidden">
                     <tr className="border-b border-white/10">
                       <th className="text-left py-2 text-poker-muted">Nivel</th>
                       <th className="text-left py-2 text-poker-muted">Small</th>
@@ -273,10 +274,13 @@ export default function TournamentDetails({ tournamentId }: TournamentDetailsPro
                   <tbody>
                     {tournament.blindLevels.map((blind) => (
                       <tr key={blind.id} className="border-b border-white/5">
-                        <td className="py-2 text-white font-medium">{blind.level}</td>
-                        <td className="py-2 text-poker-text">{blind.smallBlind.toLocaleString()}</td>
-                        <td className="py-2 text-poker-text">{blind.bigBlind.toLocaleString()}</td>
-                        <td className="py-2 text-poker-muted">{blind.duration} min</td>
+                        <td className="py-1 sm:py-2 text-white font-medium whitespace-nowrap">
+                          <span className="sm:hidden">{blind.smallBlind.toLocaleString()}/{blind.bigBlind.toLocaleString()}</span>
+                          <span className="hidden sm:inline">{blind.level}</span>
+                        </td>
+                        <td className="hidden sm:table-cell py-2 text-poker-text">{blind.smallBlind.toLocaleString()}</td>
+                        <td className="hidden sm:table-cell py-2 text-poker-text">{blind.bigBlind.toLocaleString()}</td>
+                        <td className="py-1 sm:py-2 text-poker-muted text-right">{blind.duration} min</td>
                       </tr>
                     ))}
                   </tbody>
@@ -332,6 +336,13 @@ export default function TournamentDetails({ tournamentId }: TournamentDetailsPro
               </div>
             </div>
           </div>
+
+          {/* Admin Repair Tool - Only visible for Commission */}
+          {user?.role === UserRole.Comision && (
+            <div className="lg:col-span-3">
+              <TournamentRepairTool tournamentId={tournament.id} />
+            </div>
+          )}
         </div>
       </div>
 

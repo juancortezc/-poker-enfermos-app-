@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { TournamentStatus } from '@prisma/client'
 import { withComisionAuth } from '@/lib/api-auth'
+import { parseToUTCNoon } from '@/lib/date-utils'
 
 // GET /api/tournaments - Listar todos los torneos
 export async function GET(req: NextRequest) {
@@ -93,15 +94,10 @@ export async function POST(req: NextRequest) {
         where: { status: 'ACTIVO' }
       })
 
-      // Verificar restricción de un solo torneo próximo
-      const nextTournament = await prisma.tournament.findFirst({
-        where: { status: 'PROXIMO' }
-      })
-
-      // Los nuevos torneos siempre se crean como PROXIMO
-      if (nextTournament) {
+      // Solo se puede tener un torneo activo a la vez
+      if (activeTournament) {
         return NextResponse.json(
-          { error: 'Ya existe un torneo próximo. Complete o cancele el torneo actual antes de crear uno nuevo.' },
+          { error: 'Ya existe un torneo activo. Complete el torneo actual antes de crear uno nuevo.' },
           { status: 400 }
         )
       }
@@ -125,12 +121,12 @@ export async function POST(req: NextRequest) {
         data: {
           name: `Torneo ${number}`,
           number,
-          status: 'PROXIMO', // Los nuevos torneos se crean como próximos
+          status: 'ACTIVO', // Los nuevos torneos se crean como activos
           participantIds,
           gameDates: {
             create: gameDates.map((date: any, index: number) => ({
               dateNumber: index + 1,
-              scheduledDate: new Date(date.scheduledDate),
+              scheduledDate: parseToUTCNoon(date.scheduledDate),
               playersMin: 9,
               playersMax: 24
             }))

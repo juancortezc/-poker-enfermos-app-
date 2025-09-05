@@ -2,58 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withAuth } from '@/lib/api-auth'
 
-// GET /api/tournaments/next - Obtener el próximo torneo en preparación
+// GET /api/tournaments/next - No hay concepto de "próximo torneo", siempre retorna null
 export async function GET(req: NextRequest) {
   return withAuth(req, async (req) => {
     try {
-      const nextTournament = await prisma.tournament.findFirst({
-        where: { status: 'PROXIMO' },
-        include: {
-          gameDates: {
-            orderBy: { dateNumber: 'asc' }
-          },
-          tournamentParticipants: {
-            include: {
-              player: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  role: true,
-                  photoUrl: true
-                }
-              }
-            }
-          },
-          blindLevels: {
-            orderBy: { level: 'asc' }
-          },
-          _count: {
-            select: {
-              tournamentParticipants: true,
-              gameDates: true
-            }
-          }
-        }
-      })
-
-      if (!nextTournament) {
-        return NextResponse.json({ tournament: null })
-      }
-
-      // Calcular estadísticas adicionales
-      const startDate = nextTournament.gameDates[0]?.scheduledDate
-      const endDate = nextTournament.gameDates[nextTournament.gameDates.length - 1]?.scheduledDate
-
-      return NextResponse.json({
-        tournament: nextTournament,
-        stats: {
-          startDate,
-          endDate,
-          totalParticipants: nextTournament._count.tournamentParticipants,
-          totalDates: nextTournament.gameDates.length
-        }
-      })
+      // Con la nueva arquitectura, no hay torneos "próximos"
+      // Solo existe un torneo activo a la vez
+      return NextResponse.json({ tournament: null })
     } catch (error) {
       console.error('Error fetching next tournament:', error)
       return NextResponse.json(

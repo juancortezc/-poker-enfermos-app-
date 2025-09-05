@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 import { Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -30,8 +29,8 @@ export function DatePicker({
     }
   }
 
-  const hasValue = value && value.trim() !== ''
-  const displayValue = hasValue ? format(new Date(value), 'dd/MM/yy') : ''
+  const hasValue = value && typeof value === 'string' && value.trim() !== ''
+  const displayValue = hasValue ? format(new Date(value + 'T12:00:00'), 'dd/MM/yy') : ''
 
   return (
     <div className="relative">
