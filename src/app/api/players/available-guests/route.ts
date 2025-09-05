@@ -7,49 +7,49 @@ export async function GET(request: NextRequest) {
     try {
       const { searchParams } = new URL(req.url)
       const tournamentId = searchParams.get('tournamentId')
-
-      if (!tournamentId) {
-        return NextResponse.json(
-          { error: 'Tournament ID requerido' },
-          { status: 400 }
-        )
-      }
-
-      // Obtener participantes registrados en el torneo
-      const tournament = await prisma.tournament.findUnique({
-        where: { id: parseInt(tournamentId) },
-        include: {
-          tournamentParticipants: {
-            select: {
-              player: {
-                select: { id: true }
+      
+      let registeredPlayerIds: string[] = []
+      
+      // If tournament ID is provided, exclude registered players
+      if (tournamentId) {
+        // Obtener participantes registrados en el torneo
+        const tournament = await prisma.tournament.findUnique({
+          where: { id: parseInt(tournamentId) },
+          include: {
+            tournamentParticipants: {
+              select: {
+                player: {
+                  select: { id: true }
+                }
               }
             }
           }
-        }
-      })
+        })
 
-      if (!tournament) {
-        return NextResponse.json(
-          { error: 'Torneo no encontrado' },
-          { status: 404 }
+        if (!tournament) {
+          return NextResponse.json(
+            { error: 'Torneo no encontrado' },
+            { status: 404 }
+          )
+        }
+
+        registeredPlayerIds = tournament.tournamentParticipants.map(
+          tp => tp.player.id
         )
       }
 
-      const registeredPlayerIds = tournament.tournamentParticipants.map(
-        tp => tp.player.id
-      )
-
-      // Obtener jugadores del grupo que NO están registrados en el torneo
+      // Obtener jugadores del grupo (excluding registered players if tournament provided)
       const groupMembers = await prisma.player.findMany({
         where: {
           isActive: true,
           role: {
             in: ['Enfermo', 'Comision']
           },
-          id: {
-            notIn: registeredPlayerIds
-          }
+          ...(registeredPlayerIds.length > 0 && {
+            id: {
+              notIn: registeredPlayerIds
+            }
+          })
         },
         select: {
           id: true,

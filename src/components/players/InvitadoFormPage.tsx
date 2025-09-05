@@ -144,7 +144,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
         throw new Error(errorData.error || 'Error al guardar invitado')
       }
 
-      router.push('/players')
+      router.push(`/${returnTo}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {

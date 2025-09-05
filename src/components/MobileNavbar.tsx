@@ -4,12 +4,14 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { canCRUD } from '@/lib/auth'
+import { useState, useEffect } from 'react'
 import {
   HomeIcon,
   TimerIcon,
   TrophyIcon,
   UsersIcon,
   SettingsIcon,
+  ClipboardListIcon,
 } from 'lucide-react'
 
 const navItems = [
@@ -22,10 +24,54 @@ const navItems = [
 export default function MobileNavbar() {
   const pathname = usePathname()
   const { user } = useAuth()
+  const [hasActiveGameDate, setHasActiveGameDate] = useState(false)
+
+  // Check for active game date
+  useEffect(() => {
+    if (!user?.adminKey) return
+
+    const checkActiveGameDate = async () => {
+      try {
+        const response = await fetch('/api/game-dates/active', {
+          headers: {
+            'Authorization': `Bearer ${user.adminKey}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          setHasActiveGameDate(!!data.activeDate)
+        }
+      } catch (error) {
+        console.error('Error checking active game date:', error)
+      }
+    }
+
+    checkActiveGameDate()
+    // Check every 30 seconds for updates
+    const interval = setInterval(checkActiveGameDate, 30000)
+    
+    return () => clearInterval(interval)
+  }, [user?.adminKey])
 
   if (!user) return null
 
-  const filteredItems = navItems.filter(item => 
+  // Create dynamic nav items based on active game date
+  const dynamicNavItems = [...navItems]
+  
+  // Add Registro button if there's an active game date and user is Comision
+  if (hasActiveGameDate && canCRUD(user.role)) {
+    // Insert Registro after Timer (index 2)
+    dynamicNavItems.splice(2, 0, {
+      href: '/game-dates/registro',
+      label: 'Registro',
+      icon: ClipboardListIcon,
+      roles: ['Comision']
+    })
+  }
+
+  const filteredItems = dynamicNavItems.filter(item => 
     item.roles.includes('all') || 
     (canCRUD(user.role) && item.roles.includes('Comision'))
   )

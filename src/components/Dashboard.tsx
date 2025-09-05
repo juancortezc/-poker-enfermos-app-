@@ -13,7 +13,7 @@ export default function Dashboard() {
     {
       title: 'Fecha',
       description: 'Crear noche de juego',
-      href: '/game-dates/new',
+      href: '/game-dates/config',
       icon: Calendar,
       gradient: 'from-yellow-500 to-yellow-600',
       stats: 'Próxima fecha',
