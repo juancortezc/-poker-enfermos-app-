@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Verificar que no existe ya una fecha con ese número para el torneo
+      // Verificar que existe la fecha para actualizar
       const existingDate = await prisma.gameDate.findFirst({
         where: {
           tournamentId: parseInt(tournamentId),
@@ -39,9 +39,16 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      if (existingDate) {
+      if (!existingDate) {
         return NextResponse.json(
-          { error: `Ya existe la fecha ${dateNumber} para este torneo` },
+          { error: `No se encontró la fecha ${dateNumber} para este torneo` },
+          { status: 400 }
+        )
+      }
+
+      if (existingDate.status !== 'pending') {
+        return NextResponse.json(
+          { error: `La fecha ${dateNumber} ya ha sido activada (estado: ${existingDate.status})` },
           { status: 400 }
         )
       }
@@ -50,14 +57,14 @@ export async function POST(request: NextRequest) {
       const totalParticipants = playerIds.length + guestIds.length
       const pointsForWinner = calculateWinnerPoints(totalParticipants)
 
-      // Crear la fecha de juego
-      const gameDate = await prisma.gameDate.create({
+      // Actualizar la fecha de juego existente
+      const gameDate = await prisma.gameDate.update({
+        where: {
+          id: existingDate.id
+        },
         data: {
-          tournamentId: parseInt(tournamentId),
-          dateNumber: parseInt(dateNumber),
-          scheduledDate: parseToUTCNoon(scheduledDate),
           playerIds: playerIds,
-          status: 'pending',
+          status: 'pending', // Mantener como pending hasta que se active
           playersMin: Math.min(9, totalParticipants),
           playersMax: Math.max(24, totalParticipants)
         },

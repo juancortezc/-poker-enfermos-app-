@@ -178,10 +178,10 @@ export default function GameDateForm() {
         setCurrentStep('summary')
       } else {
         const errorData = await response.json()
-        setError(errorData.error || 'Error al crear fecha')
+        setError(errorData.error || 'Error al configurar fecha')
       }
     } catch (err) {
-      setError('Error al crear fecha de juego')
+      setError('Error al configurar fecha de juego')
       console.error(err)
     } finally {
       setSaving(false)
@@ -234,7 +234,7 @@ export default function GameDateForm() {
             Volver
           </Button>
           <h1 className="text-xl font-bold text-white">
-            {currentStep === 'summary' ? 'Fecha Creada' : 'Nueva Fecha de Juego'}
+            {currentStep === 'summary' ? 'Fecha Configurada' : 'Configurar Fecha de Juego'}
           </h1>
         </div>
 
@@ -351,7 +351,7 @@ export default function GameDateForm() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
                 <Trophy className="w-5 h-5" />
-                Confirmar Creación de Fecha
+                Confirmar Configuración de Fecha
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -380,12 +380,12 @@ export default function GameDateForm() {
                   {saving ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creando...
+                      Configurando...
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
-                      Crear Fecha
+                      Configurar Fecha
                     </>
                   )}
                 </Button>
