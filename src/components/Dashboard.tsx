@@ -16,11 +16,22 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchActiveTournament() {
       try {
-        const response = await fetch('/api/tournaments/active')
+        if (!user?.adminKey) {
+          // If user doesn't have admin key, skip tournament fetch
+          return
+        }
+
+        const response = await fetch('/api/tournaments/active', {
+          headers: {
+            'Authorization': `Bearer ${user.adminKey}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        
         if (response.ok) {
-          const tournament = await response.json()
-          if (tournament) {
-            setActiveTournamentId(tournament.id)
+          const data = await response.json()
+          if (data.tournament) {
+            setActiveTournamentId(data.tournament.id)
           }
         }
       } catch (error) {
@@ -28,14 +39,16 @@ export default function Dashboard() {
       }
     }
 
-    fetchActiveTournament()
-  }, [])
+    if (user) {
+      fetchActiveTournament()
+    }
+  }, [user])
 
   const quickActions = [
     {
       title: 'Fecha',
       description: 'Crear noche de juego',
-      href: '/tournaments/simple',
+      href: '/game-dates/new',
       icon: Calendar,
       gradient: 'from-yellow-500 to-yellow-600',
       stats: 'Próxima fecha',
@@ -43,7 +56,7 @@ export default function Dashboard() {
     {
       title: 'Torneos',
       description: 'Gestión de torneos',
-      href: '/tournaments/simple',
+      href: '/tournaments',
       icon: Trophy,
       gradient: 'from-poker-red to-red-700',
       stats: 'Torneo 28',
