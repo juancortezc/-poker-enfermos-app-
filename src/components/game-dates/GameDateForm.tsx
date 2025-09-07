@@ -106,8 +106,8 @@ export default function GameDateForm() {
       if (activeResponse.ok) {
         const activeData = await activeResponse.json()
         
-        if (activeData.activeDate) {
-          setActiveDate(activeData.activeDate)
+        if (activeData && activeData.id) {
+          setActiveDate(activeData)
           setCurrentStep('summary')
           setLoading(false)
           return
