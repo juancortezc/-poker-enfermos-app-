@@ -7,7 +7,7 @@ import { UserRole, TournamentStatus } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import ProgressBar, { CircularProgress } from '@/components/ui/ProgressBar'
 import LoadingState, { CardSkeleton } from '@/components/ui/LoadingState'
-import { Plus, Trophy, Calendar, Users, Clock, Target, CheckCircle } from 'lucide-react'
+import { Plus, Trophy, Calendar, Users, Clock } from 'lucide-react'
 import { canCRUD } from '@/lib/auth'
 
 interface Tournament {
@@ -244,34 +244,6 @@ export default function TournamentsPage() {
                       </div>
                     </div>
 
-                    {/* Próxima fecha o estado de finalización */}
-                    {tournament.status === 'ACTIVO' ? (
-                      nextDate ? (
-                        <div className="p-3 bg-gradient-to-r from-poker-cyan/10 to-poker-red/10 rounded-lg border border-poker-cyan/20">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Target className="w-4 h-4 text-poker-cyan" />
-                            <span className="text-sm font-medium text-poker-cyan">Próxima fecha</span>
-                          </div>
-                          <p className="text-sm text-white">
-                            Fecha {nextDate.dateNumber} • {formatDate(nextDate.scheduledDate)}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                          <div className="flex items-center space-x-2">
-                            <CheckCircle className="w-4 h-4 text-green-400" />
-                            <span className="text-sm font-medium text-green-400">Todas las fechas completadas</span>
-                          </div>
-                        </div>
-                      )
-                    ) : (
-                      <div className="p-3 bg-gray-500/10 rounded-lg border border-gray-500/20">
-                        <div className="flex items-center space-x-2">
-                          <Trophy className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-400">Torneo finalizado</span>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Circular progress para vista rápida */}

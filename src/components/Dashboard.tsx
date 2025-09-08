@@ -4,20 +4,18 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Trophy, Users, Clock, Calendar } from 'lucide-react'
+import { Trophy, Users, Clock, Calendar, Target, CheckCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import TournamentRankingTable from './tournaments/TournamentRankingTable'
 
 export default function Dashboard() {
   const { user } = useAuth()
-  const [activeTournamentId, setActiveTournamentId] = useState<number | null>(null)
+  const [activeTournament, setActiveTournament] = useState<any>(null)
 
   // Obtener torneo activo
   useEffect(() => {
     async function fetchActiveTournament() {
       try {
         if (!user?.adminKey) {
-          // If user doesn't have admin key, skip tournament fetch
           return
         }
 
@@ -31,7 +29,7 @@ export default function Dashboard() {
         if (response.ok) {
           const data = await response.json()
           if (data.tournament) {
-            setActiveTournamentId(data.tournament.id)
+            setActiveTournament(data)
           }
         }
       } catch (error) {
@@ -43,6 +41,14 @@ export default function Dashboard() {
       fetchActiveTournament()
     }
   }, [user])
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
+  }
 
   const quickActions = [
     {
@@ -127,19 +133,30 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Widget de Ranking */}
-      {activeTournamentId && (
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-white">Ranking del Torneo</h2>
-            <Link 
-              href="/ranking"
-              className="text-poker-accent hover:text-poker-accent-hover text-sm font-medium transition-colors"
-            >
-              Ver completo →
-            </Link>
-          </div>
-          <TournamentRankingTable tournamentId={activeTournamentId} compact />
+      {/* Próxima Fecha */}
+      {activeTournament && (
+        <div className="mt-8 max-w-md mx-auto">
+          <h2 className="text-lg font-bold text-white mb-4 text-center">Próxima Fecha</h2>
+          {activeTournament.stats?.nextDate ? (
+            <div className="p-4 bg-gradient-to-r from-poker-cyan/10 to-poker-red/10 rounded-lg border border-poker-cyan/20">
+              <div className="flex items-center space-x-3 mb-2">
+                <Target className="w-5 h-5 text-poker-cyan" />
+                <span className="text-lg font-medium text-poker-cyan">
+                  Fecha {activeTournament.stats.nextDate.dateNumber}
+                </span>
+              </div>
+              <p className="text-white text-center">
+                {formatDate(activeTournament.stats.nextDate.scheduledDate)}
+              </p>
+            </div>
+          ) : (
+            <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+              <div className="flex items-center justify-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span className="text-lg font-medium text-green-400">Todas las fechas completadas</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
