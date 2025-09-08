@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Trophy, Users, Clock, Calendar, Target, CheckCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const router = useRouter()
   const [activeTournament, setActiveTournament] = useState<any>(null)
 
   // Obtener torneo activo
@@ -138,7 +140,10 @@ export default function Dashboard() {
         <div className="mt-8 max-w-md mx-auto">
           <h2 className="text-lg font-bold text-white mb-4 text-center">Próxima Fecha</h2>
           {activeTournament.stats?.nextDate ? (
-            <div className="p-4 bg-gradient-to-r from-poker-cyan/10 to-poker-red/10 rounded-lg border border-poker-cyan/20">
+            <button
+              onClick={() => router.push(`/game-dates/${activeTournament.stats.nextDate.id}/confirm`)}
+              className="w-full p-4 bg-gradient-to-r from-poker-cyan/10 to-poker-red/10 rounded-lg border border-poker-cyan/20 hover:border-poker-cyan/40 transition-all hover:bg-gradient-to-r hover:from-poker-cyan/20 hover:to-poker-red/20"
+            >
               <div className="flex items-center space-x-3 mb-2">
                 <Target className="w-5 h-5 text-poker-cyan" />
                 <span className="text-lg font-medium text-poker-cyan">
@@ -148,7 +153,7 @@ export default function Dashboard() {
               <p className="text-white text-center">
                 {formatDate(activeTournament.stats.nextDate.scheduledDate)}
               </p>
-            </div>
+            </button>
           ) : (
             <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
               <div className="flex items-center justify-center space-x-2">

@@ -108,7 +108,7 @@ model GameDate {
   scheduledDate DateTime      @map("scheduled_date") // día/mes/año
   status       GameDateStatus @default(pending)
   playerIds    String[]       @map("player_ids")
-  startTime    String?        @map("start_time")
+  startTime    DateTime?      @map("start_time")
   playersMin   Int            @default(9) @map("players_min")
   playersMax   Int            @default(24) @map("players_max")
   tournamentId Int            @map("tournament_id")
