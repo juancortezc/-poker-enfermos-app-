@@ -21,6 +21,8 @@ interface PlayerSelectorProps {
   onPlayersChange: (playerIds: string[]) => void
   onNext: () => void
   onBack: () => void
+  nextButtonText?: string
+  nextButtonIcon?: React.ReactNode
 }
 
 export default function PlayerSelector({
@@ -29,7 +31,9 @@ export default function PlayerSelector({
   selectedPlayers,
   onPlayersChange,
   onNext,
-  onBack
+  onBack,
+  nextButtonText = "Continuar a Invitados",
+  nextButtonIcon = <ChevronRight className="w-4 h-4 ml-2" />
 }: PlayerSelectorProps) {
   const togglePlayer = (playerId: string) => {
     if (selectedPlayers.includes(playerId)) {
@@ -92,8 +96,8 @@ export default function PlayerSelector({
             disabled={selectedPlayers.length === 0}
             className="flex-1 bg-poker-red hover:bg-red-700 text-white"
           >
-            Continuar a Invitados
-            <ChevronRight className="w-4 h-4 ml-2" />
+            {nextButtonText}
+            {nextButtonIcon}
           </Button>
         </div>
       </CardContent>

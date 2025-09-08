@@ -27,6 +27,8 @@ interface GuestSelectorProps {
   onGuestsChange: (guestIds: string[]) => void
   onNext: () => void
   onBack: () => void
+  nextButtonText?: string
+  nextButtonIcon?: React.ReactNode
 }
 
 export default function GuestSelector({
@@ -35,7 +37,9 @@ export default function GuestSelector({
   selectedGuests,
   onGuestsChange,
   onNext,
-  onBack
+  onBack,
+  nextButtonText = "Continuar a Confirmación",
+  nextButtonIcon = <ChevronRight className="w-4 h-4 ml-2" />
 }: GuestSelectorProps) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
@@ -245,8 +249,8 @@ export default function GuestSelector({
             onClick={onNext}
             className="flex-1 bg-poker-red hover:bg-red-700 text-white"
           >
-            Continuar a Confirmación
-            <ChevronRight className="w-4 h-4 ml-2" />
+            {nextButtonText}
+            {nextButtonIcon}
           </Button>
         </div>
       </CardContent>

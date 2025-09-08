@@ -103,16 +103,14 @@ export default function EditPlayersPage() {
     try {
       setSaving(true)
       
-      const response = await fetch('/api/game-dates', {
-        method: 'POST',
+      const response = await fetch(`/api/game-dates/${gameDateId}`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${user?.adminKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          tournamentId: gameDate.tournament.id,
-          dateNumber: gameDate.dateNumber,
-          scheduledDate: gameDate.scheduledDate,
+          action: 'update',
           playerIds: selectedPlayers,
           guestIds: [] // Mantenemos los invitados actuales
         })
@@ -197,6 +195,8 @@ export default function EditPlayersPage() {
           onPlayersChange={setSelectedPlayers}
           onNext={handleSave}
           onBack={() => router.push(`/game-dates/${gameDateId}/confirm`)}
+          nextButtonText="Actualizar Participantes"
+          nextButtonIcon={<Save className="w-4 h-4 ml-2" />}
         />
 
         {/* Confirmation Dialog */}

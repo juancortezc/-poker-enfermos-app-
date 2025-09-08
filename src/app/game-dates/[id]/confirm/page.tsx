@@ -148,7 +148,7 @@ export default function GameDateConfirmPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-white">
               <Target className="w-6 h-6 text-poker-cyan" />
-              {gameDate.status === 'pending' ? 'Confirmar Inicio de Fecha' : 'Fecha en Progreso'}
+              {gameDate.status === 'CREATED' ? 'Confirmar Inicio de Fecha' : 'Fecha en Progreso'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -200,7 +200,7 @@ export default function GameDateConfirmPage() {
                     <Clock className="w-6 h-6 text-poker-red mx-auto mb-2" />
                     <p className="text-xs text-poker-muted">Estado</p>
                     <p className="text-sm font-semibold text-white capitalize">
-                      {gameDate.status === 'pending' ? 'Pendiente' : gameDate.status}
+                      {gameDate.status === 'CREATED' ? 'Configurada' : gameDate.status}
                     </p>
                   </div>
                 </div>
@@ -208,7 +208,7 @@ export default function GameDateConfirmPage() {
             </div>
 
             {/* Warning/Status Message */}
-            {gameDate.status === 'pending' ? (
+            {gameDate.status === 'CREATED' ? (
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
                   <div className="w-5 h-5 text-yellow-400 mt-0.5">⚠️</div>
@@ -268,7 +268,7 @@ export default function GameDateConfirmPage() {
                 Cancelar
               </Button>
               
-              {canStartGame && gameDate.status === 'pending' && (
+              {canStartGame && gameDate.status === 'CREATED' && (
                 <Button
                   onClick={handleStartGame}
                   disabled={starting}

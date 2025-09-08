@@ -87,18 +87,16 @@ export default function EditGuestsPage() {
       // Combine players and guests for the API
       const allPlayerIds = [...selectedPlayers, ...selectedGuests]
       
-      const response = await fetch('/api/game-dates', {
-        method: 'POST',
+      const response = await fetch(`/api/game-dates/${gameDateId}`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${user?.adminKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          tournamentId: gameDate.tournament.id,
-          dateNumber: gameDate.dateNumber,
-          scheduledDate: gameDate.scheduledDate,
+          action: 'update',
           playerIds: allPlayerIds,
-          guestIds: selectedGuests // Still send this for compatibility
+          guestIds: selectedGuests
         })
       })
 
@@ -182,6 +180,8 @@ export default function EditGuestsPage() {
           onGuestsChange={setSelectedGuests}
           onNext={handleSave}
           onBack={() => router.push(`/game-dates/${gameDateId}/confirm`)}
+          nextButtonText="Actualizar Invitados"
+          nextButtonIcon={<Save className="w-4 h-4 ml-2" />}
         />
 
         {/* Confirmation Dialog */}
