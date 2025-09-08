@@ -12,8 +12,9 @@ export default function Dashboard() {
   const { user } = useAuth()
   const router = useRouter()
   const [activeTournament, setActiveTournament] = useState<any>(null)
+  const [hasActiveDate, setHasActiveDate] = useState(false)
 
-  // Obtener torneo activo
+  // Obtener torneo activo y fecha activa
   useEffect(() => {
     async function fetchActiveTournament() {
       try {
@@ -39,8 +40,22 @@ export default function Dashboard() {
       }
     }
 
+    async function checkActiveDate() {
+      try {
+        const response = await fetch('/api/game-dates/active')
+        
+        if (response.ok) {
+          const data = await response.json()
+          setHasActiveDate(!!data && !!data.id)
+        }
+      } catch (error) {
+        console.error('Error checking active date:', error)
+      }
+    }
+
     if (user) {
       fetchActiveTournament()
+      checkActiveDate()
     }
   }, [user])
 
@@ -55,11 +70,12 @@ export default function Dashboard() {
   const quickActions = [
     {
       title: 'Fecha',
-      description: 'Crear noche de juego',
+      description: hasActiveDate ? 'Fecha activa en curso' : 'Crear noche de juego',
       href: '/game-dates/new',
       icon: Calendar,
       gradient: 'from-yellow-500 to-yellow-600',
-      stats: 'Próxima fecha',
+      stats: hasActiveDate ? 'Deshabilitado' : 'Próxima fecha',
+      disabled: hasActiveDate,
     },
     {
       title: 'Torneos',
@@ -99,37 +115,54 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-4">
         {filteredActions.map((action, index) => {
           const Icon = action.icon
+          const isDisabled = action.disabled
+          
+          const cardContent = (
+            <Card className={`
+              bg-poker-card border-white/10 transition-all duration-200 h-full
+              ${isDisabled 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:border-poker-red/50 cursor-pointer hover:shadow-xl hover:shadow-black/30 hover:-translate-y-1'
+              }
+              animate-stagger animate-stagger-${index + 1}
+            `}>
+              <CardHeader className="pb-3">
+                <div className={`
+                  w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} 
+                  flex items-center justify-center mb-3 shadow-lg
+                  ${isDisabled ? 'grayscale' : ''}
+                `}>
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
+                <CardTitle className="text-base font-bold text-poker-text">
+                  {action.title}
+                </CardTitle>
+                <p className="text-xs text-poker-muted mt-1">
+                  {action.description}
+                </p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs font-semibold ${isDisabled ? 'text-gray-500' : 'text-poker-cyan'}`}>
+                    {action.stats}
+                  </span>
+                  <div className={`w-2 h-2 rounded-full ${isDisabled ? 'bg-gray-500' : 'bg-poker-cyan animate-pulse'}`} />
+                </div>
+              </CardContent>
+            </Card>
+          )
+          
+          if (isDisabled) {
+            return (
+              <div key={action.href}>
+                {cardContent}
+              </div>
+            )
+          }
+          
           return (
             <Link key={action.href} href={action.href}>
-              <Card className={`
-                bg-poker-card border-white/10 hover:border-poker-red/50 
-                transition-all duration-200 cursor-pointer h-full
-                hover:shadow-xl hover:shadow-black/30 hover:-translate-y-1
-                animate-stagger animate-stagger-${index + 1}
-              `}>
-                <CardHeader className="pb-3">
-                  <div className={`
-                    w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} 
-                    flex items-center justify-center mb-3 shadow-lg
-                  `}>
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <CardTitle className="text-base font-bold text-poker-text">
-                    {action.title}
-                  </CardTitle>
-                  <p className="text-xs text-poker-muted mt-1">
-                    {action.description}
-                  </p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-poker-cyan font-semibold">
-                      {action.stats}
-                    </span>
-                    <div className="w-2 h-2 bg-poker-cyan rounded-full animate-pulse" />
-                  </div>
-                </CardContent>
-              </Card>
+              {cardContent}
             </Link>
           )
         })}

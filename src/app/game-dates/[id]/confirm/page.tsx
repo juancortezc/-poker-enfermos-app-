@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Play, Calendar, Users, Trophy, Clock, Target } from 'lucide-react'
+import { ArrowLeft, Play, Calendar, Users, Trophy, Clock, Target, Edit } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 interface GameDate {
@@ -220,6 +220,29 @@ export default function GameDateConfirmPage() {
                 </div>
               </div>
             </div>
+
+            {/* Edit Buttons */}
+            {canStartGame && (
+              <div className="flex space-x-4 mb-6">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(`/game-dates/${gameDateId}/edit-players`)}
+                  className="flex-1 border-poker-cyan/30 text-poker-cyan hover:bg-poker-cyan/10"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar Participantes
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(`/game-dates/${gameDateId}/edit-guests`)}
+                  className="flex-1 border-pink-400/30 text-pink-400 hover:bg-pink-400/10"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar Invitados
+                </Button>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex space-x-4 pt-4">
