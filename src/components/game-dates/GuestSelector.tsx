@@ -67,11 +67,8 @@ export default function GuestSelector({
   const loadAvailableGuests = async () => {
     try {
       setLoading(true)
-      console.log('Loading guests for tournament:', tournamentId)
-      console.log('User admin key:', user?.adminKey ? 'Present' : 'Missing')
       
       if (!user?.adminKey) {
-        console.error('No admin key available')
         setLoading(false)
         return
       }
@@ -85,32 +82,24 @@ export default function GuestSelector({
       
       if (response.ok) {
         const data = await response.json()
-        console.log('Guests loaded successfully:', data)
         setGroupMembers(data.groupMembers || [])
         setExternalGuests(data.externalGuests || [])
       } else {
-        console.error('Failed to load guests:', response.status, response.statusText)
         const errorText = await response.text()
-        console.error('Error response:', errorText)
       }
     } catch (error) {
-      console.error('Error loading guests:', error)
+      // Error loading guests
     } finally {
       setLoading(false)
     }
   }
 
   const toggleGuest = (guestId: string) => {
-    console.log('Toggle guest called:', guestId)
-    console.log('Current selectedGuests:', selectedGuests)
-    
     if (selectedGuests.includes(guestId)) {
       const newGuests = selectedGuests.filter(id => id !== guestId)
-      console.log('Removing guest, new array:', newGuests)
       onGuestsChange(newGuests)
     } else {
       const newGuests = [...selectedGuests, guestId]
-      console.log('Adding guest, new array:', newGuests)
       onGuestsChange(newGuests)
     }
   }
@@ -160,47 +149,30 @@ export default function GuestSelector({
 
         {/* Miembros del Grupo */}
         {groupMembers.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <h3 className="text-sm font-medium text-white">
               Del Grupo ({getAvailableInvitados(groupMembers).length} de {groupMembers.length})
             </h3>
             {getAvailableInvitados(groupMembers).length > 0 ? (
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                {getAvailableInvitados(groupMembers).map((member) => (
-                  <label
-                    key={member.id}
-                    className={`flex items-center space-x-2 p-2 rounded cursor-pointer transition-all border ${
-                      selectedGuests.includes(member.id)
-                        ? 'bg-poker-red/20 border-poker-red'
-                        : 'bg-poker-dark/50 border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedGuests.includes(member.id)}
-                      onChange={() => toggleGuest(member.id)}
-                      className="rounded border-gray-300 text-poker-red focus:ring-poker-red"
-                    />
-                    <div className="flex items-center space-x-2 min-w-0">
-                      {member.photoUrl ? (
-                        <img
-                          src={member.photoUrl}
-                          alt={`${member.firstName} ${member.lastName}`}
-                          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                        />
-                      ) : (
-                        <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs text-gray-300">
-                            {member.firstName[0]}{member.lastName[0]}
-                          </span>
-                        </div>
-                      )}
-                      <span className="text-white text-sm truncate">
+              <div className="bg-poker-dark/30 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-2 gap-px bg-white/10">
+                  {getAvailableInvitados(groupMembers).map((member) => (
+                    <label
+                      key={member.id}
+                      className="flex items-center px-2 py-1 cursor-pointer transition-all bg-poker-dark/50 hover:bg-poker-dark/70"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedGuests.includes(member.id)}
+                        onChange={() => toggleGuest(member.id)}
+                        className="mr-2 rounded-sm border-gray-400 text-poker-red focus:ring-poker-red w-3 h-3 accent-poker-red"
+                      />
+                      <span className="text-white text-xs truncate">
                         {member.firstName} {member.lastName}
                       </span>
-                    </div>
-                  </label>
-                ))}
+                    </label>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="text-center py-4 text-poker-muted">
@@ -211,7 +183,7 @@ export default function GuestSelector({
         )}
 
         {/* Invitados Externos */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium text-white">
               Externos ({getAvailableInvitados(externalGuests).length} de {externalGuests.length})
@@ -220,7 +192,7 @@ export default function GuestSelector({
               <Button
                 variant="outline"
                 size="sm"
-                className="border-poker-cyan/30 text-poker-cyan hover:bg-poker-cyan/10"
+                className="border-pink-400/30 text-pink-400 hover:bg-pink-400/10"
               >
                 <UserPlus className="w-3 h-3 mr-1" />
                 Nuevo
@@ -229,42 +201,25 @@ export default function GuestSelector({
           </div>
 
           {getAvailableInvitados(externalGuests).length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-              {getAvailableInvitados(externalGuests).map((guest) => (
-                <label
-                  key={guest.id}
-                  className={`flex items-center space-x-2 p-2 rounded cursor-pointer transition-all border ${
-                    selectedGuests.includes(guest.id)
-                      ? 'bg-poker-cyan/20 border-poker-cyan'
-                      : 'bg-poker-dark/50 border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedGuests.includes(guest.id)}
-                    onChange={() => toggleGuest(guest.id)}
-                    className="rounded border-gray-300 text-poker-cyan focus:ring-poker-cyan"
-                  />
-                  <div className="flex items-center space-x-2 min-w-0">
-                    {guest.photoUrl ? (
-                      <img
-                        src={guest.photoUrl}
-                        alt={`${guest.firstName} ${guest.lastName}`}
-                        className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                      />
-                    ) : (
-                      <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs text-gray-300">
-                          {guest.firstName[0]}{guest.lastName[0]}
-                        </span>
-                      </div>
-                    )}
-                    <span className="text-white text-sm truncate">
+            <div className="bg-poker-dark/30 rounded-lg overflow-hidden">
+              <div className="grid grid-cols-2 gap-px bg-white/10">
+                {getAvailableInvitados(externalGuests).map((guest) => (
+                  <label
+                    key={guest.id}
+                    className="flex items-center px-2 py-1 cursor-pointer transition-all bg-poker-dark/50 hover:bg-poker-dark/70"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedGuests.includes(guest.id)}
+                      onChange={() => toggleGuest(guest.id)}
+                      className="mr-2 rounded-sm border-gray-400 text-pink-400 focus:ring-pink-400 w-3 h-3 accent-pink-400"
+                    />
+                    <span className="text-white text-xs truncate">
                       {guest.firstName} {guest.lastName}
                     </span>
-                  </div>
-                </label>
-              ))}
+                  </label>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="text-center py-4 text-poker-muted">
