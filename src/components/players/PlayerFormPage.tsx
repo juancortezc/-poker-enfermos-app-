@@ -132,8 +132,8 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
         throw new Error('Apellido es obligatorio')
       }
 
-      if (!formData.pin || !/^\d{4}$/.test(formData.pin)) {
-        throw new Error('PIN de 4 dígitos es obligatorio')
+      if (formData.pin && !/^\d{4}$/.test(formData.pin)) {
+        throw new Error('El PIN debe ser de 4 dígitos')
       }
 
       if (!formData.photoUrl.trim()) {
@@ -296,7 +296,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
           {/* PIN */}
           <div>
-            <Label htmlFor="pin" className="text-poker-text">PIN (4 dígitos) *</Label>
+            <Label htmlFor="pin" className="text-poker-text">PIN (4 dígitos)</Label>
             <Input
               id="pin"
               type="text"
@@ -306,7 +306,6 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
               onChange={(e) => updateFormData('pin', e.target.value.replace(/\D/g, ''))}
               className="bg-poker-dark/50 border-white/10 text-white focus:border-poker-red"
               placeholder="1234"
-              required
             />
           </div>
 
