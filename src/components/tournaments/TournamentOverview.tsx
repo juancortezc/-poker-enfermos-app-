@@ -139,10 +139,6 @@ export default function TournamentOverview() {
       case 'participants':
         router.push(`/tournaments/${tournament.id}/edit?tab=participants`)
         break
-      case 'nextDate':
-        // Navigate to game dates management
-        router.push(`/tournaments/${tournament.id}`)
-        break
       case 'startDate':
         router.push(`/tournaments/${tournament.id}/edit?tab=dates`)
         break
@@ -240,26 +236,6 @@ export default function TournamentOverview() {
                 </div>
               </button>
 
-              {/* Next Date Card */}
-              <button
-                onClick={() => handleCardClick('nextDate', activeTournament.tournament!)}
-                disabled={!canEdit}
-                className="bg-poker-red rounded-lg p-4 text-left hover:bg-red-700 transition-all disabled:cursor-default"
-              >
-                <div className="text-white/90 text-sm mb-1">Próxima Fecha</div>
-                <div className="text-xl font-bold text-white">
-                  {activeTournament.stats?.nextDate ? (
-                    <>
-                      {activeTournament.stats.nextDate.dateNumber}
-                      <div className="text-sm font-normal">
-                        {formatDate(activeTournament.stats.nextDate.scheduledDate)}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-sm">Completado</div>
-                  )}
-                </div>
-              </button>
 
               {/* Start Date Card */}
               <button

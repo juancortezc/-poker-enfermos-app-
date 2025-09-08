@@ -67,9 +67,7 @@ export default function SimpleTournamentPage() {
   }
 
   const handleViewDetails = () => {
-    if (tournament) {
-      router.push(`/tournaments/${tournament.id}`)
-    }
+    router.push('/admin')
   }
 
   const handleCreateGameDate = () => {

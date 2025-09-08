@@ -77,7 +77,7 @@ export default function TournamentsPage() {
   }
 
   const handleTournamentClick = (tournamentId: number) => {
-    router.push(`/tournaments/${tournamentId}`)
+    router.push('/admin')
   }
 
   const formatDate = (dateString: string) => {
