@@ -169,7 +169,7 @@ export default function Dashboard() {
       </div>
 
       {/* Próxima Fecha */}
-      {activeTournament && activeTournament.stats?.totalDates > 0 && (
+      {activeTournament && activeTournament.stats?.nextDate && (
         <div className="mt-8 max-w-md mx-auto">
           <h2 className="text-lg font-bold text-white mb-4 text-center">Próxima Fecha</h2>
           {activeTournament.stats?.nextDate ? (

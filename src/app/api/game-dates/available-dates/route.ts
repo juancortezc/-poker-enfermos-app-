@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
           gameDates: {
             where: {
               status: {
-                not: 'completed'  // Solo fechas que no están completadas
+                notIn: ['completed', 'CREATED']  // Excluir fechas completadas y ya configuradas
               }
             },
             orderBy: { dateNumber: 'asc' }

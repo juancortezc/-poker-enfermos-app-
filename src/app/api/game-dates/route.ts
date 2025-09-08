@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         },
         data: {
           playerIds: playerIds,
-          status: 'pending', // Mantener como pending hasta que se active
+          status: 'CREATED', // Configurada y lista para usar
           playersMin: Math.min(9, totalParticipants),
           playersMax: Math.max(24, totalParticipants)
         },

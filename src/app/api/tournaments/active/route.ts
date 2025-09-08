@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
 
       // Calcular estadísticas adicionales
       const completedDates = activeTournament.gameDates.filter(d => d.status === 'completed').length
-      const nextDate = activeTournament.gameDates.find(d => d.status === 'pending')
+      const nextDate = activeTournament.gameDates.find(d => d.status === 'CREATED')
       const startDate = activeTournament.gameDates[0]?.scheduledDate
       const endDate = activeTournament.gameDates[activeTournament.gameDates.length - 1]?.scheduledDate
 
