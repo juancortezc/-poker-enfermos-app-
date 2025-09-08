@@ -38,6 +38,11 @@ Usuario → Experiencia → Lógica → Implementación → Testing → Refinami
 El sistema ha sido migrado exitosamente a una nueva arquitectura de base de datos limpia, preservando todos los datos de jugadores e implementando funcionalidades completas de gestión de torneos y fechas de juego. 
 
 **Últimas actualizaciones:**
+- ✅ **Sistema de estados de fechas completo**: pending → CREATED → in_progress → completed
+- ✅ **Páginas de edición funcionales**: Actualización de participantes e invitados sin errores 400
+- ✅ **Botón de inicio corregido**: Aparece correctamente para fechas CREATED
+- ✅ **APIs de actualización**: PUT endpoints para modificar fechas configuradas
+- ✅ **Interfaz mejorada**: Botones "Actualizar" en lugar de "Configurar" para edición
 - 🆕 Sistema de confirmación e inicio de fechas con timer automático
 - 🆕 Página de confirmación interactiva para iniciar fechas
 - 🆕 Componentes de selección de jugadores e invitados rediseñados
@@ -131,9 +136,11 @@ POST /api/tournaments                 # Crear torneo (Comision)
 
 #### Fechas de Juego:
 ```
-GET  /api/game-dates/active           # Fecha activa actual
-GET  /api/game-dates/next-available   # Próxima fecha disponible
-POST /api/game-dates                  # Crear fecha (Comision)
+GET  /api/game-dates/active              # Fecha activa actual
+GET  /api/game-dates/available-dates     # Fechas disponibles para configurar
+GET  /api/game-dates/[id]                # Obtener detalles de fecha específica
+POST /api/game-dates                     # Crear/configurar fecha (Comision)
+PUT  /api/game-dates/[id]                # Iniciar fecha o actualizar configurada (Comision)
 ```
 
 #### Jugadores:
@@ -157,8 +164,14 @@ POST /api/players                     # Crear jugador (Comision)
 ### Características:
 - **Fechas automáticas**: Martes cada 15 días
 - **Puntos dinámicos**: 15-25 pts basado en participantes (9+ = 18pts, 12+ = 20pts, etc.)
-- **Estados**: pending → in_progress → completed
+- **Estados**: pending → **CREATED** → in_progress → completed
 - **Invitados**: Diferenciación entre miembros grupo y externos
+
+### Estados de Fecha Actualizados:
+- **pending**: Fecha creada pero no configurada (no aparece en Dashboard)
+- **CREATED**: Fecha configurada y lista para iniciar (aparece como "Próxima Fecha")
+- **in_progress**: Fecha iniciada con timer activo (botón "Registro" disponible)
+- **completed**: Fecha terminada
 
 ---
 
@@ -314,13 +327,13 @@ GET  /api/tournaments/next
 POST /api/tournaments/[id]/activate
 POST /api/tournaments/[id]/complete
 GET  /api/game-dates/available-dates
+GET  /api/game-dates/[id]                    # Obtener fecha específica
+PUT  /api/game-dates/[id]                    # Iniciar o actualizar fecha (action: 'start'|'update')
 POST /api/eliminations
 GET  /api/eliminations/game-date/[id]
 PUT  /api/eliminations/[id]
 GET  /api/game-dates/[id]/live-status
 GET  /api/tournaments/[id]/ranking
-GET  /api/game-dates/[id]
-PUT  /api/game-dates/[id]/start
 ```
 
 ---
@@ -344,6 +357,15 @@ PUT  /api/game-dates/[id]/start
 - **Schema GameDate**: `startTime` cambiado de String a DateTime
 - **Zona Horaria**: Timestamps en hora de Ecuador
 - **Integridad**: Transacciones para consistencia en inicio de fechas
+- **GameDateStatus**: Agregado estado `CREATED` para fechas configuradas
+
+### Sistema de Edición de Fechas ✅ (Última actualización)
+- **APIs de Actualización**: `PUT /api/game-dates/[id]` con `action: 'update'`
+- **Páginas de Edición Funcionales**: Sin errores 400 al actualizar fechas CREATED
+- **Botón de Inicio Corregido**: Aparece para fechas con estado CREATED
+- **Interfaz Mejorada**: Botones "Actualizar Participantes/Invitados" en lugar de "Continuar"
+- **Componentes Personalizables**: PlayerSelector y GuestSelector con texto de botón configurable
+- **Flujo Completo**: Dashboard → Confirmar → Editar → Actualizar → Iniciar → Registro
 
 ## Próximos Pasos Sugeridos
 
@@ -403,3 +425,11 @@ El sistema está completamente funcional con gestión avanzada de torneos, confi
 - PlayerSelector y GuestSelector con diseño uniforme
 - Eliminación de imágenes y uso de checkboxes coloreados
 - Limpieza de código y remoción de funciones no utilizadas
+
+### Commit 2241d0b - Corrección de Edición de Fechas y Botón de Inicio
+- Sistema completo de estados de fecha: pending → CREATED → in_progress → completed
+- PUT API para actualizar fechas configuradas sin errores 400
+- Botón "Iniciar" aparece correctamente para fechas CREATED
+- Páginas de edición funcionales con botones "Actualizar"
+- Componentes PlayerSelector y GuestSelector con texto personalizable
+- Flujo completo: Dashboard → Confirmar → Editar → Iniciar → Registro
