@@ -31,17 +31,19 @@ Usuario → Experiencia → Lógica → Implementación → Testing → Refinami
 
 ---
 
-## Estado Actual del Sistema (2025-09-05)
+## Estado Actual del Sistema (2025-09-08)
 
 ### ✅ SISTEMA COMPLETAMENTE OPERACIONAL
 
 El sistema ha sido migrado exitosamente a una nueva arquitectura de base de datos limpia, preservando todos los datos de jugadores e implementando funcionalidades completas de gestión de torneos y fechas de juego. 
 
 **Últimas actualizaciones:**
-- 🆕 Sistema de gestión de torneos con vista general (TournamentOverview)
-- 🆕 Configuración de fechas de juego single-page (GameDateConfigPage)
-- 🆕 Estados de torneo: PROXIMO → ACTIVO → FINALIZADO
-- 🆕 Navbar dinámico con botón Registro condicional
+- 🆕 Sistema de confirmación e inicio de fechas con timer automático
+- 🆕 Página de confirmación interactiva para iniciar fechas
+- 🆕 Componentes de selección de jugadores e invitados rediseñados
+- 🆕 Navegación limpia sin páginas innecesarias de torneos
+- 🆕 Ranking de torneo movido a página principal
+- 🆕 Widget "Próxima Fecha" clickeable en Dashboard
 
 ---
 
@@ -317,16 +319,38 @@ GET  /api/eliminations/game-date/[id]
 PUT  /api/eliminations/[id]
 GET  /api/game-dates/[id]/live-status
 GET  /api/tournaments/[id]/ranking
+GET  /api/game-dates/[id]
+PUT  /api/game-dates/[id]/start
 ```
 
 ---
 
+## Funcionalidades Implementadas Recientemente (2025-09-08)
+
+### Sistema de Inicio de Fechas ✅
+- **Página de Confirmación**: `/game-dates/[id]/confirm` con resumen detallado
+- **Widget Clickeable**: "Próxima Fecha" en Dashboard navega a confirmación
+- **API de Inicio**: `PUT /api/game-dates/[id]/start` inicializa timer automáticamente
+- **Timer Integration**: TimerState se crea con blind levels del torneo
+- **Flujo Completo**: Dashboard → Confirmación → Inicio → Registro
+
+### Mejoras de UI/UX ✅
+- **Componentes Consistentes**: PlayerSelector y GuestSelector con diseño uniforme
+- **Navegación Simplificada**: Eliminada página de detalle de torneo innecesaria
+- **Home Page Mejorada**: Ranking de torneo movido desde Dashboard
+- **Colores Distintivos**: Rojo para jugadores, rosa para invitados externos
+
+### Base de Datos Actualizada ✅
+- **Schema GameDate**: `startTime` cambiado de String a DateTime
+- **Zona Horaria**: Timestamps en hora de Ecuador
+- **Integridad**: Transacciones para consistencia en inicio de fechas
+
 ## Próximos Pasos Sugeridos
 
-1. **Implementar página Registro** para fecha activa
-2. **Sistema de Timer** integrado con fecha activa
-3. **Rankings y estadísticas** de torneos
-4. **Notificaciones** para cambios de fecha
+1. **Mejoras al Sistema de Timer** - Controles avanzados de pausar/reanudar
+2. **Sistema de Notificaciones** - Alerts en tiempo real
+3. **Estadísticas Avanzadas** - Métricas detalladas de torneos
+4. **Backup y Restauración** - Sistema de respaldo automático
 
 ---
 
@@ -353,4 +377,29 @@ GET  /api/tournaments/[id]/ranking
 
 El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas single-page, y navegación dinámica. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
 
-**Última actualización:** 2025-09-05 por Claude Code
+**Última actualización:** 2025-09-08 por Claude Code
+
+---
+
+## Cambios Recientes - Commits Importantes
+
+### Commit 812f8e3 - Sistema de Confirmación e Inicio de Fechas
+- Implementación completa del flujo de inicio de fechas
+- API endpoints para obtener y iniciar fechas específicas
+- Página de confirmación con validaciones de seguridad
+- Integración automática con timer y sistema de eliminaciones
+
+### Commit 8595ef0 - Reorganización de Componentes
+- Ranking de torneo movido de Dashboard a Home page
+- "Próxima Fecha" removida de lista de torneos y agregada al Dashboard
+- Navegación mejorada y componentes reorganizados
+
+### Commit 9d86f5f - Limpieza de Navegación
+- Eliminada página de detalle de torneo innecesaria
+- Redirección a dashboard en lugar de páginas no útiles
+- Componente TournamentDetails removido
+
+### Commit 9860d40 - Diseño Consistente de Componentes  
+- PlayerSelector y GuestSelector con diseño uniforme
+- Eliminación de imágenes y uso de checkboxes coloreados
+- Limpieza de código y remoción de funciones no utilizadas
