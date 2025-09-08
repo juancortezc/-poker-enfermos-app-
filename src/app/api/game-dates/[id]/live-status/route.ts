@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const gameDateId = params.id;
+    const gameDateId = parseInt(params.id);
 
     // Obtener la fecha con todos sus datos
     const gameDate = await prisma.gameDate.findUnique({
@@ -63,9 +63,9 @@ export async function GET(
 
     // Calcular el nivel de blind actual basado en el tiempo transcurrido
     let currentBlindLevel = gameDate.tournament.blindLevels[0];
-    if (gameDate.startedAt) {
+    if (gameDate.startTime) {
       const elapsedMinutes = Math.floor(
-        (Date.now() - gameDate.startedAt.getTime()) / 1000 / 60
+        (Date.now() - gameDate.startTime.getTime()) / 1000 / 60
       );
       
       let accumulatedTime = 0;
@@ -86,9 +86,9 @@ export async function GET(
 
     // Calcular tiempo restante del blind actual
     let timeRemaining = 0;
-    if (currentBlindLevel.duration > 0 && gameDate.startedAt) {
+    if (currentBlindLevel.duration > 0 && gameDate.startTime) {
       const elapsedMinutes = Math.floor(
-        (Date.now() - gameDate.startedAt.getTime()) / 1000 / 60
+        (Date.now() - gameDate.startTime.getTime()) / 1000 / 60
       );
       
       let levelStartTime = 0;
@@ -119,7 +119,7 @@ export async function GET(
         dateNumber: gameDate.dateNumber,
         status: gameDate.status,
         totalPlayers: gameDate.playerIds.length,
-        startedAt: gameDate.startedAt,
+        startedAt: gameDate.startTime,
         scheduledDate: gameDate.scheduledDate
       },
       tournament: {

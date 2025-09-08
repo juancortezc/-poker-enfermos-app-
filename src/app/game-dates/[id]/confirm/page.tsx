@@ -148,7 +148,7 @@ export default function GameDateConfirmPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-white">
               <Target className="w-6 h-6 text-poker-cyan" />
-              Confirmar Inicio de Fecha
+              {gameDate.status === 'pending' ? 'Confirmar Inicio de Fecha' : 'Fecha en Progreso'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -207,19 +207,33 @@ export default function GameDateConfirmPage() {
               </div>
             </div>
 
-            {/* Warning Message */}
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 text-yellow-400 mt-0.5">⚠️</div>
-                <div>
-                  <h4 className="text-yellow-400 font-medium mb-1">¡Atención!</h4>
-                  <p className="text-yellow-300 text-sm">
-                    Al iniciar la fecha, se activará automáticamente el timer y no podrás deshacer esta acción.
-                    Asegúrate de que todos los participantes estén listos.
-                  </p>
+            {/* Warning/Status Message */}
+            {gameDate.status === 'pending' ? (
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-5 h-5 text-yellow-400 mt-0.5">⚠️</div>
+                  <div>
+                    <h4 className="text-yellow-400 font-medium mb-1">¡Atención!</h4>
+                    <p className="text-yellow-300 text-sm">
+                      Al iniciar la fecha, se activará automáticamente el timer y no podrás deshacer esta acción.
+                      Asegúrate de que todos los participantes estén listos.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-5 h-5 text-green-400 mt-0.5">✅</div>
+                  <div>
+                    <h4 className="text-green-400 font-medium mb-1">¡Fecha Iniciada!</h4>
+                    <p className="text-green-300 text-sm">
+                      Esta fecha ya está en progreso. Puedes ir a la página de registro para gestionar las eliminaciones.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Edit Buttons */}
             {canStartGame && (
@@ -248,16 +262,16 @@ export default function GameDateConfirmPage() {
             <div className="flex space-x-4 pt-4">
               <Button
                 variant="outline"
-                onClick={() => router.push('/admin')}
+                onClick={() => router.push('/')}
                 className="flex-1 border-white/20 text-poker-text hover:bg-white/5"
               >
                 Cancelar
               </Button>
               
-              {canStartGame && (
+              {canStartGame && gameDate.status === 'pending' && (
                 <Button
                   onClick={handleStartGame}
-                  disabled={starting || gameDate.status !== 'pending'}
+                  disabled={starting}
                   className="flex-1 bg-poker-red hover:bg-red-700 text-white"
                 >
                   {starting ? (
@@ -271,6 +285,16 @@ export default function GameDateConfirmPage() {
                       Iniciar Fecha
                     </>
                   )}
+                </Button>
+              )}
+
+              {canStartGame && gameDate.status === 'in_progress' && (
+                <Button
+                  onClick={() => router.push('/registro')}
+                  className="flex-1 bg-poker-green hover:bg-green-700 text-white"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Ir a Registro
                 </Button>
               )}
             </div>

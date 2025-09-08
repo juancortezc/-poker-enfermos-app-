@@ -1,5 +1,6 @@
 import { prisma } from './prisma'
 import { UserRole } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 export interface AuthUser {
   id: string
@@ -11,23 +12,28 @@ export interface AuthUser {
 
 export async function authenticateUser(adminKey: string): Promise<AuthUser | null> {
   try {
-    const player = await prisma.player.findFirst({
+    // Find all users with Comision role (they have adminKey)
+    const players = await prisma.player.findMany({
       where: {
-        adminKey: adminKey,
+        role: UserRole.Comision,
+        adminKey: { not: null }
       },
     })
 
-    if (!player) {
-      return null
+    // Check each player's hashed admin key
+    for (const player of players) {
+      if (player.adminKey && await bcrypt.compare(adminKey, player.adminKey)) {
+        return {
+          id: player.id,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          role: player.role,
+          adminKey: player.adminKey || undefined,
+        }
+      }
     }
 
-    return {
-      id: player.id,
-      firstName: player.firstName,
-      lastName: player.lastName,
-      role: player.role,
-      adminKey: player.adminKey || undefined,
-    }
+    return null
   } catch (error) {
     console.error('Authentication error:', error)
     return null

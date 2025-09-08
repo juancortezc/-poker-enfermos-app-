@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const gameDateId = params.id;
+    const gameDateId = parseInt(params.id);
 
     // Obtener todas las eliminaciones de la fecha
     const eliminations = await prisma.elimination.findMany({
