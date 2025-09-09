@@ -1,9 +1,8 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import TournamentRankingTable from '@/components/tournaments/TournamentRankingTable'
+import HomeRankingView from '@/components/tournaments/HomeRankingView'
 
 export default function Home() {
   const { user } = useAuth()
@@ -13,17 +12,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchActiveTournament() {
       try {
-        if (!user?.adminKey) {
-          // If user doesn't have admin key, skip tournament fetch
-          return
-        }
-
-        const response = await fetch('/api/tournaments/active', {
-          headers: {
-            'Authorization': `Bearer ${user.adminKey}`,
-            'Content-Type': 'application/json'
-          }
-        })
+        const response = await fetch('/api/tournaments/active/public')
         
         if (response.ok) {
           const data = await response.json()
@@ -36,33 +25,19 @@ export default function Home() {
       }
     }
 
-    if (user) {
-      fetchActiveTournament()
-    }
-  }, [user])
+    fetchActiveTournament()
+  }, [])
 
   return (
     <div className="min-h-screen bg-poker-dark">
-      <div className="pt-16 px-4">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Poker de Enfermos</h1>
-          <p className="text-poker-muted">Bienvenido al sistema del grupo</p>
-        </div>
-
+      <div className="pt-2 px-4 pb-8">
         {/* Widget de Ranking */}
-        {activeTournamentId && (
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">Ranking del Torneo</h2>
-              <Link 
-                href="/ranking"
-                className="text-poker-accent hover:text-poker-accent-hover text-sm font-medium transition-colors"
-              >
-                Ver completo →
-              </Link>
-            </div>
-            <TournamentRankingTable tournamentId={activeTournamentId} compact />
+        {activeTournamentId ? (
+          <HomeRankingView tournamentId={activeTournamentId} />
+        ) : (
+          <div className="text-center py-16">
+            <h1 className="text-4xl font-bold text-white mb-4">Poker de Enfermos</h1>
+            <p className="text-poker-muted text-lg">No hay torneo activo en este momento</p>
           </div>
         )}
       </div>

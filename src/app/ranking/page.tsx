@@ -16,9 +16,9 @@ export default function RankingPage() {
       try {
         const response = await fetch('/api/tournaments/active');
         if (response.ok) {
-          const tournament = await response.json();
-          if (tournament) {
-            setActiveTournamentId(tournament.id);
+          const data = await response.json();
+          if (data.tournament) {
+            setActiveTournamentId(data.tournament.id);
           }
         }
       } catch (error) {
@@ -33,7 +33,7 @@ export default function RankingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-poker-black flex items-center justify-center">
+      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
         <div className="text-white text-lg">Cargando ranking...</div>
       </div>
     );
@@ -41,12 +41,12 @@ export default function RankingPage() {
 
   if (!activeTournamentId) {
     return (
-      <div className="min-h-screen bg-poker-black p-4">
+      <div className="min-h-screen bg-poker-dark p-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center mb-6">
             <button
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push('/')}
               className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors mr-4"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -64,17 +64,17 @@ export default function RankingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-poker-black p-4 pb-20">
+    <div className="min-h-screen bg-poker-dark p-4 pb-20">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center mb-6">
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/')}
             className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors mr-4"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold text-white">Ranking del Torneo</h1>
+          <h1 className="text-2xl font-bold text-white">Ranking Completo del Torneo</h1>
         </div>
 
         {/* Ranking Table */}

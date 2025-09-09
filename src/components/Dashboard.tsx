@@ -87,9 +87,9 @@ export default function Dashboard() {
       adminOnly: true,
     },
     {
-      title: 'TIMER ACTIVO',
-      href: '/timer',
-      icon: Clock,
+      title: 'RANKING',
+      href: '/ranking',
+      icon: Trophy,
     },
   ]
 

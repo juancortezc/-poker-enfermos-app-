@@ -5,6 +5,8 @@ export interface PlayerRanking {
   position: number;
   playerId: string;
   playerName: string;
+  playerAlias?: string;
+  playerPhoto?: string;
   totalPoints: number;
   datesPlayed: number;
   pointsByDate: { [dateNumber: number]: number }; // Puntos por cada fecha
@@ -39,7 +41,9 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
                 id: true,
                 firstName: true,
                 lastName: true,
-                role: true
+                role: true,
+                aliases: true,
+                photoUrl: true
               }
             }
           }
@@ -76,6 +80,8 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
     const registeredPlayers = tournament.tournamentParticipants.map(tp => ({
       id: tp.player.id,
       name: `${tp.player.firstName} ${tp.player.lastName}`,
+      alias: tp.player.aliases?.[0] || '',
+      photo: tp.player.photoUrl || null,
       role: tp.player.role
     }));
 
@@ -88,6 +94,8 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         position: 0, // Se calculará después
         playerId: player.id,
         playerName: player.name,
+        playerAlias: player.alias,
+        playerPhoto: player.photo,
         totalPoints: 0,
         datesPlayed: 0,
         pointsByDate: {},
