@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Trophy, Crown, Star, Award, User } from 'lucide-react';
 import type { TournamentRankingData } from '@/lib/ranking-utils';
 import Image from 'next/image';
+import PlayerDetailModal from './PlayerDetailModal';
 
 interface HomeRankingViewProps {
   tournamentId: number;
@@ -12,6 +13,18 @@ interface HomeRankingViewProps {
 export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) {
   const [rankingData, setRankingData] = useState<TournamentRankingData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openPlayerModal = (playerId: string) => {
+    setSelectedPlayerId(playerId);
+    setIsModalOpen(true);
+  };
+
+  const closePlayerModal = () => {
+    setIsModalOpen(false);
+    setSelectedPlayerId(null);
+  };
 
   useEffect(() => {
     async function fetchRanking() {
@@ -87,7 +100,8 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
               >
                 {/* Card del podio */}
                 <div
-                  className="relative bg-gradient-to-br from-poker-card to-gray-800 rounded-lg p-3 shadow-2xl ring-1 ring-white/10 transform transition-all duration-300 hover:scale-105 hover:shadow-3xl w-24 sm:w-28 h-32 sm:h-36"
+                  className="relative bg-gradient-to-br from-poker-card to-gray-800 rounded-lg p-3 shadow-2xl ring-1 ring-white/10 transform transition-all duration-300 hover:scale-105 hover:shadow-3xl w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
+                  onClick={() => openPlayerModal(player.playerId)}
                 >
                   {/* Círculo de posición */}
                   <div className={`
@@ -166,7 +180,8 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
               return (
                 <div
                   key={player.playerId}
-                  className="relative bg-poker-card border-2 border-poker-red rounded-lg p-2 shadow-lg ring-1 ring-poker-red/20 hover:shadow-xl transition-all duration-200"
+                  className="relative bg-poker-card border-2 border-poker-red rounded-lg p-2 shadow-lg ring-1 ring-poker-red/20 hover:shadow-xl transition-all duration-200 cursor-pointer"
+                  onClick={() => openPlayerModal(player.playerId)}
                 >
                   {/* Círculo de posición */}
                   <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-white text-black flex items-center justify-center font-bold text-xs border border-white/20 shadow-md">
@@ -207,7 +222,10 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                   key={player.playerId}
                   className="relative flex flex-col items-center"
                 >
-                  <div className="relative bg-gradient-to-br from-poker-card to-gray-800 rounded-lg p-3 shadow-xl transform transition-all duration-300 hover:scale-105 w-24 sm:w-28 h-32 sm:h-36">
+                  <div 
+                    className="relative bg-gradient-to-br from-poker-card to-gray-800 rounded-lg p-3 shadow-xl transform transition-all duration-300 hover:scale-105 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
+                    onClick={() => openPlayerModal(player.playerId)}
+                  >
                     {/* Círculo de posición rosa */}
                     <div className="absolute -top-2 -left-2 w-8 h-8 rounded-full bg-pink-500 text-white flex items-center justify-center font-bold text-sm border-2 border-pink-400 z-10">
                       {player.position}
@@ -262,6 +280,16 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
       <div className="mt-3 text-center text-poker-muted text-xs">
         <p>{rankings.length} jugadores • {rankingData.tournament.completedDates}/{rankingData.tournament.totalDates} fechas</p>
       </div>
+
+      {/* Player Detail Modal */}
+      {selectedPlayerId && (
+        <PlayerDetailModal
+          isOpen={isModalOpen}
+          onClose={closePlayerModal}
+          playerId={selectedPlayerId}
+          tournamentId={tournamentId}
+        />
+      )}
     </div>
   );
 }
