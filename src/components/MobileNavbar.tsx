@@ -93,7 +93,7 @@ export default function MobileNavbar() {
               <div className="relative">
                 <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
                 {isActive && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-poker-cyan rounded-full animate-pulse" />
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-poker-red rounded-full animate-pulse" />
                 )}
               </div>
               <span className={`text-xs mt-1 font-medium ${isActive ? 'font-bold' : ''}`}>

@@ -104,7 +104,7 @@ export function EliminationForm({
 
   return (
     <div className="bg-poker-card rounded-lg border border-white/10">
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="p-4 space-y-4">
         
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -122,18 +122,18 @@ export function EliminationForm({
         )}
 
         {/* Campos del formulario */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           
           {/* Jugador Eliminado */}
           <div>
-            <label className="block text-sm font-medium text-poker-muted mb-2">
+            <label className="block text-xs font-medium text-poker-muted mb-1">
               Jugador
             </label>
             <div className="relative">
               <select
                 value={eliminatedPlayerId}
                 onChange={(e) => setEliminatedPlayerId(e.target.value)}
-                className="w-full bg-poker-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-poker-red focus:outline-none appearance-none text-base"
+                className="w-full bg-poker-dark border border-white/20 rounded-lg px-3 py-2 text-white focus:border-poker-red focus:outline-none appearance-none text-sm"
                 required
               >
                 <option value="">Seleccionar jugador...</option>
@@ -149,12 +149,12 @@ export function EliminationForm({
 
           {/* Jugador Eliminador */}
           <div>
-            <label className="block text-sm font-medium text-poker-muted mb-2">
+            <label className="block text-xs font-medium text-poker-muted mb-1">
               {nextPosition === 2 ? 'Ganador' : 'vs'}
             </label>
             <div className="relative">
               {nextPosition === 2 ? (
-                <div className="w-full bg-poker-dark/50 border border-white/10 rounded-lg px-4 py-3 text-poker-muted">
+                <div className="w-full bg-poker-dark/50 border border-white/10 rounded-lg px-3 py-2 text-poker-muted text-sm">
                   Auto-ganador
                 </div>
               ) : (
@@ -162,7 +162,7 @@ export function EliminationForm({
                   <select
                     value={eliminatorPlayerId}
                     onChange={(e) => setEliminatorPlayerId(e.target.value)}
-                    className="w-full bg-poker-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-poker-red focus:outline-none appearance-none text-base"
+                    className="w-full bg-poker-dark border border-white/20 rounded-lg px-3 py-2 text-white focus:border-poker-red focus:outline-none appearance-none text-sm"
                     required={nextPosition !== 2}
                   >
                     <option value="">Seleccionar eliminador...</option>

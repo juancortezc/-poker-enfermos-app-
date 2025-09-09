@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Trophy, Users, Clock, Calendar, Target, CheckCircle } from 'lucide-react'
@@ -69,39 +69,27 @@ export default function Dashboard() {
 
   const quickActions = [
     {
-      title: 'Fecha',
-      description: hasActiveDate ? 'Fecha activa en curso' : 'Crear noche de juego',
+      title: 'FECHA',
       href: '/game-dates/new',
       icon: Calendar,
-      gradient: 'from-yellow-500 to-yellow-600',
-      stats: hasActiveDate ? 'Deshabilitado' : 'Próxima fecha',
       disabled: hasActiveDate,
     },
     {
-      title: 'Torneos',
-      description: 'Gestión de torneos',
+      title: 'TORNEOS',
       href: '/tournaments',
       icon: Trophy,
-      gradient: 'from-poker-red to-red-700',
-      stats: 'Torneo 28',
       adminOnly: true,
     },
     {
-      title: 'Enfermos',
-      description: 'Gestión del grupo',
+      title: 'ENFERMOS',
       href: '/players',
       icon: Users,
-      gradient: 'from-poker-green to-green-600',
-      stats: '29 activos',
       adminOnly: true,
     },
     {
-      title: 'Timer Activo',
-      description: 'Control de blinds',
+      title: 'TIMER ACTIVO',
       href: '/timer',
       icon: Clock,
-      gradient: 'from-blue-500 to-blue-600',
-      stats: 'Nivel 4',
     },
   ]
 
@@ -110,45 +98,52 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="pt-16 px-4">
+    <div className="px-4 pt-32">
       {/* Cards de acciones rápidas */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
         {filteredActions.map((action, index) => {
           const Icon = action.icon
           const isDisabled = action.disabled
           
           const cardContent = (
             <Card className={`
-              bg-poker-card border-white/10 transition-all duration-200 h-full
+              bg-gradient-to-br from-poker-card to-gray-800 border-2 border-poker-red 
+              transition-all duration-200 h-32
               ${isDisabled 
-                ? 'opacity-50 cursor-not-allowed' 
-                : 'hover:border-poker-red/50 cursor-pointer hover:shadow-xl hover:shadow-black/30 hover:-translate-y-1'
+                ? 'opacity-50 cursor-not-allowed border-gray-600 shadow-inner' 
+                : `cursor-pointer transform hover:-translate-y-1 hover:scale-[1.02] active:translate-y-0 active:scale-100
+                   shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-poker-red/30
+                   border-t-red-400 border-r-red-600 border-b-red-800 border-l-red-500`
               }
               animate-stagger animate-stagger-${index + 1}
-            `}>
-              <CardHeader className="pb-3">
+              flex flex-col items-center justify-center p-4
+              shadow-inner-light
+            `}
+            style={{
+              boxShadow: isDisabled 
+                ? 'inset 0 2px 4px rgba(0,0,0,0.3)' 
+                : `0 4px 8px rgba(0,0,0,0.4), 
+                   0 2px 4px rgba(0,0,0,0.3),
+                   inset 0 1px 0 rgba(255,255,255,0.1),
+                   inset 0 -1px 0 rgba(0,0,0,0.2)`
+            }}>
+              <div className="flex-1 flex items-center justify-center">
                 <div className={`
-                  w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} 
-                  flex items-center justify-center mb-3 shadow-lg
-                  ${isDisabled ? 'grayscale' : ''}
+                  w-12 h-12 rounded-lg flex items-center justify-center
+                  ${isDisabled 
+                    ? 'bg-gradient-to-br from-gray-600 to-gray-700 shadow-inner' 
+                    : 'bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg hover:shadow-xl hover:from-gray-600 hover:to-gray-700'
+                  }
+                  shadow-inner transition-all duration-200 transform hover:scale-105
                 `}>
-                  <Icon className="w-6 h-6 text-white" />
+                  <Icon className={`w-6 h-6 ${isDisabled ? 'text-gray-400' : 'text-white'}`} />
                 </div>
-                <CardTitle className="text-base font-bold text-poker-text">
+              </div>
+              <div className="text-center">
+                <h3 className={`text-sm font-bold ${isDisabled ? 'text-gray-500' : 'text-white'}`}>
                   {action.title}
-                </CardTitle>
-                <p className="text-xs text-poker-muted mt-1">
-                  {action.description}
-                </p>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs font-semibold ${isDisabled ? 'text-gray-500' : 'text-poker-cyan'}`}>
-                    {action.stats}
-                  </span>
-                  <div className={`w-2 h-2 rounded-full ${isDisabled ? 'bg-gray-500' : 'bg-poker-cyan animate-pulse'}`} />
-                </div>
-              </CardContent>
+                </h3>
+              </div>
             </Card>
           )
           
@@ -171,16 +166,16 @@ export default function Dashboard() {
       {/* Próxima Fecha */}
       {activeTournament && activeTournament.stats?.nextDate && (
         <div className="mt-8 max-w-md mx-auto">
-          <h2 className="text-lg font-bold text-white mb-4 text-center">Próxima Fecha</h2>
+          <h2 className="text-lg font-bold text-white mb-4 text-center">PRÓXIMA FECHA</h2>
           {activeTournament.stats?.nextDate ? (
             <button
               onClick={() => router.push(`/game-dates/${activeTournament.stats.nextDate.id}/confirm`)}
-              className="w-full p-4 bg-gradient-to-r from-poker-cyan/10 to-poker-red/10 rounded-lg border border-poker-cyan/20 hover:border-poker-cyan/40 transition-all hover:bg-gradient-to-r hover:from-poker-cyan/20 hover:to-poker-red/20"
+              className="w-full p-4 bg-poker-card rounded-lg border-2 border-poker-red hover:border-red-400 transition-all hover:bg-poker-card/80"
             >
               <div className="flex items-center space-x-3 mb-2">
-                <Target className="w-5 h-5 text-poker-cyan" />
-                <span className="text-lg font-medium text-poker-cyan">
-                  Fecha {activeTournament.stats.nextDate.dateNumber}
+                <Target className="w-5 h-5 text-poker-red" />
+                <span className="text-lg font-medium text-poker-red">
+                  FECHA {activeTournament.stats.nextDate.dateNumber}
                 </span>
               </div>
               <p className="text-white text-center">
@@ -188,10 +183,10 @@ export default function Dashboard() {
               </p>
             </button>
           ) : (
-            <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+            <div className="p-4 bg-poker-card rounded-lg border-2 border-gray-600">
               <div className="flex items-center justify-center space-x-2">
-                <CheckCircle className="w-5 h-5 text-green-400" />
-                <span className="text-lg font-medium text-green-400">Todas las fechas completadas</span>
+                <CheckCircle className="w-5 h-5 text-white" />
+                <span className="text-lg font-medium text-white">TODAS LAS FECHAS COMPLETADAS</span>
               </div>
             </div>
           )}

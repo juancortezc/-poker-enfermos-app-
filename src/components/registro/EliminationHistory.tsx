@@ -107,9 +107,9 @@ export function EliminationHistory({
             >
               {editingId === elimination.id ? (
                 // Modo edición
-                <div className="flex items-center space-x-4 flex-1">
-                  <div className="w-8 text-center">
-                    <span className="text-white font-bold text-lg">{elimination.position}</span>
+                <div className="flex items-center space-x-2 flex-1">
+                  <div className="w-6 text-center">
+                    <span className="text-white font-bold text-sm">{elimination.position}</span>
                   </div>
                   
                   {/* Eliminado */}
@@ -117,10 +117,10 @@ export function EliminationHistory({
                     <select
                       value={editForm.eliminatedPlayerId}
                       onChange={(e) => setEditForm({...editForm, eliminatedPlayerId: e.target.value})}
-                      className="w-full bg-poker-dark border border-white/20 rounded px-3 py-1 text-white text-sm"
+                      className="w-full bg-poker-dark border border-white/20 rounded px-2 py-1 text-white text-xs"
                       disabled={isUpdating}
                     >
-                      <option value="">Seleccionar...</option>
+                      <option value="">Jugador...</option>
                       {players.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.firstName} {player.lastName}
@@ -132,15 +132,15 @@ export function EliminationHistory({
                   {/* Eliminador */}
                   <div className="flex-1">
                     {elimination.position === 1 ? (
-                      <span className="text-poker-muted text-sm">Ganador</span>
+                      <span className="text-poker-muted text-xs">Ganador</span>
                     ) : (
                       <select
                         value={editForm.eliminatorPlayerId}
                         onChange={(e) => setEditForm({...editForm, eliminatorPlayerId: e.target.value})}
-                        className="w-full bg-poker-dark border border-white/20 rounded px-3 py-1 text-white text-sm"
+                        className="w-full bg-poker-dark border border-white/20 rounded px-2 py-1 text-white text-xs"
                         disabled={isUpdating}
                       >
-                        <option value="">Seleccionar...</option>
+                        <option value="">vs...</option>
                         {players.map((player) => (
                           <option key={player.id} value={player.id}>
                             {player.firstName} {player.lastName}
@@ -151,7 +151,7 @@ export function EliminationHistory({
                   </div>
 
                   <div className="w-8 text-center">
-                    <span className="text-white font-semibold">{elimination.points}</span>
+                    <span className="text-white font-semibold text-sm">{elimination.points}</span>
                   </div>
 
                   <div className="flex space-x-2">
@@ -174,24 +174,29 @@ export function EliminationHistory({
               ) : (
                 // Modo visualización
                 <>
-                  <div className="flex items-center space-x-4 flex-1">
+                  <div className="flex items-center space-x-2 flex-1">
+                    <div className="w-6 text-center">
+                      <span className="text-white font-bold text-sm">{elimination.position}</span>
+                    </div>
+                    <div className="flex-1 text-white text-sm">
+                      <span className="truncate block">
+                        {getPlayerName(elimination.eliminatedPlayerId)}
+                        {elimination.position !== 1 && (
+                          <span className="text-poker-muted">
+                            {' vs '}
+                            {elimination.eliminatorPlayer ? 
+                              getPlayerName(elimination.eliminatorPlayerId!) : 
+                              'N/A'
+                            }
+                          </span>
+                        )}
+                        {elimination.position === 1 && (
+                          <span className="text-poker-muted"> - Ganador</span>
+                        )}
+                      </span>
+                    </div>
                     <div className="w-8 text-center">
-                      <span className="text-white font-bold text-lg">{elimination.position}</span>
-                    </div>
-                    <div className="flex-1 text-white">
-                      {getPlayerName(elimination.eliminatedPlayerId)}
-                    </div>
-                    <div className="flex-1 text-poker-muted text-sm">
-                      {elimination.position === 1 ? 
-                        'Ganador' : 
-                        (elimination.eliminatorPlayer ? 
-                          getPlayerName(elimination.eliminatorPlayerId!) : 
-                          'Sin eliminador'
-                        )
-                      }
-                    </div>
-                    <div className="w-8 text-center">
-                      <span className="text-white font-semibold">{elimination.points}</span>
+                      <span className="text-white font-semibold text-sm">{elimination.points}</span>
                     </div>
                   </div>
 

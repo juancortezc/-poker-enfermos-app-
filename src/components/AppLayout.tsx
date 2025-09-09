@@ -89,9 +89,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       case UserRole.Comision:
         return 'bg-poker-red text-white'
       case UserRole.Enfermo:
-        return 'bg-poker-green text-white'
+        return 'bg-gray-600 text-white'
       case UserRole.Invitado:
-        return 'bg-poker-cyan text-poker-dark'
+        return 'bg-orange-600 text-white'
     }
   }
 
@@ -132,14 +132,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <LogoutButton />
           </div>
 
-          {/* Indicador de conexión en vivo */}
-          <div className="flex items-center justify-end mt-2 space-x-2">
-            <div className="relative flex items-center">
-              <div className="w-2 h-2 bg-poker-cyan rounded-full animate-pulse"></div>
-              <div className="absolute w-2 h-2 bg-poker-cyan rounded-full animate-ping"></div>
-            </div>
-            <span className="text-xs text-poker-muted">En vivo</span>
-          </div>
 
           {/* Search and Add Button - Only on Players Page */}
           {isPlayersPage && (
