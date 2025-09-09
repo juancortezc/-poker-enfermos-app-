@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { TrophyIcon } from 'lucide-react';
+import Link from 'next/link';
 import type { TournamentRankingData } from '@/lib/ranking-utils';
 
 interface TournamentRankingTableProps {
@@ -154,9 +155,12 @@ export default function TournamentRankingTable({
       {/* Footer para compact view */}
       {compact && rankings.length > 5 && (
         <div className="p-3 border-t border-white/10 text-center">
-          <button className="text-poker-accent hover:text-poker-accent-hover text-sm font-medium transition-colors">
+          <Link 
+            href="/ranking"
+            className="text-poker-accent hover:text-poker-accent-hover text-sm font-medium transition-colors"
+          >
             Ver ranking completo →
-          </button>
+          </Link>
         </div>
       )}
 

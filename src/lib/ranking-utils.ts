@@ -46,7 +46,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         },
         gameDates: {
           where: {
-            status: 'completed'
+            status: { in: ['completed', 'in_progress'] }
           },
           include: {
             eliminations: {
@@ -109,15 +109,29 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
           const elimination = gameDate.eliminations.find(e => e.eliminatedPlayerId === playerId);
           
           if (elimination) {
-            // Jugador fue eliminado, usar puntos de la posición
-            const points = calculatePointsForPosition(elimination.position, totalPlayersInDate);
-            ranking.pointsByDate[gameDate.dateNumber] = points;
-            ranking.totalPoints += points;
+            // Jugador fue eliminado, usar puntos guardados en la eliminación
+            ranking.pointsByDate[gameDate.dateNumber] = elimination.points;
+            ranking.totalPoints += elimination.points;
           } else {
-            // Jugador no fue eliminado, debe ser el ganador (posición 1)
-            const winnerPoints = calculatePointsForPosition(1, totalPlayersInDate);
-            ranking.pointsByDate[gameDate.dateNumber] = winnerPoints;
-            ranking.totalPoints += winnerPoints;
+            // Jugador no fue eliminado
+            // Solo asignar puntos si es el único jugador restante (ganador) o la fecha está completada
+            const eliminatedCount = gameDate.eliminations.length;
+            const activePlayersCount = totalPlayersInDate - eliminatedCount;
+            
+            if (activePlayersCount === 1 || gameDate.status === 'completed') {
+              // Es el ganador - calcular puntos
+              const secondPlace = gameDate.eliminations.find(e => e.position === 2);
+              const winnerPoints = secondPlace 
+                ? secondPlace.points + 3 
+                : calculatePointsForPosition(1, totalPlayersInDate);
+              
+              ranking.pointsByDate[gameDate.dateNumber] = winnerPoints;
+              ranking.totalPoints += winnerPoints;
+            } else {
+              // Aún jugando, no tiene puntos todavía
+              ranking.pointsByDate[gameDate.dateNumber] = 0;
+              // No sumar a totalPoints (permanece sin cambios)
+            }
           }
         }
       });
