@@ -193,9 +193,14 @@ export default function RegistroPage() {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Regresar
           </button>
-          <h1 className="text-xl font-bold text-white">
-            REGISTRO Fecha {activeGameDate.dateNumber}
-          </h1>
+          <div className="text-center">
+            <h1 className="text-xl font-bold text-white">
+              REGISTRO
+            </h1>
+            <p className="text-sm text-poker-muted">
+              Fecha #{activeGameDate.dateNumber}
+            </p>
+          </div>
           <div className="w-20" /> {/* Spacer */}
         </div>
 

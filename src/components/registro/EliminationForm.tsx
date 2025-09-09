@@ -108,9 +108,9 @@ export function EliminationForm({
         
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h3 className="text-white font-semibold">Nueva Eliminación</h3>
+          <h3 className="text-white font-semibold">POS {nextPosition}</h3>
           <div className="text-poker-red font-bold text-lg">
-            Posición {nextPosition}
+            PTS {points}
           </div>
         </div>
 
@@ -127,13 +127,13 @@ export function EliminationForm({
           {/* Jugador Eliminado */}
           <div>
             <label className="block text-sm font-medium text-poker-muted mb-2">
-              Eliminado
+              Jugador
             </label>
             <div className="relative">
               <select
                 value={eliminatedPlayerId}
                 onChange={(e) => setEliminatedPlayerId(e.target.value)}
-                className="w-full bg-poker-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-poker-red focus:outline-none appearance-none"
+                className="w-full bg-poker-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-poker-red focus:outline-none appearance-none text-base"
                 required
               >
                 <option value="">Seleccionar jugador...</option>
@@ -150,7 +150,7 @@ export function EliminationForm({
           {/* Jugador Eliminador */}
           <div>
             <label className="block text-sm font-medium text-poker-muted mb-2">
-              {nextPosition === 2 ? 'Ganador' : 'Eliminador'}
+              {nextPosition === 2 ? 'Ganador' : 'vs'}
             </label>
             <div className="relative">
               {nextPosition === 2 ? (
@@ -162,7 +162,7 @@ export function EliminationForm({
                   <select
                     value={eliminatorPlayerId}
                     onChange={(e) => setEliminatorPlayerId(e.target.value)}
-                    className="w-full bg-poker-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-poker-red focus:outline-none appearance-none"
+                    className="w-full bg-poker-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-poker-red focus:outline-none appearance-none text-base"
                     required={nextPosition !== 2}
                   >
                     <option value="">Seleccionar eliminador...</option>
@@ -181,12 +181,8 @@ export function EliminationForm({
           </div>
         </div>
 
-        {/* Puntos y botón */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-poker-muted">
-            Puntos: <span className="text-white font-semibold">{points}</span>
-          </div>
-          
+        {/* Botones */}
+        <div className="flex items-center justify-end">
           <div className="flex space-x-3">
             <button
               type="button"

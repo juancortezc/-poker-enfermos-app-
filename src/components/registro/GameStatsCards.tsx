@@ -17,7 +17,7 @@ export function GameStatsCards({ activePlayers, totalPlayers, winnerPoints }: Ga
       highlight: false
     },
     {
-      label: 'PTS Ganador',
+      label: 'Pts Max',
       value: winnerPoints,
       highlight: false
     }

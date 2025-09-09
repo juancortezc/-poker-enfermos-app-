@@ -91,13 +91,13 @@ export function EliminationHistory({
     return player ? `${player.firstName} ${player.lastName}` : 'Desconocido'
   }
 
-  // Ordenar eliminaciones por posición descendente (más recientes primero)
-  const sortedEliminations = [...eliminations].sort((a, b) => b.position - a.position)
+  // Ordenar eliminaciones por posición ascendente (más recientes primero - posiciones más bajas)
+  const sortedEliminations = [...eliminations].sort((a, b) => a.position - b.position)
 
   return (
     <div className="bg-poker-card rounded-lg border border-white/10">
       <div className="p-6">
-        <h3 className="text-white font-semibold mb-4">Historial de Eliminaciones</h3>
+        <h3 className="text-white font-semibold mb-4">Eliminaciones</h3>
         
         <div className="space-y-2">
           {sortedEliminations.map((elimination) => (

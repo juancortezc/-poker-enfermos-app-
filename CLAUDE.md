@@ -329,16 +329,30 @@ POST /api/tournaments/[id]/complete
 GET  /api/game-dates/available-dates
 GET  /api/game-dates/[id]                    # Obtener fecha específica
 PUT  /api/game-dates/[id]                    # Iniciar o actualizar fecha (action: 'start'|'update')
-POST /api/eliminations
-GET  /api/eliminations/game-date/[id]
-PUT  /api/eliminations/[id]
-GET  /api/game-dates/[id]/live-status
-GET  /api/tournaments/[id]/ranking
+POST /api/eliminations                    # Crear eliminación (con campos eliminatedPlayerId/eliminatorPlayerId)
+GET  /api/eliminations/game-date/[id]       # Obtener eliminaciones de una fecha
+PUT  /api/eliminations/[id]                 # Actualizar eliminación existente
+GET  /api/game-dates/[id]/players           # Obtener jugadores de una fecha (fixed parseInt)
+GET  /api/game-dates/[id]/live-status       # Estado en tiempo real con timer y stats
+GET  /api/tournaments/[id]/ranking          # Ranking de torneo
 ```
 
 ---
 
-## Funcionalidades Implementadas Recientemente (2025-09-08)
+## Funcionalidades Implementadas Recientemente (2025-09-09)
+
+### Sistema de Registro Rediseñado ✅ (NUEVO)
+- **Página Completamente Rediseñada**: `/registro` con diseño según REG.png
+- **Componentes Modulares**:
+  - `TimerDisplay` - Timer rojo prominente con blinds actuales
+  - `GameStatsCards` - 3 cards (Jugando/Jugadores/PTS Ganador)
+  - `EliminationForm` - Formulario de eliminación con validaciones
+  - `EliminationHistory` - Historial editable con modificación inline
+- **Diseño Mobile-First**: Optimizado para dispositivos móviles
+- **Colores Aprobados**: Eliminados cyan y verde, solo poker-red/dark/card/text
+- **Auto-refresh**: Actualización cada 5 segundos con datos en tiempo real
+- **APIs Corregidas**: Fix crítico eliminatedId → eliminatedPlayerId
+- **Autenticación Completa**: Headers Authorization en todas las requests
 
 ### Sistema de Inicio de Fechas ✅
 - **Página de Confirmación**: `/game-dates/[id]/confirm` con resumen detallado
@@ -351,7 +365,7 @@ GET  /api/tournaments/[id]/ranking
 - **Componentes Consistentes**: PlayerSelector y GuestSelector con diseño uniforme
 - **Navegación Simplificada**: Eliminada página de detalle de torneo innecesaria
 - **Home Page Mejorada**: Ranking de torneo movido desde Dashboard
-- **Colores Distintivos**: Rojo para jugadores, rosa para invitados externos
+- **Colores Distintivos**: Solo colores aprobados del sistema Enfermos
 
 ### Base de Datos Actualizada ✅
 - **Schema GameDate**: `startTime` cambiado de String a DateTime
@@ -359,7 +373,7 @@ GET  /api/tournaments/[id]/ranking
 - **Integridad**: Transacciones para consistencia en inicio de fechas
 - **GameDateStatus**: Agregado estado `CREATED` para fechas configuradas
 
-### Sistema de Edición de Fechas ✅ (Última actualización)
+### Sistema de Edición de Fechas ✅
 - **APIs de Actualización**: `PUT /api/game-dates/[id]` con `action: 'update'`
 - **Páginas de Edición Funcionales**: Sin errores 400 al actualizar fechas CREATED
 - **Botón de Inicio Corregido**: Aparece para fechas con estado CREATED
@@ -399,37 +413,37 @@ GET  /api/tournaments/[id]/ranking
 
 El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas single-page, y navegación dinámica. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
 
-**Última actualización:** 2025-09-08 por Claude Code
+**Última actualización:** 2025-09-09 por Claude Code
 
 ---
 
 ## Cambios Recientes - Commits Importantes
 
-### Commit 812f8e3 - Sistema de Confirmación e Inicio de Fechas
-- Implementación completa del flujo de inicio de fechas
-- API endpoints para obtener y iniciar fechas específicas
-- Página de confirmación con validaciones de seguridad
-- Integración automática con timer y sistema de eliminaciones
+### Commit cf32e9b - Rediseño Completo de Página de Registro
+- **Rediseño completo** de `/registro` siguiendo especificaciones REG.png
+- **Corrección crítica** de API: eliminatedId → eliminatedPlayerId (fix error 400/500)
+- **Diseño móvil-first** sin colores no aprobados (eliminado cyan/verde)
+- **Componentes modulares nuevos**:
+  - `TimerDisplay` - Timer rojo prominente con blinds actuales
+  - `GameStatsCards` - Estadísticas (Jugando/Jugadores/PTS Ganador)
+  - `EliminationForm` - Formulario completo con validaciones
+  - `EliminationHistory` - Historial editable inline
+- **Actualizaciones tiempo real** cada 5 segundos con autenticación
+- **Fix API players**: string → parseInt conversion (error 500)
+- **Logs de debugging** para APIs de eliminaciones
+- **Validaciones robustas** y auto-completado mejorado
+- **Script cleanup**: Eliminado repair-tournament-28.ts no utilizado
 
-### Commit 8595ef0 - Reorganización de Componentes
-- Ranking de torneo movido de Dashboard a Home page
-- "Próxima Fecha" removida de lista de torneos y agregada al Dashboard
-- Navegación mejorada y componentes reorganizados
-
-### Commit 9d86f5f - Limpieza de Navegación
-- Eliminada página de detalle de torneo innecesaria
-- Redirección a dashboard en lugar de páginas no útiles
-- Componente TournamentDetails removido
-
-### Commit 9860d40 - Diseño Consistente de Componentes  
-- PlayerSelector y GuestSelector con diseño uniforme
-- Eliminación de imágenes y uso de checkboxes coloreados
-- Limpieza de código y remoción de funciones no utilizadas
-
-### Commit 2241d0b - Corrección de Edición de Fechas y Botón de Inicio
+### Commit 2241d0b - Corrección de Edición de Fechas y Botón de Inicio  
 - Sistema completo de estados de fecha: pending → CREATED → in_progress → completed
 - PUT API para actualizar fechas configuradas sin errores 400
 - Botón "Iniciar" aparece correctamente para fechas CREATED
 - Páginas de edición funcionales con botones "Actualizar"
 - Componentes PlayerSelector y GuestSelector con texto personalizable
 - Flujo completo: Dashboard → Confirmar → Editar → Iniciar → Registro
+
+### Commit 812f8e3 - Sistema de Confirmación e Inicio de Fechas
+- Implementación completa del flujo de inicio de fechas
+- API endpoints para obtener y iniciar fechas específicas
+- Página de confirmación con validaciones de seguridad
+- Integración automática con timer y sistema de eliminaciones
