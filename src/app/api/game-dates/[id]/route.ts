@@ -64,6 +64,8 @@ export async function PUT(
 
       // Handle start action
       if (action === 'start') {
+        console.log(`[GAME DATE API] Starting game date ${gameDateId}...`);
+        
         // Verificar que la fecha existe y está en estado CREATED
         const existingDate = await prisma.gameDate.findUnique({
           where: { id: gameDateId },
@@ -86,11 +88,15 @@ export async function PUT(
         }
 
         if (existingDate.status !== 'CREATED') {
+          console.log(`[GAME DATE API] Cannot start. Current status: ${existingDate.status}`);
           return NextResponse.json(
             { error: `La fecha debe estar configurada para iniciar (estado actual: ${existingDate.status})` },
             { status: 400 }
           )
         }
+        
+        console.log(`[GAME DATE API] Status check passed. Current status: ${existingDate.status}`);
+        console.log(`[GAME DATE API] Player count: ${existingDate.playerIds.length}`);
 
         // Verificar que no hay otra fecha activa
         const activeDate = await prisma.gameDate.findFirst({
@@ -160,6 +166,9 @@ export async function PUT(
           return { updatedGameDate, timerState }
         })
 
+        console.log(`[GAME DATE API] Game date ${gameDateId} started successfully`);
+        console.log(`[GAME DATE API] New status: ${result.updatedGameDate.status}`);
+        
         return NextResponse.json({
           success: true,
           gameDate: result.updatedGameDate,

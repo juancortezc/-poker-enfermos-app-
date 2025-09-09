@@ -1,10 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { canCRUD } from '@/lib/auth'
-import { EliminationForm } from '@/components/eliminations/EliminationForm'
-import { EliminationTable } from '@/components/eliminations/EliminationTable'
+import { ArrowLeft } from 'lucide-react'
+import { TimerDisplay } from '@/components/registro/TimerDisplay'
+import { GameStatsCards } from '@/components/registro/GameStatsCards'
+import { EliminationForm } from '@/components/registro/EliminationForm'
+import { EliminationHistory } from '@/components/registro/EliminationHistory'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 
 interface Player {
@@ -23,10 +27,23 @@ interface Elimination {
   eliminatorPlayer?: Player | null
 }
 
-interface TimerState {
+interface GameDate {
+  id: number
+  dateNumber: number
+  scheduledDate: string
+  status: string
+  playerIds: string[]
+  tournament: {
+    id: number
+    name: string
+    number: number
+  }
+  playersCount: number
+}
+
+interface TimerData {
   currentLevel: number
   timeRemaining: number
-  isActive: boolean
   blindLevels: Array<{
     level: number
     smallBlind: number
@@ -37,160 +54,193 @@ interface TimerState {
 
 export default function RegistroPage() {
   const { user } = useAuth()
-  const [activeGameDate, setActiveGameDate] = useState<any>(null)
+  const router = useRouter()
+  
+  // Estados
+  const [activeGameDate, setActiveGameDate] = useState<GameDate | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
   const [eliminations, setEliminations] = useState<Elimination[]>([])
-  const [timerState, setTimerState] = useState<TimerState | null>(null)
+  const [timerData, setTimerData] = useState<TimerData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const fetchData = async () => {
+  // Función para obtener todos los datos
+  const fetchAllData = async () => {
+    if (!user) return // No hacer requests sin usuario
+    
     try {
-      // Fetch active game date
+      setError(null)
+      
+      // Obtener fecha activa
       const gameDateResponse = await fetch('/api/game-dates/active')
-      if (gameDateResponse.ok) {
-        const gameDateData = await gameDateResponse.json()
-        setActiveGameDate(gameDateData)
-
-        if (gameDateData?.id) {
-          // Fetch players
-          const playersResponse = await fetch(`/api/game-dates/${gameDateData.id}/players`)
-          if (playersResponse.ok) {
-            const playersData = await playersResponse.json()
-            setPlayers(playersData)
-          }
-
-          // Fetch eliminations
-          const eliminationsResponse = await fetch(`/api/eliminations/game-date/${gameDateData.id}`)
-          if (eliminationsResponse.ok) {
-            const eliminationsData = await eliminationsResponse.json()
-            setEliminations(eliminationsData)
-          }
-
-          // Fetch timer state
-          const timerResponse = await fetch(`/api/game-dates/${gameDateData.id}/live-status`)
-          if (timerResponse.ok) {
-            const timerData = await timerResponse.json()
-            setTimerState(timerData.timer)
-          }
-        }
+      if (!gameDateResponse.ok) {
+        throw new Error('No hay fecha activa')
       }
-    } catch (error) {
-      console.error('Error fetching data:', error)
+      
+      const gameDateData = await gameDateResponse.json()
+      if (!gameDateData) {
+        throw new Error('No hay fecha activa en este momento')
+      }
+      
+      setActiveGameDate(gameDateData)
+
+      // Headers de autorización
+      const authHeaders = user?.adminKey ? { 'Authorization': `Bearer ${user.adminKey}` } : {}
+
+      // Obtener jugadores, eliminaciones y timer en paralelo
+      const [playersRes, eliminationsRes, timerRes] = await Promise.all([
+        fetch(`/api/game-dates/${gameDateData.id}/players`, { headers: authHeaders }),
+        fetch(`/api/eliminations/game-date/${gameDateData.id}`, { headers: authHeaders }),
+        fetch(`/api/game-dates/${gameDateData.id}/live-status`, { headers: authHeaders })
+      ])
+
+      if (playersRes.ok) {
+        const playersData = await playersRes.json()
+        setPlayers(playersData)
+      }
+
+      if (eliminationsRes.ok) {
+        const eliminationsData = await eliminationsRes.json()
+        setEliminations(eliminationsData)
+      }
+
+      if (timerRes.ok) {
+        const timerResponse = await timerRes.json()
+        setTimerData(timerResponse.timer || null)
+      }
+
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setError(err instanceof Error ? err.message : 'Error al cargar datos')
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
   }
 
+  // Auto-refresh cada 5 segundos
   useEffect(() => {
-    fetchData()
-    // Auto-refresh every 5 seconds
-    const interval = setInterval(() => {
-      setRefreshing(true)
-      fetchData()
-    }, 5000)
-    
-    return () => clearInterval(interval)
-  }, [])
+    if (user) {
+      fetchAllData()
+      const interval = setInterval(fetchAllData, 5000)
+      return () => clearInterval(interval)
+    }
+  }, [user])
 
-  const handleEliminationSaved = () => {
-    fetchData()
-  }
-
+  // Verificación de permisos
   if (!user || !canCRUD(user.role)) {
     return (
-      <div className="min-h-screen bg-poker-green flex items-center justify-center">
+      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold mb-4">Acceso Denegado</h1>
-          <p>No tienes permisos para acceder a esta página.</p>
+          <p className="text-poker-muted">No tienes permisos para acceder a esta página.</p>
         </div>
       </div>
     )
   }
 
+  // Estados de carga y error
   if (loading) {
     return (
-      <div className="min-h-screen bg-poker-green flex items-center justify-center">
-        <div className="text-white text-xl">Cargando...</div>
+      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-poker-red mx-auto mb-4"></div>
+          <p className="text-poker-muted">Cargando...</p>
+        </div>
       </div>
     )
   }
 
-  if (!activeGameDate) {
+  if (error || !activeGameDate) {
     return (
-      <div className="min-h-screen bg-poker-green flex items-center justify-center">
+      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold mb-4">No hay fecha activa</h1>
-          <p>No existe una fecha de juego activa en este momento.</p>
+          <p className="text-poker-muted">{error || 'No existe una fecha de juego activa en este momento.'}</p>
+          <button
+            onClick={() => router.push('/')}
+            className="mt-4 px-6 py-2 bg-poker-card hover:bg-poker-card/80 text-white rounded-lg transition-colors"
+          >
+            Volver al inicio
+          </button>
         </div>
       </div>
     )
   }
 
+  // Cálculos para las estadísticas
   const totalPlayers = players.length
-  const remainingPlayers = totalPlayers - eliminations.length
+  const eliminatedPlayers = eliminations.length
+  const activePlayers = totalPlayers - eliminatedPlayers
+  const nextPosition = totalPlayers - eliminatedPlayers
+  
+  // Calcular puntos del ganador usando la función del sistema
   const winnerPoints = calculatePointsForPosition(1, totalPlayers)
-  const nextPosition = totalPlayers - eliminations.length
 
-  // Get current blind level info
-  const currentBlind = timerState?.blindLevels?.find(b => b.level === timerState.currentLevel)
-  const timeDisplay = timerState?.timeRemaining ? 
-    `${Math.floor(timerState.timeRemaining / 60)}:${String(timerState.timeRemaining % 60).padStart(2, '0')}` : '00:00'
+  // Timer data
+  const currentBlind = timerData?.blindLevels?.find(b => b.level === timerData.currentLevel)
+  const timeRemaining = timerData?.timeRemaining || 0
 
   return (
-    <div className="min-h-screen bg-poker-green pb-20">
-      <div className="max-w-4xl mx-auto p-4 space-y-6">
+    <div className="min-h-screen bg-poker-dark pb-20">
+      <div className="max-w-lg mx-auto">
+        
         {/* Header */}
-        <div className="text-center text-white">
-          <h1 className="text-2xl font-bold">REGISTRO</h1>
-          <p className="text-lg">Fecha {activeGameDate.dateNumber}</p>
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <button 
+            onClick={() => router.back()}
+            className="flex items-center text-poker-muted hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Regresar
+          </button>
+          <h1 className="text-xl font-bold text-white">
+            REGISTRO Fecha {activeGameDate.dateNumber}
+          </h1>
+          <div className="w-20" /> {/* Spacer */}
         </div>
 
-        {/* Timer Section - Red Background */}
-        <div className="bg-poker-red rounded-lg p-4 text-center text-white">
-          <div className="text-3xl font-bold mb-2">{timeDisplay}</div>
-          <div className="text-lg">
-            {currentBlind ? `${currentBlind.smallBlind}/${currentBlind.bigBlind}` : 'Sin información'}
-          </div>
-        </div>
+        {/* Timer */}
+        <div className="p-6 space-y-6">
+          <TimerDisplay 
+            timeRemaining={timeRemaining}
+            currentBlind={currentBlind}
+          />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-gray-600 rounded-lg p-4 text-center text-white">
-            <div className="text-sm text-gray-300">Jugando</div>
-            <div className="text-2xl font-bold text-orange-400">{remainingPlayers}</div>
-          </div>
-          <div className="bg-gray-600 rounded-lg p-4 text-center text-white">
-            <div className="text-sm text-gray-300">Jugadores</div>
-            <div className="text-2xl font-bold">{totalPlayers}</div>
-          </div>
-          <div className="bg-gray-600 rounded-lg p-4 text-center text-white">
-            <div className="text-sm text-gray-300">PTS Ganador</div>
-            <div className="text-2xl font-bold">{winnerPoints}</div>
-          </div>
-        </div>
+          {/* Stats Cards */}
+          <GameStatsCards
+            activePlayers={activePlayers}
+            totalPlayers={totalPlayers}
+            winnerPoints={winnerPoints}
+          />
 
-        {/* Elimination Form */}
-        <div className="bg-poker-card rounded-lg p-6">
-          <EliminationForm
-            gameDate={activeGameDate}
-            players={players}
+          {/* Elimination Form */}
+          {activePlayers > 1 && (
+            <EliminationForm
+              gameDate={activeGameDate}
+              players={players}
+              eliminations={eliminations}
+              nextPosition={nextPosition}
+              onEliminationCreated={fetchAllData}
+            />
+          )}
+
+          {/* Game Completed Message */}
+          {activePlayers <= 1 && (
+            <div className="bg-poker-red/20 border border-poker-red/40 rounded-lg p-6 text-center">
+              <h3 className="text-white text-xl font-bold mb-2">🎉 Juego Completado</h3>
+              <p className="text-poker-red">
+                El torneo ha terminado. ¡Felicitaciones al ganador!
+              </p>
+            </div>
+          )}
+
+          {/* Elimination History */}
+          <EliminationHistory
             eliminations={eliminations}
-            onEliminationSaved={handleEliminationSaved}
-            nextPosition={nextPosition}
+            players={players}
+            onEliminationUpdated={fetchAllData}
           />
         </div>
-
-        {/* Elimination History Table */}
-        {eliminations.length > 0 && (
-          <div className="bg-poker-card rounded-lg p-6">
-            <EliminationTable
-              eliminations={eliminations}
-              onEliminationUpdated={handleEliminationSaved}
-            />
-          </div>
-        )}
       </div>
     </div>
   )

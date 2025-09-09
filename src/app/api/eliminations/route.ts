@@ -7,15 +7,18 @@ export async function POST(request: NextRequest) {
   return withComisionAuth(request, async (req, user) => {
     try {
       const body = await request.json();
-    const { gameDateId, position, eliminatedId, eliminatorId } = body;
+      console.log('[ELIMINATIONS API] Received body:', body);
+      
+      const { gameDateId, position, eliminatedPlayerId, eliminatorPlayerId } = body;
 
-    // Validaciones
-    if (!gameDateId || !position || !eliminatedId) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+      // Validaciones
+      if (!gameDateId || !position || !eliminatedPlayerId) {
+        console.log('[ELIMINATIONS API] Missing required fields:', { gameDateId, position, eliminatedPlayerId });
+        return NextResponse.json(
+          { error: 'Missing required fields' },
+          { status: 400 }
+        );
+      }
 
     // Verificar que la fecha existe y está activa
     const gameDate = await prisma.gameDate.findUnique({
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
     const existingElimination = await prisma.elimination.findFirst({
       where: {
         gameDateId,
-        eliminatedPlayerId: eliminatedId
+        eliminatedPlayerId: eliminatedPlayerId
       }
     });
 
@@ -70,11 +73,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Si hay eliminador, verificar que no haya sido eliminado
-    if (eliminatorId) {
+    if (eliminatorPlayerId) {
       const eliminatorEliminated = await prisma.elimination.findFirst({
         where: {
           gameDateId,
-          eliminatedPlayerId: eliminatorId,
+          eliminatedPlayerId: eliminatorPlayerId,
           position: { gt: position } // Eliminado en una posición mayor (antes)
         }
       });
@@ -96,8 +99,8 @@ export async function POST(request: NextRequest) {
       data: {
         gameDateId,
         position,
-        eliminatedPlayerId: eliminatedId,
-        eliminatorPlayerId: eliminatorId,
+        eliminatedPlayerId: eliminatedPlayerId,
+        eliminatorPlayerId: eliminatorPlayerId,
         points,
         eliminationTime: new Date().toISOString()
       },
@@ -120,29 +123,50 @@ export async function POST(request: NextRequest) {
     });
 
     // Si llegamos a la posición 2, auto-completar la fecha
-    if (position === 2 && eliminatorId) {
-      // Crear la eliminación del ganador (posición 1)
-      const winnerPoints = calculatePointsForPosition(1, totalPlayers);
+    if (position === 2 && eliminatorPlayerId) {
+      console.log('[ELIMINATION API] Position 2 reached, checking if we should auto-complete...');
       
-      await prisma.elimination.create({
-        data: {
-          gameDateId,
-          position: 1,
-          eliminatedPlayerId: eliminatorId,
-          eliminatorPlayerId: null,
-          points: winnerPoints,
-          eliminationTime: new Date().toISOString()
-        }
+      // Verificar cuántas eliminaciones ya existen
+      const existingEliminations = await prisma.elimination.count({
+        where: { gameDateId }
       });
+      
+      // Solo auto-completar si realmente tenemos todas las eliminaciones esperadas
+      // (totalPlayers - 2) porque estamos registrando la posición 2
+      const expectedEliminations = totalPlayers - 2;
+      
+      console.log(`[ELIMINATION API] Total players: ${totalPlayers}, Existing eliminations: ${existingEliminations}, Expected: ${expectedEliminations}`);
+      
+      if (existingEliminations === expectedEliminations) {
+        console.log('[ELIMINATION API] Auto-completing game date...');
+        
+        // Crear la eliminación del ganador (posición 1)
+        const winnerPoints = calculatePointsForPosition(1, totalPlayers);
+        
+        await prisma.elimination.create({
+          data: {
+            gameDateId,
+            position: 1,
+            eliminatedPlayerId: eliminatorPlayerId,
+            eliminatorPlayerId: null,
+            points: winnerPoints,
+            eliminationTime: new Date().toISOString()
+          }
+        });
 
-      // Marcar la fecha como completada
-      await prisma.gameDate.update({
-        where: { id: gameDateId },
-        data: {
-          status: 'completed',
-          completedAt: new Date()
-        }
-      });
+        // Marcar la fecha como completada
+        await prisma.gameDate.update({
+          where: { id: gameDateId },
+          data: {
+            status: 'completed',
+            completedAt: new Date()
+          }
+        });
+        
+        console.log('[ELIMINATION API] Game date completed successfully');
+      } else {
+        console.log('[ELIMINATION API] Not auto-completing. Elimination count mismatch.');
+      }
     }
 
       return NextResponse.json(elimination);

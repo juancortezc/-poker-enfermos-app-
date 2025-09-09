@@ -6,7 +6,15 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const gameDateId = params.id;
+    const gameDateId = parseInt(params.id);
+
+    // Validar que el ID sea un número válido
+    if (isNaN(gameDateId)) {
+      return NextResponse.json(
+        { error: 'Invalid game date ID' },
+        { status: 400 }
+      );
+    }
 
     // Obtener la fecha con sus jugadores
     const gameDate = await prisma.gameDate.findUnique({
