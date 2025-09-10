@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Trophy, Users, Clock, Calendar, Target, CheckCircle } from 'lucide-react'
+import { Trophy, Users, Clock, Calendar, Target, CheckCircle, FileSpreadsheet } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -87,6 +87,12 @@ export default function Dashboard() {
       adminOnly: true,
     },
     {
+      title: 'IMPORTAR',
+      href: '/admin/import',
+      icon: FileSpreadsheet,
+      adminOnly: true,
+    },
+    {
       title: 'RANKING',
       href: '/ranking',
       icon: Trophy,
@@ -100,7 +106,7 @@ export default function Dashboard() {
   return (
     <div className="px-4 pt-32">
       {/* Cards de acciones rápidas */}
-      <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+      <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
         {filteredActions.map((action, index) => {
           const Icon = action.icon
           const isDisabled = action.disabled

@@ -1,11 +1,11 @@
-import { prisma } from '../src/lib/prisma'
+import { prisma } from '../src/lib/prisma.js';
 
 async function analyzeTournament28() {
-  console.log('=== Analyzing Tournament 28 ===\n')
-  
+  console.log('=== ANÁLISIS ESTADO ACTUAL TORNEO 28 ===\n');
+
   try {
-    // 1. Get Tournament 28 data
-    const tournament = await prisma.tournament.findFirst({
+    // 1. Obtener Tournament 28 con todos sus datos relacionados
+    const tournament28 = await prisma.tournament.findUnique({
       where: { number: 28 },
       include: {
         tournamentParticipants: {
@@ -22,155 +22,126 @@ async function analyzeTournament28() {
         },
         gameDates: {
           include: {
-            eliminations: true,
-            _count: {
+            eliminations: {
+              include: {
+                eliminatedPlayer: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                },
+                eliminatorPlayer: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              },
+              orderBy: {
+                position: 'desc'
+              }
+            },
+            timerStates: true
+          },
+          orderBy: {
+            dateNumber: 'asc'
+          }
+        },
+        tournamentRankings: {
+          include: {
+            player: {
               select: {
-                eliminations: true
+                id: true,
+                firstName: true,
+                lastName: true
               }
             }
-          },
-          orderBy: { dateNumber: 'asc' }
-        }
-      }
-    })
-
-    if (!tournament) {
-      console.error('Tournament 28 not found!')
-      return
-    }
-
-    // 2. Analyze participant discrepancy
-    console.log('PARTICIPANT ANALYSIS:')
-    console.log(`- participantIds array length: ${tournament.participantIds.length}`)
-    console.log(`- TournamentParticipant records: ${tournament.tournamentParticipants.length}`)
-    
-    if (tournament.participantIds.length !== tournament.tournamentParticipants.length) {
-      console.log('\n⚠️  MISMATCH DETECTED!')
-      
-      // Find differences
-      const participantTableIds = tournament.tournamentParticipants.map(tp => tp.playerId)
-      const missingInTable = tournament.participantIds.filter(id => !participantTableIds.includes(id))
-      const extraInTable = participantTableIds.filter(id => !tournament.participantIds.includes(id))
-      
-      if (missingInTable.length > 0) {
-        console.log(`\nMissing in TournamentParticipant table (${missingInTable.length}):`)
-        for (const playerId of missingInTable) {
-          const player = await prisma.player.findUnique({
-            where: { id: playerId },
-            select: { firstName: true, lastName: true, role: true }
-          })
-          if (player) {
-            console.log(`  - ${player.firstName} ${player.lastName} (${player.role}) - ID: ${playerId}`)
-          } else {
-            console.log(`  - Unknown player ID: ${playerId}`)
           }
         }
       }
-      
-      if (extraInTable.length > 0) {
-        console.log(`\nExtra in TournamentParticipant table (${extraInTable.length}):`)
-        const extras = tournament.tournamentParticipants.filter(tp => extraInTable.includes(tp.playerId))
-        extras.forEach(tp => {
-          console.log(`  - ${tp.player.firstName} ${tp.player.lastName} (${tp.player.role})`)
-        })
+    });
+
+    if (!tournament28) {
+      console.log('❌ Tournament 28 no encontrado');
+      return;
+    }
+
+    console.log('🏆 TOURNAMENT 28 INFO:');
+    console.log(`ID: ${tournament28.id}`);
+    console.log(`Status: ${tournament28.status}`);
+    console.log(`Participantes registrados: ${tournament28.tournamentParticipants.length}`);
+    console.log(`Fechas creadas: ${tournament28.gameDates.length}`);
+    console.log(`Rankings existentes: ${tournament28.tournamentRankings.length}\n`);
+
+    // 2. Analizar participantes registrados
+    console.log('👥 PARTICIPANTES REGISTRADOS:');
+    tournament28.tournamentParticipants.forEach((tp, index) => {
+      const player = tp.player;
+      console.log(`${index + 1}. ${player.firstName} ${player.lastName} (${player.role}) - ID: ${player.id}`);
+    });
+
+    // 3. Analizar Fecha 1 específicamente
+    const fecha1 = tournament28.gameDates.find(gd => gd.dateNumber === 1);
+    if (fecha1) {
+      console.log('\n📅 FECHA 1 ANÁLISIS:');
+      console.log(`Status: ${fecha1.status}`);
+      console.log(`Scheduled Date: ${fecha1.scheduledDate}`);
+      console.log(`Start Time: ${fecha1.startTime}`);
+      console.log(`Player IDs: ${fecha1.playerIds.length} jugadores`);
+      console.log(`Eliminaciones: ${fecha1.eliminations.length}`);
+      console.log(`Timer States: ${fecha1.timerStates.length}`);
+
+      if (fecha1.eliminations.length > 0) {
+        console.log('\n🔥 ELIMINACIONES ACTUALES (POSIBLEMENTE INCORRECTAS):');
+        fecha1.eliminations.forEach(elim => {
+          const eliminated = elim.eliminatedPlayer;
+          const eliminator = elim.eliminatorPlayer;
+          console.log(`Pos ${elim.position}: ${eliminated.firstName} ${eliminated.lastName} (${elim.points} pts) - Eliminado por: ${eliminator.firstName} ${eliminator.lastName}`);
+        });
       }
-    } else {
-      console.log('✅ Participant counts match')
-    }
 
-    // 3. Analyze game dates
-    console.log('\n\nGAME DATES ANALYSIS:')
-    console.log(`Total game dates: ${tournament.gameDates.length}`)
-    
-    const datesByStatus = {
-      pending: 0,
-      in_progress: 0,
-      completed: 0,
-      cancelled: 0
-    }
-    
-    tournament.gameDates.forEach(gd => {
-      datesByStatus[gd.status]++
-    })
-    
-    console.log('Status breakdown:')
-    Object.entries(datesByStatus).forEach(([status, count]) => {
-      if (count > 0) {
-        console.log(`  - ${status}: ${count}`)
+      if (fecha1.timerStates.length > 0) {
+        console.log('\n⏱️ TIMER STATES:');
+        fecha1.timerStates.forEach(timer => {
+          console.log(`Status: ${timer.status}, Level: ${timer.currentLevel}, Time: ${timer.timeRemaining}`);
+        });
       }
-    })
+    }
 
-    // 4. Analyze date formatting
-    console.log('\n\nDATE FORMATTING ANALYSIS:')
-    tournament.gameDates.slice(0, 3).forEach(gd => {
-      const date = new Date(gd.scheduledDate)
-      console.log(`\nDate ${gd.dateNumber}:`)
-      console.log(`  - Raw from DB: ${gd.scheduledDate}`)
-      console.log(`  - toISOString: ${date.toISOString()}`)
-      console.log(`  - toLocaleDateString: ${date.toLocaleDateString('es-ES')}`)
-      console.log(`  - Day of week: ${date.getDay()} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][date.getDay()]})`)
-      console.log(`  - UTC Date: ${date.getUTCDate()}/${date.getUTCMonth() + 1}/${date.getUTCFullYear()}`)
-    })
-
-    // 5. Analyze eliminations
-    console.log('\n\nELIMINATIONS ANALYSIS:')
-    let totalEliminations = 0
-    let datesWithEliminations = 0
-    
-    tournament.gameDates.forEach(gd => {
-      if (gd._count.eliminations > 0) {
-        datesWithEliminations++
-        totalEliminations += gd._count.eliminations
-        console.log(`  - Date ${gd.dateNumber}: ${gd._count.eliminations} eliminations`)
+    // 4. Analizar otras fechas
+    console.log('\n📅 OTRAS FECHAS:');
+    tournament28.gameDates.forEach(gd => {
+      if (gd.dateNumber !== 1) {
+        console.log(`Fecha ${gd.dateNumber}: ${gd.status} - ${gd.scheduledDate.toISOString().split('T')[0]} - ${gd.eliminations.length} eliminaciones`);
       }
-    })
-    
-    console.log(`\nTotal eliminations: ${totalEliminations}`)
-    console.log(`Dates with eliminations: ${datesWithEliminations}`)
-    console.log(`Dates without eliminations: ${tournament.gameDates.length - datesWithEliminations}`)
+    });
 
-    // 6. Check for ranking issues
-    console.log('\n\nRANKING PREREQUISITES:')
-    const completedDates = tournament.gameDates.filter(gd => gd.status === 'completed')
-    console.log(`- Completed dates: ${completedDates.length}`)
-    console.log(`- Tournament participants: ${tournament.tournamentParticipants.length}`)
-    
-    if (completedDates.length === 0) {
-      console.log('⚠️  No completed dates - rankings cannot be calculated!')
-    } else if (tournament.tournamentParticipants.length === 0) {
-      console.log('⚠️  No participants in TournamentParticipant table - rankings cannot be calculated!')
-    } else {
-      console.log('✅ Basic requirements for ranking calculation are met')
-    }
+    // 5. Listar todos los jugadores para mapeo
+    console.log('\n👨‍💼 TODOS LOS JUGADORES EN LA DB (para mapeo):');
+    const allPlayers = await prisma.player.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        role: true
+      },
+      orderBy: [
+        { firstName: 'asc' },
+        { lastName: 'asc' }
+      ]
+    });
 
-    // 7. Summary
-    console.log('\n\n=== SUMMARY OF ISSUES ===')
-    const issues = []
-    
-    if (tournament.participantIds.length !== tournament.tournamentParticipants.length) {
-      issues.push('Participant count mismatch between arrays')
-    }
-    if (completedDates.length === 0) {
-      issues.push('No game dates marked as completed')
-    }
-    if (totalEliminations === 0) {
-      issues.push('No elimination records found')
-    }
-    
-    if (issues.length === 0) {
-      console.log('✅ No major issues detected')
-    } else {
-      issues.forEach((issue, i) => {
-        console.log(`${i + 1}. ${issue}`)
-      })
-    }
+    allPlayers.forEach((player, index) => {
+      console.log(`${index + 1}. "${player.firstName} ${player.lastName}" - ${player.role} - ID: ${player.id}`);
+    });
 
   } catch (error) {
-    console.error('Error analyzing tournament:', error)
+    console.error('❌ Error analizando Tournament 28:', error);
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
 }
 
-// Run the analysis
-analyzeTournament28()
+analyzeTournament28();

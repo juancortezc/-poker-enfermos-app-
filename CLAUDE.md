@@ -413,7 +413,195 @@ GET  /api/tournaments/[id]/ranking          # Ranking de torneo
 
 El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas single-page, y navegación dinámica. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
 
-**Última actualización:** 2025-09-09 por Claude Code
+**Última actualización:** 2025-09-10 por Claude Code
+
+---
+
+## Sistema de Importación de Datos Históricos (NUEVO - 2025-09-10)
+
+### 🎯 INTERFAZ ADMIN DE IMPORTACIÓN CSV (NUEVO)
+
+**Acceso:** Dashboard → Botón "IMPORTAR" (solo para Comisión)
+**Ruta:** `/admin/import`
+
+#### Características Principales:
+- **📁 Drag & Drop Upload**: Interfaz intuitiva para subir archivos CSV
+- **🔍 Validación Previa**: Preview completo con validación de jugadores y datos
+- **⚡ Importación Segura**: Proceso transaccional con progress tracking
+- **📊 Resultados Detallados**: Feedback completo del proceso de importación
+- **🎨 Mobile-First**: Diseño optimizado para dispositivos móviles
+
+#### Flujo de Uso:
+1. **Subir CSV** → Drag & drop o click para seleccionar archivo
+2. **Validar** → Sistema verifica estructura, jugadores y datos
+3. **Preview** → Revisar datos y ver warnings/errores antes de importar
+4. **Importar** → Ejecutar importación con progress en tiempo real
+5. **Resultados** → Ver resumen completo con navegación a ranking
+
+#### APIs Creadas:
+```
+POST /api/admin/import/validate     # Validar CSV y mostrar preview
+POST /api/admin/import/execute      # Ejecutar importación
+```
+
+#### Componentes UI:
+- `CSVUpload` - Componente de upload con drag & drop
+- `CSVPreview` - Preview con validación detallada
+- `ImportProgress` - Indicador de progreso de importación
+- `ImportResults` - Resultados con navegación
+
+---
+
+## Sistema de Importación de Datos Históricos
+
+### ✅ SISTEMA COMPLETAMENTE IMPLEMENTADO Y FUNCIONAL
+
+El sistema permite cargar datos históricos de torneos desde archivos CSV, manteniendo la integridad de la base de datos y la compatibilidad con el sistema ELIMINA 2.
+
+**Funcionalidades Implementadas:**
+- 🔄 **Limpieza automática** de datos incorrectos antes de importar
+- 🎯 **Mapeo inteligente** de nombres CSV a base de datos
+- ✅ **Validación exhaustiva** de integridad de datos
+- 🛡️ **Transacciones seguras** con rollback automático
+- 📊 **Corrección automática** de listas de participantes
+
+### Scripts de Importación Disponibles
+
+#### **1. Análisis y Limpieza**
+```bash
+# Analizar estado actual del torneo
+npx tsx scripts/analyze-tournament-28.ts
+
+# Limpiar data incorrecta antes de importar
+npx tsx scripts/cleanup-tournament-28-date-1.ts
+```
+
+#### **2. Importación Principal**
+```bash
+# Importar archivo CSV histórico
+npx tsx scripts/import-historical-csv.ts archivo.csv
+
+# Ejemplo: Importar Torneo 28 Fecha 1
+npx tsx scripts/import-historical-csv.ts t28f01.csv
+```
+
+#### **3. Corrección Post-Importación**
+```bash
+# Corregir participantes que no jugaron realmente
+npx tsx scripts/fix-gamedate-participants.ts
+```
+
+### Estructura de Archivo CSV Requerida
+
+```csv
+TORNEO,FECHA,DATE,POSICION,ELIMINADO,ELMINADOR,PUNTOS
+Torneo 28,1,2025-04-15,19,Milton Tapia,Juan Guajardo,1
+Torneo 28,1,2025-04-15,18,Juan Tapia,Freddy Lopez,2
+Torneo 28,1,2025-04-15,17,Apolinar Externo,Freddy Lopez,3
+...
+Torneo 28,1,2025-04-15,2,Freddy Lopez,Roddy Naranjo,23
+Torneo 28,1,2025-04-15,1,Roddy Naranjo,,26
+```
+
+**Campos requeridos:**
+- **TORNEO**: "Torneo 28", "Torneo 29", etc.
+- **FECHA**: Número de fecha (1-12)
+- **DATE**: Fecha en formato YYYY-MM-DD
+- **POSICION**: Posición final (1 = ganador, 19 = primer eliminado)
+- **ELIMINADO**: Nombre del jugador eliminado
+- **ELMINADOR**: Nombre de quien eliminó (vacío para ganador)
+- **PUNTOS**: Puntos otorgados por la posición
+
+### Mapeo de Nombres CSV → Base de Datos
+
+El sistema incluye mapeo automático para nombres que difieren entre CSV y BD:
+
+```typescript
+// Ejemplos de mapeos automáticos
+'Juan Cortez' → 'Juan Antonio Cortez'
+'Juan Fernando Ochoa' → 'Juan Fernando  Ochoa' // (doble espacio)
+'Jose Luis Toral' → 'Jose Luis  Toral' // (doble espacio)
+```
+
+**Casos especiales manejados:**
+- ✅ **Invitados externos** (ej: "Apolinar Externo")
+- ✅ **Jugadores no participantes** del torneo pero que aparecen como eliminadores
+- ✅ **Ausencias automáticas** (jugadores registrados que no participaron)
+
+### Validaciones Implementadas
+
+#### **Pre-Importación:**
+- Verificación de formato de archivo CSV
+- Validación de posiciones secuenciales (1 a N)
+- Verificación de nombres de jugadores en base de datos
+- Validación de estructura de torneo y fecha
+
+#### **Post-Importación:**
+- Corrección de listas de participantes
+- Verificación de integridad de eliminaciones
+- Actualización automática de rankings
+- Activación del sistema ELIMINA 2
+
+### Flujo Completo de Importación
+
+```bash
+# 1. Analizar estado actual
+npx tsx scripts/analyze-tournament-28.ts
+
+# 2. Limpiar datos incorrectos (si existen)
+npx tsx scripts/cleanup-tournament-28.date-1.ts
+
+# 3. Importar datos históricos
+npx tsx scripts/import-historical-csv.ts t28f01.csv
+
+# 4. Corregir participantes (si es necesario)
+npx tsx scripts/fix-gamedate-participants.ts
+
+# 5. Verificar resultado
+curl -X GET "http://localhost:3000/api/tournaments/1/ranking"
+```
+
+### Resultado de Importación Exitosa
+
+**Datos Importados - Torneo 28, Fecha 1:**
+- ✅ **19 eliminaciones** importadas correctamente
+- ✅ **Roddy Naranjo ganador** (26 puntos)
+- ✅ **Status actualizado** de GameDate: pending → completed
+- ✅ **Ranking funcionando** con sistema ELIMINA 2
+- ✅ **Participantes corregidos** (removidos no-participantes)
+
+### Sistema de Logs y Debugging
+
+Todos los scripts incluyen logging detallado:
+```
+📁 Importando archivo: t28f01.csv
+📄 CSV parseado: 19 eliminaciones encontradas
+✅ Cache de jugadores inicializado: 29 jugadores
+✅ Validación exitosa
+📅 GameDate encontrada (ID: 1)
+📝 Importando 19 eliminaciones...
+  ✅ Pos 19: Milton Tapia (1 pts)
+  ✅ Pos 18: Juan Tapia (2 pts)
+  ...
+  ✅ Pos 1: Roddy Naranjo (26 pts)
+🎉 IMPORTACIÓN COMPLETADA EXITOSAMENTE
+```
+
+### Preparado para Múltiples Torneos
+
+El sistema está diseñado para manejar:
+- **Torneo 28** (9 fechas completadas) ✅
+- **27 torneos históricos anteriores** (preparado)
+- **Múltiples archivos CSV** en lote (futuro)
+- **Interface web admin** (futuro)
+
+### APIs Afectadas por la Importación
+
+Las siguientes APIs se actualizan automáticamente:
+- `GET /api/tournaments/[id]/ranking` - Ranking actualizado
+- `GET /api/game-dates/[id]` - Fecha con eliminaciones completas
+- Dashboard widgets - Datos históricos reflejados
+- Tablas Resumen/Total - Sistema ELIMINA 2 funcional
 
 ---
 

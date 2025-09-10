@@ -158,27 +158,30 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       });
     });
 
-    // Calcular ELIMINA 1/2 y puntuación FINAL para cada jugador
+    // SISTEMA ELIMINA 2: Calcular puntuación final usando las 10 mejores fechas de 12
+    // Regla: De las 12 fechas del torneo, solo las 10 mejores cuentan para el campeonato
+    // Se eliminan las 2 fechas con peores resultados (incluyendo ausencias = 0 puntos)
     Array.from(playerRankings.values()).forEach(ranking => {
       const dateNumbers = Object.keys(ranking.pointsByDate).map(Number).sort((a, b) => a - b);
       const completedDatesCount = dateNumbers.length;
       
-      // Solo aplicar eliminaciones a partir de 6 fechas jugadas
+      // Solo aplicar eliminaciones a partir de 6 fechas jugadas (permite mostrar desde fecha 6)
       if (completedDatesCount >= 6) {
-        // Obtener todas las puntuaciones (incluyendo 0 para fechas no participadas)
+        // Obtener todas las puntuaciones (incluyendo 0 para fechas ausentes)
         const allScores = dateNumbers.map(dateNumber => ranking.pointsByDate[dateNumber]);
         
-        // Ordenar puntuaciones de menor a mayor para encontrar las peores
+        // Ordenar puntuaciones de menor a mayor para identificar las peores
         const sortedScores = [...allScores].sort((a, b) => a - b);
         
-        // Identificar las 2 peores fechas (puntuaciones más bajas)
-        ranking.elimina1 = sortedScores[0]; // Peor puntuación
+        // Identificar las 2 peores fechas para eliminación
+        ranking.elimina1 = sortedScores[0]; // Peor puntuación (incluye 0 por ausencias)
         ranking.elimina2 = sortedScores[1]; // Segunda peor puntuación
         
-        // Calcular puntuación FINAL: total menos las 2 peores fechas
+        // PUNTUACIÓN FINAL = Total - 2 peores fechas (equivale a sumar solo las mejores)
+        // Ejemplo: Total 100 pts, elimina 5+8 = Final 87 pts (suma de mejores fechas)
         ranking.finalScore = ranking.totalPoints - (ranking.elimina1 + ranking.elimina2);
       } else {
-        // Si tiene menos de 6 fechas, no se aplican eliminaciones
+        // Antes de la fecha 6: usar puntuación total sin eliminaciones
         ranking.elimina1 = undefined;
         ranking.elimina2 = undefined;
         ranking.finalScore = ranking.totalPoints;
