@@ -1,20 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Trophy, Crown, Star, Award, User } from 'lucide-react';
 import type { TournamentRankingData } from '@/lib/ranking-utils';
 import Image from 'next/image';
 import PlayerDetailModal from './PlayerDetailModal';
+import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 
 interface HomeRankingViewProps {
   tournamentId: number;
 }
 
 export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) {
-  const [rankingData, setRankingData] = useState<TournamentRankingData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Use SWR hook for tournament ranking data
+  const { 
+    ranking: rankingData, 
+    isLoading: loading, 
+    isError,
+    errorMessage,
+    refresh 
+  } = useTournamentRanking(tournamentId, {
+    refreshInterval: 30000, // Refresh every 30 seconds
+    revalidateOnFocus: true
+  });
 
   const openPlayerModal = (playerId: string) => {
     setSelectedPlayerId(playerId);
@@ -26,28 +37,6 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
     setSelectedPlayerId(null);
   };
 
-  useEffect(() => {
-    async function fetchRanking() {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/tournaments/${tournamentId}/ranking`);
-        
-        if (!response.ok) {
-          throw new Error('Error al cargar el ranking');
-        }
-
-        const data = await response.json();
-        setRankingData(data);
-      } catch (err) {
-        console.error('Error fetching ranking:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchRanking();
-  }, [tournamentId]);
-
   if (loading) {
     return (
       <div className="animate-pulse px-4">
@@ -57,6 +46,21 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
             <div key={i} className="h-16 bg-white/5 rounded-lg"></div>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-400 text-lg mb-4">Error al cargar el ranking</p>
+        <p className="text-poker-muted text-sm mb-4">{errorMessage}</p>
+        <button
+          onClick={refresh}
+          className="bg-poker-red hover:bg-poker-red/80 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+        >
+          Reintentar
+        </button>
       </div>
     );
   }

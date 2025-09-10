@@ -37,7 +37,7 @@ Usuario → Experiencia → Lógica → Implementación → Testing → Refinami
 
 El sistema ha sido migrado exitosamente y ahora cuenta con un diseño completamente renovado siguiendo el Enfermos Design System, optimizado para dispositivos móviles.
 
-**Últimas actualizaciones (2025-09-09):**
+**Últimas actualizaciones (2025-09-10):**
 - 🎨 **ENFERMOS DESIGN SYSTEM IMPLEMENTADO**: Nuevo sistema de diseño consistente
 - ✅ **Dashboard 3D rediseñado**: Cards elegantes con efectos 3D, bordes rojos y gradientes
 - ✅ **Paleta de colores aprobada**: Solo rojo (#E10600), negro, gris y naranja
@@ -49,6 +49,9 @@ El sistema ha sido migrado exitosamente y ahora cuenta con un diseño completame
 - ✅ **ErrorBoundary añadido**: Mejor manejo de errores React
 - ✅ **Sistema de colores consistente**: Eliminados colores no aprobados (cyan/green/blue)
 - 🆕 Widget "Próxima Fecha" clickeable en Dashboard
+- 🏆 **SISTEMA ELIMINA 2 FINALIZADO**: Funcional al 100% con datos históricos
+- 🎯 **Dual Score Display**: Puntaje final vs total en home ranking
+- ✅ **Modal Player mejorado**: Score ELIMINA 2 + display correcto ausentes/ganadores
 
 ---
 
@@ -411,7 +414,15 @@ GET  /api/tournaments/[id]/ranking          # Ranking de torneo
 
 ## Estado: LISTO PARA PRODUCCIÓN ✅
 
-El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas single-page, y navegación dinámica. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
+El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas single-page, navegación dinámica y **SISTEMA ELIMINA 2 100% OPERACIONAL**. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
+
+### ✅ Características Completadas:
+- **Sistema ELIMINA 2**: Cálculo automático de puntuación final (mejores 10 de 12 fechas)
+- **Dual Score Display**: Visualización de puntaje final vs total en ranking
+- **Modal de Jugador Avanzado**: Score ELIMINA 2, fechas eliminadas marcadas, ausentes vs ganadores
+- **Datos Históricos**: 8 fechas del Torneo 28 importadas y funcionando
+- **Import System**: Interface admin para cargar CSVs históricos
+- **Responsive Design**: Optimizado mobile-first con Enfermos Design System
 
 **Última actualización:** 2025-09-10 por Claude Code
 
@@ -635,3 +646,18 @@ Las siguientes APIs se actualizan automáticamente:
 - API endpoints para obtener y iniciar fechas específicas
 - Página de confirmación con validaciones de seguridad
 - Integración automática con timer y sistema de eliminaciones
+
+### Commit 3ef7af3 - Sistema ELIMINA 2 Completamente Finalizado (2025-09-10)
+- **✅ ELIMINA 2 FINALIZADO**: Sistema completamente funcional y validado
+- **Corrección crítica**: Jugadores ausentes (0 pts) ahora muestran "AUSENTE" en lugar de "GANÓ"
+- **Final Score visible**: Puntuación ELIMINA 2 mostrada en modal de jugador
+- **Dual Score Display**: Home ranking muestra puntaje final (naranja) y total (dorado)
+- **Mejoras visuales**: 
+  - Bordes grises para fechas eliminadas en modal
+  - Display correcto: "AUSENTE" + "NO PARTICIPÓ" para jugadores con 0 pts
+  - "GANÓ" + "CAMPEÓN" solo para ganadores reales (pts > 0)
+- **Lógica perfeccionada**: 
+  - Distingue correctamente entre ausentes, eliminados y ganadores
+  - `isAbsent: true` para jugadores con 0 puntos
+  - Sistema funciona desde fecha 6 en adelante (elimina 2 peores de 10+)
+- **Datos históricos importados**: 8 fechas del Torneo 28 con sistema ELIMINA 2 activo

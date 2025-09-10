@@ -1,34 +1,100 @@
 {
   "name": "Poker de Enfermos",
-  "short_name": "Poker de Enfermos",
-  "description": "Aplicación para gestión de torneos de poker",
-  "theme_color": "#16a34a",
-  "background_color": "#ffffff",
+  "short_name": "Poker Enfermos",
+  "description": "Aplicación para gestión de torneos de poker - Sistema ELIMINA 2",
+  "theme_color": "#E10600",
+  "background_color": "#000000",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "scope": "/",
   "start_url": "/",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["games", "sports"],
   "icons": [
     {
-      "src": "/next.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-96x96.png", 
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128", 
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Timer",
-      "short_name": "Timer",
-      "description": "Ver timer del torneo",
-      "url": "/timer",
-      "icons": [{ "src": "/next.svg", "sizes": "any" }]
+      "name": "Registro",
+      "short_name": "Registro", 
+      "description": "Registrar eliminaciones en vivo",
+      "url": "/registro",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Rankings",
-      "short_name": "Rankings",
-      "description": "Ver rankings actuales",
-      "url": "/rankings",
-      "icons": [{ "src": "/next.svg", "sizes": "any" }]
+      "name": "Ranking",
+      "short_name": "Ranking",
+      "description": "Ver ranking del torneo actual",
+      "url": "/ranking",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Torneos",
+      "short_name": "Torneos",
+      "description": "Gestionar torneos",
+      "url": "/tournaments",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "320x640",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/ranking.png", 
+      "sizes": "320x640",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }

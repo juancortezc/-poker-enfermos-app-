@@ -5,59 +5,28 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Trophy, Users, Clock, Calendar, Target, CheckCircle, FileSpreadsheet } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useActiveTournament } from '@/hooks/useActiveTournament'
+import { useActiveGameDate } from '@/hooks/useGameDates'
 
 export default function Dashboard() {
   const { user } = useAuth()
   const router = useRouter()
-  const [activeTournament, setActiveTournament] = useState<any>(null)
-  const [hasActiveDate, setHasActiveDate] = useState(false)
+  
+  // Use SWR hooks for real-time data
+  const { 
+    tournament: activeTournament, 
+    isLoading: tournamentLoading, 
+    isError: tournamentError 
+  } = useActiveTournament()
+  
+  const { 
+    hasActiveDate, 
+    isLoading: dateLoading, 
+    isError: dateError 
+  } = useActiveGameDate()
 
-  // Obtener torneo activo y fecha activa
-  useEffect(() => {
-    async function fetchActiveTournament() {
-      try {
-        if (!user?.adminKey) {
-          return
-        }
-
-        const response = await fetch('/api/tournaments/active', {
-          headers: {
-            'Authorization': `Bearer ${user.adminKey}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        
-        if (response.ok) {
-          const data = await response.json()
-          if (data.tournament) {
-            setActiveTournament(data)
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching active tournament:', error)
-      }
-    }
-
-    async function checkActiveDate() {
-      try {
-        const response = await fetch('/api/game-dates/active')
-        
-        if (response.ok) {
-          const data = await response.json()
-          setHasActiveDate(!!data && !!data.id)
-        }
-      } catch (error) {
-        console.error('Error checking active date:', error)
-      }
-    }
-
-    if (user) {
-      fetchActiveTournament()
-      checkActiveDate()
-    }
-  }, [user])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
