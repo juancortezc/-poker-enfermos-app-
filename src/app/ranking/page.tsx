@@ -6,6 +6,8 @@ import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import TournamentRankingTable from '@/components/tournaments/TournamentRankingTable';
 import ResumenTable from '@/components/tables/ResumenTable';
+import TotalTable from '@/components/tables/TotalTable';
+import FechasTable from '@/components/tables/FechasTable';
 
 type TabType = 'resumen' | 'total' | 'fechas';
 
@@ -152,13 +154,11 @@ export default function RankingPage() {
           )}
           
           {activeTab === 'total' && (
-            <TournamentRankingTable tournamentId={activeTournamentId} />
+            <TotalTable tournamentId={activeTournamentId} adminKey={user?.adminKey} />
           )}
           
           {activeTab === 'fechas' && (
-            <div>
-              <p className="text-white text-center py-8">Tab Fechas - Próximamente</p>
-            </div>
+            <FechasTable tournamentId={activeTournamentId} adminKey={user?.adminKey} />
           )}
         </div>
       </div>
