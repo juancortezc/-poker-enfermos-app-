@@ -211,13 +211,13 @@ export default function ResumenTable({ tournamentId, adminKey }: ResumenTablePro
                   {player.totalPoints}
                 </td>
                 <td className="excel-cell text-center" style={{color: '#000'}}>
-                  -
+                  {player.elimina1 !== undefined ? player.elimina1 : '-'}
                 </td>
                 <td className="excel-cell text-center" style={{color: '#000'}}>
-                  -
+                  {player.elimina2 !== undefined ? player.elimina2 : '-'}
                 </td>
                 <td className="excel-cell text-center" style={{color: '#000'}}>
-                  -
+                  {player.finalScore !== undefined ? player.finalScore : '-'}
                 </td>
               </tr>
             );

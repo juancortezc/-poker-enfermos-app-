@@ -11,6 +11,10 @@ export interface PlayerRanking {
   datesPlayed: number;
   pointsByDate: { [dateNumber: number]: number }; // Puntos por cada fecha
   trend: 'up' | 'down' | 'same'; // Tendencia respecto a ranking anterior
+  // Sistema ELIMINA 2: peores fechas y puntuación final
+  elimina1?: number; // Peor fecha (menor puntuación)
+  elimina2?: number; // Segunda peor fecha 
+  finalScore?: number; // Puntuación final (mejores 10 fechas)
 }
 
 export interface TournamentRankingData {
@@ -152,6 +156,33 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
           // totalPoints no cambia (no suma ni resta)
         }
       });
+    });
+
+    // Calcular ELIMINA 1/2 y puntuación FINAL para cada jugador
+    Array.from(playerRankings.values()).forEach(ranking => {
+      const dateNumbers = Object.keys(ranking.pointsByDate).map(Number).sort((a, b) => a - b);
+      const completedDatesCount = dateNumbers.length;
+      
+      // Solo aplicar eliminaciones a partir de 6 fechas jugadas
+      if (completedDatesCount >= 6) {
+        // Obtener todas las puntuaciones (incluyendo 0 para fechas no participadas)
+        const allScores = dateNumbers.map(dateNumber => ranking.pointsByDate[dateNumber]);
+        
+        // Ordenar puntuaciones de menor a mayor para encontrar las peores
+        const sortedScores = [...allScores].sort((a, b) => a - b);
+        
+        // Identificar las 2 peores fechas (puntuaciones más bajas)
+        ranking.elimina1 = sortedScores[0]; // Peor puntuación
+        ranking.elimina2 = sortedScores[1]; // Segunda peor puntuación
+        
+        // Calcular puntuación FINAL: total menos las 2 peores fechas
+        ranking.finalScore = ranking.totalPoints - (ranking.elimina1 + ranking.elimina2);
+      } else {
+        // Si tiene menos de 6 fechas, no se aplican eliminaciones
+        ranking.elimina1 = undefined;
+        ranking.elimina2 = undefined;
+        ranking.finalScore = ranking.totalPoints;
+      }
     });
 
     // Ordenar por puntos totales (descendente) y asignar posiciones
