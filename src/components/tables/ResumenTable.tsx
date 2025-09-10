@@ -160,32 +160,32 @@ export default function ResumenTable({ tournamentId, adminKey }: ResumenTablePro
         <thead>
           <tr>
             <th className="excel-header-gray w-[8%] sm:w-[8%]" style={{color: '#000'}}>
-              <span className="hidden sm:inline" style={{color: '#000'}}>POS</span>
-              <span className="sm:hidden" style={{color: '#000'}}>#</span>
+              <span className="hidden sm:inline">POS</span>
+              <span className="sm:hidden">#</span>
             </th>
             <th className="excel-header w-[32%] sm:w-[25%]" style={{color: '#000'}}>
-              <span className="hidden sm:inline" style={{color: '#000'}}>JUGADOR</span>
-              <span className="sm:hidden" style={{color: '#000'}}>JUG</span>
+              <span className="hidden sm:inline">JUGADOR</span>
+              <span className="sm:hidden">JUG</span>
             </th>
             <th className="excel-header w-[12%] sm:w-[12%]" style={{color: '#000'}}>
-              <span className="hidden sm:inline" style={{color: '#000'}}>FECHA {lastCompletedDate}</span>
-              <span className="sm:hidden" style={{color: '#000'}}>F.{lastCompletedDate}</span>
+              <span className="hidden sm:inline">FECHA {lastCompletedDate}</span>
+              <span className="sm:hidden">F.{lastCompletedDate}</span>
             </th>
             <th className="excel-header excel-header-total w-[12%] sm:w-[13%]" style={{color: '#000'}}>
-              <span className="hidden sm:inline" style={{color: '#000'}}>TOTAL</span>
-              <span className="sm:hidden" style={{color: '#000'}}>TOT</span>
+              <span className="hidden sm:inline">TOTAL</span>
+              <span className="sm:hidden">TOT</span>
             </th>
             <th className="excel-header w-[12%] sm:w-[14%]" style={{color: '#000'}}>
-              <span className="hidden sm:inline" style={{color: '#000'}}>ELIMINA 1</span>
-              <span className="sm:hidden" style={{color: '#000'}}>E1</span>
+              <span className="hidden sm:inline">ELIMINA 1</span>
+              <span className="sm:hidden">E1</span>
             </th>
             <th className="excel-header w-[12%] sm:w-[14%]" style={{color: '#000'}}>
-              <span className="hidden sm:inline" style={{color: '#000'}}>ELIMINA 2</span>
-              <span className="sm:hidden" style={{color: '#000'}}>E2</span>
+              <span className="hidden sm:inline">ELIMINA 2</span>
+              <span className="sm:hidden">E2</span>
             </th>
             <th className="excel-header w-[12%] sm:w-[14%]" style={{color: '#000'}}>
-              <span className="hidden sm:inline" style={{color: '#000'}}>FINAL</span>
-              <span className="sm:hidden" style={{color: '#000'}}>FIN</span>
+              <span className="hidden sm:inline">FINAL</span>
+              <span className="sm:hidden">FIN</span>
             </th>
           </tr>
         </thead>

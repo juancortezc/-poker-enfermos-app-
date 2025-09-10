@@ -266,6 +266,11 @@
     letter-spacing: 0.5px;
   }
 
+  .excel-table .excel-header span,
+  .excel-header span {
+    color: #000 !important;
+  }
+
   .excel-table .excel-header-gray,
   .excel-header-gray {
     background-color: #E0E0E0 !important;
@@ -275,9 +280,19 @@
     font-size: 12px;
   }
 
+  .excel-table .excel-header-gray span,
+  .excel-header-gray span {
+    color: #000 !important;
+  }
+
   .excel-table .excel-header-total,
   .excel-header-total {
     background-color: #FFD700 !important;
+    color: #000 !important;
+  }
+
+  .excel-table .excel-header-total span,
+  .excel-header-total span {
     color: #000 !important;
   }
 

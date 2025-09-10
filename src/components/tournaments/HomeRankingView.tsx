@@ -184,7 +184,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                   onClick={() => openPlayerModal(player.playerId)}
                 >
                   {/* Círculo de posición */}
-                  <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-white text-black flex items-center justify-center font-bold text-xs border border-white/20 shadow-md">
+                  <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs border border-white/20 shadow-md">
                     {player.position}
                   </div>
                   
