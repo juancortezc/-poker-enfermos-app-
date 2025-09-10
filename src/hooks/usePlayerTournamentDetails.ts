@@ -13,6 +13,9 @@ interface PlayerTournamentDetails {
     position: number;
     totalPoints: number;
     pointsByDate: { [dateNumber: number]: number };
+    elimina1?: number;
+    elimina2?: number;
+    finalScore?: number;
   };
   datePerformance: Array<{
     dateNumber: number;
@@ -25,6 +28,7 @@ interface PlayerTournamentDetails {
     };
     points: number;
     rankingPosition?: number;
+    isAbsent?: boolean;
   }>;
   rankingEvolution: Array<{
     dateNumber: number;
@@ -104,15 +108,23 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
                     }
                   };
                 } else {
-                  // Player was not eliminated (winner or still playing)
+                  // Player was not eliminated - could be winner or absent
                   const totalPlayers = date.playerIds?.length || 0;
                   const eliminatedCount = eliminations.length;
                   
-                  if (eliminatedCount === totalPlayers - 1) {
-                    // Player won
+                  // Check if player was absent (0 points)
+                  if (baseDate.points === 0) {
                     return {
                       ...baseDate,
-                      eliminationPosition: 1,
+                      isAbsent: true
+                    };
+                  }
+                  
+                  if (eliminatedCount === totalPlayers - 1) {
+                    // Player won (has points and only one left)
+                    return {
+                      ...baseDate,
+                      eliminationPosition: undefined, // Winner doesn't have elimination position
                       eliminatedBy: undefined
                     };
                   }
@@ -128,7 +140,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
       );
 
       // Calculate ranking evolution
-      const rankingEvolution = calculateRankingEvolution(playerRanking.pointsByDate, rankingData.rankings);
+      const rankingEvolution = calculateRankingEvolution(playerRanking.pointsByDate, rankingData.rankings, playerId);
 
       setDetails({
         player: {
@@ -142,7 +154,10 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
         currentStats: {
           position: playerRanking.position,
           totalPoints: playerRanking.totalPoints,
-          pointsByDate: playerRanking.pointsByDate
+          pointsByDate: playerRanking.pointsByDate,
+          elimina1: playerRanking.elimina1,
+          elimina2: playerRanking.elimina2,
+          finalScore: playerRanking.finalScore
         },
         datePerformance: datePerformance.sort((a, b) => a.dateNumber - b.dateNumber),
         rankingEvolution
@@ -162,7 +177,8 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
 // Helper function to calculate ranking evolution
 function calculateRankingEvolution(
   playerPointsByDate: { [dateNumber: number]: number },
-  allRankings: any[]
+  allRankings: any[],
+  targetPlayerId: string
 ): Array<{ dateNumber: number; position: number; points: number }> {
   const evolution: Array<{ dateNumber: number; position: number; points: number }> = [];
   
@@ -194,16 +210,12 @@ function calculateRankingEvolution(
       };
     }).sort((a, b) => b.points - a.points);
     
-    // Find the target player's ranking
-    const targetPlayerId = Object.keys(playerPointsByDate).length > 0 ? 
-      allRankings.find(r => Object.keys(r.pointsByDate).some(d => playerPointsByDate[Number(d)] !== undefined))?.playerId : 
-      null;
-    
+    // Find the target player's ranking position
     const position = rankingsAtDate.findIndex(r => r.playerId === targetPlayerId) + 1;
     
     evolution.push({
       dateNumber,
-      position: position || allRankings.length,
+      position: position > 0 ? position : allRankings.length + 1,
       points: cumulativePoints
     });
   });

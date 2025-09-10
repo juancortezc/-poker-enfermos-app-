@@ -160,8 +160,9 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                 
                 {/* Puntos bajo la foto, alineados a la derecha */}
                 <div className="text-right mt-1">
-                  <div className="text-poker-gold font-bold text-sm">
-                    {player.totalPoints}
+                  <div className="flex flex-col items-end text-sm">
+                    <span className="text-orange-400 font-bold">{player.finalScore || player.totalPoints}</span>
+                    <span className="text-poker-gold font-bold">{player.totalPoints}</span>
                   </div>
                 </div>
               </div>
@@ -199,8 +200,9 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                         </p>
                       )}
                     </div>
-                    <div className="text-poker-gold font-bold text-sm">
-                      {player.totalPoints}
+                    <div className="flex flex-col items-end text-sm">
+                      <span className="text-orange-400 font-bold">{player.finalScore || player.totalPoints}</span>
+                      <span className="text-poker-gold font-bold">{player.totalPoints}</span>
                     </div>
                   </div>
                 </div>
@@ -265,8 +267,9 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                   
                   {/* Puntos bajo la foto, alineados a la derecha */}
                   <div className="text-right mt-1">
-                    <div className="text-poker-gold font-bold text-sm">
-                      {player.totalPoints}
+                    <div className="flex flex-col items-end text-sm">
+                      <span className="text-orange-400 font-bold">{player.finalScore || player.totalPoints}</span>
+                      <span className="text-poker-gold font-bold">{player.totalPoints}</span>
                     </div>
                   </div>
                 </div>

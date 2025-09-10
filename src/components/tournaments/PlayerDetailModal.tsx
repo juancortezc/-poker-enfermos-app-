@@ -91,13 +91,21 @@ export default function PlayerDetailModal({
                   </p>
                 )}
 
-                <div className="flex justify-center items-center gap-6">
+                <div className="flex justify-center items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Trophy className="w-5 h-5 text-poker-gold" />
                     <span className="text-poker-gold font-bold text-lg">
                       {details.currentStats.totalPoints} pts
                     </span>
                   </div>
+                  {details.currentStats.finalScore !== undefined && (
+                    <div className="flex items-center gap-2">
+                      <Crown className="w-5 h-5 text-orange-400" />
+                      <span className="text-orange-400 font-bold text-lg">
+                        {details.currentStats.finalScore} final
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-white" />
                     <span className="text-white font-bold text-lg">
@@ -154,26 +162,41 @@ export default function PlayerDetailModal({
                       );
                     }
 
+                    // Check if this date is part of ELIMINA 2 (worst dates)
+                    const isElimina2Date = date.points === details.currentStats.elimina1 || 
+                                          date.points === details.currentStats.elimina2;
+                    
                     // Completed date
                     return (
                       <div
                         key={dateNumber}
-                        className="bg-poker-card border-2 border-poker-red rounded-lg p-3 text-center"
+                        className={`bg-poker-card border-2 ${
+                          isElimina2Date ? 'border-gray-500' : 'border-poker-red'
+                        } rounded-lg p-3 text-center`}
                       >
                         <div className="text-xs text-poker-muted mb-1">
                           F{dateNumber}
                         </div>
-                        <div className="text-sm font-bold text-white mb-1">
-                          {date.eliminationPosition ? `${date.eliminationPosition}°` : 'GANÓ'}
+                        <div className="text-sm font-bold mb-1">
+                          {date.isAbsent ? (
+                            <span className="text-gray-400">AUSENTE</span>
+                          ) : date.eliminationPosition ? (
+                            <span className="text-white">{date.eliminationPosition}°</span>
+                          ) : (
+                            <span className="text-white">GANÓ</span>
+                          )}
                         </div>
                         <div className="text-poker-gold font-bold text-sm mb-1">
                           {date.points} pts
                         </div>
                         <div className={`text-xs ${date.eliminatedBy?.isGuest ? 'text-pink-500' : 'text-orange-400'}`}>
-                          {date.eliminationPosition 
-                            ? (date.eliminatedBy?.isGuest ? 'Invitado' : date.eliminatedBy?.alias || date.eliminatedBy?.name)
-                            : 'CAMPEÓN'
-                          }
+                          {date.isAbsent ? (
+                            <span className="text-gray-400">NO PARTICIPÓ</span>
+                          ) : date.eliminationPosition ? (
+                            date.eliminatedBy?.isGuest ? 'Invitado' : date.eliminatedBy?.alias || date.eliminatedBy?.name
+                          ) : (
+                            'CAMPEÓN'
+                          )}
                         </div>
                       </div>
                     );
