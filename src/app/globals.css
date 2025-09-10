@@ -242,4 +242,102 @@
   .transition-smooth {
     @apply transition-all duration-200 ease-in-out;
   }
+  
+  /* Estilos para tabla Excel */
+  .excel-table {
+    border-collapse: collapse;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', sans-serif;
+    font-size: 14px;
+  }
+
+  .excel-table th,
+  .excel-table td {
+    border: 1px solid #000;
+    padding: 6px 9px;
+  }
+
+  .excel-table .excel-header,
+  .excel-header {
+    background-color: #FFD700 !important;
+    color: #000 !important;
+    font-weight: bold;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .excel-table .excel-header-gray,
+  .excel-header-gray {
+    background-color: #E0E0E0 !important;
+    color: #000 !important;
+    font-weight: bold;
+    text-align: center;
+    font-size: 12px;
+  }
+
+  .excel-table .excel-header-total,
+  .excel-header-total {
+    background-color: #FFD700 !important;
+    color: #000 !important;
+  }
+
+  .excel-table .excel-cell,
+  .excel-cell {
+    background-color: white !important;
+    color: #000 !important;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .excel-table .excel-cell span,
+  .excel-cell span {
+    color: #000 !important;
+  }
+
+  .excel-table .excel-cell-gray,
+  .excel-cell-gray {
+    background-color: #F0F0F0 !important;
+    color: #000 !important;
+  }
+
+  .excel-table .excel-cell-total,
+  .excel-cell-total {
+    background-color: #E6F3FF !important;
+    color: #000 !important;
+  }
+
+  @media (max-width: 640px) {
+    .excel-table {
+      font-size: 10px;
+    }
+    
+    .excel-header {
+      font-size: 10px;
+      padding: 2px 3px;
+      letter-spacing: 0;
+      line-height: 1.3;
+      color: #000 !important;
+    }
+
+    .excel-header-gray {
+      font-size: 10px;
+      padding: 2px 3px;
+      line-height: 1.3;
+      color: #000 !important;
+    }
+    
+    .excel-table .excel-cell,
+    .excel-cell {
+      font-size: 10px;
+      padding: 2px 3px;
+      line-height: 1.3;
+      color: #000 !important;
+    }
+    
+    .excel-table .excel-cell span,
+    .excel-cell span {
+      color: #000 !important;
+      font-size: 10px;
+    }
+  }
 }
