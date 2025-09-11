@@ -52,10 +52,12 @@ export default function FechasTable({ tournamentId, adminKey }: FechasTableProps
           const tournamentData = await tournamentResponse.json();
           
           // Filtrar fechas completadas y ordenarlas por dateNumber descendente
-          const completed = tournamentData.tournament.gameDates
-            .filter((date: any) => date.status === 'completed')
-            .sort((a: any, b: any) => b.dateNumber - a.dateNumber)
-            .map((date: any) => ({ id: date.id, dateNumber: date.dateNumber }));
+          const completed = tournamentData.gameDates && Array.isArray(tournamentData.gameDates)
+            ? tournamentData.gameDates
+                .filter((date: any) => date.status === 'completed')
+                .sort((a: any, b: any) => b.dateNumber - a.dateNumber)
+                .map((date: any) => ({ id: date.id, dateNumber: date.dateNumber }))
+            : [];
           
           setCompletedDates(completed);
           
@@ -179,10 +181,9 @@ export default function FechasTable({ tournamentId, adminKey }: FechasTableProps
               <thead>
                 <tr>
                   <th className="excel-header-gray" style={{color: '#000'}}>POS</th>
-                  <th className="excel-header" style={{color: '#000'}}>ELIMINADO</th>
-                  <th className="excel-header" style={{color: '#000'}}>ELIMINADO POR</th>
+                  <th className="excel-header" style={{color: '#000'}}>ENFERMO</th>
+                  <th className="excel-header" style={{color: '#000'}}>VACUNADO POR</th>
                   <th className="excel-header excel-header-total" style={{color: '#000'}}>PUNTOS</th>
-                  <th className="excel-header" style={{color: '#000'}}>TIEMPO</th>
                 </tr>
               </thead>
               <tbody>
@@ -195,16 +196,15 @@ export default function FechasTable({ tournamentId, adminKey }: FechasTableProps
                       {getPlayerName(elimination.eliminatedPlayer)}
                     </td>
                     <td className="excel-cell text-left" style={{color: '#000'}}>
-                      {elimination.eliminatorPlayer 
-                        ? getPlayerName(elimination.eliminatorPlayer) 
-                        : '-'
+                      {elimination.position === 1 
+                        ? '-'
+                        : elimination.eliminatorPlayer 
+                          ? getPlayerName(elimination.eliminatorPlayer) 
+                          : '-'
                       }
                     </td>
                     <td className="excel-cell excel-cell-total text-center font-bold" style={{color: '#000'}}>
                       {elimination.points}
-                    </td>
-                    <td className="excel-cell text-center" style={{color: '#000'}}>
-                      {formatTime(elimination.eliminationTime)}
                     </td>
                   </tr>
                 ))}

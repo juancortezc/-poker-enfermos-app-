@@ -183,7 +183,7 @@ export default function ResumenTable({ tournamentId, adminKey }: ResumenTablePro
               <span className="hidden sm:inline">ELIMINA 2</span>
               <span className="sm:hidden">E2</span>
             </th>
-            <th className="excel-header w-[12%] sm:w-[14%]" style={{color: '#000'}}>
+            <th className="excel-header excel-header-total w-[12%] sm:w-[14%]" style={{color: '#000'}}>
               <span className="hidden sm:inline">FINAL</span>
               <span className="sm:hidden">FIN</span>
             </th>
@@ -216,7 +216,7 @@ export default function ResumenTable({ tournamentId, adminKey }: ResumenTablePro
                 <td className="excel-cell text-center" style={{color: '#000'}}>
                   {player.elimina2 !== undefined ? player.elimina2 : '-'}
                 </td>
-                <td className="excel-cell text-center" style={{color: '#000'}}>
+                <td className="excel-cell excel-cell-total text-center font-bold" style={{color: '#000'}}>
                   {player.finalScore !== undefined ? player.finalScore : '-'}
                 </td>
               </tr>
