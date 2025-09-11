@@ -1,53 +1,42 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { TournamentRankingData } from '@/lib/ranking-utils';
+import { useState, useRef } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Download } from 'lucide-react';
+import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 
 interface ResumenTableProps {
   tournamentId: number;
-  adminKey?: string | null;
+  userPin?: string | null;
 }
 
-export default function ResumenTable({ tournamentId, adminKey }: ResumenTableProps) {
-  const [rankingData, setRankingData] = useState<TournamentRankingData | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function ResumenTable({ tournamentId, userPin }: ResumenTableProps) {
   const [downloading, setDownloading] = useState(false);
   const tableRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    async function fetchRankingData() {
-      try {
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json'
-        };
-
-        // Add authorization header if adminKey is provided
-        if (adminKey) {
-          headers['Authorization'] = `Bearer ${adminKey}`;
-        }
-
-        const response = await fetch(`/api/tournaments/${tournamentId}/ranking`, { headers });
-        if (response.ok) {
-          const data = await response.json();
-          setRankingData(data);
-        }
-      } catch (error) {
-        console.error('Error fetching ranking data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchRankingData();
-  }, [tournamentId, adminKey]);
+  // Use SWR hook for ranking data with PIN authentication
+  const { 
+    ranking: rankingData, 
+    isLoading: loading, 
+    isError,
+    errorMessage
+  } = useTournamentRanking(tournamentId, {
+    refreshInterval: 30000 // 30 seconds refresh
+  });
 
   if (loading) {
     return (
       <div className="flex justify-center py-8">
         <div className="text-poker-muted">Cargando datos...</div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="text-red-400">Error: {errorMessage}</div>
       </div>
     );
   }

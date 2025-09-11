@@ -3,18 +3,22 @@
 import { SWRConfig } from 'swr'
 import { ReactNode } from 'react'
 
-// Custom fetcher que incluye autenticación
+// Custom fetcher que incluye autenticación con PIN
 const fetcher = async (url: string) => {
-  // Get auth token from localStorage (if available)
-  const authKey = typeof window !== 'undefined' ? localStorage.getItem('adminKey') : null
+  // Get auth token from localStorage (PIN system)
+  const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+  // Legacy support for adminKey during transition
+  const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   }
   
-  // Add authorization header if admin key exists
-  if (authKey) {
-    headers['Authorization'] = `Bearer ${authKey}`
+  // Use PIN if available, otherwise fall back to adminKey
+  if (pin) {
+    headers['Authorization'] = `Bearer PIN:${pin}`
+  } else if (adminKey) {
+    headers['Authorization'] = `Bearer ADMIN:${adminKey}`
   }
   
   const response = await fetch(url, {

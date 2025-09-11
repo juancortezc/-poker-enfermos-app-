@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TournamentRankingData } from '@/lib/ranking-utils';
 import { ChevronDown } from 'lucide-react';
+import useSWR from 'swr';
+import { fetcher } from '@/lib/swr-config';
 
 interface Player {
   id: string;
@@ -23,95 +24,58 @@ interface Elimination {
 
 interface FechasTableProps {
   tournamentId: number;
-  adminKey?: string | null;
+  userPin?: string | null;
 }
 
-export default function FechasTable({ tournamentId, adminKey }: FechasTableProps) {
-  const [rankingData, setRankingData] = useState<TournamentRankingData | null>(null);
+export default function FechasTable({ tournamentId, userPin }: FechasTableProps) {
   const [completedDates, setCompletedDates] = useState<{id: number, dateNumber: number}[]>([]);
   const [selectedDateId, setSelectedDateId] = useState<number | null>(null);
   const [eliminations, setEliminations] = useState<Elimination[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingEliminations, setLoadingEliminations] = useState(false);
 
-  // Obtener fechas completadas del torneo
+  // Use SWR for tournament data with PIN authentication
+  const { data: tournamentData, error: tournamentError, isLoading: tournamentLoading } = useSWR(
+    `/api/tournaments/${tournamentId}`,
+    fetcher,
+    { refreshInterval: 60000 } // 1 minute refresh
+  );
+
+  // Process tournament data when loaded
   useEffect(() => {
-    async function fetchTournamentData() {
-      try {
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json'
-        };
-
-        if (adminKey) {
-          headers['Authorization'] = `Bearer ${adminKey}`;
-        }
-
-        // Obtener datos del torneo para fechas completadas
-        const tournamentResponse = await fetch(`/api/tournaments/${tournamentId}`, { headers });
-        if (tournamentResponse.ok) {
-          const tournamentData = await tournamentResponse.json();
-          
-          // Filtrar fechas completadas y ordenarlas por dateNumber descendente
-          const completed = tournamentData.gameDates && Array.isArray(tournamentData.gameDates)
-            ? tournamentData.gameDates
-                .filter((date: any) => date.status === 'completed')
-                .sort((a: any, b: any) => b.dateNumber - a.dateNumber)
-                .map((date: any) => ({ id: date.id, dateNumber: date.dateNumber }))
-            : [];
-          
-          setCompletedDates(completed);
-          
-          // Seleccionar automáticamente la fecha más reciente
-          if (completed.length > 0) {
-            setSelectedDateId(completed[0].id);
-          }
-        }
-
-        // También obtener ranking data para el contexto del torneo
-        const rankingResponse = await fetch(`/api/tournaments/${tournamentId}/ranking`, { headers });
-        if (rankingResponse.ok) {
-          const ranking = await rankingResponse.json();
-          setRankingData(ranking);
-        }
-
-      } catch (error) {
-        console.error('Error fetching tournament data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchTournamentData();
-  }, [tournamentId, adminKey]);
-
-  // Obtener eliminaciones cuando se selecciona una fecha
-  useEffect(() => {
-    async function fetchEliminations() {
-      if (!selectedDateId || !adminKey) return;
+    if (tournamentData) {
+      // Filtrar fechas completadas y ordenarlas por dateNumber descendente
+      const completed = tournamentData.gameDates && Array.isArray(tournamentData.gameDates)
+        ? tournamentData.gameDates
+            .filter((date: any) => date.status === 'completed')
+            .sort((a: any, b: any) => b.dateNumber - a.dateNumber)
+            .map((date: any) => ({ id: date.id, dateNumber: date.dateNumber }))
+        : [];
       
-      setLoadingEliminations(true);
-      try {
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${adminKey}`
-        };
-
-        const response = await fetch(`/api/eliminations/game-date/${selectedDateId}`, { headers });
-        if (response.ok) {
-          const eliminationsData = await response.json();
-          // Ordenar por posición ascendente (1, 2, 3, 4...)
-          const sortedEliminations = eliminationsData.sort((a: Elimination, b: Elimination) => a.position - b.position);
-          setEliminations(sortedEliminations);
-        }
-      } catch (error) {
-        console.error('Error fetching eliminations:', error);
-      } finally {
-        setLoadingEliminations(false);
+      setCompletedDates(completed);
+      
+      // Seleccionar automáticamente la fecha más reciente
+      if (completed.length > 0) {
+        setSelectedDateId(completed[0].id);
       }
     }
+  }, [tournamentData]);
 
-    fetchEliminations();
-  }, [selectedDateId, adminKey]);
+  // Use SWR for eliminations data
+  const { data: eliminationsData, error: eliminationsError, isLoading: eliminationsLoading } = useSWR(
+    selectedDateId ? `/api/eliminations/game-date/${selectedDateId}` : null,
+    fetcher,
+    { refreshInterval: 30000 } // 30 seconds refresh
+  );
+
+  // Process eliminations data when loaded
+  useEffect(() => {
+    if (eliminationsData) {
+      // Ordenar por posición ascendente (1, 2, 3, 4...)
+      const sortedEliminations = eliminationsData.sort((a: Elimination, b: Elimination) => a.position - b.position);
+      setEliminations(sortedEliminations);
+    } else if (!eliminationsLoading) {
+      setEliminations([]);
+    }
+  }, [eliminationsData, eliminationsLoading]);
 
   const formatTime = (timeString: string) => {
     // Formatear tiempo de eliminación si es necesario
@@ -122,10 +86,18 @@ export default function FechasTable({ tournamentId, adminKey }: FechasTableProps
     return `${player.firstName} ${player.lastName}`;
   };
 
-  if (loading) {
+  if (tournamentLoading) {
     return (
       <div className="flex justify-center py-8">
         <div className="text-poker-muted">Cargando fechas...</div>
+      </div>
+    );
+  }
+
+  if (tournamentError) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="text-red-400">Error al cargar fechas: {tournamentError.message}</div>
       </div>
     );
   }
@@ -168,7 +140,7 @@ export default function FechasTable({ tournamentId, adminKey }: FechasTableProps
       {/* Tabla de eliminaciones */}
       {selectedDateId && (
         <div className="overflow-x-auto">
-          {loadingEliminations ? (
+          {eliminationsLoading ? (
             <div className="flex justify-center py-8">
               <div className="text-poker-muted">Cargando eliminaciones...</div>
             </div>

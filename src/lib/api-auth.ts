@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from './prisma'
 import { UserRole } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 export interface AuthenticatedUser {
   id: string
@@ -11,22 +12,82 @@ export interface AuthenticatedUser {
 
 export async function validateApiAccess(req: NextRequest): Promise<AuthenticatedUser | null> {
   try {
-    // Obtener admin_key del header de autorización
+    // Obtener token del header de autorización
     const authorization = req.headers.get('authorization')
     if (!authorization || !authorization.startsWith('Bearer ')) {
       return null
     }
 
-    const adminKey = authorization.substring(7) // Remover "Bearer "
+    const token = authorization.substring(7) // Remover "Bearer "
     
-    if (!adminKey) {
+    if (!token) {
       return null
     }
 
-    // Buscar usuario por admin_key
+    // Verificar si es formato PIN:xxxx (nuevo sistema)
+    if (token.startsWith('PIN:')) {
+      const pin = token.substring(4) // Remover "PIN:"
+      
+      // Validar formato del PIN (4 dígitos exactamente)
+      if (!/^\d{4}$/.test(pin)) {
+        return null
+      }
+
+      // Buscar usuarios con PINs y verificar hash
+      const users = await prisma.player.findMany({
+        where: {
+          pin: { not: null },
+          isActive: true
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          pin: true
+        }
+      })
+
+      // Verificar PIN hasheado
+      for (const user of users) {
+        if (user.pin && await bcrypt.compare(pin, user.pin)) {
+          return {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role
+          }
+        }
+      }
+
+      return null
+    }
+
+    // Verificar si es formato ADMIN:xxxx (sistema legacy)
+    if (token.startsWith('ADMIN:')) {
+      const adminKey = token.substring(6) // Remover "ADMIN:"
+      
+      // Buscar usuario por admin_key (legacy)
+      const user = await prisma.player.findFirst({
+        where: {
+          adminKey: adminKey,
+          isActive: true
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          role: true
+        }
+      })
+
+      return user
+    }
+
+    // Sistema legacy: adminKey directo (para compatibilidad)
     const user = await prisma.player.findFirst({
       where: {
-        adminKey: adminKey,
+        adminKey: token,
         isActive: true
       },
       select: {

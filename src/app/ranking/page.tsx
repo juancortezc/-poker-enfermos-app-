@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,47 +8,26 @@ import TournamentRankingTable from '@/components/tournaments/TournamentRankingTa
 import ResumenTable from '@/components/tables/ResumenTable';
 import TotalTable from '@/components/tables/TotalTable';
 import FechasTable from '@/components/tables/FechasTable';
+import { useActiveTournament } from '@/hooks/useActiveTournament';
 
 type TabType = 'resumen' | 'total' | 'fechas';
 
 export default function RankingPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const [activeTournamentId, setActiveTournamentId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('resumen');
 
-  // Obtener torneo activo
-  useEffect(() => {
-    async function fetchActiveTournament() {
-      try {
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json'
-        };
+  // Use SWR hook for active tournament with PIN authentication
+  const { 
+    tournament: activeTournament, 
+    isLoading: tournamentLoading, 
+    isError, 
+    isNotFound 
+  } = useActiveTournament({
+    refreshInterval: 60000 // 1 minute refresh
+  });
 
-        // Add authorization header if user has adminKey
-        if (user?.adminKey) {
-          headers['Authorization'] = `Bearer ${user.adminKey}`;
-        }
-
-        const response = await fetch('/api/tournaments/active', { headers });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.tournament) {
-            setActiveTournamentId(data.tournament.id);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching active tournament:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchActiveTournament();
-  }, [user]);
-
-  if (loading || authLoading) {
+  if (tournamentLoading || authLoading) {
     return (
       <div className="min-h-screen bg-poker-dark flex items-center justify-center">
         <div className="text-white text-lg">Cargando tabla...</div>
@@ -86,7 +65,7 @@ export default function RankingPage() {
     );
   }
 
-  if (!activeTournamentId) {
+  if (!activeTournament) {
     return (
       <div className="min-h-screen bg-poker-dark p-4">
         <div className="max-w-4xl mx-auto">
@@ -102,8 +81,15 @@ export default function RankingPage() {
           </div>
 
           <div className="text-center py-12">
-            <p className="text-poker-muted text-lg">No hay torneo activo</p>
-            <p className="text-poker-muted mt-2">La tabla se mostrará cuando haya un torneo en curso</p>
+            <p className="text-poker-muted text-lg">
+              {isNotFound ? 'No hay torneo activo' : 'Error al cargar el torneo'}
+            </p>
+            <p className="text-poker-muted mt-2">
+              {isNotFound 
+                ? 'La tabla se mostrará cuando haya un torneo en curso'
+                : 'Verifica tu conexión e inicia sesión nuevamente'
+              }
+            </p>
           </div>
         </div>
       </div>
@@ -150,15 +136,15 @@ export default function RankingPage() {
         {/* Tab Content */}
         <div className="mt-2">
           {activeTab === 'resumen' && (
-            <ResumenTable tournamentId={activeTournamentId} adminKey={user?.adminKey} />
+            <ResumenTable tournamentId={activeTournament.id} userPin={user?.pin} />
           )}
           
           {activeTab === 'total' && (
-            <TotalTable tournamentId={activeTournamentId} adminKey={user?.adminKey} />
+            <TotalTable tournamentId={activeTournament.id} userPin={user?.pin} />
           )}
           
           {activeTab === 'fechas' && (
-            <FechasTable tournamentId={activeTournamentId} adminKey={user?.adminKey} />
+            <FechasTable tournamentId={activeTournament.id} userPin={user?.pin} />
           )}
         </div>
       </div>

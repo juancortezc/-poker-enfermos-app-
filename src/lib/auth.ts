@@ -7,9 +7,53 @@ export interface AuthUser {
   firstName: string
   lastName: string
   role: UserRole
-  adminKey?: string
+  pin?: string
 }
 
+/**
+ * Authenticate user by PIN (new system)
+ * Replaces adminKey authentication with PIN-based auth for all users
+ */
+export async function authenticateUserByPin(pin: string): Promise<AuthUser | null> {
+  try {
+    // Validate PIN format (4 digits exactly)
+    if (!/^\d{4}$/.test(pin)) {
+      console.log('Invalid PIN format - must be 4 digits')
+      return null
+    }
+
+    // Find all active users with PINs
+    const players = await prisma.player.findMany({
+      where: {
+        isActive: true,
+        pin: { not: null }
+      },
+    })
+
+    // Check each player's hashed PIN
+    for (const player of players) {
+      if (player.pin && await bcrypt.compare(pin, player.pin)) {
+        return {
+          id: player.id,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          role: player.role,
+          pin: player.pin || undefined,
+        }
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.error('PIN authentication error:', error)
+    return null
+  }
+}
+
+/**
+ * Legacy adminKey authentication (mantener para rollback)
+ * @deprecated Use authenticateUserByPin instead
+ */
 export async function authenticateUser(adminKey: string): Promise<AuthUser | null> {
   try {
     // Find all users with Comision role (they have adminKey)
@@ -28,7 +72,7 @@ export async function authenticateUser(adminKey: string): Promise<AuthUser | nul
           firstName: player.firstName,
           lastName: player.lastName,
           role: player.role,
-          adminKey: player.adminKey || undefined,
+          pin: player.pin || undefined,
         }
       }
     }

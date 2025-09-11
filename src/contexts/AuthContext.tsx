@@ -5,7 +5,8 @@ import { AuthUser } from '@/lib/auth'
 
 interface AuthContextType {
   user: AuthUser | null
-  login: (adminKey: string) => Promise<boolean>
+  login: (pin: string) => Promise<boolean>
+  loginWithAdminKey: (adminKey: string) => Promise<boolean> // Legacy support
   logout: () => void
   loading: boolean
 }
@@ -25,7 +26,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false)
   }, [])
 
-  const login = async (adminKey: string): Promise<boolean> => {
+  const login = async (pin: string): Promise<boolean> => {
+    try {
+      // Validate PIN format on client side
+      if (!/^\d{4}$/.test(pin)) {
+        console.error('PIN must be exactly 4 digits')
+        return false
+      }
+
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pin }),
+      })
+
+      if (response.ok) {
+        const authUser = await response.json()
+        setUser(authUser)
+        localStorage.setItem('poker-user', JSON.stringify(authUser))
+        localStorage.setItem('poker-pin', pin) // Store PIN for subsequent API calls
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Login error:', error)
+      return false
+    }
+  }
+
+  const loginWithAdminKey = async (adminKey: string): Promise<boolean> => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -39,11 +70,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const authUser = await response.json()
         setUser(authUser)
         localStorage.setItem('poker-user', JSON.stringify(authUser))
+        localStorage.setItem('poker-adminkey', adminKey) // Legacy storage
         return true
       }
       return false
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('AdminKey login error:', error)
       return false
     }
   }
@@ -51,10 +83,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null)
     localStorage.removeItem('poker-user')
+    localStorage.removeItem('poker-pin')
+    localStorage.removeItem('poker-adminkey') // Clean legacy storage too
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, loginWithAdminKey, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )

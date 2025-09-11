@@ -1,58 +1,41 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { TournamentRankingData } from '@/lib/ranking-utils';
+import { useState, useRef, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Download } from 'lucide-react';
+import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 
 interface TotalTableProps {
   tournamentId: number;
-  adminKey?: string | null;
+  userPin?: string | null;
 }
 
-export default function TotalTable({ tournamentId, adminKey }: TotalTableProps) {
-  const [rankingData, setRankingData] = useState<TournamentRankingData | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function TotalTable({ tournamentId, userPin }: TotalTableProps) {
   const [downloading, setDownloading] = useState(false);
   const [completedDates, setCompletedDates] = useState<number[]>([]);
   const tableRef = useRef<HTMLDivElement>(null);
 
+  // Use SWR hook for ranking data with PIN authentication
+  const { 
+    ranking: rankingData, 
+    isLoading: loading, 
+    isError,
+    errorMessage
+  } = useTournamentRanking(tournamentId, {
+    refreshInterval: 30000 // 30 seconds refresh
+  });
+
+  // Extract completed dates when data is loaded
   useEffect(() => {
-    async function fetchRankingData() {
-      try {
-        const headers: HeadersInit = {
-          'Content-Type': 'application/json'
-        };
-
-        // Add authorization header if adminKey is provided
-        if (adminKey) {
-          headers['Authorization'] = `Bearer ${adminKey}`;
-        }
-
-        const response = await fetch(`/api/tournaments/${tournamentId}/ranking`, { headers });
-        if (response.ok) {
-          const data = await response.json();
-          setRankingData(data);
-          
-          // Obtener fechas completadas del primer jugador y ordenarlas en orden ascendente
-          if (data.rankings.length > 0) {
-            const dateNumbers = Object.keys(data.rankings[0].pointsByDate || {})
-              .map(Number)
-              .filter(dateNumber => dateNumber > 0)
-              .sort((a, b) => a - b); // Orden ascendente: F1, F2, F3, F4, F5
-            setCompletedDates(dateNumbers);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching ranking data:', error);
-      } finally {
-        setLoading(false);
-      }
+    if (rankingData && rankingData.rankings.length > 0) {
+      const dateNumbers = Object.keys(rankingData.rankings[0].pointsByDate || {})
+        .map(Number)
+        .filter(dateNumber => dateNumber > 0)
+        .sort((a, b) => a - b); // Orden ascendente: F1, F2, F3, F4, F5
+      setCompletedDates(dateNumbers);
     }
-
-    fetchRankingData();
-  }, [tournamentId, adminKey]);
+  }, [rankingData]);
 
   // Función para formatear nombre según espacio disponible
   const formatPlayerName = (name: string, availableSpace: 'full' | 'medium' | 'short') => {
@@ -134,6 +117,14 @@ export default function TotalTable({ tournamentId, adminKey }: TotalTableProps) 
     return (
       <div className="flex justify-center py-8">
         <div className="text-poker-muted">Cargando datos...</div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="text-red-400">Error: {errorMessage}</div>
       </div>
     );
   }
