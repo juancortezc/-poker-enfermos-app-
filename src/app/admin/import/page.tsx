@@ -161,9 +161,6 @@ export default function AdminImportPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-poker-red mb-2">Importar CSV Histórico</h1>
-          <p className="text-poker-text">
-            Importar eliminaciones históricas desde archivos CSV al sistema
-          </p>
         </div>
 
         {/* Error Message */}

@@ -81,11 +81,11 @@ export function CSVPreview({
       {/* Validation Status */}
       <Card className={`border-2 p-6 ${
         valid 
-          ? 'bg-green-900 bg-opacity-20 border-green-500' 
+          ? 'bg-poker-red bg-opacity-20 border-poker-red' 
           : 'bg-red-900 bg-opacity-20 border-red-500'
       }`}>
         <div className="flex items-center mb-4">
-          <div className={`text-3xl mr-3 ${valid ? 'text-green-500' : 'text-red-500'}`}>
+          <div className={`text-3xl mr-3 ${valid ? 'text-white' : 'text-red-500'}`}>
             {valid ? '✅' : '❌'}
           </div>
           <h2 className="text-xl font-semibold text-white">
@@ -127,7 +127,7 @@ export function CSVPreview({
         {/* Valid Players */}
         {playerValidation.valid.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-green-400 font-semibold mb-3">
+            <h3 className="text-white font-semibold mb-3">
               Jugadores Válidos ({playerValidation.valid.length})
             </h3>
             <div className="max-h-48 overflow-y-auto">
@@ -135,17 +135,17 @@ export function CSVPreview({
                 {playerValidation.valid.map((player, index) => (
                   <div 
                     key={index}
-                    className="flex items-center justify-between bg-green-900 bg-opacity-20 p-3 rounded border border-green-700"
+                    className="flex items-center justify-between bg-gray-800 p-3 rounded border border-gray-600"
                   >
                     <div>
                       <span className="text-white font-medium">{player.csvName}</span>
                       {player.csvName !== player.dbName && (
-                        <span className="text-green-300 text-sm ml-2">
+                        <span className="text-orange-400 text-sm ml-2">
                           → {player.dbName}
                         </span>
                       )}
                     </div>
-                    <div className="text-green-400 text-sm">
+                    <div className="text-poker-text text-sm">
                       {player.role}
                     </div>
                   </div>

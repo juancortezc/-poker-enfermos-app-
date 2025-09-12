@@ -27,10 +27,10 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
       {/* Result Status */}
       <Card className={`border-2 p-8 text-center ${
         success 
-          ? 'bg-green-900 bg-opacity-20 border-green-500' 
+          ? 'bg-poker-red bg-opacity-20 border-poker-red' 
           : 'bg-red-900 bg-opacity-20 border-red-500'
       }`}>
-        <div className={`text-6xl mb-4 ${success ? 'text-green-500' : 'text-red-500'}`}>
+        <div className={`text-6xl mb-4 ${success ? 'text-white' : 'text-red-500'}`}>
           {success ? '🎉' : '💥'}
         </div>
         
@@ -38,14 +38,14 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
           {success ? 'Importación Exitosa' : 'Error en la Importación'}
         </h2>
         
-        <p className={`text-lg mb-6 ${success ? 'text-green-300' : 'text-red-300'}`}>
+        <p className={`text-lg mb-6 ${success ? 'text-white' : 'text-red-300'}`}>
           {message}
         </p>
 
         {success && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-400">{imported}</div>
+              <div className="text-3xl font-bold text-poker-red">{imported}</div>
               <div className="text-poker-text">Eliminaciones Importadas</div>
             </div>
             {tournamentNumber && (
@@ -80,8 +80,8 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
 
       {/* Success Details */}
       {success && gameDateId && (
-        <Card className="bg-poker-card border-2 border-green-500 p-6">
-          <h3 className="text-lg font-semibold text-green-400 mb-3">Detalles de la Importación</h3>
+        <Card className="bg-poker-card border-2 border-poker-red p-6">
+          <h3 className="text-lg font-semibold text-white mb-3">Detalles de la Importación</h3>
           <div className="space-y-2 text-sm">
             <p className="text-poker-text">
               <span className="text-white font-medium">GameDate ID:</span> {gameDateId}
@@ -92,7 +92,7 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
             <p className="text-poker-text">
               <span className="text-white font-medium">Eliminaciones:</span> {imported} registros procesados
             </p>
-            <p className="text-green-300 mt-4">
+            <p className="text-white mt-4">
               ✅ Los datos han sido importados exitosamente y están disponibles en el sistema.
             </p>
           </div>

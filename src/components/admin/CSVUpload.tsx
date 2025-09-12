@@ -84,24 +84,34 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
     <div className="space-y-6">
       <Card className="bg-poker-card border-2 border-gray-600 p-6">
         <h2 className="text-xl font-semibold text-white mb-4">Formato del Archivo CSV</h2>
-        <div className="text-poker-text space-y-2">
-          <p>El archivo debe tener las siguientes columnas en orden:</p>
-          <div className="bg-black p-4 rounded border border-gray-700 font-mono text-sm">
-            <div className="text-poker-red">torneo,fecha,date,posicion,eliminado,eliminador,puntos</div>
-            <div className="text-gray-400 mt-2">
-              Torneo 28,1,2025-04-15,1,Diego Behar,,25<br />
-              Torneo 28,1,2025-04-15,2,Milton Tapia,Diego Behar,18<br />
-              ...
-            </div>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-poker-red font-medium">TORNEO</span>
+            <p className="text-poker-text">Torneo #</p>
           </div>
-          <div className="mt-4 space-y-1 text-sm">
-            <p><span className="text-poker-red">torneo:</span> Nombre del torneo (ej: "Torneo 28")</p>
-            <p><span className="text-poker-red">fecha:</span> Número de fecha (1-12)</p>
-            <p><span className="text-poker-red">date:</span> Fecha ISO (YYYY-MM-DD)</p>
-            <p><span className="text-poker-red">posicion:</span> Posición final (1 = ganador)</p>
-            <p><span className="text-poker-red">eliminado:</span> Nombre del jugador eliminado</p>
-            <p><span className="text-poker-red">eliminador:</span> Nombre del eliminador (vacío si es ganador)</p>
-            <p><span className="text-poker-red">puntos:</span> Puntos asignados (0-30)</p>
+          <div>
+            <span className="text-poker-red font-medium">FECHA</span>
+            <p className="text-poker-text"># de fecha (1-12)</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">DATE</span>
+            <p className="text-poker-text">Fecha ISO (YYYY-MM-DD)</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">POSICION</span>
+            <p className="text-poker-text">Posición de Salida</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">ELIMINADO</span>
+            <p className="text-poker-text">Nombre</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">ELIMINADOR</span>
+            <p className="text-poker-text">Nombre (vacío si es ganador)</p>
+          </div>
+          <div className="col-span-2">
+            <span className="text-poker-red font-medium">PUNTOS</span>
+            <p className="text-poker-text">Puntos asignados (0-30)</p>
           </div>
         </div>
       </Card>
@@ -139,7 +149,7 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
             </>
           ) : (
             <div className="space-y-4">
-              <div className="text-4xl text-green-500 mb-2">✅</div>
+              <div className="text-4xl text-white mb-2">✅</div>
               <div>
                 <h3 className="text-lg font-semibold text-white mb-1">
                   {selectedFile.name}

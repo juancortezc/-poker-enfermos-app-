@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Save, User, ArrowLeft } from 'lucide-react'
+import { Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from '@/components/UserAvatar'
 
@@ -154,16 +154,8 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center space-x-2 text-poker-muted hover:text-poker-red transition-colors"
-        >
-          <ArrowLeft size={20} />
-          <span>Volver</span>
-        </button>
+      <div className="text-center">
         <h1 className="text-xl font-bold text-poker-text">Mi Perfil</h1>
-        <div className="w-16"></div> {/* Spacer for centering */}
       </div>
 
       {/* Profile Photo and Name */}
