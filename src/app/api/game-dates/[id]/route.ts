@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withComisionAuth } from '@/lib/api-auth'
+import { parseToUTCNoon, validateTuesdayDate } from '@/lib/date-utils'
 
 // GET - Obtener detalles de una fecha específica
 export async function GET(
@@ -60,7 +61,7 @@ export async function PUT(
     try {
       const gameDateId = parseInt(params.id)
       const body = await req.json()
-      const { action, playerIds, guestIds } = body
+      const { action, playerIds, guestIds, scheduledDate } = body
 
       // Handle start action
       if (action === 'start') {
@@ -177,7 +178,7 @@ export async function PUT(
       }
 
       // Handle update action
-      if (action === 'update' && playerIds) {
+      if (action === 'update' && (playerIds || scheduledDate)) {
         // Verificar que la fecha existe y está en estado CREATED
         const existingDate = await prisma.gameDate.findUnique({
           where: { id: gameDateId },
@@ -206,17 +207,43 @@ export async function PUT(
           )
         }
 
-        // Calcular participantes totales
-        const totalParticipants = playerIds.length + (guestIds?.length || 0)
+        // Validar fecha si se está actualizando
+        if (scheduledDate) {
+          const dateValidation = validateTuesdayDate(scheduledDate)
+          if (!dateValidation.valid) {
+            return NextResponse.json(
+              { error: dateValidation.message },
+              { status: 400 }
+            )
+          }
+        }
+
+        // Preparar datos para actualizar
+        let updateData: any = {}
+        
+        // Actualizar participantes si se proporcionan
+        if (playerIds) {
+          const totalParticipants = playerIds.length + (guestIds?.length || 0)
+          updateData = {
+            ...updateData,
+            playerIds: playerIds,
+            playersMin: Math.min(9, totalParticipants),
+            playersMax: Math.max(24, totalParticipants)
+          }
+        }
+        
+        // Actualizar fecha si se proporciona
+        if (scheduledDate) {
+          updateData = {
+            ...updateData,
+            scheduledDate: parseToUTCNoon(scheduledDate)
+          }
+        }
 
         // Actualizar la fecha de juego
         const updatedGameDate = await prisma.gameDate.update({
           where: { id: gameDateId },
-          data: {
-            playerIds: playerIds,
-            playersMin: Math.min(9, totalParticipants),
-            playersMax: Math.max(24, totalParticipants)
-          },
+          data: updateData,
           include: {
             tournament: {
               select: {
@@ -232,7 +259,7 @@ export async function PUT(
           success: true,
           gameDate: {
             ...updatedGameDate,
-            totalParticipants,
+            totalParticipants: playerIds ? (playerIds.length + (guestIds?.length || 0)) : updatedGameDate.playerIds.length,
             playersCount: updatedGameDate.playerIds.length,
             guestIds: guestIds || []
           }

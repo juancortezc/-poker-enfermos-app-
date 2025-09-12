@@ -72,14 +72,15 @@ export default function GuestSelector({
     try {
       setLoading(true)
       
-      if (!user?.adminKey) {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      if (!pin) {
         setLoading(false)
         return
       }
       
       const response = await fetch(`/api/players/available-guests?tournamentId=${tournamentId}`, {
         headers: {
-          'Authorization': `Bearer ${user.adminKey}`,
+          'Authorization': `Bearer PIN:${pin}`,
           'Content-Type': 'application/json'
         }
       })
@@ -192,7 +193,7 @@ export default function GuestSelector({
             <h3 className="text-sm font-medium text-white">
               Externos ({getAvailableInvitados(externalGuests).length} de {externalGuests.length})
             </h3>
-            <Link href="/players/new?type=invitado&returnTo=/game-dates/new" target="_blank" rel="noopener noreferrer">
+            <Link href="/players/new?type=invitado&returnTo=/game-dates/config" target="_blank" rel="noopener noreferrer">
               <Button
                 variant="outline"
                 size="sm"

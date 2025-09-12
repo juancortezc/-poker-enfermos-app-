@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
-import { Loader2, Play, UserPlus } from 'lucide-react'
+import { Loader2, Play, UserPlus, Calendar } from 'lucide-react'
+import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 
 interface Player {
   id: string
@@ -47,7 +48,9 @@ export default function GameDateConfigPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [activating, setActivating] = useState(false)
+  const [updatingDate, setUpdatingDate] = useState(false)
   const [error, setError] = useState('')
+  const [dateError, setDateError] = useState('')
   
   // Data states
   const [tournament, setTournament] = useState<Tournament | null>(null)
@@ -296,7 +299,62 @@ export default function GameDateConfigPage() {
 
   const handleCreateGuest = () => {
     // Navigate to guest creation with return path
-    router.push('/players/new?returnTo=game-dates/config')
+    router.push('/players/new?type=invitado&returnTo=/game-dates/config')
+  }
+
+  const handleDateChange = async (newDateString: string) => {
+    if (!selectedDateId || !tournament) return
+    
+    try {
+      setUpdatingDate(true)
+      setDateError('')
+      
+      // Validate Tuesday requirement
+      const dateValidation = validateTuesdayDate(newDateString)
+      if (!dateValidation.valid) {
+        setDateError(dateValidation.message || 'Fecha inválida')
+        return
+      }
+
+      // Call API to update date
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const response = await fetch(`/api/game-dates/${selectedDateId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'update',
+          scheduledDate: newDateString
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Update local state
+        setSelectedDate(new Date(newDateString + 'T12:00:00'))
+        
+        // Update available dates list
+        setAvailableDates(prev => prev.map(date => 
+          date.id === selectedDateId 
+            ? { ...date, scheduledDate: newDateString }
+            : date
+        ))
+        
+        // Clear any previous errors
+        setError('')
+      } else {
+        const errorData = await response.json()
+        setDateError(errorData.error || 'Error al actualizar fecha')
+      }
+    } catch (err) {
+      console.error('Error updating date:', err)
+      setDateError('Error al actualizar fecha')
+    } finally {
+      setUpdatingDate(false)
+    }
   }
 
   const getDisplayName = (player: Player) => {
@@ -409,7 +467,7 @@ export default function GameDateConfigPage() {
             </button>
 
             {/* Date Display */}
-            <div className="p-2 bg-poker-card border border-white/10 rounded-lg text-center">
+            <div className="p-2 bg-poker-card border border-white/10 rounded-lg text-center relative cursor-pointer hover:border-white/20 transition-all">
               {selectedDate && (
                 <>
                   <div className="text-xs text-poker-muted">
@@ -419,6 +477,23 @@ export default function GameDateConfigPage() {
                     {selectedDate.getDate()}
                   </div>
                 </>
+              )}
+              
+              {/* Hidden DatePicker - invisible input for date selection */}
+              <input
+                type="date"
+                value={selectedDate ? formatDateForInput(selectedDate) : ''}
+                onChange={(e) => handleDateChange(e.target.value)}
+                disabled={updatingDate || !selectedDateId}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                style={{ colorScheme: 'dark' }}
+              />
+              
+              {/* Loading indicator */}
+              {updatingDate && (
+                <div className="absolute inset-0 flex items-center justify-center bg-poker-card/80 rounded-lg">
+                  <Loader2 className="w-4 h-4 animate-spin text-poker-red" />
+                </div>
               )}
             </div>
           </div>
@@ -456,7 +531,7 @@ export default function GameDateConfigPage() {
               <div className="mt-4 pt-4 border-t border-white/10">
                 <Button
                   onClick={handleCreateGuest}
-                  className="w-full bg-poker-red hover:bg-red-700 text-white"
+                  className="w-full bg-pink-600 hover:bg-pink-700 text-white"
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
                   CREAR
@@ -465,10 +540,19 @@ export default function GameDateConfigPage() {
             )}
           </div>
 
-          {/* Error Message */}
+          {/* Error Messages */}
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3">
               <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+          
+          {dateError && (
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-red-400" />
+                <p className="text-red-400 text-sm">{dateError}</p>
+              </div>
             </div>
           )}
 
