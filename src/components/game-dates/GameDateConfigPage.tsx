@@ -42,6 +42,8 @@ interface GameDateData {
 }
 
 export default function GameDateConfigPage() {
+  console.log('🎯 GameDateConfigPage component rendered')
+  
   const { user } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -67,53 +69,87 @@ export default function GameDateConfigPage() {
   
   // Check permissions
   useEffect(() => {
+    console.log('🔐 Checking permissions, user:', user ? { id: user.id, role: user.role } : 'null')
+    
     if (user && user.role !== UserRole.Comision) {
+      console.log('❌ User not Comision, redirecting to /admin')
       router.push('/admin')
       return
+    }
+    
+    if (user) {
+      console.log('✅ User has Comision permissions')
     }
   }, [user, router])
 
   // Load initial data
   useEffect(() => {
-    if (user?.adminKey) {
+    console.log('🚀 GameDateConfigPage useEffect triggered')
+    const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+    const userInfo = user ? { id: user.id, role: user.role } : 'null'
+    console.log('🔍 useEffect state:', { pin: pin?.substring(0, 4) + '***', user: userInfo })
+    
+    if (pin) {
+      console.log('✅ PIN found, calling loadInitialData')
       loadInitialData()
+    } else {
+      console.log('❌ No PIN found, not loading data')
     }
-  }, [user?.adminKey])
+  }, [user])
 
   const loadInitialData = async () => {
     try {
+      console.log('🔄 GameDateConfigPage: Starting loadInitialData')
       setLoading(true)
       setError('')
       
       // Check if there's an active game date already
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      console.log('🔑 PIN for auth:', pin?.substring(0, 4) + '***')
+      
       const activeResponse = await fetch('/api/game-dates/active', {
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })
+      
+      console.log('📡 Active game date response:', activeResponse.status)
 
       if (activeResponse.ok) {
         const activeData = await activeResponse.json()
-        if (activeData.activeDate) {
+        console.log('📊 Active data:', activeData)
+        if (activeData && activeData.activeDate) {
+          console.log('✅ Found active game date, stopping here')
           setActiveGameDate(activeData.activeDate)
           setTournament(activeData.activeDate.tournament)
           // If there's an active date, we're done loading
           setLoading(false)
           return
         }
+        console.log('📭 No active game date found, loading available dates')
       }
 
       // Load available dates and players
+      console.log('🎯 Fetching available dates...')
       const availableResponse = await fetch('/api/game-dates/available-dates', {
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })
+      
+      console.log('📡 Available dates response:', availableResponse.status)
 
       if (availableResponse.ok) {
         const data = await availableResponse.json()
+        console.log('📋 Available dates data:', {
+          tournament: data.tournament?.name,
+          availableDatesCount: data.availableDates?.length,
+          registeredPlayersCount: data.registeredPlayers?.length,
+          additionalPlayersCount: data.additionalPlayers?.length
+        })
+        
         setTournament(data.tournament)
         setAvailableDates(data.availableDates)
         setRegisteredPlayers(data.registeredPlayers)
@@ -122,6 +158,7 @@ export default function GameDateConfigPage() {
         // Set first available date as default
         if (data.availableDates.length > 0) {
           const firstDate = data.availableDates[0]
+          console.log('🎯 Setting default date:', firstDate.dateNumber)
           setSelectedDateId(firstDate.id)
           setSelectedDate(new Date(firstDate.scheduledDate))
           // Default selection: all registered players
@@ -129,31 +166,36 @@ export default function GameDateConfigPage() {
         }
         
         // Load guests
+        console.log('🎭 Loading guests...')
         await loadGuests()
       } else {
-        const errorData = await availableResponse.json()
-        setError(errorData.error || 'Error al cargar datos')
+        console.error('❌ Available dates request failed:', availableResponse.status)
+        const errorText = await availableResponse.text()
+        console.error('Error details:', errorText)
+        setError(`Error al obtener fechas disponibles: ${availableResponse.status}`)
       }
     } catch (err) {
-      console.error('Error loading data:', err)
-      setError('Error al cargar información')
+      console.error('❌ Error in loadInitialData:', err)
+      setError(`Error al cargar los datos: ${err instanceof Error ? err.message : 'Error desconocido'}`)
     } finally {
+      console.log('✅ GameDateConfigPage: loadInitialData completed')
       setLoading(false)
     }
   }
 
   const loadGuests = async () => {
     try {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch('/api/players/available-guests', {
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })
       
       if (response.ok) {
         const data = await response.json()
-        setGuests([...data.groupMembers, ...data.externalGuests])
+        setGuests(data.externalGuests)
       }
     } catch (err) {
       console.error('Error loading guests:', err)
@@ -205,10 +247,11 @@ export default function GameDateConfigPage() {
       setError('')
 
       // Create or update game date
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch('/api/game-dates', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -242,10 +285,13 @@ export default function GameDateConfigPage() {
   }
 
   const getDisplayName = (player: Player) => {
-    if (player.aliases && player.aliases.length > 0) {
-      return player.aliases[0]
-    }
-    return player.firstName
+    const firstName = player.aliases && player.aliases.length > 0 
+      ? player.aliases[0] 
+      : player.firstName
+    
+    // Add last name initial
+    const lastNameInitial = player.lastName ? player.lastName.charAt(0).toUpperCase() : ''
+    return lastNameInitial ? `${firstName} ${lastNameInitial}.` : firstName
   }
 
   const currentPlayers = activeTab === 'enfermos' 
@@ -355,7 +401,7 @@ export default function GameDateConfigPage() {
               onClick={() => setActiveTab('invitados')}
               className={`p-4 rounded-lg border-2 text-center transition-all ${
                 activeTab === 'invitados'
-                  ? 'bg-purple-600 border-purple-600 text-white'
+                  ? 'bg-pink-600 border-pink-600 text-white'
                   : 'bg-poker-card border-white/10 text-poker-text hover:border-white/20'
               }`}
             >
@@ -414,24 +460,14 @@ export default function GameDateConfigPage() {
                     onClick={() => togglePlayer(player.id)}
                     className={`p-3 rounded-lg border transition-all text-left ${
                       isSelected
-                        ? 'bg-green-600/20 border-green-500 text-green-400'
+                        ? activeTab === 'invitados' 
+                          ? 'bg-black border-pink-600 text-white'
+                          : 'bg-black border-poker-red text-white'
                         : 'bg-poker-dark/50 border-white/10 text-poker-text hover:border-white/20'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-sm">
-                          {getDisplayName(player)}
-                        </div>
-                        <div className="text-xs text-poker-muted">
-                          {player.firstName !== getDisplayName(player) ? player.firstName : ''}
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                      )}
+                    <div className="font-medium text-sm">
+                      {getDisplayName(player)}
                     </div>
                   </button>
                 )
