@@ -57,7 +57,7 @@ async function importEliminationsToDatabase(
           points: elim.puntos,
           eliminatedPlayerId: eliminatedPlayer.id,
           eliminatorPlayerId: eliminatorPlayerId,
-          eliminationTime: eliminationTime,
+          eliminationTime: eliminationTime.toISOString(),
           gameDateId: gameDateId
         }
       });
