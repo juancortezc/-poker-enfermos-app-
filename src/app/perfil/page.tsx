@@ -38,7 +38,25 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch('/api/profile')
+      // Get auth token from localStorage
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Use PIN if available, otherwise fall back to adminKey
+      if (pin) {
+        headers['Authorization'] = `Bearer PIN:${pin}`
+      } else if (adminKey) {
+        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+      }
+
+      const response = await fetch('/api/profile', {
+        headers
+      })
+
       if (response.ok) {
         const data = await response.json()
         setProfile(data)
@@ -61,13 +79,26 @@ export default function ProfilePage() {
     setSuccess('')
 
     try {
+      // Get auth token from localStorage
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Use PIN if available, otherwise fall back to adminKey
+      if (pin) {
+        headers['Authorization'] = `Bearer PIN:${pin}`
+      } else if (adminKey) {
+        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+      }
+
       const response = await fetch('/api/profile', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
-          pin: profile.pin || undefined,
+          pin: profile.pin === '****' ? undefined : profile.pin || undefined,
           birthDate: profile.birthDate || undefined,
           email: profile.email || undefined,
           phone: profile.phone || undefined,

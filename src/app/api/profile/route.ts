@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withAuth } from '@/lib/api-middleware'
+import { withAuth } from '@/lib/api-auth'
 import bcrypt from 'bcryptjs'
 
 // GET /api/profile - Obtener perfil del usuario autenticado
@@ -78,20 +78,23 @@ export async function PUT(req: NextRequest) {
 
       // Verificar si el PIN ya está en uso por otro usuario
       if (pin) {
-        const existingPlayer = await prisma.player.findFirst({
+        const allUsers = await prisma.player.findMany({
           where: {
-            pin: await bcrypt.hash(pin, 10),
-            NOT: {
-              id: user.id
-            }
-          }
+            pin: { not: null },
+            NOT: { id: user.id },
+            isActive: true
+          },
+          select: { pin: true }
         })
 
-        if (existingPlayer) {
-          return Response.json(
-            { message: 'Este PIN ya está en uso por otro usuario' },
-            { status: 400 }
-          )
+        // Verificar si algún usuario ya tiene este PIN
+        for (const existingUser of allUsers) {
+          if (existingUser.pin && await bcrypt.compare(pin, existingUser.pin)) {
+            return Response.json(
+              { message: 'Este PIN ya está en uso por otro usuario' },
+              { status: 400 }
+            )
+          }
         }
       }
 
