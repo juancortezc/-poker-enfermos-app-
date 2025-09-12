@@ -15,6 +15,11 @@ export interface PlayerRanking {
   elimina1?: number; // Peor fecha (menor puntuación)
   elimina2?: number; // Segunda peor fecha 
   finalScore?: number; // Puntuación final (mejores 10 fechas)
+  // Estadísticas para criterios de desempate
+  firstPlaces: number;  // Cantidad de fechas ganadas (1er lugar)
+  secondPlaces: number; // Cantidad de segundos lugares
+  thirdPlaces: number;  // Cantidad de terceros lugares
+  absences: number;     // Cantidad de ausencias (0 puntos)
 }
 
 export interface TournamentRankingData {
@@ -103,13 +108,24 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         totalPoints: 0,
         datesPlayed: 0,
         pointsByDate: {},
-        trend: 'same'
+        trend: 'same',
+        // Inicializar estadísticas de desempate
+        firstPlaces: 0,
+        secondPlaces: 0,
+        thirdPlaces: 0,
+        absences: 0
       });
     });
 
     // Procesar cada fecha completada
     tournament.gameDates.forEach(gameDate => {
       const totalPlayersInDate = gameDate.playerIds.length;
+      
+      // Calcular posiciones para esta fecha (necesario para estadísticas de desempate)
+      const datePositions = new Map<string, number>();
+      
+      // Determinar ganador y posiciones
+      let winner: string | null = null;
       
       // Registrar puntos para jugadores que participaron
       gameDate.playerIds.forEach(playerId => {
@@ -124,6 +140,13 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
             // Jugador fue eliminado, usar puntos guardados en la eliminación
             ranking.pointsByDate[gameDate.dateNumber] = elimination.points;
             ranking.totalPoints += elimination.points;
+            
+            // Registrar posición para estadísticas de desempate
+            datePositions.set(playerId, elimination.position);
+            
+            // Actualizar estadísticas de desempate
+            if (elimination.position === 2) ranking.secondPlaces++;
+            if (elimination.position === 3) ranking.thirdPlaces++;
           } else {
             // Jugador no fue eliminado
             // Solo asignar puntos si es el único jugador restante (ganador) o la fecha está completada
@@ -139,6 +162,11 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
               
               ranking.pointsByDate[gameDate.dateNumber] = winnerPoints;
               ranking.totalPoints += winnerPoints;
+              
+              // Registrar como ganador (posición 1)
+              datePositions.set(playerId, 1);
+              ranking.firstPlaces++;
+              winner = playerId;
             } else {
               // Aún jugando, no tiene puntos todavía
               ranking.pointsByDate[gameDate.dateNumber] = 0;
@@ -148,11 +176,12 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         }
       });
 
-      // Para jugadores registrados que NO participaron en esta fecha: 0 puntos
+      // Para jugadores registrados que NO participaron en esta fecha: 0 puntos (ausencia)
       registeredPlayers.forEach(player => {
         if (!gameDate.playerIds.includes(player.id)) {
           const ranking = playerRankings.get(player.id)!;
           ranking.pointsByDate[gameDate.dateNumber] = 0;
+          ranking.absences++; // Contar como ausencia para desempate
           // totalPoints no cambia (no suma ni resta)
         }
       });
@@ -188,15 +217,58 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       }
     });
 
-    // Ordenar por puntos totales (descendente) y asignar posiciones
-    const sortedRankings = Array.from(playerRankings.values())
-      .sort((a, b) => b.totalPoints - a.totalPoints);
+    /**
+     * Función de comparación con criterios de desempate
+     * Criterios en orden de prioridad:
+     * 1. Puntos totales (mayor)
+     * 2. Más primeros lugares (victorias)
+     * 3. Más segundos lugares
+     * 4. Más terceros lugares
+     * 5. Menos ausencias (mejor asistencia)
+     */
+    const compareRankings = (a: PlayerRanking, b: PlayerRanking): number => {
+      // 1. Puntos totales (mayor gana)
+      if (a.totalPoints !== b.totalPoints) {
+        return b.totalPoints - a.totalPoints;
+      }
+      
+      // 2. Más primeros lugares (victorias)
+      if (a.firstPlaces !== b.firstPlaces) {
+        return b.firstPlaces - a.firstPlaces;
+      }
+      
+      // 3. Más segundos lugares
+      if (a.secondPlaces !== b.secondPlaces) {
+        return b.secondPlaces - a.secondPlaces;
+      }
+      
+      // 4. Más terceros lugares
+      if (a.thirdPlaces !== b.thirdPlaces) {
+        return b.thirdPlaces - a.thirdPlaces;
+      }
+      
+      // 5. Menos ausencias (mejor asistencia)
+      if (a.absences !== b.absences) {
+        return a.absences - b.absences; // Menor es mejor
+      }
+      
+      // Si todos los criterios son iguales, mantener orden alfabético por nombre
+      return a.playerName.localeCompare(b.playerName);
+    };
 
-    // Asignar posiciones (manejar empates)
+    // Ordenar con criterios de desempate y asignar posiciones
+    const sortedRankings = Array.from(playerRankings.values())
+      .sort(compareRankings);
+
+    // Asignar posiciones (manejar empates verdaderos - muy raros después de los criterios)
     let currentPosition = 1;
     sortedRankings.forEach((ranking, index) => {
-      if (index > 0 && sortedRankings[index - 1].totalPoints > ranking.totalPoints) {
-        currentPosition = index + 1;
+      if (index > 0) {
+        const previous = sortedRankings[index - 1];
+        // Solo cambiar posición si son realmente diferentes según todos los criterios
+        if (compareRankings(previous, ranking) !== 0) {
+          currentPosition = index + 1;
+        }
       }
       ranking.position = currentPosition;
     });
