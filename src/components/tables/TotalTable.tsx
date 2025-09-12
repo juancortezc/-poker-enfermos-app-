@@ -57,19 +57,38 @@ export default function TotalTable({ tournamentId, userPin }: TotalTableProps) {
   };
 
   const downloadPDF = async () => {
-    if (!tableRef.current || !rankingData) return;
+    if (!tableRef.current || !rankingData) {
+      alert('No hay datos disponibles para generar el PDF.');
+      return;
+    }
     
     setDownloading(true);
     
     try {
+      // Validar que la tabla esté visible
+      if (tableRef.current.offsetWidth === 0 || tableRef.current.offsetHeight === 0) {
+        throw new Error('La tabla no está visible o no tiene contenido.');
+      }
+
+      console.log('Iniciando captura de tabla...');
+      
       // Para tabla ancha, usar formato landscape
       const canvas = await html2canvas(tableRef.current, {
-        scale: 1.5,
+        scale: 1.2, // Reducir escala para evitar problemas de memoria
         backgroundColor: '#ffffff',
         useCORS: true,
         allowTaint: true,
         width: tableRef.current.scrollWidth,
+        height: tableRef.current.scrollHeight,
+        logging: false // Desactivar logs de html2canvas
       });
+
+      console.log('Tabla capturada, creando PDF...');
+
+      // Validar canvas
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Error al capturar la tabla.');
+      }
 
       // Crear PDF landscape para tabla ancha
       const pdf = new jsPDF({
@@ -92,22 +111,31 @@ export default function TotalTable({ tournamentId, userPin }: TotalTableProps) {
       // Título
       pdf.setFontSize(16);
       pdf.setTextColor(0, 0, 0);
-      pdf.text(`Tabla Total - Torneo ${rankingData.tournament.number}`, pdfWidth / 2, 25, { align: 'center' });
+      const tournamentNumber = rankingData.tournament?.number || 'N/A';
+      pdf.text(`Tabla Total - Torneo ${tournamentNumber}`, pdfWidth / 2, 25, { align: 'center' });
       
       // Fecha
       pdf.setFontSize(10);
       const currentDate = new Date().toLocaleDateString('es-ES');
       pdf.text(`Generado el: ${currentDate}`, pdfWidth / 2, pdfHeight - 15, { align: 'center' });
 
+      // Convertir canvas a imagen
       const imgData = canvas.toDataURL('image/png');
+      if (!imgData || imgData === 'data:,') {
+        throw new Error('Error al convertir la tabla a imagen.');
+      }
+
       pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
 
-      const fileName = `tabla-total-torneo-${rankingData.tournament.number}.pdf`;
+      const fileName = `tabla-total-torneo-${tournamentNumber}.pdf`;
       pdf.save(fileName);
       
+      console.log('PDF generado exitosamente:', fileName);
+      
     } catch (error) {
-      console.error('Error generando PDF:', error);
-      alert('Error al generar el PDF. Inténtalo de nuevo.');
+      console.error('Error detallado generando PDF:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al generar el PDF: ${errorMessage}`);
     } finally {
       setDownloading(false);
     }

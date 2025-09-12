@@ -145,6 +145,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
             datePositions.set(playerId, elimination.position);
             
             // Actualizar estadísticas de desempate
+            if (elimination.position === 1) ranking.firstPlaces++;  // Contar victorias
             if (elimination.position === 2) ranking.secondPlaces++;
             if (elimination.position === 3) ranking.thirdPlaces++;
           } else {
