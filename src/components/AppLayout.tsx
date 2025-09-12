@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import MobileNavbar from './MobileNavbar'
 import LoginForm from './LoginForm'
-import { LogOut, User, Search, Plus, ChevronDown } from 'lucide-react'
+import { User, Search, Plus, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
@@ -11,26 +11,8 @@ import { UserRole } from '@prisma/client'
 import { usePathname, useRouter } from 'next/navigation'
 import { usePlayerSearch } from '@/contexts/PlayerSearchContext'
 import { useState, useRef, useEffect } from 'react'
+import { UserDropdown } from './UserDropdown'
 
-function LogoutButton() {
-  const { logout } = useAuth()
-  
-  const handleLogout = () => {
-    if (window.confirm('¿Seguro que deseas cerrar sesión?')) {
-      logout()
-    }
-  }
-
-  return (
-    <button
-      onClick={handleLogout}
-      className="text-poker-muted hover:text-poker-red transition-smooth p-2 rounded-lg hover:bg-poker-red/10"
-      title="Cerrar sesión"
-    >
-      <LogOut size={20} />
-    </button>
-  )
-}
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -128,8 +110,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
 
-            {/* Botón logout */}
-            <LogoutButton />
+            {/* User Dropdown */}
+            <UserDropdown />
           </div>
 
 
