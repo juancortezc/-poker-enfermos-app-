@@ -82,40 +82,6 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-poker-card border-2 border-gray-600 p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Formato del Archivo CSV</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-poker-red font-medium">TORNEO</span>
-            <p className="text-poker-text">Torneo #</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">FECHA</span>
-            <p className="text-poker-text"># de fecha (1-12)</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">DATE</span>
-            <p className="text-poker-text">Fecha ISO (YYYY-MM-DD)</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">POSICION</span>
-            <p className="text-poker-text">Posición de Salida</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">ELIMINADO</span>
-            <p className="text-poker-text">Nombre</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">ELIMINADOR</span>
-            <p className="text-poker-text">Nombre (vacío si es ganador)</p>
-          </div>
-          <div className="col-span-2">
-            <span className="text-poker-red font-medium">PUNTOS</span>
-            <p className="text-poker-text">Puntos asignados (0-30)</p>
-          </div>
-        </div>
-      </Card>
-
       {/* Upload Area */}
       <Card className="bg-poker-card border-2 border-gray-600">
         <div
@@ -175,6 +141,41 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
               </div>
             </div>
           )}
+        </div>
+      </Card>
+
+      {/* Formato del Archivo CSV */}
+      <Card className="bg-poker-card border-2 border-gray-600 p-6">
+        <h2 className="text-xl font-semibold text-white mb-4">Formato del Archivo CSV</h2>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-poker-red font-medium">TORNEO</span>
+            <p className="text-poker-text">Torneo #</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">FECHA</span>
+            <p className="text-poker-text"># de fecha (1-12)</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">DATE</span>
+            <p className="text-poker-text">Fecha ISO (YYYY-MM-DD)</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">POSICION</span>
+            <p className="text-poker-text">Posición de Salida</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">ELIMINADO</span>
+            <p className="text-poker-text">Nombre</p>
+          </div>
+          <div>
+            <span className="text-poker-red font-medium">ELIMINADOR</span>
+            <p className="text-poker-text">Nombre (vacío si es ganador)</p>
+          </div>
+          <div className="col-span-2">
+            <span className="text-poker-red font-medium">PUNTOS</span>
+            <p className="text-poker-text">Puntos asignados (0-30)</p>
+          </div>
         </div>
       </Card>
 
