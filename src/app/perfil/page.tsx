@@ -168,13 +168,13 @@ export default function ProfilePage() {
 
       {/* Profile Photo and Name */}
       <div className="text-center py-8">
-        <div className="mx-auto mb-4 shadow-lg">
-          <UserAvatar user={profile} size="xl" />
+        <div className="flex justify-center mb-4">
+          <UserAvatar user={profile} size="xl" className="shadow-lg" />
         </div>
         <h2 className="text-2xl font-bold text-poker-text">
           {profile.firstName} {profile.lastName}
         </h2>
-        <p className="text-poker-muted mt-1">
+        <p className="text-orange-400 mt-1 font-medium">
           {aliasesText}
         </p>
       </div>
