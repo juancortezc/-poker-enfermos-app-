@@ -8,6 +8,7 @@ export interface AuthUser {
   lastName: string
   role: UserRole
   pin?: string
+  photoUrl?: string
 }
 
 /**
@@ -28,6 +29,14 @@ export async function authenticateUserByPin(pin: string): Promise<AuthUser | nul
         isActive: true,
         pin: { not: null }
       },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        pin: true,
+        photoUrl: true,
+      }
     })
 
     // Check each player's hashed PIN
@@ -39,6 +48,7 @@ export async function authenticateUserByPin(pin: string): Promise<AuthUser | nul
           lastName: player.lastName,
           role: player.role,
           pin: player.pin || undefined,
+          photoUrl: player.photoUrl || undefined,
         }
       }
     }
@@ -62,6 +72,15 @@ export async function authenticateUser(adminKey: string): Promise<AuthUser | nul
         role: UserRole.Comision,
         adminKey: { not: null }
       },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        pin: true,
+        photoUrl: true,
+        adminKey: true,
+      }
     })
 
     // Check each player's hashed admin key
@@ -73,6 +92,7 @@ export async function authenticateUser(adminKey: string): Promise<AuthUser | nul
           lastName: player.lastName,
           role: player.role,
           pin: player.pin || undefined,
+          photoUrl: player.photoUrl || undefined,
         }
       }
     }

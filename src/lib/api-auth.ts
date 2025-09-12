@@ -8,6 +8,7 @@ export interface AuthenticatedUser {
   firstName: string
   lastName: string
   role: UserRole
+  photoUrl?: string
 }
 
 export async function validateApiAccess(req: NextRequest): Promise<AuthenticatedUser | null> {
@@ -44,7 +45,8 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
           firstName: true,
           lastName: true,
           role: true,
-          pin: true
+          pin: true,
+          photoUrl: true
         }
       })
 
@@ -55,7 +57,8 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
             id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
-            role: user.role
+            role: user.role,
+            photoUrl: user.photoUrl || undefined
           }
         }
       }
@@ -77,7 +80,8 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
           id: true,
           firstName: true,
           lastName: true,
-          role: true
+          role: true,
+          photoUrl: true
         }
       })
 
@@ -94,7 +98,8 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
         id: true,
         firstName: true,
         lastName: true,
-        role: true
+        role: true,
+        photoUrl: true
       }
     })
 

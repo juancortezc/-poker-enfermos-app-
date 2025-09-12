@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Save, User, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { UserAvatar } from '@/components/UserAvatar'
 
 interface PlayerProfile {
   id: string
@@ -148,7 +149,6 @@ export default function ProfilePage() {
     )
   }
 
-  const initials = `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase()
   const aliasesText = profile.aliases.join(', ') || 'Sin alias'
 
   return (
@@ -168,8 +168,8 @@ export default function ProfilePage() {
 
       {/* Profile Photo and Name */}
       <div className="text-center py-8">
-        <div className="w-32 h-32 bg-poker-red rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-4 shadow-lg">
-          {initials}
+        <div className="mx-auto mb-4 shadow-lg">
+          <UserAvatar user={profile} size="xl" />
         </div>
         <h2 className="text-2xl font-bold text-poker-text">
           {profile.firstName} {profile.lastName}

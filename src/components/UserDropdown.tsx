@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { LogOut, User, ChevronDown } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 import { useRouter } from 'next/navigation'
+import { UserAvatar } from './UserAvatar'
 
 export function UserDropdown() {
   const { user, logout } = useAuth()
@@ -47,8 +48,6 @@ export function UserDropdown() {
 
   if (!user) return null
 
-  const initials = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Trigger */}
@@ -57,9 +56,7 @@ export function UserDropdown() {
         className="flex items-center space-x-2 text-poker-text hover:text-poker-red transition-smooth p-2 rounded-lg hover:bg-poker-red/10"
       >
         {/* Avatar */}
-        <div className="w-8 h-8 bg-poker-red rounded-full flex items-center justify-center text-white text-sm font-medium">
-          {initials}
-        </div>
+        <UserAvatar user={user} size="sm" />
         <ChevronDown 
           size={16} 
           className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} 
@@ -72,9 +69,7 @@ export function UserDropdown() {
           {/* User Info Header */}
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-poker-red rounded-full flex items-center justify-center text-white text-lg font-medium">
-                {initials}
-              </div>
+              <UserAvatar user={user} size="md" />
               <div className="flex-1 min-w-0">
                 <div className="text-white font-medium truncate">
                   {user.firstName} {user.lastName}
