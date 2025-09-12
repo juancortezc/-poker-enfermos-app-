@@ -66,27 +66,43 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
 
   // Cargar lista de Enfermos/Comisión para seleccionar invitador
   useEffect(() => {
-    if (user?.adminKey) {
+    if (user) {
       fetchEnfermos()
     }
-  }, [user?.adminKey])
+  }, [user])
 
   const fetchEnfermos = async () => {
     try {
+      // Get auth token from localStorage
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Use PIN if available, otherwise fall back to adminKey
+      if (pin) {
+        headers['Authorization'] = `Bearer PIN:${pin}`
+      } else if (adminKey) {
+        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+      }
+
       const response = await fetch('/api/players?role=Enfermo,Comision', {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers
       })
 
       if (response.ok) {
         const data = await response.json()
+        console.log('Enfermos data:', data) // Debug log
         // Filtrar solo Enfermos y Comisión activos
         const enfermosData = data.filter((p: any) => 
           (p.role === UserRole.Enfermo || p.role === UserRole.Comision) && p.isActive
         )
         setEnfermos(enfermosData)
+        console.log('Filtered enfermos:', enfermosData) // Debug log
+      } else {
+        console.error('Failed to fetch enfermos:', response.status, response.statusText)
       }
     } catch (err) {
       console.error('Error fetching enfermos:', err)
@@ -130,12 +146,24 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
       const url = isEditing ? `/api/players/${invitadoId}` : '/api/players'
       const method = isEditing ? 'PUT' : 'POST'
 
+      // Get auth token from localStorage
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Use PIN if available, otherwise fall back to adminKey
+      if (pin) {
+        headers['Authorization'] = `Bearer PIN:${pin}`
+      } else if (adminKey) {
+        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+      }
+
       const response = await fetch(url, {
         method,
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(submitData)
       })
 
