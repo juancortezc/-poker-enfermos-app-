@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
-import { DatePicker } from '@/components/ui/date-picker'
-import { ArrowLeft, Loader2, Play, UserPlus } from 'lucide-react'
+import { Loader2, Play, UserPlus } from 'lucide-react'
 
 interface Player {
   id: string
@@ -105,7 +104,16 @@ export default function GameDateConfigPage() {
       
       // Check if there's an active game date already
       const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      console.log('🔑 PIN for auth:', pin?.substring(0, 4) + '***')
+      console.log('🔑 PIN for auth:', pin ? pin.substring(0, 4) + '***' : 'NO PIN FOUND')
+      
+      if (!pin) {
+        console.error('❌ No PIN found in localStorage')
+        setError('No se encontró autenticación. Redirigiendo al login...')
+        setTimeout(() => {
+          router.push('/admin')
+        }, 1500)
+        return
+      }
       
       const activeResponse = await fetch('/api/game-dates/active', {
         headers: {
@@ -172,7 +180,18 @@ export default function GameDateConfigPage() {
         console.error('❌ Available dates request failed:', availableResponse.status)
         const errorText = await availableResponse.text()
         console.error('Error details:', errorText)
-        setError(`Error al obtener fechas disponibles: ${availableResponse.status}`)
+        
+        if (availableResponse.status === 401) {
+          // Error de autenticación - intentar limpiar y redirigir
+          console.error('❌ Error de autenticación - PIN inválido o expirado')
+          setError('Error de autenticación. Por favor, vuelve a iniciar sesión.')
+          // Opcionalmente, redirigir a login después de un delay
+          setTimeout(() => {
+            router.push('/admin')
+          }, 2000)
+        } else {
+          setError(`Error al obtener fechas disponibles: ${availableResponse.status}`)
+        }
       }
     } catch (err) {
       console.error('❌ Error in loadInitialData:', err)
@@ -215,10 +234,6 @@ export default function GameDateConfigPage() {
     setActiveTab('enfermos')
   }
 
-  const handleDateChange = (newDate: Date | undefined) => {
-    setSelectedDate(newDate)
-    // TODO: Save date change to database if needed
-  }
 
   const togglePlayer = (playerId: string) => {
     if (activeTab === 'enfermos') {
@@ -323,34 +338,18 @@ export default function GameDateConfigPage() {
 
   return (
     <div className="min-h-screen bg-poker-dark text-white">
-      <div className="max-w-md mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center mb-8">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/dashboard')}
-            className="text-poker-muted hover:text-white hover:bg-white/10 mr-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Regresar
-          </Button>
-          <h1 className="text-2xl font-bold text-white">
-            FECHA
-          </h1>
-        </div>
-
+      <div className="max-w-md mx-auto px-4 py-4">
         {/* Main Content */}
         <div className="space-y-6">
           {/* Date Selection and Activation */}
           {!activeGameDate && (
             <div className="bg-poker-card rounded-lg border border-white/10 p-4">
-              {/* Date Dropdown */}
-              <div className="mb-4">
+              <div className="flex gap-2">
+                {/* Date Dropdown - 50% width */}
                 <select
                   value={selectedDateId || ''}
                   onChange={(e) => handleDateSelection(Number(e.target.value))}
-                  className="w-full p-3 bg-poker-dark text-white border border-white/20 rounded-lg text-lg font-bold"
+                  className="w-1/2 p-3 bg-poker-dark text-white border border-white/20 rounded-lg text-lg font-bold"
                 >
                   {availableDates.map((date) => (
                     <option key={date.id} value={date.id}>
@@ -358,26 +357,26 @@ export default function GameDateConfigPage() {
                     </option>
                   ))}
                 </select>
-              </div>
 
-              {/* Activate Button */}
-              <Button
-                onClick={handleActivate}
-                disabled={activating || selectedPlayers.length === 0}
-                className="w-full bg-poker-red hover:bg-red-700 text-white text-lg font-bold py-6"
-              >
-                {activating ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Activando...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-5 h-5 mr-2" />
-                    ACTIVAR
-                  </>
-                )}
-              </Button>
+                {/* Activate Button - 50% width */}
+                <Button
+                  onClick={handleActivate}
+                  disabled={activating || selectedPlayers.length === 0}
+                  className="w-1/2 bg-poker-red hover:bg-red-700 text-white text-lg font-bold"
+                >
+                  {activating ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Activando...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-5 h-5 mr-2" />
+                      ACTIVAR
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           )}
 
@@ -386,64 +385,42 @@ export default function GameDateConfigPage() {
             {/* Enfermos Tab */}
             <button
               onClick={() => setActiveTab('enfermos')}
-              className={`p-4 rounded-lg border-2 text-center transition-all ${
+              className={`p-2 rounded-lg border-2 text-center transition-all ${
                 activeTab === 'enfermos'
                   ? 'bg-poker-red border-poker-red text-white'
                   : 'bg-poker-card border-white/10 text-poker-text hover:border-white/20'
               }`}
             >
-              <div className="text-sm">Enfermos</div>
-              <div className="text-2xl font-bold">{selectedCount}</div>
+              <div className="text-xs">Enfermos</div>
+              <div className="text-lg font-bold">{selectedPlayers.length}</div>
             </button>
 
             {/* Invitados Tab */}
             <button
               onClick={() => setActiveTab('invitados')}
-              className={`p-4 rounded-lg border-2 text-center transition-all ${
+              className={`p-2 rounded-lg border-2 text-center transition-all ${
                 activeTab === 'invitados'
                   ? 'bg-pink-600 border-pink-600 text-white'
                   : 'bg-poker-card border-white/10 text-poker-text hover:border-white/20'
               }`}
             >
-              <div className="text-sm">Invitados</div>
-              <div className="text-2xl font-bold">{selectedGuests.length}</div>
+              <div className="text-xs">Invitados</div>
+              <div className="text-lg font-bold">{selectedGuests.length}</div>
             </button>
 
             {/* Date Display */}
-            <div className="p-4 bg-poker-card border border-white/10 rounded-lg text-center">
+            <div className="p-2 bg-poker-card border border-white/10 rounded-lg text-center">
               {selectedDate && (
                 <>
-                  <div className="text-sm text-poker-muted">
+                  <div className="text-xs text-poker-muted">
                     {selectedDate.toLocaleDateString('es-ES', { month: 'long' })}
                   </div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-lg font-bold">
                     {selectedDate.getDate()}
                   </div>
                 </>
               )}
             </div>
-          </div>
-
-          {/* Date Picker (when date is clicked) */}
-          {selectedDate && (
-            <div className="bg-poker-card rounded-lg border border-white/10 p-4">
-              <DatePicker
-                selected={selectedDate}
-                onSelect={handleDateChange}
-                className="w-full"
-              />
-            </div>
-          )}
-
-          {/* Todos Button */}
-          <div className="text-right">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-poker-muted hover:text-white"
-            >
-              Todos
-            </Button>
           </div>
 
           {/* Player List */}
