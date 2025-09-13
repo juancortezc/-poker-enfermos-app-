@@ -105,9 +105,10 @@ export default function PlayersPage() {
   const fetchPlayers = async () => {
     try {
       setLoading(true)
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch('/api/players?includeInactive=false', {
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })

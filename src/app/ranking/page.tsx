@@ -136,15 +136,15 @@ export default function RankingPage() {
         {/* Tab Content */}
         <div className="mt-2">
           {activeTab === 'resumen' && (
-            <ResumenTable tournamentId={activeTournament.id} userPin={user?.pin} />
+            <ResumenTable tournamentId={activeTournament.tournament?.id || activeTournament.id} userPin={user?.pin} />
           )}
           
           {activeTab === 'total' && (
-            <TotalTable tournamentId={activeTournament.id} userPin={user?.pin} />
+            <TotalTable tournamentId={activeTournament.tournament?.id || activeTournament.id} userPin={user?.pin} />
           )}
           
           {activeTab === 'fechas' && (
-            <FechasTable tournamentId={activeTournament.id} userPin={user?.pin} />
+            <FechasTable tournamentId={activeTournament.tournament?.id || activeTournament.id} userPin={user?.pin} />
           )}
         </div>
       </div>

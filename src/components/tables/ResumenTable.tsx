@@ -1,9 +1,5 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { Download } from 'lucide-react';
 import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 
 interface ResumenTableProps {
@@ -12,8 +8,6 @@ interface ResumenTableProps {
 }
 
 export default function ResumenTable({ tournamentId, userPin }: ResumenTableProps) {
-  const [downloading, setDownloading] = useState(false);
-  const tableRef = useRef<HTMLDivElement>(null);
 
   // Use SWR hook for ranking data with PIN authentication
   const { 
@@ -78,73 +72,10 @@ export default function ResumenTable({ tournamentId, userPin }: ResumenTableProp
     return parts[0] || name;
   };
 
-  const downloadPDF = async () => {
-    if (!tableRef.current || !rankingData) return;
-    
-    setDownloading(true);
-    
-    try {
-      // Capturar la tabla como imagen
-      const canvas = await html2canvas(tableRef.current, {
-        scale: 2, // Alta resolución
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        allowTaint: true,
-      });
-
-      // Crear PDF cuadrado 800x800px
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [800, 800]
-      });
-
-      // Obtener dimensiones
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      // Calcular dimensiones para ajustar en PDF cuadrado
-      const pdfWidth = 800;
-      const pdfHeight = 800;
-      
-      // Calcular escala manteniendo proporciones
-      const scale = Math.min(pdfWidth / imgWidth, (pdfHeight - 100) / imgHeight);
-      const scaledWidth = imgWidth * scale;
-      const scaledHeight = imgHeight * scale;
-      
-      // Centrar la imagen
-      const x = (pdfWidth - scaledWidth) / 2;
-      const y = 50; // Dejar espacio para título
-
-      // Agregar título
-      pdf.setFontSize(18);
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(`Tabla Resumen - Torneo ${rankingData.tournament.number}`, pdfWidth / 2, 30, { align: 'center' });
-      
-      // Agregar fecha
-      pdf.setFontSize(12);
-      const currentDate = new Date().toLocaleDateString('es-ES');
-      pdf.text(`Generado el: ${currentDate}`, pdfWidth / 2, 750, { align: 'center' });
-
-      // Agregar imagen de la tabla
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
-
-      // Descargar PDF
-      const fileName = `tabla-resumen-torneo-${rankingData.tournament.number}.pdf`;
-      pdf.save(fileName);
-      
-    } catch (error) {
-      console.error('Error generando PDF:', error);
-      alert('Error al generar el PDF. Inténtalo de nuevo.');
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   return (
     <div className="w-full">
-      <div ref={tableRef}>
+      <div>
         <table className="excel-table w-full table-fixed">
         <thead>
           <tr>
@@ -213,24 +144,6 @@ export default function ResumenTable({ tournamentId, userPin }: ResumenTableProp
           })}
         </tbody>
         </table>
-      </div>
-      
-      {/* Botón de descarga PDF */}
-      <div className="flex justify-center mt-6">
-        <button
-          onClick={downloadPDF}
-          disabled={downloading || !rankingData}
-          className={`
-            flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200
-            ${downloading || !rankingData 
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-              : 'bg-poker-red text-white hover:bg-red-700 active:scale-95 shadow-lg hover:shadow-xl'
-            }
-          `}
-        >
-          <Download className="w-4 h-4" />
-          {downloading ? 'Generando PDF...' : 'Descargar PDF'}
-        </button>
       </div>
     </div>
   );

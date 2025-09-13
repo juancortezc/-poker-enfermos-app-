@@ -39,7 +39,7 @@ export default function Dashboard() {
   const quickActions = [
     {
       title: 'FECHA',
-      href: '/game-dates/new',
+      href: '/game-dates/config',
       icon: Calendar,
       disabled: hasActiveDate,
     },

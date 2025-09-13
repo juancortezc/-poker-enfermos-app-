@@ -1,0 +1,253 @@
+{
+  "timestamp": "2025-09-11T17:16:03.536Z",
+  "migration": "adminKey-to-pins",
+  "summary": {
+    "totalUsers": 29,
+    "usersWithPreviousAdminKey": 6,
+    "roleDistribution": {
+      "Comision": 6,
+      "Enfermo": 16,
+      "Invitado": 7
+    }
+  },
+  "users": [
+    {
+      "id": "cmfbl19pd000bp8dbhwudzwur",
+      "name": "Diego Behar",
+      "role": "Comision",
+      "pin": "7276",
+      "hadAdminKey": true,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1axu0013p8dbz8lt3c9u",
+      "name": "Javier Martinez",
+      "role": "Comision",
+      "pin": "1706",
+      "hadAdminKey": true,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1bg8001bp8db63ct0xsu",
+      "name": "Jose Luis  Toral",
+      "role": "Comision",
+      "pin": "5122",
+      "hadAdminKey": true,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1c0w001lp8dbef0p6on3",
+      "name": "Juan Antonio Cortez",
+      "role": "Comision",
+      "pin": "7368",
+      "hadAdminKey": true,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1abh000pp8dbtb7gbx1f",
+      "name": "Juan Fernando  Ochoa",
+      "role": "Comision",
+      "pin": "1978",
+      "hadAdminKey": true,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1b9r0019p8db1ii11dat",
+      "name": "Meche Garrido",
+      "role": "Comision",
+      "pin": "0334",
+      "hadAdminKey": true,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl19xg000hp8dbmfmgx4kt",
+      "name": "Carlos Chacón",
+      "role": "Enfermo",
+      "pin": "9737",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1a2t000lp8dbfxf99gyb",
+      "name": "Damian Amador",
+      "role": "Enfermo",
+      "pin": "3118",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1agu000tp8dbbyqfrghw",
+      "name": "Daniel Vela",
+      "role": "Enfermo",
+      "pin": "8558",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1ama000xp8dblmchx37p",
+      "name": "Fernando Peña",
+      "role": "Enfermo",
+      "pin": "2319",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl19j30009p8dbppitimmz",
+      "name": "Freddy Lopez",
+      "role": "Enfermo",
+      "pin": "9785",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1a5j000np8dbpesoje76",
+      "name": "Joffre Palacios",
+      "role": "Enfermo",
+      "pin": "6495",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl19s2000dp8dbyogiettf",
+      "name": "Jorge Tamayo",
+      "role": "Enfermo",
+      "pin": "9672",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1aoz000zp8db4thegvmo",
+      "name": "Jose Patricio  Moreno",
+      "role": "Enfermo",
+      "pin": "3631",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl19ge0007p8db9bphj9j7",
+      "name": "Juan Tapia",
+      "role": "Enfermo",
+      "pin": "8969",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl19dp0005p8dbimtmb5g1",
+      "name": "Juan Guajardo",
+      "role": "Enfermo",
+      "pin": "5622",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1ae6000rp8dbj5erik9j",
+      "name": "Miguel Chiesa",
+      "role": "Enfermo",
+      "pin": "0971",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl19b10003p8db4jdy8zri",
+      "name": "Milton Tapia",
+      "role": "Enfermo",
+      "pin": "7958",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl19uq000fp8dbnvdeekj6",
+      "name": "Mono Benites",
+      "role": "Enfermo",
+      "pin": "3450",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl195n0001p8dbwge7v0a6",
+      "name": "Roddy Naranjo",
+      "role": "Enfermo",
+      "pin": "6183",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1a05000jp8dbvv09hppc",
+      "name": "Ruben Cadena",
+      "role": "Enfermo",
+      "pin": "7399",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1ajk000vp8dbzfs1govt",
+      "name": "Sean Willis",
+      "role": "Enfermo",
+      "pin": "3023",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1b3b0017p8dbexmswzk3",
+      "name": "Agustin Guerrero",
+      "role": "Invitado",
+      "pin": "2599",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1brn001jp8db92rbqqg9",
+      "name": "Alejandro Perez",
+      "role": "Invitado",
+      "pin": "7180",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1b0l0015p8dbk7us4l69",
+      "name": "Apolinar Externo",
+      "role": "Invitado",
+      "pin": "9508",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1biw001dp8dbs420b2x6",
+      "name": "Carlos jr",
+      "role": "Invitado",
+      "pin": "8055",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1aro0011p8dbbpksrzy1",
+      "name": "Invitado SN",
+      "role": "Invitado",
+      "pin": "0719",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1blp001fp8dbh9niq4a5",
+      "name": "Julio Betu",
+      "role": "Invitado",
+      "pin": "3114",
+      "hadAdminKey": false,
+      "isActive": true
+    },
+    {
+      "id": "cmfbl1bos001hp8db64v2q566",
+      "name": "Sebastian Caicedo",
+      "role": "Invitado",
+      "pin": "1207",
+      "hadAdminKey": false,
+      "isActive": true
+    }
+  ],
+  "juanAntonioDetails": {
+    "found": true,
+    "id": "cmfbl1c0w001lp8dbef0p6on3",
+    "name": "Juan Antonio Cortez",
+    "assignedPin": "7368"
+  }
+}

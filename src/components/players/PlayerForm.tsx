@@ -111,9 +111,10 @@ export default function PlayerForm({
 
   const fetchEnfermos = async () => {
     try {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch('/api/players?role=Enfermo', {
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })
@@ -164,10 +165,11 @@ export default function PlayerForm({
       const url = player ? `/api/players/${player.id}` : '/api/players'
       const method = player ? 'PUT' : 'POST'
 
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(submitData)

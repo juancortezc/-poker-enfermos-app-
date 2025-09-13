@@ -34,7 +34,7 @@ export default function Home() {
       <div className="pt-2 px-4 pb-8">
         {/* Widget de Ranking */}
         {activeTournament ? (
-          <HomeRankingView tournamentId={activeTournament.id} />
+          <HomeRankingView tournamentId={activeTournament.tournament?.id || activeTournament.id} />
         ) : (
           <div className="text-center py-16">
             <h1 className="text-4xl font-bold text-white mb-4">Poker de Enfermos</h1>

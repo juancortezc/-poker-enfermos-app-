@@ -1,0 +1,30 @@
+ID,Nombre,Apellido,Rol,PIN,Tenía AdminKey,Activo
+cmfbl19pd000bp8dbhwudzwur,"Diego","Behar",Comision,7276,Sí,Sí
+cmfbl1axu0013p8dbz8lt3c9u,"Javier","Martinez",Comision,1706,Sí,Sí
+cmfbl1bg8001bp8db63ct0xsu,"Jose Luis ","Toral",Comision,5122,Sí,Sí
+cmfbl1c0w001lp8dbef0p6on3,"Juan Antonio","Cortez",Comision,7368,Sí,Sí
+cmfbl1abh000pp8dbtb7gbx1f,"Juan Fernando"," Ochoa",Comision,1978,Sí,Sí
+cmfbl1b9r0019p8db1ii11dat,"Meche","Garrido",Comision,0334,Sí,Sí
+cmfbl19xg000hp8dbmfmgx4kt,"Carlos","Chacón",Enfermo,9737,No,Sí
+cmfbl1a2t000lp8dbfxf99gyb,"Damian","Amador",Enfermo,3118,No,Sí
+cmfbl1agu000tp8dbbyqfrghw,"Daniel","Vela",Enfermo,8558,No,Sí
+cmfbl1ama000xp8dblmchx37p,"Fernando","Peña",Enfermo,2319,No,Sí
+cmfbl19j30009p8dbppitimmz,"Freddy","Lopez",Enfermo,9785,No,Sí
+cmfbl1a5j000np8dbpesoje76,"Joffre","Palacios",Enfermo,6495,No,Sí
+cmfbl19s2000dp8dbyogiettf,"Jorge","Tamayo",Enfermo,9672,No,Sí
+cmfbl1aoz000zp8db4thegvmo,"Jose Patricio ","Moreno",Enfermo,3631,No,Sí
+cmfbl19ge0007p8db9bphj9j7,"Juan","Tapia",Enfermo,8969,No,Sí
+cmfbl19dp0005p8dbimtmb5g1,"Juan","Guajardo",Enfermo,5622,No,Sí
+cmfbl1ae6000rp8dbj5erik9j,"Miguel","Chiesa",Enfermo,0971,No,Sí
+cmfbl19b10003p8db4jdy8zri,"Milton","Tapia",Enfermo,7958,No,Sí
+cmfbl19uq000fp8dbnvdeekj6,"Mono","Benites",Enfermo,3450,No,Sí
+cmfbl195n0001p8dbwge7v0a6,"Roddy","Naranjo",Enfermo,6183,No,Sí
+cmfbl1a05000jp8dbvv09hppc,"Ruben","Cadena",Enfermo,7399,No,Sí
+cmfbl1ajk000vp8dbzfs1govt,"Sean","Willis",Enfermo,3023,No,Sí
+cmfbl1b3b0017p8dbexmswzk3,"Agustin","Guerrero",Invitado,2599,No,Sí
+cmfbl1brn001jp8db92rbqqg9,"Alejandro","Perez",Invitado,7180,No,Sí
+cmfbl1b0l0015p8dbk7us4l69,"Apolinar","Externo",Invitado,9508,No,Sí
+cmfbl1biw001dp8dbs420b2x6,"Carlos","jr",Invitado,8055,No,Sí
+cmfbl1aro0011p8dbbpksrzy1,"Invitado","SN",Invitado,0719,No,Sí
+cmfbl1blp001fp8dbh9niq4a5,"Julio","Betu",Invitado,3114,No,Sí
+cmfbl1bos001hp8db64v2q566,"Sebastian","Caicedo",Invitado,1207,No,Sí

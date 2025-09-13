@@ -1,0 +1,50 @@
+[
+  {
+    "id": "cmfbl19pd000bp8dbhwudzwur",
+    "firstName": "Diego",
+    "lastName": "Behar",
+    "role": "Comision",
+    "adminKey": "$2b$10$uImcSJVGJTmUiOOwzZ5K6uStLtC.KYpLUZIiivzYFKGxUeA6aiOBa",
+    "pin": null
+  },
+  {
+    "id": "cmfbl1abh000pp8dbtb7gbx1f",
+    "firstName": "Juan Fernando",
+    "lastName": " Ochoa",
+    "role": "Comision",
+    "adminKey": "$2b$10$7eMzV0ol/c62nn3QUg9.SOJyrAft5c0LAan9NhuNB6OWv7tRhcMfS",
+    "pin": null
+  },
+  {
+    "id": "cmfbl1axu0013p8dbz8lt3c9u",
+    "firstName": "Javier",
+    "lastName": "Martinez",
+    "role": "Comision",
+    "adminKey": "$2b$10$V.zOHPHiM0sr9YpnyFR7YuWlI5BFQ4iUL98NK2r2SVfYXYQ1Tjjx6",
+    "pin": null
+  },
+  {
+    "id": "cmfbl1b9r0019p8db1ii11dat",
+    "firstName": "Meche",
+    "lastName": "Garrido",
+    "role": "Comision",
+    "adminKey": "$2b$10$xKT4ockwWhaVuvss80UItOT4qXpKIdLN.uGFBsPE0.JJ6TL2CAKnq",
+    "pin": null
+  },
+  {
+    "id": "cmfbl1bg8001bp8db63ct0xsu",
+    "firstName": "Jose Luis ",
+    "lastName": "Toral",
+    "role": "Comision",
+    "adminKey": "$2b$10$6XbFC6IZ6w5q.KE0RW9r1uEgQK9RdZ1Rmdph2oaJ8yowPhSAeWfgq",
+    "pin": null
+  },
+  {
+    "id": "cmfbl1c0w001lp8dbef0p6on3",
+    "firstName": "Juan Antonio",
+    "lastName": "Cortez",
+    "role": "Comision",
+    "adminKey": "$2b$10$q8dwK7Oh0RJbubUQfI8s2u.oMDit2BiXqxBcuqAh51Fk0De/xv0E.",
+    "pin": "1234"
+  }
+]
