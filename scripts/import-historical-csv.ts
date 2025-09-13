@@ -99,7 +99,7 @@ async function validateCSVData(eliminations: CSVElimination[]): Promise<{
   }
 
   // 4. Validate winner (position 1) has no eliminator
-  const winner = eliminations.find(e => e.position === 1);
+  const winner = eliminations.find(e => e.posicion === 1);
   if (winner && winner.eliminador) {
     warnings.push(`Ganador ${winner.eliminado} tiene eliminador: ${winner.eliminador}`);
   }
