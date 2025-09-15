@@ -100,7 +100,7 @@ export async function PUT(req: NextRequest) {
       }
 
       // Preparar datos para actualizar
-      const updateData: any = {}
+      const updateData: Record<string, unknown> = {}
       
       if (pin) {
         updateData.pin = await bcrypt.hash(pin, 10)

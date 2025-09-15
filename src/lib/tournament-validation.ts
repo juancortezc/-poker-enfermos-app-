@@ -50,8 +50,7 @@ export const validateTournamentNumber = async (
       
       if (response.ok) {
         const tournaments = await response.json()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const existingTournament = tournaments.find((t: any) => 
+        const existingTournament = tournaments.find((t: { number: number; id: string | number }) => 
           t.number === number && (!excludeId || t.id.toString() !== excludeId)
         )
         

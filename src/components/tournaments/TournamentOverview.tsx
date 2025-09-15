@@ -33,7 +33,7 @@ interface TournamentData {
   stats?: {
     completedDates?: number
     totalDates?: number
-    nextDate?: any
+    nextDate?: { dateNumber: number; scheduledDate: string } | null
     startDate?: string
     endDate?: string
     isCompleted?: boolean

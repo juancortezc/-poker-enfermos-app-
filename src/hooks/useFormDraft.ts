@@ -3,10 +3,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 interface FormDraftOptions {
   key: string
   autosaveInterval?: number
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSave?: (data: any) => void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onRestore?: (data: any) => void
+  onSave?: (data: unknown) => void
+  onRestore?: (data: unknown) => void
 }
 
 interface FormDraftResult<T> {
@@ -125,11 +123,9 @@ export function useFormDraft<T extends Record<string, any>>(
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useFormValidation<T extends Record<string, any>>(
+export function useFormValidation<T extends Record<string, unknown>>(
   data: T,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  validator: (data: T) => { isValid: boolean; errors: any[]; warnings: any[] }
+  validator: (data: T) => { isValid: boolean; errors: string[]; warnings: string[] }
 ) {
   const [validationResult, setValidationResult] = useState(() => validator(data))
   const [isValidating, setIsValidating] = useState(false)

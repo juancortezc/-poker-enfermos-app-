@@ -97,7 +97,7 @@ export function useRealTimeUpdates(options: RealTimeUpdatesOptions = {}) {
         console.log('🔌 Socket disconnected')
       })
 
-      socket.on('connect_error', (error: any) => {
+      socket.on('connect_error', (error: Error) => {
         console.error('Socket connection error:', error)
       })
 

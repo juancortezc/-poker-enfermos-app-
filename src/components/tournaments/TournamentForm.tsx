@@ -324,8 +324,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateFormData = useCallback((field: keyof FormData, value: any) => {
+  const updateFormData = useCallback((field: keyof FormData, value: FormData[keyof FormData]) => {
     const newData = { ...formData, [field]: value }
     setFormData(newData)
     

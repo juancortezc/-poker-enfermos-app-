@@ -69,7 +69,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
       const datesData = await datesResponse.json();
 
       // Find this player in the ranking
-      const playerRanking = rankingData.rankings.find((r: any) => r.playerId === playerId);
+      const playerRanking = rankingData.rankings.find((r: { playerId: string }) => r.playerId === playerId);
       
       if (!playerRanking) {
         throw new Error('Player not found in tournament ranking');
@@ -77,7 +77,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
 
       // Process dates and get elimination details for completed ones
       const datePerformance = await Promise.all(
-        datesData.map(async (date: any) => {
+        datesData.map(async (date: { id: string; dateNumber: number; status: string; scheduledDate: string }) => {
           const baseDate = {
             dateNumber: date.dateNumber,
             status: date.status,
@@ -92,7 +92,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
                 const eliminations = await eliminationsResponse.json();
                 
                 // Find if this player was eliminated
-                const playerElimination = eliminations.find((e: any) => e.eliminatedPlayerId === playerId);
+                const playerElimination = eliminations.find((e: { eliminatedPlayerId: string }) => e.eliminatedPlayerId === playerId);
                 
                 if (playerElimination) {
                   // Player was eliminated
@@ -177,7 +177,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
 // Helper function to calculate ranking evolution
 function calculateRankingEvolution(
   playerPointsByDate: { [dateNumber: number]: number },
-  allRankings: any[],
+  allRankings: Array<{ playerId: string; [key: string]: unknown }>,
   targetPlayerId: string
 ): Array<{ dateNumber: number; position: number; points: number }> {
   const evolution: Array<{ dateNumber: number; position: number; points: number }> = [];

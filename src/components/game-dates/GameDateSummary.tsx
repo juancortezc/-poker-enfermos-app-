@@ -5,7 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, Users, Trophy, Edit, Clock } from 'lucide-react'
 
 interface GameDateSummaryProps {
-  gameDate: any
+  gameDate: { 
+    id: string; 
+    dateNumber: number; 
+    scheduledDate: string; 
+    status: string;
+    playerIds?: string[];
+    guestIds?: string[];
+    pointsForWinner?: number;
+  }
   onEdit?: () => void
 }
 

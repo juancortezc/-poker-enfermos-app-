@@ -219,7 +219,7 @@ export async function PUT(
         }
 
         // Preparar datos para actualizar
-        let updateData: any = {}
+        let updateData: Record<string, unknown> = {}
         
         // Actualizar participantes si se proporcionan
         if (playerIds) {

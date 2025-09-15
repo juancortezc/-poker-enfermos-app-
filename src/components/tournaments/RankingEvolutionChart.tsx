@@ -13,8 +13,8 @@ interface RankingEvolutionChartProps {
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: any[];
-  label?: any;
+  payload?: Array<{ value: number; dataKey: string }>;
+  label?: string | number;
 }
 
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {

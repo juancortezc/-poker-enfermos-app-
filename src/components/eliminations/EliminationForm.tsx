@@ -21,7 +21,7 @@ interface Elimination {
 }
 
 interface EliminationFormProps {
-  gameDate: any
+  gameDate: { id: string; dateNumber: number; scheduledDate: string; status: string }
   players: Player[]
   eliminations: Elimination[]
   onEliminationSaved: () => void

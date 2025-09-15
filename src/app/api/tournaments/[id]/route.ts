@@ -116,7 +116,7 @@ export async function PUT(
       }
 
       // Preparar datos de actualización
-      const updateData: any = {}
+      const updateData: Record<string, unknown> = {}
       
       if (name !== undefined) updateData.name = name.trim()
       if (status !== undefined) updateData.status = status as TournamentStatus
@@ -152,7 +152,7 @@ export async function PUT(
       // Actualizar fechas si se proporcionaron
       if (gameDates && Array.isArray(gameDates)) {
         await Promise.all(
-          gameDates.map((gameDate: any) => 
+          gameDates.map((gameDate: { id: string; dateNumber: number; scheduledDate: string }) => 
             prisma.gameDate.update({
               where: { 
                 id: gameDate.id,
@@ -194,7 +194,7 @@ export async function PUT(
         
         // Crear nuevos blinds
         await prisma.blindLevel.createMany({
-          data: blindLevels.map((blind: any) => ({
+          data: blindLevels.map((blind: { level: number; smallBlind: number; bigBlind: number; duration: number }) => ({
             tournamentId,
             level: blind.level,
             smallBlind: blind.smallBlind,
