@@ -54,9 +54,6 @@ export default function LoginForm() {
             <h1 className="text-3xl font-bold text-poker-text mb-2">
               Poker Enfermos
             </h1>
-            <p className="text-poker-muted text-sm">
-              Ingresa tu clave de acceso para continuar
-            </p>
           </div>
 
           {/* Formulario */}
@@ -103,7 +100,7 @@ export default function LoginForm() {
           {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-poker-muted text-xs">
-              © 2025 Poker Enfermos. Todos los derechos reservados.
+              Desarrollado por BLACK MAMBA. Todos los derechos reservados.
             </p>
           </div>
         </CardContent>

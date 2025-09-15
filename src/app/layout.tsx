@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Poker de Enfermos",
+  title: "POKER DE ENFERMOS",
   description: "Aplicación para gestión de torneos de poker - Sistema ELIMINA 2",
   manifest: "/manifest.json",
   themeColor: "#E10600",
