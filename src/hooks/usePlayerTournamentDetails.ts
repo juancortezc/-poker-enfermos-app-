@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface PlayerTournamentDetails {
   player: {
@@ -42,13 +42,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (playerId && tournamentId) {
-      fetchPlayerDetails();
-    }
-  }, [playerId, tournamentId, fetchPlayerDetails]);
-
-  const fetchPlayerDetails = async () => {
+  const fetchPlayerDetails = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -169,7 +163,13 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     } finally {
       setLoading(false);
     }
-  };
+  }, [playerId, tournamentId]);
+
+  useEffect(() => {
+    if (playerId && tournamentId) {
+      fetchPlayerDetails();
+    }
+  }, [playerId, tournamentId, fetchPlayerDetails]);
 
   return { details, loading, error, refetch: fetchPlayerDetails };
 }

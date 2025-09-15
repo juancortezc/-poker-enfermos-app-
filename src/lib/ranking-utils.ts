@@ -166,7 +166,6 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
               // Registrar como ganador (posición 1)
               datePositions.set(playerId, 1);
               ranking.firstPlaces++;
-              winner = playerId;
             } else {
               // Aún jugando, no tiene puntos todavía
               ranking.pointsByDate[gameDate.dateNumber] = 0;

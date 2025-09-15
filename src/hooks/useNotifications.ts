@@ -59,19 +59,6 @@ export const useNotifications = () => {
   const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES);
   const [isSupported, setIsSupported] = useState(false);
 
-  // Verificar soporte del navegador
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const supported = 'Notification' in window && 'serviceWorker' in navigator;
-      setIsSupported(supported);
-      
-      if (supported) {
-        setPermission(Notification.permission);
-        loadPreferences();
-      }
-    }
-  }, [loadPreferences]);
-
   // Cargar preferencias desde localStorage
   const loadPreferences = useCallback(() => {
     try {
@@ -84,6 +71,19 @@ export const useNotifications = () => {
       console.warn('Error loading notification preferences:', error);
     }
   }, []);
+
+  // Verificar soporte del navegador
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const supported = 'Notification' in window && 'serviceWorker' in navigator;
+      setIsSupported(supported);
+      
+      if (supported) {
+        setPermission(Notification.permission);
+        loadPreferences();
+      }
+    }
+  }, [loadPreferences]);
 
   // Guardar preferencias en localStorage
   const savePreferences = useCallback((newPreferences: NotificationPreferences) => {
