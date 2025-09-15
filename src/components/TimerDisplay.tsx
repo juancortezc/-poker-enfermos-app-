@@ -38,10 +38,11 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     if (!effectiveGameDateId || isControlling) return
     setIsControlling(true)
     try {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch(`/api/timer/game-date/${effectiveGameDateId}/pause`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })
@@ -59,10 +60,11 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     if (!effectiveGameDateId || isControlling) return
     setIsControlling(true)
     try {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch(`/api/timer/game-date/${effectiveGameDateId}/resume`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })

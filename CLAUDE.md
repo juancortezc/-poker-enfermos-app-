@@ -45,6 +45,8 @@ El sistema ha sido migrado exitosamente y ahora cuenta con un diseño completame
 - ✅ **UI simplificada**: Solo elementos esenciales sin información innecesaria
 - ✅ **Real-time countdown**: Tiempo en vivo con datos del torneo
 - ✅ **Manejo de errores**: Edge cases y validaciones completas
+- 📅 **CALENDARIO ADMIN IMPLEMENTADO**: Vista limpia del calendario del torneo
+- 📋 **REGLAMENTO PDF DIRECTO**: Acceso simplificado al documento oficial
 - 🎨 **ENFERMOS DESIGN SYSTEM IMPLEMENTADO**: Nuevo sistema de diseño consistente
 - ✅ **Dashboard 3D rediseñado**: Cards elegantes con efectos 3D, bordes rojos y gradientes
 - ✅ **Paleta de colores aprobada**: Solo rojo (#E10600), negro, gris y naranja
@@ -385,6 +387,57 @@ POST /api/timer/game-date/[id]/level-up     // Avanzar nivel (auth: Comisión)
 
 ### Flujo de Timer:
 1. **Inicio de Fecha** → TimerState se crea automáticamente
+2. **Timer Activo** → Countdown con blind levels del torneo
+3. **Control Comisión** → Pause/resume/level-up disponible
+4. **Vista Enfermos** → Solo lectura del estado actual
+5. **Sincronización** → Updates automáticos cada 5 segundos
+
+---
+
+## Sección Admin Completada (NUEVO - 2025-09-15)
+
+### 📅 CALENDARIO ADMIN - Vista Limpia del Torneo
+
+**Ruta:** `/admin/calendar` (Solo Comisión)
+
+**Características Implementadas:**
+- ✅ **Layout Exacto**: Replica el calendario de creación de torneos
+- ✅ **Sin Títulos**: Eliminado todo texto explicativo innecesario  
+- ✅ **Grid Responsivo**: Cards con día/mes como TournamentForm
+- ✅ **Estados Visuales**: Bordes de colores según status
+  - 🔴 **Rojo**: Fechas futuras programadas
+  - 🔵 **Azul**: Fechas configuradas (CREATED)
+  - 🟠 **Naranja**: Fechas en progreso
+  - 🟢 **Verde**: Fechas completadas
+  - ⚪ **Gris**: Fechas pasadas sin configurar
+- ✅ **SWR Integration**: Auto-refresh cada 60 segundos
+- ✅ **Mobile-First**: Grid adaptativo 3 columnas → 2 → 3
+
+**Componentes:**
+```typescript
+// Uso directo de SWR con endpoint completo
+const { data } = useSWR<{tournament: Tournament}>('/api/tournaments/active')
+const gameDates = data.tournament.gameDates || []
+```
+
+### 📋 REGLAMENTO ADMIN - PDF Directo
+
+**Ruta:** `/admin/regulations` (Solo Comisión)
+
+**Características Implementadas:**
+- ✅ **PDF Directo**: Iframe full-screen sin elementos adicionales
+- ✅ **Sin Títulos**: Eliminado todo UI innecesario
+- ✅ **Vista Limpia**: Solo el documento PDF
+- ✅ **URL Oficial**: Google Storage con reglamento actualizado
+- ✅ **Responsive**: Altura dinámica calc(100vh - 2rem)
+
+**Implementación:**
+```typescript
+<iframe
+  src="https://storage.googleapis.com/poker-enfermos/REGLAMENTO%20POKER%20DE%20ENFERMOS.pdf"
+  className="w-full h-screen border-0 rounded-lg"
+/>
+```
 2. **Blind Levels** → Datos cargados desde configuración del torneo
 3. **Control Comisión** → Pause/resume/level-up disponibles
 4. **Vista Enfermos** → Solo lectura, sin botones de control
