@@ -4,12 +4,11 @@ import { withComisionAuth } from '@/lib/api-auth';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return withComisionAuth(request, async (req, user) => {
+  return withComisionAuth(request, async (_req, _user) => {
     try {
-
-    const eliminationId = params.id;
+    const { id: eliminationId } = await params;
     const body = await request.json();
     const { eliminatedId, eliminatorId } = body;
 
@@ -118,12 +117,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return withComisionAuth(request, async (req, user) => {
+  return withComisionAuth(request, async (_req, _user) => {
     try {
-
-    const eliminationId = params.id;
+    const { id: eliminationId } = await params;
 
     // Obtener la eliminación
     const elimination = await prisma.elimination.findUnique({

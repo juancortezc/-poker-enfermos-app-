@@ -3,10 +3,10 @@ import { calculateTournamentRanking } from '@/lib/ranking-utils';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const tournamentId = parseInt(params.id);
+    const tournamentId = parseInt((await params).id);
 
     if (isNaN(tournamentId)) {
       return NextResponse.json(

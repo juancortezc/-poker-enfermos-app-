@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withComisionAuth } from '@/lib/api-auth'
-import { parseToUTCNoon } from '@/lib/date-utils'
 
 // POST - Crear nueva fecha de juego
 export async function POST(request: NextRequest) {
-  return withComisionAuth(request, async (req, user) => {
+  return withComisionAuth(request, async (req, _user) => {
     try {
       const data = await req.json()
       const {

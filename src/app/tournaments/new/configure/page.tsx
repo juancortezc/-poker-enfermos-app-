@@ -1,11 +1,12 @@
 import TournamentForm from '@/components/tournaments/TournamentForm'
 
 interface PageProps {
-  searchParams: { number?: string }
+  searchParams: Promise<{ number?: string }>
 }
 
-export default function ConfigureTournament({ searchParams }: PageProps) {
-  const initialTournamentNumber = searchParams.number ? parseInt(searchParams.number) : undefined
+export default async function ConfigureTournament({ searchParams }: PageProps) {
+  const params = await searchParams
+  const initialTournamentNumber = params.number ? parseInt(params.number) : undefined
   
   return <TournamentForm initialTournamentNumber={initialTournamentNumber} />
 }

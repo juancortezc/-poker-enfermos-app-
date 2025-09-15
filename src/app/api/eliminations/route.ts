@@ -5,7 +5,7 @@ import { calculatePointsForPosition } from '@/lib/tournament-utils';
 import { updateParentChildStats } from '@/lib/parent-child-stats';
 
 export async function POST(request: NextRequest) {
-  return withComisionAuth(request, async (req, user) => {
+  return withComisionAuth(request, async (_req, _user) => {
     try {
       const body = await request.json();
       console.log('[ELIMINATIONS API] Received body:', body);

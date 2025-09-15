@@ -13,10 +13,10 @@ interface PlayerWithVictoryData {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
-    const tournamentId = parseInt(params.tournamentId);
+    const tournamentId = parseInt((await params).tournamentId);
 
     if (isNaN(tournamentId)) {
       return NextResponse.json(

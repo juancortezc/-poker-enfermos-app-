@@ -6,11 +6,11 @@ import { parseToUTCNoon, validateTuesdayDate } from '@/lib/date-utils'
 // GET - Obtener detalles de una fecha específica
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return withComisionAuth(request, async (req, user) => {
+  return withComisionAuth(request, async (_req, _user) => {
     try {
-      const gameDateId = parseInt(params.id)
+      const gameDateId = parseInt((await params).id)
 
       const gameDate = await prisma.gameDate.findUnique({
         where: { id: gameDateId },
@@ -55,11 +55,11 @@ export async function GET(
 // PUT - Iniciar una fecha (cambiar status a in_progress e inicializar timer) o actualizar fecha configurada
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return withComisionAuth(request, async (req, user) => {
+  return withComisionAuth(request, async (_req, _user) => {
     try {
-      const gameDateId = parseInt(params.id)
+      const gameDateId = parseInt((await params).id)
       const body = await req.json()
       const { action, playerIds, guestIds, scheduledDate } = body
 

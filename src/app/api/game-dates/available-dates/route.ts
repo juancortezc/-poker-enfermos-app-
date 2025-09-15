@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { withAuth } from '@/lib/api-auth'
 
 export async function GET(request: NextRequest) {
-  return withAuth(request, async (req, user) => {
+  return withAuth(request, async (_req, _user) => {
     try {
       // Obtener el torneo activo
       const activeTournament = await prisma.tournament.findFirst({

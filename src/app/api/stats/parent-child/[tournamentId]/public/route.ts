@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma'
 // GET /api/stats/parent-child/[tournamentId]/public - Versión pública para testing
 export async function GET(
   req: NextRequest,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   try {
-    const tournamentId = parseInt(params.tournamentId)
+    const tournamentId = parseInt((await params).tournamentId)
     
     if (isNaN(tournamentId)) {
       return NextResponse.json(

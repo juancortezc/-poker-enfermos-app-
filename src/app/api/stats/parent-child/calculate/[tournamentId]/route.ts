@@ -5,7 +5,7 @@ import { withAuth } from '@/lib/api-auth'
 // POST /api/stats/parent-child/calculate/[tournamentId] - Calcular estadísticas desde eliminaciones existentes
 export async function POST(
   req: NextRequest,
-  { params }: { params: { tournamentId: string } }
+  { params }: { params: Promise<{ tournamentId: string }> }
 ) {
   return withAuth(req, async (req, user) => {
     try {
@@ -17,7 +17,7 @@ export async function POST(
         )
       }
 
-      const tournamentId = parseInt(params.tournamentId)
+      const tournamentId = parseInt((await params).tournamentId)
       
       if (isNaN(tournamentId)) {
         return NextResponse.json(

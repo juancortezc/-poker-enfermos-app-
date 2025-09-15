@@ -3,10 +3,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const gameDateId = parseInt(params.id);
+    const gameDateId = parseInt((await params).id);
 
     // Validar que el ID sea un número válido
     if (isNaN(gameDateId)) {

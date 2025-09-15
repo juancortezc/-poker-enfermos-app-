@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma'
 // GET /api/tournaments/:id/dates/public - Obtener fechas públicas del torneo
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const tournamentId = parseInt(params.id)
+    const tournamentId = parseInt((await params).id)
 
     if (isNaN(tournamentId)) {
       return NextResponse.json(

@@ -8,7 +8,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withAuth(req, async (req) => {
+  return withAuth(req, async (_req) => {
   try {
     const { id } = await params
 
@@ -63,7 +63,7 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withComisionAuth(req, async (req) => {
+  return withComisionAuth(req, async (_req) => {
   try {
     const { id } = await params
     const data = await req.json()
@@ -183,7 +183,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withComisionAuth(req, async (req) => {
+  return withComisionAuth(req, async (_req) => {
   try {
     const { id } = await params
 

@@ -4,11 +4,11 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withComisionAuth(request, async (req, user) => {
     try {
-      const gameDateId = parseInt(params.id)
+      const gameDateId = parseInt((await params).id)
       const { toLevel } = await req.json()
       
       if (isNaN(gameDateId)) {

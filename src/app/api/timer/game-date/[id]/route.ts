@@ -4,11 +4,11 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuth(request, async (req, user) => {
     try {
-      const gameDateId = parseInt(params.id)
+      const gameDateId = parseInt((await params).id)
       
       if (isNaN(gameDateId)) {
         return NextResponse.json(

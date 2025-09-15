@@ -4,10 +4,10 @@ import { getWinnerPoints } from '@/lib/tournament-utils';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const gameDateId = parseInt(params.id);
+    const gameDateId = parseInt((await params).id);
 
     // Obtener la fecha con todos sus datos
     const gameDate = await prisma.gameDate.findUnique({
