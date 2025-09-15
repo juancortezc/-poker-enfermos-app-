@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Plus, ChevronDown } from 'lucide-react'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { useAuth } from '@/contexts/AuthContext'
+import { useNotifications } from '@/hooks/useNotifications'
 
 interface Player {
   id: string
@@ -37,6 +38,7 @@ export function EliminationForm({
   onEliminationCreated 
 }: EliminationFormProps) {
   const { user } = useAuth()
+  const { notifyPlayerEliminated, notifyWinner } = useNotifications()
   const [eliminatedPlayerId, setEliminatedPlayerId] = useState('')
   const [eliminatorPlayerId, setEliminatorPlayerId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -79,6 +81,24 @@ export function EliminationForm({
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Error al registrar eliminación')
+      }
+
+      // Obtener información del jugador eliminado para notificaciones
+      const eliminatedPlayer = players.find(p => p.id === eliminatedPlayerId)
+      const eliminatorPlayer = eliminatorPlayerId ? players.find(p => p.id === eliminatorPlayerId) : null
+
+      // Enviar notificaciones según el tipo de eliminación
+      if (nextPosition === 1) {
+        // Es un ganador
+        if (eliminatedPlayer) {
+          notifyWinner(`${eliminatedPlayer.firstName} ${eliminatedPlayer.lastName}`, points)
+        }
+      } else if (nextPosition === 2 && eliminatorPlayer) {
+        // Posición 2, el eliminador será el ganador
+        notifyWinner(`${eliminatorPlayer.firstName} ${eliminatorPlayer.lastName}`, calculatePointsForPosition(1, players.length))
+      } else if (eliminatedPlayer) {
+        // Eliminación regular
+        notifyPlayerEliminated(`${eliminatedPlayer.firstName} ${eliminatedPlayer.lastName}`, nextPosition)
       }
 
       // Limpiar formulario

@@ -1,0 +1,46 @@
+{
+  "warning.mp3": {
+    "type": "tone",
+    "frequency": 800,
+    "duration": 0.5,
+    "volume": 0.3,
+    "description": "Tono de advertencia para 1 minuto restante"
+  },
+  "blind-change.mp3": {
+    "type": "chord",
+    "frequencies": [
+      800,
+      1000,
+      1200
+    ],
+    "duration": 0.8,
+    "volume": 0.4,
+    "description": "Acorde para cambio de blinds"
+  },
+  "elimination.mp3": {
+    "type": "tone",
+    "frequency": 400,
+    "duration": 0.6,
+    "volume": 0.3,
+    "description": "Tono bajo para eliminación"
+  },
+  "winner.mp3": {
+    "type": "melody",
+    "frequencies": [
+      800,
+      1000,
+      1200,
+      1500
+    ],
+    "duration": 1.2,
+    "volume": 0.5,
+    "description": "Melodía ascendente para ganador"
+  },
+  "completion.mp3": {
+    "type": "tone",
+    "frequency": 600,
+    "duration": 0.7,
+    "volume": 0.3,
+    "description": "Tono medio para fecha completada"
+  }
+}
