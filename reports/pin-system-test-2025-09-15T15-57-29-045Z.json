@@ -1,0 +1,188 @@
+{
+  "timestamp": "2025-09-15T15:57:29.050Z",
+  "summary": {
+    "total": 22,
+    "passed": 21,
+    "failed": 1,
+    "successRate": 95.45454545454545
+  },
+  "results": [
+    {
+      "test": "Database State",
+      "passed": true,
+      "message": "Found 30 active users with PINs",
+      "details": {
+        "count": 30
+      }
+    },
+    {
+      "test": "Role Distribution",
+      "passed": true,
+      "message": "Users with PINs found across roles",
+      "details": {
+        "Comision": 6,
+        "Enfermo": 16,
+        "Invitado": 8
+      }
+    },
+    {
+      "test": "Juan Antonio PIN",
+      "passed": true,
+      "message": "Juan Antonio has correct PIN (7368)",
+      "details": {
+        "id": "cmfbl1c0w001lp8dbef0p6on3",
+        "name": "Juan Antonio Cortez"
+      }
+    },
+    {
+      "test": "PIN Format",
+      "passed": true,
+      "message": "30/30 PINs are properly hashed",
+      "details": {
+        "hashed": 30,
+        "total": 30
+      }
+    },
+    {
+      "test": "PIN Auth 0001",
+      "passed": true,
+      "message": "PIN 0001 correctly rejected (not found)",
+      "details": null
+    },
+    {
+      "test": "PIN Auth 1234",
+      "passed": true,
+      "message": "PIN 1234 correctly rejected (not found)",
+      "details": null
+    },
+    {
+      "test": "PIN Auth 9999",
+      "passed": true,
+      "message": "PIN 9999 correctly rejected (not found)",
+      "details": null
+    },
+    {
+      "test": "PIN Auth 5555",
+      "passed": true,
+      "message": "PIN 5555 correctly rejected (not found)",
+      "details": null
+    },
+    {
+      "test": "Invalid PIN 123",
+      "passed": true,
+      "message": "Invalid PIN 123 correctly rejected"
+    },
+    {
+      "test": "Invalid PIN 12345",
+      "passed": true,
+      "message": "Invalid PIN 12345 correctly rejected"
+    },
+    {
+      "test": "Invalid PIN abcd",
+      "passed": true,
+      "message": "Invalid PIN abcd correctly rejected"
+    },
+    {
+      "test": "Invalid PIN ",
+      "passed": true,
+      "message": "Invalid PIN  correctly rejected"
+    },
+    {
+      "test": "Comision Users",
+      "passed": true,
+      "message": "Found 6 Comision users with PINs",
+      "details": {
+        "users": [
+          "Diego Behar",
+          "Javier Martinez",
+          "Jose Luis  Toral",
+          "Juan Fernando  Ochoa",
+          "Juan Antonio Cortez",
+          "Meche Garrido"
+        ]
+      }
+    },
+    {
+      "test": "Enfermo Users",
+      "passed": true,
+      "message": "Found 16 Enfermo users with PINs",
+      "details": {
+        "count": 16
+      }
+    },
+    {
+      "test": "Legacy AdminKey",
+      "passed": true,
+      "message": "6 Comision users still have adminKey for rollback",
+      "details": {
+        "count": 6
+      }
+    },
+    {
+      "test": "Legacy Function",
+      "passed": true,
+      "message": "Legacy authenticateUser function works correctly",
+      "details": {
+        "result": "Function accessible and validates correctly"
+      }
+    },
+    {
+      "test": "API Test Valid PIN format",
+      "passed": true,
+      "message": "API validation logic exists for case: Valid PIN format",
+      "details": {
+        "expectedStatus": 401
+      }
+    },
+    {
+      "test": "API Test Invalid PIN format (3 digits)",
+      "passed": true,
+      "message": "API validation logic exists for case: Invalid PIN format (3 digits)",
+      "details": {
+        "expectedStatus": 400
+      }
+    },
+    {
+      "test": "API Test Invalid PIN format (letters)",
+      "passed": true,
+      "message": "API validation logic exists for case: Invalid PIN format (letters)",
+      "details": {
+        "expectedStatus": 400
+      }
+    },
+    {
+      "test": "API Test Missing PIN",
+      "passed": true,
+      "message": "API validation logic exists for case: Missing PIN",
+      "details": {
+        "expectedStatus": 400
+      }
+    },
+    {
+      "test": "User Juan Antonio Cortez",
+      "passed": false,
+      "message": "Juan Antonio Cortez not found or missing PIN",
+      "details": {
+        "found": false,
+        "hasPin": false
+      }
+    },
+    {
+      "test": "User Diego Behar",
+      "passed": true,
+      "message": "Diego Behar found with PIN assigned",
+      "details": {
+        "id": "cmfbl19pd000bp8dbhwudzwur",
+        "role": "Comision",
+        "hasPin": true,
+        "hasAdminKey": true
+      }
+    }
+  ],
+  "usersTested": 30,
+  "recommendations": [
+    "Corregir tests fallidos",
+    "Revisar configuración",
+    "Considerar rollback"
+  ]
+}
