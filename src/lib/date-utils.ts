@@ -121,7 +121,7 @@ export function validateTuesdayDate(dateString: string): { valid: boolean; messa
     }
     
     return { valid: true }
-  } catch (error) {
+  } catch {
     return {
       valid: false,
       message: 'Fecha inválida'

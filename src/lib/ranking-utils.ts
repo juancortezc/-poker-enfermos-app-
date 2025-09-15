@@ -125,7 +125,6 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       const datePositions = new Map<string, number>();
       
       // Determinar ganador y posiciones
-      let winner: string | null = null;
       
       // Registrar puntos para jugadores que participaron
       gameDate.playerIds.forEach(playerId => {

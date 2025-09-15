@@ -28,9 +28,9 @@ const fetcher = async (url: string) => {
   
   if (!response.ok) {
     // Create error object with status for better error handling
-    const error = new Error(`HTTP Error: ${response.status}`)
-    ;(error as any).status = response.status
-    ;(error as any).info = await response.text()
+    const error = new Error(`HTTP Error: ${response.status}`) as Error & { status?: number; info?: string }
+    error.status = response.status
+    error.info = await response.text()
     throw error
   }
   

@@ -70,7 +70,7 @@ export const useNotifications = () => {
         loadPreferences();
       }
     }
-  }, []);
+  }, [loadPreferences]);
 
   // Cargar preferencias desde localStorage
   const loadPreferences = useCallback(() => {

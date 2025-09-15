@@ -46,7 +46,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     if (playerId && tournamentId) {
       fetchPlayerDetails();
     }
-  }, [playerId, tournamentId]);
+  }, [playerId, tournamentId, fetchPlayerDetails]);
 
   const fetchPlayerDetails = async () => {
     setLoading(true);
