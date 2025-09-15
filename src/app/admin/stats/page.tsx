@@ -40,7 +40,6 @@ interface StatsResponse {
 const fetcher = async (url: string) => {
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${localStorage.getItem('adminKey')}`,
       'Content-Type': 'application/json',
     },
   })
@@ -111,14 +110,14 @@ export default function StatsPage() {
       <div className="px-4 pt-20 pb-8">
         {/* Título */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-2xl font-bold text-white mb-2">
             Padres e Hijos Torneo {statsData?.tournament?.number}
           </h1>
         </div>
 
         {/* Estadísticas */}
         {relations.length > 0 ? (
-          <div className="max-w-md mx-auto space-y-6">
+          <div className="max-w-4xl mx-auto space-y-4">
             {relations.map((relation, index) => (
               <ParentChildCard
                 key={relation.id}
