@@ -5,8 +5,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import ParentChildCard from '@/components/stats/ParentChildCard'
+import DaysWithoutVictoryTable from '@/components/stats/DaysWithoutVictoryTable'
 import { Card } from '@/components/ui/card'
-import { Loader2, Users, Trophy } from 'lucide-react'
+import { Loader2, Users, CalendarX } from 'lucide-react'
 
 interface Player {
   id: string
@@ -37,6 +38,30 @@ interface StatsResponse {
   totalRelations: number
 }
 
+interface PlayerWithVictoryData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl?: string | null;
+  lastVictoryDate?: string | null;
+  daysWithoutVictory: number;
+  hasNeverWon: boolean;
+}
+
+interface DaysWithoutVictoryResponse {
+  tournament: Tournament
+  players: PlayerWithVictoryData[]
+  stats: {
+    totalPlayers: number
+    playersWithVictories: number
+    playersNeverWon: number
+    averageDaysWithoutVictory: number
+    longestStreak: number
+  }
+}
+
+type TabType = 'parent-child' | 'days-without-victory'
+
 const fetcher = async (url: string) => {
   const response = await fetch(url, {
     headers: {
@@ -54,6 +79,7 @@ const fetcher = async (url: string) => {
 export default function StatsPage() {
   const { user } = useAuth()
   const router = useRouter()
+  const [activeTab, setActiveTab] = useState<TabType>('parent-child')
 
   // Verificar acceso de Comisión
   useEffect(() => {
@@ -63,8 +89,18 @@ export default function StatsPage() {
   }, [user, router])
 
   // Obtener estadísticas del torneo activo
-  const { data: statsData, error, isLoading } = useSWR<StatsResponse>(
+  const { data: statsData, error: statsError, isLoading: statsLoading } = useSWR<StatsResponse>(
     user?.role === 'Comision' ? '/api/stats/parent-child/1' : null,
+    fetcher,
+    {
+      refreshInterval: 30000, // Actualizar cada 30 segundos
+      revalidateOnFocus: true,
+    }
+  )
+
+  // Obtener datos de días sin ganar
+  const { data: daysData, error: daysError, isLoading: daysLoading } = useSWR<DaysWithoutVictoryResponse>(
+    user?.role === 'Comision' && activeTab === 'days-without-victory' ? '/api/stats/days-without-victory/1' : null,
     fetcher,
     {
       refreshInterval: 30000, // Actualizar cada 30 segundos
@@ -75,6 +111,9 @@ export default function StatsPage() {
   if (user?.role !== 'Comision') {
     return null
   }
+
+  const isLoading = activeTab === 'parent-child' ? statsLoading : daysLoading
+  const error = activeTab === 'parent-child' ? statsError : daysError
 
   if (isLoading) {
     return (
@@ -104,6 +143,8 @@ export default function StatsPage() {
   }
 
   const relations = statsData?.parentChildRelations || []
+  const daysPlayers = daysData?.players || []
+  const tournamentNumber = statsData?.tournament?.number || daysData?.tournament?.number || 28
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark">
@@ -111,46 +152,84 @@ export default function StatsPage() {
         {/* Título */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-white mb-2">
-            Padres e Hijos Torneo {statsData?.tournament?.number}
+            Estadísticas Torneo {tournamentNumber}
           </h1>
         </div>
 
-        {/* Estadísticas */}
-        {relations.length > 0 ? (
-          <div className="max-w-4xl mx-auto space-y-4">
-            {relations.map((relation, index) => (
-              <ParentChildCard
-                key={relation.id}
-                relation={relation}
-                index={index}
-              />
-            ))}
+        {/* Tabs */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="flex bg-gray-800/50 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('parent-child')}
+              className={`
+                flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200
+                ${activeTab === 'parent-child' 
+                  ? 'bg-poker-red text-white shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                }
+              `}
+            >
+              <Users className="w-4 h-4" />
+              <span className="font-medium">Padres e Hijos</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('days-without-victory')}
+              className={`
+                flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200
+                ${activeTab === 'days-without-victory' 
+                  ? 'bg-poker-red text-white shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                }
+              `}
+            >
+              <CalendarX className="w-4 h-4" />
+              <span className="font-medium">Días sin Ganar</span>
+            </button>
           </div>
-        ) : (
-          <div className="max-w-md mx-auto">
-            <Card className="admin-card p-8 text-center">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center">
-                  <Users className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-white">
-                  Sin Relaciones Padre-Hijo
-                </h3>
-                <p className="text-gray-400 text-center">
-                  No hay jugadores con 3 o más eliminaciones sobre otro jugador en este torneo.
+        </div>
+
+        {/* Contenido de Tabs */}
+        {activeTab === 'parent-child' ? (
+          /* Tab Padres e Hijos */
+          relations.length > 0 ? (
+            <div className="max-w-4xl mx-auto space-y-4">
+              {relations.map((relation, index) => (
+                <ParentChildCard
+                  key={relation.id}
+                  relation={relation}
+                  index={index}
+                />
+              ))}
+              {/* Footer con contador */}
+              <div className="text-center mt-8">
+                <p className="text-gray-400 text-sm">
+                  {relations.length} relación{relations.length !== 1 ? 'es' : ''} activa{relations.length !== 1 ? 's' : ''}
                 </p>
               </div>
-            </Card>
-          </div>
-        )}
-
-        {/* Footer con contador */}
-        {relations.length > 0 && (
-          <div className="text-center mt-8">
-            <p className="text-gray-400 text-sm">
-              {relations.length} relación{relations.length !== 1 ? 'es' : ''} activa{relations.length !== 1 ? 's' : ''}
-            </p>
-          </div>
+            </div>
+          ) : (
+            <div className="max-w-md mx-auto">
+              <Card className="admin-card p-8 text-center">
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center">
+                    <Users className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">
+                    Sin Relaciones Padre-Hijo
+                  </h3>
+                  <p className="text-gray-400 text-center">
+                    No hay jugadores con 3 o más eliminaciones sobre otro jugador en este torneo.
+                  </p>
+                </div>
+              </Card>
+            </div>
+          )
+        ) : (
+          /* Tab Días sin Ganar */
+          <DaysWithoutVictoryTable 
+            players={daysPlayers}
+            tournamentNumber={tournamentNumber}
+          />
         )}
       </div>
     </div>

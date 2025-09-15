@@ -123,6 +123,18 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Si es posición 1 (ganador), actualizar lastVictoryDate
+    if (position === 1) {
+      const victoryDate = gameDate.scheduledDate.toLocaleDateString('es-EC'); // DD/MM/YYYY format
+      await prisma.player.update({
+        where: { id: eliminatedPlayerId },
+        data: { 
+          lastVictoryDate: victoryDate
+        }
+      });
+      console.log('[ELIMINATION API] Updated lastVictoryDate for manual winner:', eliminatedPlayerId, 'Date:', victoryDate);
+    }
+
     // Actualizar estadísticas padre-hijo si hay eliminador
     if (eliminatorPlayerId) {
       await updateParentChildStats(
@@ -164,6 +176,23 @@ export async function POST(request: NextRequest) {
             eliminationTime: new Date().toISOString()
           }
         });
+
+        // Actualizar lastVictoryDate del ganador
+        const gameDateForWinner = await prisma.gameDate.findUnique({
+          where: { id: gameDateId },
+          select: { scheduledDate: true }
+        });
+        
+        if (gameDateForWinner) {
+          const victoryDate = gameDateForWinner.scheduledDate.toLocaleDateString('es-EC'); // DD/MM/YYYY format
+          await prisma.player.update({
+            where: { id: eliminatorPlayerId },
+            data: { 
+              lastVictoryDate: victoryDate
+            }
+          });
+          console.log('[ELIMINATION API] Updated lastVictoryDate for auto-completed winner:', eliminatorPlayerId, 'Date:', victoryDate);
+        }
 
         // Marcar la fecha como completada
         await prisma.gameDate.update({
