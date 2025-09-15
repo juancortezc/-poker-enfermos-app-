@@ -118,7 +118,13 @@ export default function ResumenTable({ tournamentId, userPin }: ResumenTableProp
             return (
               <tr key={player.playerId} className={index % 2 === 1 ? 'bg-gray-50' : ''}>
                 <td className="excel-cell excel-cell-gray text-center font-medium" style={{color: '#000'}}>
-                  {player.position}
+                  <span className={`position-badge ${
+                    player.position === 1 ? 'position-1st' : 
+                    player.position === 2 ? 'position-2nd' :
+                    player.position === 3 ? 'position-3rd' : ''
+                  }`}>
+                    {player.position}
+                  </span>
                 </td>
                 <td className="excel-cell text-left" style={{color: '#000'}}>
                   <span className="hidden sm:inline" style={{color: '#000'}}>{player.playerName}</span>
@@ -127,7 +133,7 @@ export default function ResumenTable({ tournamentId, userPin }: ResumenTableProp
                 <td className="excel-cell text-center" style={{color: '#000'}}>
                   {pointsLastDate}
                 </td>
-                <td className="excel-cell excel-cell-total text-center font-bold" style={{color: '#000'}}>
+                <td className="excel-cell excel-cell-total text-center font-bold score-emphasis" style={{color: '#1a365d'}}>
                   {player.totalPoints}
                 </td>
                 <td className="excel-cell text-center" style={{color: '#000'}}>
@@ -136,7 +142,7 @@ export default function ResumenTable({ tournamentId, userPin }: ResumenTableProp
                 <td className="excel-cell text-center" style={{color: '#000'}}>
                   {player.elimina2 !== undefined ? player.elimina2 : '-'}
                 </td>
-                <td className="excel-cell excel-cell-total text-center font-bold" style={{color: '#000'}}>
+                <td className="excel-cell excel-cell-total text-center font-bold score-emphasis" style={{color: '#1a365d'}}>
                   {player.finalScore !== undefined ? player.finalScore : '-'}
                 </td>
               </tr>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+// Button component removed - using native buttons
 import { Card } from '@/components/ui/card';
 
 interface ValidationResult {
@@ -51,7 +51,7 @@ export function CSVPreview({
     <div className="space-y-6">
       {/* Summary Card */}
       {previewData && (
-        <Card className="bg-poker-card border-2 border-gray-600 p-6">
+        <Card className="admin-card p-6">
           <h2 className="text-xl font-semibold text-white mb-4">Resumen del Archivo</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="text-center">
@@ -232,25 +232,25 @@ export function CSVPreview({
 
       {/* Action Buttons */}
       <div className="flex gap-4 justify-center">
-        <Button
+        <button
           onClick={onBackToUpload}
-          className="bg-gray-600 hover:bg-gray-700 text-white"
+          className={`btn-admin-outline ${isImporting ? 'btn-admin-disabled' : ''}`}
           disabled={isImporting}
         >
           ← Cambiar Archivo
-        </Button>
+        </button>
         
-        <Button
+        <button
           onClick={onImport}
           disabled={!valid || isImporting}
           className={`${
-            valid 
-              ? 'bg-poker-red hover:bg-red-700' 
-              : 'bg-gray-500 cursor-not-allowed'
-          } text-white font-semibold px-8`}
+            valid && !isImporting
+              ? 'btn-admin-success btn-admin-lg' 
+              : 'btn-admin-disabled'
+          }`}
         >
-          {isImporting ? 'Importando...' : 'Ejecutar Importación'}
-        </Button>
+          {isImporting ? '⏳ Importando...' : '🚀 Ejecutar Importación'}
+        </button>
       </div>
     </div>
   );

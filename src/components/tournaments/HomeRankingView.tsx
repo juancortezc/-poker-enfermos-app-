@@ -83,8 +83,11 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
   return (
     <div className="w-full">
       {/* Título compacto */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">Ranking Torneo #{rankingData.tournament.number}</h1>
+      <div className="text-center mb-4">
+        <h1 className="text-2xl font-bold text-white mb-1">Torneo #{rankingData.tournament.number}</h1>
+        <div className="text-xs text-poker-muted">
+          {rankings.length} jugadores • {rankingData.tournament.completedDates}/{rankingData.tournament.totalDates} fechas
+        </div>
       </div>
 
       {/* Podio - Top 3 */}
@@ -104,19 +107,18 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
               >
                 {/* Card del podio */}
                 <div
-                  className="relative bg-gradient-to-br from-poker-card to-gray-800 rounded-lg p-3 shadow-2xl ring-1 ring-white/10 transform transition-all duration-300 hover:scale-105 hover:shadow-3xl w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
+                  className="relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
                   onClick={() => openPlayerModal(player.playerId)}
                 >
                   {/* Círculo de posición */}
                   <div className={`
                     absolute -top-2 -left-2 w-8 h-8 rounded-full 
-                    flex items-center justify-center font-bold text-sm
-                    border-2 z-10
+                    flex items-center justify-center font-bold text-sm z-10
                     ${isFirst 
-                      ? 'bg-yellow-400 text-black border-yellow-500' 
+                      ? 'position-1st' 
                       : isSecond 
-                      ? 'bg-gray-300 text-black border-gray-400' 
-                      : 'bg-orange-400 text-black border-orange-500'
+                      ? 'position-2nd' 
+                      : 'position-3rd'
                     }
                   `}>
                     {player.position}
@@ -138,10 +140,10 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                     <div className={`
                       absolute inset-0 rounded-lg
                       ${isFirst 
-                        ? 'bg-gradient-to-br from-yellow-900/50 to-yellow-600/30' 
+                        ? 'bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20' 
                         : isSecond 
-                        ? 'bg-gradient-to-br from-gray-700/50 to-gray-500/30' 
-                        : 'bg-gradient-to-br from-orange-900/50 to-orange-600/30'
+                        ? 'bg-gradient-to-br from-gray-600/40 via-gray-500/30 to-gray-400/20' 
+                        : 'bg-gradient-to-br from-orange-900/40 via-orange-700/30 to-orange-500/20'
                       }
                     `} />
                   )}
@@ -164,9 +166,9 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                 
                 {/* Puntos bajo la foto, alineados a la derecha */}
                 <div className="text-right mt-1">
-                  <div className="flex flex-col items-end text-sm">
-                    <span className="text-orange-400 font-bold">{player.finalScore || player.totalPoints}</span>
-                    <span className="text-poker-gold font-bold">{player.totalPoints}</span>
+                  <div className="flex flex-col items-end">
+                    <span className="text-orange-400 font-bold score-emphasis text-sm">{player.finalScore || player.totalPoints}</span>
+                    <span className="text-poker-gold font-semibold text-xs">{player.totalPoints}</span>
                   </div>
                 </div>
               </div>
@@ -185,7 +187,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
               return (
                 <div
                   key={player.playerId}
-                  className="relative bg-poker-card border-2 border-poker-red rounded-lg p-2 shadow-lg ring-1 ring-poker-red/20 hover:shadow-xl transition-all duration-200 cursor-pointer"
+                  className="relative dashboard-card rounded-lg p-2 cursor-pointer"
                   onClick={() => openPlayerModal(player.playerId)}
                 >
                   {/* Círculo de posición */}
@@ -204,9 +206,9 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                         </p>
                       )}
                     </div>
-                    <div className="flex flex-col items-end text-sm">
-                      <span className="text-orange-400 font-bold">{player.finalScore || player.totalPoints}</span>
-                      <span className="text-poker-gold font-bold">{player.totalPoints}</span>
+                    <div className="flex flex-col items-end">
+                      <span className="text-orange-400 font-bold score-emphasis text-sm">{player.finalScore || player.totalPoints}</span>
+                      <span className="text-poker-gold font-semibold text-xs">{player.totalPoints}</span>
                     </div>
                   </div>
                 </div>
@@ -229,7 +231,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                   className="relative flex flex-col items-center"
                 >
                   <div 
-                    className="relative bg-gradient-to-br from-poker-card to-gray-800 rounded-lg p-3 shadow-xl transform transition-all duration-300 hover:scale-105 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
+                    className="relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
                     onClick={() => openPlayerModal(player.playerId)}
                   >
                     {/* Círculo de posición rosa */}

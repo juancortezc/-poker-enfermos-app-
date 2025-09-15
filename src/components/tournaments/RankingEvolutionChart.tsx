@@ -23,10 +23,10 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     return (
       <div className="bg-poker-card border border-white/20 rounded-lg p-3 shadow-xl">
         <p className="text-white font-semibold">Fecha {label}</p>
-        <p className="text-poker-gold">
+        <p className="text-cyan-400">
           Posición: {data.position}°
         </p>
-        <p className="text-orange-400">
+        <p className="text-blue-400">
           Puntos: {data.points}
         </p>
       </div>
@@ -97,23 +97,23 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
             />
             <Tooltip 
               content={<CustomTooltip />}
-              cursor={{ stroke: '#E10600', strokeWidth: 1 }}
+              cursor={{ stroke: '#06b6d4', strokeWidth: 1 }}
             />
             <Line
               type="monotone"
               dataKey="position"
-              stroke="#E10600"
+              stroke="#06b6d4"
               strokeWidth={3}
               dot={{ 
-                fill: '#FFA500', 
+                fill: '#3b82f6', 
                 strokeWidth: 2, 
-                stroke: '#E10600',
+                stroke: '#06b6d4',
                 r: 6 
               }}
               activeDot={{ 
                 r: 8, 
-                fill: '#FFA500',
-                stroke: '#E10600',
+                fill: '#3b82f6',
+                stroke: '#06b6d4',
                 strokeWidth: 2
               }}
             />
@@ -128,11 +128,11 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
         </p>
         <div className="flex justify-center items-center gap-4 mt-2 text-xs">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-0.5 bg-poker-red"></div>
+            <div className="w-3 h-0.5 bg-cyan-400"></div>
             <span className="text-poker-muted">Posición en ranking</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             <span className="text-poker-muted">Fecha jugada</span>
           </div>
         </div>

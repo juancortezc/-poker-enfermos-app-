@@ -39,7 +39,7 @@ export default function PlayerDetailModal({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-poker-dark rounded-xl shadow-2xl ring-1 ring-white/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+          className="dashboard-card rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {loading || !details ? (
@@ -57,7 +57,7 @@ export default function PlayerDetailModal({
                 <h2 className="text-xl font-bold text-white">Detalles del Jugador</h2>
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                  className="text-gray-400 hover:text-white transition-smooth p-2 hover:bg-white/10 rounded-lg"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -65,7 +65,7 @@ export default function PlayerDetailModal({
 
               {/* Player Header Section */}
               <div className="text-center mb-8">
-                <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-gray-700">
+                <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden dashboard-card p-2">
                   {details.player.photoUrl ? (
                     <Image
                       src={details.player.photoUrl}
@@ -75,7 +75,7 @@ export default function PlayerDetailModal({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-poker-gold">
                       <Trophy className="w-16 h-16" />
                     </div>
                   )}
@@ -94,21 +94,21 @@ export default function PlayerDetailModal({
                 <div className="flex justify-center items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Trophy className="w-5 h-5 text-poker-gold" />
-                    <span className="text-poker-gold font-bold text-lg">
+                    <span className="text-poker-gold font-bold text-lg score-emphasis">
                       {details.currentStats.totalPoints} pts
                     </span>
                   </div>
                   {details.currentStats.finalScore !== undefined && (
                     <div className="flex items-center gap-2">
                       <Crown className="w-5 h-5 text-orange-400" />
-                      <span className="text-orange-400 font-bold text-lg">
+                      <span className="text-orange-400 font-bold text-lg score-emphasis">
                         {details.currentStats.finalScore} final
                       </span>
                     </div>
                   )}
                   <div className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-white" />
-                    <span className="text-white font-bold text-lg">
+                    <span className="text-white font-bold text-lg score-emphasis">
                       {details.currentStats.position}° lugar
                     </span>
                   </div>
@@ -131,7 +131,8 @@ export default function PlayerDetailModal({
                       return (
                         <div
                           key={dateNumber}
-                          className="bg-gray-700 border-2 border-gray-600 rounded-lg p-3 text-center opacity-50"
+                          className="dashboard-card opacity-50 rounded-lg p-3 text-center"
+                          style={{ borderColor: '#4a4a4a' }}
                         >
                           <div className="text-xs text-gray-400 mb-1">
                             F{dateNumber}
@@ -148,13 +149,14 @@ export default function PlayerDetailModal({
                       return (
                         <div
                           key={dateNumber}
-                          className="bg-poker-card border-2 border-orange-500 rounded-lg p-3 text-center"
+                          className="dashboard-card rounded-lg p-3 text-center"
+                          style={{ borderColor: '#f59e0b' }}
                         >
                           <div className="text-xs text-poker-muted mb-1">
                             F{dateNumber}
                           </div>
                           <div className="text-sm text-orange-400 mb-1">EN VIVO</div>
-                          <div className="text-poker-gold font-bold text-sm mb-1">
+                          <div className="text-poker-gold font-bold text-sm mb-1 score-emphasis">
                             {date.points} pts
                           </div>
                           <div className="text-xs text-orange-400">JUGANDO</div>
@@ -170,9 +172,8 @@ export default function PlayerDetailModal({
                     return (
                       <div
                         key={dateNumber}
-                        className={`bg-poker-card border-2 ${
-                          isElimina2Date ? 'border-gray-500' : 'border-poker-red'
-                        } rounded-lg p-3 text-center`}
+                        className="dashboard-card rounded-lg p-3 text-center"
+                        style={{ borderColor: isElimina2Date ? '#6b7280' : 'var(--poker-red)' }}
                       >
                         <div className="text-xs text-poker-muted mb-1">
                           F{dateNumber}
@@ -186,7 +187,7 @@ export default function PlayerDetailModal({
                             <span className="text-white">GANÓ</span>
                           )}
                         </div>
-                        <div className="text-poker-gold font-bold text-sm mb-1">
+                        <div className="text-poker-gold font-bold text-sm mb-1 score-emphasis">
                           {date.points} pts
                         </div>
                         <div className={`text-xs ${date.eliminatedBy?.isGuest ? 'text-pink-500' : 'text-orange-400'}`}>
@@ -207,7 +208,7 @@ export default function PlayerDetailModal({
               {/* Last Victory Card */}
               {details.player.lastVictoryDate && (
                 <div className="mb-8">
-                  <div className="bg-gradient-to-r from-poker-card to-poker-red/20 border-2 border-poker-red rounded-lg p-4">
+                  <div className="dashboard-card rounded-lg p-4" style={{ background: 'linear-gradient(135deg, var(--poker-card) 0%, rgba(225, 6, 0, 0.2) 100%)' }}>
                     <div className="flex items-center gap-3">
                       <Crown className="w-6 h-6 text-poker-gold" />
                       <div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+// Button component removed - using native buttons
 import { Card } from '@/components/ui/card';
 
 interface ImportResult {
@@ -25,10 +25,10 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
   return (
     <div className="space-y-6">
       {/* Result Status */}
-      <Card className={`border-2 p-8 text-center ${
+      <Card className={`p-8 text-center ${
         success 
-          ? 'bg-poker-red bg-opacity-20 border-poker-red' 
-          : 'bg-red-900 bg-opacity-20 border-red-500'
+          ? 'admin-card-success' 
+          : 'admin-card-error'
       }`}>
         <div className={`text-6xl mb-4 ${success ? 'text-white' : 'text-red-500'}`}>
           {success ? '🎉' : '💥'}
@@ -66,7 +66,7 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
 
       {/* Error Details */}
       {!success && suggestions && suggestions.length > 0 && (
-        <Card className="bg-poker-card border-2 border-red-500 p-6">
+        <Card className="admin-card-error p-6">
           <h3 className="text-lg font-semibold text-red-400 mb-3">Detalles del Error</h3>
           <ul className="space-y-2">
             {suggestions.map((suggestion, index) => (
@@ -80,7 +80,7 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
 
       {/* Success Details */}
       {success && gameDateId && (
-        <Card className="bg-poker-card border-2 border-poker-red p-6">
+        <Card className="admin-card-highlight p-6">
           <h3 className="text-lg font-semibold text-white mb-3">Detalles de la Importación</h3>
           <div className="space-y-2 text-sm">
             <p className="text-poker-text">
@@ -101,7 +101,7 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
 
       {/* Navigation Links */}
       {success && (
-        <Card className="bg-poker-card border-2 border-gray-600 p-6">
+        <Card className="admin-card p-6">
           <h3 className="text-lg font-semibold text-white mb-3">Próximos Pasos</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-black rounded border border-gray-700">
@@ -109,12 +109,12 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
                 <div className="text-white font-medium">Ver Ranking del Torneo</div>
                 <div className="text-poker-text text-sm">Verificar los puntos importados</div>
               </div>
-              <Button
+              <button
                 onClick={() => window.open('/ranking', '_blank')}
-                className="bg-poker-red hover:bg-red-700 text-white text-sm"
+                className="btn-admin-primary btn-admin-sm"
               >
-                Ver Ranking
-              </Button>
+                🏆 Ver Ranking
+              </button>
             </div>
             
             {gameDateId && (
@@ -123,12 +123,12 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
                   <div className="text-white font-medium">Administrar Puntos</div>
                   <div className="text-poker-text text-sm">Ajustar puntos si es necesario</div>
                 </div>
-                <Button
+                <button
                   onClick={() => window.open('/admin/points', '_blank')}
-                  className="bg-gray-600 hover:bg-gray-700 text-white text-sm"
+                  className="btn-admin-secondary btn-admin-sm"
                 >
-                  Admin Puntos
-                </Button>
+                  ⚙️ Admin Puntos
+                </button>
               </div>
             )}
           </div>
@@ -137,20 +137,20 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
 
       {/* Action Buttons */}
       <div className="flex gap-4 justify-center">
-        <Button
+        <button
           onClick={onStartOver}
-          className="bg-poker-red hover:bg-red-700 text-white font-semibold px-8"
+          className="btn-admin-primary btn-admin-lg"
         >
-          Nueva Importación
-        </Button>
+          ✨ Nueva Importación
+        </button>
         
         {!success && (
-          <Button
+          <button
             onClick={onBackToPreview}
-            className="bg-gray-600 hover:bg-gray-700 text-white"
+            className="btn-admin-outline"
           >
             ← Regresar
-          </Button>
+          </button>
         )}
       </div>
     </div>

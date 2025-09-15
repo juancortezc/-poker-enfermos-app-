@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { Button } from '@/components/ui/button';
+// Button component removed - using native buttons
 import { Card } from '@/components/ui/card';
 import LoadingState from '@/components/ui/LoadingState';
 
@@ -83,7 +83,7 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
   return (
     <div className="space-y-6">
       {/* Upload Area */}
-      <Card className="bg-poker-card border-2 border-gray-600">
+      <Card className="admin-card">
         <div
           className={`p-8 text-center border-2 border-dashed transition-colors ${
             isDragging 
@@ -103,12 +103,12 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
               <p className="text-poker-text mb-6">
                 O haz clic para seleccionar un archivo
               </p>
-              <Button
+              <button
                 onClick={handleChooseFile}
-                className="bg-poker-red hover:bg-red-700 text-white"
+                className="btn-admin-secondary"
               >
                 Seleccionar Archivo
-              </Button>
+              </button>
               <p className="text-sm text-gray-500 mt-4">
                 Máximo 5MB • Solo archivos .csv
               </p>
@@ -126,18 +126,18 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
               </div>
               
               <div className="flex gap-3 justify-center">
-                <Button
+                <button
                   onClick={handleUpload}
-                  className="bg-poker-red hover:bg-red-700 text-white"
+                  className="btn-admin-primary"
                 >
                   Validar Archivo
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={handleRemoveFile}
-                  className="bg-gray-600 hover:bg-gray-700 text-white"
+                  className="btn-admin-outline"
                 >
                   Cambiar Archivo
-                </Button>
+                </button>
               </div>
             </div>
           )}
@@ -145,7 +145,7 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
       </Card>
 
       {/* Formato del Archivo CSV */}
-      <Card className="bg-poker-card border-2 border-gray-600 p-6">
+      <Card className="admin-card p-6">
         <h2 className="text-xl font-semibold text-white mb-4">Formato del Archivo CSV</h2>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>

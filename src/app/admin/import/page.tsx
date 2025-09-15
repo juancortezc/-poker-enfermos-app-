@@ -147,7 +147,7 @@ export default function AdminImportPage() {
   if (!user || user.role !== 'Comision') {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <Card className="bg-poker-card border-poker-red border-2 p-8 text-center">
+        <Card className="admin-card-error p-8 text-center">
           <h1 className="text-2xl font-bold text-poker-red mb-4">Acceso Denegado</h1>
           <p className="text-poker-text">Solo usuarios de la Comisión pueden acceder a esta página.</p>
         </Card>
@@ -178,9 +178,9 @@ export default function AdminImportPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between text-sm text-poker-text">
             <div className={`flex items-center ${currentStep === 'upload' ? 'text-poker-red' : currentStep !== 'upload' ? 'text-white' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                currentStep === 'upload' ? 'bg-poker-red text-white' : 
-                currentStep !== 'upload' ? 'bg-white text-black' : 'bg-gray-600'
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 font-bold text-sm ${
+                currentStep === 'upload' ? 'btn-admin-primary' : 
+                currentStep !== 'upload' ? 'btn-admin-success' : 'btn-admin-neutral'
               }`}>
                 1
               </div>
@@ -194,9 +194,9 @@ export default function AdminImportPage() {
             </div>
             
             <div className={`flex items-center ${currentStep === 'preview' ? 'text-poker-red' : ['importing', 'results'].includes(currentStep) ? 'text-white' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                currentStep === 'preview' ? 'bg-poker-red text-white' : 
-                ['importing', 'results'].includes(currentStep) ? 'bg-white text-black' : 'bg-gray-600'
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 font-bold text-sm ${
+                currentStep === 'preview' ? 'btn-admin-primary' : 
+                ['importing', 'results'].includes(currentStep) ? 'btn-admin-success' : 'btn-admin-neutral'
               }`}>
                 2
               </div>
@@ -210,8 +210,8 @@ export default function AdminImportPage() {
             </div>
             
             <div className={`flex items-center ${['importing', 'results'].includes(currentStep) ? 'text-poker-red' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                ['importing', 'results'].includes(currentStep) ? 'bg-poker-red text-white' : 'bg-gray-600'
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                ['importing', 'results'].includes(currentStep) ? 'btn-admin-success' : 'btn-admin-neutral'
               }`}>
                 3
               </div>

@@ -87,7 +87,7 @@ export default function LoginForm() {
             <Button
               type="submit"
               disabled={loading || !adminKey}
-              className="w-full h-12 bg-poker-red hover:bg-red-700 text-white font-semibold transition-smooth disabled:opacity-50"
+              className="w-full h-12 btn-enhanced text-white font-semibold disabled:opacity-50"
             >
               {loading ? (
                 <>

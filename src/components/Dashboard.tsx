@@ -82,40 +82,23 @@ export default function Dashboard() {
           
           const cardContent = (
             <Card className={`
-              bg-gradient-to-br from-poker-card to-gray-800 border-2 border-poker-red 
-              transition-all duration-200 h-32
-              ${isDisabled 
-                ? 'opacity-50 cursor-not-allowed border-gray-600 shadow-inner' 
-                : `cursor-pointer transform hover:-translate-y-1 hover:scale-[1.02] active:translate-y-0 active:scale-100
-                   shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-poker-red/30
-                   border-t-red-400 border-r-red-600 border-b-red-800 border-l-red-500`
-              }
+              admin-card h-32
+              ${isDisabled ? 'opacity-60' : 'cursor-pointer hover:scale-105'}
               animate-stagger animate-stagger-${index + 1}
               flex flex-col items-center justify-center p-4
-              shadow-inner-light
-            `}
-            style={{
-              boxShadow: isDisabled 
-                ? 'inset 0 2px 4px rgba(0,0,0,0.3)' 
-                : `0 4px 8px rgba(0,0,0,0.4), 
-                   0 2px 4px rgba(0,0,0,0.3),
-                   inset 0 1px 0 rgba(255,255,255,0.1),
-                   inset 0 -1px 0 rgba(0,0,0,0.2)`
-            }}>
+              transition-all duration-300
+            `}>
               <div className="flex-1 flex items-center justify-center">
                 <div className={`
-                  w-12 h-12 rounded-lg flex items-center justify-center
-                  ${isDisabled 
-                    ? 'bg-gradient-to-br from-gray-600 to-gray-700 shadow-inner' 
-                    : 'bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg hover:shadow-xl hover:from-gray-600 hover:to-gray-700'
-                  }
-                  shadow-inner transition-all duration-200 transform hover:scale-105
+                  w-14 h-14 flex items-center justify-center rounded-xl
+                  ${isDisabled ? 'bg-gray-700/50' : 'bg-gradient-to-br from-white/10 to-white/5'}
+                  shadow-inner
                 `}>
-                  <Icon className={`w-6 h-6 ${isDisabled ? 'text-gray-400' : 'text-white'}`} />
+                  <Icon className={`w-7 h-7 ${isDisabled ? 'text-gray-500' : 'text-white drop-shadow-lg'}`} />
                 </div>
               </div>
               <div className="text-center">
-                <h3 className={`text-sm font-bold ${isDisabled ? 'text-gray-500' : 'text-white'}`}>
+                <h3 className={`text-sm font-semibold tracking-wide ${isDisabled ? 'text-gray-500' : 'text-white'}`}>
                   {action.title}
                 </h3>
               </div>
@@ -145,11 +128,11 @@ export default function Dashboard() {
           {activeTournament.stats?.nextDate ? (
             <button
               onClick={() => router.push(`/game-dates/${activeTournament.stats.nextDate.id}/confirm`)}
-              className="w-full p-4 bg-poker-card rounded-lg border-2 border-poker-red hover:border-red-400 transition-all hover:bg-poker-card/80"
+              className="w-full btn-admin-primary"
             >
               <div className="flex items-center space-x-3 mb-2">
-                <Target className="w-5 h-5 text-poker-red" />
-                <span className="text-lg font-medium text-poker-red">
+                <Target className="w-5 h-5 text-white" />
+                <span className="text-lg font-semibold text-white">
                   FECHA {activeTournament.stats.nextDate.dateNumber}
                 </span>
               </div>

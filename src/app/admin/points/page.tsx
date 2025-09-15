@@ -50,7 +50,7 @@ export default function AdminPointsPage() {
           <div className="flex items-center">
             <button
               onClick={() => router.push('/dashboard')}
-              className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors mr-4"
+              className="btn-admin-outline btn-admin-sm mr-4"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -63,12 +63,12 @@ export default function AdminPointsPage() {
           <div className="flex gap-2">
             <button
               onClick={resetToDefault}
-              className="flex items-center gap-2 px-4 py-2 bg-poker-muted hover:bg-poker-muted/80 text-white rounded-lg transition-colors"
+              className="btn-admin-neutral flex items-center gap-2"
             >
               <RotateCcw className="w-4 h-4" />
               Restaurar
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-poker-accent hover:bg-poker-accent-hover text-white rounded-lg transition-colors">
+            <button className="btn-admin-success flex items-center gap-2">
               <Save className="w-4 h-4" />
               Guardar
             </button>
@@ -76,17 +76,17 @@ export default function AdminPointsPage() {
         </div>
 
         {/* Selector de cantidad de jugadores */}
-        <div className="bg-poker-card border border-white/10 rounded-lg p-4 mb-6">
+        <div className="admin-card p-6 mb-6">
           <h3 className="text-white font-bold mb-3">Seleccionar cantidad de jugadores</h3>
           <div className="grid grid-cols-8 gap-2">
             {Array.from({ length: 16 }, (_, i) => i + 9).map(count => (
               <button
                 key={count}
                 onClick={() => setSelectedPlayerCount(count)}
-                className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                className={`text-sm font-medium transition-smooth ${
                   selectedPlayerCount === count
-                    ? 'bg-poker-accent text-white'
-                    : 'bg-white/10 text-poker-text hover:bg-white/20'
+                    ? 'btn-admin-primary btn-admin-sm'
+                    : 'btn-admin-outline btn-admin-sm'
                 }`}
               >
                 {count}
@@ -96,7 +96,7 @@ export default function AdminPointsPage() {
         </div>
 
         {/* Tabla de puntos para la cantidad seleccionada */}
-        <div className="bg-poker-card border border-white/10 rounded-lg overflow-hidden">
+        <div className="admin-card overflow-hidden">
           <div className="p-4 border-b border-white/10">
             <h3 className="text-white font-bold">
               Distribución de puntos para {selectedPlayerCount} jugadores
