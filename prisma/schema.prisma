@@ -64,7 +64,7 @@ model Player {
   lastVictoryDate   String?  @map("last_victory_date")
   
   // Nuevos campos
-  pin               String?  @db.Char(4)
+  pin               String?
   birthDate         String?  @map("birth_date")
   phone             String?
   email             String?
@@ -77,6 +77,8 @@ model Player {
   tournamentRankings TournamentRanking[]
   timerActions      TimerAction[]
   tournamentParticipants TournamentParticipant[]
+  parentStats       ParentChildStats[] @relation("ParentStats")
+  childStats        ParentChildStats[] @relation("ChildStats")
   
   // Relación para invitados
   inviter           Player?  @relation("PlayerInviter", fields: [inviterId], references: [id])
@@ -99,6 +101,7 @@ model Tournament {
   tournamentRankings  TournamentRanking[]
   blindLevels         BlindLevel[]
   tournamentParticipants TournamentParticipant[]
+  parentChildStats    ParentChildStats[]
 
   @@map("tournaments")
 }
@@ -230,4 +233,24 @@ model TournamentParticipant {
 
   @@unique([tournamentId, playerId])
   @@map("tournament_participants")
+}
+
+model ParentChildStats {
+  id                Int      @id @default(autoincrement())
+  tournamentId      Int      @map("tournament_id") 
+  parentPlayerId    String   @map("parent_player_id")
+  childPlayerId     String   @map("child_player_id") 
+  eliminationCount  Int      @map("elimination_count")
+  isActiveRelation  Boolean  @default(false) @map("is_active_relation") // true if count >= 3
+  firstElimination  DateTime @map("first_elimination")
+  lastElimination   DateTime @map("last_elimination")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  parentPlayer  Player     @relation("ParentStats", fields: [parentPlayerId], references: [id])
+  childPlayer   Player     @relation("ChildStats", fields: [childPlayerId], references: [id])
+  
+  @@unique([tournamentId, parentPlayerId, childPlayerId])
+  @@map("parent_child_stats")
 }

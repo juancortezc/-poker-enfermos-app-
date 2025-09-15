@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Trophy, Users, Clock, Calendar, Target, CheckCircle, FileSpreadsheet, Timer, CalendarDays, FileText } from 'lucide-react'
+import { Trophy, Users, Clock, Calendar, Target, CheckCircle, FileSpreadsheet, Timer, CalendarDays, FileText, BarChart3 } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
@@ -80,9 +80,10 @@ export default function Dashboard() {
       adminOnly: true,
     },
     {
-      title: 'RANKING',
-      href: '/ranking',
-      icon: Trophy,
+      title: 'STATS',
+      href: '/admin/stats',
+      icon: BarChart3,
+      adminOnly: true,
     },
   ]
 

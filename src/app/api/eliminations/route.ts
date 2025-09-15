@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withComisionAuth } from '@/lib/api-auth';
 import { calculatePointsForPosition } from '@/lib/tournament-utils';
+import { updateParentChildStats } from '@/lib/parent-child-stats';
 
 export async function POST(request: NextRequest) {
   return withComisionAuth(request, async (req, user) => {
@@ -121,6 +122,16 @@ export async function POST(request: NextRequest) {
         }
       }
     });
+
+    // Actualizar estadísticas padre-hijo si hay eliminador
+    if (eliminatorPlayerId) {
+      await updateParentChildStats(
+        gameDate.tournament.id,
+        eliminatorPlayerId,
+        eliminatedPlayerId,
+        gameDate.scheduledDate
+      );
+    }
 
     // Si llegamos a la posición 2, auto-completar la fecha
     if (position === 2 && eliminatorPlayerId) {
