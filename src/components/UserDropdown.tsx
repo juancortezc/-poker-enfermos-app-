@@ -6,6 +6,7 @@ import { LogOut, User, ChevronDown, Bell } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from './UserAvatar'
+import { canAccess } from '@/lib/permissions'
 
 export function UserDropdown() {
   const { user, logout } = useAuth()
@@ -90,13 +91,16 @@ export function UserDropdown() {
 
           {/* Menu Options */}
           <div className="py-1">
-            <button
-              onClick={handleProfileClick}
-              className="w-full text-left flex items-center space-x-3 px-4 py-3 text-white hover:bg-poker-red/20 transition-colors"
-            >
-              <User size={18} className="text-poker-muted" />
-              <span>Mi Perfil</span>
-            </button>
+            {/* Mi Perfil - Solo para Comisión y Enfermo */}
+            {canAccess(user.role, 'profile') && (
+              <button
+                onClick={handleProfileClick}
+                className="w-full text-left flex items-center space-x-3 px-4 py-3 text-white hover:bg-poker-red/20 transition-colors"
+              >
+                <User size={18} className="text-poker-muted" />
+                <span>Mi Perfil</span>
+              </button>
+            )}
 
             <button
               onClick={handleNotificationsClick}

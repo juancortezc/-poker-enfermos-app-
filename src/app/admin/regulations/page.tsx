@@ -10,7 +10,7 @@ export default function RegulationsPage() {
     return <LoadingState />;
   }
 
-  if (!user || user.role !== 'Comision') {
+  if (!user || !['Comision', 'Enfermo', 'Invitado'].includes(user.role)) {
     return null;
   }
 

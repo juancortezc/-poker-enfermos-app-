@@ -42,6 +42,7 @@ export default function Dashboard() {
       href: '/game-dates/config',
       icon: Calendar,
       disabled: hasActiveDate,
+      adminOnly: true, // Solo Comisión puede crear fechas
     },
     {
       title: 'TORNEOS',
@@ -59,30 +60,6 @@ export default function Dashboard() {
       title: 'IMPORTAR',
       href: '/admin/import',
       icon: FileSpreadsheet,
-      adminOnly: true,
-    },
-    {
-      title: 'TIMER',
-      href: '/timer',
-      icon: Timer,
-      adminOnly: true,
-    },
-    {
-      title: 'CALENDARIO',
-      href: '/admin/calendar',
-      icon: CalendarDays,
-      adminOnly: true,
-    },
-    {
-      title: 'REGLAMENTO',
-      href: '/admin/regulations',
-      icon: FileText,
-      adminOnly: true,
-    },
-    {
-      title: 'STATS',
-      href: '/admin/stats',
-      icon: BarChart3,
       adminOnly: true,
     },
   ]

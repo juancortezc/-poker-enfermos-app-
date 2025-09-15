@@ -22,7 +22,7 @@ export default function CalendarPage() {
   const { user, loading: authLoading } = useAuth();
   
   const { data, isLoading, error } = useSWR<{tournament: Tournament}>(
-    user?.role === 'Comision' ? '/api/tournaments/active' : null,
+    user ? '/api/tournaments/active' : null,
     {
       refreshInterval: 60000
     }
@@ -32,7 +32,7 @@ export default function CalendarPage() {
     return <LoadingState />;
   }
 
-  if (!user || user.role !== 'Comision') {
+  if (!user || !['Comision', 'Enfermo', 'Invitado'].includes(user.role)) {
     return null;
   }
 

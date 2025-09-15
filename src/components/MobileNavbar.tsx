@@ -18,7 +18,7 @@ const navItems = [
   { href: '/', label: 'Inicio', icon: HomeIcon, roles: ['all'] },
   { href: '/timer', label: 'Timer', icon: TimerIcon, roles: ['all'] },
   { href: '/ranking', label: 'Tabla', icon: TrophyIcon, roles: ['all'] },
-  { href: '/admin', label: 'Admin', icon: SettingsIcon, roles: ['Comision'] },
+  { href: '/admin', label: 'Admin', icon: SettingsIcon, roles: ['all'] },
 ]
 
 export default function MobileNavbar() {

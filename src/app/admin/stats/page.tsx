@@ -7,7 +7,8 @@ import useSWR from 'swr'
 import ParentChildCard from '@/components/stats/ParentChildCard'
 import DaysWithoutVictoryTable from '@/components/stats/DaysWithoutVictoryTable'
 import { Card } from '@/components/ui/card'
-import { Loader2, Users, CalendarX } from 'lucide-react'
+import { Loader2, Users, CalendarX, Lock } from 'lucide-react'
+import { canAccess } from '@/lib/permissions'
 
 interface Player {
   id: string
@@ -81,16 +82,20 @@ export default function StatsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('parent-child')
 
-  // Verificar acceso de Comisión
+  // Verificar acceso - permitir todos los roles pero con limitaciones
   useEffect(() => {
-    if (user && user.role !== 'Comision') {
+    if (user && !['Comision', 'Enfermo', 'Invitado'].includes(user.role)) {
       router.push('/')
     }
   }, [user, router])
 
+  // Verificar acceso a tabs por rol
+  const canAccessParentChild = user ? canAccess(user.role, 'stats-parents') : false
+  const canAccessDaysWithoutVictory = user ? canAccess(user.role, 'stats-days') : false
+
   // Obtener estadísticas del torneo activo
   const { data: statsData, error: statsError, isLoading: statsLoading } = useSWR<StatsResponse>(
-    user?.role === 'Comision' ? '/api/stats/parent-child/1' : null,
+    canAccessParentChild ? '/api/stats/parent-child/1' : null,
     fetcher,
     {
       refreshInterval: 30000, // Actualizar cada 30 segundos
@@ -100,7 +105,7 @@ export default function StatsPage() {
 
   // Obtener datos de días sin ganar
   const { data: daysData, error: daysError, isLoading: daysLoading } = useSWR<DaysWithoutVictoryResponse>(
-    user?.role === 'Comision' && activeTab === 'days-without-victory' ? '/api/stats/days-without-victory/1' : null,
+    canAccessDaysWithoutVictory && activeTab === 'days-without-victory' ? '/api/stats/days-without-victory/1' : null,
     fetcher,
     {
       refreshInterval: 30000, // Actualizar cada 30 segundos
@@ -108,7 +113,21 @@ export default function StatsPage() {
     }
   )
 
-  if (user?.role !== 'Comision') {
+  // Permitir acceso pero redirigir si no puede acceder a ningún tab
+  useEffect(() => {
+    if (user && !canAccessParentChild && !canAccessDaysWithoutVictory) {
+      router.push('/')
+    }
+  }, [user, canAccessParentChild, canAccessDaysWithoutVictory, router])
+
+  // Cambiar tab por defecto si no puede acceder a parent-child
+  useEffect(() => {
+    if (user && !canAccessParentChild && canAccessDaysWithoutVictory && activeTab === 'parent-child') {
+      setActiveTab('days-without-victory')
+    }
+  }, [user, canAccessParentChild, canAccessDaysWithoutVictory, activeTab])
+
+  if (!user || (!canAccessParentChild && !canAccessDaysWithoutVictory)) {
     return null
   }
 
@@ -160,25 +179,35 @@ export default function StatsPage() {
         <div className="max-w-4xl mx-auto mb-8">
           <div className="flex bg-gray-800/50 rounded-lg p-1">
             <button
-              onClick={() => setActiveTab('parent-child')}
+              onClick={() => canAccessParentChild && setActiveTab('parent-child')}
+              disabled={!canAccessParentChild}
               className={`
-                flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200
-                ${activeTab === 'parent-child' 
-                  ? 'bg-poker-red text-white shadow-lg' 
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200 relative
+                ${!canAccessParentChild 
+                  ? 'cursor-not-allowed opacity-50 text-gray-500'
+                  : activeTab === 'parent-child' 
+                    ? 'bg-poker-red text-white shadow-lg' 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                 }
               `}
+              title={!canAccessParentChild ? 'Solo disponible para Comisión' : ''}
             >
               <Users className="w-4 h-4" />
               <span className="font-medium">Padres e Hijos</span>
+              {!canAccessParentChild && (
+                <Lock className="w-3 h-3 ml-1" />
+              )}
             </button>
             <button
-              onClick={() => setActiveTab('days-without-victory')}
+              onClick={() => canAccessDaysWithoutVictory && setActiveTab('days-without-victory')}
+              disabled={!canAccessDaysWithoutVictory}
               className={`
                 flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200
-                ${activeTab === 'days-without-victory' 
-                  ? 'bg-poker-red text-white shadow-lg' 
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                ${!canAccessDaysWithoutVictory 
+                  ? 'cursor-not-allowed opacity-50 text-gray-500'
+                  : activeTab === 'days-without-victory' 
+                    ? 'bg-poker-red text-white shadow-lg' 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                 }
               `}
             >
