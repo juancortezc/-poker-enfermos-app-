@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
           phone: true,
           photoUrl: true,
           role: true,
+          lastVictoryDate: true,
         }
       })
 

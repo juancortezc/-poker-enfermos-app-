@@ -66,9 +66,6 @@ export default function DaysWithoutVictoryTable({
                 <th className="text-left px-4 py-3 text-white font-semibold border-r border-gray-600">
                   Jugador
                 </th>
-                <th className="text-center px-4 py-3 text-white font-semibold border-r border-gray-600">
-                  Última Victoria
-                </th>
                 <th className="text-center px-4 py-3 text-white font-semibold">
                   Días sin Ganar
                 </th>
@@ -128,43 +125,35 @@ export default function DaysWithoutVictoryTable({
                     </div>
                   </td>
 
-                  {/* Última Victoria */}
-                  <td className="px-4 py-3 text-center border-r border-gray-600">
-                    {player.hasNeverWon ? (
-                      <span className="text-gray-500 italic text-sm">
-                        Nunca
-                      </span>
-                    ) : (
-                      <span className="text-gray-300 font-mono text-sm">
-                        {player.lastVictoryDate}
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Días sin Ganar */}
+                  {/* Días sin Ganar + Última Victoria */}
                   <td className="px-4 py-3 text-center">
-                    {player.hasNeverWon ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-gray-500 italic text-sm">
-                          N/A
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2">
-                        <span className={`
-                          font-bold text-lg
-                          ${player.daysWithoutVictory > 100 ? 'text-red-400' : 
-                            player.daysWithoutVictory > 60 ? 'text-orange-400' : 
-                            player.daysWithoutVictory > 30 ? 'text-yellow-400' : 
-                            'text-green-400'}
-                        `}>
-                          {player.daysWithoutVictory}
-                        </span>
-                        <span className="text-gray-400 text-xs">
-                          días
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex flex-col items-center">
+                      {player.hasNeverWon ? (
+                        <>
+                          <span className="text-gray-500 italic text-sm">
+                            N/A
+                          </span>
+                          <span className="text-gray-500 italic text-xs mt-1">
+                            Nunca
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className={`
+                            font-bold text-lg
+                            ${player.daysWithoutVictory > 100 ? 'text-red-400' : 
+                              player.daysWithoutVictory > 60 ? 'text-orange-400' : 
+                              player.daysWithoutVictory > 30 ? 'text-yellow-400' : 
+                              'text-green-400'}
+                          `}>
+                            {player.daysWithoutVictory}
+                          </span>
+                          <span className="text-gray-400 font-mono text-xs mt-1">
+                            {player.lastVictoryDate}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

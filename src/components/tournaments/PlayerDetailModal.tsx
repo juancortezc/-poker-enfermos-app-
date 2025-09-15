@@ -86,12 +86,48 @@ export default function PlayerDetailModal({
                 </h3>
                 
                 {details.player.aliases.length > 0 && (
-                  <p className="text-orange-400 mb-4">
+                  <p className="text-orange-400 mb-2">
                     ({details.player.aliases.join(', ')})
                   </p>
                 )}
+                
+                {/* Días sin ganar */}
+                <div className="mb-4">
+                  {details.player.lastVictoryDate ? (() => {
+                    // Calcular días sin ganar
+                    const [day, month, year] = details.player.lastVictoryDate.split('/').map(Number);
+                    const lastVictoryDate = new Date(year, month - 1, day);
+                    const today = new Date();
+                    const timeDiff = today.getTime() - lastVictoryDate.getTime();
+                    const daysWithoutVictory = Math.floor(timeDiff / (1000 * 3600 * 24));
+                    
+                    return (
+                      <div className="flex flex-col items-center">
+                        <span className={`
+                          text-3xl font-bold
+                          ${daysWithoutVictory > 100 ? 'text-red-400' : 
+                            daysWithoutVictory > 60 ? 'text-orange-400' : 
+                            daysWithoutVictory > 30 ? 'text-yellow-400' : 
+                            'text-green-400'}
+                        `}>
+                          {daysWithoutVictory}
+                        </span>
+                        <span className="text-sm text-gray-400 mt-1">
+                          días sin ganar
+                        </span>
+                        <span className="text-xs text-gray-500 mt-1">
+                          Última victoria: {details.player.lastVictoryDate}
+                        </span>
+                      </div>
+                    );
+                  })() : (
+                    <div className="text-gray-500 text-sm">
+                      Sin victorias registradas
+                    </div>
+                  )}
+                </div>
 
-                <div className="flex justify-center items-center gap-4">
+                <div className="flex justify-center items-center gap-4 mb-4">
                   <div className="flex items-center gap-2">
                     <Trophy className="w-5 h-5 text-poker-gold" />
                     <span className="text-poker-gold font-bold text-lg score-emphasis">
@@ -205,26 +241,6 @@ export default function PlayerDetailModal({
                 </div>
               </div>
 
-              {/* Last Victory Card */}
-              {details.player.lastVictoryDate && (
-                <div className="mb-8">
-                  <div className="dashboard-card rounded-lg p-4" style={{ background: 'linear-gradient(135deg, var(--poker-card) 0%, rgba(225, 6, 0, 0.2) 100%)' }}>
-                    <div className="flex items-center gap-3">
-                      <Crown className="w-6 h-6 text-poker-gold" />
-                      <div>
-                        <h5 className="text-white font-bold">Última Victoria</h5>
-                        <p className="text-poker-muted text-sm">
-                          {new Date(details.player.lastVictoryDate).toLocaleDateString('es-ES', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Ranking Evolution Chart */}
               <div className="mb-6">

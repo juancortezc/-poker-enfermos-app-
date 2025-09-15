@@ -20,6 +20,7 @@ interface PlayerProfile {
   phone?: string
   photoUrl?: string
   role: string
+  lastVictoryDate?: string | null
 }
 
 export default function ProfilePage() {
@@ -150,6 +151,20 @@ export default function ProfilePage() {
   }
 
   const aliasesText = profile.aliases.join(', ') || 'Sin alias'
+  
+  // Calcular días sin ganar
+  let daysWithoutVictory = null;
+  let formattedLastVictory = null;
+  
+  if (profile.lastVictoryDate) {
+    // Parsear fecha desde formato DD/MM/YYYY
+    const [day, month, year] = profile.lastVictoryDate.split('/').map(Number);
+    const lastVictoryDate = new Date(year, month - 1, day);
+    const today = new Date();
+    const timeDiff = today.getTime() - lastVictoryDate.getTime();
+    daysWithoutVictory = Math.floor(timeDiff / (1000 * 3600 * 24));
+    formattedLastVictory = profile.lastVictoryDate;
+  }
 
   return (
     <div className="space-y-6">
@@ -169,6 +184,33 @@ export default function ProfilePage() {
         <p className="text-orange-400 mt-1 font-medium">
           {aliasesText}
         </p>
+        
+        {/* Días sin ganar */}
+        <div className="mt-4">
+          {daysWithoutVictory !== null ? (
+            <div className="flex flex-col items-center">
+              <span className={`
+                text-2xl font-bold
+                ${daysWithoutVictory > 100 ? 'text-red-400' : 
+                  daysWithoutVictory > 60 ? 'text-orange-400' : 
+                  daysWithoutVictory > 30 ? 'text-yellow-400' : 
+                  'text-green-400'}
+              `}>
+                {daysWithoutVictory}
+              </span>
+              <span className="text-sm text-gray-400 mt-1">
+                días sin ganar
+              </span>
+              <span className="text-xs text-gray-500 mt-1">
+                Última victoria: {formattedLastVictory}
+              </span>
+            </div>
+          ) : (
+            <div className="text-gray-500 text-sm">
+              Sin victorias registradas
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Form */}
