@@ -599,7 +599,128 @@ El sistema está completamente funcional con gestión avanzada de torneos, confi
 - **Import System**: Interface admin para cargar CSVs históricos
 - **Responsive Design**: Optimizado mobile-first con Enfermos Design System
 
-**Última actualización:** 2025-09-10 por Claude Code
+---
+
+## Sistema de Permisos y Notificaciones (NUEVO - 2025-09-15)
+
+### 🔐 SISTEMA DE PERMISOS COMPLETO IMPLEMENTADO
+
+El sistema ahora cuenta con control granular de acceso basado en roles con validaciones type-safe y testing automatizado completo.
+
+**Características Principales:**
+- 🎯 **Permissions Helper**: `lib/permissions.ts` con funciones type-safe para validación
+- 🔍 **Granular Access Control**: 11 features específicas con permisos por rol
+- 🔒 **Visual Indicators**: Cards con candados para funciones restringidas
+- 👥 **Role-Based Navigation**: Admin button para todos con restricciones visuales
+- ✅ **Testing Automatizado**: 21 tests con 100% de éxito
+- 📱 **Mobile-First**: Dashboard adaptativo según permisos de usuario
+
+### Configuración de Permisos por Rol:
+
+#### **Comisión (Acceso Completo)**
+- ✅ **Todas las funcionalidades**: Control total del sistema
+- ✅ **Admin Dashboard**: Acceso sin restricciones
+- ✅ **Gestión**: Fechas, Torneos, Jugadores, Importación
+- ✅ **Stats Completas**: Días sin Ganar + Padres e Hijos
+
+#### **Enfermo (Acceso Limitado)**
+- ✅ **Lectura**: Calendar, Regulations, Stats-Days, Profile
+- 🔒 **Bloqueado**: Gestión admin, Stats-Parents, Control Timer
+- 👁️ **Dashboard**: Candados visuales en funciones restringidas
+
+#### **Invitado (Solo Lectura)**
+- ✅ **Público**: Calendar, Regulations, Stats-Days
+- 🔒 **Sin Profile**: Acceso restringido a perfil personal
+- 🔒 **Sin Admin**: Solo consulta de información pública
+
+### APIs y Funciones de Permisos:
+
+```typescript
+// Validación de acceso a features
+canAccess(userRole: UserRole, feature: FeaturePermission): boolean
+
+// Nivel de acceso del usuario
+getAccessLevel(userRole: UserRole): 'full' | 'limited' | 'read-only'
+
+// Features del dashboard por rol
+getDashboardFeatures(userRole: UserRole): DashboardFeatures
+
+// Validación de rutas
+canAccessRoute(userRole: UserRole, route: string): boolean
+
+// Mensajes de restricción
+getRestrictionMessage(userRole: UserRole, feature: FeaturePermission): string
+```
+
+### Componentes de UI:
+
+- **RestrictedCard**: Cards con candados para funciones bloqueadas
+- **AdminCard**: Variant específico para dashboard admin
+- **AdminLimitedDashboard**: Dashboard para roles no-Comisión
+- **UserDropdown**: Sin perfil para Invitados
+- **MobileNavbar**: Admin button para todos los roles
+
+### Testing del Sistema:
+
+**Script:** `scripts/test-permission-system.ts`
+
+**Resultados del Testing Automatizado:**
+- ✅ **21 tests ejecutados**: 100% de éxito
+- ✅ **canAccess()**: Validación completa por rol y feature
+- ✅ **getAccessLevel()**: Niveles de acceso correctos
+- ✅ **getDashboardFeatures()**: Features por rol validadas
+- ✅ **canAccessRoute()**: Rutas públicas vs restringidas
+- ✅ **Edge Cases**: Manejo de undefined/null
+- ✅ **Consistencia**: PERMISSIONS_MAP completo
+- ✅ **Lógica de Negocio**: Jerarquía de roles correcta
+
+**Comando de Testing:**
+```bash
+npx tsx scripts/test-permission-system.ts
+```
+
+---
+
+## Preparación para Deploy en Vercel
+
+### ✅ PRE-REQUISITOS COMPLETADOS
+
+1. **Sistema de Permisos**: Implementado y validado al 100%
+2. **Testing Automatizado**: 21 tests pasando exitosamente
+3. **Role-Based Access**: Funcionando en todos los componentes
+4. **APIs Seguras**: Validación de permisos en endpoints
+5. **UI Consistente**: Visual indicators para restricciones
+6. **Notificaciones**: Sistema completo sin dependencias externas
+
+### Acceso por Rol - Resumen Final:
+
+| Función | Comisión | Enfermo | Invitado |
+|---------|----------|---------|----------|
+| Dashboard Completo | ✅ | 🔒 Limitado | 🔒 Limitado |
+| Calendar | ✅ | ✅ | ✅ |
+| Regulations | ✅ | ✅ | ✅ |
+| Stats - Días sin Ganar | ✅ | ✅ | ✅ |
+| Stats - Padres e Hijos | ✅ | 🔒 | 🔒 |
+| Profile | ✅ | ✅ | 🔒 |
+| Gestión Fechas | ✅ | 🔒 | 🔒 |
+| Gestión Torneos | ✅ | 🔒 | 🔒 |
+| Gestión Jugadores | ✅ | 🔒 | 🔒 |
+| Importación | ✅ | 🔒 | 🔒 |
+| Control Timer | ✅ | 🔒 | 🔒 |
+| Registro Eliminaciones | ✅ | 🔒 | 🔒 |
+
+### Navbar por Rol:
+
+**Todos los roles tienen acceso a:**
+- 🏠 **Inicio**: Dashboard con widgets públicos
+- ⏰ **Timer**: Visualización de estado (Comisión = control)
+- 🏆 **Tabla**: Ranking público del torneo
+- ⚙️ **Admin**: Dashboard con restricciones visuales
+
+**Dinámico:**
+- 📝 **Registro**: Solo aparece para Comisión cuando hay fecha activa
+
+**Última actualización:** 2025-09-15 por Claude Code
 
 ---
 
