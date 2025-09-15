@@ -38,13 +38,15 @@ Usuario → Experiencia → Lógica → Implementación → Testing → Refinami
 El sistema ha sido migrado exitosamente y ahora cuenta con un diseño completamente renovado siguiendo el Enfermos Design System, optimizado para dispositivos móviles.
 
 **Últimas actualizaciones (2025-09-15):**
-- ⏰ **SISTEMA DE TIMER COMPLETAMENTE FUNCIONAL**: Control profesional de blinds y tiempo
+- 🔔 **SISTEMA DE NOTIFICACIONES COMPLETO**: Notificaciones web nativas con sonido y vibración
+- ✅ **Panel de configuración**: Acceso desde dropdown usuario con preferencias personalizables
 - ✅ **Timer automático**: Se inicia automáticamente al empezar fechas de juego
 - ✅ **Control role-based**: Comisión control total, Enfermos solo lectura
 - ✅ **APIs robustas**: Pause/resume/level-up con autenticación completa
 - ✅ **UI simplificada**: Solo elementos esenciales sin información innecesaria
 - ✅ **Real-time countdown**: Tiempo en vivo con datos del torneo
-- ✅ **Manejo de errores**: Edge cases y validaciones completas
+- ✅ **Notificaciones timer**: 1 minuto warning, cambio de blinds, timer pausado
+- ✅ **Notificaciones juego**: Eliminaciones y ganador con sonidos configurables
 - 📅 **CALENDARIO ADMIN IMPLEMENTADO**: Vista limpia del calendario del torneo
 - 📋 **REGLAMENTO PDF DIRECTO**: Acceso simplificado al documento oficial
 - 🎨 **ENFERMOS DESIGN SYSTEM IMPLEMENTADO**: Nuevo sistema de diseño consistente
@@ -354,6 +356,67 @@ POST /api/timer/game-date/[id]/pause        # Pausar timer (auth: solo Comisión
 POST /api/timer/game-date/[id]/resume       # Reanudar timer (auth: solo Comisión)
 POST /api/timer/game-date/[id]/level-up     # Avanzar nivel de blinds (auth: solo Comisión)
 ```
+
+---
+
+## Sistema de Notificaciones Completo (NUEVO - 2025-09-15)
+
+### 🔔 SISTEMA DE NOTIFICACIONES WEB NATIVAS IMPLEMENTADO
+
+El sistema proporciona notificaciones completas durante las fechas de juego, con sonido, vibración y configuración personalizable por usuario.
+
+**Características Principales:**
+- 📱 **Web Notifications API nativa** - Sin servicios externos
+- 🔊 **Sistema de sonidos** con archivos configurables y Web Audio API fallback
+- 📳 **Vibración inteligente** con patrones de intensidad
+- ⚙️ **Panel de configuración** accesible desde dropdown de usuario
+- 🎯 **Notificaciones específicas** para timer y eventos de juego
+- 💾 **Persistencia** de preferencias en localStorage
+
+### Tipos de Notificaciones Implementadas:
+
+#### **Timer:**
+- ⏰ **1 minuto warning** - Aviso cuando queda 1 minuto para cambio de blinds
+- 🔄 **Cambio de blinds** - Notifica nuevo nivel con small/big blinds
+- ⏸️ **Timer pausado** - Avisa cuando Comisión pausa el timer
+
+#### **Enfermos (Juego):**
+- 💀 **Jugador eliminado** - Notifica eliminación con posición
+- 🏆 **Ganador** - Celebra ganador con puntos obtenidos
+
+### Acceso y Configuración:
+```
+Header → Dropdown Usuario → "Notificaciones" → /notificaciones
+```
+
+**Panel de Configuración:**
+- **Permiso Sistema** - Estado y solicitud de permisos del navegador
+- **Timer** - Configurar notificaciones de timer (on/off por tipo)
+- **Enfermos** - Configurar notificaciones de juego
+- **Sonido** - Control de volumen y test de sonidos
+- **Vibración** - Intensidad (suave/medio/fuerte) y test
+
+### Integración en Componentes:
+- **TimerDisplay**: Notificaciones automáticas de 1 minuto y cambio de blinds
+- **EliminationForm**: Notificaciones de eliminaciones y ganador
+- **UserDropdown**: Acceso directo al panel de configuración
+
+### Archivos de Sonido:
+```
+/public/sounds/
+├── warning.mp3      # Tono de advertencia (1 min warning)
+├── blind-change.mp3 # Acorde para cambio de blinds
+├── elimination.mp3  # Tono bajo para eliminación
+├── winner.mp3       # Melodía ascendente para ganador
+├── completion.mp3   # Tono medio para fecha completada
+└── config.json      # Configuración Web Audio API
+```
+
+### Componentes y Hooks:
+- **useNotifications** - Hook principal para gestión de notificaciones
+- **NotificationService** - Servicio centralizado con singleton pattern
+- **Switch UI Component** - Componente toggle para configuraciones
+- **NotificationsPage** - Página de configuración `/notificaciones`
 
 ---
 
@@ -787,6 +850,16 @@ Las siguientes APIs se actualizan automáticamente:
   - Parámetro `type=invitado` agregado correctamente
 - **UX Refinada**: Date picker nativo oculto, hover effects sutiles, sin bordes rojos ni botones verdes
 
+### Commit 71c9750 - Sistema de Notificaciones Completo + UX Mejorado (2025-09-15)
+- **🔔 SISTEMA DE NOTIFICACIONES COMPLETO**: Web Notifications API nativas con sonido y vibración
+- **Panel de configuración accesible**: Enlace en dropdown de usuario para todos los jugadores
+- **Componente Switch UI**: Componente nativo siguiendo design system Poker Enfermos
+- **Interfaz simplificada**: Títulos acortados, subtítulos eliminados, UI minimalista
+- **5 tipos de sonido**: warning, blind-change, elimination, winner, completion
+- **Configuraciones personalizables**: Timer, juego, sonido, vibración con preferencias persistentes
+- **Integración completa**: TimerDisplay y EliminationForm con notificaciones automáticas
+- **UX refinada**: "Enfermos" en lugar de "Notificaciones de Juego", acceso directo desde header
+
 ### Commit 6e0e9b7 - Sistema de Timer Completamente Funcional (2025-09-15)
 - **⏰ TIMER SYSTEM COMPLETO**: Control profesional de blinds y tiempo completamente implementado
 - **Inicialización Automática**: Timer se crea automáticamente al iniciar fecha de juego
@@ -808,13 +881,15 @@ Las siguientes APIs se actualizan automáticamente:
 
 ## Estado: LISTO PARA PRODUCCIÓN ✅
 
-El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas, navegación dinámica, **SISTEMA ELIMINA 2 100% OPERACIONAL**, y **TIMER PROFESIONAL COMPLETAMENTE FUNCIONAL**. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
+El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas, navegación dinámica, **SISTEMA ELIMINA 2 100% OPERACIONAL**, **TIMER PROFESIONAL COMPLETAMENTE FUNCIONAL**, y **SISTEMA DE NOTIFICACIONES COMPLETO**. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
 
 ### ✅ Características Completadas:
+- **Sistema de Notificaciones**: Web Notifications nativas con sonido, vibración y configuración personalizable
 - **Sistema de Timer Profesional**: Control total de blinds y tiempo con autenticación role-based
 - **Sistema ELIMINA 2**: Cálculo automático de puntuación final (mejores 10 de 12 fechas)
 - **Dual Score Display**: Visualización de puntaje final vs total en ranking
 - **Modal de Jugador Avanzado**: Score ELIMINA 2, fechas eliminadas marcadas, ausentes vs ganadores
+- **Panel de Usuario**: Acceso a configuraciones desde dropdown con UI simplificada
 - **Datos Históricos**: 8 fechas del Torneo 28 importadas y funcionando
 - **Import System**: Interface admin para cargar CSVs históricos
 - **Responsive Design**: Optimizado mobile-first con Enfermos Design System
