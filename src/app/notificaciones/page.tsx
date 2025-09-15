@@ -117,15 +117,6 @@ export default function NotificationsPage() {
       <div className="px-4 pt-20 pb-8">
         <div className="max-w-2xl mx-auto space-y-6">
           
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              Configuración de Notificaciones
-            </h1>
-            <p className="text-gray-400">
-              Personaliza qué notificaciones quieres recibir durante las fechas de juego
-            </p>
-          </div>
 
           {/* Permission Status */}
           <Card className="admin-card p-6">
@@ -137,12 +128,7 @@ export default function NotificationsPage() {
                   <AlertTriangle className="w-6 h-6 text-orange-400" />
                 )}
                 <div>
-                  <h3 className="text-white font-semibold">Estado de Permisos</h3>
-                  <p className="text-gray-400 text-sm">
-                    {permission === 'granted' && 'Notificaciones habilitadas'}
-                    {permission === 'denied' && 'Notificaciones bloqueadas - Habilita en configuración del navegador'}
-                    {permission === 'default' && 'Permisos pendientes - Haz click para habilitar'}
-                  </p>
+                  <h3 className="text-white font-semibold">Permiso Sistema</h3>
                 </div>
               </div>
               
@@ -162,15 +148,12 @@ export default function NotificationsPage() {
           <Card className="admin-card p-6">
             <div className="flex items-center gap-3 mb-4">
               <Timer className="w-6 h-6 text-poker-red" />
-              <h3 className="text-white font-semibold">Notificaciones de Timer</h3>
+              <h3 className="text-white font-semibold">Timer</h3>
             </div>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-white">Aviso 1 minuto antes</Label>
-                  <p className="text-gray-400 text-sm">Te avisa cuando queda 1 minuto para cambio de blinds</p>
-                </div>
+                <Label className="text-white">Aviso 1 minuto antes</Label>
                 <Switch
                   checked={preferences.timer.oneMinuteWarning}
                   onCheckedChange={(value) => handlePreferenceChange('timer', 'oneMinuteWarning', value)}
@@ -178,10 +161,7 @@ export default function NotificationsPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-white">Cambio de blinds</Label>
-                  <p className="text-gray-400 text-sm">Notifica cuando cambian los niveles de blinds</p>
-                </div>
+                <Label className="text-white">Cambio de blinds</Label>
                 <Switch
                   checked={preferences.timer.blindChange}
                   onCheckedChange={(value) => handlePreferenceChange('timer', 'blindChange', value)}
@@ -189,10 +169,7 @@ export default function NotificationsPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-white">Timer pausado</Label>
-                  <p className="text-gray-400 text-sm">Avisa cuando la Comisión pausa el timer</p>
-                </div>
+                <Label className="text-white">Timer pausado</Label>
                 <Switch
                   checked={preferences.timer.timerPaused}
                   onCheckedChange={(value) => handlePreferenceChange('timer', 'timerPaused', value)}
@@ -205,15 +182,12 @@ export default function NotificationsPage() {
           <Card className="admin-card p-6">
             <div className="flex items-center gap-3 mb-4">
               <Trophy className="w-6 h-6 text-poker-red" />
-              <h3 className="text-white font-semibold">Notificaciones de Juego</h3>
+              <h3 className="text-white font-semibold">Enfermos</h3>
             </div>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-white">Jugador eliminado</Label>
-                  <p className="text-gray-400 text-sm">Notifica cuando un jugador es eliminado</p>
-                </div>
+                <Label className="text-white">Jugador eliminado</Label>
                 <Switch
                   checked={preferences.game.playerEliminated}
                   onCheckedChange={(value) => handlePreferenceChange('game', 'playerEliminated', value)}
@@ -221,24 +195,10 @@ export default function NotificationsPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-white">Ganador declarado</Label>
-                  <p className="text-gray-400 text-sm">Celebra cuando hay un ganador</p>
-                </div>
+                <Label className="text-white">Ganador</Label>
                 <Switch
                   checked={preferences.game.winnerDeclared}
                   onCheckedChange={(value) => handlePreferenceChange('game', 'winnerDeclared', value)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-white">Fecha completada</Label>
-                  <p className="text-gray-400 text-sm">Notifica cuando termina una fecha de juego</p>
-                </div>
-                <Switch
-                  checked={preferences.game.gameCompleted}
-                  onCheckedChange={(value) => handlePreferenceChange('game', 'gameCompleted', value)}
                 />
               </div>
             </div>
@@ -252,7 +212,7 @@ export default function NotificationsPage() {
               ) : (
                 <VolumeX className="w-6 h-6 text-gray-400" />
               )}
-              <h3 className="text-white font-semibold">Configuración de Sonido</h3>
+              <h3 className="text-white font-semibold">Sonido</h3>
             </div>
             
             <div className="space-y-4">
@@ -277,17 +237,16 @@ export default function NotificationsPage() {
                     onChange={(e) => handlePreferenceChange('sound', 'volume', parseInt(e.target.value))}
                     className="w-full"
                   />
-                  <div className="flex gap-2 mt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => testSound('warning.mp3')}
-                      disabled={testingSound}
-                    >
-                      <TestTube className="w-4 h-4 mr-1" />
-                      Test
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => testSound('warning.mp3')}
+                    disabled={testingSound}
+                    className="mt-2"
+                  >
+                    <TestTube className="w-4 h-4 mr-1" />
+                    Test
+                  </Button>
                 </div>
               )}
             </div>
@@ -297,7 +256,7 @@ export default function NotificationsPage() {
           <Card className="admin-card p-6">
             <div className="flex items-center gap-3 mb-4">
               <Smartphone className="w-6 h-6 text-poker-red" />
-              <h3 className="text-white font-semibold">Configuración de Vibración</h3>
+              <h3 className="text-white font-semibold">Vibración</h3>
             </div>
             
             <div className="space-y-4">
@@ -328,7 +287,7 @@ export default function NotificationsPage() {
                     className="mt-2"
                   >
                     <TestTube className="w-4 h-4 mr-1" />
-                    Probar Vibración
+                    Test
                   </Button>
                 </div>
               )}

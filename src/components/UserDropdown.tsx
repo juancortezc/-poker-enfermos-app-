@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { LogOut, User, ChevronDown } from 'lucide-react'
+import { LogOut, User, ChevronDown, Bell } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from './UserAvatar'
@@ -33,6 +33,11 @@ export function UserDropdown() {
   const handleProfileClick = () => {
     setIsOpen(false)
     router.push('/perfil')
+  }
+
+  const handleNotificationsClick = () => {
+    setIsOpen(false)
+    router.push('/notificaciones')
   }
 
   const getRoleBadgeColor = (role: UserRole) => {
@@ -91,6 +96,14 @@ export function UserDropdown() {
             >
               <User size={18} className="text-poker-muted" />
               <span>Mi Perfil</span>
+            </button>
+
+            <button
+              onClick={handleNotificationsClick}
+              className="w-full text-left flex items-center space-x-3 px-4 py-3 text-white hover:bg-poker-red/20 transition-colors"
+            >
+              <Bell size={18} className="text-poker-muted" />
+              <span>Notificaciones</span>
             </button>
             
             <div className="border-t border-white/10 my-1"></div>
