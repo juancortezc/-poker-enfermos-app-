@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Trophy, Users, Clock, Calendar, Target, CheckCircle, FileSpreadsheet } from 'lucide-react'
+import { Trophy, Users, Clock, Calendar, Target, CheckCircle, FileSpreadsheet, Timer } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
@@ -59,6 +59,12 @@ export default function Dashboard() {
       title: 'IMPORTAR',
       href: '/admin/import',
       icon: FileSpreadsheet,
+      adminOnly: true,
+    },
+    {
+      title: 'TIMER',
+      href: '/timer',
+      icon: Timer,
       adminOnly: true,
     },
     {
