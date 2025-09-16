@@ -32,6 +32,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
   const router = useRouter()
   const [enfermos, setEnfermos] = useState<Player[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingInvitado, setLoadingInvitado] = useState(false)
   const [error, setError] = useState('')
   const currentYear = new Date().getFullYear()
   const isEditing = !!invitadoId
@@ -68,8 +69,11 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
   useEffect(() => {
     if (user) {
       fetchEnfermos()
+      if (isEditing) {
+        fetchInvitado()
+      }
     }
-  }, [user])
+  }, [user, isEditing])
 
   const fetchEnfermos = async () => {
     try {
@@ -106,6 +110,51 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
       }
     } catch (err) {
       console.error('Error fetching enfermos:', err)
+    }
+  }
+
+  const fetchInvitado = async () => {
+    if (!invitadoId) return
+    
+    setLoadingInvitado(true)
+    try {
+      // Get auth token from localStorage
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Use PIN if available, otherwise fall back to adminKey
+      if (pin) {
+        headers['Authorization'] = `Bearer PIN:${pin}`
+      } else if (adminKey) {
+        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+      }
+
+      const response = await fetch(`/api/players/${invitadoId}`, {
+        headers
+      })
+
+      if (response.ok) {
+        const invitado = await response.json()
+        console.log('Loaded invitado:', invitado)
+        setFormData({
+          firstName: invitado.firstName || '',
+          lastName: invitado.lastName || '',
+          inviterId: invitado.inviterId || '',
+          joinYear: invitado.joinYear?.toString() || currentYear.toString()
+        })
+      } else {
+        console.error('Failed to fetch invitado:', response.status)
+        setError('Error al cargar datos del invitado')
+      }
+    } catch (err) {
+      console.error('Error fetching invitado:', err)
+      setError('Error al cargar datos del invitado')
+    } finally {
+      setLoadingInvitado(false)
     }
   }
 
@@ -191,6 +240,14 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
     return (
       <div className="flex items-center justify-center min-h-64">
         <p className="text-poker-muted">Sin permisos para acceder a esta página</p>
+      </div>
+    )
+  }
+
+  if (loadingInvitado) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-poker-red" />
       </div>
     )
   }
@@ -302,7 +359,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push('/players')}
+              onClick={() => router.push(returnTo)}
               className="flex-1 border-white/20 text-poker-text hover:bg-white/5"
               disabled={loading}
             >

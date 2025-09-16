@@ -56,12 +56,11 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
   }
 
   const handleEdit = () => {
-    // Solo permitir edición para Enfermos y Comisión
     if (player.role === UserRole.Invitado) {
-      // TODO: Navegar al formulario específico de Invitados cuando esté implementado
-      return
+      router.push(`/players/invitado/edit/${player.id}`)
+    } else {
+      router.push(`/players/edit/${player.id}`)
     }
-    router.push(`/players/edit/${player.id}`)
   }
 
   const roleBadge = getRoleBadge(player.role)

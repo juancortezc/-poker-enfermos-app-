@@ -1,6 +1,32 @@
 import useSWR from 'swr'
 import { useActiveGameDate } from './useActiveGameDate'
 
+// Fetcher con autenticación
+const timerFetcher = async (url: string) => {
+  // Get auth token from localStorage
+  const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+  const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+  
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  }
+  
+  // Use PIN if available, otherwise fall back to adminKey
+  if (pin) {
+    headers['Authorization'] = `Bearer PIN:${pin}`
+  } else if (adminKey) {
+    headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+  }
+
+  const response = await fetch(url, { headers })
+  
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`)
+  }
+  
+  return response.json()
+}
+
 interface BlindLevel {
   level: number
   smallBlind: number
@@ -58,6 +84,7 @@ export function useTimerState(): UseTimerStateReturn {
     mutate: refresh 
   } = useSWR<TimerState>(
     activeGameDate && isInProgress ? `/api/timer/game-date/${activeGameDate.id}` : null,
+    timerFetcher,
     {
       refreshInterval: 1000, // Actualizar cada segundo para el timer
       revalidateOnFocus: true,
@@ -102,6 +129,7 @@ export function useTimerStateById(gameDateId: number | null): UseTimerStateRetur
     mutate: refresh 
   } = useSWR<TimerState>(
     gameDateId ? `/api/timer/game-date/${gameDateId}` : null,
+    timerFetcher,
     {
       refreshInterval: 1000,
       revalidateOnFocus: true,
