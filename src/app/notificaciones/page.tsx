@@ -28,6 +28,7 @@ export default function NotificationsPage() {
     isSupported,
     permission,
     preferences,
+    deviceInfo,
     requestPermission,
     savePreferences,
     playSound,
@@ -36,6 +37,9 @@ export default function NotificationsPage() {
     notifyBlindChange,
     notifyPlayerEliminated,
     notifyWinner,
+    shouldShowVibrationControls,
+    shouldShowIOSInstructions,
+    notificationStatusMessage,
   } = useNotifications();
 
   const [saving, setSaving] = useState(false);
@@ -252,47 +256,74 @@ export default function NotificationsPage() {
             </div>
           </Card>
 
-          {/* Vibration Settings */}
-          <Card className="admin-card p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Smartphone className="w-6 h-6 text-poker-red" />
-              <h3 className="text-white font-semibold">Vibración</h3>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label className="text-white">Vibración habilitada</Label>
-                <Switch
-                  checked={preferences.vibration.enabled}
-                  onCheckedChange={(value) => handlePreferenceChange('vibration', 'enabled', value)}
-                />
+          {/* Vibration Settings - Only show on supported devices */}
+          {shouldShowVibrationControls && (
+            <Card className="admin-card p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Smartphone className="w-6 h-6 text-poker-red" />
+                <h3 className="text-white font-semibold">Vibración</h3>
               </div>
-
-              {preferences.vibration.enabled && (
-                <div>
-                  <Label className="text-white block mb-2">Intensidad</Label>
-                  <select
-                    value={preferences.vibration.intensity}
-                    onChange={(e) => handlePreferenceChange('vibration', 'intensity', e.target.value)}
-                    className="w-full bg-poker-card border border-gray-600 rounded px-3 py-2 text-white"
-                  >
-                    <option value="light">Suave</option>
-                    <option value="medium">Media</option>
-                    <option value="heavy">Fuerte</option>
-                  </select>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={testVibration}
-                    className="mt-2"
-                  >
-                    <TestTube className="w-4 h-4 mr-1" />
-                    Test
-                  </Button>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-white">Vibración habilitada</Label>
+                  <Switch
+                    checked={preferences.vibration.enabled}
+                    onCheckedChange={(value) => handlePreferenceChange('vibration', 'enabled', value)}
+                  />
                 </div>
-              )}
-            </div>
-          </Card>
+
+                {preferences.vibration.enabled && (
+                  <div>
+                    <Label className="text-white block mb-2">Intensidad</Label>
+                    <select
+                      value={preferences.vibration.intensity}
+                      onChange={(e) => handlePreferenceChange('vibration', 'intensity', e.target.value)}
+                      className="w-full bg-poker-card border border-gray-600 rounded px-3 py-2 text-white"
+                    >
+                      <option value="light">Suave</option>
+                      <option value="medium">Media</option>
+                      <option value="heavy">Fuerte</option>
+                    </select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={testVibration}
+                      className="mt-2"
+                    >
+                      <TestTube className="w-4 h-4 mr-1" />
+                      Test
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {/* iOS Instructions Card - Only show when needed */}
+          {shouldShowIOSInstructions && (
+            <Card className="admin-card p-6 border-amber-500 bg-amber-900/20">
+              <div className="flex items-center gap-3 mb-4">
+                <AlertTriangle className="w-6 h-6 text-amber-500" />
+                <h3 className="text-amber-200 font-semibold">Instrucciones para iOS</h3>
+              </div>
+              
+              <div className="text-amber-100 space-y-2">
+                <p className="text-sm">
+                  Para recibir notificaciones en iOS, necesitas instalar esta app como PWA:
+                </p>
+                <ol className="text-sm list-decimal list-inside space-y-1 ml-2">
+                  <li>Abre este sitio en Safari</li>
+                  <li>Toca el botón "Compartir" (⬆️)</li>
+                  <li>Selecciona "Agregar a Pantalla de Inicio"</li>
+                  <li>Abre la app desde el icono instalado</li>
+                </ol>
+                <p className="text-xs text-amber-200 mt-3">
+                  Note: La vibración no está disponible en dispositivos iOS.
+                </p>
+              </div>
+            </Card>
+          )}
 
           {/* Test Notifications */}
           {permission === 'granted' && (

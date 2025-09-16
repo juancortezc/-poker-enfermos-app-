@@ -1,5 +1,7 @@
 import useSWR from 'swr'
 import { useActiveGameDate } from './useActiveGameDate'
+import { adaptiveIntervals } from '@/lib/swr-config'
+import { useEffect, useState } from 'react'
 
 // Fetcher con autenticación
 const timerFetcher = async (url: string) => {
@@ -68,14 +70,33 @@ const formatTime = (seconds: number): string => {
 }
 
 /**
- * Hook para obtener el estado del timer en tiempo real
+ * Hook para obtener el estado del timer con intervalos inteligentes optimizados para móviles
  * Se conecta automáticamente a la fecha activa
  */
 export function useTimerState(): UseTimerStateReturn {
-  // Primero obtenemos la fecha activa
+  // Track page visibility for smart interval management
+  const [isVisible, setIsVisible] = useState(true)
+  
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsVisible(!document.hidden)
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  // Primero obtenemos la fecha activa con intervalos optimizados
   const { gameDate: activeGameDate, isInProgress } = useActiveGameDate({
-    refreshInterval: 5000 // Refresh cada 5 segundos
+    refreshInterval: adaptiveIntervals.liveGame.foreground
   })
+
+  // Determinar el intervalo del timer basado en estado y visibilidad
+  const getTimerInterval = () => {
+    if (!isVisible) return 0 // Pause when not visible
+    if (!activeGameDate || !isInProgress) return adaptiveIntervals.timer.inactive
+    return adaptiveIntervals.timer.active
+  }
 
   // Luego obtenemos el estado del timer para esa fecha
   const { 
@@ -86,9 +107,10 @@ export function useTimerState(): UseTimerStateReturn {
     activeGameDate && isInProgress ? `/api/timer/game-date/${activeGameDate.id}` : null,
     timerFetcher,
     {
-      refreshInterval: 1000, // Actualizar cada segundo para el timer
+      refreshInterval: getTimerInterval(),
       revalidateOnFocus: true,
-      dedupingInterval: 500
+      refreshWhenHidden: false, // Don't refresh when hidden
+      dedupingInterval: 1000, // Increased for mobile optimization
     }
   )
 

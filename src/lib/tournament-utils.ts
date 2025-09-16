@@ -30,7 +30,7 @@ export function calculatePointsForPosition(position: number, totalPlayers: numbe
   
   // Posición 9 (índice 8): +2 puntos respecto a posición 10
   if (players >= 9) {
-    pointsArray[8] = pointsArray[9] + 2;
+    pointsArray[8] = (pointsArray[9] || 0) + 2;
   }
   
   // Posiciones 8-4 (índices 7-3): +1 punto cada una

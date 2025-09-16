@@ -3,12 +3,40 @@
 import { SWRConfig } from 'swr'
 import { ReactNode } from 'react'
 
+// Detect mobile devices for optimized configurations
+const isMobile = typeof window !== 'undefined' ? 
+  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) : false
+
+// Detect iOS specifically for special handling
+const isIOS = typeof window !== 'undefined' ? 
+  /iPad|iPhone|iPod/.test(navigator.userAgent) : false
+
+// Check if app is running in standalone mode (PWA)
+const isStandalone = typeof window !== 'undefined' ? 
+  window.matchMedia('(display-mode: standalone)').matches || 
+  (window.navigator as any).standalone === true : false
+
+// Hybrid storage helper for mobile reliability
+const getStorageItem = (key: string): string | null => {
+  if (typeof window === 'undefined') return null
+  
+  try {
+    return localStorage.getItem(key) || sessionStorage.getItem(key)
+  } catch (error) {
+    try {
+      return sessionStorage.getItem(key)
+    } catch (sessionError) {
+      return null
+    }
+  }
+}
+
 // Custom fetcher que incluye autenticación con PIN
 const fetcher = async (url: string) => {
-  // Get auth token from localStorage (PIN system)
-  const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+  // Get auth token from hybrid storage (PIN system)
+  const pin = getStorageItem('poker-pin')
   // Legacy support for adminKey during transition
-  const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+  const adminKey = getStorageItem('poker-adminkey')
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -37,16 +65,21 @@ const fetcher = async (url: string) => {
   return response.json()
 }
 
-// SWR configuration optimized for Poker app
+// Mobile-optimized SWR configuration
 const swrConfig = {
   fetcher,
-  // Global settings
-  revalidateOnFocus: true, // Revalidate when user returns to tab
-  revalidateOnReconnect: true, // Revalidate when internet reconnects
+  
+  // Global settings optimized for mobile devices
+  revalidateOnFocus: true,
+  revalidateOnReconnect: true,
+  refreshWhenHidden: false, // Don't refresh when app is in background
+  refreshWhenOffline: false, // Don't try to refresh when offline
   refreshInterval: 0, // No auto-refresh by default (set per hook)
-  dedupingInterval: 5000, // Dedupe requests within 5 seconds
-  errorRetryInterval: 5000, // Retry failed requests every 5 seconds
-  errorRetryCount: 3, // Max 3 retries for failed requests
+  
+  // Mobile-optimized intervals
+  dedupingInterval: isMobile ? 10000 : 5000, // Longer deduping on mobile
+  errorRetryInterval: isMobile ? 8000 : 5000, // Less aggressive retry on mobile
+  errorRetryCount: isMobile ? 2 : 3, // Fewer retries on mobile
   
   // Cache provider for better performance
   provider: () => new Map(),
@@ -88,8 +121,46 @@ export function SWRProvider({ children }: SWRProviderProps) {
   )
 }
 
-// Export fetcher for direct use if needed
-export { fetcher }
+// Export fetcher and device detection for direct use
+export { fetcher, isMobile, isIOS, isStandalone }
+
+// Adaptive intervals based on device and context
+export const adaptiveIntervals = {
+  // Timer intervals (critical for real-time)
+  timer: {
+    active: 1000,        // 1s when timer is actively running
+    inactive: isMobile ? 30000 : 15000,  // 30s mobile, 15s desktop when no active timer
+  },
+  
+  // Live game data (important for ongoing games)
+  liveGame: {
+    foreground: isMobile ? 3000 : 2000,  // 3s mobile, 2s desktop
+    background: 0,       // Pause when in background
+  },
+  
+  // Tournament/ranking data (normal priority)
+  tournament: {
+    foreground: isMobile ? 90000 : 60000, // 1.5min mobile, 1min desktop
+    background: isMobile ? 180000 : 120000, // 3min mobile, 2min desktop
+  },
+  
+  // Admin/stats data (low priority)
+  admin: {
+    foreground: 120000,  // 2min
+    background: 300000,  // 5min
+  }
+}
+
+// Get appropriate interval based on data type and visibility
+export function getInterval(type: keyof typeof adaptiveIntervals, isVisible = true): number {
+  const intervals = adaptiveIntervals[type]
+  
+  if (typeof intervals === 'object') {
+    return isVisible ? intervals.foreground : intervals.background
+  }
+  
+  return intervals
+}
 
 // SWR key generators for consistency
 export const swrKeys = {

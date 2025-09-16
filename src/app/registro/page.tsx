@@ -10,6 +10,9 @@ import { GameStatsCards } from '@/components/registro/GameStatsCards'
 import { EliminationForm } from '@/components/registro/EliminationForm'
 import { EliminationHistory } from '@/components/registro/EliminationHistory'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
+import { useActiveGameDate } from '@/hooks/useActiveGameDate'
+import { useGameDateLiveStatus } from '@/hooks/useGameDateLiveStatus'
+import { adaptiveIntervals } from '@/lib/swr-config'
 
 interface Player {
   id: string
@@ -56,75 +59,53 @@ export default function RegistroPage() {
   const { user } = useAuth()
   const router = useRouter()
   
-  // Estados
-  const [activeGameDate, setActiveGameDate] = useState<GameDate | null>(null)
-  const [players, setPlayers] = useState<Player[]>([])
-  const [eliminations, setEliminations] = useState<Elimination[]>([])
-  const [timerData, setTimerData] = useState<TimerData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  // Función para obtener todos los datos
-  const fetchAllData = async () => {
-    if (!user) return // No hacer requests sin usuario
-    
-    try {
-      setError(null)
-      
-      // Obtener fecha activa
-      const gameDateResponse = await fetch('/api/game-dates/active')
-      if (!gameDateResponse.ok) {
-        throw new Error('No hay fecha activa')
-      }
-      
-      const gameDateData = await gameDateResponse.json()
-      if (!gameDateData) {
-        throw new Error('No hay fecha activa en este momento')
-      }
-      
-      setActiveGameDate(gameDateData)
-
-      // Headers de autorización
-      const authHeaders = user?.adminKey ? { 'Authorization': `Bearer ${user.adminKey}` } : {}
-
-      // Obtener jugadores, eliminaciones y timer en paralelo
-      const [playersRes, eliminationsRes, timerRes] = await Promise.all([
-        fetch(`/api/game-dates/${gameDateData.id}/players`, { headers: authHeaders }),
-        fetch(`/api/eliminations/game-date/${gameDateData.id}`, { headers: authHeaders }),
-        fetch(`/api/game-dates/${gameDateData.id}/live-status`, { headers: authHeaders })
-      ])
-
-      if (playersRes.ok) {
-        const playersData = await playersRes.json()
-        setPlayers(playersData)
-      }
-
-      if (eliminationsRes.ok) {
-        const eliminationsData = await eliminationsRes.json()
-        setEliminations(eliminationsData)
-      }
-
-      if (timerRes.ok) {
-        const timerResponse = await timerRes.json()
-        setTimerData(timerResponse.timer || null)
-      }
-
-    } catch (err) {
-      console.error('Error fetching data:', err)
-      setError(err instanceof Error ? err.message : 'Error al cargar datos')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Auto-refresh cada 5 segundos
+  // Track page visibility for optimized intervals
+  const [isVisible, setIsVisible] = useState(true)
+  
   useEffect(() => {
-    if (user) {
-      fetchAllData()
-      const interval = setInterval(fetchAllData, 5000)
-      return () => clearInterval(interval)
+    const handleVisibilityChange = () => {
+      setIsVisible(!document.hidden)
     }
-  }, [user])
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  // Use SWR hooks with mobile-optimized intervals instead of manual setInterval
+  const { 
+    gameDate: activeGameDate, 
+    isInProgress,
+    isLoading: gameDateLoading,
+    isError: gameDateError,
+    error: gameDateErrorObj
+  } = useActiveGameDate({
+    refreshInterval: isVisible 
+      ? adaptiveIntervals.liveGame.foreground 
+      : adaptiveIntervals.liveGame.background
+  })
+
+  const { 
+    data: liveData,
+    isLoading: liveDataLoading,
+    isError: liveDataError,
+    mutate: refreshLiveData
+  } = useGameDateLiveStatus(activeGameDate?.id || null, {
+    refreshInterval: isVisible 
+      ? adaptiveIntervals.liveGame.foreground 
+      : adaptiveIntervals.liveGame.background
+  })
+
+  // Derived states from SWR data
+  const loading = gameDateLoading || (activeGameDate && liveDataLoading)
+  const error = gameDateError 
+    ? 'No hay fecha activa' 
+    : liveDataError 
+      ? 'Error al cargar datos de la fecha'
+      : null
+  
+  const players = liveData?.players || []
+  const eliminations = liveData?.eliminations || []
+  const timerData = liveData?.timer || null
 
   // Verificación de permisos
   if (!user || !canCRUD(user.role)) {
@@ -219,7 +200,7 @@ export default function RegistroPage() {
               players={players}
               eliminations={eliminations}
               nextPosition={nextPosition}
-              onEliminationCreated={fetchAllData}
+              onEliminationCreated={refreshLiveData}
             />
           )}
 
@@ -237,7 +218,7 @@ export default function RegistroPage() {
           <EliminationHistory
             eliminations={eliminations}
             players={players}
-            onEliminationUpdated={fetchAllData}
+            onEliminationUpdated={refreshLiveData}
           />
         </div>
       </div>

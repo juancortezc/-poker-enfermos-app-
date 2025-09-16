@@ -53,7 +53,7 @@ export async function PUT(req: NextRequest) {
   return withAuth(req, async (req, user) => {
     try {
       const body = await req.json()
-      const { pin, birthDate, email, phone } = body
+      const { pin, birthDate, email, phone, markComplete } = body
 
       // Validaciones
       if (pin && (typeof pin !== 'string' || pin.length !== 4 || !/^\d{4}$/.test(pin))) {
@@ -116,6 +116,11 @@ export async function PUT(req: NextRequest) {
       
       if (phone !== undefined) {
         updateData.phone = phone || null
+      }
+
+      // Si markComplete es true, marcar el perfil como completo
+      if (markComplete) {
+        updateData.requiresProfileUpdate = false
       }
 
       // Actualizar usuario

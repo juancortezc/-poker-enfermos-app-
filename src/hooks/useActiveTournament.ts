@@ -1,5 +1,6 @@
 import useSWR from 'swr'
-import { swrKeys } from '@/lib/swr-config'
+import { swrKeys, getInterval } from '@/lib/swr-config'
+import { useEffect, useState } from 'react'
 
 interface Tournament {
   id: number
@@ -23,15 +24,27 @@ interface UseActiveTournamentOptions {
 }
 
 /**
- * Custom hook for active tournament data
+ * Custom hook for active tournament data with mobile-optimized intervals
  * Provides caching and auto-refresh for the currently active tournament
  * 
  * @param options - SWR configuration options
  * @returns SWR response with active tournament data
  */
 export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
+  // Track page visibility for adaptive refresh rates
+  const [isVisible, setIsVisible] = useState(true)
+  
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsVisible(!document.hidden)
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
   const {
-    refreshInterval = 60000, // 1 minute default for tournament status
+    refreshInterval = getInterval('tournament', isVisible),
     revalidateOnFocus = true,
     revalidateOnReconnect = true
   } = options
@@ -39,9 +52,10 @@ export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
   const swrResponse = useSWR<Tournament>(
     swrKeys.activeTournament(),
     {
-      refreshInterval,
+      refreshInterval: isVisible ? refreshInterval : getInterval('tournament', false),
       revalidateOnFocus,
       revalidateOnReconnect,
+      refreshWhenHidden: false, // Don't refresh when app is in background
       
       // Error handling
       shouldRetryOnError: (error) => {
@@ -50,8 +64,8 @@ export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
         return true
       },
       
-      // Performance
-      dedupingInterval: 10000, // Dedupe requests within 10 seconds
+      // Mobile-optimized performance
+      dedupingInterval: 15000, // Longer deduping for mobile
       errorRetryInterval: 10000,
       errorRetryCount: 2
     }

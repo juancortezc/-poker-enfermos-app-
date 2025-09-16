@@ -12,10 +12,11 @@ import { usePathname, useRouter } from 'next/navigation'
 import { usePlayerSearch } from '@/contexts/PlayerSearchContext'
 import { useState, useRef, useEffect } from 'react'
 import { UserDropdown } from './UserDropdown'
+import { ProfileUpdateModal } from './ProfileUpdateModal'
 
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, loading, profileNeedsUpdate, checkProfileStatus } = useAuth()
   const pathname = usePathname()
   const router = useRouter()
   const { searchTerm, setSearchTerm, showAddButton } = usePlayerSearch()
@@ -46,6 +47,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     } else {
       router.push('/players/new?type=invitado')
     }
+  }
+
+  const handleProfileUpdateComplete = () => {
+    // Refresh profile status after update
+    checkProfileStatus()
   }
 
   if (loading) {
@@ -175,6 +181,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Navbar móvil */}
       <MobileNavbar />
+
+      {/* Profile Update Modal */}
+      <ProfileUpdateModal
+        isOpen={profileNeedsUpdate}
+        onComplete={handleProfileUpdateComplete}
+      />
     </div>
   )
 }

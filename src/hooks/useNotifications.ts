@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { isIOS, isStandalone } from '@/lib/swr-config';
 
 export interface NotificationPreferences {
   timer: {
@@ -58,6 +59,12 @@ export const useNotifications = () => {
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [preferences, setPreferences] = useState<NotificationPreferences>(DEFAULT_PREFERENCES);
   const [isSupported, setIsSupported] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState({
+    isIOS: false,
+    isStandalone: false,
+    supportsVibration: false,
+    supportsPWANotifications: false
+  });
 
   // Cargar preferencias desde localStorage
   const loadPreferences = useCallback(() => {
@@ -72,13 +79,27 @@ export const useNotifications = () => {
     }
   }, []);
 
-  // Verificar soporte del navegador
+  // Verificar soporte del navegador y dispositivo
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const supported = 'Notification' in window && 'serviceWorker' in navigator;
-      setIsSupported(supported);
+      const basicSupport = 'Notification' in window && 'serviceWorker' in navigator;
+      const deviceIsIOS = isIOS;
+      const deviceIsStandalone = isStandalone;
+      const supportsVibration = 'vibrate' in navigator && !deviceIsIOS; // iOS never supports vibration
       
-      if (supported) {
+      // iOS notifications only work in standalone PWA mode
+      const supportsPWANotifications = deviceIsIOS ? deviceIsStandalone : basicSupport;
+      
+      setDeviceInfo({
+        isIOS: deviceIsIOS,
+        isStandalone: deviceIsStandalone,
+        supportsVibration,
+        supportsPWANotifications
+      });
+      
+      setIsSupported(supportsPWANotifications);
+      
+      if (supportsPWANotifications) {
         setPermission(Notification.permission);
         loadPreferences();
       }
@@ -125,9 +146,20 @@ export const useNotifications = () => {
     }
   }, [preferences.sound]);
 
-  // Vibrar dispositivo
+  // Vibrar dispositivo (iOS compatible)
   const vibrate = useCallback((pattern?: number[]) => {
-    if (!preferences.vibration.enabled || !navigator.vibrate) return;
+    if (!preferences.vibration.enabled) return;
+    
+    // Skip vibration silently on iOS since it's not supported
+    if (deviceInfo.isIOS) {
+      console.debug('Vibration skipped on iOS device');
+      return;
+    }
+    
+    if (!navigator.vibrate) {
+      console.debug('Vibration not supported on this device');
+      return;
+    }
 
     try {
       if (pattern) {
@@ -144,7 +176,7 @@ export const useNotifications = () => {
     } catch (error) {
       console.warn('Error vibrating device:', error);
     }
-  }, [preferences.vibration]);
+  }, [preferences.vibration, deviceInfo.isIOS]);
 
   // Enviar notificación
   const sendNotification = useCallback(async (
@@ -259,6 +291,7 @@ export const useNotifications = () => {
     isSupported,
     permission,
     preferences,
+    deviceInfo, // Información del dispositivo para UI condicional
     
     // Acciones
     requestPermission,
@@ -275,5 +308,14 @@ export const useNotifications = () => {
     // Utilidades
     playSound,
     vibrate,
+    
+    // Helpers for UI
+    shouldShowVibrationControls: deviceInfo.supportsVibration,
+    shouldShowIOSInstructions: deviceInfo.isIOS && !deviceInfo.isStandalone,
+    notificationStatusMessage: deviceInfo.isIOS && !deviceInfo.isStandalone 
+      ? 'Las notificaciones requieren instalar la app desde Safari > Compartir > Agregar a Pantalla de Inicio'
+      : isSupported 
+        ? 'Notificaciones disponibles' 
+        : 'Notificaciones no soportadas en este navegador'
   };
 };

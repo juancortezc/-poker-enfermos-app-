@@ -69,6 +69,7 @@ model Player {
   phone             String?
   email             String?
   isActive          Boolean  @default(true) @map("is_active")
+  requiresProfileUpdate Boolean @default(true) @map("requires_profile_update")
 
   // Relaciones
   gameResults       GameResult[]

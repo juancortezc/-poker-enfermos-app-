@@ -117,3 +117,45 @@ export function hasPermission(userRole: UserRole, requiredRole: UserRole): boole
 export function canCRUD(userRole: UserRole): boolean {
   return userRole === UserRole.Comision
 }
+
+/**
+ * Verifica si el perfil del usuario está completo
+ * Un perfil está completo si tiene PIN, cumpleaños, email y teléfono
+ */
+export function isProfileComplete(player: {
+  pin?: string | null
+  birthDate?: string | null
+  email?: string | null
+  phone?: string | null
+}): boolean {
+  return !!(
+    player.pin &&
+    player.birthDate &&
+    player.email &&
+    player.phone
+  )
+}
+
+/**
+ * Verifica si el perfil del usuario está completo usando el ID
+ */
+export async function checkProfileComplete(playerId: string): Promise<boolean> {
+  try {
+    const player = await prisma.player.findUnique({
+      where: { id: playerId },
+      select: {
+        pin: true,
+        birthDate: true,
+        email: true,
+        phone: true,
+      }
+    })
+
+    if (!player) return false
+
+    return isProfileComplete(player)
+  } catch (error) {
+    console.error('Error checking profile completeness:', error)
+    return false
+  }
+}
