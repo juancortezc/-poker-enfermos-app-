@@ -76,6 +76,7 @@ export function useActiveGameDate(options: UseActiveGameDateOptions = {}) {
     // Game date status checks
     isInProgress: swrResponse.data?.status === 'in_progress',
     isCreated: swrResponse.data?.status === 'CREATED',
+    isActive: swrResponse.data?.status === 'in_progress' || swrResponse.data?.status === 'CREATED',
     isPending: swrResponse.data?.status === 'pending',
     isCompleted: swrResponse.data?.status === 'completed',
     isCancelled: swrResponse.data?.status === 'cancelled'
