@@ -16,27 +16,56 @@ const isStandalone = typeof window !== 'undefined' ?
   window.matchMedia('(display-mode: standalone)').matches || 
   (window.navigator as any).standalone === true : false
 
-// Hybrid storage helper for mobile reliability
+// Hybrid storage helper for mobile reliability - FIXED VERSION
 const getStorageItem = (key: string): string | null => {
   if (typeof window === 'undefined') return null
   
+  let value: string | null = null
+  
+  // Try localStorage first (primary storage)
   try {
-    return localStorage.getItem(key) || sessionStorage.getItem(key)
-  } catch (error) {
-    try {
-      return sessionStorage.getItem(key)
-    } catch (sessionError) {
-      return null
+    value = localStorage.getItem(key)
+    if (value !== null) {
+      console.debug(`[Storage] Found ${key} in localStorage`)
+      return value
     }
+  } catch (error) {
+    console.warn(`[Storage] localStorage failed for ${key}:`, error)
   }
+  
+  // Fallback to sessionStorage
+  try {
+    value = sessionStorage.getItem(key)
+    if (value !== null) {
+      console.debug(`[Storage] Found ${key} in sessionStorage (fallback)`)
+      
+      // Try to migrate back to localStorage if possible
+      try {
+        localStorage.setItem(key, value)
+        console.debug(`[Storage] Migrated ${key} back to localStorage`)
+      } catch (migrationError) {
+        console.debug(`[Storage] Could not migrate ${key} to localStorage:`, migrationError)
+      }
+      
+      return value
+    }
+  } catch (sessionError) {
+    console.warn(`[Storage] sessionStorage also failed for ${key}:`, sessionError)
+  }
+  
+  console.debug(`[Storage] No value found for ${key} in any storage`)
+  return null
 }
 
-// Custom fetcher que incluye autenticación con PIN
+// Custom fetcher que incluye autenticación con PIN - IMPROVED VERSION
 const fetcher = async (url: string) => {
+  console.debug('[SWR] Fetching:', url)
+  
   // Get auth token from hybrid storage (PIN system)
   const pin = getStorageItem('poker-pin')
-  // Legacy support for adminKey during transition
   const adminKey = getStorageItem('poker-adminkey')
+  
+  console.debug('[SWR] Auth tokens available:', { hasPin: !!pin, hasAdminKey: !!adminKey })
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -45,8 +74,12 @@ const fetcher = async (url: string) => {
   // Use PIN if available, otherwise fall back to adminKey
   if (pin) {
     headers['Authorization'] = `Bearer PIN:${pin}`
+    console.debug('[SWR] Using PIN authentication')
   } else if (adminKey) {
     headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+    console.debug('[SWR] Using AdminKey authentication')
+  } else {
+    console.debug('[SWR] No authentication token available')
   }
   
   const response = await fetch(url, {
@@ -54,15 +87,22 @@ const fetcher = async (url: string) => {
     headers,
   })
   
+  console.debug('[SWR] Response status:', response.status)
+  
   if (!response.ok) {
+    const errorText = await response.text()
+    console.error('[SWR] Request failed:', response.status, errorText)
+    
     // Create error object with status for better error handling
     const error = new Error(`HTTP Error: ${response.status}`) as Error & { status?: number; info?: string }
     error.status = response.status
-    error.info = await response.text()
+    error.info = errorText
     throw error
   }
   
-  return response.json()
+  const data = await response.json()
+  console.debug('[SWR] Success:', url)
+  return data
 }
 
 // Mobile-optimized SWR configuration

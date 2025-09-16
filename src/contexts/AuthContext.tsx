@@ -68,49 +68,76 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [profileNeedsUpdate, setProfileNeedsUpdate] = useState(false)
 
-  // Auto-recovery function for lost sessions
+  // Auto-recovery function for lost sessions - IMPROVED VERSION
   const attemptAutoRecovery = async () => {
+    console.debug('[Auth] Starting auto-recovery...')
+    
     const storedUser = storage.getItem('poker-user')
     const pin = storage.getItem('poker-pin')
     const adminKey = storage.getItem('poker-adminkey')
     
+    console.debug('[Auth] Recovery data:', {
+      hasUser: !!storedUser,
+      hasPin: !!pin,
+      hasAdminKey: !!adminKey
+    })
+    
     if (storedUser && (pin || adminKey)) {
       try {
-        // Validate session is still valid
-        const isValid = await validateSession(pin || adminKey)
+        // Parse user data
+        const userData = JSON.parse(storedUser)
+        console.debug('[Auth] Parsed user data:', userData.firstName, userData.lastName)
+        
+        // Try PIN first, then adminKey
+        const token = pin || adminKey
+        const isValid = await validateSession(token)
+        
+        console.debug('[Auth] Session validation result:', isValid)
+        
         if (isValid) {
-          const userData = JSON.parse(storedUser)
           setUser(userData)
           await checkProfileStatus()
+          console.debug('[Auth] Auto-recovery successful')
           return true
         } else {
-          // Clear invalid data
+          console.warn('[Auth] Session invalid, clearing data')
           clearAuthData()
         }
       } catch (error) {
-        console.warn('Auto-recovery failed:', error)
+        console.warn('[Auth] Auto-recovery failed:', error)
         clearAuthData()
       }
+    } else {
+      console.debug('[Auth] No stored credentials found')
     }
     return false
   }
 
-  // Validate if session is still active
+  // Validate if session is still active - IMPROVED VERSION
   const validateSession = async (token: string | null): Promise<boolean> => {
-    if (!token) return false
+    if (!token) {
+      console.debug('[Auth] No token provided for validation')
+      return false
+    }
     
     try {
       const headers: HeadersInit = { 'Content-Type': 'application/json' }
       
-      if (token.length === 4 && /^\d{4}$/.test(token)) {
-        headers['Authorization'] = `Bearer PIN:${token}`
-      } else {
-        headers['Authorization'] = `Bearer ADMIN:${token}`
-      }
+      // Determine auth type based on token format
+      const isPinFormat = token.length === 4 && /^\d{4}$/.test(token)
+      const authType = isPinFormat ? 'PIN' : 'ADMIN'
+      headers['Authorization'] = `Bearer ${authType}:${token}`
+      
+      console.debug(`[Auth] Validating session with ${authType} format`)
       
       const response = await fetch('/api/profile/status', { headers })
-      return response.ok
-    } catch {
+      const isValid = response.ok
+      
+      console.debug(`[Auth] Session validation: ${isValid ? 'SUCCESS' : 'FAILED'} (${response.status})`)
+      
+      return isValid
+    } catch (error) {
+      console.warn('[Auth] Session validation error:', error)
       return false
     }
   }
@@ -196,9 +223,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (pin: string): Promise<boolean> => {
     try {
+      console.debug('[Auth] Attempting login with PIN:', pin)
+      
       // Validate PIN format on client side
       if (!/^\d{4}$/.test(pin)) {
-        console.error('PIN must be exactly 4 digits')
+        console.error('[Auth] PIN must be exactly 4 digits')
         return false
       }
 
@@ -210,18 +239,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ pin }),
       })
 
+      console.debug('[Auth] Login response status:', response.status)
+
       if (response.ok) {
         const authUser = await response.json()
+        console.debug('[Auth] Login successful for:', authUser.firstName, authUser.lastName)
+        
         setUser(authUser)
         storage.setItem('poker-user', JSON.stringify(authUser))
         storage.setItem('poker-pin', pin) // Store PIN for subsequent API calls
+        
+        console.debug('[Auth] User data and PIN stored successfully')
+        
         // Check profile status after login
         await checkProfileStatus()
         return true
+      } else {
+        const errorData = await response.text()
+        console.error('[Auth] Login failed:', response.status, errorData)
       }
+      
       return false
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('[Auth] Login error:', error)
       return false
     }
   }
