@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
@@ -47,6 +47,11 @@ export default function GameDateConfigPage() {
   
   const { user } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // Check if we're in edit mode
+  const isEditMode = searchParams.get('edit') === 'true'
+  const editGameDateId = searchParams.get('gameDateId') ? parseInt(searchParams.get('gameDateId')!) : null
   const [loading, setLoading] = useState(true)
   const [activating, setActivating] = useState(false)
   const [updatingDate, setUpdatingDate] = useState(false)
@@ -83,7 +88,6 @@ export default function GameDateConfigPage() {
       setLoading(true)
       setError('')
       
-      // Check if there's an active game date already
       const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       
       if (!pin) {
@@ -93,7 +97,47 @@ export default function GameDateConfigPage() {
         }, 1500)
         return
       }
+
+      // If in edit mode, load specific game date data
+      if (isEditMode && editGameDateId) {
+        const gameDateResponse = await fetch(`/api/game-dates/${editGameDateId}`, {
+          headers: {
+            'Authorization': pin ? `Bearer PIN:${pin}` : '',
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (gameDateResponse.ok) {
+          const gameDateData = await gameDateResponse.json()
+          const gameDate = gameDateData.gameDate
+          
+          // Set up for editing existing game date
+          setTournament(gameDate.tournament)
+          setSelectedDateId(gameDate.id)
+          setSelectedDate(new Date(gameDate.scheduledDate))
+          setSelectedPlayers(gameDate.playerIds)
+          
+          // Also load available dates for dropdown
+          const availableResponse = await fetch('/api/game-dates/available-dates', {
+            headers: {
+              'Authorization': pin ? `Bearer PIN:${pin}` : '',
+              'Content-Type': 'application/json'
+            }
+          })
+
+          if (availableResponse.ok) {
+            const data = await availableResponse.json()
+            setAvailableDates(data.availableDates)
+            setAllPlayers(data.allPlayers)
+            await loadGuests()
+          }
+          
+          setLoading(false)
+          return
+        }
+      }
       
+      // Normal flow: Check if there's an active game date already
       const activeResponse = await fetch('/api/game-dates/active', {
         headers: {
           'Authorization': pin ? `Bearer PIN:${pin}` : '',
@@ -103,7 +147,7 @@ export default function GameDateConfigPage() {
 
       if (activeResponse.ok) {
         const activeData = await activeResponse.json()
-        if (activeData && activeData.activeDate) {
+        if (activeData && activeData.activeDate && !isEditMode) {
           setActiveGameDate(activeData.activeDate)
           setTournament(activeData.activeDate.tournament)
           setLoading(false)
@@ -171,7 +215,7 @@ export default function GameDateConfigPage() {
     } finally {
       setLoading(false)
     }
-  }, [router, loadGuests])
+  }, [router, loadGuests, isEditMode, editGameDateId])
 
   // Load initial data - only run once when user is available and has Comision role
   useEffect(() => {
@@ -238,7 +282,7 @@ export default function GameDateConfigPage() {
 
   const handleActivate = async () => {
     if (!tournament || !selectedDateId || !selectedDate) {
-      setError('Datos incompletos para activar fecha')
+      setError('Datos incompletos para procesar fecha')
       return
     }
 
@@ -246,34 +290,59 @@ export default function GameDateConfigPage() {
       setActivating(true)
       setError('')
 
-      // Create or update game date
       const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      const response = await fetch('/api/game-dates', {
-        method: 'POST',
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          tournamentId: tournament.id,
-          dateNumber: availableDates.find(d => d.id === selectedDateId)?.dateNumber,
-          scheduledDate: selectedDate.toISOString(),
-          playerIds: [...selectedPlayers, ...selectedGuests]
+      
+      if (isEditMode && editGameDateId) {
+        // Update existing game date
+        const response = await fetch(`/api/game-dates/${editGameDateId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': pin ? `Bearer PIN:${pin}` : '',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'update',
+            playerIds: [...selectedPlayers, ...selectedGuests],
+            scheduledDate: selectedDate.toISOString().split('T')[0]
+          })
         })
-      })
 
-      if (response.ok) {
-        const result = await response.json()
-        setActiveGameDate(result.gameDate)
-        // Reload data to show activated state
-        await loadInitialData()
+        if (response.ok) {
+          // Redirect back to admin page after successful update
+          router.push('/admin/game-dates')
+          return
+        } else {
+          const errorData = await response.json()
+          setError(errorData.error || 'Error al actualizar fecha')
+        }
       } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Error al activar fecha')
+        // Create new game date
+        const response = await fetch('/api/game-dates', {
+          method: 'POST',
+          headers: {
+            'Authorization': pin ? `Bearer PIN:${pin}` : '',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            tournamentId: tournament.id,
+            dateNumber: availableDates.find(d => d.id === selectedDateId)?.dateNumber,
+            scheduledDate: selectedDate.toISOString(),
+            playerIds: [...selectedPlayers, ...selectedGuests]
+          })
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          setActiveGameDate(result.gameDate)
+          await loadInitialData()
+        } else {
+          const errorData = await response.json()
+          setError(errorData.error || 'Error al activar fecha')
+        }
       }
     } catch (err) {
-      console.error('Error activating date:', err)
-      setError('Error al activar fecha de juego')
+      console.error('Error processing date:', err)
+      setError('Error al procesar fecha de juego')
     } finally {
       setActivating(false)
     }
@@ -408,12 +477,12 @@ export default function GameDateConfigPage() {
                   {activating ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Activando...
+                      {isEditMode ? 'Actualizando...' : 'Activando...'}
                     </>
                   ) : (
                     <>
                       <Play className="w-5 h-5 mr-2" />
-                      ACTIVAR
+                      {isEditMode ? 'ACTUALIZAR' : 'ACTIVAR'}
                     </>
                   )}
                 </Button>

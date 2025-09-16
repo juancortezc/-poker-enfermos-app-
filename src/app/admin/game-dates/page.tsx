@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
-import { Trash2, RotateCcw, Play, Settings } from 'lucide-react'
+import { Trash2, RotateCcw, Play, Settings, Edit } from 'lucide-react'
 
 interface GameDate {
   id: number
@@ -57,6 +57,11 @@ export default function AdminGameDatesPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleEdit = (gameDateId: number) => {
+    // Navigate to configuration page with edit parameters
+    window.location.href = `/game-dates/config?edit=true&gameDateId=${gameDateId}`
   }
 
   const handleDelete = async (gameDateId: number) => {
@@ -213,26 +218,43 @@ export default function AdminGameDatesPage() {
                       }
                     </td>
                     <td className="px-4 py-3">
-                      {gameDate.status !== 'pending' && (
-                        <Button
-                          onClick={() => handleDelete(gameDate.id)}
-                          disabled={deleting === gameDate.id}
-                          size="sm"
-                          className="bg-red-600 hover:bg-red-700 text-white"
-                        >
-                          {deleting === gameDate.id ? (
-                            'Eliminando...'
-                          ) : (
-                            <>
-                              <Trash2 className="w-3 h-3 mr-1" />
-                              Eliminar
-                            </>
-                          )}
-                        </Button>
-                      )}
-                      {gameDate.status === 'pending' && (
-                        <span className="text-gray-500 text-sm">No configurada</span>
-                      )}
+                      <div className="flex gap-2">
+                        {/* Edit button - only for CREATED status */}
+                        {gameDate.status === 'CREATED' && (
+                          <Button
+                            onClick={() => handleEdit(gameDate.id)}
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Editar
+                          </Button>
+                        )}
+                        
+                        {/* Delete button - for all configured statuses */}
+                        {gameDate.status !== 'pending' && (
+                          <Button
+                            onClick={() => handleDelete(gameDate.id)}
+                            disabled={deleting === gameDate.id}
+                            size="sm"
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                          >
+                            {deleting === gameDate.id ? (
+                              'Eliminando...'
+                            ) : (
+                              <>
+                                <Trash2 className="w-3 h-3 mr-1" />
+                                Eliminar
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        
+                        {/* Pending status message */}
+                        {gameDate.status === 'pending' && (
+                          <span className="text-gray-500 text-sm">No configurada</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
