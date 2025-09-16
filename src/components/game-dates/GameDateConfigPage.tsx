@@ -16,6 +16,7 @@ interface Player {
   photoUrl?: string
   isActive: boolean
   aliases?: string[]
+  shouldPreselect?: boolean
 }
 
 interface Tournament {
@@ -60,8 +61,7 @@ export default function GameDateConfigPage() {
   const [activeGameDate, setActiveGameDate] = useState<GameDateData | null>(null)
   
   // Player states
-  const [registeredPlayers, setRegisteredPlayers] = useState<Player[]>([])
-  const [additionalPlayers, setAdditionalPlayers] = useState<Player[]>([])
+  const [allPlayers, setAllPlayers] = useState<Player[]>([])
   const [guests, setGuests] = useState<Player[]>([])
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [selectedGuests, setSelectedGuests] = useState<string[]>([])
@@ -157,23 +157,42 @@ export default function GameDateConfigPage() {
         console.log('📋 Available dates data:', {
           tournament: data.tournament?.name,
           availableDatesCount: data.availableDates?.length,
-          registeredPlayersCount: data.registeredPlayers?.length,
-          additionalPlayersCount: data.additionalPlayers?.length
+          allPlayersCount: data.allPlayers?.length,
+          registeredPlayersCount: data.registeredPlayers?.length
         })
         
         setTournament(data.tournament)
         setAvailableDates(data.availableDates)
-        setRegisteredPlayers(data.registeredPlayers)
-        setAdditionalPlayers(data.additionalPlayers || [])
         
-        // Set first available date as default
-        if (data.availableDates.length > 0) {
-          const firstDate = data.availableDates[0]
-          console.log('🎯 Setting default date:', firstDate.dateNumber)
-          setSelectedDateId(firstDate.id)
-          setSelectedDate(new Date(firstDate.scheduledDate))
-          // Default selection: all registered players
-          setSelectedPlayers(data.registeredPlayers.map((p: Player) => p.id))
+        // Use allPlayers if available, otherwise fall back to old structure
+        if (data.allPlayers) {
+          setAllPlayers(data.allPlayers)
+          // Pre-select players who should be selected
+          const preselectIds = data.allPlayers
+            .filter((p: any) => p.shouldPreselect)
+            .map((p: any) => p.id)
+          
+          // Set first available date as default
+          if (data.availableDates.length > 0) {
+            const firstDate = data.availableDates[0]
+            console.log('🎯 Setting default date:', firstDate.dateNumber)
+            setSelectedDateId(firstDate.id)
+            setSelectedDate(new Date(firstDate.scheduledDate))
+            setSelectedPlayers(preselectIds)
+          }
+        } else {
+          // Backward compatibility
+          const allPlayersList = [...data.registeredPlayers, ...(data.additionalPlayers || [])]
+          setAllPlayers(allPlayersList)
+          
+          // Set first available date as default
+          if (data.availableDates.length > 0) {
+            const firstDate = data.availableDates[0]
+            console.log('🎯 Setting default date:', firstDate.dateNumber)
+            setSelectedDateId(firstDate.id)
+            setSelectedDate(new Date(firstDate.scheduledDate))
+            setSelectedPlayers(data.registeredPlayers.map((p: Player) => p.id))
+          }
         }
         
         // Load guests
@@ -231,8 +250,11 @@ export default function GameDateConfigPage() {
     setSelectedDateId(dateId)
     setSelectedDate(new Date(selectedDateData.scheduledDate))
     
-    // Reset selections to default (registered players checked)
-    setSelectedPlayers(registeredPlayers.map(p => p.id))
+    // Reset selections to default (pre-select players who should be selected)
+    const preselectIds = allPlayers
+      .filter(p => (p as any).shouldPreselect)
+      .map(p => p.id)
+    setSelectedPlayers(preselectIds)
     setSelectedGuests([])
     setActiveTab('enfermos')
   }
@@ -368,7 +390,7 @@ export default function GameDateConfigPage() {
   }
 
   const currentPlayers = activeTab === 'enfermos' 
-    ? [...registeredPlayers, ...additionalPlayers]
+    ? allPlayers
     : guests
 
   const selectedCount = activeTab === 'enfermos' 

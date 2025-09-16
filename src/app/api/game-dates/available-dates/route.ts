@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         )
       }
 
-      // Get all active players for additional selection
+      // Get all active players (Enfermos and Comision)
       const allActivePlayers = await prisma.player.findMany({
         where: {
           isActive: true,
@@ -56,17 +56,38 @@ export async function GET(request: NextRequest) {
           lastName: true,
           role: true,
           photoUrl: true,
-          isActive: true
-        }
+          isActive: true,
+          aliases: true
+        },
+        orderBy: [
+          { role: 'asc' },
+          { firstName: 'asc' }
+        ]
       })
 
-      const registeredPlayers = activeTournament.tournamentParticipants
-        .filter(tp => tp.player.isActive)
-        .map(tp => tp.player)
+      // Get all players who have participated in any game date of this tournament
+      const allGameDates = await prisma.gameDate.findMany({
+        where: { tournamentId: activeTournament.id },
+        select: { playerIds: true }
+      })
+      
+      const participatingPlayerIds = new Set<string>()
+      allGameDates.forEach(gd => {
+        gd.playerIds.forEach(id => participatingPlayerIds.add(id))
+      })
 
-      // Get players not registered in tournament
-      const registeredPlayerIds = registeredPlayers.map(p => p.id)
-      const availableAdditionalPlayers = allActivePlayers.filter(p => !registeredPlayerIds.includes(p.id))
+      // Get tournament participants for pre-selection
+      const tournamentParticipantIds = new Set(
+        activeTournament.tournamentParticipants
+          .filter(tp => tp.player.isActive)
+          .map(tp => tp.player.id)
+      )
+
+      // Mark players who should be pre-selected (tournament participants or have played in any date)
+      const playersWithSelectionInfo = allActivePlayers.map(player => ({
+        ...player,
+        shouldPreselect: tournamentParticipantIds.has(player.id) || participatingPlayerIds.has(player.id)
+      }))
 
       // Map available game dates for dropdown
       const availableDates = activeTournament.gameDates.map(gd => ({
@@ -83,8 +104,10 @@ export async function GET(request: NextRequest) {
           number: activeTournament.number
         },
         availableDates: availableDates,
-        registeredPlayers: registeredPlayers,
-        additionalPlayers: availableAdditionalPlayers
+        allPlayers: playersWithSelectionInfo,
+        // Keep backward compatibility
+        registeredPlayers: playersWithSelectionInfo.filter(p => p.shouldPreselect),
+        additionalPlayers: []
       })
     } catch (error) {
       console.error('Error getting available game dates:', error)
