@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
@@ -43,7 +43,7 @@ interface GameDateData {
 }
 
 export default function GameDateConfigPage() {
-  console.log('🎯 GameDateConfigPage component rendered')
+  // Component rendered - reduced logging for performance
   
   const { user } = useAuth()
   const router = useRouter()
@@ -71,46 +71,22 @@ export default function GameDateConfigPage() {
   
   // Check permissions
   useEffect(() => {
-    console.log('🔐 Checking permissions, user:', user ? { id: user.id, role: user.role } : 'null')
-    
     if (user && user.role !== UserRole.Comision) {
-      console.log('❌ User not Comision, redirecting to /admin')
       router.push('/admin')
       return
     }
-    
-    if (user) {
-      console.log('✅ User has Comision permissions')
-    }
   }, [user, router])
 
-  // Load initial data
-  useEffect(() => {
-    console.log('🚀 GameDateConfigPage useEffect triggered')
-    const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-    const userInfo = user ? { id: user.id, role: user.role } : 'null'
-    console.log('🔍 useEffect state:', { pin: pin?.substring(0, 4) + '***', user: userInfo })
-    
-    if (pin) {
-      console.log('✅ PIN found, calling loadInitialData')
-      loadInitialData()
-    } else {
-      console.log('❌ No PIN found, not loading data')
-    }
-  }, [user])
-
-  const loadInitialData = async () => {
+  // Memoize loadInitialData to prevent infinite re-renders
+  const loadInitialData = useCallback(async () => {
     try {
-      console.log('🔄 GameDateConfigPage: Starting loadInitialData')
       setLoading(true)
       setError('')
       
       // Check if there's an active game date already
       const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      console.log('🔑 PIN for auth:', pin ? pin.substring(0, 4) + '***' : 'NO PIN FOUND')
       
       if (!pin) {
-        console.error('❌ No PIN found in localStorage')
         setError('No se encontró autenticación. Redirigiendo al login...')
         setTimeout(() => {
           router.push('/admin')
@@ -124,42 +100,27 @@ export default function GameDateConfigPage() {
           'Content-Type': 'application/json'
         }
       })
-      
-      console.log('📡 Active game date response:', activeResponse.status)
 
       if (activeResponse.ok) {
         const activeData = await activeResponse.json()
-        console.log('📊 Active data:', activeData)
         if (activeData && activeData.activeDate) {
-          console.log('✅ Found active game date, stopping here')
           setActiveGameDate(activeData.activeDate)
           setTournament(activeData.activeDate.tournament)
-          // If there's an active date, we're done loading
           setLoading(false)
           return
         }
-        console.log('📭 No active game date found, loading available dates')
       }
 
       // Load available dates and players
-      console.log('🎯 Fetching available dates...')
       const availableResponse = await fetch('/api/game-dates/available-dates', {
         headers: {
           'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })
-      
-      console.log('📡 Available dates response:', availableResponse.status)
 
       if (availableResponse.ok) {
         const data = await availableResponse.json()
-        console.log('📋 Available dates data:', {
-          tournament: data.tournament?.name,
-          availableDatesCount: data.availableDates?.length,
-          allPlayersCount: data.allPlayers?.length,
-          registeredPlayersCount: data.registeredPlayers?.length
-        })
         
         setTournament(data.tournament)
         setAvailableDates(data.availableDates)
@@ -175,7 +136,6 @@ export default function GameDateConfigPage() {
           // Set first available date as default
           if (data.availableDates.length > 0) {
             const firstDate = data.availableDates[0]
-            console.log('🎯 Setting default date:', firstDate.dateNumber)
             setSelectedDateId(firstDate.id)
             setSelectedDate(new Date(firstDate.scheduledDate))
             setSelectedPlayers(preselectIds)
@@ -188,7 +148,6 @@ export default function GameDateConfigPage() {
           // Set first available date as default
           if (data.availableDates.length > 0) {
             const firstDate = data.availableDates[0]
-            console.log('🎯 Setting default date:', firstDate.dateNumber)
             setSelectedDateId(firstDate.id)
             setSelectedDate(new Date(firstDate.scheduledDate))
             setSelectedPlayers(data.registeredPlayers.map((p: Player) => p.id))
@@ -196,18 +155,10 @@ export default function GameDateConfigPage() {
         }
         
         // Load guests
-        console.log('🎭 Loading guests...')
         await loadGuests()
       } else {
-        console.error('❌ Available dates request failed:', availableResponse.status)
-        const errorText = await availableResponse.text()
-        console.error('Error details:', errorText)
-        
         if (availableResponse.status === 401) {
-          // Error de autenticación - intentar limpiar y redirigir
-          console.error('❌ Error de autenticación - PIN inválido o expirado')
           setError('Error de autenticación. Por favor, vuelve a iniciar sesión.')
-          // Opcionalmente, redirigir a login después de un delay
           setTimeout(() => {
             router.push('/admin')
           }, 2000)
@@ -216,15 +167,24 @@ export default function GameDateConfigPage() {
         }
       }
     } catch (err) {
-      console.error('❌ Error in loadInitialData:', err)
       setError(`Error al cargar los datos: ${err instanceof Error ? err.message : 'Error desconocido'}`)
     } finally {
-      console.log('✅ GameDateConfigPage: loadInitialData completed')
       setLoading(false)
     }
-  }
+  }, [router, loadGuests])
 
-  const loadGuests = async () => {
+  // Load initial data - only run once when user is available and has Comision role
+  useEffect(() => {
+    if (user && user.role === UserRole.Comision) {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      if (pin) {
+        loadInitialData()
+      }
+    }
+  }, [user, loadInitialData])
+
+
+  const loadGuests = useCallback(async () => {
     try {
       const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch('/api/players/available-guests', {
@@ -241,7 +201,7 @@ export default function GameDateConfigPage() {
     } catch (err) {
       console.error('Error loading guests:', err)
     }
-  }
+  }, [])
 
   const handleDateSelection = async (dateId: number) => {
     const selectedDateData = availableDates.find(d => d.id === dateId)
@@ -380,13 +340,14 @@ export default function GameDateConfigPage() {
   }
 
   const getDisplayName = (player: Player) => {
-    const firstName = player.aliases && player.aliases.length > 0 
+    // Use firstName as primary, alias as secondary option only if firstName is too long
+    const displayName = player.firstName.length > 12 && player.aliases && player.aliases.length > 0
       ? player.aliases[0] 
-      : player.firstName
+      : player.firstName.trim()
     
-    // Add last name initial
-    const lastNameInitial = player.lastName ? player.lastName.charAt(0).toUpperCase() : ''
-    return lastNameInitial ? `${firstName} ${lastNameInitial}.` : firstName
+    // Add last name initial consistently
+    const lastNameInitial = player.lastName ? player.lastName.trim().charAt(0).toUpperCase() : ''
+    return lastNameInitial ? `${displayName} ${lastNameInitial}.` : displayName
   }
 
   const currentPlayers = activeTab === 'enfermos' 
