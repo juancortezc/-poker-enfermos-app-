@@ -7,6 +7,7 @@ import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { Loader2, Play, UserPlus, Calendar } from 'lucide-react'
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
+import { useGameDateStatus } from '@/hooks/useGameDateStatus'
 
 interface Player {
   id: string
@@ -43,27 +44,31 @@ interface GameDateData {
 }
 
 export default function GameDateConfigPage() {
-  // Component rendered - reduced logging for performance
-  
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   
+  // Use centralized hook for GameDate status
+  const { 
+    tournament, 
+    availableDates, 
+    activeGameDate, 
+    hasAvailableDates,
+    showConfigPage,
+    isLoading: statusLoading 
+  } = useGameDateStatus()
+  
   // Check if we're in edit mode
   const isEditMode = searchParams.get('edit') === 'true'
   const editGameDateId = searchParams.get('gameDateId') ? parseInt(searchParams.get('gameDateId')!) : null
-  const [loading, setLoading] = useState(true)
+  
+  // Local component states
   const [activating, setActivating] = useState(false)
   const [updatingDate, setUpdatingDate] = useState(false)
   const [error, setError] = useState('')
   const [dateError, setDateError] = useState('')
-  
-  // Data states
-  const [tournament, setTournament] = useState<Tournament | null>(null)
-  const [availableDates, setAvailableDates] = useState<AvailableDate[]>([])
   const [selectedDateId, setSelectedDateId] = useState<number | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [activeGameDate, setActiveGameDate] = useState<GameDateData | null>(null)
   
   // Player states
   const [allPlayers, setAllPlayers] = useState<Player[]>([])
@@ -82,80 +87,66 @@ export default function GameDateConfigPage() {
     }
   }, [user, router])
 
-  // Memoize loadInitialData to prevent infinite re-renders
-  const loadInitialData = useCallback(async () => {
+  // Initialize data when centralized hook loads or edit mode changes
+  useEffect(() => {
+    if (!statusLoading && user && user.role === UserRole.Comision) {
+      initializeData()
+    }
+  }, [statusLoading, user, isEditMode, editGameDateId])
+
+  const initializeData = useCallback(async () => {
     try {
-      setLoading(true)
       setError('')
       
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      // Load players and guests
+      await loadPlayersAndGuests()
       
-      if (!pin) {
-        setError('No se encontró autenticación. Redirigiendo al login...')
-        setTimeout(() => {
-          router.push('/admin')
-        }, 1500)
-        return
-      }
-
       // If in edit mode, load specific game date data
       if (isEditMode && editGameDateId) {
-        const gameDateResponse = await fetch(`/api/game-dates/${editGameDateId}`, {
-          headers: {
-            'Authorization': pin ? `Bearer PIN:${pin}` : '',
-            'Content-Type': 'application/json'
-          }
-        })
-
-        if (gameDateResponse.ok) {
-          const gameDateData = await gameDateResponse.json()
-          const gameDate = gameDateData.gameDate
-          
-          // Set up for editing existing game date
-          setTournament(gameDate.tournament)
-          setSelectedDateId(gameDate.id)
-          setSelectedDate(new Date(gameDate.scheduledDate))
-          setSelectedPlayers(gameDate.playerIds)
-          
-          // Also load available dates for dropdown
-          const availableResponse = await fetch('/api/game-dates/available-dates', {
-            headers: {
-              'Authorization': pin ? `Bearer PIN:${pin}` : '',
-              'Content-Type': 'application/json'
-            }
-          })
-
-          if (availableResponse.ok) {
-            const data = await availableResponse.json()
-            setAvailableDates(data.availableDates)
-            setAllPlayers(data.allPlayers)
-            await loadGuests()
-          }
-          
-          setLoading(false)
-          return
+        await loadEditData()
+      } else {
+        // Normal mode: set first available date as default
+        if (availableDates.length > 0) {
+          const firstDate = availableDates[0]
+          setSelectedDateId(firstDate.id)
+          setSelectedDate(new Date(firstDate.scheduledDate))
         }
       }
-      
-      // Normal flow: Check if there's an active game date already
-      const activeResponse = await fetch('/api/game-dates/active', {
+    } catch (err) {
+      setError(`Error al cargar los datos: ${err instanceof Error ? err.message : 'Error desconocido'}`)
+    }
+  }, [isEditMode, editGameDateId, availableDates])
+
+  const loadEditData = useCallback(async () => {
+    if (!editGameDateId) return
+    
+    try {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const response = await fetch(`/api/game-dates/${editGameDateId}`, {
         headers: {
           'Authorization': pin ? `Bearer PIN:${pin}` : '',
           'Content-Type': 'application/json'
         }
       })
 
-      if (activeResponse.ok) {
-        const activeData = await activeResponse.json()
-        if (activeData && activeData.activeDate && !isEditMode) {
-          setActiveGameDate(activeData.activeDate)
-          setTournament(activeData.activeDate.tournament)
-          setLoading(false)
-          return
-        }
+      if (response.ok) {
+        const data = await response.json()
+        const gameDate = data.gameDate
+        
+        setSelectedDateId(gameDate.id)
+        setSelectedDate(new Date(gameDate.scheduledDate))
+        setSelectedPlayers(gameDate.playerIds)
       }
+    } catch (err) {
+      setError('Error al cargar datos de la fecha')
+    }
+  }, [editGameDateId])
 
-      // Load available dates and players
+  const loadPlayersAndGuests = useCallback(async () => {
+    try {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      
+      // Load available players
       const availableResponse = await fetch('/api/game-dates/available-dates', {
         headers: {
           'Authorization': pin ? `Bearer PIN:${pin}` : '',
@@ -166,66 +157,24 @@ export default function GameDateConfigPage() {
       if (availableResponse.ok) {
         const data = await availableResponse.json()
         
-        setTournament(data.tournament)
-        setAvailableDates(data.availableDates)
-        
-        // Use allPlayers if available, otherwise fall back to old structure
         if (data.allPlayers) {
           setAllPlayers(data.allPlayers)
-          // Pre-select players who should be selected
-          const preselectIds = data.allPlayers
-            .filter((p: any) => p.shouldPreselect)
-            .map((p: any) => p.id)
-          
-          // Set first available date as default
-          if (data.availableDates.length > 0) {
-            const firstDate = data.availableDates[0]
-            setSelectedDateId(firstDate.id)
-            setSelectedDate(new Date(firstDate.scheduledDate))
+          // Pre-select players who should be selected (if not in edit mode)
+          if (!isEditMode) {
+            const preselectIds = data.allPlayers
+              .filter((p: any) => p.shouldPreselect)
+              .map((p: any) => p.id)
             setSelectedPlayers(preselectIds)
           }
-        } else {
-          // Backward compatibility
-          const allPlayersList = [...data.registeredPlayers, ...(data.additionalPlayers || [])]
-          setAllPlayers(allPlayersList)
-          
-          // Set first available date as default
-          if (data.availableDates.length > 0) {
-            const firstDate = data.availableDates[0]
-            setSelectedDateId(firstDate.id)
-            setSelectedDate(new Date(firstDate.scheduledDate))
-            setSelectedPlayers(data.registeredPlayers.map((p: Player) => p.id))
-          }
-        }
-        
-        // Load guests
-        await loadGuests()
-      } else {
-        if (availableResponse.status === 401) {
-          setError('Error de autenticación. Por favor, vuelve a iniciar sesión.')
-          setTimeout(() => {
-            router.push('/admin')
-          }, 2000)
-        } else {
-          setError(`Error al obtener fechas disponibles: ${availableResponse.status}`)
         }
       }
+      
+      // Load guests
+      await loadGuests()
     } catch (err) {
-      setError(`Error al cargar los datos: ${err instanceof Error ? err.message : 'Error desconocido'}`)
-    } finally {
-      setLoading(false)
+      console.error('Error loading players and guests:', err)
     }
-  }, [router, loadGuests, isEditMode, editGameDateId])
-
-  // Load initial data - only run once when user is available and has Comision role
-  useEffect(() => {
-    if (user && user.role === UserRole.Comision) {
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      if (pin) {
-        loadInitialData()
-      }
-    }
-  }, [user, loadInitialData])
+  }, [isEditMode])
 
 
   const loadGuests = useCallback(async () => {
@@ -435,7 +384,7 @@ export default function GameDateConfigPage() {
     )
   }
 
-  if (loading) {
+  if (statusLoading) {
     return (
       <div className="min-h-screen bg-poker-dark flex items-center justify-center">
         <div className="text-center">

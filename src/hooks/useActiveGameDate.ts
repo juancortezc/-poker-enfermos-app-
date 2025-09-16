@@ -25,6 +25,9 @@ interface UseActiveGameDateOptions {
  * Custom hook for active game date data
  * Provides caching and auto-refresh for the currently active game date
  * 
+ * @deprecated Use useGameDateStatus() from '@/hooks/useGameDateStatus' instead
+ * This hook provides more comprehensive state management and better consistency
+ * 
  * @param options - SWR configuration options
  * @returns SWR response with active game date data
  */

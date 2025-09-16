@@ -1,14 +1,14 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { useActiveGameDate } from '@/hooks/useActiveGameDate'
+import { useTimerStatus } from '@/hooks/useGameDateStatus'
 import { canCRUD } from '@/lib/auth'
 import TimerDisplay from '@/components/TimerDisplay'
 import { Clock } from 'lucide-react'
 
 export default function TimerPage() {
   const { user } = useAuth()
-  const { gameDate: activeGameDate, isLoading } = useActiveGameDate()
+  const { timerData, hasTimer, isLoading } = useTimerStatus()
 
   // Verificar permisos
   if (!user || !canCRUD(user.role)) {

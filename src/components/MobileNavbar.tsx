@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { canCRUD } from '@/lib/auth'
-import { useState, useEffect } from 'react'
+import { useNavigation } from '@/hooks/useGameDateStatus'
 import {
   HomeIcon,
   TimerIcon,
@@ -24,29 +24,7 @@ const navItems = [
 export default function MobileNavbar() {
   const pathname = usePathname()
   const { user } = useAuth()
-  const [hasActiveGameDate, setHasActiveGameDate] = useState(false)
-
-  // Check for active game date
-  useEffect(() => {
-    const checkActiveGameDate = async () => {
-      try {
-        const response = await fetch('/api/game-dates/active')
-        
-        if (response.ok) {
-          const data = await response.json()
-          setHasActiveGameDate(!!data)
-        }
-      } catch (error) {
-        console.error('Error checking active game date:', error)
-      }
-    }
-
-    checkActiveGameDate()
-    // Check every 30 seconds for updates
-    const interval = setInterval(checkActiveGameDate, 30000)
-    
-    return () => clearInterval(interval)
-  }, [])
+  const { showRegistrationButton } = useNavigation()
 
   if (!user) return null
 
@@ -54,7 +32,7 @@ export default function MobileNavbar() {
   const dynamicNavItems = [...navItems]
   
   // Add Registro button if there's an active game date and user is Comision
-  if (hasActiveGameDate && canCRUD(user.role)) {
+  if (showRegistrationButton && canCRUD(user.role)) {
     // Insert Registro after Timer (index 2)
     dynamicNavItems.splice(2, 0, {
       href: '/registro',
