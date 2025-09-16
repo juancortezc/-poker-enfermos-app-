@@ -67,31 +67,8 @@ export function getAccessLevel(userRole: UserRole): 'full' | 'limited' | 'read-o
  * Funciones disponibles en el dashboard por rol
  */
 export function getDashboardFeatures(userRole: UserRole) {
-  const baseFeatures = [
-    {
-      id: 'calendar',
-      title: 'CALENDARIO',
-      href: '/admin/calendar',
-      accessible: canAccess(userRole, 'calendar'),
-      restricted: false
-    },
-    {
-      id: 'regulations',
-      title: 'REGLAMENTO',
-      href: '/admin/regulations',
-      accessible: canAccess(userRole, 'regulations'),
-      restricted: false
-    },
-    {
-      id: 'stats',
-      title: 'STATS',
-      href: '/admin/stats',
-      accessible: canAccess(userRole, 'stats-days'), // Al menos días sin ganar
-      restricted: userRole !== 'Comision' // Restringido parcialmente para no-Comisión
-    }
-  ]
-
-  const adminFeatures = [
+  // Orden solicitado: Fecha, Torneos, Enfermos, Stats, Calendario, Reglamento
+  const allFeatures = [
     {
       id: 'game-dates',
       title: 'FECHA',
@@ -114,25 +91,30 @@ export function getDashboardFeatures(userRole: UserRole) {
       restricted: !canAccess(userRole, 'players')
     },
     {
-      id: 'import',
-      title: 'IMPORTAR',
-      href: '/admin/import',
-      accessible: canAccess(userRole, 'import'),
-      restricted: !canAccess(userRole, 'import')
+      id: 'stats',
+      title: 'STATS',
+      href: '/admin/stats',
+      accessible: canAccess(userRole, 'stats-days'), // Al menos días sin ganar
+      restricted: userRole !== 'Comision' // Restringido parcialmente para no-Comisión
     },
     {
-      id: 'timer',
-      title: 'TIMER',
-      href: '/timer',
-      accessible: canAccess(userRole, 'timer-control'),
-      restricted: !canAccess(userRole, 'timer-control')
+      id: 'calendar',
+      title: 'CALENDARIO',
+      href: '/admin/calendar',
+      accessible: canAccess(userRole, 'calendar'),
+      restricted: false
+    },
+    {
+      id: 'regulations',
+      title: 'REGLAMENTO',
+      href: '/admin/regulations',
+      accessible: canAccess(userRole, 'regulations'),
+      restricted: false
     }
   ]
 
   return {
-    base: baseFeatures,
-    admin: adminFeatures,
-    all: [...baseFeatures, ...adminFeatures]
+    all: allFeatures
   }
 }
 
