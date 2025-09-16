@@ -37,7 +37,12 @@ Usuario → Experiencia → Lógica → Implementación → Testing → Refinami
 
 El sistema ha sido migrado exitosamente y ahora cuenta con un diseño completamente renovado siguiendo el Enfermos Design System, optimizado para dispositivos móviles.
 
-**Últimas actualizaciones (2025-09-15):**
+**Últimas actualizaciones (2025-09-16):**
+- 🗑️ **GESTIÓN AVANZADA DE FECHAS**: Sistema completo de eliminación y administración
+- ✅ **DELETE API para GameDates**: Limpieza transaccional completa de datos
+- ✅ **Página Admin /admin/game-dates**: Interfaz visual para gestión de fechas
+- ✅ **Debug endpoint**: Diagnóstico completo del estado de GameDates
+- ✅ **Reset de fechas problemáticas**: GameDate 11 y 12 resueltas exitosamente
 - 🔔 **SISTEMA DE NOTIFICACIONES COMPLETO**: Notificaciones web nativas con sonido y vibración
 - ✅ **Panel de configuración**: Acceso desde dropdown usuario con preferencias personalizables
 - ✅ **Timer automático**: Se inicia automáticamente al empezar fechas de juego
@@ -150,11 +155,17 @@ POST /api/tournaments                 # Crear torneo (Comision)
 
 #### Fechas de Juego:
 ```
-GET  /api/game-dates/active              # Fecha activa actual
-GET  /api/game-dates/available-dates     # Fechas disponibles para configurar
-GET  /api/game-dates/[id]                # Obtener detalles de fecha específica
-POST /api/game-dates                     # Crear/configurar fecha (Comision)
-PUT  /api/game-dates/[id]                # Iniciar fecha o actualizar configurada (Comision)
+GET    /api/game-dates/active            # Fecha activa actual (CREATED o in_progress)
+GET    /api/game-dates/available-dates   # Fechas disponibles para configurar
+GET    /api/game-dates/[id]              # Obtener detalles de fecha específica
+POST   /api/game-dates                   # Crear/configurar fecha (Comision)
+PUT    /api/game-dates/[id]              # Iniciar fecha o actualizar configurada (Comision)
+DELETE /api/game-dates/[id]              # Eliminar fecha y resetear a 'pending' (Comision)
+```
+
+#### Administración y Debug:
+```
+GET  /api/debug/game-dates               # Diagnóstico completo de GameDates
 ```
 
 #### Jugadores:
@@ -267,6 +278,12 @@ POST /api/tournaments/[id]/complete   # Completar/modificar torneo
 - Botón **"Torneos"** → `/tournaments/overview` (vista general)
 - Acciones rápidas para Timer, Enfermos (Admin)
 - Diseño centrado, limpio sin cards de estado
+
+### Páginas de Administración:
+- **`/admin/game-dates`** → Gestión visual de fechas con eliminación
+- **`/admin/calendar`** → Vista del calendario del torneo
+- **`/admin/regulations`** → PDF directo del reglamento
+- **`/admin/import`** → Importación de datos históricos CSV
 
 ### Formularios:
 - **TournamentForm**: Tabs responsivos, validación completa, sin iconos en móvil
@@ -681,6 +698,88 @@ npx tsx scripts/test-permission-system.ts
 
 ---
 
+## Sistema de Gestión Avanzada de Fechas (NUEVO - 2025-09-16)
+
+### 🗑️ ELIMINACIÓN Y ADMINISTRACIÓN COMPLETA DE GAMEDATES
+
+El sistema ahora cuenta con funcionalidad completa para gestionar, eliminar y resetear fechas de juego problemáticas, con limpieza transaccional de todos los datos asociados.
+
+**Funcionalidades Implementadas:**
+- ✅ **DELETE endpoint**: Eliminación segura con cleanup completo
+- ✅ **Página de administración**: Interface visual para gestión de fechas
+- ✅ **Debug endpoint**: Diagnóstico completo del estado del sistema
+- ✅ **Reset transaccional**: Limpieza atómica de datos relacionados
+- ✅ **Validaciones de seguridad**: Solo fechas configuradas pueden eliminarse
+
+### DELETE API - Limpieza Completa
+```typescript
+DELETE /api/game-dates/[id]
+```
+
+**Proceso de Eliminación:**
+1. **Validación**: Verificar existencia y permisos de eliminación
+2. **Limpieza Transaccional**:
+   - Timer actions (dependencias de timer states)
+   - Timer states (asociados a la fecha)
+   - Eliminations (registros de la fecha)
+   - Tournament rankings (rankings afectados)
+3. **Reset GameDate**: Status → 'pending', playerIds → [], startTime → null
+4. **Logging Completo**: Registro detallado de registros eliminados
+
+**Casos de Uso Resueltos:**
+- ✅ GameDate 11 problemática (eliminada y recreada exitosamente)
+- ✅ GameDate 12 reseteada para reconfiguración
+- ✅ 152 tournament rankings limpiados durante proceso
+
+### Página de Administración `/admin/game-dates`
+
+**Características:**
+- 📊 **Vista tabular** de todas las fechas del torneo
+- 🎨 **Estados visuales** con colores por status (pending/CREATED/in_progress/completed)
+- 🗑️ **Botones de eliminación** para fechas configuradas
+- 🔄 **Actualización en tiempo real** del estado de fechas
+- 🚀 **Accesos rápidos** a configuración y registro
+- 🔒 **Solo Comisión** tiene acceso a funcionalidades de eliminación
+
+**Estados de Fecha:**
+- 🔘 **Pendiente** (gris): No configurada, no eliminable
+- 🔵 **Configurada** (azul): Lista para iniciar, eliminable
+- 🟠 **En Progreso** (naranja): Timer activo, eliminable
+- 🟢 **Completada** (verde): Fecha finalizada, eliminable
+
+### Debug Endpoint `/api/debug/game-dates`
+
+**Información Proporcionada:**
+- 📋 Lista completa de GameDates con metadata
+- 🎯 Estado detallado de fechas específicas
+- 📊 Contadores de eliminations y timer states
+- 🏆 Información de tournament y rankings asociados
+- 🔍 Útil para diagnóstico y resolución de problemas
+
+### Flujo de Resolución de Problemas
+
+```bash
+# 1. Diagnosticar estado
+GET /api/debug/game-dates
+
+# 2. Eliminar fecha problemática
+DELETE /api/game-dates/[id]
+
+# 3. Recrear fecha limpia
+POST /api/game-dates
+
+# 4. Verificar estado final
+GET /api/game-dates/active
+```
+
+**Resultado del Testing:**
+- ✅ GameDate 11: Eliminada (152 rankings limpiados) → Recreada → Iniciada exitosamente
+- ✅ GameDate 12: Reseteada a 'pending' para reconfiguración
+- ✅ Sistema funcionando: Todas las APIs operativas sin errores
+- ✅ Interface admin: Gestión visual completa y funcional
+
+---
+
 ## Preparación para Deploy en Vercel
 
 ### ✅ PRE-REQUISITOS COMPLETADOS
@@ -720,7 +819,7 @@ npx tsx scripts/test-permission-system.ts
 **Dinámico:**
 - 📝 **Registro**: Solo aparece para Comisión cuando hay fecha activa
 
-**Última actualización:** 2025-09-15 por Claude Code
+**Última actualización:** 2025-09-16 por Claude Code
 
 ---
 
@@ -1015,4 +1114,4 @@ El sistema está completamente funcional con gestión avanzada de torneos, confi
 - **Import System**: Interface admin para cargar CSVs históricos
 - **Responsive Design**: Optimizado mobile-first con Enfermos Design System
 
-**Última actualización:** 2025-09-15 por Claude Code
+**Última actualización:** 2025-09-16 por Claude Code
