@@ -177,6 +177,116 @@ POST /api/players                     # Crear jugador (Comision)
 
 ---
 
+## API Unificado y Hook Centralizado (NUEVO - 2025-09-16)
+
+### 🔄 SISTEMA DE ESTADO UNIFICADO IMPLEMENTADO
+
+Para resolver problemas de consistencia de estados (como GameDate 11 mostrando diferentes estados en diferentes páginas), se implementó un sistema centralizado que proporciona una sola fuente de verdad para toda la información de GameDate.
+
+**Problema Resuelto:**
+- GameDate 11 aparecía como "finalizada" en Registro
+- Timer reportaba "no hay fecha activa"  
+- Admin mostraba "por activar"
+- Diferentes APIs retornaban estados inconsistentes
+
+### API Unificado `/api/game-dates/status`
+
+**Endpoint principal:** `GET /api/game-dates/status`
+
+```typescript
+interface GameDateStatusResponse {
+  success: boolean
+  tournament: Tournament | null
+  activeGameDate: GameDate | null      // GameDate activa con flags de estado
+  timerData: TimerData | null          // Datos del timer en tiempo real
+  availableDates: AvailableDate[]      // Fechas disponibles para configurar
+  visibility: {                       // Flags de visibilidad por página
+    showInRegistro: boolean           // Mostrar en página de registro
+    showInTimer: boolean              // Mostrar página de timer
+    showInConfig: boolean             // Mostrar configuración
+    showInAdmin: boolean              // Mostrar funciones admin
+  }
+  userRole: string                     // Rol del usuario autenticado
+  timestamp: string                    // Timestamp de la respuesta
+}
+```
+
+**Características del API:**
+- ✅ **Datos consolidados**: Tournament, GameDate, Timer en una sola respuesta
+- ✅ **Estados calculados**: isActive, isConfigured, canStart, canEdit
+- ✅ **Visibilidad por página**: Flags específicos para cada componente
+- ✅ **Timer en tiempo real**: Tiempo actualizado sin autenticación adicional
+- ✅ **Autenticación**: Solo requiere PIN, funciona para todos los roles
+
+### Hook Centralizado `useGameDateStatus()`
+
+**Hook principal:** `useGameDateStatus(refreshInterval?: number)`
+
+```typescript
+const {
+  // Datos principales
+  tournament,
+  activeGameDate,
+  timerData,
+  availableDates,
+  
+  // Flags de estado
+  isActive,
+  hasActiveGameDate,
+  hasConfiguredGameDate,
+  hasTimerData,
+  
+  // Visibilidad de páginas
+  showRegistrationButton,
+  showTimerPage,
+  showConfigPage,
+  showAdminFeatures,
+  
+  // Funciones de utilidad
+  canStartGameDate,
+  canEditGameDate,
+  canControlTimer,
+  getFormattedDate,
+  refresh
+} = useGameDateStatus()
+```
+
+**Hooks especializados:**
+```typescript
+// Para componentes específicos
+const { activeDate, isActive } = useActiveGameDate()
+const { timerData, canControl } = useTimerStatus()
+const { availableDates, canConfigure } = useGameDateConfig()
+const { showRegistrationButton, showTimerPage } = useNavigation()
+```
+
+### Migración de Componentes
+
+**Componentes actualizados:**
+- ✅ **MobileNavbar**: Usa `useNavigation()` para mostrar botón Registro
+- ✅ **GameDateConfigPage**: Usa estado consolidado, elimina loops infinitos
+- ✅ **Timer Page**: Usa `useTimerStatus()` especializado
+- ✅ **Registration Page**: Usa flags de visibilidad correctos
+
+**Beneficios:**
+- 🔄 **Consistencia**: Mismo estado en todas las páginas
+- ⚡ **Performance**: Un solo endpoint, menos requests
+- 🛡️ **Reliability**: SWR con retry y error handling
+- 🎯 **Simplicidad**: Hooks especializados para casos de uso específicos
+
+### Backward Compatibility
+
+**Hook anterior marcado como deprecated:**
+```typescript
+/**
+ * @deprecated Use useGameDateStatus() from '@/hooks/useGameDateStatus' instead
+ * This hook provides more comprehensive state management and better consistency
+ */
+export function useActiveGameDate() { ... }
+```
+
+---
+
 ## Flujo de Fecha (Game Date)
 
 ### Proceso de Creación:

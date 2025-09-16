@@ -10,7 +10,7 @@ import { GameStatsCards } from '@/components/registro/GameStatsCards'
 import { EliminationForm } from '@/components/registro/EliminationForm'
 import { EliminationHistory } from '@/components/registro/EliminationHistory'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
-import { useActiveGameDate } from '@/hooks/useActiveGameDate'
+import { useGameDateStatus } from '@/hooks/useGameDateStatus'
 import { useGameDateLiveStatus } from '@/hooks/useGameDateLiveStatus'
 import { adaptiveIntervals } from '@/lib/swr-config'
 
@@ -73,16 +73,17 @@ export default function RegistroPage() {
 
   // Use SWR hooks with mobile-optimized intervals instead of manual setInterval
   const { 
-    gameDate: activeGameDate, 
-    isInProgress,
+    activeGameDate, 
+    isActive: isInProgress,
     isLoading: gameDateLoading,
-    isError: gameDateError,
-    error: gameDateErrorObj
-  } = useActiveGameDate({
-    refreshInterval: isVisible 
-      ? adaptiveIntervals.liveGame.foreground 
-      : adaptiveIntervals.liveGame.background
-  })
+    error: gameDateErrorObj,
+    showRegistrationButton
+  } = useGameDateStatus(isVisible 
+    ? adaptiveIntervals.liveGame.foreground 
+    : adaptiveIntervals.liveGame.background
+  )
+  
+  const gameDateError = !!gameDateErrorObj
 
   const { 
     data: liveData,
@@ -131,7 +132,7 @@ export default function RegistroPage() {
     )
   }
 
-  if (error || !activeGameDate) {
+  if (error || !activeGameDate || !showRegistrationButton) {
     return (
       <div className="min-h-screen bg-poker-dark flex items-center justify-center">
         <div className="text-center text-white">
