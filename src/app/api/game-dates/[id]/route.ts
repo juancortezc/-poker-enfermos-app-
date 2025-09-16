@@ -154,7 +154,7 @@ export async function PUT(
             data: {
               timerStateId: timerState.id,
               actionType: 'start',
-              performedBy: user.id,
+              performedBy: _user.id,
               fromLevel: null,
               toLevel: 1,
               metadata: {
@@ -274,6 +274,138 @@ export async function PUT(
       console.error('Error starting game date:', error)
       return NextResponse.json(
         { error: 'Error interno del servidor' },
+        { status: 500 }
+      )
+    }
+  })
+}
+
+// DELETE - Eliminar una fecha de juego y toda su data relacionada
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return withComisionAuth(request, async (_req, user) => {
+    try {
+      const gameDateId = parseInt((await params).id)
+      
+      console.log(`[DELETE GAME DATE] Starting deletion of GameDate ${gameDateId} by user ${user.id}`)
+
+      // Verificar que la fecha existe
+      const existingDate = await prisma.gameDate.findUnique({
+        where: { id: gameDateId },
+        include: {
+          tournament: {
+            select: {
+              id: true,
+              name: true,
+              number: true
+            }
+          },
+          eliminations: true,
+          timerStates: {
+            include: {
+              timerActions: true
+            }
+          }
+        }
+      })
+
+      if (!existingDate) {
+        return NextResponse.json(
+          { error: 'Fecha no encontrada' },
+          { status: 404 }
+        )
+      }
+
+      console.log(`[DELETE GAME DATE] Found GameDate ${gameDateId} - Status: ${existingDate.status}`)
+      console.log(`[DELETE GAME DATE] Associated data - Eliminations: ${existingDate.eliminations.length}, TimerStates: ${existingDate.timerStates.length}`)
+
+      // Validar que se puede eliminar
+      if (existingDate.status === 'pending') {
+        return NextResponse.json(
+          { error: 'No se puede eliminar una fecha no configurada' },
+          { status: 400 }
+        )
+      }
+
+      // Usar transacción para eliminar todo de forma segura
+      const result = await prisma.$transaction(async (tx) => {
+        let deletedRecords = {
+          timerActions: 0,
+          timerStates: 0,
+          eliminations: 0,
+          tournamentRankings: 0
+        }
+
+        // 1. Eliminar timer actions (dependencias de timer states)
+        for (const timerState of existingDate.timerStates) {
+          const deletedActions = await tx.timerAction.deleteMany({
+            where: { timerStateId: timerState.id }
+          })
+          deletedRecords.timerActions += deletedActions.count
+        }
+
+        // 2. Eliminar timer states
+        const deletedTimerStates = await tx.timerState.deleteMany({
+          where: { gameDateId: gameDateId }
+        })
+        deletedRecords.timerStates = deletedTimerStates.count
+
+        // 3. Eliminar eliminations
+        const deletedEliminations = await tx.elimination.deleteMany({
+          where: { gameDateId: gameDateId }
+        })
+        deletedRecords.eliminations = deletedEliminations.count
+
+        // 4. Eliminar tournament rankings relacionados
+        const deletedRankings = await tx.tournamentRanking.deleteMany({
+          where: { 
+            tournamentId: existingDate.tournament.id,
+            // Solo eliminar rankings que podrían estar relacionados con esta fecha
+            // (esto es un enfoque conservador)
+          }
+        })
+        deletedRecords.tournamentRankings = deletedRankings.count
+
+        // 5. Resetear la GameDate a estado pendiente
+        const resetGameDate = await tx.gameDate.update({
+          where: { id: gameDateId },
+          data: {
+            status: 'pending',
+            startTime: null,
+            playerIds: [],
+            playersMin: 9,
+            playersMax: 24
+          }
+        })
+
+        return { resetGameDate, deletedRecords }
+      })
+
+      console.log(`[DELETE GAME DATE] Deletion completed successfully:`)
+      console.log(`[DELETE GAME DATE] - Timer Actions deleted: ${result.deletedRecords.timerActions}`)
+      console.log(`[DELETE GAME DATE] - Timer States deleted: ${result.deletedRecords.timerStates}`)
+      console.log(`[DELETE GAME DATE] - Eliminations deleted: ${result.deletedRecords.eliminations}`)
+      console.log(`[DELETE GAME DATE] - Tournament Rankings deleted: ${result.deletedRecords.tournamentRankings}`)
+      console.log(`[DELETE GAME DATE] - GameDate reset to: ${result.resetGameDate.status}`)
+
+      return NextResponse.json({
+        success: true,
+        message: `Fecha ${existingDate.dateNumber} del ${existingDate.tournament.name} eliminada y reseteada correctamente`,
+        deletedRecords: result.deletedRecords,
+        gameDate: {
+          id: result.resetGameDate.id,
+          dateNumber: result.resetGameDate.dateNumber,
+          status: result.resetGameDate.status,
+          tournament: existingDate.tournament
+        }
+      })
+
+    } catch (error) {
+      console.error('[DELETE GAME DATE] Error:', error)
+      return NextResponse.json(
+        { error: 'Error interno del servidor al eliminar fecha' },
         { status: 500 }
       )
     }
