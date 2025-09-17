@@ -83,10 +83,10 @@ export async function GET(request: NextRequest) {
           .map(tp => tp.player.id)
       )
 
-      // Mark players who should be pre-selected (tournament participants or have played in any date)
+      // Mark players who should be pre-selected (ONLY tournament participants)
       const playersWithSelectionInfo = allActivePlayers.map(player => ({
         ...player,
-        shouldPreselect: tournamentParticipantIds.has(player.id) || participatingPlayerIds.has(player.id)
+        shouldPreselect: tournamentParticipantIds.has(player.id)
       }))
 
       // Map available game dates for dropdown

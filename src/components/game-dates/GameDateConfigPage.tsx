@@ -203,12 +203,15 @@ export default function GameDateConfigPage() {
     setSelectedDateId(dateId)
     setSelectedDate(new Date(selectedDateData.scheduledDate))
     
-    // Reset selections to default (pre-select players who should be selected)
-    const preselectIds = allPlayers
-      .filter(p => (p as any).shouldPreselect)
-      .map(p => p.id)
-    setSelectedPlayers(preselectIds)
-    setSelectedGuests([])
+    // Keep current selections when changing date - don't reset
+    // Only set initial selections if this is the first date selection
+    if (selectedPlayers.length === 0 && selectedGuests.length === 0) {
+      const preselectIds = allPlayers
+        .filter(p => (p as any).shouldPreselect)
+        .map(p => p.id)
+      setSelectedPlayers(preselectIds)
+      setSelectedGuests([])
+    }
     setActiveTab('enfermos')
   }
 
