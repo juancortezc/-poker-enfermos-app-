@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import ParentChildCard from '@/components/stats/ParentChildCard'
 import DaysWithoutVictoryTable from '@/components/stats/DaysWithoutVictoryTable'
+import HistoricalStatsCard from '@/components/stats/HistoricalStatsCard'
 import { Card } from '@/components/ui/card'
-import { Loader2, Users, CalendarX, Lock } from 'lucide-react'
+import { Loader2, Users, CalendarX, Trophy, Lock } from 'lucide-react'
 import { canAccess } from '@/lib/permissions'
 
 interface Player {
@@ -61,7 +62,7 @@ interface DaysWithoutVictoryResponse {
   }
 }
 
-type TabType = 'parent-child' | 'days-without-victory'
+type TabType = 'parent-child' | 'days-without-victory' | 'historical'
 
 const fetcher = async (url: string) => {
   const response = await fetch(url, {
@@ -92,6 +93,7 @@ export default function StatsPage() {
   // Verificar acceso a tabs por rol
   const canAccessParentChild = user ? canAccess(user.role, 'stats-parents') : false
   const canAccessDaysWithoutVictory = user ? canAccess(user.role, 'stats-days') : false
+  const canAccessHistorical = user ? canAccess(user.role, 'stats-historical') : false
 
   // Obtener estadísticas del torneo activo
   const { data: statsData, error: statsError, isLoading: statsLoading } = useSWR<StatsResponse>(
@@ -115,24 +117,28 @@ export default function StatsPage() {
 
   // Permitir acceso pero redirigir si no puede acceder a ningún tab
   useEffect(() => {
-    if (user && !canAccessParentChild && !canAccessDaysWithoutVictory) {
+    if (user && !canAccessParentChild && !canAccessDaysWithoutVictory && !canAccessHistorical) {
       router.push('/')
     }
-  }, [user, canAccessParentChild, canAccessDaysWithoutVictory, router])
+  }, [user, canAccessParentChild, canAccessDaysWithoutVictory, canAccessHistorical, router])
 
   // Cambiar tab por defecto si no puede acceder a parent-child
   useEffect(() => {
-    if (user && !canAccessParentChild && canAccessDaysWithoutVictory && activeTab === 'parent-child') {
-      setActiveTab('days-without-victory')
+    if (user && !canAccessParentChild && activeTab === 'parent-child') {
+      if (canAccessDaysWithoutVictory) {
+        setActiveTab('days-without-victory')
+      } else if (canAccessHistorical) {
+        setActiveTab('historical')
+      }
     }
-  }, [user, canAccessParentChild, canAccessDaysWithoutVictory, activeTab])
+  }, [user, canAccessParentChild, canAccessDaysWithoutVictory, canAccessHistorical, activeTab])
 
-  if (!user || (!canAccessParentChild && !canAccessDaysWithoutVictory)) {
+  if (!user || (!canAccessParentChild && !canAccessDaysWithoutVictory && !canAccessHistorical)) {
     return null
   }
 
-  const isLoading = activeTab === 'parent-child' ? statsLoading : daysLoading
-  const error = activeTab === 'parent-child' ? statsError : daysError
+  const isLoading = activeTab === 'parent-child' ? statsLoading : activeTab === 'days-without-victory' ? daysLoading : false
+  const error = activeTab === 'parent-child' ? statsError : activeTab === 'days-without-victory' ? daysError : null
 
   if (isLoading) {
     return (
@@ -214,6 +220,22 @@ export default function StatsPage() {
               <CalendarX className="w-4 h-4" />
               <span className="font-medium">Días sin Ganar</span>
             </button>
+            <button
+              onClick={() => canAccessHistorical && setActiveTab('historical')}
+              disabled={!canAccessHistorical}
+              className={`
+                flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all duration-200
+                ${!canAccessHistorical 
+                  ? 'cursor-not-allowed opacity-50 text-gray-500'
+                  : activeTab === 'historical' 
+                    ? 'bg-poker-red text-white shadow-lg' 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                }
+              `}
+            >
+              <Trophy className="w-4 h-4" />
+              <span className="font-medium">Histórico</span>
+            </button>
           </div>
         </div>
 
@@ -253,12 +275,17 @@ export default function StatsPage() {
               </Card>
             </div>
           )
-        ) : (
+        ) : activeTab === 'days-without-victory' ? (
           /* Tab Días sin Ganar */
           <DaysWithoutVictoryTable 
             players={daysPlayers}
             tournamentNumber={tournamentNumber}
           />
+        ) : (
+          /* Tab Histórico */
+          <div className="max-w-4xl mx-auto">
+            <HistoricalStatsCard />
+          </div>
         )}
       </div>
     </div>

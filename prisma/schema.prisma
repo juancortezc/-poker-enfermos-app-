@@ -80,6 +80,7 @@ model Player {
   tournamentParticipants TournamentParticipant[]
   parentStats       ParentChildStats[] @relation("ParentStats")
   childStats        ParentChildStats[] @relation("ChildStats")
+  historicalStats   HistoricalTournamentStats[]
   
   // Relación para invitados
   inviter           Player?  @relation("PlayerInviter", fields: [inviterId], references: [id])
@@ -254,4 +255,25 @@ model ParentChildStats {
   
   @@unique([tournamentId, parentPlayerId, childPlayerId])
   @@map("parent_child_stats")
+}
+
+model HistoricalTournamentStats {
+  id                Int      @id @default(autoincrement())
+  tournamentNumber  Int      @map("tournament_number") // Tournament 1, 2, 3... 27
+  playerId          String   @map("player_id")
+  finalPosition     Int      @map("final_position") // 1st, 2nd, 3rd, etc.
+  points            Int?     // Final points scored (nullable for old data)
+  isWinner          Boolean  @default(false) @map("is_winner") // Champion flag
+  isSecondPlace     Boolean  @default(false) @map("is_second_place")
+  isThirdPlace      Boolean  @default(false) @map("is_third_place")
+  is7thPlace        Boolean  @default(false) @map("is_7th_place") // Special 7/2 statistic
+  is2ndToLast       Boolean  @default(false) @map("is_2nd_to_last") // Special 7/2 statistic
+  notes             String?  // Additional context
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@unique([tournamentNumber, playerId])
+  @@map("historical_tournament_stats")
 }

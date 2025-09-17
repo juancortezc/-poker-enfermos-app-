@@ -9,6 +9,7 @@ export type FeaturePermission =
   | 'regulations'        // Reglamento PDF
   | 'stats-days'         // Estadísticas - Días sin ganar
   | 'stats-parents'      // Estadísticas - Padres e hijos
+  | 'stats-historical'   // Estadísticas históricas (Torneos 1-27)
   | 'profile'            // Perfil personal
   | 'game-dates'         // Gestión de fechas
   | 'tournaments'        // Gestión de torneos
@@ -25,6 +26,7 @@ const PERMISSIONS_MAP: Record<FeaturePermission, UserRole[]> = {
   'calendar': ['Comision', 'Enfermo', 'Invitado'],
   'regulations': ['Comision', 'Enfermo', 'Invitado'],
   'stats-days': ['Comision', 'Enfermo', 'Invitado'],
+  'stats-historical': ['Comision', 'Enfermo', 'Invitado'],
   
   // Solo Comisión y Enfermo
   'profile': ['Comision', 'Enfermo'],
@@ -94,7 +96,7 @@ export function getDashboardFeatures(userRole: UserRole) {
       id: 'stats',
       title: 'STATS',
       href: '/admin/stats',
-      accessible: canAccess(userRole, 'stats-days'), // Al menos días sin ganar
+      accessible: canAccess(userRole, 'stats-days') || canAccess(userRole, 'stats-historical'), // Al menos una estadística disponible
       restricted: userRole !== 'Comision' // Restringido parcialmente para no-Comisión
     },
     {
@@ -132,7 +134,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
   // Rutas admin específicas
   if (route.startsWith('/admin/calendar')) return canAccess(userRole, 'calendar')
   if (route.startsWith('/admin/regulations')) return canAccess(userRole, 'regulations')
-  if (route.startsWith('/admin/stats')) return canAccess(userRole, 'stats-days')
+  if (route.startsWith('/admin/stats')) return canAccess(userRole, 'stats-days') || canAccess(userRole, 'stats-historical')
   
   // Rutas admin restringidas (solo Comisión)
   if (route.startsWith('/admin/')) return userRole === 'Comision'
