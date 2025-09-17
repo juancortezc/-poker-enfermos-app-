@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { useActiveGameDate } from '@/hooks/useActiveGameDate'
+import { useActiveGameDate } from '@/hooks/useGameDateStatus'
 import { useGameDateLiveStatus } from '@/hooks/useGameDateLiveStatus'
 import { LiveTimerDisplay } from '@/components/live/LiveTimerDisplay'
 import { LiveStats } from '@/components/live/LiveStats'
@@ -16,7 +16,7 @@ export default function LivePage() {
   const [isLoading, setIsLoading] = useState(true)
 
   // Obtener fecha activa
-  const { gameDate: activeGameDate, isLoading: isLoadingGameDate } = useActiveGameDate()
+  const { activeDate: activeGameDate, isLoading: isLoadingGameDate } = useActiveGameDate()
 
   // Obtener datos en tiempo real
   const { 

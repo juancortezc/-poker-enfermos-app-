@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useActiveGameDate } from '@/hooks/useActiveGameDate'
+import { useTimerStatus } from '@/hooks/useGameDateStatus'
 import { useTimerState, useTimerStateById } from '@/hooks/useTimerState'
 import { useNotifications } from '@/hooks/useNotifications'
 import { Card, CardContent } from '@/components/ui/card'

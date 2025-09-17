@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { useActiveGameDate } from './useActiveGameDate'
+import { useActiveGameDate } from './useGameDateStatus'
 import { adaptiveIntervals } from '@/lib/swr-config'
 import { useEffect, useState } from 'react'
 

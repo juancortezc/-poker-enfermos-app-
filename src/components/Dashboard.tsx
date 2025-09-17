@@ -8,7 +8,7 @@ import { Trophy, Users, Clock, Calendar, Target, CheckCircle, FileSpreadsheet, T
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
-import { useActiveGameDate } from '@/hooks/useGameDates'
+import { useGameDateStatus } from '@/hooks/useGameDateStatus'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -22,10 +22,10 @@ export default function Dashboard() {
   } = useActiveTournament()
   
   const { 
-    hasActiveDate, 
+    hasActiveGameDate: hasActiveDate, 
     isLoading: dateLoading, 
-    isError: dateError 
-  } = useActiveGameDate()
+    error: dateError 
+  } = useGameDateStatus()
 
 
   const formatDate = (dateString: string) => {

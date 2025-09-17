@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Edit2, Check, X } from 'lucide-react'
+import { useGameDateStatus } from '@/hooks/useGameDateStatus'
 
 interface Player {
   id: string
@@ -28,6 +29,7 @@ export function EliminationTable({
   eliminations,
   onEliminationUpdated
 }: EliminationTableProps) {
+  const { activeGameDate } = useGameDateStatus()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     eliminatedId: '',
@@ -43,22 +45,17 @@ export function EliminationTable({
       eliminatorId: elimination.eliminatorPlayerId || ''
     })
 
-    // For now, we'll use the current players from the game date
-    // This would ideally be fetched from the API
-    try {
-      const res = await fetch(`/api/game-dates/active`)
-      if (res.ok) {
-        const gameDate = await res.json()
-        if (gameDate) {
-          const playersRes = await fetch(`/api/game-dates/${gameDate.id}/players`)
-          if (playersRes.ok) {
-            const players = await playersRes.json()
-            setAvailablePlayers(players)
-          }
+    // Use the active game date from the unified hook
+    if (activeGameDate?.id) {
+      try {
+        const playersRes = await fetch(`/api/game-dates/${activeGameDate.id}/players`)
+        if (playersRes.ok) {
+          const players = await playersRes.json()
+          setAvailablePlayers(players)
         }
+      } catch (error) {
+        console.error('Error fetching players:', error)
       }
-    } catch (error) {
-      console.error('Error fetching players:', error)
     }
   }
 
