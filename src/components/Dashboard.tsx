@@ -57,8 +57,8 @@ export default function Dashboard() {
       adminOnly: true,
     },
     {
-      title: 'IMPORTAR',
-      href: '/admin/import',
+      title: 'HISTÓRICO',
+      href: '/admin/historical-import',
       icon: FileSpreadsheet,
       adminOnly: true,
     },
