@@ -71,6 +71,11 @@ export default function RegistroPage() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
+  // Calculate refresh intervals before hooks to avoid initialization issues
+  const refreshInterval = isVisible 
+    ? adaptiveIntervals.liveGame.foreground 
+    : adaptiveIntervals.liveGame.background
+
   // Use SWR hooks with mobile-optimized intervals instead of manual setInterval
   const { 
     activeGameDate, 
@@ -78,10 +83,7 @@ export default function RegistroPage() {
     isLoading: gameDateLoading,
     error: gameDateErrorObj,
     showRegistrationButton
-  } = useGameDateStatus(isVisible 
-    ? adaptiveIntervals.liveGame.foreground 
-    : adaptiveIntervals.liveGame.background
-  )
+  } = useGameDateStatus(refreshInterval)
   
   const gameDateError = !!gameDateErrorObj
 
@@ -91,9 +93,7 @@ export default function RegistroPage() {
     isError: liveDataError,
     mutate: refreshLiveData
   } = useGameDateLiveStatus(activeGameDate?.id || null, {
-    refreshInterval: isVisible 
-      ? adaptiveIntervals.liveGame.foreground 
-      : adaptiveIntervals.liveGame.background
+    refreshInterval
   })
 
   // Derived states from SWR data
