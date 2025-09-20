@@ -23,33 +23,32 @@ export const metadata: Metadata = {
   title: "Poker de Enfermos",
   description: "Aplicación para gestión de torneos de poker - Sistema ELIMINA 2",
   manifest: "/manifest.json",
-  themeColor: "#E10600",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Poker Enfermos",
     startupImage: [
       {
-        url: "/icons/icon-192x192.png",
+        url: "/icons/icon-192x192.svg",
         media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
       }
     ]
   },
   icons: {
     icon: [
-      { url: "/icons/icon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-16x16.png", sizes: "16x16", type: "image/png" }
+      { url: "/icons/icon-32x32.svg", sizes: "32x32", type: "image/svg+xml" },
+      { url: "/icons/icon-16x16.svg", sizes: "16x16", type: "image/svg+xml" }
     ],
     apple: [
-      { url: "/icons/icon-57x57.png", sizes: "57x57", type: "image/png" },
-      { url: "/icons/icon-60x60.png", sizes: "60x60", type: "image/png" },
-      { url: "/icons/icon-72x72.png", sizes: "72x72", type: "image/png" },
-      { url: "/icons/icon-76x76.png", sizes: "76x76", type: "image/png" },
-      { url: "/icons/icon-114x114.png", sizes: "114x114", type: "image/png" },
-      { url: "/icons/icon-120x120.png", sizes: "120x120", type: "image/png" },
-      { url: "/icons/icon-144x144.png", sizes: "144x144", type: "image/png" },
-      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
-      { url: "/icons/icon-180x180.png", sizes: "180x180", type: "image/png" }
+      { url: "/icons/icon-57x57.svg", sizes: "57x57", type: "image/svg+xml" },
+      { url: "/icons/icon-60x60.svg", sizes: "60x60", type: "image/svg+xml" },
+      { url: "/icons/icon-72x72.svg", sizes: "72x72", type: "image/svg+xml" },
+      { url: "/icons/icon-76x76.svg", sizes: "76x76", type: "image/svg+xml" },
+      { url: "/icons/icon-114x114.svg", sizes: "114x114", type: "image/svg+xml" },
+      { url: "/icons/icon-120x120.svg", sizes: "120x120", type: "image/svg+xml" },
+      { url: "/icons/icon-144x144.svg", sizes: "144x144", type: "image/svg+xml" },
+      { url: "/icons/icon-152x152.svg", sizes: "152x152", type: "image/svg+xml" },
+      { url: "/icons/icon-180x180.svg", sizes: "180x180", type: "image/svg+xml" }
     ]
   },
   other: {
@@ -59,7 +58,7 @@ export const metadata: Metadata = {
     "apple-mobile-web-app-title": "Poker Enfermos",
     "application-name": "Poker Enfermos",
     "msapplication-TileColor": "#E10600",
-    "msapplication-TileImage": "/icons/icon-144x144.png"
+    "msapplication-TileImage": "/icons/icon-144x144.svg"
   }
 };
 
@@ -67,7 +66,8 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false
+  userScalable: false,
+  themeColor: "#E10600"
 };
 
 export default function RootLayout({

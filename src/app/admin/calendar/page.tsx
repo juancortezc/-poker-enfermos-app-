@@ -54,10 +54,17 @@ export default function CalendarPage() {
     return 'future';
   };
 
+  // Find the next available date (first future date that is not completed)
+  const nextAvailableDate = gameDates.find(gameDate => {
+    const dateObj = parseISO(gameDate.scheduledDate);
+    const status = getDateStatus(gameDate.scheduledDate, gameDate.status);
+    return !isBefore(dateObj, today) && status !== 'completed';
+  });
+
   const getBorderClass = (status: string) => {
     switch (status) {
       case 'completed': 
-        return 'border-green-500/40';
+        return 'border-gray-500/40';
       case 'in_progress': 
         return 'border-orange-500/60';
       case 'created': 
@@ -72,7 +79,7 @@ export default function CalendarPage() {
   const getHoverBorderClass = (status: string) => {
     switch (status) {
       case 'completed': 
-        return 'hover:border-green-500/60';
+        return 'hover:border-gray-500/60';
       case 'in_progress': 
         return 'hover:border-orange-500/80';
       case 'created': 
@@ -82,6 +89,14 @@ export default function CalendarPage() {
       default: 
         return 'hover:border-poker-red/60';
     }
+  };
+
+  const getBackgroundClass = (gameDate: GameDate) => {
+    // Highlight the next available date with red background
+    if (nextAvailableDate && gameDate.id === nextAvailableDate.id) {
+      return 'bg-poker-red/20';
+    }
+    return 'bg-poker-card';
   };
 
   return (
@@ -95,7 +110,7 @@ export default function CalendarPage() {
             return (
               <div
                 key={gameDate.id}
-                className={`bg-poker-card border-2 ${getBorderClass(status)} rounded-xl p-4 ${getHoverBorderClass(status)} transition-all duration-200 hover:shadow-lg hover:shadow-poker-red/10`}
+                className={`${getBackgroundClass(gameDate)} border-2 ${getBorderClass(status)} rounded-xl p-4 ${getHoverBorderClass(status)} transition-all duration-200 hover:shadow-lg hover:shadow-poker-red/10`}
               >
                 <div className="text-center space-y-3">
                   <div className="flex items-center justify-center space-x-2">
