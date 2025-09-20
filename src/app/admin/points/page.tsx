@@ -54,10 +54,6 @@ export default function AdminPointsPage() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Administración de Puntos</h1>
-              <p className="text-poker-muted">Configuración de la tabla de puntos por posición</p>
-            </div>
           </div>
 
           <div className="flex gap-2">

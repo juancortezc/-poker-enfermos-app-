@@ -77,7 +77,7 @@ export default function Dashboard() {
   )
 
   return (
-    <div className="px-4 pt-32">
+    <div className="px-4 pt-20">
       {/* Cards de acciones rápidas */}
       <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
         {filteredActions.map((action, index) => {
@@ -95,7 +95,7 @@ export default function Dashboard() {
               <div className="flex-1 flex items-center justify-center">
                 <div className={`
                   w-14 h-14 flex items-center justify-center rounded-xl
-                  ${isDisabled ? 'bg-gray-700/50' : 'bg-gradient-to-br from-white/10 to-white/5'}
+                  ${isDisabled ? 'bg-gray-700/50' : 'bg-poker-red'}
                   shadow-inner
                 `}>
                   <Icon className={`w-7 h-7 ${isDisabled ? 'text-gray-500' : 'text-white drop-shadow-lg'}`} />
@@ -128,7 +128,6 @@ export default function Dashboard() {
       {/* Próxima Fecha */}
       {activeTournament && activeTournament.stats?.nextDate && (
         <div className="mt-8 max-w-md mx-auto">
-          <h2 className="text-lg font-bold text-white mb-4 text-center">PRÓXIMA FECHA</h2>
           {activeTournament.stats?.nextDate ? (
             <button
               onClick={() => router.push(`/game-dates/${activeTournament.stats.nextDate.id}/confirm`)}

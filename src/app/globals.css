@@ -602,7 +602,7 @@
   
   /* Modern Admin Cards - Elegant & Clean */
   .admin-card {
-    background: linear-gradient(145deg, #2a2d3a 0%, #1f2129 100%);
+    background: var(--poker-card);
     backdrop-filter: blur(10px);
     border: 2px solid transparent;
     border-radius: 20px;
@@ -622,7 +622,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background: linear-gradient(135deg, #E10600 0%, #ff8c00 50%, #ffd700 100%);
+    background: var(--poker-red);
     z-index: -1;
     margin: -2px;
     border-radius: 20px;
@@ -635,7 +635,7 @@
   }
   
   .admin-card:hover {
-    background: linear-gradient(145deg, #2d303d 0%, #22242d 100%);
+    background: var(--poker-card);
     box-shadow: 
       0 20px 60px rgba(0, 0, 0, 0.5),
       0 10px 20px rgba(0, 0, 0, 0.3),

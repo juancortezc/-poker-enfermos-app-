@@ -168,12 +168,6 @@ export default function StatsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark">
       <div className="px-4 pt-20 pb-8">
-        {/* Título */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">
-            Estadísticas Torneo {tournamentNumber}
-          </h1>
-        </div>
 
         {/* Tabs */}
         <div className="max-w-4xl mx-auto mb-8">

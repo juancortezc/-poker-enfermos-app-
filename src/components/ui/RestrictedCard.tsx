@@ -58,7 +58,7 @@ export function RestrictedCard({
           w-14 h-14 flex items-center justify-center rounded-xl
           ${isBlocked 
             ? 'bg-gray-700/50' 
-            : 'bg-gradient-to-br from-white/10 to-white/5'
+            : 'bg-poker-red'
           }
           shadow-inner
         `}>

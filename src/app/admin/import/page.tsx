@@ -158,10 +158,6 @@ export default function AdminImportPage() {
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-poker-red mb-2">Importar CSV Histórico</h1>
-        </div>
 
         {/* Error Message */}
         {error && (
