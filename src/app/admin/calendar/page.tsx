@@ -54,11 +54,15 @@ export default function CalendarPage() {
     return 'future';
   };
 
-  // Find the next available date (first future date that is not completed)
+  // Find the next available date (first future date that is not completed, created, or in_progress)
   const nextAvailableDate = gameDates.find(gameDate => {
     const dateObj = parseISO(gameDate.scheduledDate);
     const status = getDateStatus(gameDate.scheduledDate, gameDate.status);
-    return !isBefore(dateObj, today) && status !== 'completed';
+    // Solo resaltar fechas que están verdaderamente "disponibles" (pending/future)
+    return !isBefore(dateObj, today) && 
+           status !== 'completed' && 
+           status !== 'in_progress' && 
+           status !== 'created';
   });
 
   const getBorderClass = (status: string) => {

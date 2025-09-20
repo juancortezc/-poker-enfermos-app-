@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useGameDates'
+import { useConfiguredOrActiveGameDate } from '@/hooks/useConfiguredOrActiveGameDate'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -27,6 +28,13 @@ export default function Dashboard() {
     isError: dateError 
   } = useActiveGameDate()
 
+  // Hook para verificar si hay fecha configurada O activa (para botón FECHA)
+  const { 
+    hasConfiguredOrActiveDate,
+    gameDate: configuredOrActiveDate,
+    isLoading: configuredOrActiveLoading
+  } = useConfiguredOrActiveGameDate()
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -41,7 +49,7 @@ export default function Dashboard() {
       title: 'FECHA',
       href: '/game-dates/config',
       icon: Calendar,
-      disabled: hasActiveDate,
+      disabled: hasConfiguredOrActiveDate,
       adminOnly: true, // Solo Comisión puede crear fechas
     },
     {
