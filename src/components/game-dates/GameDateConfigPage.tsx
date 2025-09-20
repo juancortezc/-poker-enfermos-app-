@@ -513,8 +513,8 @@ export default function GameDateConfigPage() {
                     className={`p-3 rounded-lg border transition-all text-left ${
                       isSelected
                         ? activeTab === 'invitados' 
-                          ? 'bg-black border-pink-600 text-white'
-                          : 'bg-black border-poker-red text-white'
+                          ? 'bg-pink-600 border-pink-600 text-white'
+                          : 'bg-poker-red border-poker-red text-white'
                         : 'bg-poker-dark/50 border-white/10 text-poker-text hover:border-white/20'
                     }`}
                   >
