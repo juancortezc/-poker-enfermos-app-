@@ -5,6 +5,37 @@ import { withAuth } from '@/lib/api-auth'
 export async function GET(request: NextRequest) {
   return withAuth(request, async (_req, _user) => {
     try {
+      // FIRST: Check if there are any CREATED or in_progress dates
+      // If so, block all date creation
+      const activeOrCreatedDate = await prisma.gameDate.findFirst({
+        where: {
+          status: {
+            in: ['CREATED', 'in_progress']
+          }
+        }
+      })
+
+      // If there's an active or created date, return empty available dates
+      if (activeOrCreatedDate) {
+        console.log('🚫 Blocking date creation - found active date:', {
+          dateNumber: activeOrCreatedDate.dateNumber,
+          status: activeOrCreatedDate.status
+        })
+        
+        return NextResponse.json({
+          tournament: null,
+          availableDates: [], // Empty - no dates can be created
+          registeredPlayers: [],
+          additionalPlayers: [],
+          blocked: true,
+          blockedReason: `Existe una fecha ${activeOrCreatedDate.dateNumber} en estado ${activeOrCreatedDate.status}`,
+          activeDate: {
+            dateNumber: activeOrCreatedDate.dateNumber,
+            status: activeOrCreatedDate.status
+          }
+        })
+      }
+
       // Obtener el torneo activo
       const activeTournament = await prisma.tournament.findFirst({
         where: { status: 'ACTIVO' },
@@ -12,7 +43,7 @@ export async function GET(request: NextRequest) {
           gameDates: {
             where: {
               status: {
-                notIn: ['completed', 'CREATED']  // Excluir fechas completadas y ya configuradas
+                notIn: ['completed', 'CREATED', 'in_progress']  // Only allow pending dates when no active dates exist
               }
             },
             orderBy: { dateNumber: 'asc' }

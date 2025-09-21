@@ -1,4 +1,5 @@
 import useSWR from 'swr'
+import { swrKeys } from '@/lib/swr-config'
 
 interface GameDate {
   id: number
@@ -46,11 +47,15 @@ export function useConfiguredOrActiveGameDate(options: UseConfiguredOrActiveGame
   } = options
 
   const swrResponse = useSWR<GameDate | null>(
-    '/api/game-dates/configured-or-active',
+    swrKeys.configuredOrActiveGameDate(),
     {
       refreshInterval,
       revalidateOnFocus,
       revalidateOnReconnect,
+      
+      // Aggressive cache settings to prevent stale data
+      revalidateIfStale: true,
+      revalidateOnMount: true,
       
       // Error handling
       shouldRetryOnError: (error) => {
@@ -59,12 +64,30 @@ export function useConfiguredOrActiveGameDate(options: UseConfiguredOrActiveGame
         return true
       },
       
-      // Performance
-      dedupingInterval: 10000, // Dedupe requests within 10 seconds
-      errorRetryInterval: 10000,
-      errorRetryCount: 2
+      // Reduced cache times for more responsive updates
+      dedupingInterval: 2000, // Further reduced to 2 seconds
+      errorRetryInterval: 5000, // Faster error retry
+      errorRetryCount: 3,
+      
+      // Force validation on window focus
+      focusThrottleInterval: 1000,
+      
+      // Prevent keeping stale data
+      keepPreviousData: false
     }
   )
+
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🎯 useConfiguredOrActiveGameDate:', {
+      endpoint: swrKeys.configuredOrActiveGameDate(),
+      data: swrResponse.data,
+      error: swrResponse.error,
+      isLoading: !swrResponse.error && swrResponse.data === undefined,
+      hasConfiguredOrActiveDate: !!swrResponse.data,
+      status: swrResponse.data?.status
+    })
+  }
 
   return {
     ...swrResponse,

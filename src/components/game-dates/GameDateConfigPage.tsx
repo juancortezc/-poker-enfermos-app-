@@ -158,8 +158,20 @@ export default function GameDateConfigPage() {
           tournament: data.tournament?.name,
           availableDatesCount: data.availableDates?.length,
           registeredPlayersCount: data.registeredPlayers?.length,
-          additionalPlayersCount: data.additionalPlayers?.length
+          additionalPlayersCount: data.additionalPlayers?.length,
+          blocked: data.blocked,
+          blockedReason: data.blockedReason
         })
+        
+        // Check if access is blocked due to active dates
+        if (data.blocked) {
+          setError(data.blockedReason || 'No se pueden crear fechas en este momento')
+          setAvailableDates([])
+          setRegisteredPlayers([])
+          setAdditionalPlayers([])
+          setTournament(null)
+          return
+        }
         
         setTournament(data.tournament)
         setAvailableDates(data.availableDates)
@@ -392,6 +404,30 @@ export default function GameDateConfigPage() {
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-poker-red" />
           <p className="text-poker-muted">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show blocked state when there's an active/created date
+  if (error && error.includes('Existe una fecha')) {
+    return (
+      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
+        <div className="max-w-md mx-auto px-4">
+          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-6 text-center">
+            <Calendar className="w-12 h-12 mx-auto mb-4 text-red-400" />
+            <h2 className="text-xl font-bold text-red-400 mb-3">Acceso Bloqueado</h2>
+            <p className="text-red-300 mb-6">{error}</p>
+            <p className="text-gray-400 text-sm mb-6">
+              No se pueden crear nuevas fechas mientras exista una fecha en estado CREATED o in_progress.
+            </p>
+            <Button
+              onClick={() => router.push('/admin')}
+              className="w-full bg-poker-red hover:bg-red-700 text-white"
+            >
+              Volver al Admin
+            </Button>
+          </div>
         </div>
       </div>
     )

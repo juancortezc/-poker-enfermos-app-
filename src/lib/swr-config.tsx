@@ -106,6 +106,7 @@ export const swrKeys = {
   // Game dates
   gameDates: (tournamentId: number) => `/api/tournaments/${tournamentId}/dates/public`,
   activeGameDate: () => '/api/game-dates/active',
+  configuredOrActiveGameDate: () => '/api/game-dates/configured-or-active',
   gameDate: (gameDateId: number) => `/api/game-dates/${gameDateId}`,
   
   // Eliminations
@@ -129,6 +130,7 @@ export const mutateRelated = {
     mutate(swrKeys.gameDates(tournamentId))
     mutate(swrKeys.tournamentRanking(tournamentId))
     mutate(swrKeys.activeGameDate())
+    mutate(swrKeys.configuredOrActiveGameDate())
     if (gameDateId) {
       mutate(swrKeys.gameDate(gameDateId))
       mutate(swrKeys.gameDateEliminations(gameDateId))
