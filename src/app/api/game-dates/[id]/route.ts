@@ -60,7 +60,7 @@ export async function PUT(
   return withComisionAuth(request, async (_req, _user) => {
     try {
       const gameDateId = parseInt((await params).id)
-      const body = await req.json()
+      const body = await request.json()
       const { action, playerIds, guestIds, scheduledDate } = body
 
       // Handle start action
@@ -154,7 +154,7 @@ export async function PUT(
             data: {
               timerStateId: timerState.id,
               actionType: 'start',
-              performedBy: user.id,
+              performedBy: _user.id,
               fromLevel: null,
               toLevel: 1,
               metadata: {

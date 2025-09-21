@@ -1,0 +1,384 @@
+{
+  "tournament": {
+    "id": 1,
+    "number": 28,
+    "name": "Torneo 28",
+    "status": "ACTIVO"
+  },
+  "expectedFinalTotals": {
+    "Roddy Naranjo": 196,
+    "Miguel Chiesa": 159,
+    "Fernando Peña": 144,
+    "Juan Antonio Cortez": 145,
+    "Daniel Vela": 136,
+    "Joffre Palacios": 131,
+    "Jorge Tamayo": 121,
+    "Juan Fernando Ochoa": 117,
+    "Juan Tapia": 114,
+    "Ruben Cadena": 113,
+    "Mono Benites": 108,
+    "Diego Behar": 104,
+    "Milton Tapia": 101,
+    "Sean Willis": 99,
+    "Damian Amador": 97,
+    "Javier Martinez": 92,
+    "Juan Guajardo": 86,
+    "Carlos Chacón": 64,
+    "Agustin Guerrero": 63
+  },
+  "verifiedDates": {
+    "8": {
+      "date": 8,
+      "participants": [
+        "Milton Tapia",
+        "Carlos Chacón",
+        "Jose Luis Toral",
+        "Joffre Palacios",
+        "Juan Guajardo",
+        "Jorge Tamayo",
+        "Daniel Vela",
+        "Damian Amador",
+        "Juan Fernando Ochoa",
+        "Sean Willis",
+        "Javier Martinez",
+        "Juan Tapia",
+        "Carlos jr",
+        "Agustin Guerrero",
+        "Julio Betu",
+        "Meche Garrido",
+        "Juan Antonio Cortez",
+        "Diego Behar",
+        "Mono Benites",
+        "Ruben Cadena",
+        "Roddy Naranjo",
+        "Miguel Chiesa",
+        "Fernando Peña"
+      ],
+      "eliminations": [
+        {
+          "position": 23,
+          "eliminated": "Milton Tapia",
+          "eliminator": "Juan Antonio Cortez",
+          "points": 1
+        },
+        {
+          "position": 22,
+          "eliminated": "Carlos Chacón",
+          "eliminator": "Sean Willis",
+          "points": 2
+        },
+        {
+          "position": 21,
+          "eliminated": "Jose Luis Toral",
+          "eliminator": "Diego Behar",
+          "points": 3
+        },
+        {
+          "position": 20,
+          "eliminated": "Joffre Palacios",
+          "eliminator": "Juan Fernando Ochoa",
+          "points": 4
+        },
+        {
+          "position": 19,
+          "eliminated": "Juan Guajardo",
+          "eliminator": "Agustin Guerrero",
+          "points": 5
+        },
+        {
+          "position": 18,
+          "eliminated": "Jorge Tamayo",
+          "eliminator": "Julio Betu",
+          "points": 6
+        },
+        {
+          "position": 17,
+          "eliminated": "Daniel Vela",
+          "eliminator": "Agustin Guerrero",
+          "points": 7
+        },
+        {
+          "position": 16,
+          "eliminated": "Damian Amador",
+          "eliminator": "Mono Benites",
+          "points": 8
+        },
+        {
+          "position": 15,
+          "eliminated": "Juan Fernando Ochoa",
+          "eliminator": "Julio Betu",
+          "points": 9
+        },
+        {
+          "position": 14,
+          "eliminated": "Sean Willis",
+          "eliminator": "Roddy Naranjo",
+          "points": 10
+        },
+        {
+          "position": 13,
+          "eliminated": "Javier Martinez",
+          "eliminator": "Ruben Cadena",
+          "points": 11
+        },
+        {
+          "position": 12,
+          "eliminated": "Juan Tapia",
+          "eliminator": "Diego Behar",
+          "points": 12
+        },
+        {
+          "position": 11,
+          "eliminated": "Carlos jr",
+          "eliminator": "Roddy Naranjo",
+          "points": 13
+        },
+        {
+          "position": 10,
+          "eliminated": "Agustin Guerrero",
+          "eliminator": "Roddy Naranjo",
+          "points": 14
+        },
+        {
+          "position": 9,
+          "eliminated": "Julio Betu",
+          "eliminator": "Mono Benites",
+          "points": 16
+        },
+        {
+          "position": 8,
+          "eliminated": "Meche Garrido",
+          "eliminator": "Fernando Peña",
+          "points": 17
+        },
+        {
+          "position": 7,
+          "eliminated": "Juan Antonio Cortez",
+          "eliminator": "Miguel Chiesa",
+          "points": 18
+        },
+        {
+          "position": 6,
+          "eliminated": "Diego Behar",
+          "eliminator": "Fernando Peña",
+          "points": 19
+        },
+        {
+          "position": 5,
+          "eliminated": "Mono Benites",
+          "eliminator": "Ruben Cadena",
+          "points": 20
+        },
+        {
+          "position": 4,
+          "eliminated": "Ruben Cadena",
+          "eliminator": "Roddy Naranjo",
+          "points": 21
+        },
+        {
+          "position": 3,
+          "eliminated": "Roddy Naranjo",
+          "eliminator": "Fernando Peña",
+          "points": 24
+        },
+        {
+          "position": 2,
+          "eliminated": "Miguel Chiesa",
+          "eliminator": "Fernando Peña",
+          "points": 27
+        },
+        {
+          "position": 1,
+          "eliminated": "Fernando Peña",
+          "eliminator": null,
+          "points": 30
+        }
+      ],
+      "verified": true,
+      "source": "User provided real data CSV - complete and verified"
+    },
+    "11": {
+      "date": 11,
+      "participants": [
+        "Diego Behar",
+        "Juan Fernando Ochoa",
+        "Ruben Cadena",
+        "Miguel Chiesa",
+        "Sean Willis",
+        "Mono Benites",
+        "Damian Amador",
+        "Javier Martinez",
+        "Fernando Peña",
+        "Juan Antonio Cortez",
+        "Jose Patricio Moreno",
+        "Milton Tapia",
+        "Joffre Palacios",
+        "Roddy Naranjo",
+        "Jose Luis Toral",
+        "Carlos Chacón",
+        "Freddy Lopez",
+        "Daniel Vela",
+        "Jorge Tamayo"
+      ],
+      "eliminations": [
+        {
+          "position": 20,
+          "eliminated": "Diego Behar",
+          "eliminator": "Sean Willis",
+          "points": 1
+        },
+        {
+          "position": 19,
+          "eliminated": "Juan Fernando Ochoa",
+          "eliminator": "Ruben Cadena",
+          "points": 2
+        },
+        {
+          "position": 18,
+          "eliminated": "Ruben Cadena",
+          "eliminator": "Juan Antonio Cortez",
+          "points": 3
+        },
+        {
+          "position": 17,
+          "eliminated": "Miguel Chiesa",
+          "eliminator": "Freddy Lopez",
+          "points": 5
+        },
+        {
+          "position": 16,
+          "eliminated": "Sean Willis",
+          "eliminator": "Mono Benites",
+          "points": 6
+        },
+        {
+          "position": 15,
+          "eliminated": "Mono Benites",
+          "eliminator": "Milton Tapia",
+          "points": 7
+        },
+        {
+          "position": 14,
+          "eliminated": "Damian Amador",
+          "eliminator": "Joffre Palacios",
+          "points": 8
+        },
+        {
+          "position": 13,
+          "eliminated": "Javier Martinez",
+          "eliminator": "Fernando Peña",
+          "points": 9
+        },
+        {
+          "position": 12,
+          "eliminated": "Fernando Peña",
+          "eliminator": "Jorge Tamayo",
+          "points": 10
+        },
+        {
+          "position": 11,
+          "eliminated": "Juan Antonio Cortez",
+          "eliminator": "Jose Patricio Moreno",
+          "points": 11
+        },
+        {
+          "position": 10,
+          "eliminated": "Jose Patricio Moreno",
+          "eliminator": "Milton Tapia",
+          "points": 13
+        },
+        {
+          "position": 9,
+          "eliminated": "Milton Tapia",
+          "eliminator": "Roddy Naranjo",
+          "points": 14
+        },
+        {
+          "position": 8,
+          "eliminated": "Joffre Palacios",
+          "eliminator": "Freddy Lopez",
+          "points": 15
+        },
+        {
+          "position": 7,
+          "eliminated": "Roddy Naranjo",
+          "eliminator": "Daniel Vela",
+          "points": 16
+        },
+        {
+          "position": 6,
+          "eliminated": "Jose Luis Toral",
+          "eliminator": "Carlos Chacón",
+          "points": 17
+        },
+        {
+          "position": 5,
+          "eliminated": "Carlos Chacón",
+          "eliminator": "Daniel Vela",
+          "points": 18
+        },
+        {
+          "position": 4,
+          "eliminated": "Freddy Lopez",
+          "eliminator": "Jorge Tamayo",
+          "points": 21
+        },
+        {
+          "position": 3,
+          "eliminated": "Daniel Vela",
+          "eliminator": "Jorge Tamayo",
+          "points": 24
+        },
+        {
+          "position": 2,
+          "eliminated": "Jorge Tamayo",
+          "eliminator": null,
+          "points": 27
+        }
+      ],
+      "verified": true,
+      "source": "f11.jpeg image data - verified against real tournament results"
+    }
+  },
+  "pointCalculationRules": {
+    "algorithm": "Linear Points System",
+    "description": "Winner gets 30 points, linear decrease by position",
+    "examples": [
+      {
+        "totalPlayers": 20,
+        "position": 1,
+        "expectedPoints": 30
+      },
+      {
+        "totalPlayers": 20,
+        "position": 2,
+        "expectedPoints": 27
+      },
+      {
+        "totalPlayers": 20,
+        "position": 10,
+        "expectedPoints": 16
+      },
+      {
+        "totalPlayers": 20,
+        "position": 20,
+        "expectedPoints": 1
+      },
+      {
+        "totalPlayers": 23,
+        "position": 1,
+        "expectedPoints": 30
+      },
+      {
+        "totalPlayers": 23,
+        "position": 2,
+        "expectedPoints": 27
+      },
+      {
+        "totalPlayers": 23,
+        "position": 23,
+        "expectedPoints": 1
+      }
+    ]
+  }
+}

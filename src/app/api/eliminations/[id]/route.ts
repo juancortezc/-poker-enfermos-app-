@@ -8,7 +8,8 @@ export async function PUT(
 ) {
   return withComisionAuth(request, async (_req, _user) => {
     try {
-    const { id: eliminationId } = await params;
+    const { id } = await params;
+    const eliminationId = parseInt(id);
     const body = await request.json();
     const { eliminatedId, eliminatorId } = body;
 
@@ -121,7 +122,8 @@ export async function DELETE(
 ) {
   return withComisionAuth(request, async (_req, _user) => {
     try {
-    const { id: eliminationId } = await params;
+    const { id } = await params;
+    const eliminationId = parseInt(id);
 
     // Obtener la eliminación
     const elimination = await prisma.elimination.findUnique({
