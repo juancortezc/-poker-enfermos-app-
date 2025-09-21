@@ -3,10 +3,12 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(_request: NextRequest) {
   try {
-    // Buscar fecha activa (solo in_progress para el botón de registro)
+    // Buscar fecha activa (CREATED o in_progress para el botón de registro)
     const activeGameDate = await prisma.gameDate.findFirst({
       where: {
-        status: 'in_progress'
+        status: {
+          in: ['CREATED', 'in_progress']
+        }
       },
       include: {
         tournament: {

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { Edit2, User } from 'lucide-react'
@@ -35,6 +36,7 @@ interface PlayerCardProps {
 
 export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
   const router = useRouter()
+  const [imageError, setImageError] = useState(false)
   const getRoleBadge = (role: UserRole) => {
     switch (role) {
       case UserRole.Comision:
@@ -56,12 +58,11 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
   }
 
   const handleEdit = () => {
-    // Solo permitir edición para Enfermos y Comisión
     if (player.role === UserRole.Invitado) {
-      // TODO: Navegar al formulario específico de Invitados cuando esté implementado
-      return
+      router.push(`/players/edit-invitado/${player.id}`)
+    } else {
+      router.push(`/players/edit/${player.id}`)
     }
-    router.push(`/players/edit/${player.id}`)
   }
 
   const roleBadge = getRoleBadge(player.role)
@@ -74,13 +75,14 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
         <div className="flex items-center space-x-3">
           {/* Circular Avatar */}
           <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-600 flex-shrink-0">
-            {player.photoUrl ? (
+            {player.photoUrl && !imageError ? (
               <Image
                 src={player.photoUrl}
                 alt={`${player.firstName} ${player.lastName}`}
                 width={48}
                 height={48}
                 className="w-full h-full object-cover"
+                onError={() => setImageError(true)}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">

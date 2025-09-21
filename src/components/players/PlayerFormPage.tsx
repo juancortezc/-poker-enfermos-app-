@@ -49,6 +49,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showMoreInfo, setShowMoreInfo] = useState(false)
+  const [imageError, setImageError] = useState(false)
   const currentYear = new Date().getFullYear()
   const isEditing = !!playerId
 
@@ -75,21 +76,39 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
   // Cargar jugador si estamos editando
   useEffect(() => {
-    if (playerId && user?.adminKey) {
+    if (playerId && user) {
       fetchPlayer()
     }
-  }, [playerId, user?.adminKey])
+  }, [playerId, user])
+
+  // Reset image error when photoUrl changes
+  useEffect(() => {
+    setImageError(false)
+  }, [formData.photoUrl])
 
   const fetchPlayer = async () => {
-    if (!playerId || !user?.adminKey) return
+    if (!playerId) return
 
     try {
       setLoading(true)
+      
+      // Get auth token from localStorage
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Use PIN if available, otherwise fall back to adminKey
+      if (pin) {
+        headers['Authorization'] = `Bearer PIN:${pin}`
+      } else if (adminKey) {
+        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+      }
+
       const response = await fetch(`/api/players/${playerId}`, {
-        headers: {
-          'Authorization': `Bearer ${user.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers
       })
 
       if (response.ok) {
@@ -169,12 +188,24 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
       const url = isEditing ? `/api/players/${playerId}` : '/api/players'
       const method = isEditing ? 'PUT' : 'POST'
 
+      // Get auth token from localStorage
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+      
+      // Use PIN if available, otherwise fall back to adminKey
+      if (pin) {
+        headers['Authorization'] = `Bearer PIN:${pin}`
+      } else if (adminKey) {
+        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+      }
+
       const response = await fetch(url, {
         method,
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(submitData)
       })
 
@@ -252,13 +283,14 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
           {/* Foto de perfil */}
           <div className="flex justify-center">
             <div className="relative w-32 h-32 rounded-full overflow-hidden bg-poker-card border-2 border-white/10">
-              {formData.photoUrl ? (
+              {formData.photoUrl && !imageError ? (
                 <Image
                   src={formData.photoUrl}
                   alt="Preview"
                   width={120}
                   height={120}
                   className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-poker-muted">

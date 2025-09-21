@@ -283,8 +283,11 @@ export default function GameDateConfigPage() {
       if (response.ok) {
         const result = await response.json()
         setActiveGameDate(result.gameDate)
-        // Reload data to show activated state
-        await loadInitialData()
+        // Don't reload initial data to preserve selections
+        // Just update the available dates to reflect the change
+        setAvailableDates(prev => prev.filter(d => d.id !== selectedDateId))
+        // Show success message or redirect
+        router.push(`/game-dates/${result.gameDate.id}/confirm`)
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Error al activar fecha')

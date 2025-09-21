@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { useGameDateLiveStatus } from '@/hooks/useGameDateLiveStatus'
@@ -15,6 +16,7 @@ interface TimerDisplayProps {
 }
 
 export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
+  const router = useRouter()
   const { user } = useAuth()
   const canControl = user && canCRUD(user.role)
   
@@ -167,6 +169,25 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
         >
           Reintentar
         </button>
+      </div>
+    )
+  }
+
+  // Check for CREATED status (configured but not started)
+  if (activeGameDate?.status === 'CREATED') {
+    return (
+      <div className="admin-card p-8 text-center">
+        <div className="text-6xl mb-4">⏱️</div>
+        <h3 className="text-xl font-semibold text-white mb-2">Fecha Configurada</h3>
+        <p className="text-poker-muted mb-4">Fecha {activeGameDate.dateNumber} lista para iniciar</p>
+        {canControl && (
+          <button 
+            onClick={() => router.push(`/game-dates/${activeGameDate.id}/confirm`)}
+            className="btn-admin-primary"
+          >
+            Ir a Iniciar Fecha
+          </button>
+        )}
       </div>
     )
   }

@@ -33,6 +33,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
   const [enfermos, setEnfermos] = useState<Player[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [imageError, setImageError] = useState(false)
   const currentYear = new Date().getFullYear()
   const isEditing = !!invitadoId
   
@@ -106,6 +107,44 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
       }
     } catch (err) {
       console.error('Error fetching enfermos:', err)
+    }
+  }
+
+  // Cargar datos del invitado si estamos editando
+  useEffect(() => {
+    if (invitadoId && user?.adminKey) {
+      fetchInvitado()
+    }
+  }, [invitadoId, user?.adminKey])
+
+  const fetchInvitado = async () => {
+    if (!invitadoId || !user?.adminKey) return
+
+    try {
+      setLoading(true)
+      const response = await fetch(`/api/players/${invitadoId}`, {
+        headers: {
+          'Authorization': `Bearer ${user.adminKey}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const invitadoData = await response.json()
+        setFormData({
+          firstName: invitadoData.firstName,
+          lastName: invitadoData.lastName,
+          inviterId: invitadoData.inviterId || '',
+          joinYear: invitadoData.joinYear?.toString() || currentYear.toString()
+        })
+      } else {
+        setError('Error al cargar datos del invitado')
+      }
+    } catch (err) {
+      setError('Error al cargar datos del invitado')
+      console.error('Error fetching invitado:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -218,13 +257,20 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
           {/* Foto de perfil - Pato genérico */}
           <div className="flex justify-center">
             <div className="relative w-32 h-32 rounded-full overflow-hidden bg-poker-card border-2 border-white/10">
-              <Image
-                src="https://storage.googleapis.com/poker-enfermos/pato.png"
-                alt="Invitado"
-                width={128}
-                height={128}
-                className="w-full h-full object-cover"
-              />
+              {!imageError ? (
+                <Image
+                  src="https://storage.googleapis.com/poker-enfermos/pato.png"
+                  alt="Invitado"
+                  width={128}
+                  height={128}
+                  className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-poker-muted">
+                  <span className="text-4xl">🦆</span>
+                </div>
+              )}
             </div>
           </div>
 

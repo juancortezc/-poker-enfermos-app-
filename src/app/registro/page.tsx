@@ -65,6 +65,33 @@ export default function RegistroPage() {
   const [error, setError] = useState<string | null>(null)
 
   // Función para obtener todos los datos
+  const handleStartGame = async () => {
+    if (!activeGameDate) return
+
+    try {
+      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+      const response = await fetch(`/api/game-dates/${activeGameDate.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': pin ? `Bearer PIN:${pin}` : '',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: 'start' })
+      })
+
+      if (response.ok) {
+        // Refresh data after starting
+        await fetchAllData()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Error al iniciar la fecha')
+      }
+    } catch (error) {
+      console.error('Error starting game:', error)
+      setError('Error al iniciar la fecha')
+    }
+  }
+
   const fetchAllData = async () => {
     if (!user) return // No hacer requests sin usuario
     
@@ -105,8 +132,16 @@ export default function RegistroPage() {
       }
 
       if (timerRes.ok) {
-        const timerResponse = await timerRes.json()
-        setTimerData(timerResponse.timer || null)
+        const liveStatus = await timerRes.json()
+        // Extract timer data from live status
+        if (liveStatus.currentBlind) {
+          setTimerData({
+            currentLevel: liveStatus.currentBlind.level,
+            timeRemaining: liveStatus.currentBlind.timeRemaining,
+            blindLevels: [liveStatus.currentBlind], // For now, just show current blind
+            status: liveStatus.gameDate.status
+          })
+        }
       }
 
     } catch (err) {
@@ -198,12 +233,21 @@ export default function RegistroPage() {
           </h1>
         </div>
 
-        {/* Timer */}
+        {/* Timer / Start Button */}
         <div className="p-3 space-y-3">
-          <TimerDisplay 
-            timeRemaining={timeRemaining}
-            currentBlind={currentBlind}
-          />
+          {activeGameDate.status === 'CREATED' ? (
+            <button
+              onClick={handleStartGame}
+              className="w-full px-6 py-4 bg-poker-red hover:bg-red-700 text-white font-bold rounded-lg transition-colors"
+            >
+              INICIAR FECHA
+            </button>
+          ) : (
+            <TimerDisplay 
+              timeRemaining={timeRemaining}
+              currentBlind={currentBlind}
+            />
+          )}
 
           {/* Stats Cards */}
           <GameStatsCards
