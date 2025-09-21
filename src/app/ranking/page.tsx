@@ -97,8 +97,8 @@ export default function RankingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark pt-2 px-4 pb-20">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-poker-dark pt-2 pb-20">
+      <div className="container mx-auto px-4">
         {/* Tabs */}
         <div className="flex border-b border-gray-600 mb-4">
           <button

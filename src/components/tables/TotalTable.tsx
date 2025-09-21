@@ -80,8 +80,8 @@ export default function TotalTable({ tournamentId, userPin }: TotalTableProps) {
 
   return (
     <div className="w-full">
-      <div>
-        <table className="excel-table w-full">
+      <div className="overflow-x-auto overflow-y-visible" style={{ backgroundColor: '#1a1a1a' }}>
+        <table className="excel-table w-full min-w-[1000px]" style={{ backgroundColor: 'white' }}>
           <thead>
             <tr>
               <th className="excel-header-gray sticky-col" style={{color: '#000'}}>POS</th>

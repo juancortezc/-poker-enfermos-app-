@@ -139,7 +139,7 @@ export default function FechasTable({ tournamentId, userPin }: FechasTableProps)
 
       {/* Tabla de eliminaciones */}
       {selectedDateId && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-visible" style={{ backgroundColor: '#1a1a1a' }}>
           {eliminationsLoading ? (
             <div className="flex justify-center py-8">
               <div className="text-poker-muted">Cargando eliminaciones...</div>
@@ -149,7 +149,7 @@ export default function FechasTable({ tournamentId, userPin }: FechasTableProps)
               <p className="text-poker-muted">No hay eliminaciones registradas para esta fecha</p>
             </div>
           ) : (
-            <table className="excel-table w-full">
+            <table className="excel-table w-full min-w-[600px]" style={{ backgroundColor: 'white' }}>
               <thead>
                 <tr>
                   <th className="excel-header-gray" style={{color: '#000'}}>POS</th>
