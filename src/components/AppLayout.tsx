@@ -14,7 +14,12 @@ import { useState, useRef, useEffect } from 'react'
 import { UserDropdown } from './UserDropdown'
 
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+interface AppLayoutProps {
+  children: React.ReactNode
+  fullWidth?: boolean
+}
+
+export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
   const { user, loading } = useAuth()
   const pathname = usePathname()
   const router = useRouter()
@@ -23,6 +28,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   
   const isPlayersPage = pathname === '/players'
+  // Auto-detect if page needs full width (stats pages, admin pages with tables)
+  const needsFullWidth = fullWidth || pathname.includes('/admin/stats') || pathname.includes('/stats')
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -81,7 +88,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-poker-dark pb-20">
       {/* Header */}
       <header className="bg-poker-card shadow-lg border-b border-white/10 sticky top-0 z-40">
-        <div className="max-w-md mx-auto p-4">
+        <div className={`${needsFullWidth ? 'container mx-auto max-w-none' : 'max-w-md mx-auto'} p-4`}>
           <div className="flex justify-between items-center">
             {/* Logo y usuario */}
             <div className="flex items-center space-x-3">
@@ -167,7 +174,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Contenido principal */}
-      <main className="max-w-md mx-auto p-4">
+      <main className={`${needsFullWidth ? 'container mx-auto max-w-none px-4' : 'max-w-md mx-auto p-4'}`}>
         <div className="animate-enter">
           {children}
         </div>

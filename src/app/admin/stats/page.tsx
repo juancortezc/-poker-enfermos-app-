@@ -167,10 +167,10 @@ export default function StatsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark">
-      <div className="px-4 pt-20 pb-8">
+      <div className="pt-4 pb-8">
 
         {/* Tabs */}
-        <div className="max-w-4xl mx-auto mb-8">
+        <div className="mb-8">
           <div className="flex bg-gray-800/50 rounded-lg p-1">
             <button
               onClick={() => canAccessParentChild && setActiveTab('parent-child')}
@@ -215,7 +215,7 @@ export default function StatsPage() {
         {activeTab === 'parent-child' ? (
           /* Tab Padres e Hijos */
           relations.length > 0 ? (
-            <div className="max-w-4xl mx-auto space-y-4">
+            <div className="space-y-4">
               {relations.map((relation, index) => (
                 <ParentChildCard
                   key={relation.id}

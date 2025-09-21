@@ -44,7 +44,7 @@ export default function DaysWithoutVictoryTable({
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="w-full">
       <Card className="bg-gradient-to-b from-gray-800 to-gray-900 border-2 border-gray-700 rounded-lg overflow-hidden">
         {/* Header tipo Excel */}
         <div className="bg-gray-800/50 px-4 py-3 border-b border-gray-700">
@@ -54,36 +54,36 @@ export default function DaysWithoutVictoryTable({
           </h3>
         </div>
 
-        {/* Tabla */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        {/* Tabla con scroll mejorado */}
+        <div className="overflow-x-auto overflow-y-visible bg-gradient-to-b from-gray-800 to-gray-900">
+          <table className="w-full min-w-[600px] bg-gradient-to-b from-gray-800 to-gray-900">
             {/* Headers */}
-            <thead className="bg-gray-700/50">
+            <thead className="bg-gray-700/50 sticky top-0">
               <tr>
-                <th className="text-left px-4 py-3 text-white font-semibold border-r border-gray-600">
+                <th className="text-left px-4 py-3 text-white font-semibold border-r border-gray-600 bg-gray-700/50">
                   #
                 </th>
-                <th className="text-left px-4 py-3 text-white font-semibold border-r border-gray-600">
+                <th className="text-left px-4 py-3 text-white font-semibold border-r border-gray-600 bg-gray-700/50">
                   Jugador
                 </th>
-                <th className="text-center px-4 py-3 text-white font-semibold">
+                <th className="text-center px-4 py-3 text-white font-semibold bg-gray-700/50">
                   Días sin Ganar
                 </th>
               </tr>
             </thead>
 
             {/* Body */}
-            <tbody>
+            <tbody className="bg-gradient-to-b from-gray-800 to-gray-900">
               {players.map((player, index) => (
                 <tr 
                   key={player.id}
                   className={`
                     border-b border-gray-700/50
-                    ${player.hasNeverWon ? 'bg-gray-800/30' : ''}
+                    ${player.hasNeverWon ? 'bg-gray-800/30' : 'bg-transparent'}
                   `}
                 >
                   {/* Posición */}
-                  <td className="px-4 py-3 border-r border-gray-600">
+                  <td className="px-4 py-3 border-r border-gray-600 bg-inherit">
                     <div className="flex items-center gap-2">
                       <span className="text-gray-300 font-mono text-sm">
                         {index + 1}
@@ -95,7 +95,7 @@ export default function DaysWithoutVictoryTable({
                   </td>
 
                   {/* Jugador */}
-                  <td className="px-4 py-3 border-r border-gray-600">
+                  <td className="px-4 py-3 border-r border-gray-600 bg-inherit">
                     <div className="flex items-center gap-3">
                       {/* Avatar */}
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-700 flex-shrink-0">
@@ -126,7 +126,7 @@ export default function DaysWithoutVictoryTable({
                   </td>
 
                   {/* Días sin Ganar + Última Victoria */}
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3 text-center bg-inherit">
                     <div className="flex flex-col items-center">
                       {player.hasNeverWon ? (
                         <>
