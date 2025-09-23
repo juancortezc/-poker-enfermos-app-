@@ -1138,6 +1138,18 @@ Las siguientes APIs se actualizan automáticamente:
 
 ---
 
+### Commit f4b879e - Limpieza Masiva de Código Muerto + Client Auth (2025-09-23)
+- **🗑️ DEAD CODE REMOVED**: Eliminación completa de componentes y APIs no utilizados
+- **Legacy Components**: Dashboard, ErrorBoundary, eliminaciones antiguas, TournamentRepairTool
+- **Dead Hooks**: useConfiguredOrActiveGameDate, useRealTimeUpdates (sin consumidores)
+- **Dead APIs**: configured-or-active, socket, next-available routes removidas
+- **Socket.io Cleanup**: Biblioteca y hooks no utilizados completamente eliminados
+- **Prototype Pages**: Simple tournament pages sin navegación removidas
+- **🔧 CLIENT-AUTH LIBRARY**: Nueva biblioteca esencial creada desde cero
+- **Auth Functions**: buildAuthHeaders, getStoredAuthToken, clearStoredAuthTokens
+- **TypeScript Support**: Interfaces completas para AuthUser y opciones
+- **📊 Results**: 500+ líneas removidas, warnings 108→93, build 100% exitoso
+
 ### Commit 6a79645 - Calidad de Código y ESLint Completamente Limpio (2025-09-23)
 - **🔧 ESLINT 100% ERROR-FREE**: Sistema completamente limpio sin errores de bloqueo
 - **Reducción Masiva**: 243 problemas → 108 problemas (53% mejora)
@@ -1168,7 +1180,9 @@ Las siguientes APIs se actualizan automáticamente:
 El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas, navegación dinámica, **SISTEMA ELIMINA 2 100% OPERACIONAL**, **TIMER PROFESIONAL COMPLETAMENTE FUNCIONAL**, **SISTEMA DE NOTIFICACIONES COMPLETO**, y **SECCIÓN DE RESULTADOS HISTÓRICOS INTERACTIVA**. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
 
 ### ✅ Características Completadas:
+- **Dead Code Free**: 500+ líneas de código muerto eliminadas, codebase optimizado
 - **Code Quality 100% Clean**: ESLint completamente error-free, TypeScript type-safe
+- **Client-Auth Library**: Sistema de autenticación frontend completo desde cero
 - **Sección de Resultados Históricos**: 3 tabs interactivos con modal detallado y tooltips
 - **Sistema de Notificaciones**: Web Notifications nativas con sonido, vibración y configuración personalizable
 - **Sistema de Timer Profesional**: Control total de blinds y tiempo con autenticación role-based
