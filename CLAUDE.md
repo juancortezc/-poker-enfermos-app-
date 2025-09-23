@@ -37,7 +37,15 @@ Usuario → Experiencia → Lógica → Implementación → Testing → Refinami
 
 El sistema ha sido migrado exitosamente y ahora cuenta con un diseño completamente renovado siguiendo el Enfermos Design System, optimizado para dispositivos móviles.
 
-**Últimas actualizaciones (2025-09-15):**
+**Últimas actualizaciones (2025-09-23):**
+- 🏆 **SECCIÓN DE RESULTADOS COMPLETA**: Nueva sección histórica con 3 tabs interactivos
+- ✅ **Campeonatos Tab**: Cards elegantes con fotos de campeones y info del torneo
+- ✅ **Campeones Tab**: Estadísticas de campeones con tooltips de torneos ganados
+- ✅ **Podios Tab**: Estadísticas completas con modal detallado por jugador
+- ✅ **Modal Interactivo**: Click en jugadores muestra historial completo (1°, 2°, 3°, Siete, Dos)
+- ✅ **Navegación Móvil**: Tabs responsivos sin scroll horizontal
+- ✅ **Bordes Históricos**: Jugadores inactivos marcados con bordes grises
+- ✅ **Hover Tooltips**: Información de torneos ganados al pasar mouse
 - 🔔 **SISTEMA DE NOTIFICACIONES COMPLETO**: Notificaciones web nativas con sonido y vibración
 - ✅ **Panel de configuración**: Acceso desde dropdown usuario con preferencias personalizables
 - ✅ **Timer automático**: Se inicia automáticamente al empezar fechas de juego
@@ -759,6 +767,130 @@ POST /api/admin/import/execute      # Ejecutar importación
 
 ---
 
+## Sección de Resultados Históricos (NUEVO - 2025-09-23)
+
+### 🏆 SISTEMA DE RESULTADOS COMPLETO IMPLEMENTADO
+
+**Ruta:** `/admin/resultados` (Accesible para todos los usuarios)
+
+La nueva sección de resultados proporciona una vista completa de los datos históricos de torneos con diseño elegante y funcionalidad interactiva.
+
+### Características Principales:
+
+#### **1. Navegación por Tabs Responsiva**
+- **3 Tabs Principales**: Campeonatos, Campeones, Podios
+- **Mobile-First**: Sin scroll horizontal, navegación optimizada para móvil
+- **Tab Sizing**: `flex-1` para distribución equitativa del espacio
+- **Adaptive Text**: Labels completos en desktop, truncados en móvil
+
+#### **2. Tab Campeonatos - Cards Elegantes**
+- **Layout**: Grid responsivo `1 md:2 lg:3` columnas
+- **Diseño**: Cards con foto prominente del campeón
+- **Información**: 
+  - Badge del número de torneo (top-right)
+  - Foto del campeón con overlay de gradiente
+  - Nombre completo, alias y estado histórico
+  - Subcampeón y tercero en sección inferior
+- **Interacciones**: Hover con scale y shadow effects
+- **Fallback**: Icono de trofeo cuando no hay foto
+
+#### **3. Tab Campeones - Estadísticas con Tooltips**
+- **Layout Podio**: Top 3 en cards grandes con círculos dorados/plata/bronce
+- **Layout Grid**: Resto en grid 3x3 con contadores de campeonatos
+- **Hover Tooltips**: Muestra "Campeón en: T1, T2, T3..." al pasar mouse
+- **Bordes Históricos**: Jugadores inactivos con borde gris
+- **Alias Support**: Apodos mostrados bajo nombres
+
+#### **4. Tab Podios - Modal Interactivo**
+- **Estadísticas**: Top 3 + grid con contadores de podios totales
+- **Click Modal**: Modal detallado al hacer click en cualquier jugador
+- **Modal Content**:
+  - Header con foto, nombre, alias y estado
+  - Cards de estadísticas: 1°, 2°, 3°, Siete, Dos
+  - Resumen: Mejor posición, total podios, apariciones
+  - Historial cronológico por torneo con íconos de posición
+
+### APIs Implementadas:
+
+#### **Tournament Winners**:
+```
+GET /api/tournaments/winners          # Todos los ganadores históricos
+```
+
+#### **Champions Stats**:
+```
+GET /api/tournaments/champions-stats  # Estadísticas de campeones
+```
+
+#### **Podium Stats**:
+```
+GET /api/tournaments/podium-stats     # Estadísticas de podios
+```
+
+#### **Player Podium Details**:
+```
+GET /api/players/[id]/podium-details  # Detalles completos de un jugador
+```
+
+### Componentes Creados:
+
+#### **Principales**:
+- `TournamentResultsPage.tsx` - Container principal con tabs
+- `ChampionshipsTable.tsx` - Tab de campeonatos con cards elegantes  
+- `ChampionsCards.tsx` - Tab de campeones con tooltips
+- `PodiumStatsTable.tsx` - Tab de podios con modal
+- `PodiumResultsModal.tsx` - Modal detallado de jugador
+
+#### **Funcionalidades Técnicas**:
+- **Tooltip System**: Z-index 9999 con `overflow-visible` en containers
+- **Historical Sorting**: Jugadores activos primero, históricos al final
+- **Responsive Design**: Mobile-first con breakpoints adaptativos
+- **Error Handling**: Loading states y retry functionality
+- **Animations**: Framer Motion para modales, hover effects para cards
+
+### Estructura de Datos:
+
+#### **TournamentWinners Model**:
+```prisma
+model TournamentWinners {
+  id               Int      @id @default(autoincrement())
+  tournamentNumber Int      @unique
+  championId       String   // Ganador
+  runnerUpId       String   // Subcampeón  
+  thirdPlaceId     String   // Tercero
+  sieteId          String   // Penúltimo
+  dosId            String   // Último
+  
+  champion     Player @relation("Champion")
+  runnerUp     Player @relation("RunnerUp")
+  thirdPlace   Player @relation("ThirdPlace")
+  siete        Player @relation("Siete")
+  dos          Player @relation("Dos")
+}
+```
+
+### UX/UI Highlights:
+
+#### **Accesibilidad**:
+- **Todos los Roles**: Comisión, Enfermo, Invitado pueden acceder
+- **Touch Targets**: Mínimo 48px para interacción móvil
+- **Keyboard Navigation**: Soporte completo para navegación por teclado
+- **Screen Readers**: Alt text y aria labels apropiados
+
+#### **Visual Design**:
+- **Color Scheme**: Dorado para 1°, Plata para 2°, Bronce para 3°
+- **Borders**: Grises para jugadores históricos
+- **Shadows**: Elevation effects para profundidad
+- **Typography**: Jerarquía clara con tamaños responsivos
+
+#### **Performance**:
+- **SWR Integration**: Caché automático y revalidación
+- **Lazy Loading**: Componentes cargados bajo demanda
+- **Image Optimization**: Next.js Image con fallbacks
+- **Bundle Splitting**: Componentes separados por funcionalidad
+
+---
+
 ## Sistema de Importación de Datos Históricos
 
 ### ✅ SISTEMA COMPLETAMENTE IMPLEMENTADO Y FUNCIONAL
@@ -1000,11 +1132,27 @@ Las siguientes APIs se actualizan automáticamente:
 
 ---
 
+### Commit ddb120f + af91111 - Sección de Resultados Históricos Completa (2025-09-23)
+- **🏆 SECCIÓN DE RESULTADOS COMPLETA**: Nueva sección histórica con 3 tabs interactivos
+- **Campeonatos Tab**: Cards elegantes con fotos de campeones, badges de torneo y diseño magazine-style
+- **Campeones Tab**: Layout podio + grid con hover tooltips mostrando torneos ganados
+- **Podios Tab**: Estadísticas completas con modal interactivo detallado por jugador
+- **Modal Interactivo**: Click en jugadores muestra historial completo (1°, 2°, 3°, Siete, Dos)
+- **APIs Robustas**: 4 nuevos endpoints para winners, champions-stats, podium-stats y player details
+- **Mobile-First UX**: Tabs responsivos sin scroll horizontal, tooltips con z-index 9999
+- **Bordes Históricos**: Jugadores inactivos identificados con bordes grises
+- **Database Schema**: TournamentWinners model con relaciones completas
+- **Tooltip System**: Hover effects con posicionamiento absoluto y overflow-visible
+- **Permisos**: Acceso para todos los roles con navegación unificada
+
+---
+
 ## Estado: LISTO PARA PRODUCCIÓN ✅
 
-El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas, navegación dinámica, **SISTEMA ELIMINA 2 100% OPERACIONAL**, **TIMER PROFESIONAL COMPLETAMENTE FUNCIONAL**, y **SISTEMA DE NOTIFICACIONES COMPLETO**. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
+El sistema está completamente funcional con gestión avanzada de torneos, configuración de fechas, navegación dinámica, **SISTEMA ELIMINA 2 100% OPERACIONAL**, **TIMER PROFESIONAL COMPLETAMENTE FUNCIONAL**, **SISTEMA DE NOTIFICACIONES COMPLETO**, y **SECCIÓN DE RESULTADOS HISTÓRICOS INTERACTIVA**. Toda la funcionalidad crítica ha sido probada y verificada con datos reales.
 
 ### ✅ Características Completadas:
+- **Sección de Resultados Históricos**: 3 tabs interactivos con modal detallado y tooltips
 - **Sistema de Notificaciones**: Web Notifications nativas con sonido, vibración y configuración personalizable
 - **Sistema de Timer Profesional**: Control total de blinds y tiempo con autenticación role-based
 - **Sistema ELIMINA 2**: Cálculo automático de puntuación final (mejores 10 de 12 fechas)
@@ -1015,4 +1163,4 @@ El sistema está completamente funcional con gestión avanzada de torneos, confi
 - **Import System**: Interface admin para cargar CSVs históricos
 - **Responsive Design**: Optimizado mobile-first con Enfermos Design System
 
-**Última actualización:** 2025-09-15 por Claude Code
+**Última actualización:** 2025-09-23 por Claude Code
