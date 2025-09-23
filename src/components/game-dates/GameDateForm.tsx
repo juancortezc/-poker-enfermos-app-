@@ -13,6 +13,7 @@ import { ArrowLeft, Save, Loader2, Calendar, Users, UserPlus, Trophy } from 'luc
 import PlayerSelector from './PlayerSelector'
 import GuestSelector from './GuestSelector'
 import GameDateSummary from './GameDateSummary'
+import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -70,7 +71,7 @@ export default function GameDateForm() {
   const [additionalPlayers, setAdditionalPlayers] = useState<Player[]>([])
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([])
   const [selectedGuests, setSelectedGuests] = useState<string[]>([])
-  const [createdGameDate, setCreatedGameDate] = useState<any>(null)
+  const [createdGameDate, setCreatedGameDate] = useState<{ id: number; dateNumber: number; scheduledDate: string } | null>(null)
 
   // Editable date info states
   const [editableDateNumber, setEditableDateNumber] = useState<number>(1)
@@ -86,10 +87,10 @@ export default function GameDateForm() {
 
   // Cargar datos iniciales
   useEffect(() => {
-    if (user?.adminKey) {
+    if (getStoredAuthToken()) {
       loadInitialData()
     }
-  }, [user?.adminKey])
+  }, [user])
 
   const loadInitialData = async () => {
     try {
@@ -97,10 +98,7 @@ export default function GameDateForm() {
       
       // Verificar si hay fecha activa
       const activeResponse = await fetch('/api/game-dates/active', {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
       if (activeResponse.ok) {
@@ -116,10 +114,7 @@ export default function GameDateForm() {
 
       // Si no hay fecha activa, obtener fechas disponibles del torneo
       const availableResponse = await fetch('/api/game-dates/available-dates', {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
       if (availableResponse.ok) {
@@ -159,10 +154,7 @@ export default function GameDateForm() {
 
       const response = await fetch('/api/game-dates', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           tournamentId: tournament.id,
           dateNumber: nextDate.dateNumber,

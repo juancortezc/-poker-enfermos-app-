@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Trophy, Crown, Star, Award, User } from 'lucide-react';
-import type { TournamentRankingData } from '@/lib/ranking-utils';
+import { User } from 'lucide-react';
 import Image from 'next/image';
 import PlayerDetailModal from './PlayerDetailModal';
 import { useTournamentRanking } from '@/hooks/useTournamentRanking';
@@ -93,12 +92,11 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
       {/* Podio - Top 3 */}
       <div className="mb-4">
         <div className="flex justify-center items-center gap-2 sm:gap-3">
-          {topThree.map((player, index) => {
+          {topThree.map((player) => {
             if (!player) return null;
             
             const isFirst = player.position === 1;
             const isSecond = player.position === 2;
-            const isThird = player.position === 3;
             
             return (
               <div
@@ -181,7 +179,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
       {middle.length > 0 && (
         <div className="mb-4">
           <div className="grid grid-cols-3 gap-2 px-2">
-            {middle.map((player, index) => {
+            {middle.map((player) => {
               const firstName = player.playerName.split(' ')[0];
               
               return (

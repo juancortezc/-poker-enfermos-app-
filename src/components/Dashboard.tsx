@@ -30,7 +30,7 @@ export default function Dashboard() {
 
   // Simple state for button disable logic
   const [hasActiveOrCreatedDate, setHasActiveOrCreatedDate] = useState(false)
-  const [activeDateInfo, setActiveDateInfo] = useState<any>(null)
+  const [activeDateInfo, setActiveDateInfo] = useState<{ id: number; dateNumber: number; status: string } | null>(null)
   const [isCheckingDates, setIsCheckingDates] = useState(true) // Start as checking to prevent premature clicks
 
   // Direct check for CREATED or in_progress dates

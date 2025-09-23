@@ -27,7 +27,7 @@ interface FechasTableProps {
   userPin?: string | null;
 }
 
-export default function FechasTable({ tournamentId, userPin }: FechasTableProps) {
+export default function FechasTable({ tournamentId }: FechasTableProps) {
   const [completedDates, setCompletedDates] = useState<{id: number, dateNumber: number}[]>([]);
   const [selectedDateId, setSelectedDateId] = useState<number | null>(null);
   const [eliminations, setEliminations] = useState<Elimination[]>([]);
@@ -45,9 +45,9 @@ export default function FechasTable({ tournamentId, userPin }: FechasTableProps)
       // Filtrar fechas completadas y ordenarlas por dateNumber descendente
       const completed = tournamentData.gameDates && Array.isArray(tournamentData.gameDates)
         ? tournamentData.gameDates
-            .filter((date: any) => date.status === 'completed')
-            .sort((a: any, b: any) => b.dateNumber - a.dateNumber)
-            .map((date: any) => ({ id: date.id, dateNumber: date.dateNumber }))
+            .filter((date: { status: string }) => date.status === 'completed')
+            .sort((a: { dateNumber: number }, b: { dateNumber: number }) => b.dateNumber - a.dateNumber)
+            .map((date: { id: number; dateNumber: number }) => ({ id: date.id, dateNumber: date.dateNumber }))
         : [];
       
       setCompletedDates(completed);
@@ -60,7 +60,7 @@ export default function FechasTable({ tournamentId, userPin }: FechasTableProps)
   }, [tournamentData]);
 
   // Use SWR for eliminations data
-  const { data: eliminationsData, error: eliminationsError, isLoading: eliminationsLoading } = useSWR(
+  const { data: eliminationsData, isLoading: eliminationsLoading } = useSWR(
     selectedDateId ? `/api/eliminations/game-date/${selectedDateId}` : null,
     fetcher,
     { refreshInterval: 30000 } // 30 seconds refresh
@@ -77,10 +77,7 @@ export default function FechasTable({ tournamentId, userPin }: FechasTableProps)
     }
   }, [eliminationsData, eliminationsLoading]);
 
-  const formatTime = (timeString: string) => {
-    // Formatear tiempo de eliminación si es necesario
-    return timeString || '-';
-  };
+  // TODO: Re-enable time formatting when needed
 
   const getPlayerName = (player: Player) => {
     return `${player.firstName} ${player.lastName}`;

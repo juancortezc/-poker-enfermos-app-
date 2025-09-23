@@ -9,6 +9,7 @@ import { CSVUpload } from '@/components/admin/CSVUpload';
 import { CSVPreview } from '@/components/admin/CSVPreview';
 import { ImportProgress } from '@/components/admin/ImportProgress';
 import { ImportResults } from '@/components/admin/ImportResults';
+import { buildAuthHeaders } from '@/lib/client-auth';
 
 interface CSVElimination {
   torneo: string;
@@ -68,9 +69,7 @@ export default function AdminImportPage() {
       
       const response = await fetch('/api/admin/import/validate', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${(user as any)?.adminKey}`
-        },
+        headers: buildAuthHeaders(),
         body: formData
       });
       
@@ -89,7 +88,7 @@ export default function AdminImportPage() {
     } finally {
       setIsValidating(false);
     }
-  }, [(user as any)?.adminKey]);
+  }, [user]);
 
   const handleImport = useCallback(async () => {
     if (!validationResult || !validationResult.valid) {
@@ -103,10 +102,7 @@ export default function AdminImportPage() {
     try {
       const response = await fetch('/api/admin/import/execute', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(user as any)?.adminKey}`
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           eliminations: validationResult.eliminations
         })
@@ -126,7 +122,7 @@ export default function AdminImportPage() {
       console.error('Error executing import:', err);
       setCurrentStep('preview'); // Regresar a preview en caso de error
     }
-  }, [validationResult, (user as any)?.adminKey]);
+  }, [validationResult, user]);
 
   const handleStartOver = useCallback(() => {
     setCurrentStep('upload');
@@ -228,7 +224,7 @@ export default function AdminImportPage() {
             validationResult={validationResult}
             onImport={handleImport}
             onBackToUpload={handleStartOver}
-            // @ts-ignore - TypeScript false positive
+            // @ts-expect-error - isImporting prop type issue
             isImporting={currentStep === 'importing'}
           />
         )}

@@ -8,7 +8,7 @@ interface TotalTableProps {
   userPin?: string | null;
 }
 
-export default function TotalTable({ tournamentId, userPin }: TotalTableProps) {
+export default function TotalTable({ tournamentId }: TotalTableProps) {
   const [completedDates, setCompletedDates] = useState<number[]>([]);
 
   // Use SWR hook for ranking data with PIN authentication

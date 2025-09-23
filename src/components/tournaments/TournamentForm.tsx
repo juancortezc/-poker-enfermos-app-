@@ -14,6 +14,7 @@ import { TOURNAMENT_PRESETS, getPresetById } from '@/lib/tournament-presets'
 import { generateTournamentDates } from '@/lib/date-utils'
 import { ArrowLeft, Save, Loader2, Check, AlertCircle, Target, X } from 'lucide-react'
 import { toast } from 'react-toastify'
+import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -125,14 +126,14 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
 
   // Cargar jugadores disponibles (Enfermos y Comisión activos)
   useEffect(() => {
-    if (user?.adminKey) {
+    if (user && getStoredAuthToken()) {
       fetchAvailablePlayers()
     }
-  }, [user?.adminKey])
+  }, [user, fetchAvailablePlayers])
 
   // Obtener número de torneo o cargar torneo existente
   useEffect(() => {
-    if (user?.adminKey) {
+    if (user && getStoredAuthToken()) {
       if (isEditing) {
         fetchTournamentData()
       } else {
@@ -145,22 +146,19 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
         }
       }
     }
-  }, [user?.adminKey, isEditing, initialTournamentNumber])
+  }, [user, isEditing, initialTournamentNumber, fetchTournamentData])
 
   const fetchNextTournamentNumber = async () => {
-    if (!user?.adminKey) {
-      console.log('No admin key available, skipping tournament number fetch')
+    if (!getStoredAuthToken()) {
+      console.log('No auth token available, skipping tournament number fetch')
       setInitialLoading(false)
       return
     }
-    
+
     try {
       setLoadingMessage('Obteniendo número de torneo...')
       const response = await fetch('/api/tournaments/next-number', {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
       
       if (response.ok) {
@@ -200,10 +198,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
     try {
       setLoadingMessage('Cargando datos del torneo...')
       const response = await fetch(`/api/tournaments/${tournamentId}`, {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
       if (response.ok) {
         const tournament = await response.json()
@@ -228,20 +223,13 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
   const fetchAvailablePlayers = async () => {
     try {
       setLoadingMessage('Cargando lista de jugadores...')
-      console.log('Fetching players with adminKey:', !!user?.adminKey)
       const response = await fetch('/api/players?role=Enfermo,Comision', {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
-      console.log('Players API response status:', response.status)
       if (response.ok) {
         const data = await response.json()
-        console.log('Raw players data:', data.length, 'players')
         const activePlayers = data.filter((p: Player) => p.isActive)
-        console.log('Active players:', activePlayers.length, 'active players')
         setAvailablePlayers(activePlayers)
         
         // Seleccionar todos por defecto solo en nuevo torneo
@@ -295,10 +283,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
 
       const response = await fetch(url, {
         method,
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify(submitData)
       })
 
@@ -332,17 +317,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
     validateWithDebounce(newData)
   }, [formData, validateWithDebounce])
 
-  // Validación de número de torneo
-  const validateTournamentNumberDebounced = useCallback(async (number: number) => {
-    if (!user?.adminKey) return
-    
-    try {
-      const error = await validateTournamentNumber(number, isEditing ? tournamentId : undefined, user.adminKey)
-      setNumberValidationError(error?.message || '')
-    } catch (err) {
-      console.error('Error validating tournament number:', err)
-    }
-  }, [user?.adminKey, isEditing, tournamentId])
+  // TODO: Re-enable tournament number validation when needed
 
   // Cargar preset
   const loadPreset = useCallback((presetId: string) => {
@@ -420,11 +395,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
     updateFormData('participantIds', newParticipants)
   }
 
-  const updateBlindLevel = (index: number, field: keyof BlindLevel, value: number) => {
-    const newBlinds = [...formData.blindLevels]
-    newBlinds[index] = { ...newBlinds[index], [field]: value }
-    updateFormData('blindLevels', newBlinds)
-  }
+  // TODO: Re-enable blind level updates when editing is implemented
 
   if (!user || user.role !== UserRole.Comision) {
     return (

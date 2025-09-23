@@ -7,7 +7,7 @@ interface ResumenTableProps {
   userPin?: string | null;
 }
 
-export default function ResumenTable({ tournamentId, userPin }: ResumenTableProps) {
+export default function ResumenTable({ tournamentId }: ResumenTableProps) {
 
   // Use SWR hook for ranking data with PIN authentication
   const { 

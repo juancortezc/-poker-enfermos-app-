@@ -56,7 +56,7 @@ export default function PodiumResultsModal({ isOpen, onClose, playerId }: Podium
     if (isOpen && playerId) {
       fetchPodiumDetails();
     }
-  }, [isOpen, playerId]);
+  }, [isOpen, playerId, fetchPodiumDetails]);
 
   const fetchPodiumDetails = async () => {
     if (!playerId) return;

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
 import { Wrench, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 interface TournamentHealthData {
   tournament: {
@@ -43,11 +44,11 @@ export default function TournamentRepairTool({ tournamentId }: TournamentRepairT
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [healthData, setHealthData] = useState<TournamentHealthData | null>(null)
-  const [repairResult, setRepairResult] = useState<any>(null)
+  const [repairResult, setRepairResult] = useState<{ message: string; success: boolean; details?: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const checkHealth = async () => {
-    if (!user?.adminKey) return
+    if (!getStoredAuthToken()) return
 
     setLoading(true)
     setError(null)
@@ -55,9 +56,7 @@ export default function TournamentRepairTool({ tournamentId }: TournamentRepairT
     
     try {
       const response = await fetch(`/api/admin/repair-tournament?tournamentId=${tournamentId}`, {
-        headers: {
-          'Authorization': `Bearer ${user.adminKey}`
-        }
+        headers: buildAuthHeaders()
       })
 
       if (!response.ok) {
@@ -74,7 +73,7 @@ export default function TournamentRepairTool({ tournamentId }: TournamentRepairT
   }
 
   const repairTournament = async () => {
-    if (!user?.adminKey || !healthData) return
+    if (!getStoredAuthToken() || !healthData) return
 
     setLoading(true)
     setError(null)
@@ -82,10 +81,7 @@ export default function TournamentRepairTool({ tournamentId }: TournamentRepairT
     try {
       const response = await fetch('/api/admin/repair-tournament', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user.adminKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({ tournamentId })
       })
 

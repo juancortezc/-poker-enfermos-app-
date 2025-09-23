@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status') as TournamentStatus | null
 
-    const where: any = {}
+    const where: { status?: TournamentStatus } = {}
     if (status) {
       where.status = status
     }
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
           status: 'ACTIVO', // Los nuevos torneos se crean como activos
           participantIds,
           gameDates: {
-            create: gameDates.map((date: any, index: number) => ({
+            create: gameDates.map((date: { scheduledDate: string }, index: number) => ({
               dateNumber: index + 1,
               scheduledDate: parseToUTCNoon(date.scheduledDate),
               playersMin: 9,

@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import LoadingState from '@/components/ui/LoadingState'
 import TournamentCompletionModal from './TournamentCompletionModal'
 import TournamentCancellationModal from './TournamentCancellationModal'
-import { ArrowLeft, Users, Calendar, Play, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, Users, Play, X, Loader2 } from 'lucide-react'
 import { canCRUD } from '@/lib/auth'
+import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 interface Tournament {
   id: number
@@ -62,20 +63,19 @@ export default function TournamentOverview() {
   const fetchTournaments = async () => {
     try {
       setLoading(true)
-      
+      if (!getStoredAuthToken()) {
+        setLoading(false)
+        return
+      }
+      const headers = buildAuthHeaders()
+
       // Fetch active and next tournaments in parallel
       const [activeResponse, nextResponse] = await Promise.all([
         fetch('/api/tournaments/active', {
-          headers: {
-            'Authorization': `Bearer ${user?.adminKey}`,
-            'Content-Type': 'application/json'
-          }
+          headers
         }),
         fetch('/api/tournaments/next', {
-          headers: {
-            'Authorization': `Bearer ${user?.adminKey}`,
-            'Content-Type': 'application/json'
-          }
+          headers
         })
       ])
 
@@ -103,10 +103,7 @@ export default function TournamentOverview() {
       setActivating(true)
       const response = await fetch(`/api/tournaments/${nextTournament.tournament.id}/activate`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders({}, { includeJson: true })
       })
 
       if (response.ok) {

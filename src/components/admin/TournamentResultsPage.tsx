@@ -11,7 +11,7 @@ type TabId = 'campeonatos' | 'campeones' | 'podios'
 interface Tab {
   id: TabId
   label: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<{ className?: string }>
 }
 
 const tabs: Tab[] = [

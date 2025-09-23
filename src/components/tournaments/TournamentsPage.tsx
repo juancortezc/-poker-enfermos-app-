@@ -9,6 +9,7 @@ import ProgressBar, { CircularProgress } from '@/components/ui/ProgressBar'
 import LoadingState, { CardSkeleton } from '@/components/ui/LoadingState'
 import { Plus, Trophy, Calendar, Users, Clock } from 'lucide-react'
 import { canCRUD } from '@/lib/auth'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Tournament {
   id: number
@@ -48,17 +49,14 @@ export default function TournamentsPage() {
 
   useEffect(() => {
     fetchTournaments()
-  }, [activeTab])
+  }, [activeTab, fetchTournaments])
 
   const fetchTournaments = async () => {
     try {
       setLoading(true)
       const status = activeTab === 'activos' ? 'ACTIVO' : 'FINALIZADO'
       const response = await fetch(`/api/tournaments?status=${status}`, {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
       if (response.ok) {
@@ -76,7 +74,7 @@ export default function TournamentsPage() {
     router.push('/tournaments/new')
   }
 
-  const handleTournamentClick = (tournamentId: number) => {
+  const handleTournamentClick = () => {
     router.push('/admin')
   }
 
@@ -190,7 +188,6 @@ export default function TournamentsPage() {
             const completedDates = tournament.gameDates.filter(d => d.status === 'completed').length
             const totalDates = tournament.gameDates.length || 12
             // const progressPercentage = (completedDates / totalDates) * 100 // Para uso futuro
-            const nextDate = tournament.gameDates.find(d => d.status === 'pending')
             
             return (
               <div
