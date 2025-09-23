@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { UserRole, TournamentStatus } from '@prisma/client'
@@ -47,11 +47,7 @@ export default function TournamentsPage() {
 
   const canEdit = canCRUD(user?.role)
 
-  useEffect(() => {
-    fetchTournaments()
-  }, [activeTab, fetchTournaments])
-
-  const fetchTournaments = async () => {
+  const fetchTournaments = useCallback(async () => {
     try {
       setLoading(true)
       const status = activeTab === 'activos' ? 'ACTIVO' : 'FINALIZADO'
@@ -68,14 +64,18 @@ export default function TournamentsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTab])
+
+  useEffect(() => {
+    fetchTournaments()
+  }, [fetchTournaments])
 
   const handleCreateTournament = () => {
     router.push('/tournaments/new')
   }
 
-  const handleTournamentClick = () => {
-    router.push('/admin')
+  const handleTournamentClick = (tournamentId: number) => {
+    router.push(`/tournaments/${tournamentId}`)
   }
 
   const formatDate = (dateString: string) => {
@@ -122,9 +122,6 @@ export default function TournamentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Torneos</h1>
-          <p className="text-poker-muted">
-            {canEdit ? 'Gestionar torneos del grupo' : 'Ver torneos del grupo'}
-          </p>
         </div>
         {canEdit && (
           <Button 
@@ -142,20 +139,20 @@ export default function TournamentsPage() {
         <div className="flex space-x-0">
           <button
             onClick={() => setActiveTab('activos')}
-            className={`px-6 py-3 font-medium rounded-l-lg transition-all ${
+            className={`px-6 py-3 font-semibold rounded-l-lg border border-r-0 transition-colors ${
               activeTab === 'activos'
-                ? 'bg-poker-red text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-poker-red text-white border-poker-red'
+                : 'bg-black text-gray-300 border-white/10 hover:text-white'
             }`}
           >
             Torneos Activos
           </button>
           <button
             onClick={() => setActiveTab('finalizados')}
-            className={`px-6 py-3 font-medium rounded-r-lg transition-all ${
+            className={`px-6 py-3 font-semibold rounded-r-lg border border-l-0 -ml-px transition-colors ${
               activeTab === 'finalizados'
-                ? 'bg-poker-red text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-poker-red text-white border-poker-red'
+                : 'bg-black text-gray-300 border-white/10 hover:text-white'
             }`}
           >
             Finalizados

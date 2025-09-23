@@ -200,9 +200,9 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                           <Image
                             src={player.playerPhoto}
                             alt={player.playerName}
-                            fill
-                            sizes="48px"
-                            className="object-cover"
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
                           />
                         </div>
                       ) : (

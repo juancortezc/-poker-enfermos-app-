@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { AuthUser } from '@/lib/auth'
-import { clearStoredAuthTokens } from '@/lib/client-auth'
+import { clearStoredAuthTokens, storePin, storeAdminKey } from '@/lib/client-auth'
 
 interface AuthContextType {
   user: AuthUser | null
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const authUser = await response.json()
         setUser(authUser)
         localStorage.setItem('poker-user', JSON.stringify(authUser))
-        localStorage.setItem('poker-pin', pin) // Store PIN for subsequent API calls
+        storePin(pin)
         return true
       }
       return false
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const authUser = await response.json()
         setUser(authUser)
         localStorage.setItem('poker-user', JSON.stringify(authUser))
-        localStorage.setItem('poker-adminkey', adminKey) // Legacy storage
+        storeAdminKey(adminKey)
         return true
       }
       return false

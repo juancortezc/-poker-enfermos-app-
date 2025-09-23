@@ -110,7 +110,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
           lastName: playerData.lastName,
           role: playerData.role,
           aliases: playerData.aliases.length > 0 ? playerData.aliases : [''],
-          pin: playerData.pin || '',
+          pin: playerData.pin ? '****' : '',
           birthDate: playerData.birthDate || '',
           phone: playerData.phone || '',
           email: playerData.email || '',
@@ -142,7 +142,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
         throw new Error('Apellido es obligatorio')
       }
 
-      if (formData.pin && !/^\d{4}$/.test(formData.pin)) {
+      if (formData.pin && formData.pin !== '****' && !/^\d{4}$/.test(formData.pin)) {
         throw new Error('El PIN debe ser de 4 dígitos')
       }
 
@@ -168,7 +168,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
         lastName: formData.lastName.trim(),
         role: formData.role,
         aliases: cleanAliases,
-        pin: formData.pin || undefined,
+        pin: formData.pin && formData.pin !== '****' ? formData.pin : undefined,
         birthDate: formData.birthDate || undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
@@ -311,9 +311,14 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
               maxLength={4}
               pattern="\d{4}"
               value={formData.pin}
+              placeholder={player?.pin ? '****' : '1234'}
+              onFocus={() => {
+                if (formData.pin === '****') {
+                  updateFormData('pin', '')
+                }
+              }}
               onChange={(e) => updateFormData('pin', e.target.value.replace(/\D/g, ''))}
               className="bg-poker-dark/50 border-white/10 text-white focus:border-poker-red"
-              placeholder="1234"
             />
           </div>
 

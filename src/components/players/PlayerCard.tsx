@@ -41,18 +41,23 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
     switch (role) {
       case UserRole.Comision:
         return {
-          color: 'bg-poker-red text-white',
+          classes: 'bg-poker-red text-white',
           label: 'Comisión'
         }
       case UserRole.Enfermo:
         return {
-          color: 'bg-gray-300 text-black',
+          classes: 'bg-gray-700 text-white',
           label: 'Enfermo'
         }
       case UserRole.Invitado:
         return {
-          color: 'bg-blue-600 text-white',
+          classes: 'bg-pink-500 text-white',
           label: 'Invitado'
+        }
+      default:
+        return {
+          classes: 'bg-gray-600 text-white',
+          label: 'Jugador'
         }
     }
   }
@@ -66,7 +71,7 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
   }
 
   const roleBadge = getRoleBadge(player.role)
-  const mainAlias = player.aliases[0] || ''
+  const mainAlias = player.aliases[0]?.trim() || ''
 
   return (
     <div className="bg-poker-card border border-white/10 rounded-lg p-4 hover:bg-poker-card/80 transition-all">
@@ -92,21 +97,19 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
           </div>
 
           {/* Name and Role */}
-          <div>
-            <div className="flex items-center space-x-2">
-              <h3 className="font-semibold text-white">
-                {player.firstName} {player.lastName}
-              </h3>
-              {mainAlias && (
-                <span className="text-poker-cyan font-medium">
-                  ({mainAlias})
-                </span>
-              )}
-            </div>
-            <div className="mt-1">
-              <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${roleBadge.color}`}>
+          <div className="space-y-1">
+            <h3 className="font-semibold text-white">
+              {player.firstName} {player.lastName}
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className={`inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${roleBadge.classes}`}>
                 {roleBadge.label}
               </span>
+              {mainAlias && (
+                <span className="text-orange-400 text-xs font-semibold">
+                  • {mainAlias}
+                </span>
+              )}
             </div>
           </div>
         </div>

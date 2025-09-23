@@ -1,4 +1,20 @@
-import type { NotificationOptions, NotificationPreferences } from '@/hooks/useNotifications';
+import { 
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  type NotificationOptions,
+  type NotificationPreferences,
+  type NotificationCategory,
+  type NotificationPreferenceType,
+} from '@/lib/notification-types';
+
+interface InternalNotificationPayload {
+  title: string;
+  options: NotificationOptions & {
+    timestamp: number;
+    requireInteraction: boolean;
+    silent: boolean;
+    autoClose?: number;
+  };
+}
 
 /**
  * Servicio central de notificaciones
@@ -8,6 +24,11 @@ export class NotificationService {
   private static instance: NotificationService;
   private isInitialized = false;
   private serviceWorkerRegistration: ServiceWorkerRegistration | null = null;
+  private preferences: NotificationPreferences = DEFAULT_NOTIFICATION_PREFERENCES;
+  private broadcastChannel: BroadcastChannel | null = null;
+  private preferenceListeners = new Set<(preferences: NotificationPreferences) => void>();
+  private clientId = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  private pushSubscription: PushSubscription | null = null;
 
   private constructor() {}
 
@@ -16,6 +37,85 @@ export class NotificationService {
       NotificationService.instance = new NotificationService();
     }
     return NotificationService.instance;
+  }
+
+  private toUint8Array(base64String: string): Uint8Array {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+
+    return outputArray;
+  }
+
+  async getPushSubscription(): Promise<PushSubscription | null> {
+    await this.initialize();
+    if (!this.serviceWorkerRegistration) {
+      return null;
+    }
+
+    const pushManager = this.serviceWorkerRegistration.pushManager;
+
+    if (this.pushSubscription) return this.pushSubscription;
+
+    try {
+      this.pushSubscription = await pushManager.getSubscription();
+    } catch (error) {
+      console.warn('Error retrieving push subscription:', error);
+    }
+
+    return this.pushSubscription;
+  }
+
+  async subscribeToPush(applicationServerKey?: string) {
+    await this.initialize();
+
+    if (!this.serviceWorkerRegistration) {
+      throw new Error('Service worker not available');
+    }
+
+    try {
+      const pushManager = this.serviceWorkerRegistration.pushManager;
+      const existing = await pushManager.getSubscription();
+      if (existing) {
+        this.pushSubscription = existing;
+        return existing;
+      }
+
+      const subscribeOptions: PushSubscriptionOptionsInit = {
+        userVisibleOnly: true,
+      };
+
+      if (applicationServerKey) {
+        subscribeOptions.applicationServerKey = this.toUint8Array(applicationServerKey);
+      }
+
+      this.pushSubscription = await pushManager.subscribe(subscribeOptions);
+      return this.pushSubscription;
+    } catch (error) {
+      console.error('Failed to subscribe to push notifications:', error);
+      throw error;
+    }
+  }
+
+  async unsubscribeFromPush() {
+    const subscription = await this.getPushSubscription();
+    if (!subscription) return false;
+
+    try {
+      const success = await subscription.unsubscribe();
+      if (success) {
+        this.pushSubscription = null;
+      }
+      return success;
+    } catch (error) {
+      console.error('Failed to unsubscribe from push notifications:', error);
+      return false;
+    }
   }
 
   /**
@@ -31,15 +131,9 @@ export class NotificationService {
         return false;
       }
 
-      // Registrar service worker si no está registrado
-      if ('serviceWorker' in navigator) {
-        try {
-          this.serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js');
-          console.log('Service Worker registered for notifications');
-        } catch (error) {
-          console.warn('Service Worker registration failed:', error);
-        }
-      }
+      await this.registerServiceWorker();
+      this.loadPreferences();
+      this.setupBroadcastChannel();
 
       this.isInitialized = true;
       return true;
@@ -47,6 +141,105 @@ export class NotificationService {
       console.error('Failed to initialize notification service:', error);
       return false;
     }
+  }
+
+  private async registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+
+    try {
+      // Si ya hay un SW activo, obtener el registro
+      this.serviceWorkerRegistration = await navigator.serviceWorker.getRegistration();
+
+      if (!this.serviceWorkerRegistration) {
+        this.serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js');
+      }
+
+      // Asegurar que el SW esté listo
+      this.serviceWorkerRegistration = await navigator.serviceWorker.ready;
+      console.log('Service Worker ready for notifications');
+    } catch (error) {
+      console.warn('Service Worker registration failed:', error);
+    }
+  }
+
+  private setupBroadcastChannel() {
+    if (typeof window === 'undefined' || !('BroadcastChannel' in window)) return;
+
+    this.broadcastChannel = new BroadcastChannel('poker-notifications');
+    this.broadcastChannel.addEventListener('message', (event) => {
+      const { type, payload, source } = event.data || {};
+
+      if (type === 'PREFERENCES_UPDATED' && payload && source !== this.clientId) {
+        this.preferences = payload;
+        this.preferenceListeners.forEach((listener) => listener(this.preferences));
+      }
+
+      if (type === 'SHOW_NOTIFICATION' && payload && source !== this.clientId) {
+        this.routeNotification(payload as InternalNotificationPayload).catch((error) => {
+          console.warn('Failed to route broadcast notification:', error);
+        });
+      }
+    });
+  }
+
+  private loadPreferences() {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const stored = window.localStorage.getItem('notification-preferences');
+      if (stored) {
+        const parsed = JSON.parse(stored) as Partial<NotificationPreferences>;
+        this.preferences = {
+          ...DEFAULT_NOTIFICATION_PREFERENCES,
+          ...parsed,
+          timer: {
+            ...DEFAULT_NOTIFICATION_PREFERENCES.timer,
+            ...(parsed?.timer || {}),
+          },
+          game: {
+            ...DEFAULT_NOTIFICATION_PREFERENCES.game,
+            ...(parsed?.game || {}),
+          },
+        };
+      }
+    } catch (error) {
+      console.warn('Error loading notification preferences:', error);
+    }
+  }
+
+  private persistPreferences(preferences: NotificationPreferences) {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem('notification-preferences', JSON.stringify(preferences));
+    } catch (error) {
+      console.error('Error saving notification preferences:', error);
+    }
+  }
+
+  getPreferences(): NotificationPreferences {
+    return this.preferences;
+  }
+
+  subscribeToPreferenceChanges(callback: (preferences: NotificationPreferences) => void): () => void {
+    this.preferenceListeners.add(callback);
+    return () => {
+      this.preferenceListeners.delete(callback);
+    };
+  }
+
+  updatePreferences(preferences: NotificationPreferences) {
+    this.preferences = preferences;
+    this.persistPreferences(preferences);
+
+    if (this.broadcastChannel) {
+      this.broadcastChannel.postMessage({
+        type: 'PREFERENCES_UPDATED',
+        payload: preferences,
+        source: this.clientId,
+      });
+    }
+
+    this.preferenceListeners.forEach((listener) => listener(preferences));
   }
 
   /**
@@ -73,6 +266,7 @@ export class NotificationService {
     if (!this.isSupported()) return false;
 
     try {
+      await this.initialize();
       const permission = await Notification.requestPermission();
       return permission === 'granted';
     } catch (error) {
@@ -130,52 +324,26 @@ export class NotificationService {
    * Enviar notificación
    */
   async sendNotification(options: NotificationOptions): Promise<boolean> {
-    if (!this.isInitialized) {
-      await this.initialize();
-    }
+    await this.initialize();
 
     if (this.getPermissionStatus() !== 'granted') {
       console.warn('Notification permission not granted');
       return false;
     }
 
-    try {
-      const notification = new Notification(options.title, {
-        body: options.body,
-        icon: options.icon || '/icons/icon-192x192.png',
-        badge: '/icons/icon-96x96.png',
-        tag: options.tag,
+    const payload: InternalNotificationPayload = {
+      title: options.title,
+      options: {
+        ...options,
+        timestamp: Date.now(),
         requireInteraction: options.priority === 'high',
         silent: !options.sound,
-        renotify: true,
-        timestamp: Date.now(),
-      });
+        autoClose: options.priority === 'high' ? undefined : 5000,
+      },
+    };
 
-      // Reproducir sonido si está especificado
-      if (options.sound) {
-        this.playSound(options.sound).catch(e => 
-          console.warn('Could not play notification sound:', e)
-        );
-      }
-
-      // Vibrar si está especificado
-      if (options.vibrate) {
-        this.vibrate();
-      }
-
-      // Auto-cerrar notificación (excepto alta prioridad)
-      if (options.priority !== 'high') {
-        setTimeout(() => {
-          notification.close();
-        }, 5000);
-      }
-
-      // Manejar click en notificación
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
-
+    try {
+      await this.routeNotification(payload);
       return true;
     } catch (error) {
       console.error('Error sending notification:', error);
@@ -183,39 +351,89 @@ export class NotificationService {
     }
   }
 
+  private async routeNotification(payload: InternalNotificationPayload) {
+    const registration = await this.ensureRegistration();
+
+    if (registration?.active) {
+      registration.active.postMessage({
+        type: 'SHOW_NOTIFICATION',
+        payload,
+        source: this.clientId,
+      });
+    } else if (this.isSupported()) {
+      // Fallback directo en caso de no tener SW activo
+      const { title, options } = payload;
+      const notification = new Notification(title, {
+        body: options.body,
+        icon: options.icon || '/icons/icon-192x192.png',
+        badge: '/icons/icon-96x96.png',
+        tag: options.tag,
+        requireInteraction: options.requireInteraction,
+        silent: options.silent,
+        data: options.data,
+        timestamp: options.timestamp,
+      });
+
+      if (options.autoClose) {
+        setTimeout(() => notification.close(), options.autoClose);
+      }
+    }
+  }
+
+  private async ensureRegistration(): Promise<ServiceWorkerRegistration | null> {
+    if (this.serviceWorkerRegistration) return this.serviceWorkerRegistration;
+    if (!('serviceWorker' in navigator)) return null;
+
+    try {
+      this.serviceWorkerRegistration = await navigator.serviceWorker.ready;
+      return this.serviceWorkerRegistration;
+    } catch (error) {
+      console.warn('Service worker not ready', error);
+      return null;
+    }
+  }
+
   /**
    * Enviar notificación con preferencias de usuario
    */
   async sendNotificationWithPreferences(
-    type: string,
+    type: NotificationPreferenceType,
     options: NotificationOptions,
     preferences: NotificationPreferences
   ): Promise<boolean> {
-    // Verificar si el tipo de notificación está habilitado
+    await this.initialize();
+
     const category = this.getNotificationCategory(type);
     if (!this.isNotificationEnabled(type, category, preferences)) {
       console.log(`Notification disabled for type: ${type}`);
       return false;
     }
 
-    // Aplicar configuración de sonido
-    if (options.sound && !preferences.sound.enabled) {
-      delete options.sound;
+    const finalOptions: NotificationOptions = { ...options };
+
+    if (options.sound && preferences.sound.enabled) {
+      this.playSound(options.sound, preferences.sound.volume / 100).catch((error) =>
+        console.warn('Could not play notification sound:', error)
+      );
+    } else {
+      delete finalOptions.sound;
     }
 
-    // Aplicar configuración de vibración
-    if (options.vibrate && !preferences.vibration.enabled) {
-      options.vibrate = false;
+    if (options.vibrate && preferences.vibration.enabled) {
+      const pattern = this.getVibrationPattern(preferences.vibration.intensity);
+      this.vibrate(pattern);
+    } else {
+      finalOptions.vibrate = false;
     }
 
-    return this.sendNotification(options);
+    return this.sendNotification(finalOptions);
   }
 
   /**
    * Obtener categoría de notificación
    */
-  private getNotificationCategory(type: string): 'timer' | 'game' {
-    const timerTypes = ['oneMinuteWarning', 'blindChange', 'timerPaused'];
+  private getNotificationCategory(type: string): NotificationCategory {
+    const timerTypes: NotificationPreferenceType[] = ['oneMinuteWarning', 'blindChange', 'timerPaused'];
     return timerTypes.includes(type) ? 'timer' : 'game';
   }
 
@@ -223,12 +441,12 @@ export class NotificationService {
    * Verificar si un tipo de notificación está habilitado
    */
   private isNotificationEnabled(
-    type: string, 
-    category: 'timer' | 'game', 
+    type: NotificationPreferenceType,
+    category: NotificationCategory,
     preferences: NotificationPreferences
   ): boolean {
     const categoryPrefs = preferences[category];
-    return categoryPrefs[type as keyof typeof categoryPrefs] === true;
+    return Boolean(categoryPrefs[type as keyof typeof categoryPrefs]);
   }
 
   /**

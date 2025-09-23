@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotifications, type NotificationPreferences } from '@/hooks/useNotifications';
-import { notificationService } from '@/lib/notifications';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -18,7 +17,6 @@ import {
   Smartphone,
   AlertTriangle,
   CheckCircle,
-  Settings,
   TestTube
 } from 'lucide-react';
 
@@ -26,6 +24,7 @@ export default function NotificationsPage() {
   const { user } = useAuth();
   const {
     isSupported,
+    isInitializing,
     permission,
     preferences,
     requestPermission,
@@ -36,10 +35,14 @@ export default function NotificationsPage() {
     notifyBlindChange,
     notifyPlayerEliminated,
     notifyWinner,
+    pushSubscription,
+    subscribeToPush,
+    unsubscribeFromPush,
   } = useNotifications();
 
   const [saving, setSaving] = useState(false);
   const [testingSound, setTestingSound] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
 
   // Solicitar permisos al cargar la página si no están otorgados
   useEffect(() => {
@@ -90,6 +93,33 @@ export default function NotificationsPage() {
     elimination: () => notifyPlayerEliminated('Jugador Test', 10),
     winner: () => notifyWinner('Ganador Test', 25),
   };
+
+  const pushEnabled = Boolean(pushSubscription);
+
+  const handleEnablePush = async () => {
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    setPushLoading(true);
+    try {
+      await subscribeToPush(vapidKey);
+    } catch (error) {
+      console.error('Error enabling push notifications:', error);
+    }
+    setPushLoading(false);
+  };
+
+  const handleDisablePush = async () => {
+    setPushLoading(true);
+    await unsubscribeFromPush();
+    setPushLoading(false);
+  };
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark flex items-center justify-center">
+        <div className="text-poker-muted">Preparando notificaciones...</div>
+      </div>
+    );
+  }
 
   if (!isSupported) {
     return (
@@ -142,6 +172,48 @@ export default function NotificationsPage() {
                 </Button>
               )}
             </div>
+          </Card>
+
+          {/* Push Subscription */}
+          <Card className="admin-card p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3">
+                  <Bell className={`w-6 h-6 ${pushEnabled ? 'text-green-400' : 'text-orange-400'}`} />
+                  <h3 className="text-white font-semibold">Push / Background</h3>
+                </div>
+                <p className="text-xs text-poker-muted mt-2">
+                  {pushEnabled
+                    ? 'Recibirás alertas aunque estés en otras páginas del sitio.'
+                    : 'Activa push para recibir alertas aunque la app esté en segundo plano.'}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                {pushEnabled ? (
+                  <Button
+                    variant="outline"
+                    onClick={handleDisablePush}
+                    disabled={pushLoading}
+                    className="text-sm"
+                  >
+                    {pushLoading ? 'Desactivando...' : 'Desactivar'}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleEnablePush}
+                    disabled={pushLoading || permission !== 'granted'}
+                    className="bg-poker-red hover:bg-poker-red/80 text-sm"
+                  >
+                    {pushLoading ? 'Activando...' : 'Activar Push'}
+                  </Button>
+                )}
+              </div>
+            </div>
+            {permission !== 'granted' && (
+              <p className="text-xs text-orange-400 mt-3">
+                Primero autoriza las notificaciones del navegador para habilitar push.
+              </p>
+            )}
           </Card>
 
           {/* Timer Notifications */}

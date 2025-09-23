@@ -152,95 +152,82 @@ export default function AdminImportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-poker-dark">
+      <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
 
-        {/* Error Message */}
         {error && (
-          <div className="mb-6">
-            <ValidationMessage 
-              type="error" 
-              message={error}
-              onDismiss={() => setError(null)}
+          <ValidationMessage
+            type="error"
+            message={error}
+            onDismiss={() => setError(null)}
+          />
+        )}
+
+        <section className="bg-poker-card border border-white/10 rounded-2xl p-6 sm:p-8 space-y-6">
+          <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Importar Eliminaciones</h1>
+              <p className="text-sm text-poker-muted mt-1">Carga un archivo CSV para validar y aplicar resultados de una fecha.</p>
+            </div>
+          </header>
+
+          <div className="space-y-5 text-sm text-poker-muted">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold ${currentStep === 'upload' ? 'bg-poker-red text-white' : 'bg-white/10 text-white'}`}>1</div>
+              <div>
+                <p className={`font-semibold ${currentStep === 'upload' ? 'text-white' : 'text-poker-muted'}`}>Subir archivo</p>
+                <p className="text-xs sm:text-sm text-poker-muted">Selecciona el CSV y verifica que tenga el formato correcto.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold ${currentStep === 'preview' ? 'bg-poker-red text-white' : ['importing', 'results'].includes(currentStep) ? 'bg-green-500 text-white' : 'bg-white/10 text-white'}`}>2</div>
+              <div>
+                <p className={`font-semibold ${currentStep === 'preview' ? 'text-white' : ['importing', 'results'].includes(currentStep) ? 'text-white' : 'text-poker-muted'}`}>Previsualizar</p>
+                <p className="text-xs sm:text-sm text-poker-muted">Confirma los datos detectados y revisa los jugadores coincidentes.</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold ${['importing', 'results'].includes(currentStep) ? 'bg-poker-red text-white' : 'bg-white/10 text-white'}`}>3</div>
+              <div>
+                <p className={`font-semibold ${['importing', 'results'].includes(currentStep) ? 'text-white' : 'text-poker-muted'}`}>Importar</p>
+                <p className="text-xs sm:text-sm text-poker-muted">Aplica la importación y revisa el resumen final con los registros creados.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="space-y-8">
+          {currentStep === 'upload' && (
+            <CSVUpload
+              onFileUpload={handleFileUpload}
+              isValidating={isValidating}
             />
-          </div>
-        )}
+          )}
 
-        {/* Progress Indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between text-sm text-poker-text">
-            <div className={`flex items-center ${currentStep === 'upload' ? 'text-poker-red' : 'text-white'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 font-bold text-sm ${
-                currentStep === 'upload' ? 'btn-admin-primary' : 'btn-admin-success'
-              }`}>
-                1
-              </div>
-              Subir Archivo
-            </div>
-            
-            <div className="flex-1 h-0.5 bg-gray-600 mx-4">
-              <div className={`h-full bg-poker-red transition-all ${
-                ['preview', 'importing', 'results'].includes(currentStep) ? 'w-full' : 'w-0'
-              }`} />
-            </div>
-            
-            <div className={`flex items-center ${currentStep === 'preview' ? 'text-poker-red' : ['importing', 'results'].includes(currentStep) ? 'text-white' : ''}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 font-bold text-sm ${
-                currentStep === 'preview' ? 'btn-admin-primary' : 
-                ['importing', 'results'].includes(currentStep) ? 'btn-admin-success' : 'btn-admin-neutral'
-              }`}>
-                2
-              </div>
-              Previsualizar
-            </div>
-            
-            <div className="flex-1 h-0.5 bg-gray-600 mx-4">
-              <div className={`h-full bg-poker-red transition-all ${
-                ['importing', 'results'].includes(currentStep) ? 'w-full' : 'w-0'
-              }`} />
-            </div>
-            
-            <div className={`flex items-center ${['importing', 'results'].includes(currentStep) ? 'text-poker-red' : ''}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                ['importing', 'results'].includes(currentStep) ? 'btn-admin-success' : 'btn-admin-neutral'
-              }`}>
-                3
-              </div>
-              Importar
-            </div>
-          </div>
+          {currentStep === 'preview' && validationResult && (
+            <CSVPreview
+              validationResult={validationResult}
+              onImport={handleImport}
+              onBackToUpload={handleStartOver}
+              // @ts-expect-error - isImporting prop type issue
+              isImporting={currentStep === 'importing'}
+            />
+          )}
+
+          {currentStep === 'importing' && (<ImportProgress />)}
+
+          {currentStep === 'results' && importResult && (
+            <ImportResults
+              result={importResult}
+              onStartOver={handleStartOver}
+              onBackToPreview={handleBackToPreview}
+            />
+          )}
         </div>
-
-        {/* Step Content */}
-        {currentStep === 'upload' && (
-          <CSVUpload 
-            onFileUpload={handleFileUpload}
-            isValidating={isValidating}
-          />
-        )}
-
-        {currentStep === 'preview' && validationResult && (
-          <CSVPreview 
-            validationResult={validationResult}
-            onImport={handleImport}
-            onBackToUpload={handleStartOver}
-            // @ts-expect-error - isImporting prop type issue
-            isImporting={currentStep === 'importing'}
-          />
-        )}
-
-        {currentStep === 'importing' && (
-          <ImportProgress />
-        )}
-
-        {currentStep === 'results' && importResult && (
-          <ImportResults 
-            result={importResult}
-            onStartOver={handleStartOver}
-            onBackToPreview={handleBackToPreview}
-          />
-        )}
       </div>
     </div>
   );
 }
+

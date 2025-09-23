@@ -145,37 +145,21 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
       </Card>
 
       {/* Formato del Archivo CSV */}
-      <Card className="admin-card p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Formato del Archivo CSV</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-poker-red font-medium">TORNEO</span>
-            <p className="text-poker-text">Torneo #</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">FECHA</span>
-            <p className="text-poker-text"># de fecha (1-12)</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">DATE</span>
-            <p className="text-poker-text">Fecha ISO (YYYY-MM-DD)</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">POSICION</span>
-            <p className="text-poker-text">Posición de Salida</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">ELIMINADO</span>
-            <p className="text-poker-text">Nombre</p>
-          </div>
-          <div>
-            <span className="text-poker-red font-medium">ELIMINADOR</span>
-            <p className="text-poker-text">Nombre (vacío si es ganador)</p>
-          </div>
-          <div className="col-span-2">
-            <span className="text-poker-red font-medium">PUNTOS</span>
-            <p className="text-poker-text">Puntos asignados (0-30)</p>
-          </div>
+      <Card className="admin-card p-6 sm:p-7">
+        <h2 className="text-xl font-semibold text-white mb-3">Formato del archivo CSV</h2>
+        <p className="text-sm text-poker-muted mb-4">El archivo debe contener exactamente <span className="font-semibold text-white">7 columnas</span> en el siguiente orden:</p>
+        <ol className="list-decimal list-inside space-y-2 text-sm text-poker-text">
+          <li><span className="font-semibold text-white">TORNEO</span> — Número del torneo (ej. 28).</li>
+          <li><span className="font-semibold text-white">FECHA</span> — Número de fecha jugada (1-12).</li>
+          <li><span className="font-semibold text-white">DATE</span> — Fecha en formato <code className="font-mono text-xs bg-black/40 px-1 py-0.5 rounded">YYYY-MM-DD</code>.</li>
+          <li><span className="font-semibold text-white">POSICION</span> — Posición en la que salió el jugador.</li>
+          <li><span className="font-semibold text-white">ELIMINADO</span> — Nombre completo del jugador eliminado.</li>
+          <li><span className="font-semibold text-white">ELIMINADOR</span> — Nombre del jugador que lo eliminó (vacío para el ganador).</li>
+          <li><span className="font-semibold text-white">PUNTOS</span> — Puntos asignados a la posición.</li>
+        </ol>
+        <div className="mt-5 bg-black/40 border border-white/10 rounded-lg p-4 text-xs sm:text-sm text-white/80">
+          <p className="uppercase text-poker-muted tracking-wide text-[10px] sm:text-[11px]">Ejemplo de fila</p>
+          <code className="block mt-2 whitespace-pre-wrap break-words font-mono">28,7,2025-07-08,11,Jose Patricio Moreno,Freddy Lopez,12</code>
         </div>
       </Card>
 

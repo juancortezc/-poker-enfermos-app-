@@ -45,6 +45,48 @@ export default function PlayersPage() {
 
   const canEdit = !!(user && canCRUD(user.role))
 
+  const getRolePriority = (role: UserRole) => {
+    switch (role) {
+      case UserRole.Comision:
+        return 0
+      case UserRole.Enfermo:
+        return 1
+      default:
+        return 2
+    }
+  }
+
+  const dedupePlayers = (list: Player[]) => {
+    const map = new Map<string, Player>()
+
+    list.forEach(player => {
+      const normalizedFirst = player.firstName.trim()
+      const normalizedLast = player.lastName.trim()
+      const key = `${normalizedFirst.toLowerCase()}|${normalizedLast.toLowerCase()}`
+      const candidate: Player = {
+        ...player,
+        firstName: normalizedFirst,
+        lastName: normalizedLast
+      }
+
+      const existing = map.get(key)
+
+      if (!existing) {
+        map.set(key, candidate)
+        return
+      }
+
+      const existingPriority = getRolePriority(existing.role)
+      const candidatePriority = getRolePriority(candidate.role)
+
+      if (candidatePriority < existingPriority) {
+        map.set(key, candidate)
+      }
+    })
+
+    return Array.from(map.values())
+  }
+
   // Cargar jugadores
   useEffect(() => {
     fetchPlayers()
@@ -111,7 +153,8 @@ export default function PlayersPage() {
       })
       if (response.ok) {
         const data = await response.json()
-        setPlayers(data)
+        const deduped = dedupePlayers(data)
+        setPlayers(deduped)
       }
     } catch (error) {
       console.error('Error fetching players:', error)
@@ -160,20 +203,20 @@ export default function PlayersPage() {
         <div className="flex space-x-0">
           <button
             onClick={() => setActiveTab('enfermos')}
-            className={`px-6 py-3 font-medium rounded-l-lg transition-all ${
+            className={`px-6 py-3 font-semibold rounded-l-lg border border-r-0 transition-colors ${
               activeTab === 'enfermos'
-                ? 'bg-poker-red text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-poker-red text-white border-poker-red'
+                : 'bg-black text-gray-300 border-white/10 hover:text-white'
             }`}
           >
             Enfermos ({enfermosCount})
           </button>
           <button
             onClick={() => setActiveTab('invitados')}
-            className={`px-6 py-3 font-medium rounded-r-lg transition-all ${
+            className={`px-6 py-3 font-semibold rounded-r-lg border border-l-0 -ml-px transition-colors ${
               activeTab === 'invitados'
-                ? 'bg-poker-red text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-pink-500 text-white border-pink-500'
+                : 'bg-black text-gray-300 border-white/10 hover:text-white'
             }`}
           >
             Invitados ({invitadosCount})

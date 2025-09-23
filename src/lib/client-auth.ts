@@ -1,107 +1,93 @@
 /**
- * Client-side authentication utilities
- * Handles token storage, headers, and auth state for frontend
+ * Client-side helpers for retrieving stored credentials and building
+ * Authorization headers. Keeps all localStorage access in one place.
  */
 
-// Local storage keys
-const AUTH_TOKEN_KEY = 'poker-auth-token'
-const USER_DATA_KEY = 'poker-user-data'
+export type AuthCredential = {
+  scheme: 'PIN' | 'ADMIN'
+  value: string
+}
 
-export interface AuthUser {
-  id: string
-  firstName: string
-  lastName: string
-  role: string
-  pin?: string
-  photoUrl?: string
+const PIN_KEY = 'poker-pin'
+const ADMIN_KEY = 'poker-adminkey'
+
+/**
+ * Reads whichever credential is currently stored. PIN takes priority
+ * over the legacy admin key because that is the primary auth flow.
+ */
+export function getStoredAuthToken(): AuthCredential | null {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  const pin = window.localStorage.getItem(PIN_KEY)
+  if (pin) {
+    return { scheme: 'PIN', value: pin }
+  }
+
+  const adminKey = window.localStorage.getItem(ADMIN_KEY)
+  if (adminKey) {
+    return { scheme: 'ADMIN', value: adminKey }
+  }
+
+  return null
 }
 
 /**
- * Get stored authentication token from localStorage
- */
-export function getStoredAuthToken(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(AUTH_TOKEN_KEY)
-}
-
-/**
- * Store authentication token in localStorage
- */
-export function storeAuthToken(token: string): void {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(AUTH_TOKEN_KEY, token)
-}
-
-/**
- * Get stored user data from localStorage
- */
-export function getStoredUserData(): AuthUser | null {
-  if (typeof window === 'undefined') return null
-  const userData = localStorage.getItem(USER_DATA_KEY)
-  return userData ? JSON.parse(userData) : null
-}
-
-/**
- * Store user data in localStorage
- */
-export function storeUserData(user: AuthUser): void {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(USER_DATA_KEY, JSON.stringify(user))
-}
-
-/**
- * Clear all stored authentication data
- */
-export function clearStoredAuthTokens(): void {
-  if (typeof window === 'undefined') return
-  localStorage.removeItem(AUTH_TOKEN_KEY)
-  localStorage.removeItem(USER_DATA_KEY)
-}
-
-/**
- * Get authorization header value for API requests
+ * Returns the Authorization header value or null if there are no
+ * credentials stored.
  */
 export function getAuthHeaderValue(): string | null {
-  const token = getStoredAuthToken()
-  return token ? `Bearer ${token}` : null
+  const credential = getStoredAuthToken()
+  if (!credential) {
+    return null
+  }
+
+  return `Bearer ${credential.scheme}:${credential.value}`
 }
 
 /**
- * Build headers object with authentication for fetch requests
+ * Convenience helper to merge authentication headers with optional
+ * JSON headers. Returned value is a plain object suitable for fetch.
  */
 export function buildAuthHeaders(
-  additionalHeaders: Record<string, string> = {},
+  base: HeadersInit = {},
   options: { includeJson?: boolean } = {}
-): Record<string, string> {
-  const headers: Record<string, string> = {
-    ...additionalHeaders
-  }
-
-  // Add authorization header if token exists
+): HeadersInit {
+  const headers = new Headers(base)
   const authHeader = getAuthHeaderValue()
+
   if (authHeader) {
-    headers['Authorization'] = authHeader
+    headers.set('Authorization', authHeader)
   }
 
-  // Add content-type header if requested
   if (options.includeJson) {
-    headers['Content-Type'] = 'application/json'
+    headers.set('Content-Type', 'application/json')
   }
 
-  return headers
+  return Object.fromEntries(headers.entries())
 }
 
 /**
- * Check if user is authenticated
+ * Utility helpers for mutating stored credentials. Used by login/logout
+ * flows to keep the storage format encapsulated here.
  */
+export function storePin(pin: string): void {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(PIN_KEY, pin)
+}
+
+export function storeAdminKey(key: string): void {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(ADMIN_KEY, key)
+}
+
+export function clearStoredAuthTokens(): void {
+  if (typeof window === 'undefined') return
+  window.localStorage.removeItem(PIN_KEY)
+  window.localStorage.removeItem(ADMIN_KEY)
+}
+
 export function isAuthenticated(): boolean {
-  return getStoredAuthToken() !== null
-}
-
-/**
- * Get current user role from stored data
- */
-export function getCurrentUserRole(): string | null {
-  const userData = getStoredUserData()
-  return userData?.role || null
+  return getAuthHeaderValue() !== null
 }
