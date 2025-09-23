@@ -86,15 +86,15 @@ export default function TotalTable({ tournamentId }: TotalTableProps) {
             <tr>
               <th className="excel-header-gray sticky-col" style={{color: '#000'}}>POS</th>
               <th className="excel-header sticky-col" style={{color: '#000'}}>JUGADOR</th>
-              <th className="excel-header excel-header-total sticky-col" style={{color: '#000'}}>TOTAL</th>
+              <th className="excel-header excel-header-total sticky-col" style={{color: '#000'}}>FINAL</th>
               {completedDates.map(dateNumber => (
                 <th key={dateNumber} className="excel-header date-header" style={{color: '#000'}}>
                   F{dateNumber}
                 </th>
               ))}
-              <th className="excel-header" style={{color: '#000'}}>E1</th>
-              <th className="excel-header" style={{color: '#000'}}>E2</th>
-              <th className="excel-header excel-header-total" style={{color: '#000'}}>FINAL</th>
+              <th className="excel-header" style={{color: '#b91c1c'}}>E1</th>
+              <th className="excel-header" style={{color: '#b91c1c'}}>E2</th>
+              <th className="excel-header excel-header-total" style={{color: '#000'}}>TOTAL</th>
             </tr>
           </thead>
           <tbody>
@@ -113,7 +113,7 @@ export default function TotalTable({ tournamentId }: TotalTableProps) {
                   {formatPlayerName(player.playerName, nameFormat)}
                 </td>
                 <td className="excel-cell excel-cell-total text-center font-bold score-emphasis" style={{color: '#1a365d'}}>
-                  {player.totalPoints}
+                  {player.finalScore !== undefined ? player.finalScore : '-'}
                 </td>
                 {completedDates.map(dateNumber => (
                   <td key={dateNumber} className="excel-cell text-center date-cell" style={{color: '#000'}}>
@@ -127,7 +127,7 @@ export default function TotalTable({ tournamentId }: TotalTableProps) {
                   {player.elimina2 !== undefined ? player.elimina2 : '-'}
                 </td>
                 <td className="excel-cell excel-cell-total text-center font-bold score-emphasis" style={{color: '#1a365d'}}>
-                  {player.finalScore !== undefined ? player.finalScore : '-'}
+                  {player.totalPoints}
                 </td>
               </tr>
             ))}

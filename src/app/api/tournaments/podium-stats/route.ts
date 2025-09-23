@@ -14,9 +14,9 @@ export async function GET() {
     })
 
     allTournaments.forEach(t => {
-      allPlayers.add(t.championId)
-      allPlayers.add(t.runnerUpId)
-      allPlayers.add(t.thirdPlaceId)
+      if (t.championId) allPlayers.add(t.championId)
+      if (t.runnerUpId) allPlayers.add(t.runnerUpId)
+      if (t.thirdPlaceId) allPlayers.add(t.thirdPlaceId)
     })
 
     // Calcular estadísticas para cada jugador
@@ -85,17 +85,22 @@ export async function GET() {
     const totalThirdPlaces = validStats.reduce((sum, s) => sum + s.thirdPlaces, 0)
     const totalPodiumAppearances = validStats.reduce((sum, s) => sum + s.totalPodiums, 0)
 
+    const playersCount = validStats.length
+    const averagePodiumsPerPlayer = playersCount > 0
+      ? Math.round((totalPodiumAppearances / playersCount) * 10) / 10
+      : 0
+
     return NextResponse.json({
       success: true,
       data: {
         players: validStats,
         summary: {
-          totalPlayersInPodiums: validStats.length,
+          totalPlayersInPodiums: playersCount,
           totalFirstPlaces: totalFirstPlaces,
           totalSecondPlaces: totalSecondPlaces,
           totalThirdPlaces: totalThirdPlaces,
           totalPodiumAppearances: totalPodiumAppearances,
-          averagePodiumsPerPlayer: Math.round((totalPodiumAppearances / validStats.length) * 10) / 10
+          averagePodiumsPerPlayer
         }
       }
     })

@@ -136,7 +136,7 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
 
       {/* Tabla de eliminaciones */}
       {selectedDateId && (
-        <div className="overflow-x-auto overflow-y-visible" style={{ backgroundColor: '#1a1a1a' }}>
+        <div className="sm:overflow-x-auto overflow-visible overflow-y-visible" style={{ backgroundColor: '#1a1a1a' }}>
           {eliminationsLoading ? (
             <div className="flex justify-center py-8">
               <div className="text-poker-muted">Cargando eliminaciones...</div>
@@ -146,39 +146,74 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
               <p className="text-poker-muted">No hay eliminaciones registradas para esta fecha</p>
             </div>
           ) : (
-            <table className="excel-table w-full min-w-[600px]" style={{ backgroundColor: 'white' }}>
-              <thead>
-                <tr>
-                  <th className="excel-header-gray" style={{color: '#000'}}>POS</th>
-                  <th className="excel-header" style={{color: '#000'}}>ENFERMO</th>
-                  <th className="excel-header" style={{color: '#000'}}>VACUNADO POR</th>
-                  <th className="excel-header excel-header-total" style={{color: '#000'}}>PUNTOS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {eliminations.map((elimination, index) => (
-                  <tr key={elimination.id} className={index % 2 === 1 ? 'bg-gray-50' : ''}>
-                    <td className="excel-cell excel-cell-gray text-center font-medium" style={{color: '#000'}}>
-                      {elimination.position}
-                    </td>
-                    <td className="excel-cell text-left" style={{color: '#000'}}>
-                      {getPlayerName(elimination.eliminatedPlayer)}
-                    </td>
-                    <td className="excel-cell text-left" style={{color: '#000'}}>
-                      {elimination.position === 1 
-                        ? '-'
-                        : elimination.eliminatorPlayer 
-                          ? getPlayerName(elimination.eliminatorPlayer) 
-                          : '-'
-                      }
-                    </td>
-                    <td className="excel-cell excel-cell-total text-center font-bold" style={{color: '#000'}}>
-                      {elimination.points}
-                    </td>
+            <>
+              <table className="excel-table w-full hidden sm:table sm:min-w-[600px]" style={{ backgroundColor: 'white' }}>
+                <thead>
+                  <tr>
+                    <th className="excel-header-gray" style={{color: '#000'}}>POS</th>
+                    <th className="excel-header" style={{color: '#000'}}>ENFERMO</th>
+                    <th className="excel-header" style={{color: '#000'}}>VACUNADO POR</th>
+                    <th className="excel-header excel-header-total" style={{color: '#000'}}>PUNTOS</th>
                   </tr>
+                </thead>
+                <tbody>
+                  {eliminations.map((elimination, index) => (
+                    <tr key={elimination.id} className={index % 2 === 1 ? 'bg-gray-50' : ''}>
+                      <td className="excel-cell excel-cell-gray text-center font-medium" style={{color: '#000'}}>
+                        {elimination.position}
+                      </td>
+                      <td className="excel-cell text-left" style={{color: '#000'}}>
+                        {getPlayerName(elimination.eliminatedPlayer)}
+                      </td>
+                      <td className="excel-cell text-left" style={{color: '#000'}}>
+                        {elimination.position === 1 
+                          ? '-'
+                          : elimination.eliminatorPlayer 
+                            ? getPlayerName(elimination.eliminatorPlayer) 
+                            : '-'
+                        }
+                      </td>
+                      <td className="excel-cell excel-cell-total text-center font-bold" style={{color: '#000'}}>
+                        {elimination.points}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="sm:hidden space-y-3 px-1">
+                {eliminations.map((elimination) => (
+                  <div
+                    key={elimination.id}
+                    className="rounded-lg border border-black/10 bg-white p-3 shadow-sm"
+                  >
+                    <div className="flex items-center justify-between text-xs font-semibold text-black/70">
+                      <span>Posición</span>
+                      <span className="text-base font-bold text-black">{elimination.position}</span>
+                    </div>
+                    <div className="mt-2">
+                      <p className="text-[11px] uppercase tracking-wide text-black/50">Enfermo</p>
+                      <p className="text-sm font-semibold text-black">{getPlayerName(elimination.eliminatedPlayer)}</p>
+                    </div>
+                    <div className="mt-2">
+                      <p className="text-[11px] uppercase tracking-wide text-black/50">Vacunado por</p>
+                      <p className="text-sm font-semibold text-black">
+                        {elimination.position === 1
+                          ? '-'
+                          : elimination.eliminatorPlayer
+                            ? getPlayerName(elimination.eliminatorPlayer)
+                            : '-'
+                        }
+                      </p>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <p className="text-[11px] uppercase tracking-wide text-black/50">Puntos</p>
+                      <p className="text-base font-bold text-poker-red">{elimination.points}</p>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
       )}

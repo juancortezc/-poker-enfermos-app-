@@ -118,11 +118,7 @@ export default function ResumenTable({ tournamentId }: ResumenTableProps) {
             return (
               <tr key={player.playerId} className={index % 2 === 1 ? 'bg-gray-50' : ''}>
                 <td className="excel-cell excel-cell-gray text-center font-medium" style={{color: '#000'}}>
-                  <span className={`position-badge ${
-                    player.position === 1 ? 'position-1st' : 
-                    player.position === 2 ? 'position-2nd' :
-                    player.position === 3 ? 'position-3rd' : ''
-                  }`}>
+                  <span className="text-sm font-semibold">
                     {player.position}
                   </span>
                 </td>

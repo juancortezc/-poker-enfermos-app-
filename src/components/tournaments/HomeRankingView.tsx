@@ -193,16 +193,33 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                     {player.position}
                   </div>
                   
-                  <div className="flex justify-between items-center pt-2 h-full">
-                    <div>
-                      <h4 className="font-semibold text-white text-xs">
-                        {firstName}
-                      </h4>
-                      {player.playerAlias && (
-                        <p className="text-orange-400 text-xs">
-                          ({player.playerAlias})
-                        </p>
+                  <div className="flex justify-between items-center gap-3 pt-2 h-full">
+                    <div className="flex items-center gap-3">
+                      {player.playerPhoto ? (
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-black/20">
+                          <Image
+                            src={player.playerPhoto}
+                            alt={player.playerName}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-md bg-white/10 flex items-center justify-center">
+                          <User className="w-7 h-7 text-white/50" />
+                        </div>
                       )}
+                      <div>
+                        <h4 className="font-semibold text-white text-xs">
+                          {firstName}
+                        </h4>
+                        {player.playerAlias && (
+                          <p className="text-orange-400 text-xs">
+                            ({player.playerAlias})
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex flex-col items-end">
                       <span className="text-orange-400 font-bold score-emphasis text-sm">{player.finalScore || player.totalPoints}</span>

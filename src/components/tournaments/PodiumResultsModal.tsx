@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Trophy, Medal, Award, User } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
@@ -52,13 +52,7 @@ export default function PodiumResultsModal({ isOpen, onClose, playerId }: Podium
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen && playerId) {
-      fetchPodiumDetails();
-    }
-  }, [isOpen, playerId, fetchPodiumDetails]);
-
-  const fetchPodiumDetails = async () => {
+  const fetchPodiumDetails = useCallback(async () => {
     if (!playerId) return;
 
     setLoading(true);
@@ -77,7 +71,13 @@ export default function PodiumResultsModal({ isOpen, onClose, playerId }: Podium
     } finally {
       setLoading(false);
     }
-  };
+  }, [playerId]);
+
+  useEffect(() => {
+    if (isOpen && playerId) {
+      fetchPodiumDetails();
+    }
+  }, [isOpen, playerId, fetchPodiumDetails]);
 
   const getPlayerName = (player: Player) => {
     return `${player.firstName} ${player.lastName}`;

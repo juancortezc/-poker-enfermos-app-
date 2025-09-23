@@ -109,7 +109,7 @@ export default function RankingPage() {
                 : 'text-poker-muted hover:text-white'
             }`}
           >
-            Resumen
+            Ultima
           </button>
           <button
             onClick={() => setActiveTab('total')}
@@ -129,7 +129,7 @@ export default function RankingPage() {
                 : 'text-poker-muted hover:text-white'
             }`}
           >
-            Fechas
+            Eliminaciones
           </button>
         </div>
 
