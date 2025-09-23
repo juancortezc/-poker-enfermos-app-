@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Play, Pause, Bell, BellOff } from 'lucide-react'
 import { canCRUD } from '@/lib/auth'
 import { formatTime } from '@/lib/timer-utils'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface TimerDisplayProps {
   gameDateId?: number
@@ -52,13 +53,9 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     if (!effectiveGameDateId || isControlling) return
     setIsControlling(true)
     try {
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch(`/api/timer/game-date/${effectiveGameDateId}/pause`, {
         method: 'POST',
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders({}, { includeJson: true })
       })
       if (response.ok) {
         refresh()
@@ -74,13 +71,9 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     if (!effectiveGameDateId || isControlling) return
     setIsControlling(true)
     try {
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch(`/api/timer/game-date/${effectiveGameDateId}/resume`, {
         method: 'POST',
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders({}, { includeJson: true })
       })
       if (response.ok) {
         refresh()

@@ -7,6 +7,7 @@ import { UserPlus, ChevronLeft, ChevronRight, Users, ExternalLink } from 'lucide
 import { UserRole } from '@prisma/client'
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
+import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -72,17 +73,13 @@ export default function GuestSelector({
     try {
       setLoading(true)
       
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      if (!pin) {
+      if (!getStoredAuthToken()) {
         setLoading(false)
         return
       }
       
       const response = await fetch(`/api/players/available-guests?tournamentId=${tournamentId}`, {
-        headers: {
-          'Authorization': `Bearer PIN:${pin}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
       
       if (response.ok) {

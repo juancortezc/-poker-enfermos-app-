@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { AuthUser } from '@/lib/auth'
+import { clearStoredAuthTokens } from '@/lib/client-auth'
 
 interface AuthContextType {
   user: AuthUser | null
@@ -83,8 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null)
     localStorage.removeItem('poker-user')
-    localStorage.removeItem('poker-pin')
-    localStorage.removeItem('poker-adminkey') // Clean legacy storage too
+    clearStoredAuthTokens()
   }
 
   return (

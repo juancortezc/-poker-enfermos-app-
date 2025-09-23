@@ -3,6 +3,7 @@ import { Plus, ChevronDown } from 'lucide-react'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNotifications } from '@/hooks/useNotifications'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -66,10 +67,7 @@ export function EliminationForm({
     try {
       const response = await fetch('/api/eliminations', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           gameDateId: gameDate.id,
           position: nextPosition,

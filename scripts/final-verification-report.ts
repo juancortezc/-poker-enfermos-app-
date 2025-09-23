@@ -38,7 +38,7 @@ async function generateFinalReport() {
 
   try {
     // Get current system state
-    const response = await fetch('http://localhost:3003/api/tournaments/1/ranking')
+    const response = await fetch('http://localhost:3000/api/tournaments/1/ranking')
     const apiData = await response.json()
     const systemPlayers = apiData.rankings
 

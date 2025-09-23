@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, Users, AlertTriangle } from 'lucide-react'
 import { toast } from 'react-toastify'
 import PlayerSelector from '@/components/game-dates/PlayerSelector'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface GameDate {
   id: number
@@ -56,10 +57,7 @@ export default function EditPlayersPage() {
       
       // Fetch game date details
       const gameDateResponse = await fetch(`/api/game-dates/${gameDateId}`, {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
       if (!gameDateResponse.ok) {
@@ -72,10 +70,7 @@ export default function EditPlayersPage() {
 
       // Fetch available players
       const playersResponse = await fetch('/api/game-dates/available-dates', {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
       if (playersResponse.ok) {
@@ -105,10 +100,7 @@ export default function EditPlayersPage() {
       
       const response = await fetch(`/api/game-dates/${gameDateId}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           action: 'update',
           playerIds: selectedPlayers,

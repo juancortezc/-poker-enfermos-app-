@@ -10,6 +10,7 @@ import { GameStatsCards } from '@/components/registro/GameStatsCards'
 import { EliminationForm } from '@/components/registro/EliminationForm'
 import { EliminationHistory } from '@/components/registro/EliminationHistory'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -69,13 +70,9 @@ export default function RegistroPage() {
     if (!activeGameDate) return
 
     try {
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch(`/api/game-dates/${activeGameDate.id}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json'
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({ action: 'start' })
       })
 
@@ -112,7 +109,7 @@ export default function RegistroPage() {
       setActiveGameDate(gameDateData)
 
       // Headers de autorización
-      const authHeaders = user?.adminKey ? { 'Authorization': `Bearer ${user.adminKey}` } : {}
+      const authHeaders = buildAuthHeaders()
 
       // Obtener jugadores, eliminaciones y timer en paralelo
       const [playersRes, eliminationsRes, timerRes] = await Promise.all([

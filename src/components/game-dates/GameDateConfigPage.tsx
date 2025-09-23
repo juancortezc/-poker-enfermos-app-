@@ -7,6 +7,7 @@ import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { Loader2, Play, UserPlus, Calendar } from 'lucide-react'
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
+import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -87,15 +88,15 @@ export default function GameDateConfigPage() {
   // Load initial data
   useEffect(() => {
     console.log('🚀 GameDateConfigPage useEffect triggered')
-    const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
+    const token = getStoredAuthToken()
     const userInfo = user ? { id: user.id, role: user.role } : 'null'
-    console.log('🔍 useEffect state:', { pin: pin?.substring(0, 4) + '***', user: userInfo })
-    
-    if (pin) {
-      console.log('✅ PIN found, calling loadInitialData')
+    console.log('🔍 useEffect state:', { token: token ? `${token.scheme}:****` : 'none', user: userInfo })
+
+    if (token) {
+      console.log('✅ Auth token found, calling loadInitialData')
       loadInitialData()
     } else {
-      console.log('❌ No PIN found, not loading data')
+      console.log('❌ No auth token found, not loading data')
     }
   }, [user])
 
@@ -106,10 +107,10 @@ export default function GameDateConfigPage() {
       setError('')
       
       // Check if there's an active game date already
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      console.log('🔑 PIN for auth:', pin ? pin.substring(0, 4) + '***' : 'NO PIN FOUND')
-      
-      if (!pin) {
+      const token = getStoredAuthToken()
+      console.log('🔑 Auth token for requests:', token ? `${token.scheme}:****` : 'NO TOKEN FOUND')
+
+      if (!token) {
         console.error('❌ No PIN found in localStorage')
         setError('No se encontró autenticación. Redirigiendo al login...')
         setTimeout(() => {
@@ -117,12 +118,11 @@ export default function GameDateConfigPage() {
         }, 1500)
         return
       }
-      
+
+      const authHeaders = buildAuthHeaders()
+
       const activeResponse = await fetch('/api/game-dates/active', {
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json'
-        }
+        headers: authHeaders
       })
       
       console.log('📡 Active game date response:', activeResponse.status)
@@ -144,10 +144,7 @@ export default function GameDateConfigPage() {
       // Load available dates and players
       console.log('🎯 Fetching available dates...')
       const availableResponse = await fetch('/api/game-dates/available-dates', {
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json'
-        }
+        headers: authHeaders
       })
       
       console.log('📡 Available dates response:', availableResponse.status)

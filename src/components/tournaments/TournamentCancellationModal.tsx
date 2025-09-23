@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { X, AlertTriangle, Loader2 } from 'lucide-react'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Tournament {
   id: number
@@ -45,10 +46,7 @@ export default function TournamentCancellationModal({
       setLoading(true)
       const response = await fetch(`/api/tournaments/${tournament.id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders({}, { includeJson: true })
       })
 
       if (response.ok) {

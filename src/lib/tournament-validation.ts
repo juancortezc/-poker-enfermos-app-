@@ -20,7 +20,7 @@ interface ValidationResult {
 export const validateTournamentNumber = async (
   number: number, 
   excludeId?: string,
-  adminKey?: string
+  authHeader?: string
 ): Promise<ValidationError | null> => {
   if (!number || number < 1) {
     return {
@@ -38,12 +38,12 @@ export const validateTournamentNumber = async (
     }
   }
 
-  // Verificar si ya existe (solo si tenemos adminKey)
-  if (adminKey) {
+  // Verificar si ya existe (solo si tenemos credenciales)
+  if (authHeader) {
     try {
       const response = await fetch('/api/tournaments', {
         headers: {
-          'Authorization': `Bearer ${adminKey}`,
+          'Authorization': authHeader,
           'Content-Type': 'application/json'
         }
       })

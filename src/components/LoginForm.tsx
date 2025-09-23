@@ -9,7 +9,7 @@ import { KeyRound, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 
 export default function LoginForm() {
-  const [adminKey, setAdminKey] = useState('')
+  const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { login } = useAuth()
@@ -19,10 +19,16 @@ export default function LoginForm() {
     setLoading(true)
     setError('')
 
-    const success = await login(adminKey)
+    if (!/^\d{4}$/.test(pin)) {
+      setError('El PIN debe tener exactamente 4 dígitos')
+      setLoading(false)
+      return
+    }
+
+    const success = await login(pin)
     
     if (!success) {
-      setError('Clave de acceso inválida')
+      setError('PIN inválido')
     }
     
     setLoading(false)
@@ -55,7 +61,7 @@ export default function LoginForm() {
               Poker Enfermos
             </h1>
             <p className="text-poker-muted text-sm">
-              Ingresa tu clave de acceso para continuar
+              Ingresa tu PIN de acceso para continuar
             </p>
           </div>
 
@@ -66,10 +72,12 @@ export default function LoginForm() {
                 <KeyRound className="h-5 w-5 text-poker-muted" />
               </div>
               <Input
-                type="text"
-                placeholder="Clave de acceso"
-                value={adminKey}
-                onChange={(e) => setAdminKey(e.target.value)}
+                type="password"
+                inputMode="numeric"
+                pattern="\d{4}"
+                placeholder="Ingresa tu PIN (4 dígitos)"
+                value={pin}
+                onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
                 disabled={loading}
                 className="w-full pl-10 h-12 bg-poker-dark/50 border-poker-red/30 text-poker-text placeholder:text-poker-muted focus:border-poker-red focus:ring-poker-red/30 transition-smooth"
                 autoComplete="off"
@@ -86,7 +94,7 @@ export default function LoginForm() {
             {/* Botón */}
             <Button
               type="submit"
-              disabled={loading || !adminKey}
+              disabled={loading || pin.length !== 4}
               className="w-full h-12 btn-enhanced text-white font-semibold disabled:opacity-50"
             >
               {loading ? (

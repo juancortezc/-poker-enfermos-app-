@@ -48,7 +48,7 @@ async function getAllWinners(tournamentId: number = 1) {
     });
 
     const winners: WinnerInfo[] = [];
-    let totalWinnings: { [playerId: string]: { count: number; name: string; alias: string; dates: number[] } } = {};
+    const totalWinnings: { [playerId: string]: { count: number; name: string; alias: string; dates: number[] } } = {};
 
     console.log('📅 GANADORES POR FECHA:\n');
 

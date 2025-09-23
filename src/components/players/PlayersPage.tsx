@@ -7,6 +7,7 @@ import { canCRUD } from '@/lib/auth'
 import { UserRole } from '@prisma/client'
 import PlayerList from './PlayerList'
 import PlayerForm from './PlayerForm'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -105,12 +106,8 @@ export default function PlayersPage() {
   const fetchPlayers = async () => {
     try {
       setLoading(true)
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch('/api/players?includeInactive=false', {
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
       if (response.ok) {
         const data = await response.json()

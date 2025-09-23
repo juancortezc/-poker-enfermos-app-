@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { X, Calendar, CheckCircle, Loader2 } from 'lucide-react'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Tournament {
   id: number
@@ -45,10 +46,7 @@ export default function TournamentCompletionModal({
       setLoading(true)
       const response = await fetch(`/api/tournaments/${tournament.id}/complete`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           action: 'modify_date',
           endDate: newEndDate.toISOString()
@@ -81,10 +79,7 @@ export default function TournamentCompletionModal({
       setLoading(true)
       const response = await fetch(`/api/tournaments/${tournament.id}/complete`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           action: 'complete_tournament'
         })

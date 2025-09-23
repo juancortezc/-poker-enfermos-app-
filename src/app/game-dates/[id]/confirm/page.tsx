@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Play, Calendar, Users, Trophy, Clock, Target, Edit } from 'lucide-react'
 import { toast } from 'react-toastify'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface GameDate {
   id: number
@@ -43,10 +44,7 @@ export default function GameDateConfirmPage() {
     try {
       setLoading(true)
       const response = await fetch(`/api/game-dates/${gameDateId}`, {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
       if (response.ok) {
@@ -73,10 +71,7 @@ export default function GameDateConfirmPage() {
       setStarting(true)
       const response = await fetch(`/api/game-dates/${gameDateId}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({ action: 'start' })
       })
 

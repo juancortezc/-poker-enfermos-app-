@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save, Loader2, Plus, X, ChevronDown, ChevronUp } from 'lucide-react'
 import Image from 'next/image'
+import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -91,24 +92,14 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
     try {
       setLoading(true)
-      
-      // Get auth token from localStorage
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      }
-      
-      // Use PIN if available, otherwise fall back to adminKey
-      if (pin) {
-        headers['Authorization'] = `Bearer PIN:${pin}`
-      } else if (adminKey) {
-        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+
+      if (!getStoredAuthToken()) {
+        setLoading(false)
+        return
       }
 
       const response = await fetch(`/api/players/${playerId}`, {
-        headers
+        headers: buildAuthHeaders()
       })
 
       if (response.ok) {
@@ -188,24 +179,9 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
       const url = isEditing ? `/api/players/${playerId}` : '/api/players'
       const method = isEditing ? 'PUT' : 'POST'
 
-      // Get auth token from localStorage
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      }
-      
-      // Use PIN if available, otherwise fall back to adminKey
-      if (pin) {
-        headers['Authorization'] = `Bearer PIN:${pin}`
-      } else if (adminKey) {
-        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
-      }
-
       const response = await fetch(url, {
         method,
-        headers,
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify(submitData)
       })
 

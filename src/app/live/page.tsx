@@ -9,10 +9,12 @@ import { LiveTimerDisplay } from '@/components/live/LiveTimerDisplay'
 import { LiveStats } from '@/components/live/LiveStats'
 import { ActivePlayersTable } from '@/components/live/ActivePlayersTable'
 import { RecentEliminationsTable } from '@/components/live/RecentEliminationsTable'
+import { UserRole } from '@prisma/client'
 
 export default function LivePage() {
   const router = useRouter()
-  const { user, hasPermission, isComision } = useAuth()
+  const { user } = useAuth()
+  const isComision = user?.role === UserRole.Comision
   const [isLoading, setIsLoading] = useState(true)
 
   // Obtener fecha activa
@@ -36,12 +38,6 @@ export default function LivePage() {
       return
     }
 
-    // Verificar permisos para acceder a LIVE
-    if (!hasPermission('canAccessLive')) {
-      router.push('/')
-      return
-    }
-
     // Redireccionar usuarios Comision a registro si hay fecha activa
     if (isComision && activeGameDate) {
       router.push('/registro')
@@ -49,7 +45,7 @@ export default function LivePage() {
     }
 
     setIsLoading(false)
-  }, [user, hasPermission, isComision, activeGameDate, router])
+  }, [user, isComision, activeGameDate, router])
 
   // Loading inicial
   if (isLoading || isLoadingGameDate) {

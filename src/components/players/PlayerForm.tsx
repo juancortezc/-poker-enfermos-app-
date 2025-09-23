@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { X, Save, Loader2, Plus, Minus } from 'lucide-react'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -111,12 +112,8 @@ export default function PlayerForm({
 
   const fetchEnfermos = async () => {
     try {
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch('/api/players?role=Enfermo', {
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
       if (response.ok) {
         const data = await response.json()
@@ -165,13 +162,9 @@ export default function PlayerForm({
       const url = player ? `/api/players/${player.id}` : '/api/players'
       const method = player ? 'PUT' : 'POST'
 
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
       const response = await fetch(url, {
         method,
-        headers: {
-          'Authorization': pin ? `Bearer PIN:${pin}` : '',
-          'Content-Type': 'application/json',
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify(submitData)
       })
 

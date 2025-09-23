@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Edit2, Check, X } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Player {
   id: string
@@ -61,10 +62,7 @@ export function EliminationHistory({
     try {
       const response = await fetch(`/api/eliminations/${eliminationId}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           eliminatedPlayerId: editForm.eliminatedPlayerId,
           eliminatorPlayerId: editForm.eliminatorPlayerId || null

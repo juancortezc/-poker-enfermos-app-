@@ -7,6 +7,7 @@ import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
+import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 export default function TournamentStartPage() {
   const { user } = useAuth()
@@ -27,7 +28,7 @@ export default function TournamentStartPage() {
 
   // Fetch next tournament number on mount
   useEffect(() => {
-    if (user?.adminKey) {
+    if (user && getStoredAuthToken()) {
       fetchNextTournamentNumber()
     }
   }, [user])
@@ -36,10 +37,7 @@ export default function TournamentStartPage() {
     try {
       setLoading(true)
       const response = await fetch('/api/tournaments/next-number', {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
       if (response.ok) {

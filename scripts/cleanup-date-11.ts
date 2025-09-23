@@ -39,7 +39,7 @@ async function cleanupDate11() {
 
     // Use transaction to ensure data consistency
     const result = await prisma.$transaction(async (tx) => {
-      let cleanupSummary = {
+      const cleanupSummary = {
         timerStatesDeleted: 0,
         eliminationsDeleted: 0,
         gameResultsDeleted: 0,

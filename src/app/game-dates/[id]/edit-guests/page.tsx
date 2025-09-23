@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Save, UserPlus, AlertTriangle } from 'lucide-react'
 import { toast } from 'react-toastify'
 import GuestSelector from '@/components/game-dates/GuestSelector'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface GameDate {
   id: number
@@ -47,10 +48,7 @@ export default function EditGuestsPage() {
       
       // Fetch game date details
       const response = await fetch(`/api/game-dates/${gameDateId}`, {
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        }
+        headers: buildAuthHeaders()
       })
 
       if (!response.ok) {
@@ -89,10 +87,7 @@ export default function EditGuestsPage() {
       
       const response = await fetch(`/api/game-dates/${gameDateId}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${user?.adminKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           action: 'update',
           playerIds: allPlayerIds,
