@@ -1,948 +1,485 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
+/* ============================================
+   TAILWIND v4 THEME INLINE CONFIGURATION
+   ============================================ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Paleta de Colores Consolidada - Poker Enfermos */
+  --color-poker-red-500: #E50914;
+  --color-poker-dark-950: #1B1B1B;
+  --color-poker-dark-900: #2A2A2A;
+  --color-poker-dark-800: #3B3B3B;
+  --color-poker-gold-500: #FFD700;
+  --color-poker-blue-500: #1E90FF;
+  --color-poker-orange-500: #FF8C00;
+  --color-poker-silver-500: #C0C0C0;
+  --color-poker-bronze-500: #CD7F32;
   
-  /* Colores personalizados Poker */
-  --color-poker-dark: var(--poker-dark);
-  --color-poker-card: var(--poker-card);
-  --color-poker-red: var(--poker-red);
-  --color-poker-cyan: var(--poker-cyan);
-  --color-poker-green: var(--poker-green);
-  --color-poker-text: var(--poker-text);
-  --color-poker-muted: var(--poker-muted);
-}
-
-:root {
+  /* Semantic Design Tokens */
+  --color-primary: var(--color-poker-red-500);
+  --color-secondary: var(--color-poker-orange-500);
+  --color-accent: var(--color-poker-blue-500);
+  --color-background: var(--color-poker-dark-950);
+  --color-surface: var(--color-poker-dark-900);
+  --color-surface-elevated: var(--color-poker-dark-800);
+  --color-text-primary: rgba(255, 255, 255, 0.95);
+  --color-text-secondary: rgba(255, 255, 255, 0.75);
+  --color-text-muted: rgba(255, 255, 255, 0.5);
+  
+  /* Typography Tokens */
+  --font-family-sans: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-weight-normal: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
+  
+  /* Border Radius System */
   --radius: 0.625rem;
-  
-  /* Colores personalizados Poker - Tema Oscuro por defecto */
-  --poker-dark: #1A1A1A; /* Fondo principal gris oscuro */
-  --poker-card: #242424; /* Cards elevadas */
-  --poker-red: #E10600; /* Rojo F1 - acento principal */
-  --poker-cyan: #00D2BE; /* Cyan - actualizaciones en vivo */
-  --poker-green: #16a34a; /* Verde poker tradicional */
-  --poker-text: rgba(255, 255, 255, 0.9); /* Texto al 90% opacidad */
-  --poker-muted: rgba(255, 255, 255, 0.6); /* Texto secundario */
-  
-  /* Enhanced color palette for visual depth */
-  --poker-dark-lighter: #2A2A2A; /* Slightly lighter dark for subtle contrast */
-  --poker-card-lighter: #2F2F2F; /* Lighter card for hover states */
-  --poker-red-light: #FF1100; /* Brighter red for highlights */
-  --poker-red-dark: #B30500; /* Darker red for depth */
-  --poker-gold: #FFD700; /* Gold for winners and important elements */
-  --poker-gold-light: #FFF4A3; /* Light gold for subtle accents */
-  --poker-silver: #C0C0C0; /* Silver for second place */
-  --poker-bronze: #CD7F32; /* Bronze for third place */
-  --poker-success: #22c55e; /* Success green (slightly brighter) */
-  --poker-warning: #f59e0b; /* Warning amber */
-  --poker-info: #06b6d4; /* Info cyan (different from accent) */
-  
-  /* Mapeo a sistema de colores */
-  --background: #1A1A1A;
-  --foreground: rgba(255, 255, 255, 0.9);
-  --card: #242424;
-  --card-foreground: rgba(255, 255, 255, 0.9);
-  --popover: #242424;
-  --popover-foreground: rgba(255, 255, 255, 0.9);
-  --primary: #E10600;
-  --primary-foreground: #FFFFFF;
-  --secondary: #16a34a;
-  --secondary-foreground: #FFFFFF;
-  --muted: #333333;
-  --muted-foreground: rgba(255, 255, 255, 0.6);
-  --accent: #00D2BE;
-  --accent-foreground: #1A1A1A;
-  --destructive: #DC2626;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.15);
-  --ring: #E10600;
-  
-  /* Charts */
-  --chart-1: #E10600;
-  --chart-2: #00D2BE;
-  --chart-3: #16a34a;
-  --chart-4: #FFC107;
-  --chart-5: #9333EA;
-  
-  /* Sidebar */
-  --sidebar: #242424;
-  --sidebar-foreground: rgba(255, 255, 255, 0.9);
-  --sidebar-primary: #E10600;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #00D2BE;
-  --sidebar-accent-foreground: #1A1A1A;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #E10600;
+  --radius-sm: 0.375rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
 }
 
-/* Modo claro - opcional */
-.light {
-  --background: #F5F5F5;
-  --foreground: #1A1A1A;
-  --card: #FFFFFF;
-  --card-foreground: #1A1A1A;
-  --popover: #FFFFFF;
-  --popover-foreground: #1A1A1A;
-  --primary: #E10600;
-  --primary-foreground: #FFFFFF;
-  --secondary: #16a34a;
-  --secondary-foreground: #FFFFFF;
-  --muted: #F0F0F0;
-  --muted-foreground: #666666;
-  --accent: #00D2BE;
-  --accent-foreground: #FFFFFF;
-  --destructive: #DC2626;
-  --border: #E5E5E5;
-  --input: #E5E5E5;
-  --ring: #E10600;
-}
-
+/* ============================================
+   LAYER: BASE - Reset y Estilos Fundamentales
+   ============================================ */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-size: 16px;
-    line-height: 1.6;
+  /* Reset Global */
+  *,
+  *::before,
+  *::after {
+    border-color: rgba(255, 255, 255, 0.1);
   }
   
-  /* Tamaños mínimos para accesibilidad */
+  /* Body Principal - Fondo Mesa de Póker */
+  body {
+    background: radial-gradient(ellipse at center, #2A2A2A 0%, #1B1B1B 70%, #0A0A0A 100%);
+    color: rgba(255, 255, 255, 0.95);
+    font-family: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 18px; /* Base 18px para +50 años */
+    line-height: 1.6;
+    font-weight: 600; /* Sans-serif bold por defecto */
+    min-height: 100vh;
+  }
+  
+  /* Sistema de Tipografía - Tamaños Grandes */
+  h1, h2, h3, h4, h5, h6 {
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+  }
+  
+  h1 { font-size: 2.25rem; } /* 36px */
+  h2 { font-size: 1.875rem; } /* 30px */
+  h3 { font-size: 1.5rem; } /* 24px */
+  h4 { font-size: 1.25rem; } /* 20px */
+  h5 { font-size: 1.125rem; } /* 18px */
+  h6 { font-size: 1rem; } /* 16px */
+  
+  p, span, div {
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.6;
+    font-weight: 600;
+  }
+  
+  /* Accesibilidad - Tamaños Mínimos de Touch */
   button, 
   .button,
-  [role="button"] {
+  [role="button"],
+  a[href] {
     min-height: 48px;
+    min-width: 48px;
     touch-action: manipulation;
   }
   
-  /* Efectos de presión para todos los botones */
-  button:active, 
-  .button:active,
-  [role="button"]:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease-in-out;
-  }
-  
-  /* Efectos hover mejorados */
-  button:hover:not(:disabled), 
-  .button:hover:not(:disabled),
-  [role="button"]:hover:not(:disabled) {
-    transform: translateY(-1px);
-    transition: transform 0.2s ease-in-out;
-  }
-  
-  /* Estado deshabilitado */
-  button:disabled,
-  .button:disabled,
-  [role="button"]:disabled {
-    transform: none;
-    cursor: not-allowed;
-  }
-  
-  /* Enhanced Typography System */
-  h1, h2, h3, h4, h5, h6 {
-    @apply text-poker-text;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-  }
-  
-  h1 { font-size: 2.25rem; }
-  h2 { font-size: 1.875rem; }
-  h3 { font-size: 1.5rem; }
-  h4 { font-size: 1.25rem; }
-  h5 { font-size: 1.125rem; }
-  h6 { font-size: 1rem; }
-  
-  p, span {
-    @apply text-poker-text/90;
-    line-height: 1.6;
-  }
-  
-  /* Enhanced readability for small text */
-  .text-xs, .text-sm {
-    letter-spacing: 0.025em;
-  }
-  
-  /* Cards elevadas con sombra sutil */
-  .card-elevated {
-    @apply bg-poker-card shadow-lg shadow-black/20;
-  }
-  
-  /* Enhanced Dashboard Card Styles */
-  .dashboard-card {
-    background: linear-gradient(135deg, var(--poker-card) 0%, var(--poker-dark-lighter) 100%);
-    border: 2px solid var(--poker-red);
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.4),
-      0 2px 4px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .dashboard-card:hover:not(.disabled) {
-    background: linear-gradient(135deg, var(--poker-card-lighter) 0%, var(--poker-card) 100%);
-    border-color: var(--poker-red-light);
-    box-shadow: 
-      0 8px 24px rgba(0, 0, 0, 0.5),
-      0 4px 12px rgba(225, 6, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px) scale(1.02);
-  }
-  
-  .dashboard-card:active:not(.disabled) {
-    transform: translateY(0) scale(1);
-    transition: transform 0.1s ease-in-out;
-  }
-  
-  .dashboard-card.disabled {
-    background: linear-gradient(135deg, rgba(36, 36, 36, 0.5) 0%, rgba(26, 26, 26, 0.8) 100%);
-    border-color: #4a4a4a;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
-    opacity: 0.6;
-  }
-  
-  /* Enhanced Icon Containers */
-  .icon-container {
-    background: linear-gradient(135deg, rgba(115, 115, 115, 0.2) 0%, rgba(64, 64, 64, 0.4) 100%);
-    border-radius: 0.75rem;
-    box-shadow: 
-      inset 0 1px 2px rgba(255, 255, 255, 0.08),
-      inset 0 -1px 2px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s ease-in-out;
-  }
-  
-  .icon-container:hover {
-    background: linear-gradient(135deg, rgba(128, 128, 128, 0.25) 0%, rgba(80, 80, 80, 0.45) 100%);
-    transform: scale(1.05);
-  }
-}
-
-/* Animaciones personalizadas */
-@layer utilities {
-  /* Entrada escalonada */
-  .animate-enter {
-    animation: enter 0.3s ease-out;
-  }
-  
-  .animate-stagger {
-    animation: enter 0.3s ease-out;
-    animation-fill-mode: backwards;
-  }
-  
-  .animate-stagger-1 { animation-delay: 50ms; }
-  .animate-stagger-2 { animation-delay: 100ms; }
-  .animate-stagger-3 { animation-delay: 150ms; }
-  .animate-stagger-4 { animation-delay: 200ms; }
-  
-  /* Enhanced Visual Hierarchy Utilities */
-  .score-emphasis {
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.025em;
-  }
-  
-  .position-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 2rem;
-    height: 1.5rem;
-    border-radius: 0.375rem;
-    font-weight: 700;
-    font-size: 0.75rem;
-    line-height: 1;
-  }
-  
-  .position-1st {
-    background: linear-gradient(135deg, var(--poker-gold) 0%, #FFC107 100%);
-    color: #1a1a1a;
-    box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
-  }
-  
-  .position-2nd {
-    background: linear-gradient(135deg, var(--poker-silver) 0%, #A0A0A0 100%);
-    color: #1a1a1a;
-    box-shadow: 0 2px 4px rgba(192, 192, 192, 0.3);
-  }
-  
-  .position-3rd {
-    background: linear-gradient(135deg, var(--poker-bronze) 0%, #B8860B 100%);
-    color: white;
-    box-shadow: 0 2px 4px rgba(205, 127, 50, 0.3);
-  }
-  
-  /* Button Enhancements */
-  .btn-enhanced {
-    background: linear-gradient(135deg, var(--poker-red) 0%, var(--poker-red-dark) 100%);
-    border: 1px solid var(--poker-red-light);
-    box-shadow: 
-      0 2px 8px rgba(225, 6, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .btn-enhanced:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--poker-red-light) 0%, var(--poker-red) 100%);
-    box-shadow: 
-      0 4px 16px rgba(225, 6, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    transform: translateY(-1px);
-  }
-  
-  .btn-enhanced:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 
-      0 2px 4px rgba(225, 6, 0, 0.2),
-      inset 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Enhanced Focus States for Accessibility */
-  .btn-enhanced:focus-visible {
-    outline: 2px solid var(--poker-red-light);
-    outline-offset: 2px;
-    box-shadow: 
-      0 0 0 4px rgba(225, 6, 0, 0.3),
-      0 4px 16px rgba(225, 6, 0, 0.3);
-  }
-  
-  /* Tooltip fixes for Champions tab and other overflow issues */
-  .tournament-results-container {
-    overflow: visible !important;
-  }
-  
-  .champions-tooltip {
-    z-index: 9999 !important;
-    position: fixed !important;
-  }
-  
-  /* Ensure parent containers don't clip tooltips */
-  .group:hover {
-    overflow: visible !important;
-  }
-  
-  /* Modern Admin Buttons - Elegant & Minimalist */
-  .btn-admin-primary {
-    background: linear-gradient(135deg, #E10600 0%, #ff6b00 50%, #ffa500 100%);
-    border: none;
-    border-radius: 14px;
-    padding: 14px 28px;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 0.05em;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-      0 6px 20px rgba(225, 6, 0, 0.4),
-      0 3px 8px rgba(0, 0, 0, 0.2),
-      inset 0 -2px 0 rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden;
-    text-transform: uppercase;
-  }
-  
-  .btn-admin-primary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
-  
-  .btn-admin-primary:hover {
-    background: linear-gradient(135deg, #ff1100 0%, #ff8c00 50%, #ffb700 100%);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 25px rgba(255, 107, 0, 0.5),
-      0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .btn-admin-primary:hover::before {
-    left: 100%;
-  }
-  
-  .btn-admin-primary:active {
-    transform: translateY(0);
-    transition: transform 0.1s;
-  }
-  
-  .btn-admin-secondary {
-    background: linear-gradient(135deg, #d35400 0%, #e67e22 50%, #f39c12 100%);
-    border: 1px solid transparent;
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.025em;
-    color: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-      0 4px 14px rgba(211, 84, 0, 0.3),
-      0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn-admin-secondary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
-  
-  .btn-admin-secondary:hover {
-    background: linear-gradient(135deg, #e74c3c 0%, #ff8c00 50%, #ffc107 100%);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 25px rgba(230, 126, 34, 0.4),
-      0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .btn-admin-secondary:hover::before {
-    left: 100%;
-  }
-  
-  .btn-admin-secondary:active {
-    transform: translateY(0);
-    transition: transform 0.1s;
-  }
-  
-  .btn-admin-success {
-    background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 50%, #ffc107 100%);
-    border: 1px solid transparent;
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.025em;
-    color: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-      0 4px 14px rgba(255, 140, 0, 0.3),
-      0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn-admin-success::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
-  
-  .btn-admin-success:hover {
-    background: linear-gradient(135deg, #ff8c00 0%, #ffa500 50%, #ffd700 100%);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 25px rgba(255, 193, 7, 0.4),
-      0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .btn-admin-success:hover::before {
-    left: 100%;
-  }
-  
-  .btn-admin-success:active {
-    transform: translateY(0);
-    transition: transform 0.1s;
-  }
-  
-  .btn-admin-neutral {
-    background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.025em;
-    color: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 
-      0 4px 14px rgba(99, 110, 114, 0.25),
-      0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn-admin-neutral::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.5s;
-  }
-  
-  .btn-admin-neutral:hover {
-    background: linear-gradient(135deg, #8b4513 0%, #cd853f 50%, #daa520 100%);
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 25px rgba(205, 133, 63, 0.35),
-      0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .btn-admin-neutral:hover::before {
-    left: 100%;
-  }
-  
-  .btn-admin-neutral:active {
-    transform: translateY(0);
-    transition: transform 0.1s;
-  }
-  
-  .btn-admin-outline {
-    background: transparent;
-    border: 2px solid #ddd;
-    border-radius: 12px;
-    padding: 10px 22px;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.025em;
-    color: #ddd;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn-admin-outline::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 50%, #ffa500 100%);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s ease;
-    z-index: -1;
-  }
-  
-  .btn-admin-outline:hover {
-    color: white;
-    border-color: #ff8c00;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(255, 140, 0, 0.25);
-  }
-  
-  .btn-admin-outline:hover::before {
-    transform: scaleX(1);
-  }
-  
-  .btn-admin-outline:active {
-    transform: translateY(0);
-    transition: transform 0.1s;
-  }
-  
-  /* Small variants */
-  .btn-admin-sm {
-    padding: 8px 16px;
-    font-size: 12px;
-    border-radius: 10px;
-  }
-  
-  /* Large variants */
-  .btn-admin-lg {
-    padding: 16px 32px;
-    font-size: 16px;
-    border-radius: 14px;
-  }
-  
-  /* Disabled state */
-  .btn-admin-disabled {
-    background: #555 !important;
-    color: #999 !important;
-    cursor: not-allowed !important;
-    transform: none !important;
-    box-shadow: none !important;
-    pointer-events: none;
-  }
-  
-  /* Modern Admin Cards - Elegant & Clean */
-  .admin-card {
-    background: var(--poker-card);
-    backdrop-filter: blur(10px);
-    border: 2px solid transparent;
-    border-radius: 20px;
-    background-clip: padding-box;
-    position: relative;
-    box-shadow: 
-      0 10px 40px rgba(0, 0, 0, 0.4),
-      0 2px 10px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .admin-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: var(--poker-red);
-    z-index: -1;
-    margin: -2px;
-    border-radius: 20px;
-    opacity: 0;
-    transition: opacity 0.4s;
-  }
-  
-  .admin-card:hover::before {
-    opacity: 1;
-  }
-  
-  .admin-card:hover {
-    background: var(--poker-card);
-    box-shadow: 
-      0 20px 60px rgba(0, 0, 0, 0.5),
-      0 10px 20px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    transform: translateY(-4px) scale(1.02);
-  }
-  
-  .admin-card-highlight {
-    background: linear-gradient(145deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
-    border: 1px solid rgba(255, 140, 0, 0.2);
-    box-shadow: 
-      0 8px 32px rgba(255, 140, 0, 0.15),
-      0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  
-  .admin-card-success {
-    background: linear-gradient(145deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
-    border: 1px solid rgba(255, 193, 7, 0.2);
-    box-shadow: 
-      0 8px 32px rgba(255, 193, 7, 0.15),
-      0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  
-  .admin-card-error {
-    background: linear-gradient(145deg, rgba(225, 6, 0, 0.1) 0%, rgba(255, 107, 107, 0.05) 100%);
-    border: 1px solid rgba(225, 6, 0, 0.2);
-    box-shadow: 
-      0 8px 32px rgba(225, 6, 0, 0.15),
-      0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  
-  .dashboard-card:focus-visible {
-    outline: 2px solid var(--poker-red-light);
-    outline-offset: 2px;
-    box-shadow: 
-      0 0 0 4px rgba(225, 6, 0, 0.3),
-      0 8px 24px rgba(0, 0, 0, 0.5);
-  }
-  
-  /* Enhanced Input Focus */
+  /* Estados de Focus Mejorados */
+  button:focus-visible,
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: 2px solid var(--poker-red);
+    outline: 2px solid var(--color-poker-red-500);
     outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(225, 6, 0, 0.2);
+    box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.3);
   }
-  
-  @keyframes enter {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* Pulso para actualizaciones en vivo */
-  .animate-live-pulse {
-    animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  
-  @keyframes live-pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.7;
-      transform: scale(1.05);
-    }
-  }
-  
-  /* Indicador de actualización */
-  .live-indicator::before {
-    content: '';
-    @apply absolute -top-1 -right-1 w-3 h-3 bg-poker-cyan rounded-full;
-    animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-  }
-  
-  @keyframes ping {
-    75%, 100% {
-      transform: scale(2);
-      opacity: 0;
-    }
-  }
-  
-  /* Transiciones suaves */
-  .transition-smooth {
-    @apply transition-all duration-200 ease-in-out;
-  }
-  
-  /* Estilos para tabla Excel */
-  .excel-table {
-    border-collapse: collapse;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Arial', sans-serif;
-    font-size: 14px;
-  }
+}
 
-  .excel-table th,
-  .excel-table td {
-    border: 1px solid #000;
-    padding: 6px 9px;
-  }
-
-  .excel-table .excel-header,
-  .excel-header {
-    background: linear-gradient(135deg, #FFD700 0%, #FFC107 50%, #FFB300 100%) !important;
-    color: #000 !important;
+/* ============================================
+   LAYER: COMPONENTS - Componentes Reutilizables
+   ============================================ */
+@layer components {
+  /* Botón Principal Poker */
+  .btn-poker {
+    background: linear-gradient(135deg, #E50914 0%, #B30500 50%, #822727 100%);
+    color: white;
     font-weight: 700;
-    text-align: center;
-    font-size: 12px;
-    letter-spacing: 0.8px;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
-    border: 1px solid #E6C200 !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.6), 0 0 40px rgba(229, 9, 20, 0.4);
+    transform: scale(1);
+    transition: all 0.3s ease-out;
+    min-height: 48px;
   }
-
-  .excel-table .excel-header span,
-  .excel-header span {
-    color: #000 !important;
+  
+  .btn-poker:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(229, 9, 20, 0.8), 0 0 50px rgba(229, 9, 20, 0.6);
   }
-
-  .excel-table .excel-header-gray,
-  .excel-header-gray {
-    background: linear-gradient(135deg, #F0F0F0 0%, #E0E0E0 50%, #D0D0D0 100%) !important;
-    color: #333 !important;
+  
+  .btn-poker:active {
+    transform: scale(0.95);
+  }
+  
+  /* Card Base - Mesa de Póker */
+  .card-poker {
+    background: linear-gradient(145deg, #2A2A2A 0%, #1B1B1B 50%, #171717 100%);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-poker:hover {
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.4);
+    transform: scale(1.02);
+    border-color: rgba(229, 9, 20, 0.3);
+  }
+  
+  /* Posiciones - Top 3 con Glow */
+  .position-1st {
+    background: linear-gradient(135deg, #FFD700 0%, #FFC107 30%, #FFB300 70%, #FF8F00 100%);
+    color: black;
+    font-weight: 900;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .position-2nd {
+    background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 30%, #A8A8A8 70%, #909090 100%);
+    color: black;
+    font-weight: 900;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 20px rgba(192, 192, 192, 0.6), 0 0 40px rgba(192, 192, 192, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .position-3rd {
+    background: linear-gradient(135deg, #CD7F32 0%, #B8860B 30%, #A0522D 70%, #8B4513 100%);
+    color: white;
+    font-weight: 900;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.6), 0 0 40px rgba(205, 127, 50, 0.4);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Input Base */
+  .input-poker {
+    background: #2A2A2A;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.95);
+    min-height: 48px;
+    font-size: 16px; /* Evita zoom en iOS */
+    font-weight: 600;
+  }
+  
+  .input-poker::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .input-poker:focus {
+    border-color: #E50914;
+    box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.3);
+    outline: none;
+  }
+  
+  /* Dashboard Cards con Efectos 3D */
+  .dashboard-card {
+    background: linear-gradient(145deg, #2A2A2A 0%, #1B1B1B 50%, #171717 100%);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 2px solid rgba(229, 9, 20, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .dashboard-card:hover {
+    transform: scale(1.02);
+    border-color: rgba(229, 9, 20, 0.6);
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  
+  .dashboard-card:hover::before {
+    opacity: 1;
+  }
+  
+  /* Cards para últimas posiciones con borde rosa */
+  .card-last-position {
+    border: 2px solid #ec4899 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(236, 72, 153, 0.3);
+  }
+  
+  .card-last-position:hover {
+    border-color: #db2777 !important;
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 30px rgba(236, 72, 153, 0.5);
+  }
+  
+  /* Asegurar que círculos de posición siempre estén al frente */
+  .position-1st,
+  .position-2nd, 
+  .position-3rd {
+    z-index: 60 !important;
+    position: relative;
+  }
+  
+  /* Círculos de posición para todas las posiciones */
+  .dashboard-card {
+    overflow: visible !important;
+  }
+  
+  /* Grid containers deben permitir overflow */
+  .grid {
+    overflow: visible !important;
+  }
+  
+  /* Tabla Excel para Móvil */
+  .table-excel {
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  .table-excel th,
+  .table-excel td {
+    border: 1px solid black;
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+  }
+  
+  .table-excel th {
+    background: linear-gradient(135deg, #FFD700 0%, #FFC107 30%, #FFB300 70%, #FF8F00 100%);
+    color: black;
     font-weight: 700;
     text-align: center;
     font-size: 12px;
     letter-spacing: 0.5px;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
-    border: 1px solid #C0C0C0 !important;
   }
-
-  .excel-table .excel-header-gray span,
-  .excel-header-gray span {
-    color: #000 !important;
-  }
-
-  .excel-table .excel-header-total,
-  .excel-header-total {
-    background-color: #FFD700 !important;
-    color: #000 !important;
-  }
-
-  .excel-table .excel-header-total span,
-  .excel-header-total span {
-    color: #000 !important;
-  }
-
-  .excel-table .excel-cell,
-  .excel-cell {
-    background-color: white !important;
-    color: #000 !important;
+  
+  .table-excel td {
+    background: white;
+    color: black;
     font-size: 13px;
-    line-height: 1.4;
   }
-
-  .excel-table .excel-cell span,
-  .excel-cell span {
-    color: #000 !important;
-  }
-
-  .excel-table .excel-cell-gray,
-  .excel-cell-gray {
-    background-color: #F0F0F0 !important;
-    color: #000 !important;
-  }
-
-  .excel-table .excel-cell-total,
-  .excel-cell-total {
-    background: linear-gradient(135deg, #F0F8FF 0%, #E6F3FF 50%, #D4E8FF 100%) !important;
-    color: #1a365d !important;
-    font-weight: 600;
-    border: 1px solid #B3D9FF !important;
-  }
-
+  
+  /* Mobile Optimizations */
   @media (max-width: 640px) {
-    .excel-table {
+    .table-excel {
       font-size: 10px;
     }
     
-    .excel-header {
-      font-size: 10px;
-      padding: 2px 3px;
-      letter-spacing: 0;
-      line-height: 1.3;
-      color: #000 !important;
-    }
-
-    .excel-header-gray {
-      font-size: 10px;
-      padding: 2px 3px;
-      line-height: 1.3;
-      color: #000 !important;
+    .table-excel th,
+    .table-excel td {
+      padding: 0.25rem 0.375rem;
     }
     
-    .excel-table .excel-cell,
-    .excel-cell {
-      font-size: 10px;
-      padding: 2px 3px;
-      line-height: 1.3;
-      color: #000 !important;
-    }
-    
-    .excel-table .excel-cell span,
-    .excel-cell span {
-      color: #000 !important;
-      font-size: 10px;
+    .dashboard-card {
+      padding: 1rem;
     }
   }
+}
 
-  /* Estilos específicos para TotalTable con scroll horizontal */
-  .total-table-container {
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
+/* ============================================
+   LAYER: UTILITIES - Utilidades Específicas
+   ============================================ */
+@layer utilities {
+  /* Efectos de Glow para Elementos Importantes */
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);
+  }
+  
+  .glow-silver {
+    box-shadow: 0 0 20px rgba(192, 192, 192, 0.6), 0 0 40px rgba(192, 192, 192, 0.4);
+  }
+  
+  .glow-bronze {
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.6), 0 0 40px rgba(205, 127, 50, 0.4);
+  }
+  
+  .glow-red {
+    box-shadow: 0 0 20px rgba(229, 9, 20, 0.6), 0 0 40px rgba(229, 9, 20, 0.4);
+  }
+  
+  /* Animaciones de Entrada */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+  
+  /* Efectos de Presión para Botones */
+  .btn-press {
+    transition: transform 0.1s ease;
+  }
+  
+  .btn-press:active {
+    transform: scale(0.95);
+  }
+  
+  /* Text Shadows para Mejor Legibilidad */
+  .text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  .text-shadow-strong {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  
+  /* Estados de Loading */
+  .loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  
+  /* Scrollbar Customizado */
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(229, 9, 20, 0.6) rgba(42, 42, 42, 0.3);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* iOS smooth scroll */
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: rgba(42, 42, 42, 0.3);
     border-radius: 4px;
   }
-
-  .total-table {
-    min-width: 100%;
-    white-space: nowrap;
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: rgba(229, 9, 20, 0.6);
+    border-radius: 4px;
+    border: 1px solid rgba(42, 42, 42, 0.5);
   }
-
-  .sticky-col {
-    position: sticky;
-    left: 0;
-    z-index: 10;
-    background-color: inherit !important;
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: rgba(229, 9, 20, 0.8);
   }
-
-  .date-header {
-    min-width: 50px;
-    width: 50px;
-    text-align: center;
+  
+  .scrollbar-custom::-webkit-scrollbar-corner {
+    background: rgba(42, 42, 42, 0.3);
   }
+}
 
-  .date-cell {
-    min-width: 50px;
-    width: 50px;
-    text-align: center;
+/* ============================================
+   ANIMACIONES KEYFRAMES
+   ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-
-  /* Media query para orientación landscape en móvil */
-  @media screen and (orientation: landscape) and (max-height: 500px) {
-    .total-table-container {
-      max-height: calc(100vh - 120px);
-      overflow-y: auto;
-    }
-    
-    .total-table {
-      font-size: 11px;
-    }
-    
-    .total-table th,
-    .total-table td {
-      padding: 3px 4px;
-      line-height: 1.2;
-    }
-    
-    .date-header,
-    .date-cell {
-      min-width: 45px;
-      width: 45px;
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  /* Mejoras para scroll horizontal en móvil */
-  @media (max-width: 640px) {
-    .total-table-container {
-      border-left: 1px solid #000;
-      border-right: 1px solid #000;
-    }
-    
-    .total-table {
-      font-size: 10px;
-    }
-    
-    .date-header,
-    .date-cell {
-      min-width: 40px;
-      width: 40px;
-      font-size: 9px;
-    }
-    
-    .sticky-col {
-      min-width: 80px;
-      max-width: 80px;
-    }
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
   }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ============================================
+   MEDIA QUERIES - RESPONSIVE OPTIMIZATIONS
+   ============================================ */
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1023px) {
+  body {
+    font-size: 16px;
+  }
+  
+  .dashboard-card {
+    @apply p-5;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .dashboard-card:hover {
+    @apply shadow-2xl scale-105;
+  }
+  
+  .btn-poker:hover {
+    @apply shadow-2xl;
+  }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2) {
+  .text-shadow {
+    text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Landscape Mobile */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .dashboard-card {
+    @apply p-3;
+  }
+  
+  button {
+    min-height: 40px;
+  }
 }

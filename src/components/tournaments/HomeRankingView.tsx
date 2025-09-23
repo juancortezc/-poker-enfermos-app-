@@ -80,7 +80,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
   const lastTwo = rankings.slice(-2);
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-visible">
       {/* Título compacto */}
       <div className="text-center mb-4">
         <h1 className="text-2xl font-bold text-white mb-1">Torneo #{rankingData.tournament.number}</h1>
@@ -108,10 +108,10 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                   className="relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
                   onClick={() => openPlayerModal(player.playerId)}
                 >
-                  {/* Círculo de posición */}
+                  {/* Círculo de posición mejorado */}
                   <div className={`
-                    absolute -top-2 -left-2 w-8 h-8 rounded-full 
-                    flex items-center justify-center font-bold text-sm z-10
+                    absolute -top-2 -left-2 w-9 h-9 rounded-full 
+                    flex items-center justify-center font-bold text-sm z-50 shadow-lg
                     ${isFirst 
                       ? 'position-1st' 
                       : isSecond 
@@ -175,21 +175,21 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
         </div>
       </div>
 
-      {/* Posiciones 4+ en cards */}
+      {/* Posiciones 4+ en cards - Grid 2 columnas */}
       {middle.length > 0 && (
-        <div className="mb-4">
-          <div className="grid grid-cols-3 gap-2 px-2">
+        <div className="mb-4 overflow-visible">
+          <div className="grid grid-cols-2 gap-3 max-w-md mx-auto px-2 overflow-visible">
             {middle.map((player) => {
               const firstName = player.playerName.split(' ')[0];
               
               return (
                 <div
                   key={player.playerId}
-                  className="relative dashboard-card rounded-lg p-2 cursor-pointer"
+                  className="relative dashboard-card rounded-lg p-3 cursor-pointer overflow-visible"
                   onClick={() => openPlayerModal(player.playerId)}
                 >
-                  {/* Círculo de posición */}
-                  <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs border border-white/20 shadow-md">
+                  {/* Círculo de posición mejorado */}
+                  <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs border-2 border-gray-600 shadow-lg z-50">
                     {player.position}
                   </div>
                   
@@ -229,11 +229,11 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                   className="relative flex flex-col items-center"
                 >
                   <div 
-                    className="relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
+                    className="relative dashboard-card card-last-position rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
                     onClick={() => openPlayerModal(player.playerId)}
                   >
-                    {/* Círculo de posición rosa */}
-                    <div className="absolute -top-2 -left-2 w-8 h-8 rounded-full bg-pink-500 text-white flex items-center justify-center font-bold text-sm border-2 border-pink-400 z-10">
+                    {/* Círculo de posición rosa mejorado */}
+                    <div className="absolute -top-2 -left-2 w-9 h-9 rounded-full bg-pink-500 text-white flex items-center justify-center font-bold text-sm border-2 border-pink-400 z-50 shadow-lg">
                       {player.position}
                     </div>
 

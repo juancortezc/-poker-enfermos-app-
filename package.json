@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
+    "build:css": "tailwindcss -o ./src/app/globals.css --minify",
+    "build:prod": "NODE_ENV=production npm run build:css && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "analyze": "npm run build && npx @next/bundle-analyzer"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

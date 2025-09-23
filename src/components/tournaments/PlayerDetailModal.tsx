@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePlayerTournamentDetails } from '@/hooks/usePlayerTournamentDetails';
 import RankingEvolutionChart from './RankingEvolutionChart';
+import useSWR from 'swr';
 
 interface PlayerDetailModalProps {
   isOpen: boolean;
@@ -24,6 +25,17 @@ export default function PlayerDetailModal({
     isOpen ? tournamentId : 0
   );
 
+  // Obtener estadísticas de campeonatos
+  const { data: championStats } = useSWR(
+    isOpen ? '/api/tournaments/champions-stats' : null,
+    (url) => fetch(url).then(res => res.json())
+  );
+
+  // Calcular campeonatos del jugador actual
+  const playerChampionships = championStats?.data?.all?.find(
+    (champion: any) => champion.player?.id === playerId
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -32,14 +44,14 @@ export default function PlayerDetailModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center p-2 sm:p-4 pt-4 sm:pt-8 overflow-hidden"
         onClick={onClose}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="dashboard-card rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+          className="bg-poker-table border-2 border-poker-red rounded-xl w-full max-w-6xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto scrollbar-custom"
           onClick={(e) => e.stopPropagation()}
         >
           {loading || !details ? (
@@ -51,13 +63,16 @@ export default function PlayerDetailModal({
               )}
             </div>
           ) : (
-            <div className="p-6">
+            <div className="p-4 sm:p-6 lg:p-8">
               {/* Header with close button */}
               <div className="flex justify-between items-start mb-6">
                 <h2 className="text-xl font-bold text-white">Detalles del Jugador</h2>
                 <button
-                  onClick={onClose}
-                  className="text-gray-400 hover:text-white transition-smooth p-2 hover:bg-white/10 rounded-lg"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -65,7 +80,7 @@ export default function PlayerDetailModal({
 
               {/* Player Header Section */}
               <div className="text-center mb-8">
-                <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden dashboard-card p-2">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full overflow-hidden card-poker p-2">
                   {details.player.photoUrl ? (
                     <Image
                       src={details.player.photoUrl}
@@ -90,6 +105,17 @@ export default function PlayerDetailModal({
                     ({details.player.aliases.join(', ')})
                   </p>
                 )}
+
+                {/* Campeonatos Ganados */}
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <Crown className="w-6 h-6 text-poker-gold" />
+                  <span className="text-poker-gold font-bold text-xl">
+                    {playerChampionships?.championshipsCount > 0 
+                      ? `${playerChampionships.championshipsCount} Campeonato${playerChampionships.championshipsCount > 1 ? 's' : ''}`
+                      : 'Sin títulos'
+                    }
+                  </span>
+                </div>
                 
                 {/* Días sin ganar */}
                 <div className="mb-4">
@@ -105,10 +131,10 @@ export default function PlayerDetailModal({
                       <div className="flex flex-col items-center">
                         <span className={`
                           text-3xl font-bold
-                          ${daysWithoutVictory > 100 ? 'text-red-400' : 
-                            daysWithoutVictory > 60 ? 'text-orange-400' : 
-                            daysWithoutVictory > 30 ? 'text-yellow-400' : 
-                            'text-green-400'}
+                          ${daysWithoutVictory > 100 ? 'text-poker-red' : 
+                            daysWithoutVictory > 60 ? 'text-poker-orange' : 
+                            daysWithoutVictory > 30 ? 'text-poker-gold' : 
+                            'text-poker-orange'}
                         `}>
                           {daysWithoutVictory}
                         </span>
@@ -157,7 +183,7 @@ export default function PlayerDetailModal({
                   <Crown className="w-5 h-5 text-poker-red" />
                   Performance por Fecha
                 </h4>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
                   {Array.from({ length: 12 }, (_, i) => {
                     const dateNumber = i + 1;
                     const date = details.datePerformance.find(d => d.dateNumber === dateNumber);
