@@ -38,6 +38,14 @@ Usuario → Experiencia → Lógica → Implementación → Testing → Refinami
 El sistema ha sido migrado exitosamente y ahora cuenta con un diseño completamente renovado siguiendo el Enfermos Design System, optimizado para dispositivos móviles.
 
 **Últimas actualizaciones (2025-09-23):**
+- 📊 **EXCEL TABLE STYLING RESTAURADO**: CSS completo restaurado para las 3 tablas principales del sistema
+- ✅ **TotalTable.tsx**: Tabla de ranking completa con diseño Excel profesional
+- ✅ **ResumenTable.tsx**: Tabla resumen con estilo Excel consistente
+- ✅ **FechasTable.tsx**: Tabla de eliminaciones por fecha con diseño Excel
+- ✅ **Headers Dorados**: Gradientes gold/yellow con bordes y sombras profesionales
+- ✅ **Sticky Columns**: Columnas de posición y jugador fijas durante scroll horizontal
+- ✅ **Mobile Responsive**: Optimización completa para dispositivos móviles
+- ✅ **Clases CSS Completas**: `.excel-table`, `.excel-header`, `.excel-cell`, `.sticky-col` restauradas
 - 🏆 **SECCIÓN DE RESULTADOS COMPLETA**: Nueva sección histórica con 3 tabs interactivos
 - ✅ **Campeonatos Tab**: Cards elegantes con fotos de campeones y info del torneo
 - ✅ **Campeones Tab**: Estadísticas de campeones con tooltips de torneos ganados
@@ -1159,6 +1167,11 @@ Las siguientes APIs se actualizan automáticamente:
 - **React Hooks Fixed**: Dependencias corregidas para evitar stale closures
 - **API Type Improvements**: Mejor tipado en routes y respuestas
 - **Production Ready**: Código listo para deploy sin warnings críticos
+
+### Commit pendiente - Ajustes UI Admin (2025-09-23)
+- **Dashboard sin Timer duplicado**: se remueve la tarjeta de Timer del menú admin para evitar redundancia.
+- **Tabs Estándar**: se unifican los estados activos en rojo institucional (e invitados en rosa) en listados de torneos, enfermos y panel de fechas.
+- **Panel de Fecha Mejorado**: cards de selección muestran estados preseleccionados con colores consistentes y la tarjeta de fecha activa destaca en negro.
 
 ### Commit ddb120f + af91111 - Sección de Resultados Históricos Completa (2025-09-23)
 - **🏆 SECCIÓN DE RESULTADOS COMPLETA**: Nueva sección histórica con 3 tabs interactivos

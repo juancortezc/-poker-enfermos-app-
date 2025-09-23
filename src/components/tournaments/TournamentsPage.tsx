@@ -141,7 +141,7 @@ export default function TournamentsPage() {
             onClick={() => setActiveTab('activos')}
             className={`px-6 py-3 font-semibold rounded-l-lg border border-r-0 transition-colors ${
               activeTab === 'activos'
-                ? 'bg-poker-red text-white border-poker-red'
+                ? 'bg-red-600 text-white border-red-600'
                 : 'bg-black text-gray-300 border-white/10 hover:text-white'
             }`}
           >
@@ -151,7 +151,7 @@ export default function TournamentsPage() {
             onClick={() => setActiveTab('finalizados')}
             className={`px-6 py-3 font-semibold rounded-r-lg border border-l-0 -ml-px transition-colors ${
               activeTab === 'finalizados'
-                ? 'bg-poker-red text-white border-poker-red'
+                ? 'bg-red-600 text-white border-red-600'
                 : 'bg-black text-gray-300 border-white/10 hover:text-white'
             }`}
           >

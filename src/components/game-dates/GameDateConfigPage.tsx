@@ -481,7 +481,7 @@ export default function GameDateConfigPage() {
               onClick={() => setActiveTab('enfermos')}
               className={`p-2 rounded-lg border-2 text-center transition-all ${
                 activeTab === 'enfermos'
-                  ? 'bg-poker-red border-poker-red text-white'
+                  ? 'bg-red-600 border-red-600 text-white'
                   : 'bg-poker-card border-white/10 text-poker-text hover:border-white/20'
               }`}
             >
@@ -494,7 +494,7 @@ export default function GameDateConfigPage() {
               onClick={() => setActiveTab('invitados')}
               className={`p-2 rounded-lg border-2 text-center transition-all ${
                 activeTab === 'invitados'
-                  ? 'bg-pink-600 border-pink-600 text-white'
+                  ? 'bg-pink-500 border-pink-500 text-white'
                   : 'bg-poker-card border-white/10 text-poker-text hover:border-white/20'
               }`}
             >
@@ -503,13 +503,13 @@ export default function GameDateConfigPage() {
             </button>
 
             {/* Date Display */}
-            <div className="p-2 bg-poker-card border border-white/10 rounded-lg text-center relative cursor-pointer hover:border-white/20 transition-all">
+            <div className={`p-2 rounded-lg border-2 text-center relative cursor-pointer transition-all ${selectedDateId ? 'bg-black text-white border-white/30' : 'bg-poker-card border-white/10 text-poker-text hover:border-white/20'}`}>
               {selectedDate && (
                 <>
-                  <div className="text-xs text-poker-muted">
+                  <div className={`text-xs ${selectedDateId ? 'text-white/70' : 'text-poker-muted'}`}>
                     {selectedDate.toLocaleDateString('es-ES', { month: 'long' })}
                   </div>
-                  <div className="text-lg font-bold">
+                  <div className={`text-lg font-bold ${selectedDateId ? 'text-white' : 'text-white'}`}>
                     {selectedDate.getDate()}
                   </div>
                 </>
@@ -549,8 +549,8 @@ export default function GameDateConfigPage() {
                     className={`p-3 rounded-lg border transition-all text-left ${
                       isSelected
                         ? activeTab === 'invitados' 
-                          ? 'bg-pink-600 border-pink-600 text-white'
-                          : 'bg-poker-red border-poker-red text-white'
+                          ? 'bg-pink-500 border-pink-500 text-white'
+                          : 'bg-red-600 border-red-600 text-white'
                         : 'bg-poker-dark/50 border-white/10 text-poker-text hover:border-white/20'
                     }`}
                   >
@@ -567,7 +567,7 @@ export default function GameDateConfigPage() {
               <div className="mt-4 pt-4 border-t border-white/10">
                 <Button
                   onClick={handleCreateGuest}
-                  className="w-full bg-pink-600 hover:bg-pink-700 text-white"
+                  className="w-full bg-pink-500 hover:bg-pink-600 text-white"
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
                   CREAR

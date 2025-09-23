@@ -12,7 +12,6 @@ import {
   Trophy,
   Users,
   FileSpreadsheet,
-  Timer,
   Award
 } from 'lucide-react'
 
@@ -25,7 +24,6 @@ const iconMap = {
   tournaments: Trophy,
   players: Users,
   import: FileSpreadsheet,
-  timer: Timer,
 }
 
 export default function AdminLimitedDashboard() {

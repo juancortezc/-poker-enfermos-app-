@@ -14,7 +14,6 @@ export type FeaturePermission =
   | 'tournaments'        // Gestión de torneos
   | 'players'            // Gestión de jugadores
   | 'import'             // Importación de datos
-  | 'timer-control'      // Control del timer
   | 'eliminations'       // Registro de eliminaciones
 
 /**
@@ -35,7 +34,6 @@ const PERMISSIONS_MAP: Record<FeaturePermission, UserRole[]> = {
   'tournaments': ['Comision'],
   'players': ['Comision'],
   'import': ['Comision'],
-  'timer-control': ['Comision'],
   'eliminations': ['Comision'],
 }
 
@@ -126,13 +124,6 @@ export function getDashboardFeatures(userRole: UserRole) {
       href: '/admin/import',
       accessible: canAccess(userRole, 'import'),
       restricted: !canAccess(userRole, 'import')
-    },
-    {
-      id: 'timer',
-      title: 'TIMER',
-      href: '/timer',
-      accessible: canAccess(userRole, 'timer-control'),
-      restricted: !canAccess(userRole, 'timer-control')
     }
   ]
 
@@ -184,7 +175,6 @@ export function getRestrictionMessage(userRole: UserRole, feature: FeaturePermis
     case 'tournaments':
     case 'players':
     case 'import':
-    case 'timer-control':
     case 'eliminations':
       return 'Solo disponible para Comisión'
     default:
