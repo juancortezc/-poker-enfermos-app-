@@ -348,6 +348,21 @@
       0 4px 16px rgba(225, 6, 0, 0.3);
   }
   
+  /* Tooltip fixes for Champions tab and other overflow issues */
+  .tournament-results-container {
+    overflow: visible !important;
+  }
+  
+  .champions-tooltip {
+    z-index: 9999 !important;
+    position: fixed !important;
+  }
+  
+  /* Ensure parent containers don't clip tooltips */
+  .group:hover {
+    overflow: visible !important;
+  }
+  
   /* Modern Admin Buttons - Elegant & Minimalist */
   .btn-admin-primary {
     background: linear-gradient(135deg, #E10600 0%, #ff6b00 50%, #ffa500 100%);

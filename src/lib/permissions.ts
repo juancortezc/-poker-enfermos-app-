@@ -83,6 +83,13 @@ export function getDashboardFeatures(userRole: UserRole) {
       restricted: false
     },
     {
+      id: 'resultados',
+      title: 'RESULTADOS',
+      href: '/admin/resultados',
+      accessible: true, // Accesible para todos los usuarios
+      restricted: false
+    },
+    {
       id: 'stats',
       title: 'STATS',
       href: '/admin/stats',

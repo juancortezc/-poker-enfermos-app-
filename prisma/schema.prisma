@@ -80,6 +80,13 @@ model Player {
   parentStats       ParentChildStats[] @relation("ParentStats")
   childStats        ParentChildStats[] @relation("ChildStats")
   
+  // Relaciones para ganadores históricos
+  championWins     TournamentWinners[] @relation("Champion")
+  runnerUpWins     TournamentWinners[] @relation("RunnerUp")
+  thirdPlaceWins   TournamentWinners[] @relation("ThirdPlace")
+  sietePositions   TournamentWinners[] @relation("Siete")      // PENÚLTIMO
+  dosPositions     TournamentWinners[] @relation("Dos")        // ÚLTIMO
+  
   // Relación para invitados
   inviter           Player?  @relation("PlayerInviter", fields: [inviterId], references: [id])
   invitees          Player[] @relation("PlayerInviter")
@@ -253,4 +260,23 @@ model ParentChildStats {
   
   @@unique([tournamentId, parentPlayerId, childPlayerId])
   @@map("parent_child_stats")
+}
+
+model TournamentWinners {
+  id               Int      @id @default(autoincrement())
+  tournamentNumber Int      @map("tournament_number") @unique
+  championId       String   @map("champion_id")
+  runnerUpId       String   @map("runner_up_id") 
+  thirdPlaceId     String   @map("third_place_id")
+  sieteId          String   @map("siete_id")        // PENÚLTIMO lugar
+  dosId            String   @map("dos_id")          // ÚLTIMO lugar
+  createdAt        DateTime @default(now()) @map("created_at")
+  
+  champion     Player @relation("Champion", fields: [championId], references: [id])
+  runnerUp     Player @relation("RunnerUp", fields: [runnerUpId], references: [id])
+  thirdPlace   Player @relation("ThirdPlace", fields: [thirdPlaceId], references: [id])
+  siete        Player @relation("Siete", fields: [sieteId], references: [id])      // PENÚLTIMO
+  dos          Player @relation("Dos", fields: [dosId], references: [id])          // ÚLTIMO
+  
+  @@map("tournament_winners")
 }

@@ -12,12 +12,14 @@ import {
   Trophy,
   Users,
   FileSpreadsheet,
-  Timer
+  Timer,
+  Award
 } from 'lucide-react'
 
 const iconMap = {
   calendar: CalendarDays,
   regulations: FileText,
+  resultados: Award,
   stats: BarChart3,
   'game-dates': Calendar,
   tournaments: Trophy,
