@@ -147,7 +147,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                   )}
 
                   {/* Contenido sobre la foto */}
-                  <div className="relative flex flex-col items-center justify-end h-full pb-2">
+                  <div className="relative flex flex-col items-center justify-end h-full pb-8">
                     {/* Si no hay foto, mostrar icono */}
                     {!player.playerPhoto && (
                       <div className="mb-auto mt-4">
@@ -160,12 +160,20 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                       {player.playerName.split(' ')[0]}
                     </h3>
                   </div>
+
+                  {/* Puntaje final destacado sobre el borde inferior */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50">
+                    <div className="bg-black/75 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 shadow-lg">
+                      <span className="text-orange-400 font-black text-xl sm:text-2xl leading-none tracking-tight">
+                        {player.finalScore ?? player.totalPoints}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 
                 {/* Puntos bajo la foto, alineados a la derecha */}
                 <div className="text-right mt-1">
                   <div className="flex flex-col items-end">
-                    <span className="text-orange-400 font-bold score-emphasis text-sm">{player.finalScore || player.totalPoints}</span>
                     <span className="text-poker-gold font-semibold text-xs">{player.totalPoints}</span>
                   </div>
                 </div>
@@ -271,7 +279,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                     )}
 
                     {/* Contenido sobre la foto */}
-                    <div className="relative flex flex-col items-center justify-end h-full pb-2">
+                    <div className="relative flex flex-col items-center justify-end h-full pb-8">
                       {/* Si no hay foto, mostrar icono */}
                       {!player.playerPhoto && (
                         <div className="mb-auto mt-4">
@@ -284,12 +292,20 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                         {firstName}
                       </h3>
                     </div>
+
+                    {/* Puntaje final destacado sobre el borde inferior */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50">
+                      <div className="bg-black/75 backdrop-blur-sm border border-pink-400/40 rounded-full px-4 py-1.5 shadow-lg">
+                        <span className="text-pink-400 font-black text-xl sm:text-2xl leading-none tracking-tight">
+                          {player.finalScore ?? player.totalPoints}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Puntos bajo la foto, alineados a la derecha */}
                   <div className="text-right mt-1">
                     <div className="flex flex-col items-end text-sm">
-                      <span className="text-orange-400 font-bold">{player.finalScore || player.totalPoints}</span>
                       <span className="text-poker-gold font-bold">{player.totalPoints}</span>
                     </div>
                   </div>
