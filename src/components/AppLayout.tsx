@@ -85,10 +85,10 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark pb-20">
+    <div className="min-h-screen bg-poker-dark">
       {/* Header */}
-      <header className="bg-poker-card shadow-lg border-b border-white/10 sticky top-0 z-40">
-        <div className={`${needsFullWidth ? 'container mx-auto max-w-none' : 'max-w-md mx-auto'} p-4`}>
+      <header className="bg-poker-card shadow-lg border-b border-white/10 sticky top-0 z-60 relative before:absolute before:inset-0 before:bg-black/80 before:content-[''] before:backdrop-blur-sm">
+        <div className={`${needsFullWidth ? 'container mx-auto max-w-none' : 'max-w-md mx-auto'} p-4 relative z-10`}>
           <div className="flex justify-between items-center">
             {/* Logo y usuario */}
             <div className="flex items-center space-x-3">
@@ -147,7 +147,7 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
                   </Button>
                   
                   {showDropdown && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-poker-card border border-white/10 rounded-lg shadow-lg z-50">
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-poker-card border border-white/10 rounded-lg shadow-lg z-dropdown">
                       <div className="py-1">
                         <button
                           onClick={() => handlePlayerTypeSelect('invitado')}
@@ -174,7 +174,9 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
       </header>
 
       {/* Contenido principal */}
-      <main className={`${needsFullWidth ? 'container mx-auto max-w-none px-4' : 'max-w-md mx-auto p-4'}`}>
+      <main
+        className={`${needsFullWidth ? 'container mx-auto max-w-none px-4' : 'max-w-md mx-auto px-4'} pt-6 pb-28`}
+      >
         <div className="animate-enter">
           {children}
         </div>

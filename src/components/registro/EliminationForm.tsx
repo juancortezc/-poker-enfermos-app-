@@ -54,8 +54,16 @@ export function EliminationForm({
   // Calcular puntos para la posición actual
   const points = calculatePointsForPosition(nextPosition, players.length)
 
+  // Identificar ganador automático cuando solo quedan dos jugadores
+  const autoWinner = useMemo(() => {
+    if (nextPosition !== 2 || !eliminatedPlayerId) return null
+    return activePlayers.find(player => player.id !== eliminatedPlayerId) || null
+  }, [nextPosition, eliminatedPlayerId, activePlayers])
+
   // Validar si el formulario está completo
-  const isValid = eliminatedPlayerId && (nextPosition === 2 || eliminatorPlayerId)
+  const isValid = Boolean(
+    eliminatedPlayerId && (nextPosition === 2 ? autoWinner : eliminatorPlayerId)
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,6 +73,14 @@ export function EliminationForm({
     setError(null)
 
     try {
+      const eliminatorIdForRequest = nextPosition === 2
+        ? autoWinner?.id || null
+        : eliminatorPlayerId
+
+      if (nextPosition === 2 && !eliminatorIdForRequest) {
+        throw new Error('No se pudo identificar al ganador automáticamente')
+      }
+
       const response = await fetch('/api/eliminations', {
         method: 'POST',
         headers: buildAuthHeaders({}, { includeJson: true }),
@@ -72,7 +88,7 @@ export function EliminationForm({
           gameDateId: gameDate.id,
           position: nextPosition,
           eliminatedPlayerId,
-          eliminatorPlayerId: nextPosition === 2 ? null : eliminatorPlayerId
+          eliminatorPlayerId: eliminatorIdForRequest
         })
       })
 
@@ -83,7 +99,11 @@ export function EliminationForm({
 
       // Obtener información del jugador eliminado para notificaciones
       const eliminatedPlayer = players.find(p => p.id === eliminatedPlayerId)
-      const eliminatorPlayer = eliminatorPlayerId ? players.find(p => p.id === eliminatorPlayerId) : null
+      const eliminatorPlayer = nextPosition === 2
+        ? autoWinner
+        : eliminatorPlayerId
+          ? players.find(p => p.id === eliminatorPlayerId)
+          : null
 
       // Enviar notificaciones según el tipo de eliminación
       if (nextPosition === 1) {
@@ -172,8 +192,10 @@ export function EliminationForm({
             </label>
             <div className="relative">
               {nextPosition === 2 ? (
-                <div className="w-full bg-poker-dark/50 border border-white/10 rounded-lg px-3 py-2 text-poker-muted text-sm">
-                  Auto-ganador
+                <div className="w-full bg-poker-dark/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80">
+                  {autoWinner
+                    ? `${autoWinner.firstName} ${autoWinner.lastName}`
+                    : 'Selecciona primero al jugador eliminado'}
                 </div>
               ) : (
                 <>

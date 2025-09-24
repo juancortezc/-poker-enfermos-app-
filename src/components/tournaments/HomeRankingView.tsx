@@ -79,6 +79,11 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
   const middle = rankings.slice(3, -2);
   const lastTwo = rankings.slice(-2);
 
+  const firstPlace = topThree.find((player) => player?.position === 1) || null;
+  const podiumBase = topThree
+    .filter((player) => player && player.position !== 1)
+    .sort((a, b) => (a?.position || 0) - (b?.position || 0));
+
   return (
     <div className="w-full overflow-visible">
       {/* Título compacto */}
@@ -90,96 +95,137 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
       </div>
 
       {/* Podio - Top 3 */}
-      <div className="mb-4">
-        <div className="flex justify-center items-center gap-2 sm:gap-3">
-          {topThree.map((player) => {
-            if (!player) return null;
-            
-            const isFirst = player.position === 1;
-            const isSecond = player.position === 2;
-            
-            return (
+      <div className="mb-6">
+        {/* Ganador centrado */}
+        {firstPlace && (
+          <div className="flex justify-center mb-6">
+            <div className="relative flex flex-col items-center">
               <div
-                key={player.playerId}
-                className="relative flex flex-col items-center"
+                className="relative dashboard-card podium-border-gold rounded-lg p-3 w-28 sm:w-32 h-36 sm:h-40 cursor-pointer"
+                onClick={() => openPlayerModal(firstPlace.playerId)}
               >
-                {/* Card del podio */}
-                <div
-                  className="relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
-                  onClick={() => openPlayerModal(player.playerId)}
-                >
-                  {/* Círculo de posición mejorado */}
-                  <div className={`
-                    absolute -top-2 -left-2 w-9 h-9 rounded-full 
-                    flex items-center justify-center font-bold text-sm z-50 shadow-lg
-                    ${isFirst 
-                      ? 'position-1st' 
-                      : isSecond 
-                      ? 'position-2nd' 
-                      : 'position-3rd'
-                    }
-                  `}>
-                    {player.position}
-                  </div>
+                <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm z-50 shadow-lg position-1st">
+                  {firstPlace.position}
+                </div>
 
-                  {/* Foto como fondo del card */}
-                  {player.playerPhoto ? (
-                    <div className="absolute inset-0 rounded-lg overflow-hidden">
-                      <Image
-                        src={player.playerPhoto}
-                        alt={player.playerName}
-                        width={144}
-                        height={176}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                {firstPlace.playerPhoto ? (
+                  <div className="absolute inset-0 rounded-lg overflow-hidden">
+                    <Image
+                      src={firstPlace.playerPhoto}
+                      alt={firstPlace.playerName}
+                      width={160}
+                      height={192}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20" />
+                )}
+
+                <div className="relative flex flex-col items-center justify-end h-full pb-10">
+                  {!firstPlace.playerPhoto && (
+                    <div className="mb-auto mt-4">
+                      <User className="w-14 sm:w-16 h-14 sm:h-16 text-white/50" />
                     </div>
-                  ) : (
-                    <div className={`
-                      absolute inset-0 rounded-lg
-                      ${isFirst 
-                        ? 'bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20' 
-                        : isSecond 
-                        ? 'bg-gradient-to-br from-gray-600/40 via-gray-500/30 to-gray-400/20' 
-                        : 'bg-gradient-to-br from-orange-900/40 via-orange-700/30 to-orange-500/20'
-                      }
-                    `} />
                   )}
 
-                  {/* Contenido sobre la foto */}
-                  <div className="relative flex flex-col items-center justify-end h-full pb-8">
-                    {/* Si no hay foto, mostrar icono */}
-                    {!player.playerPhoto && (
-                      <div className="mb-auto mt-4">
-                        <User className="w-12 sm:w-16 h-12 sm:h-16 text-white/50" />
-                      </div>
-                    )}
-
-                    {/* Nombre en la base */}
-                    <h3 className="text-white font-bold text-xs sm:text-sm text-center drop-shadow-lg">
-                      {player.playerName.split(' ')[0]}
-                    </h3>
-                  </div>
-
-                  {/* Puntaje final destacado sobre el borde inferior */}
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50">
-                    <div className="bg-black/75 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 shadow-lg">
-                      <span className="text-orange-400 font-black text-xl sm:text-2xl leading-none tracking-tight">
-                        {player.finalScore ?? player.totalPoints}
-                      </span>
-                    </div>
-                  </div>
+                  <h3 className="text-white font-bold text-sm sm:text-base text-center drop-shadow-lg">
+                    {firstPlace.playerName.split(' ')[0]}
+                  </h3>
                 </div>
-                
-                {/* Puntos bajo la foto, alineados a la derecha */}
-                <div className="text-right mt-1">
-                  <div className="flex flex-col items-end">
-                    <span className="text-poker-gold font-semibold text-xs">{player.totalPoints}</span>
+
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50">
+                  <div className="bg-black/75 backdrop-blur-sm border border-white/10 rounded-full px-5 py-1.5 shadow-lg">
+                    <span className="text-orange-400 font-black text-2xl sm:text-3xl leading-none tracking-tight">
+                      {firstPlace.finalScore ?? firstPlace.totalPoints}
+                    </span>
                   </div>
                 </div>
               </div>
-            );
-          })}
+
+              <div className="mt-2">
+                <div className="flex flex-col items-center">
+                  <span className="text-poker-gold font-semibold text-xs">{firstPlace.totalPoints}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Segundo y tercero como base */}
+        <div className="flex justify-center gap-6 sm:gap-8">
+          {podiumBase.map((player) => {
+              if (!player) return null;
+
+              const isSecond = player.position === 2;
+
+              return (
+                <div key={player.playerId} className="relative flex flex-col items-center">
+                  <div
+                    className={`relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer ${
+                      isSecond ? 'podium-border-silver' : 'podium-border-bronze'
+                    }`}
+                    onClick={() => openPlayerModal(player.playerId)}
+                  >
+                    <div className={`
+                      absolute -top-2 -left-2 w-9 h-9 rounded-full 
+                      flex items-center justify-center font-bold text-sm z-50 shadow-lg
+                      ${isSecond ? 'position-2nd' : 'position-3rd'}
+                    `}>
+                      {player.position}
+                    </div>
+
+                    {player.playerPhoto ? (
+                      <div className="absolute inset-0 rounded-lg overflow-hidden">
+                        <Image
+                          src={player.playerPhoto}
+                          alt={player.playerName}
+                          width={144}
+                          height={176}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      </div>
+                    ) : (
+                      <div className={`
+                        absolute inset-0 rounded-lg
+                        ${isSecond
+                          ? 'bg-gradient-to-br from-gray-600/40 via-gray-500/30 to-gray-400/20'
+                          : 'bg-gradient-to-br from-orange-900/40 via-orange-700/30 to-orange-500/20'
+                        }
+                      `} />
+                    )}
+
+                    <div className="relative flex flex-col items-center justify-end h-full pb-8">
+                      {!player.playerPhoto && (
+                        <div className="mb-auto mt-4">
+                          <User className="w-12 sm:w-16 h-12 sm:h-16 text-white/50" />
+                        </div>
+                      )}
+
+                      <h3 className="text-white font-bold text-xs sm:text-sm text-center drop-shadow-lg">
+                        {player.playerName.split(' ')[0]}
+                      </h3>
+                    </div>
+
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50">
+                      <div className="bg-black/75 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 shadow-lg">
+                        <span className="text-orange-400 font-black text-xl sm:text-2xl leading-none tracking-tight">
+                          {player.finalScore ?? player.totalPoints}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-1">
+                    <div className="flex flex-col items-center">
+                      <span className="text-poker-gold font-semibold text-xs">{player.totalPoints}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
         </div>
       </div>
 

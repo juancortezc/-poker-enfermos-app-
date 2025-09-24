@@ -11,7 +11,8 @@ export async function PUT(
     const { id } = await params;
     const eliminationId = parseInt(id);
     const body = await request.json();
-    const { eliminatedId, eliminatorId } = body;
+    const eliminatedId = body.eliminatedPlayerId ?? body.eliminatedId;
+    const eliminatorId = body.eliminatorPlayerId ?? body.eliminatorId;
 
     // Obtener la eliminación actual
     const currentElimination = await prisma.elimination.findUnique({

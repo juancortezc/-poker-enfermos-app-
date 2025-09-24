@@ -149,18 +149,17 @@ export async function POST(request: NextRequest) {
     if (position === 2 && eliminatorPlayerId) {
       console.log('[ELIMINATION API] Position 2 reached, checking if we should auto-complete...');
       
-      // Verificar cuántas eliminaciones ya existen
+      // Verificar cuántas eliminaciones hay tras registrar al subcampeón
       const existingEliminations = await prisma.elimination.count({
         where: { gameDateId }
       });
-      
-      // Solo auto-completar si realmente tenemos todas las eliminaciones esperadas
-      // (totalPlayers - 2) porque estamos registrando la posición 2
-      const expectedEliminations = totalPlayers - 2;
-      
-      console.log(`[ELIMINATION API] Total players: ${totalPlayers}, Existing eliminations: ${existingEliminations}, Expected: ${expectedEliminations}`);
-      
-      if (existingEliminations === expectedEliminations) {
+
+      // Para llegar al ganador necesitamos todas las posiciones salvo la 1 registrada manualmente
+      const expectedBeforeWinner = Math.max(totalPlayers - 1, 0);
+
+      console.log(`[ELIMINATION API] Total players: ${totalPlayers}, Existing eliminations: ${existingEliminations}, Expected before winner: ${expectedBeforeWinner}`);
+
+      if (existingEliminations === expectedBeforeWinner) {
         console.log('[ELIMINATION API] Auto-completing game date...');
         
         // Crear la eliminación del ganador (posición 1)

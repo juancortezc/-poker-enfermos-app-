@@ -37,6 +37,7 @@ export function EliminationHistory({
     eliminatorPlayerId: ''
   })
   const [isUpdating, setIsUpdating] = useState(false)
+  const [updateError, setUpdateError] = useState<string | null>(null)
 
   if (eliminations.length === 0) {
     return null
@@ -48,17 +49,24 @@ export function EliminationHistory({
       eliminatedPlayerId: elimination.eliminatedPlayerId,
       eliminatorPlayerId: elimination.eliminatorPlayerId || ''
     })
+    setUpdateError(null)
   }
 
   const handleCancelEdit = () => {
     setEditingId(null)
     setEditForm({ eliminatedPlayerId: '', eliminatorPlayerId: '' })
+    setUpdateError(null)
   }
 
   const handleSaveEdit = async (eliminationId: string) => {
     if (!editForm.eliminatedPlayerId) return
+    if (editForm.eliminatorPlayerId && editForm.eliminatorPlayerId === editForm.eliminatedPlayerId) {
+      setUpdateError('El eliminador no puede ser el mismo jugador eliminado')
+      return
+    }
 
     setIsUpdating(true)
+    setUpdateError(null)
     try {
       const response = await fetch(`/api/eliminations/${eliminationId}`, {
         method: 'PUT',
@@ -79,6 +87,7 @@ export function EliminationHistory({
 
     } catch (error) {
       console.error('Error updating elimination:', error)
+      setUpdateError(error instanceof Error ? error.message : 'Error desconocido al actualizar')
     } finally {
       setIsUpdating(false)
     }
@@ -97,6 +106,12 @@ export function EliminationHistory({
       <div className="p-6">
         <h3 className="text-white font-semibold mb-4">Eliminaciones</h3>
         
+        {updateError && (
+          <div className="mb-3 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+            <p className="text-red-400 text-sm">{updateError}</p>
+          </div>
+        )}
+
         <div className="space-y-2">
           {sortedEliminations.map((elimination) => (
             <div 

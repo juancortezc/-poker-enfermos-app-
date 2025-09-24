@@ -70,8 +70,8 @@ export default function MobileNavbar() {
   )
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-poker-card border-t border-white/10 px-2 py-2 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-      <div className="flex justify-around items-center max-w-md mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 bg-poker-card border-t border-white/10 px-2 py-2 z-60 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] relative before:absolute before:inset-0 before:bg-black/85 before:content-[''] before:backdrop-blur-sm">
+      <div className="flex justify-around items-center max-w-md mx-auto relative z-10">
         {filteredItems.map((item, index) => {
           const Icon = item.icon
           const isActive = pathname === item.href
