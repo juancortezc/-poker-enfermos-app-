@@ -123,7 +123,15 @@ export async function PUT(
     
     if (firstName !== undefined) updateData.firstName = firstName
     if (lastName !== undefined) updateData.lastName = lastName
-    if (aliases !== undefined) updateData.aliases = aliases
+    if (aliases !== undefined) {
+      const sanitizedAliases = Array.isArray(aliases)
+        ? aliases
+            .map((alias: unknown) => (typeof alias === 'string' ? alias.trim() : ''))
+            .filter(Boolean)
+        : []
+
+      updateData.aliases = { set: sanitizedAliases }
+    }
     if (pin !== undefined) updateData.pin = pin
     if (birthDate !== undefined) updateData.birthDate = birthDate
     if (phone !== undefined) updateData.phone = phone

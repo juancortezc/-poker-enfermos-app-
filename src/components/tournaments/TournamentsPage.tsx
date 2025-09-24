@@ -119,14 +119,12 @@ export default function TournamentsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Torneos</h1>
-        </div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-3xl font-bold text-white tracking-tight">Torneos</h1>
         {canEdit && (
           <Button 
             onClick={handleCreateTournament}
-            className="bg-poker-red hover:bg-red-700 text-white"
+            className="bg-poker-red hover:bg-red-700 text-white self-start md:self-auto"
           >
             <Plus className="w-4 h-4 mr-2" />
             Crear Torneo
@@ -181,82 +179,83 @@ export default function TournamentsPage() {
             )}
           </div>
         ) : (
-          tournaments.map((tournament) => {
-            const completedDates = tournament.gameDates.filter(d => d.status === 'completed').length
-            const totalDates = tournament.gameDates.length || 12
-            // const progressPercentage = (completedDates / totalDates) * 100 // Para uso futuro
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {tournaments.map((tournament) => {
+              const completedDates = tournament.gameDates.filter(d => d.status === 'completed').length
+              const totalDates = tournament.gameDates.length || 12
+              // const progressPercentage = (completedDates / totalDates) * 100 // Para uso futuro
             
-            return (
-              <div
-                key={tournament.id}
-                onClick={() => handleTournamentClick(tournament.id)}
-                className="bg-poker-card border border-white/10 rounded-lg p-6 hover:bg-poker-card/80 cursor-pointer transition-all group hover:border-white/20"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-xl font-bold text-white group-hover:text-poker-cyan transition-colors">
-                        Torneo {tournament.number}
-                      </h3>
-                      {getStatusBadge(tournament.status)}
-                    </div>
-                    
-                    <h4 className="text-lg text-poker-text mb-4">
-                      {tournament.name}
-                    </h4>
+              return (
+                <div
+                  key={tournament.id}
+                  onClick={() => handleTournamentClick(tournament.id)}
+                  className="bg-poker-card border border-white/10 rounded-xl p-6 hover:bg-poker-card/80 cursor-pointer transition-all group hover:border-white/20 flex flex-col h-full"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold text-white group-hover:text-poker-cyan transition-colors truncate">
+                          Torneo {tournament.number}
+                        </h3>
+                        {getStatusBadge(tournament.status)}
+                      </div>
+                      
+                      <h4 className="text-lg text-poker-text/90 mb-4 truncate">
+                        {tournament.name}
+                      </h4>
 
-                    {/* Progress section para torneos activos */}
-                    {tournament.status === 'ACTIVO' && (
-                      <div className="mb-4 space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-poker-text">Progreso del torneo</span>
-                          <span className="text-poker-cyan font-medium">{completedDates}/{totalDates} fechas</span>
+                      {/* Progress section para torneos activos */}
+                      {tournament.status === 'ACTIVO' && (
+                        <div className="mb-4 space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-poker-text">Progreso del torneo</span>
+                            <span className="text-poker-cyan font-medium">{completedDates}/{totalDates} fechas</span>
+                          </div>
+                          <ProgressBar 
+                            value={completedDates} 
+                            max={totalDates} 
+                            color={completedDates === totalDates ? 'green' : 'cyan'}
+                            size="md"
+                          />
                         </div>
-                        <ProgressBar 
-                          value={completedDates} 
-                          max={totalDates} 
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-4">
+                        <div className="flex items-center space-x-2 text-poker-muted">
+                          <Users className="w-4 h-4 text-poker-cyan" />
+                          <span>{tournament._count.tournamentParticipants} participantes</span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2 text-poker-muted">
+                          <Calendar className="w-4 h-4 text-green-400" />
+                          <span>{completedDates}/{totalDates} fechas</span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2 text-poker-muted">
+                          <Clock className="w-4 h-4 text-yellow-400" />
+                          <span>{formatDate(tournament.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Circular progress para vista rápida */}
+                    {tournament.status === 'ACTIVO' && (
+                      <div className="flex-shrink-0">
+                        <CircularProgress
+                          value={completedDates}
+                          max={totalDates}
+                          size={68}
+                          strokeWidth={6}
                           color={completedDates === totalDates ? 'green' : 'cyan'}
-                          size="md"
+                          showValue
                         />
                       </div>
                     )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm mb-4">
-                      <div className="flex items-center space-x-2 text-poker-muted">
-                        <Users className="w-4 h-4 text-poker-cyan" />
-                        <span>{tournament._count.tournamentParticipants} participantes</span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2 text-poker-muted">
-                        <Calendar className="w-4 h-4 text-green-400" />
-                        <span>{completedDates}/{totalDates} fechas</span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2 text-poker-muted">
-                        <Clock className="w-4 h-4 text-yellow-400" />
-                        <span>{formatDate(tournament.createdAt)}</span>
-                      </div>
-                    </div>
-
                   </div>
-
-                  {/* Circular progress para vista rápida */}
-                  {tournament.status === 'ACTIVO' && (
-                    <div className="ml-4 flex-shrink-0">
-                      <CircularProgress
-                        value={completedDates}
-                        max={totalDates}
-                        size={60}
-                        strokeWidth={6}
-                        color={completedDates === totalDates ? 'green' : 'cyan'}
-                        showValue
-                      />
-                    </div>
-                  )}
                 </div>
-              </div>
-            )
-          })
+              )
+            })}
+          </div>
         )}
       </div>
     </div>

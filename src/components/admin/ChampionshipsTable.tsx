@@ -109,102 +109,114 @@ export default function ChampionshipsTable() {
     )
   }
 
-  const getPlayerAlias = (player: Player) => {
+  const getPlayerAlias = (player?: Player) => {
+    if (!player) return ''
     return player.aliases && player.aliases.length > 0 ? player.aliases[0] : ''
+  }
+
+  const renderPositionRow = (
+    label: string,
+    badge: string,
+    badgeClass: string,
+    labelClass: string,
+    player?: Player
+  ) => {
+    if (!player) return null
+
+    return (
+      <div className="flex items-center gap-3 bg-black/25 border border-white/10 rounded-xl px-4 py-3">
+        <div className={`w-10 h-10 text-sm font-bold rounded-full flex items-center justify-center ${badgeClass}`}>
+          {badge}
+        </div>
+        <div className="flex-1 text-left">
+          <p className={`text-xs uppercase tracking-wide font-semibold ${labelClass}`}>{label}</p>
+          <p className="text-white font-semibold leading-tight">{formatPlayerName(player)}</p>
+          {getPlayerAlias(player) && (
+            <p className="text-xs text-white/60">({getPlayerAlias(player)})</p>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="w-full p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tournaments.map((tournament) => (
-          <div
-            key={tournament.tournamentNumber}
-            className={`relative dashboard-card rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 ${
-              !tournament.champion.isActive ? 'border-2 border-gray-400' : ''
-            }`}
-          >
-            {/* Tournament Number Badge */}
-            <div className="absolute top-4 right-4 z-10">
-              <div className="bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-full">
-                <span className="text-xs font-medium">TORNEO</span>
-                <span className="text-2xl font-bold block text-center">{tournament.tournamentNumber}</span>
-              </div>
-            </div>
+      <div className="grid gap-6">
+        {tournaments.map((tournament) => {
+          const isHistorical = !tournament.champion.isActive
 
-            {/* Player Photo Section */}
-            <div className="relative h-64 sm:h-72">
-              {tournament.champion.photoUrl ? (
-                <div className="absolute inset-0">
-                  <img
-                    src={tournament.champion.photoUrl}
-                    alt={formatPlayerName(tournament.champion)}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+          return (
+            <div key={tournament.tournamentNumber} className="relative pt-16">
+              {/* Tournament badge */}
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2">
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-red-600/80 bg-black flex flex-col items-center justify-center shadow-[0_0_35px_rgba(229,9,20,0.45)]">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-white/70">Torneo</span>
+                  <span className="text-3xl sm:text-4xl font-black text-white leading-none mt-1">
+                    {tournament.tournamentNumber}
+                  </span>
                 </div>
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20">
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-6xl opacity-30">🏆</div>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-                </div>
-              )}
-
-              {/* Champion Name Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <div className="flex items-center mb-2">
-                  <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-black font-bold text-sm">1º</span>
-                  </div>
-                  <span className="text-yellow-400 text-sm font-semibold uppercase tracking-wider">Campeón</span>
-                </div>
-                <h2 className="text-white text-2xl sm:text-3xl font-bold mb-1 drop-shadow-lg">
-                  {formatPlayerName(tournament.champion)}
-                </h2>
-                {getPlayerAlias(tournament.champion) && (
-                  <p className="text-orange-400 text-lg">
-                    ({getPlayerAlias(tournament.champion)})
-                  </p>
-                )}
-                {!tournament.champion.isActive && (
-                  <div className="inline-block bg-gray-600/80 text-white text-xs px-2 py-1 rounded mt-2">
-                    Histórico
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Other Positions */}
-            <div className="bg-poker-card/50 p-4 space-y-3">
-              {/* Subcampeón */}
-              <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-                <div className="flex items-center">
-                  <div className="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-bold text-xs">2º</span>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-xs">Subcampeón</p>
-                    <p className="text-white font-semibold">{formatPlayerName(tournament.runnerUp)}</p>
-                  </div>
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase tracking-wide">
+                  1º Campeón
                 </div>
               </div>
 
-              {/* Tercero */}
-              <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
-                <div className="flex items-center">
-                  <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center mr-3">
-                    <span className="text-white font-bold text-xs">3º</span>
+              <div
+                className={`relative bg-gradient-to-b from-white/5 via-black/40 to-black/70 border border-white/10 rounded-3xl px-6 pt-20 pb-6 flex flex-col items-center text-center h-full overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:border-white/25 ${
+                  isHistorical ? 'opacity-90 border-gray-500/60' : ''
+                }`}
+              >
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_55%)]" />
+                </div>
+
+                <div className="relative z-10 flex flex-col items-center gap-6 w-full">
+                  {/* Champion photo */}
+                  <div className="w-full max-w-[220px]">
+                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden ring-4 ring-white/10 shadow-2xl">
+                      {tournament.champion.photoUrl ? (
+                        <img
+                          src={tournament.champion.photoUrl}
+                          alt={formatPlayerName(tournament.champion)}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20 flex items-center justify-center text-5xl text-white/50">
+                          🏆
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent" />
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-orange-400 text-xs">Tercero</p>
-                    <p className="text-white font-semibold">{formatPlayerName(tournament.thirdPlace)}</p>
+
+                  {/* Champion info */}
+                  <div className="flex flex-col items-center gap-1">
+                    <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+                      {formatPlayerName(tournament.champion)}
+                    </h2>
+                    {getPlayerAlias(tournament.champion) && (
+                      <p className="text-orange-400 text-sm font-semibold">
+                        ({getPlayerAlias(tournament.champion)})
+                      </p>
+                    )}
+                    {isHistorical && (
+                      <span className="mt-1 inline-flex items-center gap-2 bg-gray-700/70 text-white text-xs font-medium px-3 py-1 rounded-full uppercase tracking-wide">
+                        Histórico
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Positions */}
+                  <div className="w-full space-y-3 text-sm">
+                    {renderPositionRow('Subcampeón', '2º', 'bg-gray-500 text-white', 'text-gray-300', tournament.runnerUp)}
+                    {renderPositionRow('Tercero', '3º', 'bg-orange-500 text-white', 'text-orange-300', tournament.thirdPlace)}
+                    {renderPositionRow('7', '7º', 'bg-red-500 text-white', 'text-red-300', tournament.siete)}
+                    {renderPositionRow('2', '2º', 'bg-purple-500 text-white', 'text-purple-300', tournament.dos)}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

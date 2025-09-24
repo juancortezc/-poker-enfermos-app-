@@ -29,7 +29,11 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
   
   const isPlayersPage = pathname === '/players'
   // Auto-detect if page needs full width (stats pages, admin pages with tables)
-  const needsFullWidth = fullWidth || pathname.includes('/admin/stats') || pathname.includes('/stats')
+  const needsFullWidth =
+    fullWidth ||
+    pathname.includes('/admin/stats') ||
+    pathname.includes('/stats') ||
+    pathname.includes('/tournaments')
 
   // Close dropdown when clicking outside
   useEffect(() => {
