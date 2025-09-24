@@ -12,6 +12,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { usePlayerSearch } from '@/contexts/PlayerSearchContext'
 import { useState, useRef, useEffect } from 'react'
 import { UserDropdown } from './UserDropdown'
+import { PwaInstallPrompt } from './PwaInstallPrompt'
+import { ProfileCompletionPrompt } from './ProfileCompletionPrompt'
 
 
 interface AppLayoutProps {
@@ -188,6 +190,8 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
 
       {/* Navbar móvil */}
       <MobileNavbar />
+      <PwaInstallPrompt />
+      <ProfileCompletionPrompt />
     </div>
   )
 }

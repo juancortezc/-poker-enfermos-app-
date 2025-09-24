@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from '@/components/UserAvatar'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface PlayerProfile {
   id: string
@@ -38,26 +39,16 @@ export default function ProfilePage() {
     }
   }, [user])
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (options: { silent?: boolean } = {}) => {
+    const { silent = false } = options
     try {
-      // Get auth token from localStorage
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      }
-      
-      // Use PIN if available, otherwise fall back to adminKey
-      if (pin) {
-        headers['Authorization'] = `Bearer PIN:${pin}`
-      } else if (adminKey) {
-        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
+      const headers = buildAuthHeaders({}, { includeJson: true })
+
+      if (!silent) {
+        setLoading(true)
       }
 
-      const response = await fetch('/api/profile', {
-        headers
-      })
+      const response = await fetch('/api/profile', { headers })
 
       if (response.ok) {
         const data = await response.json()
@@ -68,7 +59,9 @@ export default function ProfilePage() {
     } catch (error) {
       setError('Error de conexión')
     } finally {
-      setLoading(false)
+      if (!silent) {
+        setLoading(false)
+      }
     }
   }
 
@@ -81,24 +74,9 @@ export default function ProfilePage() {
     setSuccess('')
 
     try {
-      // Get auth token from localStorage
-      const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
-      const adminKey = typeof window !== 'undefined' ? localStorage.getItem('poker-adminkey') : null
-      
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-      }
-      
-      // Use PIN if available, otherwise fall back to adminKey
-      if (pin) {
-        headers['Authorization'] = `Bearer PIN:${pin}`
-      } else if (adminKey) {
-        headers['Authorization'] = `Bearer ADMIN:${adminKey}`
-      }
-
       const response = await fetch('/api/profile', {
         method: 'PUT',
-        headers,
+        headers: buildAuthHeaders({}, { includeJson: true }),
         body: JSON.stringify({
           pin: profile.pin === '****' ? undefined : profile.pin || undefined,
           birthDate: profile.birthDate || undefined,
@@ -109,6 +87,7 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setSuccess('Perfil actualizado correctamente')
+        await fetchProfile({ silent: true })
       } else {
         const data = await response.json()
         setError(data.message || 'Error al actualizar el perfil')
