@@ -15,8 +15,8 @@ export default function Home() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-poker-dark">
-        <div className="pt-2 px-4 pb-8">
+      <div>
+        <div className="pt-2">
           <div className="text-center py-16">
             <h1 className="text-4xl font-bold text-white mb-4">Poker de Enfermos</h1>
             <div className="animate-pulse">
@@ -30,8 +30,8 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark">
-      <div className="pt-2 px-4 pb-8">
+    <div>
+      <div className="pt-2">
         {/* Widget de Ranking */}
         {activeTournament ? (
           <HomeRankingView tournamentId={activeTournament.tournament?.id || activeTournament.id} />

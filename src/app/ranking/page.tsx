@@ -29,7 +29,7 @@ export default function RankingPage() {
 
   if (tournamentLoading || authLoading) {
     return (
-      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
+      <div className="flex items-center justify-center py-8">
         <div className="text-white text-lg">Cargando tabla...</div>
       </div>
     );
@@ -38,7 +38,7 @@ export default function RankingPage() {
   // Verificar autenticación
   if (!user) {
     return (
-      <div className="min-h-screen bg-poker-dark p-4">
+      <div className="p-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center mb-6">
             <button
@@ -67,7 +67,7 @@ export default function RankingPage() {
 
   if (!activeTournament) {
     return (
-      <div className="min-h-screen bg-poker-dark p-4">
+      <div className="p-4">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="flex items-center mb-6">
@@ -97,7 +97,7 @@ export default function RankingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark pt-2 pb-20">
+    <div className="pt-2">
       <div className="container mx-auto px-4">
         {/* Tabs */}
         <div className="flex border-b border-gray-600 mb-4">

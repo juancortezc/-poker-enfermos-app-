@@ -7,6 +7,7 @@ import { User, Search, Plus, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
+import Link from 'next/link'
 import { UserRole } from '@prisma/client'
 import { usePathname, useRouter } from 'next/navigation'
 import { usePlayerSearch } from '@/contexts/PlayerSearchContext'
@@ -91,22 +92,26 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark">
+    <div className="min-h-screen bg-poker-dark flex flex-col">
       {/* Header */}
-      <header className="bg-poker-card shadow-lg border-b border-white/10 sticky top-0 z-60 relative before:absolute before:inset-0 before:bg-black/80 before:content-[''] before:backdrop-blur-sm">
+      <header className="bg-poker-card shadow-lg border-b border-white/10 sticky top-0 z-[60] relative before:absolute before:inset-0 before:bg-black/80 before:content-[''] before:backdrop-blur-sm">
         <div className={`${needsFullWidth ? 'container mx-auto max-w-none' : 'max-w-md mx-auto'} p-4 relative z-10`}>
           <div className="flex justify-between items-center">
             {/* Logo y usuario */}
             <div className="flex items-center space-x-3">
-              <div className="relative w-10 h-10 bg-poker-dark rounded-lg p-1.5 shadow-inner">
+              <Link
+                href="/"
+                className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-poker-dark p-1.5 shadow-inner transition-colors hover:bg-poker-red/20"
+                aria-label="Ir al inicio"
+              >
                 <Image
                   src="https://storage.googleapis.com/poker-enfermos/logo.png"
                   alt="Poker Logo"
                   width={32}
                   height={32}
-                  className="w-full h-full object-contain"
+                  className="h-full w-full object-contain"
                 />
-              </div>
+              </Link>
               <div>
                 <h1 className="text-lg font-bold text-poker-text">
                   Poker de Enfermos
@@ -179,16 +184,16 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
         </div>
       </header>
 
-      {/* Contenido principal */}
+      {/* Contenido principal con scroll */}
       <main
-        className={`${needsFullWidth ? 'container mx-auto max-w-none px-4' : 'max-w-md mx-auto px-4'} pt-6 pb-28`}
+        className={`${needsFullWidth ? 'container mx-auto max-w-none px-4' : 'max-w-md mx-auto px-4'} flex-1 overflow-y-auto pt-6 pb-24`}
       >
         <div className="animate-enter">
           {children}
         </div>
       </main>
 
-      {/* Navbar móvil */}
+      {/* Navbar móvil fijo al bottom + prompts persistentes */}
       <MobileNavbar />
       <PwaInstallPrompt />
       <ProfileCompletionPrompt />

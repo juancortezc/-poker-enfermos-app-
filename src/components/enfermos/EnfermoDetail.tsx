@@ -302,11 +302,11 @@ export default function EnfermoDetail({ playerId }: EnfermoDetailProps) {
           </div>
 
           <div className="mt-6 space-y-3">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {podiumRow.map(({ key, label, value, Icon, accent }) => (
                 <div
                   key={key}
-                  className="flex flex-col items-center rounded-2xl border border-white/10 bg-black/40 px-3 py-4 text-center"
+                  className="flex flex-col items-center rounded-2xl border border-white/10 bg-black/40 px-2 py-3 text-center sm:px-3 sm:py-4"
                 >
                   <Icon className={`mb-2 h-6 w-6 ${accent}`} />
                   <span className="text-lg font-bold text-white">{value}</span>
@@ -314,11 +314,11 @@ export default function EnfermoDetail({ playerId }: EnfermoDetailProps) {
                 </div>
               ))}
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {extraRow.map(({ key, label, value }) => (
                 <div
                   key={key}
-                  className="flex flex-col items-center rounded-2xl border border-white/10 bg-black/40 px-3 py-4 text-center"
+                  className="flex flex-col items-center rounded-2xl border border-white/10 bg-black/40 px-2 py-3 text-center sm:px-3 sm:py-4"
                 >
                   <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
                     {label}

@@ -161,7 +161,7 @@ export default function RegistroPage() {
   // Verificación de permisos
   if (!user || !canCRUD(user.role)) {
     return (
-      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
+      <div className="flex items-center justify-center py-8">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold mb-4">Acceso Denegado</h1>
           <p className="text-poker-muted">No tienes permisos para acceder a esta página.</p>
@@ -173,7 +173,7 @@ export default function RegistroPage() {
   // Estados de carga y error
   if (loading) {
     return (
-      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
+      <div className="flex items-center justify-center py-8">
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-poker-red mx-auto mb-4"></div>
           <p className="text-poker-muted">Cargando...</p>
@@ -184,7 +184,7 @@ export default function RegistroPage() {
 
   if (error || !activeGameDate) {
     return (
-      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
+      <div className="flex items-center justify-center py-8">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold mb-4">No hay fecha activa</h1>
           <p className="text-poker-muted">{error || 'No existe una fecha de juego activa en este momento.'}</p>
@@ -213,7 +213,7 @@ export default function RegistroPage() {
   const timeRemaining = timerData?.timeRemaining || 0
 
   return (
-    <div className="min-h-screen bg-poker-dark pb-20">
+    <div>
       <div className="max-w-lg mx-auto">
         
         {/* Header */}

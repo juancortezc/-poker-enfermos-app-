@@ -526,6 +526,11 @@
    LAYER: UTILITIES - Utilidades Específicas
    ============================================ */
 @layer utilities {
+  /* Safe area for mobile devices */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
   /* Efectos de Glow para Elementos Importantes */
   .glow-gold {
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);

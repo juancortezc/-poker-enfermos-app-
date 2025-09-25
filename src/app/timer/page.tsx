@@ -13,7 +13,7 @@ export default function TimerPage() {
   // Verificar permisos
   if (!user || !canCRUD(user.role)) {
     return (
-      <div className="min-h-screen bg-poker-dark flex items-center justify-center p-4">
+      <div className="flex items-center justify-center p-4">
         <div className="admin-card-error p-8 text-center max-w-md">
           <div className="text-4xl mb-4">🔒</div>
           <h1 className="text-2xl font-bold text-white mb-2">Acceso Restringido</h1>
@@ -25,7 +25,7 @@ export default function TimerPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-poker-dark flex items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-r from-[#E10600] to-[#ffa500] rounded-full flex items-center justify-center animate-pulse mb-4">
             <Clock className="w-8 h-8 text-white" />
@@ -37,7 +37,7 @@ export default function TimerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark p-4">
+    <div className="p-4">
       <div className="max-w-md mx-auto pt-8">
         <TimerDisplay />
       </div>

@@ -115,7 +115,7 @@ export default function NotificationsPage() {
 
   if (isInitializing) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark flex items-center justify-center">
+      <div className="flex items-center justify-center py-8">
         <div className="text-poker-muted">Preparando notificaciones...</div>
       </div>
     );
@@ -123,8 +123,8 @@ export default function NotificationsPage() {
 
   if (!isSupported) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark">
-        <div className="px-4 pt-20 pb-8">
+      <div>
+        <div className="pt-20">
           <div className="max-w-md mx-auto text-center">
             <Card className="admin-card p-8">
               <BellOff className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -143,8 +143,8 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark">
-      <div className="px-4 pt-20 pb-8">
+    <div>
+      <div className="pt-20">
         <div className="max-w-2xl mx-auto space-y-6">
           
 

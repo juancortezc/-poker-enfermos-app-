@@ -23,6 +23,48 @@ const createInitialDates = () => {
   return generateTournamentDates(today, 12)
 }
 
+const sanitizeDateString = (value: unknown): string => {
+  if (typeof value !== 'string') {
+    return ''
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return ''
+  }
+
+  const dateOnly = trimmed.split('T')[0]
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) {
+    return ''
+  }
+
+  const testDate = new Date(dateOnly + 'T12:00:00.000Z')
+  if (Number.isNaN(testDate.getTime())) {
+    return ''
+  }
+
+  return dateOnly
+}
+
+const normalizeGameDates = (rawDates: unknown): GeneratedDate[] => {
+  if (!Array.isArray(rawDates)) {
+    return createInitialDates()
+  }
+
+  const normalized = Array.from({ length: 12 }, (_, index) => {
+    const entry = rawDates[index] as Partial<GeneratedDate> | undefined
+    const scheduledDate = sanitizeDateString(entry?.scheduledDate)
+
+    return {
+      dateNumber: index + 1,
+      scheduledDate
+    }
+  })
+
+  const hasDefinedDates = normalized.some(date => date.scheduledDate)
+  return hasDefinedDates ? normalized : createInitialDates()
+}
+
 export default function CalendarDraftBuilder() {
   const { user } = useAuth()
   const router = useRouter()
@@ -83,8 +125,8 @@ export default function CalendarDraftBuilder() {
       try {
         if (getStoredAuthToken()) {
           const draft = await fetchCalendarDraft()
-          if (!cancelled && draft?.gameDates?.length === 12) {
-            setGameDates(draft.gameDates as GeneratedDate[])
+          if (!cancelled && draft?.gameDates?.length) {
+            setGameDates(normalizeGameDates(draft.gameDates))
             if (draft.tournamentNumber !== undefined && draft.tournamentNumber !== null) {
               setCustomNumber(draft.tournamentNumber)
             }
@@ -122,7 +164,12 @@ export default function CalendarDraftBuilder() {
     if (!hasLoadedRef.current) return
     if (!getStoredAuthToken()) return
 
-    const hasIncompleteDates = gameDates.some(date => !date.scheduledDate)
+    const persistableDates = gameDates.slice(0, 12).map((date, index) => ({
+      dateNumber: index + 1,
+      scheduledDate: sanitizeDateString(date.scheduledDate)
+    }))
+
+    const hasIncompleteDates = persistableDates.some(date => !date.scheduledDate)
     if (hasIncompleteDates) {
       setIsSaving(false)
       return
@@ -138,7 +185,7 @@ export default function CalendarDraftBuilder() {
     saveTimeoutRef.current = setTimeout(() => {
       saveCalendarDraft({
         tournamentNumber: numberToPersist,
-        gameDates
+        gameDates: persistableDates
       })
         .then(() => {
           if (cancelled) return
@@ -176,18 +223,25 @@ export default function CalendarDraftBuilder() {
       return
     }
 
-    const testDate = new Date(scheduledDate + 'T12:00:00.000Z')
+    const normalizedValue = sanitizeDateString(scheduledDate)
+
+    if (!normalizedValue) {
+      toast.error('Fecha inválida seleccionada')
+      return
+    }
+
+    const testDate = new Date(normalizedValue + 'T12:00:00.000Z')
     if (isNaN(testDate.getTime())) {
       toast.error('Fecha inválida seleccionada')
       return
     }
 
     if (index === 0) {
-      const generated = generateGameDates(scheduledDate)
+      const generated = generateGameDates(normalizedValue)
       setGameDates(generated)
     } else {
       const updatedDates = [...gameDates]
-      updatedDates[index].scheduledDate = scheduledDate
+      updatedDates[index].scheduledDate = normalizedValue
 
       const remainingCount = 12 - (index + 1)
       if (remainingCount > 0) {
@@ -206,7 +260,10 @@ export default function CalendarDraftBuilder() {
     setError('')
   }, [])
 
-  const validDatesCount = useMemo(() => gameDates.filter(date => date.scheduledDate).length, [gameDates])
+  const validDatesCount = useMemo(
+    () => gameDates.filter(date => sanitizeDateString(date.scheduledDate)).length,
+    [gameDates]
+  )
 
   const approveCalendar = useCallback(async () => {
     if (validDatesCount !== 12) {
@@ -223,7 +280,10 @@ export default function CalendarDraftBuilder() {
       setApproving(true)
       await saveCalendarDraft({
         tournamentNumber,
-        gameDates
+        gameDates: gameDates.slice(0, 12).map((date, index) => ({
+          dateNumber: index + 1,
+          scheduledDate: sanitizeDateString(date.scheduledDate)
+        }))
       })
 
       toast.success('Calendario aprobado. Continúa con la configuración del torneo.')
@@ -283,11 +343,11 @@ export default function CalendarDraftBuilder() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 sm:gap-3">
             {gameDates.map((gameDate, index) => (
               <div
                 key={gameDate.dateNumber}
-                className="rounded-xl border-2 border-poker-red/40 bg-poker-card p-3 transition-all duration-200 hover:border-poker-red/60 hover:shadow-lg hover:shadow-poker-red/10"
+                className="rounded-xl border border-poker-red/40 bg-poker-card p-2.5 text-xs transition-all duration-200 hover:border-poker-red/60 hover:shadow-lg hover:shadow-poker-red/10 sm:p-3"
               >
                 <div className="space-y-2 text-center">
                   <div className="flex items-center justify-center space-x-2 text-[11px] text-poker-muted">
@@ -299,8 +359,8 @@ export default function CalendarDraftBuilder() {
                     if (!gameDate.scheduledDate) {
                       return (
                         <div className="space-y-1 text-poker-muted">
-                          <div className="text-xl font-bold sm:text-2xl">--</div>
-                          <div className="text-base font-semibold sm:text-lg">---</div>
+                          <div className="text-lg font-bold sm:text-2xl">--</div>
+                          <div className="text-sm font-semibold sm:text-lg">---</div>
                         </div>
                       )
                     }
@@ -309,16 +369,16 @@ export default function CalendarDraftBuilder() {
                     if (Number.isNaN(dateObj.getTime())) {
                       return (
                         <div className="space-y-1 text-red-400">
-                          <div className="text-xl font-bold sm:text-2xl">!</div>
-                          <div className="text-base font-semibold sm:text-lg">ERROR</div>
+                          <div className="text-lg font-bold sm:text-2xl">!</div>
+                          <div className="text-sm font-semibold sm:text-lg">ERROR</div>
                         </div>
                       )
                     }
 
                     return (
                       <div className="space-y-0.5">
-                        <div className="text-xl font-bold text-white sm:text-2xl">{dateObj.getDate()}</div>
-                        <div className="text-sm font-semibold text-orange-400 sm:text-base">
+                        <div className="text-lg font-bold text-white sm:text-2xl">{dateObj.getDate()}</div>
+                        <div className="text-xs font-semibold text-orange-400 sm:text-base">
                           {dateObj
                             .toLocaleDateString('es-ES', { month: 'short' })
                             .toUpperCase()}
@@ -333,7 +393,7 @@ export default function CalendarDraftBuilder() {
                       onChange={(value) => updateGameDate(index, value)}
                       placeholder={index === 0 ? 'Seleccionar fecha' : 'Auto'}
                       required={index === 0}
-                      className="w-full text-xs opacity-80 transition-opacity hover:opacity-100 sm:text-sm"
+                      className="w-full text-[11px] opacity-80 transition-opacity hover:opacity-100 sm:text-sm"
                     />
                   </div>
                 </div>
