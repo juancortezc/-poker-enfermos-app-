@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { LogOut, User, ChevronDown, Bell } from 'lucide-react'
+import { LogOut, User, ChevronDown, Bell, Download, Share2 } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from './UserAvatar'
