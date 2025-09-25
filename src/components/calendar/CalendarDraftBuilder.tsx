@@ -10,7 +10,7 @@ import LoadingState from '@/components/ui/LoadingState'
 import { generateTournamentDates } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 import { fetchCalendarDraft, saveCalendarDraft } from '@/lib/calendar-draft'
-import { ArrowLeft, CalendarDays, Check, AlertTriangle, Loader2 } from 'lucide-react'
+import { CalendarDays, Check, AlertTriangle, Loader2 } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 interface GeneratedDate {
