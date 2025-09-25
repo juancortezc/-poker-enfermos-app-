@@ -122,6 +122,36 @@ export function UserDropdown() {
                   <LogOut size={18} className="text-poker-muted" />
                   <span>Cerrar Sesión</span>
                 </button>
+
+                <div className="border-t border-white/10 my-1"></div>
+
+                <div className="px-4 py-3 space-y-2">
+                  <p className="text-xs uppercase tracking-wide text-white/60">Instalar aplicación</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('pwa:show'))
+                      }
+                    }}
+                    className="w-full text-left flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-sm text-white transition-colors hover:bg-white/10"
+                  >
+                    <span>Descargar app</span>
+                    <Download size={16} className="text-white/70" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('pwa:show', { detail: { forceIos: true } }))
+                      }
+                    }}
+                    className="w-full text-left flex items-center justify-between rounded-lg border border-white/20 px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10"
+                  >
+                    <span>Instrucciones iOS</span>
+                    <Share2 size={16} className="text-white/60" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

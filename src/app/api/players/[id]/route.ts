@@ -137,7 +137,10 @@ export async function PUT(
     if (phone !== undefined) updateData.phone = phone
     if (email !== undefined) updateData.email = email
     if (role !== undefined) updateData.role = role
-    if (photoUrl !== undefined) updateData.photoUrl = photoUrl
+    if (photoUrl !== undefined) {
+      const sanitizedPhoto = typeof photoUrl === 'string' ? photoUrl.trim() : ''
+      updateData.photoUrl = sanitizedPhoto || null
+    }
     if (isActive !== undefined) updateData.isActive = isActive
     if (joinYear !== undefined) {
       updateData.joinYear = joinYear

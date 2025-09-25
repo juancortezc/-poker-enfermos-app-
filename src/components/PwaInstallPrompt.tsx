@@ -34,11 +34,16 @@ export function PwaInstallPrompt() {
     if (typeof window === 'undefined') return
 
     const dismissed = window.localStorage.getItem(DISMISS_KEY)
-    if (dismissed === '1') return
-    if (isStandaloneDisplayMode()) return
+    const iosDevice = detectIos()
+    setIsIos(iosDevice)
 
-    const ios = detectIos()
-    setIsIos(ios)
+    if (dismissed === '1' && !iosDevice) {
+      // We'll still allow manual prompts later via custom event
+    }
+
+    if (isStandaloneDisplayMode()) {
+      return
+    }
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault()
@@ -53,10 +58,19 @@ export function PwaInstallPrompt() {
       window.localStorage.setItem(DISMISS_KEY, '1')
     }
 
+    const handleManualPrompt = (event: Event) => {
+      const detail = (event as CustomEvent<{ forceIos?: boolean }>).detail || {}
+      const ios = detectIos()
+      setIsIos(ios)
+      setShowIosSteps(detail.forceIos || ios)
+      setVisible(true)
+    }
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
+    window.addEventListener('pwa:show', handleManualPrompt as EventListener)
 
-    if (ios) {
+    if (iosDevice && dismissed !== '1') {
       setVisible(true)
       setShowIosSteps(true)
     }
@@ -64,6 +78,7 @@ export function PwaInstallPrompt() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
+      window.removeEventListener('pwa:show', handleManualPrompt as EventListener)
     }
   }, [])
 

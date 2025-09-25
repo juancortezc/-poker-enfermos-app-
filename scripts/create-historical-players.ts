@@ -24,6 +24,8 @@ async function createHistoricalPlayers() {
   console.log('=' * 70)
   
   try {
+    const newPhotoUrl = 'https://storage.googleapis.com/poker-enfermos/logo.png'
+
     for (const playerData of historicalPlayers) {
       // Verificar si el jugador ya existe
       const existingPlayer = await prisma.player.findFirst({
@@ -34,7 +36,15 @@ async function createHistoricalPlayers() {
       })
       
       if (existingPlayer) {
-        console.log(`⚠️  ${playerData.firstName} ${playerData.lastName} ya existe`)
+        if (existingPlayer.photoUrl !== newPhotoUrl) {
+          await prisma.player.update({
+            where: { id: existingPlayer.id },
+            data: { photoUrl: newPhotoUrl }
+          })
+          console.log(`🔄 Actualizado: ${playerData.firstName} ${playerData.lastName} -> nueva foto`)
+        } else {
+          console.log(`⚠️  ${playerData.firstName} ${playerData.lastName} ya existe con la foto correcta`)
+        }
         continue
       }
       
@@ -47,7 +57,7 @@ async function createHistoricalPlayers() {
           isActive: false,
           joinDate: '2010-01-01',
           joinYear: 2010,
-          photoUrl: '/logo-grupo.png', // Logo del grupo para jugadores históricos
+          photoUrl: newPhotoUrl,
           aliases: []
         }
       })
