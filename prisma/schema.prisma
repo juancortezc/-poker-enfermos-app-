@@ -178,6 +178,17 @@ model TournamentRanking {
   @@map("tournament_rankings")
 }
 
+model CalendarDraft {
+  id               Int      @id @default(1)
+  tournamentNumber Int?
+  gameDates        Json
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  updatedBy        String?  @map("updated_by")
+
+  @@map("calendar_drafts")
+}
+
 model TimerState {
   id             Int           @id @default(autoincrement())
   gameDateId     Int           @unique @map("game_date_id")

@@ -64,66 +64,118 @@ export function getAccessLevel(userRole: UserRole): 'full' | 'limited' | 'read-o
 /**
  * Funciones disponibles en el dashboard por rol
  */
+export interface DashboardFeature {
+  id: string
+  title: string
+  href: string
+  accessible: boolean
+  restricted: boolean
+  permission?: FeaturePermission
+}
+
 export function getDashboardFeatures(userRole: UserRole) {
-  const baseFeatures = [
+  const withPermission = (permission?: FeaturePermission) => {
+    if (!permission) {
+      return {
+        accessible: true,
+        restricted: false
+      }
+    }
+
+    const allowed = canAccess(userRole, permission)
+    return {
+      accessible: allowed,
+      restricted: !allowed
+    }
+  }
+
+  const baseFeatures: DashboardFeature[] = [
+    {
+      id: 'resultados',
+      title: 'RESULTADOS',
+      href: '/admin/resultados',
+      permission: undefined,
+      ...withPermission()
+    },
+    {
+      id: 'sin-ganar',
+      title: 'SIN GANAR',
+      href: '/admin/sin-ganar',
+      permission: 'stats-days',
+      ...withPermission('stats-days')
+    },
+    {
+      id: 'club-1000',
+      title: 'CLUB 1000',
+      href: '/admin/club-1000',
+      permission: undefined,
+      ...withPermission()
+    },
+    {
+      id: 'enfermos-base',
+      title: 'ENFERMOS',
+      href: '/admin/enfermos',
+      permission: undefined,
+      ...withPermission()
+    },
     {
       id: 'calendar',
       title: 'CALENDARIO',
       href: '/admin/calendar',
-      accessible: canAccess(userRole, 'calendar'),
-      restricted: false
+      permission: 'calendar',
+      ...withPermission('calendar')
     },
     {
       id: 'regulations',
       title: 'REGLAMENTO',
       href: '/admin/regulations',
-      accessible: canAccess(userRole, 'regulations'),
-      restricted: false
-    },
-    {
-      id: 'resultados',
-      title: 'RESULTADOS',
-      href: '/admin/resultados',
-      accessible: true, // Accesible para todos los usuarios
-      restricted: false
-    },
-    {
-      id: 'stats',
-      title: 'STATS',
-      href: '/admin/stats',
-      accessible: canAccess(userRole, 'stats-days'), // Al menos días sin ganar
-      restricted: userRole !== 'Comision' // Restringido parcialmente para no-Comisión
+      permission: 'regulations',
+      ...withPermission('regulations')
     }
   ]
 
-  const adminFeatures = [
+  const adminFeatures: DashboardFeature[] = [
     {
       id: 'game-dates',
-      title: 'FECHA',
+      title: 'ACTIVAR FECHA',
       href: '/game-dates/config',
-      accessible: canAccess(userRole, 'game-dates'),
-      restricted: !canAccess(userRole, 'game-dates')
+      permission: 'game-dates',
+      ...withPermission('game-dates')
     },
     {
       id: 'tournaments',
-      title: 'TORNEOS',
+      title: 'CREAR TORNEO',
       href: '/tournaments',
-      accessible: canAccess(userRole, 'tournaments'),
-      restricted: !canAccess(userRole, 'tournaments')
+      permission: 'tournaments',
+      ...withPermission('tournaments')
+    },
+    {
+      id: 'calendar-builder',
+      title: 'CREAR CALENDARIO',
+      href: '/admin/calendar/create',
+      permission: 'game-dates',
+      ...withPermission('game-dates')
     },
     {
       id: 'players',
-      title: 'ENFERMOS',
+      title: 'JUGADORES',
       href: '/players',
-      accessible: canAccess(userRole, 'players'),
-      restricted: !canAccess(userRole, 'players')
+      permission: 'players',
+      ...withPermission('players')
     },
     {
       id: 'import',
       title: 'IMPORTAR',
       href: '/admin/import',
-      accessible: canAccess(userRole, 'import'),
-      restricted: !canAccess(userRole, 'import')
+      permission: 'import',
+      ...withPermission('import')
+    },
+    {
+      id: 'stats',
+      title: 'STATS',
+      href: '/admin/stats',
+      permission: 'stats-parents',
+      ...withPermission('stats-parents')
     }
   ]
 
@@ -146,9 +198,14 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
   if (route === '/perfil') return canAccess(userRole, 'profile')
 
   // Rutas admin específicas
+  if (route.startsWith('/admin/calendar/create')) return canAccess(userRole, 'game-dates')
+  if (route.startsWith('/admin/sin-ganar')) return canAccess(userRole, 'stats-days')
+  if (route.startsWith('/admin/club-1000')) return true
+  if (route.startsWith('/admin/enfermos')) return true
+  if (route.startsWith('/admin/resultados')) return true
   if (route.startsWith('/admin/calendar')) return canAccess(userRole, 'calendar')
   if (route.startsWith('/admin/regulations')) return canAccess(userRole, 'regulations')
-  if (route.startsWith('/admin/stats')) return canAccess(userRole, 'stats-days')
+  if (route.startsWith('/admin/stats')) return canAccess(userRole, 'stats-parents')
   
   // Rutas admin restringidas (solo Comisión)
   if (route.startsWith('/admin/')) return userRole === 'Comision'

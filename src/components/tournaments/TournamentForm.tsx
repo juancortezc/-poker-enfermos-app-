@@ -15,6 +15,7 @@ import { generateTournamentDates } from '@/lib/date-utils'
 import { ArrowLeft, Save, Loader2, Check, AlertCircle, Target, X } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
+import { fetchCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
 
 interface Player {
   id: string
@@ -66,9 +67,10 @@ const DEFAULT_BLIND_LEVELS: BlindLevel[] = [
 interface TournamentFormProps {
   tournamentId?: string
   initialTournamentNumber?: number
+  useCalendarDraft?: boolean
 }
 
-export default function TournamentForm({ tournamentId, initialTournamentNumber }: TournamentFormProps) {
+export default function TournamentForm({ tournamentId, initialTournamentNumber, useCalendarDraft }: TournamentFormProps) {
   const { user } = useAuth()
   const router = useRouter()
   const [availablePlayers, setAvailablePlayers] = useState<Player[]>([])
@@ -76,7 +78,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
   const [loadingMessage, setLoadingMessage] = useState('')
   const [initialLoading, setInitialLoading] = useState(true)
   const [error, setError] = useState('')
-  const [tournamentNumber, setTournamentNumber] = useState<number>(0)
+  const [tournamentNumber, setTournamentNumber] = useState<number>(initialTournamentNumber || 0)
   const [showBlindsConfirm, setShowBlindsConfirm] = useState(false)
   const [pendingBlindLevels, setPendingBlindLevels] = useState<BlindLevel[]>([])
   const [numberValidationError, setNumberValidationError] = useState<string>('')
@@ -123,6 +125,36 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
     }
   }, [user, router])
 
+  useEffect(() => {
+    if (!useCalendarDraft) return
+
+    let cancelled = false
+
+    const loadDraft = async () => {
+      try {
+        const draft = await fetchCalendarDraft()
+        if (!cancelled && draft && Array.isArray(draft.gameDates) && draft.gameDates.length === 12) {
+          setFormData(prev => ({
+            ...prev,
+            tournamentNumber: draft.tournamentNumber || initialTournamentNumber || prev.tournamentNumber,
+            gameDates: draft.gameDates
+          }))
+
+          if (draft.tournamentNumber) {
+            setTournamentNumber(draft.tournamentNumber)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading shared calendar draft:', error)
+      }
+    }
+
+    loadDraft()
+    return () => {
+      cancelled = true
+    }
+  }, [useCalendarDraft, initialTournamentNumber])
+
 
   // Cargar jugadores disponibles (Enfermos y Comisión activos)
   useEffect(() => {
@@ -133,66 +165,67 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
 
   // Obtener número de torneo o cargar torneo existente
   useEffect(() => {
-    if (user && getStoredAuthToken()) {
-      if (isEditing) {
-        fetchTournamentData()
-      } else {
-        // Si no se proporcionó número inicial, obtener el siguiente
-        if (!initialTournamentNumber) {
-          fetchNextTournamentNumber()
-        } else {
-          setTournamentNumber(initialTournamentNumber)
-          setInitialLoading(false)
-        }
+    const fetchNextTournamentNumber = async () => {
+      if (!getStoredAuthToken()) {
+        console.log('No auth token available, skipping tournament number fetch')
+        setInitialLoading(false)
+        return
       }
-    }
-  }, [user, isEditing, initialTournamentNumber, fetchTournamentData])
 
-  const fetchNextTournamentNumber = async () => {
-    if (!getStoredAuthToken()) {
-      console.log('No auth token available, skipping tournament number fetch')
-      setInitialLoading(false)
-      return
-    }
+      try {
+        setLoadingMessage('Obteniendo número de torneo...')
+        const response = await fetch('/api/tournaments/next-number', {
+          headers: buildAuthHeaders()
+        })
 
-    try {
-      setLoadingMessage('Obteniendo número de torneo...')
-      const response = await fetch('/api/tournaments/next-number', {
-        headers: buildAuthHeaders()
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        setTournamentNumber(data.nextNumber)
-        setFormData(prev => ({
-          ...prev,
-          tournamentNumber: data.nextNumber
-        }))
-      } else {
-        console.error('API response not ok:', response.status, response.statusText)
-        const errorData = await response.json().catch(() => ({}))
-        console.error('Error details:', errorData)
-        // Set default tournament number if API fails
+        if (response.ok) {
+          const data = await response.json()
+          setTournamentNumber(data.nextNumber)
+          setFormData(prev => ({
+            ...prev,
+            tournamentNumber: data.nextNumber
+          }))
+        } else {
+          console.error('API response not ok:', response.status, response.statusText)
+          const errorData = await response.json().catch(() => ({}))
+          console.error('Error details:', errorData)
+          const defaultNumber = 28
+          setTournamentNumber(defaultNumber)
+          setFormData(prev => ({
+            ...prev,
+            tournamentNumber: defaultNumber
+          }))
+        }
+      } catch (err) {
+        console.error('Error fetching tournament number:', err)
         const defaultNumber = 28
         setTournamentNumber(defaultNumber)
         setFormData(prev => ({
           ...prev,
           tournamentNumber: defaultNumber
         }))
+      } finally {
+        setInitialLoading(false)
       }
-    } catch (err) {
-      console.error('Error fetching tournament number:', err)
-      // Set default tournament number if fetch fails
-      const defaultNumber = 28
-      setTournamentNumber(defaultNumber)
-      setFormData(prev => ({
-        ...prev,
-        tournamentNumber: defaultNumber
-      }))
-    } finally {
-      setInitialLoading(false)
     }
-  }
+
+    if (user && getStoredAuthToken()) {
+      if (isEditing) {
+        fetchTournamentData()
+      } else {
+        if (!initialTournamentNumber) {
+          fetchNextTournamentNumber()
+        } else {
+          setTournamentNumber(initialTournamentNumber)
+          setFormData(prev => ({
+            ...prev,
+            tournamentNumber: initialTournamentNumber
+          }))
+          setInitialLoading(false)
+        }
+      }
+    }
+  }, [user, isEditing, initialTournamentNumber, fetchTournamentData])
 
   const fetchTournamentData = async () => {
     try {
@@ -296,6 +329,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber }
       
       // Limpiar draft al completar exitosamente
       clearDraft()
+      await clearCalendarDraft()
       
       // Mostrar notificación de éxito
       toast.success(`Torneo ${formData.tournamentNumber} ${isEditing ? 'Actualizado' : 'Creado'}`)

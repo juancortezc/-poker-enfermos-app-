@@ -35,15 +35,17 @@ export function RestrictedCard({
 
   const cardContent = (
     <Card className={`
-      h-32 relative
-      ${isBlocked 
-        ? 'opacity-60 cursor-not-allowed' 
-        : 'cursor-pointer hover:scale-105'
+      relative h-28 sm:h-32 overflow-hidden
+      border-white/10 bg-white/5 backdrop-blur-md
+      ${isBlocked
+        ? 'cursor-not-allowed opacity-70'
+        : 'cursor-pointer transition-transform hover:-translate-y-1 hover:border-poker-red/40 hover:shadow-[0_18px_45px_rgba(229,9,20,0.18)]'
       }
-      flex flex-col items-center justify-center p-4
-      transition-all duration-300
+      flex flex-col items-center justify-between p-3 sm:p-4
+      transition-all duration-300 ease-out
       ${className}
     `}>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/12 via-transparent to-black/60" aria-hidden />
       {/* Lock overlay for restricted items */}
       {showLock && (
         <div className="absolute top-2 right-2 z-10">
@@ -53,25 +55,24 @@ export function RestrictedCard({
         </div>
       )}
 
-      <div className="flex-1 flex items-center justify-center">
+      <div className="relative flex flex-1 items-center justify-center">
         <div className={`
-          w-14 h-14 flex items-center justify-center rounded-xl
-          ${isBlocked 
-            ? 'bg-gray-700/50' 
-            : 'bg-poker-red'
+          flex h-12 w-12 items-center justify-center rounded-xl sm:h-14 sm:w-14
+          ${isBlocked
+            ? 'bg-gray-700/60'
+            : 'bg-gradient-to-br from-poker-red to-poker-orange shadow-[0_0_18px_rgba(229,9,20,0.35)]'
           }
-          shadow-inner
         `}>
-          <Icon className={`w-7 h-7 ${
-            isBlocked 
-              ? 'text-gray-500' 
-              : 'text-white drop-shadow-lg'
+          <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${
+            isBlocked
+              ? 'text-gray-500'
+              : 'text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.35)]'
           }`} />
         </div>
       </div>
       
-      <div className="text-center">
-        <h3 className={`text-sm font-semibold tracking-wide ${
+      <div className="relative text-center">
+        <h3 className={`text-xs sm:text-sm font-semibold tracking-wide ${
           isBlocked ? 'text-gray-500' : 'text-white'
         }`}>
           {title}
@@ -79,7 +80,7 @@ export function RestrictedCard({
         
         {/* Restriction message */}
         {showLock && userRole && feature && (
-          <p className="text-xs text-gray-400 mt-1 leading-tight">
+          <p className="mt-1 text-[10px] leading-tight text-gray-400">
             {getRestrictionMessage(userRole, feature)}
           </p>
         )}

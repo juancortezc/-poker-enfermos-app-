@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { X, Download, Share2 } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,7 +8,8 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
 }
 
-const DISMISS_KEY = 'pwa-install-dismissed-v1'
+const DISMISS_KEY = 'pwa-install-dismissed-at-v1'
+const INSTALL_FLAG = 'installed'
 
 const isStandaloneDisplayMode = () => {
   if (typeof window === 'undefined') return false
@@ -29,17 +30,32 @@ export function PwaInstallPrompt() {
   const [visible, setVisible] = useState(false)
   const [isIos, setIsIos] = useState(false)
   const [showIosSteps, setShowIosSteps] = useState(false)
+  const dismissedTodayRef = useRef(false)
+
+  const markDismissedToday = () => {
+    if (typeof window === 'undefined') return
+    const today = new Date().toISOString().slice(0, 10)
+    window.localStorage.setItem(DISMISS_KEY, today)
+    dismissedTodayRef.current = true
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const dismissed = window.localStorage.getItem(DISMISS_KEY)
+    const today = new Date().toISOString().slice(0, 10)
+    let dismissed = window.localStorage.getItem(DISMISS_KEY)
+
+    if (dismissed === '1') {
+      window.localStorage.setItem(DISMISS_KEY, today)
+      dismissed = today
+    }
+
+    const hasInstalled = dismissed === INSTALL_FLAG
+    const hasDismissedToday = dismissed === today || hasInstalled
+    dismissedTodayRef.current = hasDismissedToday
+
     const iosDevice = detectIos()
     setIsIos(iosDevice)
-
-    if (dismissed === '1' && !iosDevice) {
-      // We'll still allow manual prompts later via custom event
-    }
 
     if (isStandaloneDisplayMode()) {
       return
@@ -47,6 +63,9 @@ export function PwaInstallPrompt() {
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault()
+      if (dismissedTodayRef.current) {
+        return
+      }
       setDeferredPrompt(event as BeforeInstallPromptEvent)
       setVisible(true)
       setShowIosSteps(false)
@@ -55,7 +74,8 @@ export function PwaInstallPrompt() {
     const handleAppInstalled = () => {
       setDeferredPrompt(null)
       setVisible(false)
-      window.localStorage.setItem(DISMISS_KEY, '1')
+      window.localStorage.setItem(DISMISS_KEY, INSTALL_FLAG)
+      dismissedTodayRef.current = true
     }
 
     const handleManualPrompt = (event: Event) => {
@@ -70,7 +90,7 @@ export function PwaInstallPrompt() {
     window.addEventListener('appinstalled', handleAppInstalled)
     window.addEventListener('pwa:show', handleManualPrompt as EventListener)
 
-    if (iosDevice && dismissed !== '1') {
+    if (iosDevice && !hasDismissedToday) {
       setVisible(true)
       setShowIosSteps(true)
     }
@@ -85,9 +105,7 @@ export function PwaInstallPrompt() {
   const hidePrompt = () => {
     setVisible(false)
     setDeferredPrompt(null)
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(DISMISS_KEY, '1')
-    }
+    markDismissedToday()
   }
 
   const handleInstallClick = async () => {

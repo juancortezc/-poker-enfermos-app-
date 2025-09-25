@@ -3,27 +3,36 @@
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 import { getDashboardFeatures } from '@/lib/permissions'
+import type { DashboardFeature } from '@/lib/permissions'
 import { AdminCard } from '@/components/ui/RestrictedCard'
-import { 
-  Calendar, 
-  FileText, 
+import {
+  Award,
   BarChart3,
+  CalendarCheck,
   CalendarDays,
-  Trophy,
-  Users,
+  CalendarPlus,
   FileSpreadsheet,
-  Award
+  FileText,
+  Flame,
+  HeartPulse,
+  Sparkles,
+  Trophy,
+  Users
 } from 'lucide-react'
 
 const iconMap = {
+  resultados: Award,
+  'sin-ganar': Flame,
+  'club-1000': Sparkles,
+  'enfermos-base': HeartPulse,
   calendar: CalendarDays,
   regulations: FileText,
-  resultados: Award,
-  stats: BarChart3,
-  'game-dates': Calendar,
+  'game-dates': CalendarCheck,
   tournaments: Trophy,
+  'calendar-builder': CalendarPlus,
   players: Users,
   import: FileSpreadsheet,
+  stats: BarChart3,
 }
 
 export default function AdminLimitedDashboard() {
@@ -33,83 +42,77 @@ export default function AdminLimitedDashboard() {
 
   const features = getDashboardFeatures(user.role)
 
+  const renderFeature = (feature: DashboardFeature, index: number, offset = 0) => {
+    const Icon = iconMap[feature.id as keyof typeof iconMap] || BarChart3
+    const isInteractive = feature.accessible && !feature.restricted
+
+    const card = (
+      <AdminCard
+        title={feature.title}
+        icon={Icon}
+        accessible={feature.accessible}
+        restricted={feature.restricted}
+        userRole={user.role}
+        feature={feature.permission}
+        index={offset + index}
+      />
+    )
+
+    if (isInteractive) {
+      return (
+        <Link key={feature.id} href={feature.href} className="block">
+          {card}
+        </Link>
+      )
+    }
+
+    return (
+      <div key={feature.id} className="block" aria-disabled>
+        {card}
+      </div>
+    )
+  }
+
   return (
-    <div className="px-4 pt-20 pb-20">
-      <div className="max-w-md mx-auto">
+    <div className="relative px-4 pt-16 pb-28">
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80" aria-hidden />
 
-        {/* Funciones disponibles */}
+      <div className="relative mx-auto flex w-full max-w-xl flex-col gap-8">
         {features.base.length > 0 && (
-          <div className="mb-8">
-            <div className="grid grid-cols-2 gap-4">
-              {features.base.map((feature, index) => {
-                const Icon = iconMap[feature.id as keyof typeof iconMap] || BarChart3
-                
-                const cardElement = (
-                  <AdminCard
-                    key={feature.id}
-                    title={feature.title}
-                    icon={Icon}
-                    accessible={feature.accessible}
-                    restricted={feature.restricted}
-                    userRole={user.role}
-                    feature={feature.id}
-                    index={index}
-                  />
-                )
-
-                return feature.accessible && !feature.restricted ? (
-                  <Link key={feature.id} href={feature.href}>
-                    {cardElement}
-                  </Link>
-                ) : (
-                  cardElement
-                )
-              })}
+          <section className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-white/70">Accesos rápidos</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">
+                Menu
+              </span>
             </div>
-          </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              {features.base.map((feature, index) => renderFeature(feature, index))}
+            </div>
+          </section>
         )}
 
-        {/* Funciones administrativas (solo Comisión o con restricciones) */}
         {(user.role === 'Comision' || features.admin.some(f => f.accessible || f.restricted)) && (
-          <div>
-            <div className="grid grid-cols-2 gap-4">
-              {features.admin.map((feature, index) => {
-                const Icon = iconMap[feature.id as keyof typeof iconMap] || BarChart3
-                
-                const cardElement = (
-                  <AdminCard
-                    key={feature.id}
-                    title={feature.title}
-                    icon={Icon}
-                    accessible={feature.accessible}
-                    restricted={feature.restricted}
-                    userRole={user.role}
-                    feature={feature.id}
-                    index={features.base.length + index}
-                  />
-                )
-
-                return feature.accessible && !feature.restricted ? (
-                  <Link key={feature.id} href={feature.href}>
-                    {cardElement}
-                  </Link>
-                ) : (
-                  cardElement
-                )
-              })}
+          <section className="rounded-3xl border border-poker-red/20 bg-poker-red/5 p-4 shadow-[0_16px_50px_rgba(229,9,20,0.18)] backdrop-blur-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-white/70">Comisión</span>
+              <span className="inline-flex items-center gap-2 rounded-full bg-poker-red/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
+                <span className="h-2 w-2 rounded-full bg-poker-red animate-pulse" />
+                Exclusivo
+              </span>
             </div>
-          </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              {features.admin.map((feature, index) => renderFeature(feature, index, features.base.length))}
+            </div>
+          </section>
         )}
 
-        {/* Información adicional para usuarios limitados */}
         {user.role !== 'Comision' && (
-          <div className="mt-8 p-4 bg-gray-800/50 rounded-lg">
-            <p className="text-gray-400 text-sm text-center">
-              {user.role === 'Enfermo' 
-                ? 'Como Enfermo, tienes acceso a estadísticas y documentos del torneo.'
-                : 'Como Invitado, puedes consultar información pública del torneo.'
-              }
-            </p>
+          <div className="rounded-3xl border border-white/10 bg-white/10 p-4 text-center text-sm text-white/70">
+            {user.role === 'Enfermo'
+              ? 'Como Enfermo tienes acceso directo a resultados, calendario y estadísticas públicas.'
+              : 'Como Invitado puedes consultar la información general del torneo desde este menú.'
+            }
           </div>
         )}
       </div>
