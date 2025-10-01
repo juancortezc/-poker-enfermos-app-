@@ -226,27 +226,35 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
      * 5. Menos ausencias (mejor asistencia)
      */
     const compareRankings = (a: PlayerRanking, b: PlayerRanking): number => {
-      // 1. Puntos totales (mayor gana)
+      const aScore = a.finalScore ?? a.totalPoints;
+      const bScore = b.finalScore ?? b.totalPoints;
+
+      // 1. Puntuación final (mayor gana)
+      if (aScore !== bScore) {
+        return bScore - aScore;
+      }
+
+      // 2. Puntos totales como desempate secundario (para contexto histórico)
       if (a.totalPoints !== b.totalPoints) {
         return b.totalPoints - a.totalPoints;
       }
-      
-      // 2. Más primeros lugares (victorias)
+
+      // 3. Más primeros lugares (victorias)
       if (a.firstPlaces !== b.firstPlaces) {
         return b.firstPlaces - a.firstPlaces;
       }
-      
-      // 3. Más segundos lugares
+
+      // 4. Más segundos lugares
       if (a.secondPlaces !== b.secondPlaces) {
         return b.secondPlaces - a.secondPlaces;
       }
-      
-      // 4. Más terceros lugares
+
+      // 5. Más terceros lugares
       if (a.thirdPlaces !== b.thirdPlaces) {
         return b.thirdPlaces - a.thirdPlaces;
       }
-      
-      // 5. Menos ausencias (mejor asistencia)
+
+      // 6. Menos ausencias (mejor asistencia)
       if (a.absences !== b.absences) {
         return a.absences - b.absences; // Menor es mejor
       }

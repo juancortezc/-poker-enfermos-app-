@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
             gameDateId,
             position: 1,
             eliminatedPlayerId: eliminatorPlayerId,
-            eliminatorPlayerId: null,
+            eliminatorPlayerId,
             points: winnerPoints,
             eliminationTime: new Date().toISOString()
           }
@@ -197,8 +197,7 @@ export async function POST(request: NextRequest) {
         await prisma.gameDate.update({
           where: { id: gameDateId },
           data: {
-            status: 'completed',
-            completedAt: new Date()
+            status: 'completed'
           }
         });
         

@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
 import { Plus, ChevronDown } from 'lucide-react'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
-import { useAuth } from '@/contexts/AuthContext'
 import { useNotifications } from '@/hooks/useNotifications'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { useSWRConfig } from 'swr'
+import { swrKeys } from '@/lib/swr-config'
 
 interface Player {
   id: string
@@ -25,6 +26,7 @@ interface EliminationFormProps {
     id: number
     dateNumber: number
   }
+  tournamentId: number
   players: Player[]
   eliminations: Elimination[]
   nextPosition: number
@@ -33,13 +35,14 @@ interface EliminationFormProps {
 
 export function EliminationForm({ 
   gameDate, 
+  tournamentId,
   players, 
   eliminations, 
   nextPosition,
   onEliminationCreated 
 }: EliminationFormProps) {
-  const { user } = useAuth()
   const { notifyPlayerEliminated, notifyWinner } = useNotifications()
+  const { mutate } = useSWRConfig()
   const [eliminatedPlayerId, setEliminatedPlayerId] = useState('')
   const [eliminatorPlayerId, setEliminatorPlayerId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -125,6 +128,14 @@ export function EliminationForm({
       
       // Notificar al componente padre
       onEliminationCreated()
+
+      // Refrescar vistas públicas para reflejar el cambio
+      mutate(swrKeys.activeGameDate())
+      mutate(swrKeys.activeTournament())
+      mutate(swrKeys.gameDateEliminations(gameDate.id))
+      mutate(swrKeys.gameDate(gameDate.id))
+      mutate(swrKeys.gameDates(tournamentId))
+      mutate(swrKeys.tournamentRanking(tournamentId))
 
     } catch (err) {
       console.error('Error creating elimination:', err)

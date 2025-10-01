@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Edit2, Check, X } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { useSWRConfig } from 'swr'
+import { swrKeys } from '@/lib/swr-config'
 
 interface Player {
   id: string
@@ -22,15 +23,19 @@ interface Elimination {
 interface EliminationHistoryProps {
   eliminations: Elimination[]
   players: Player[]
+  tournamentId: number
+  gameDateId: number
   onEliminationUpdated: () => void
 }
 
 export function EliminationHistory({ 
   eliminations, 
   players, 
+  tournamentId,
+  gameDateId,
   onEliminationUpdated 
 }: EliminationHistoryProps) {
-  const { user } = useAuth()
+  const { mutate } = useSWRConfig()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     eliminatedPlayerId: '',
@@ -84,6 +89,12 @@ export function EliminationHistory({
 
       handleCancelEdit()
       onEliminationUpdated()
+      mutate(swrKeys.activeGameDate())
+      mutate(swrKeys.activeTournament())
+      mutate(swrKeys.gameDateEliminations(gameDateId))
+      mutate(swrKeys.gameDate(gameDateId))
+      mutate(swrKeys.gameDates(tournamentId))
+      mutate(swrKeys.tournamentRanking(tournamentId))
 
     } catch (error) {
       console.error('Error updating elimination:', error)

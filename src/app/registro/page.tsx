@@ -257,6 +257,7 @@ export default function RegistroPage() {
           {activePlayers > 1 && (
             <EliminationForm
               gameDate={activeGameDate}
+              tournamentId={activeGameDate.tournament.id}
               players={players}
               eliminations={eliminations}
               nextPosition={nextPosition}
@@ -278,6 +279,8 @@ export default function RegistroPage() {
           <EliminationHistory
             eliminations={eliminations}
             players={players}
+            tournamentId={activeGameDate.tournament.id}
+            gameDateId={activeGameDate.id}
             onEliminationUpdated={fetchAllData}
           />
         </div>

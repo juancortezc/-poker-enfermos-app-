@@ -27,8 +27,14 @@ interface FechasTableProps {
   userPin?: string | null;
 }
 
+type AvailableDate = {
+  id: number;
+  dateNumber: number;
+  status: string;
+}
+
 export default function FechasTable({ tournamentId }: FechasTableProps) {
-  const [completedDates, setCompletedDates] = useState<{id: number, dateNumber: number}[]>([]);
+  const [availableDates, setAvailableDates] = useState<AvailableDate[]>([]);
   const [selectedDateId, setSelectedDateId] = useState<number | null>(null);
   const [eliminations, setEliminations] = useState<Elimination[]>([]);
 
@@ -43,18 +49,29 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
   useEffect(() => {
     if (tournamentData) {
       // Filtrar fechas completadas y ordenarlas por dateNumber descendente
-      const completed = tournamentData.gameDates && Array.isArray(tournamentData.gameDates)
+      const dates = tournamentData.gameDates && Array.isArray(tournamentData.gameDates)
         ? tournamentData.gameDates
-            .filter((date: { status: string }) => date.status === 'completed')
+            .filter((date: { status: string }) => ['completed', 'in_progress'].includes(date.status))
             .sort((a: { dateNumber: number }, b: { dateNumber: number }) => b.dateNumber - a.dateNumber)
-            .map((date: { id: number; dateNumber: number }) => ({ id: date.id, dateNumber: date.dateNumber }))
+            .map((date: { id: number; dateNumber: number; status: string }) => ({
+              id: date.id,
+              dateNumber: date.dateNumber,
+              status: date.status
+            }))
         : [];
-      
-      setCompletedDates(completed);
-      
-      // Seleccionar automáticamente la fecha más reciente
-      if (completed.length > 0) {
-        setSelectedDateId(completed[0].id);
+
+      setAvailableDates(dates);
+
+      if (dates.length > 0) {
+        const activeDate = dates.find(date => date.status === 'in_progress') || dates[0];
+        setSelectedDateId(currentId => {
+          if (currentId && dates.some(date => date.id === currentId)) {
+            return currentId;
+          }
+          return activeDate.id;
+        });
+      } else {
+        setSelectedDateId(null);
       }
     }
   }, [tournamentData]);
@@ -99,11 +116,11 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
     );
   }
 
-  if (completedDates.length === 0) {
+  if (availableDates.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-poker-muted text-lg">No hay fechas completadas</p>
-        <p className="text-poker-muted mt-2">Las fechas aparecerán aquí una vez que se completen</p>
+        <p className="text-poker-muted text-lg">No hay fechas disponibles</p>
+        <p className="text-poker-muted mt-2">Las eliminaciones se mostrarán aquí cuando se registre una fecha.</p>
       </div>
     );
   }
@@ -124,9 +141,9 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
             "
           >
             <option value="">Seleccionar Fecha</option>
-            {completedDates.map(date => (
+            {availableDates.map(date => (
               <option key={date.id} value={date.id}>
-                Fecha {date.dateNumber}
+                {`Fecha ${date.dateNumber}${date.status === 'in_progress' ? ' (En curso)' : ''}`}
               </option>
             ))}
           </select>

@@ -7,6 +7,33 @@ import { usePlayerTournamentDetails } from '@/hooks/usePlayerTournamentDetails';
 import RankingEvolutionChart from './RankingEvolutionChart';
 import useSWR from 'swr';
 
+interface ChampionPlayer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl?: string | null;
+  isActive: boolean;
+  aliases: string[];
+}
+
+interface ChampionData {
+  player: ChampionPlayer | null;
+  championshipsCount: number;
+  tournamentNumbers: number[];
+}
+
+interface ChampionStatsResponse {
+  success: boolean;
+  data?: {
+    all: ChampionData[];
+    top3: ChampionData[];
+    others: ChampionData[];
+    totalChampions: number;
+    totalChampionships: number;
+  };
+  error?: string;
+}
+
 interface PlayerDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,14 +53,14 @@ export default function PlayerDetailModal({
   );
 
   // Obtener estadísticas de campeonatos
-  const { data: championStats } = useSWR(
+  const { data: championStats } = useSWR<ChampionStatsResponse>(
     isOpen ? '/api/tournaments/champions-stats' : null,
-    (url) => fetch(url).then(res => res.json())
+    (url: string) => fetch(url).then(res => res.json() as Promise<ChampionStatsResponse>)
   );
 
   // Calcular campeonatos del jugador actual
   const playerChampionships = championStats?.data?.all?.find(
-    (champion: any) => champion.player?.id === playerId
+    (champion) => champion.player?.id === playerId
   );
 
   if (!isOpen) return null;
