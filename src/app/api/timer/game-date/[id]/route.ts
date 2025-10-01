@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
+import { computeTimerState } from '@/lib/timer-state'
 
 export async function GET(
   request: NextRequest,
@@ -56,30 +57,21 @@ export async function GET(
         )
       }
 
-      // Obtener blind levels del torneo
       const blindLevels = gameDate.tournament.blindLevels
+      const currentBlind = blindLevels.find(bl => bl.level === timerState.currentLevel) || null
+      const nextBlind = blindLevels.find(bl => bl.level === timerState.currentLevel + 1) || null
 
-      // Encontrar el blind level actual y el siguiente
-      const currentBlind = blindLevels.find(bl => bl.level === timerState.currentLevel)
-      const nextBlind = blindLevels.find(bl => bl.level === timerState.currentLevel + 1)
-
-      // Calcular tiempo restante en tiempo real si el timer está activo
-      let actualTimeRemaining = timerState.timeRemaining
-      
-      if (timerState.status === 'active' && timerState.levelStartTime) {
-        const now = new Date()
-        const levelStartTime = new Date(timerState.levelStartTime)
-        const elapsedSeconds = Math.floor((now.getTime() - levelStartTime.getTime()) / 1000)
-        const totalDuration = (currentBlind?.duration || 0) * 60 // Convert minutes to seconds
-        
-        actualTimeRemaining = Math.max(0, totalDuration - elapsedSeconds)
-      }
+      const computed = computeTimerState(timerState)
 
       return NextResponse.json({
         success: true,
         timerState: {
           ...timerState,
-          timeRemaining: actualTimeRemaining
+          timeRemaining: computed.timeRemaining,
+          totalElapsed: computed.totalElapsed,
+          status: computed.status,
+          levelStartTime: computed.levelStartTime,
+          startTime: computed.startTime
         },
         currentBlind,
         nextBlind,
@@ -92,7 +84,7 @@ export async function GET(
           dateNumber: gameDate.dateNumber,
           status: gameDate.status
         },
-        isActive: timerState.status === 'active',
+        isActive: computed.status === 'active',
         canControl: user.role === 'Comision'
       })
 

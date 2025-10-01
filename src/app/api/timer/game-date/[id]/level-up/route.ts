@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
+import { deriveLevelChangeUpdate } from '@/lib/timer-state'
 
 export async function POST(
   request: NextRequest,
@@ -81,17 +82,14 @@ export async function POST(
         )
       }
 
-      // Calcular nuevo tiempo restante basado en la duración del nuevo nivel
-      const newTimeRemaining = targetBlindLevel.duration * 60 // convertir minutos a segundos
+      const newTimeRemaining = targetBlindLevel.duration * 60
+      const updatePayload = deriveLevelChangeUpdate(timerState, toLevel, newTimeRemaining)
 
-      // Actualizar el timer state
       const updatedTimer = await prisma.timerState.update({
         where: { id: timerState.id },
         data: {
-          currentLevel: toLevel,
-          timeRemaining: newTimeRemaining,
-          levelStartTime: new Date(),
-          updatedAt: new Date()
+          ...updatePayload,
+          status: timerState.status // Mantener el estado actual (activo o pausado)
         }
       })
 
@@ -107,7 +105,8 @@ export async function POST(
             levelUpAt: new Date().toISOString(),
             newDuration: targetBlindLevel.duration,
             newSmallBlind: targetBlindLevel.smallBlind,
-            newBigBlind: targetBlindLevel.bigBlind
+            newBigBlind: targetBlindLevel.bigBlind,
+            timeRemaining: updatePayload.timeRemaining
           }
         }
       })

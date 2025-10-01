@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getWinnerPoints } from '@/lib/tournament-utils';
+import { computeTimerState } from '@/lib/timer-state';
 
 export async function GET(
   request: NextRequest,
@@ -43,6 +44,11 @@ export async function GET(
       );
     }
 
+    // Obtener timer state actual
+    const timerState = await prisma.timerState.findUnique({
+      where: { gameDateId }
+    })
+
     // Calcular jugadores activos (no eliminados)
     const eliminatedPlayerIds = gameDate.eliminations.map(e => e.eliminatedPlayerId);
     const activePlayers = gameDate.playerIds.filter(
@@ -61,47 +67,12 @@ export async function GET(
       }
     });
 
-    // Calcular el nivel de blind actual basado en el tiempo transcurrido
-    let currentBlindLevel = gameDate.tournament.blindLevels[0];
-    if (gameDate.startTime) {
-      const elapsedMinutes = Math.floor(
-        (Date.now() - gameDate.startTime.getTime()) / 1000 / 60
-      );
-      
-      let accumulatedTime = 0;
-      for (const blind of gameDate.tournament.blindLevels) {
-        if (blind.duration === 0) {
-          // Último nivel sin límite de tiempo
-          currentBlindLevel = blind;
-          break;
-        }
-        
-        accumulatedTime += blind.duration;
-        if (elapsedMinutes < accumulatedTime) {
-          currentBlindLevel = blind;
-          break;
-        }
-      }
-    }
-
-    // Calcular tiempo restante del blind actual
-    let timeRemaining = 0;
-    if (currentBlindLevel.duration > 0 && gameDate.startTime) {
-      const elapsedMinutes = Math.floor(
-        (Date.now() - gameDate.startTime.getTime()) / 1000 / 60
-      );
-      
-      let levelStartTime = 0;
-      for (const blind of gameDate.tournament.blindLevels) {
-        if (blind.level === currentBlindLevel.level) {
-          break;
-        }
-        levelStartTime += blind.duration;
-      }
-      
-      const elapsedInCurrentLevel = elapsedMinutes - levelStartTime;
-      timeRemaining = Math.max(0, currentBlindLevel.duration * 60 - elapsedInCurrentLevel * 60);
-    }
+    const blindLevels = gameDate.tournament.blindLevels
+    const activeTimer = timerState ? computeTimerState(timerState) : null
+    const currentBlindLevel = blindLevels.find(bl => bl.level === (activeTimer?.currentLevel || 1))
+      || blindLevels[0]
+    const nextBlindLevel = blindLevels.find(bl => bl.level === (currentBlindLevel.level + 1)) || null
+    const timeRemaining = activeTimer ? activeTimer.timeRemaining : 0;
 
     // Calcular próxima posición
     const lastElimination = gameDate.eliminations.reduce((max, e) => 
@@ -139,8 +110,16 @@ export async function GET(
         smallBlind: currentBlindLevel.smallBlind,
         bigBlind: currentBlindLevel.bigBlind,
         duration: currentBlindLevel.duration,
-        timeRemaining
+        timeRemaining,
+        next: nextBlindLevel ? {
+          level: nextBlindLevel.level,
+          smallBlind: nextBlindLevel.smallBlind,
+          bigBlind: nextBlindLevel.bigBlind,
+          duration: nextBlindLevel.duration
+        } : null,
+        status: activeTimer?.status || timerState?.status || 'inactive'
       },
+      timerState: activeTimer,
       activePlayers: activePlayersData,
       recentEliminations: gameDate.eliminations
         .sort((a, b) => b.position - a.position)

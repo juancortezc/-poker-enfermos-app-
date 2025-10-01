@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
+import { deriveResumeUpdate } from '@/lib/timer-state'
 
 export async function POST(
   request: NextRequest,
@@ -56,14 +57,11 @@ export async function POST(
       }
 
       // Reanudar el timer
+      const updatePayload = deriveResumeUpdate(timerState)
+
       const updatedTimer = await prisma.timerState.update({
         where: { id: timerState.id },
-        data: {
-          status: 'active',
-          levelStartTime: new Date(), // Reiniciar el tiempo de nivel
-          pausedAt: null,
-          lastUpdated: new Date()
-        }
+        data: updatePayload
       })
 
       // Registrar la acción
@@ -76,7 +74,7 @@ export async function POST(
           toLevel: timerState.currentLevel,
           metadata: {
             resumedAt: new Date().toISOString(),
-            timeRemaining: timerState.timeRemaining
+            timeRemaining: updatePayload.timeRemaining
           }
         }
       })

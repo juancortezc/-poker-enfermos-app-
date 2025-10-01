@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { useGameDateLiveStatus } from '@/hooks/useGameDateLiveStatus'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useTimerStateById } from '@/hooks/useTimerState'
 import { Card, CardContent } from '@/components/ui/card'
 import { Play, Pause, Bell, BellOff } from 'lucide-react'
 import { canCRUD } from '@/lib/auth'
-import { formatTime } from '@/lib/timer-utils'
 import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface TimerDisplayProps {
@@ -25,14 +25,24 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
   const { gameDate: activeGameDate } = useActiveGameDate()
   const effectiveGameDateId = gameDateId || activeGameDate?.id || null
   
-  // Obtener estado en tiempo real
+  // Estado "público" para notificaciones y datos generales
   const { 
     liveStatus, 
-    isLoading, 
+    isLoading: liveLoading, 
     isError,
     refresh,
-    isGameActive
   } = useGameDateLiveStatus(effectiveGameDateId)
+
+  // Estado autoritativo del timer (TimerState)
+  const {
+    timerState,
+    currentBlindLevel,
+    formattedTimeRemaining,
+    isLoading: timerLoading,
+    isActive: timerActive,
+    isPaused: timerPaused,
+    refresh: refreshTimer
+  } = useTimerStateById(effectiveGameDateId)
 
   // Hook de notificaciones
   const {
@@ -43,12 +53,18 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     notifyBlindChange,
   } = useNotifications()
 
-  // Estado local para controles y notificaciones
   const [isControlling, setIsControlling] = useState(false)
   const [lastNotifiedLevel, setLastNotifiedLevel] = useState<number | null>(null)
-  const [lastWarningTime, setLastWarningTime] = useState<number | null>(null)
+  const [lastWarningLevel, setLastWarningLevel] = useState<number | null>(null)
 
-  // Control handlers
+  const isGameActive = timerActive && !timerPaused
+
+  const activeBlind = currentBlindLevel || liveStatus?.currentBlind || null
+  const timeRemainingSeconds = timerState?.timeRemaining ?? activeBlind?.timeRemaining ?? 0
+  const durationMinutes = activeBlind?.duration ?? 0
+  const displayTime = durationMinutes === 0 ? 'SIN LÍMITE' : formattedTimeRemaining
+  const isCriticalTime = durationMinutes > 0 && timeRemainingSeconds < 300
+
   const handlePause = async () => {
     if (!effectiveGameDateId || isControlling) return
     setIsControlling(true)
@@ -58,7 +74,7 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
         headers: buildAuthHeaders({}, { includeJson: true })
       })
       if (response.ok) {
-        refresh()
+        await Promise.all([refresh(), refreshTimer()])
       }
     } catch (error) {
       console.error('Error pausing timer:', error)
@@ -76,7 +92,7 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
         headers: buildAuthHeaders({}, { includeJson: true })
       })
       if (response.ok) {
-        refresh()
+        await Promise.all([refresh(), refreshTimer()])
       }
     } catch (error) {
       console.error('Error resuming timer:', error)
@@ -85,56 +101,49 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     }
   }
 
-  // Efecto para manejar notificaciones de timer
+  // Notificaciones automáticas cuando cambia el blind o queda 1 minuto
   useEffect(() => {
     if (!liveStatus || !liveStatus.currentBlind || !notificationSupported || permission !== 'granted') {
-      return;
+      return
     }
 
-    const { currentBlind } = liveStatus;
-    const timeRemaining = currentBlind.timeRemaining || 0;
-    const currentLevel = currentBlind.level;
-    const duration = currentBlind.duration || 0;
+    const { currentBlind } = liveStatus
+    const timeRemaining = currentBlind.timeRemaining || 0
+    const currentLevel = currentBlind.level
 
-    // Solo procesar si el timer está activo y tiene duración definida
-    if (!isGameActive || duration === 0) return;
+    if (!isGameActive) return
 
-    // Notificación de 1 minuto restante
-    if (timeRemaining <= 60 && timeRemaining > 55 && lastWarningTime !== currentLevel) {
+    // Aviso de 1 minuto restante
+    if (timeRemaining <= 60 && timeRemaining > 55 && lastWarningLevel !== currentLevel) {
       if (preferences.timer.oneMinuteWarning) {
-        notifyTimerWarning();
-        setLastWarningTime(currentLevel);
+        notifyTimerWarning()
+        setLastWarningLevel(currentLevel)
       }
     }
 
-    // Notificación de cambio de nivel (cuando el nivel cambia)
-    if (currentLevel !== lastNotifiedLevel && lastNotifiedLevel !== null) {
+    // Notificación de cambio de nivel
+    if (lastNotifiedLevel !== null && currentLevel !== lastNotifiedLevel) {
       if (preferences.timer.blindChange) {
-        const smallBlind = currentBlind.smallBlind || 0;
-        const bigBlind = currentBlind.bigBlind || 0;
-        notifyBlindChange(currentLevel, smallBlind, bigBlind);
+        notifyBlindChange(currentLevel, currentBlind.smallBlind || 0, currentBlind.bigBlind || 0)
       }
     }
 
-    // Actualizar el último nivel notificado
     if (currentLevel !== lastNotifiedLevel) {
-      setLastNotifiedLevel(currentLevel);
+      setLastNotifiedLevel(currentLevel)
     }
-
   }, [
-    liveStatus, 
-    isGameActive, 
-    notificationSupported, 
-    permission, 
+    liveStatus,
+    isGameActive,
+    notificationSupported,
+    permission,
     preferences,
     notifyTimerWarning,
     notifyBlindChange,
     lastNotifiedLevel,
-    lastWarningTime
-  ]);
+    lastWarningLevel
+  ])
 
-  // Loading state
-  if (isLoading) {
+  if (liveLoading || timerLoading) {
     return (
       <div className="animate-pulse">
         <div className="admin-card p-8">
@@ -149,7 +158,6 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     )
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="admin-card-error p-8 text-center">
@@ -166,7 +174,6 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     )
   }
 
-  // Check for CREATED status (configured but not started)
   if (activeGameDate?.status === 'CREATED') {
     return (
       <div className="admin-card p-8 text-center">
@@ -185,8 +192,7 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     )
   }
 
-  // No active game
-  if (!effectiveGameDateId || !liveStatus) {
+  if (!effectiveGameDateId || (!liveStatus && !timerState)) {
     return (
       <div className="admin-card p-8 text-center">
         <div className="text-6xl mb-4">⏸️</div>
@@ -196,33 +202,27 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
     )
   }
 
-  const { currentBlind } = liveStatus
-  const timeRemaining = currentBlind?.timeRemaining || 0
-  const duration = currentBlind?.duration || 20
-
-  // Formatear tiempo
-  const formattedTime = duration === 0 
-    ? "SIN LÍMITE" 
-    : formatTime(Math.floor(timeRemaining))
-
-  // Determinar si el tiempo es crítico (menos de 5 minutos)
-  const isCriticalTime = duration > 0 && timeRemaining < 300
-
   return (
     <Card className="admin-card overflow-hidden">
       <CardContent className="p-0">
-        {/* Time Display */}
         <div className="relative bg-gradient-to-b from-poker-dark to-poker-dark-lighter p-8">
           <div className="relative z-10">
-            <div className={`text-7xl md:text-8xl font-mono font-black text-center mb-2 ${
-              isCriticalTime ? 'text-red-500 animate-pulse' : 'text-white'
-            }`} style={{ letterSpacing: '0.1em' }}>
-              {formattedTime}
+            <div
+              className={`text-7xl md:text-8xl font-mono font-black text-center mb-2 ${
+                isCriticalTime ? 'text-red-500 animate-pulse' : 'text-white'
+              }`}
+              style={{ letterSpacing: '0.1em' }}
+            >
+              {displayTime}
             </div>
+            {activeBlind && (
+              <div className="text-sm md:text-base font-semibold text-center text-white/80">
+                Blinds: {activeBlind.smallBlind}/{activeBlind.bigBlind}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Control Buttons */}
         {canControl && (
           <div className="border-t border-white/10 p-6 bg-poker-dark">
             <div className="flex items-center justify-between mb-4">
@@ -250,10 +250,10 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
                 )}
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               {isGameActive ? (
-                <button 
+                <button
                   onClick={handlePause}
                   disabled={isControlling}
                   className="btn-admin-neutral h-14 flex items-center justify-center gap-2"
@@ -262,7 +262,7 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
                   PAUSAR
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={handleResume}
                   disabled={isControlling}
                   className="btn-admin-primary h-14 flex items-center justify-center gap-2"
@@ -271,8 +271,7 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
                   REINICIAR
                 </button>
               )}
-              
-              {/* Botón de configuración de notificaciones */}
+
               <button
                 onClick={() => window.location.href = '/notificaciones'}
                 className="btn-admin-secondary h-14 flex items-center justify-center gap-2"

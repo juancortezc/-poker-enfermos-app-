@@ -1,4 +1,5 @@
 import useSWR from 'swr'
+import { useMemo } from 'react'
 import { useActiveGameDate } from './useActiveGameDate'
 
 interface BlindLevel {
@@ -8,129 +9,98 @@ interface BlindLevel {
   duration: number
 }
 
-interface TimerState {
-  id: number
-  gameDateId: number
-  status: 'active' | 'paused' | 'stopped'
-  currentLevel: number
-  timeRemaining: number
-  startTime: string
-  levelStartTime: string
-  blindLevels: BlindLevel[]
-  createdAt: string
-  updatedAt: string
+interface TimerStatePayload {
+  success: boolean
+  timerState: {
+    id: number
+    gameDateId: number
+    status: 'active' | 'paused' | 'stopped'
+    currentLevel: number
+    timeRemaining: number
+    totalElapsed: number
+    startTime: string | null
+    levelStartTime: string | null
+  }
+  currentBlind: BlindLevel | null
+  nextBlind: BlindLevel | null
+  tournament: {
+    id: number
+    name: string
+  }
+  gameDate: {
+    id: number
+    dateNumber: number
+    status: string
+  }
+  isActive: boolean
+  canControl: boolean
 }
 
 interface UseTimerStateReturn {
-  timerState: TimerState | null
+  response: TimerStatePayload | null
+  timerState: TimerStatePayload['timerState'] | null
   currentBlindLevel: BlindLevel | null
   nextBlindLevel: BlindLevel | null
+  formattedTimeRemaining: string
   isLoading: boolean
   isError: boolean
   error: Error | null
   refresh: () => void
   isActive: boolean
   isPaused: boolean
-  formattedTimeRemaining: string
 }
 
-// Función auxiliar para formatear tiempo
 const formatTime = (seconds: number): string => {
+  if (seconds <= 0) return '00:00'
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
-/**
- * Hook para obtener el estado del timer en tiempo real
- * Se conecta automáticamente a la fecha activa
- */
-export function useTimerState(): UseTimerStateReturn {
-  // Primero obtenemos la fecha activa
-  const { gameDate: activeGameDate, isInProgress } = useActiveGameDate({
-    refreshInterval: 5000 // Refresh cada 5 segundos
+function useTimerStateInternal(key: string | null): UseTimerStateReturn {
+  const { data, error, mutate } = useSWR<TimerStatePayload>(key, {
+    refreshInterval: 1000,
+    revalidateOnFocus: true,
+    dedupingInterval: 400
   })
 
-  // Luego obtenemos el estado del timer para esa fecha
-  const { 
-    data: timerState, 
-    error, 
-    mutate: refresh 
-  } = useSWR<TimerState>(
-    activeGameDate && isInProgress ? `/api/timer/game-date/${activeGameDate.id}` : null,
-    {
-      refreshInterval: 1000, // Actualizar cada segundo para el timer
-      revalidateOnFocus: true,
-      dedupingInterval: 500
-    }
-  )
+  const timerState = data?.timerState ?? null
+  const currentBlind = data?.currentBlind ?? null
+  const nextBlind = data?.nextBlind ?? null
 
-  // Calcular blind level actual
-  const currentBlindLevel = timerState?.blindLevels?.find(
-    level => level.level === timerState.currentLevel
-  ) || null
-
-  // Calcular próximo blind level
-  const nextBlindLevel = timerState?.blindLevels?.find(
-    level => level.level === timerState.currentLevel + 1
-  ) || null
-
-  // Formatear tiempo restante
-  const formattedTimeRemaining = timerState?.timeRemaining 
-    ? formatTime(timerState.timeRemaining)
-    : '--:--'
+  const formattedTime = useMemo(() => {
+    if (!timerState) return '--:--'
+    return formatTime(timerState.timeRemaining)
+  }, [timerState])
 
   return {
-    timerState: timerState || null,
-    currentBlindLevel,
-    nextBlindLevel,
-    isLoading: !error && !timerState && !!activeGameDate,
+    response: data ?? null,
+    timerState,
+    currentBlindLevel: currentBlind,
+    nextBlindLevel: nextBlind,
+    formattedTimeRemaining: formattedTime,
+    isLoading: !error && !data && !!key,
     isError: !!error,
     error,
-    refresh,
+    refresh: () => mutate(),
     isActive: timerState?.status === 'active',
-    isPaused: timerState?.status === 'paused',
-    formattedTimeRemaining
+    isPaused: timerState?.status === 'paused'
   }
 }
 
-// Hook alternativo para usar con un gameDateId específico
+export function useTimerState(): UseTimerStateReturn {
+  const { gameDate: activeGameDate, isInProgress } = useActiveGameDate({
+    refreshInterval: 5000
+  })
+
+  const key = activeGameDate && isInProgress
+    ? `/api/timer/game-date/${activeGameDate.id}`
+    : null
+
+  return useTimerStateInternal(key)
+}
+
 export function useTimerStateById(gameDateId: number | null): UseTimerStateReturn {
-  const { 
-    data: timerState, 
-    error, 
-    mutate: refresh 
-  } = useSWR<TimerState>(
-    gameDateId ? `/api/timer/game-date/${gameDateId}` : null,
-    {
-      refreshInterval: 1000,
-      revalidateOnFocus: true,
-      dedupingInterval: 500
-    }
-  )
-
-  const currentBlindLevel = timerState?.blindLevels?.find(
-    level => level.level === timerState.currentLevel
-  ) || null
-
-  const nextBlindLevel = timerState?.blindLevels?.find(
-    level => level.level === timerState.currentLevel + 1
-  ) || null
-
-  const formattedTimeRemaining = timerState?.timeRemaining 
-    ? formatTime(timerState.timeRemaining)
-    : '--:--'
-
-  return {
-    timerState: timerState || null,
-    currentBlindLevel,
-    nextBlindLevel,
-    isLoading: !error && !timerState && !!gameDateId,
-    isError: !!error,
-    error,
-    refresh,
-    isActive: timerState?.status === 'active',
-    isPaused: timerState?.status === 'paused',
-    formattedTimeRemaining
-  }
+  const key = gameDateId ? `/api/timer/game-date/${gameDateId}` : null
+  return useTimerStateInternal(key)
 }

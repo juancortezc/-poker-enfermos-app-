@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
+import { derivePauseUpdate } from '@/lib/timer-state'
 
 export async function POST(
   request: NextRequest,
@@ -56,13 +57,11 @@ export async function POST(
       }
 
       // Pausar el timer
+      const updatePayload = derivePauseUpdate(timerState)
+
       const updatedTimer = await prisma.timerState.update({
         where: { id: timerState.id },
-        data: {
-          status: 'paused',
-          pausedAt: new Date(),
-          lastUpdated: new Date()
-        }
+        data: updatePayload
       })
 
       // Registrar la acción
@@ -74,8 +73,8 @@ export async function POST(
           fromLevel: timerState.currentLevel,
           toLevel: timerState.currentLevel,
           metadata: {
-            pausedAt: new Date().toISOString(),
-            timeRemaining: timerState.timeRemaining
+            pausedAt: updatePayload.pausedAt?.toISOString(),
+            timeRemaining: updatePayload.timeRemaining
           }
         }
       })

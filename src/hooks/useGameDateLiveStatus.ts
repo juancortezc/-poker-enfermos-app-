@@ -28,7 +28,24 @@ export interface LiveGameDateStatus {
     bigBlind: number
     duration: number
     timeRemaining: number
+    status?: string
+    next?: {
+      level: number
+      smallBlind: number
+      bigBlind: number
+      duration: number
+    } | null
   }
+  timerState?: {
+    id: number
+    status: string
+    currentLevel: number
+    timeRemaining: number
+    elapsedInLevel: number
+    totalElapsed: number
+    startTime: Date | string | null
+    levelStartTime: Date | string | null
+  } | null
   activePlayers: Array<{
     id: string
     firstName: string
@@ -143,7 +160,8 @@ export function useGameDateLiveStatus(
     // Timer information
     currentBlind: swrResponse.data?.currentBlind || null,
     timeRemaining: swrResponse.data?.currentBlind.timeRemaining || 0,
-    
+    timerState: swrResponse.data?.timerState || null,
+
     // Players data
     activePlayers: swrResponse.data?.activePlayers || [],
     recentEliminations: swrResponse.data?.recentEliminations || [],
