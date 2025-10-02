@@ -17,9 +17,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
 
       const body = await req.json().catch(() => ({}))
-      const { title, content, isActive } = body as {
+      const { title, content, imageUrl, isActive } = body as {
         title?: string
         content?: string
+        imageUrl?: string
         isActive?: boolean
       }
 
@@ -30,6 +31,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
       if (typeof content === 'string') {
         updateData.content = content.trim()
+      }
+      if (typeof imageUrl === 'string') {
+        updateData.imageUrl = imageUrl.trim() || null
       }
       if (typeof isActive === 'boolean') {
         updateData.isActive = isActive

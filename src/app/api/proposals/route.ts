@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return withComisionAuth(request, async (req) => {
     try {
-      const { title, content } = await req.json()
+      const { title, content, imageUrl } = await req.json()
 
       if (!title || !content) {
         return NextResponse.json({ error: 'Título y contenido son obligatorios' }, { status: 400 })
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
         data: {
           title: String(title).trim(),
           content: String(content).trim(),
+          imageUrl: imageUrl ? String(imageUrl).trim() : null,
         }
       })
 
