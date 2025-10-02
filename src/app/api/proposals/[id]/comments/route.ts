@@ -4,11 +4,12 @@ import { withAuth } from '@/lib/api-auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuth(request, async () => {
     try {
-      const proposalId = parseInt(params.id)
+      const { id } = await params
+      const proposalId = parseInt(id)
 
       if (isNaN(proposalId)) {
         return NextResponse.json({ error: 'ID de propuesta inválido' }, { status: 400 })
@@ -39,11 +40,12 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuth(request, async (req, user) => {
     try {
-      const proposalId = parseInt(params.id)
+      const { id } = await params
+      const proposalId = parseInt(id)
 
       if (isNaN(proposalId)) {
         return NextResponse.json({ error: 'ID de propuesta inválido' }, { status: 400 })

@@ -13,12 +13,14 @@ import {
   SettingsIcon,
   ClipboardListIcon,
   ArrowLeft,
+  Lightbulb,
 } from 'lucide-react'
 
 const navItems = [
   { href: '/', label: 'Inicio', icon: HomeIcon, roles: ['all'] },
   { href: '/timer', label: 'Timer', icon: TimerIcon, roles: ['Comision'] },
   { href: '/ranking', label: 'Tabla', icon: TrophyIcon, roles: ['all'] },
+  { href: '/t29', label: 'T29', icon: Lightbulb, roles: ['all'] },
   { href: '/admin', label: 'Menu', icon: SettingsIcon, roles: ['all'] },
 ]
 

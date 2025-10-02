@@ -4,7 +4,7 @@ import { UserRole } from '@prisma/client'
  * Sistema de permisos para controlar acceso a funcionalidades por rol
  */
 
-export type FeaturePermission = 
+export type FeaturePermission =
   | 'calendar'           // Calendario del torneo
   | 'regulations'        // Reglamento PDF
   | 'stats-days'         // Estadísticas - Días sin ganar
@@ -15,6 +15,7 @@ export type FeaturePermission =
   | 'players'            // Gestión de jugadores
   | 'import'             // Importación de datos
   | 'eliminations'       // Registro de eliminaciones
+  | 't29-proposals'      // Propuestas T29
 
 /**
  * Mapa de permisos por feature y rol
@@ -24,6 +25,7 @@ const PERMISSIONS_MAP: Record<FeaturePermission, UserRole[]> = {
   'calendar': ['Comision', 'Enfermo', 'Invitado'],
   'regulations': ['Comision', 'Enfermo', 'Invitado'],
   'stats-days': ['Comision', 'Enfermo', 'Invitado'],
+  't29-proposals': ['Comision', 'Enfermo', 'Invitado'],
   
   // Solo Comisión y Enfermo
   'profile': ['Comision', 'Enfermo'],
@@ -131,6 +133,13 @@ export function getDashboardFeatures(userRole: UserRole) {
       href: '/admin/regulations',
       permission: 'regulations',
       ...withPermission('regulations')
+    },
+    {
+      id: 't29-proposals',
+      title: 'T29',
+      href: '/t29',
+      permission: 't29-proposals',
+      ...withPermission('t29-proposals')
     }
   ]
 
@@ -191,7 +200,7 @@ export function getDashboardFeatures(userRole: UserRole) {
  */
 export function canAccessRoute(userRole: UserRole, route: string): boolean {
   // Rutas públicas (accesibles para todos)
-  const publicRoutes = ['/', '/timer', '/ranking', '/players', '/notificaciones']
+  const publicRoutes = ['/', '/timer', '/ranking', '/players', '/notificaciones', '/t29']
   if (publicRoutes.includes(route)) return true
 
   // Rutas de perfil (solo Comisión y Enfermo)

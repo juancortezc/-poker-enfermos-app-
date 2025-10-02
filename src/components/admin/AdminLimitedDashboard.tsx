@@ -15,6 +15,7 @@ import {
   FileText,
   Flame,
   HeartPulse,
+  Lightbulb,
   Sparkles,
   Trophy,
   Users
@@ -33,6 +34,7 @@ const iconMap = {
   players: Users,
   import: FileSpreadsheet,
   stats: BarChart3,
+  't29-proposals': Lightbulb,
 }
 
 export default function AdminLimitedDashboard() {
