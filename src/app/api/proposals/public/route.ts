@@ -1,8 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function GET(request: NextRequest) {
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
   try {
+    // Ensure Prisma connection
+    await prisma.$connect()
+
     // Solo propuestas activas para la vista pública
     const proposals = await prisma.proposal.findMany({
       where: { isActive: true },
@@ -19,6 +24,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ proposals })
   } catch (error) {
     console.error('Error fetching public proposals:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+
+    // Return empty array instead of error to prevent UI breaking
+    return NextResponse.json({ proposals: [] })
+  } finally {
+    await prisma.$disconnect()
   }
 }
