@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { canCRUD } from '@/lib/auth'
@@ -11,6 +11,8 @@ import { EliminationForm } from '@/components/registro/EliminationForm'
 import { EliminationHistory } from '@/components/registro/EliminationHistory'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { useTimerStateById } from '@/hooks/useTimerState'
+import { formatTime } from '@/lib/timer-utils'
 
 interface Player {
   id: string
@@ -42,17 +44,6 @@ interface GameDate {
   playersCount: number
 }
 
-interface TimerData {
-  currentLevel: number
-  timeRemaining: number
-  blindLevels: Array<{
-    level: number
-    smallBlind: number
-    bigBlind: number
-    duration: number
-  }>
-}
-
 export default function RegistroPage() {
   const { user } = useAuth()
   const router = useRouter()
@@ -61,9 +52,16 @@ export default function RegistroPage() {
   const [activeGameDate, setActiveGameDate] = useState<GameDate | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
   const [eliminations, setEliminations] = useState<Elimination[]>([])
-  const [timerData, setTimerData] = useState<TimerData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const {
+    timerState,
+    currentBlindLevel,
+    formattedTimeRemaining,
+    isActive: timerIsActive,
+    isPaused: timerIsPaused
+  } = useTimerStateById(activeGameDate?.id ?? null)
 
   // Función para obtener todos los datos
   const handleStartGame = async () => {
@@ -89,7 +87,7 @@ export default function RegistroPage() {
     }
   }
 
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     if (!user) return // No hacer requests sin usuario
     
     try {
@@ -111,11 +109,10 @@ export default function RegistroPage() {
       // Headers de autorización
       const authHeaders = buildAuthHeaders()
 
-      // Obtener jugadores, eliminaciones y timer en paralelo
-      const [playersRes, eliminationsRes, timerRes] = await Promise.all([
+      // Obtener jugadores y eliminaciones en paralelo
+      const [playersRes, eliminationsRes] = await Promise.all([
         fetch(`/api/game-dates/${gameDateData.id}/players`, { headers: authHeaders }),
-        fetch(`/api/eliminations/game-date/${gameDateData.id}`, { headers: authHeaders }),
-        fetch(`/api/game-dates/${gameDateData.id}/live-status`, { headers: authHeaders })
+        fetch(`/api/eliminations/game-date/${gameDateData.id}`, { headers: authHeaders })
       ])
 
       if (playersRes.ok) {
@@ -128,26 +125,13 @@ export default function RegistroPage() {
         setEliminations(eliminationsData)
       }
 
-      if (timerRes.ok) {
-        const liveStatus = await timerRes.json()
-        // Extract timer data from live status
-        if (liveStatus.currentBlind) {
-          setTimerData({
-            currentLevel: liveStatus.currentBlind.level,
-            timeRemaining: liveStatus.currentBlind.timeRemaining,
-            blindLevels: [liveStatus.currentBlind], // For now, just show current blind
-            status: liveStatus.gameDate.status
-          })
-        }
-      }
-
     } catch (err) {
       console.error('Error fetching data:', err)
       setError(err instanceof Error ? err.message : 'Error al cargar datos')
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
 
   // Auto-refresh cada 5 segundos
   useEffect(() => {
@@ -156,7 +140,7 @@ export default function RegistroPage() {
       const interval = setInterval(fetchAllData, 5000)
       return () => clearInterval(interval)
     }
-  }, [user])
+  }, [user, fetchAllData])
 
   // Verificación de permisos
   if (!user || !canCRUD(user.role)) {
@@ -208,9 +192,27 @@ export default function RegistroPage() {
   // Calcular puntos del ganador usando la función del sistema
   const winnerPoints = calculatePointsForPosition(1, totalPlayers)
 
-  // Timer data
-  const currentBlind = timerData?.blindLevels?.find(b => b.level === timerData.currentLevel)
-  const timeRemaining = timerData?.timeRemaining || 0
+  const displayBlind = currentBlindLevel
+    ? {
+        smallBlind: currentBlindLevel.smallBlind,
+        bigBlind: currentBlindLevel.bigBlind
+      }
+    : undefined
+
+  const timerSeconds = timerState?.timeRemaining ?? (currentBlindLevel ? currentBlindLevel.duration * 60 : 0)
+  const fallbackFormatted = currentBlindLevel
+    ? currentBlindLevel.duration === 0
+      ? 'SIN LÍMITE'
+      : formatTime(currentBlindLevel.duration * 60)
+    : '--:--'
+  const displayFormatted = timerState ? formattedTimeRemaining : fallbackFormatted
+  const timerStatus = timerIsPaused
+    ? 'paused'
+    : timerIsActive
+      ? 'active'
+      : activeGameDate.status === 'in_progress'
+        ? 'active'
+        : 'inactive'
 
   return (
     <div>
@@ -241,8 +243,10 @@ export default function RegistroPage() {
             </button>
           ) : (
             <TimerDisplay 
-              timeRemaining={timeRemaining}
-              currentBlind={currentBlind}
+              timeRemaining={timerSeconds}
+              formattedTime={displayFormatted}
+              status={timerStatus}
+              currentBlind={displayBlind}
             />
           )}
 
