@@ -78,9 +78,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}>
         <SWRProvider>
           <AuthProvider>
             <PlayerSearchProvider>

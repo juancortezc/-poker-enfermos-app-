@@ -15,7 +15,7 @@
   --color-poker-orange-500: #FF8C00;
   --color-poker-silver-500: #C0C0C0;
   --color-poker-bronze-500: #CD7F32;
-  
+
   /* Semantic Design Tokens */
   --color-primary: var(--color-poker-red-500);
   --color-secondary: var(--color-poker-orange-500);
@@ -59,7 +59,7 @@
     -webkit-font-smoothing: antialiased;
     font-size: 18px; /* Base 18px para +50 años */
     line-height: 1.6;
-    font-weight: 600; /* Sans-serif bold por defecto */
+    font-weight: 600;
     min-height: 100vh;
   }
   

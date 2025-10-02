@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveLevelChangeUpdate } from '@/lib/timer-state'
+import { emitTimerEvent } from '@/lib/server-socket'
 
 export async function POST(
   request: NextRequest,
@@ -111,12 +112,16 @@ export async function POST(
         }
       })
 
-      return NextResponse.json({
+      const responseBody = {
         success: true,
         timerState: updatedTimer,
         blindLevel: targetBlindLevel,
         message: `Avanzado al nivel ${toLevel} exitosamente`
-      })
+      }
+
+      await emitTimerEvent(gameDateId, 'timer-level-changed')
+
+      return NextResponse.json(responseBody)
 
     } catch (error) {
       console.error('[TIMER LEVEL UP ERROR]', error)

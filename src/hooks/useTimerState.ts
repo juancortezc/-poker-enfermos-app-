@@ -1,6 +1,7 @@
 import useSWR from 'swr'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useActiveGameDate } from './useActiveGameDate'
+import { useSocket } from './useSocket'
 
 interface BlindLevel {
   level: number
@@ -59,10 +60,32 @@ const formatTime = (seconds: number): string => {
 
 function useTimerStateInternal(key: string | null): UseTimerStateReturn {
   const { data, error, mutate } = useSWR<TimerStatePayload>(key, {
-    refreshInterval: 1000,
+    refreshInterval: 0,
     revalidateOnFocus: true,
     dedupingInterval: 400
   })
+
+  const { socket } = useSocket()
+
+  useEffect(() => {
+    if (!socket || !key) return
+    const match = key.match(/game-date\/(\d+)/)
+    if (!match) return
+    const id = Number(match[1])
+    if (!Number.isFinite(id)) return
+
+    const handleTimerState = () => {
+      mutate()
+    }
+
+    socket.emit('join-timer', id)
+    socket.on('timer-state', handleTimerState)
+
+    return () => {
+      socket.emit('leave-timer', id)
+      socket.off('timer-state', handleTimerState)
+    }
+  }, [socket, key, mutate])
 
   const timerState = data?.timerState ?? null
   const currentBlind = data?.currentBlind ?? null

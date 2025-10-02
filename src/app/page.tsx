@@ -8,7 +8,7 @@ export default function Home() {
   const { user } = useAuth()
   
   // Use SWR hook for active tournament with PIN authentication
-  const { tournament: activeTournament, isLoading, isError, isNotFound } = useActiveTournament({
+  const { tournament: activeTournament, isLoading, isNotFound } = useActiveTournament({
     refreshInterval: 60000 // 1 minute refresh
   })
 
@@ -39,16 +39,10 @@ export default function Home() {
           <div className="text-center py-16">
             <h1 className="text-4xl font-bold text-white mb-4">Poker de Enfermos</h1>
             <p className="text-poker-muted text-lg">
-              {isNotFound || !user ? 
-                'No hay torneo activo en este momento' : 
-                'Error al cargar el torneo activo'
-              }
+              {isNotFound || !user
+                ? 'No hay torneo activo esta noche. Prepara tus fichas para la próxima partida.'
+                : 'No pudimos cargar el torneo. Intenta refrescar o vuelve a iniciar sesión.'}
             </p>
-            {isError && user && (
-              <p className="text-red-400 text-sm mt-2">
-                Verifica tu conexión e inicia sesión nuevamente
-              </p>
-            )}
           </div>
         )}
       </div>

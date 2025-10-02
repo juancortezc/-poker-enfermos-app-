@@ -6,7 +6,8 @@ import { withAuth } from '@/lib/api-auth'
 export async function GET(req: NextRequest) {
   return withAuth(req, async (req) => {
     try {
-      const activeTournament = await prisma.tournament.findFirst({
+      // Buscar primero torneo activo, si no existe, el más reciente
+      let activeTournament = await prisma.tournament.findFirst({
         where: { status: 'ACTIVO' },
         include: {
           gameDates: {
@@ -36,6 +37,40 @@ export async function GET(req: NextRequest) {
           }
         }
       })
+
+      // Si no hay torneo activo, buscar el más reciente
+      if (!activeTournament) {
+        activeTournament = await prisma.tournament.findFirst({
+          orderBy: { number: 'desc' },
+          include: {
+            gameDates: {
+              orderBy: { dateNumber: 'asc' }
+            },
+            tournamentParticipants: {
+              include: {
+                player: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    role: true,
+                    photoUrl: true
+                  }
+                }
+              }
+            },
+            blindLevels: {
+              orderBy: { level: 'asc' }
+            },
+            _count: {
+              select: {
+                tournamentParticipants: true,
+                gameDates: true
+              }
+            }
+          }
+        })
+      }
 
       if (!activeTournament) {
         return NextResponse.json({ tournament: null })

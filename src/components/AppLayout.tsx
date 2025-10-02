@@ -101,7 +101,7 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
             <div className="flex items-center space-x-3">
               <Link
                 href="/"
-                className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-poker-dark p-1.5 shadow-inner transition-colors hover:bg-poker-red/20"
+                className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-black/40 p-1.5 shadow-inner transition-colors hover:bg-[rgba(215,142,82,0.25)]"
                 aria-label="Ir al inicio"
               >
                 <Image
@@ -113,12 +113,12 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
                 />
               </Link>
               <div>
-                <h1 className="text-lg font-bold text-poker-text">
+                <h1 className="text-lg font-bold text-noir-primary">
                   Poker de Enfermos
                 </h1>
                 <div className="flex items-center gap-2">
-                  <User size={14} className="text-poker-muted" />
-                  <span className="text-sm text-poker-muted">
+                  <User size={14} className="text-noir-muted" />
+                  <span className="text-sm text-noir-muted">
                     {user.firstName} {user.lastName}
                   </span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRoleBadgeColor(user.role)}`}>
@@ -137,20 +137,20 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
           {isPlayersPage && (
             <div className="flex items-center space-x-3 mt-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-noir-muted w-4 h-4" />
                 <Input
                   type="text"
                   placeholder="Buscar por nombre o alias..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-poker-card/50 border-white/10 text-white placeholder:text-gray-400 focus:border-poker-red focus:ring-poker-red/30 h-12"
+                  className="pl-10 bg-black/25 border-noir text-noir-primary placeholder:text-noir-muted focus:border-[rgba(212,138,79,0.8)] focus:ring-[rgba(212,138,79,0.28)] h-12"
                 />
               </div>
               {showAddButton && (
                 <div className="relative" ref={dropdownRef}>
                   <Button 
                     onClick={handleAddClick}
-                    className="bg-poker-red hover:bg-red-700 text-white h-12 px-6 font-medium"
+                    className="noir-button h-12 px-6 font-medium"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar
@@ -158,21 +158,21 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
                   </Button>
                   
                   {showDropdown && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-poker-card border border-white/10 rounded-lg shadow-lg z-dropdown">
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-noir-card border border-noir rounded-lg shadow-lg z-dropdown">
                       <div className="py-1">
                         <button
                           onClick={() => handlePlayerTypeSelect('invitado')}
-                          className="w-full text-left px-4 py-2 text-white hover:bg-poker-red/20 transition-colors"
+                          className="w-full text-left px-4 py-2 text-noir-primary hover:bg-black/35 transition-colors"
                         >
                           <div className="font-medium">Invitado</div>
-                          <div className="text-sm text-gray-400">Invitado por un Enfermo</div>
+                          <div className="text-sm text-noir-muted">Invitado por un Enfermo</div>
                         </button>
                         <button
                           onClick={() => handlePlayerTypeSelect('enfermo')}
-                          className="w-full text-left px-4 py-2 text-white hover:bg-poker-red/20 transition-colors"
+                          className="w-full text-left px-4 py-2 text-noir-primary hover:bg-black/35 transition-colors"
                         >
                           <div className="font-medium">Enfermo/Comisión</div>
-                          <div className="text-sm text-gray-400">Miembro del grupo</div>
+                          <div className="text-sm text-noir-muted">Miembro del grupo</div>
                         </button>
                       </div>
                     </div>
@@ -186,7 +186,7 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
 
       {/* Contenido principal con scroll */}
       <main
-        className={`${needsFullWidth ? 'container mx-auto max-w-none px-4' : 'max-w-md mx-auto px-4'} flex-1 overflow-y-auto pt-6 pb-24`}
+        className={`${needsFullWidth ? 'container mx-auto max-w-none px-4' : 'max-w-md mx-auto px-4'} flex-1 overflow-y-auto pt-6 pb-24 text-noir-primary`}
       >
         <div className="animate-enter">
           {children}
