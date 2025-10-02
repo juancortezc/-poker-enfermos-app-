@@ -4,7 +4,6 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import { useAuth } from '@/contexts/AuthContext'
 import LoadingState from '@/components/ui/LoadingState'
-import { buildAuthHeaders } from '@/lib/client-auth'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Lightbulb, MessageSquareText } from 'lucide-react'
@@ -18,8 +17,8 @@ interface Proposal {
   imageUrl?: string | null
 }
 
-const fetcher = async (url: string) => {
-  const response = await fetch(url, { headers: buildAuthHeaders() })
+const publicFetcher = async (url: string) => {
+  const response = await fetch(url)
   if (!response.ok) {
     throw new Error('No se pudieron cargar las propuestas activas')
   }
@@ -29,7 +28,7 @@ const fetcher = async (url: string) => {
 export default function T29Page() {
   const { user, loading } = useAuth()
   const [activeProposalId, setActiveProposalId] = useState<number | null>(null)
-  const { data, isLoading, error } = useSWR(user ? '/api/proposals' : null, fetcher)
+  const { data, isLoading, error } = useSWR('/api/proposals/public', publicFetcher)
 
   if (loading) {
     return <LoadingState />
