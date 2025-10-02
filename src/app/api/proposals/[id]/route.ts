@@ -11,7 +11,8 @@ interface RouteParams {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   return withComisionAuth(request, async (req) => {
     try {
-      const proposalId = parseInt(params.id, 10)
+      const { id } = await params
+      const proposalId = parseInt(id, 10)
       if (Number.isNaN(proposalId)) {
         return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
       }
@@ -59,7 +60,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   return withComisionAuth(request, async () => {
     try {
-      const proposalId = parseInt(params.id, 10)
+      const { id } = await params
+      const proposalId = parseInt(id, 10)
       if (Number.isNaN(proposalId)) {
         return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
       }

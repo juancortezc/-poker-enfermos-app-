@@ -69,11 +69,11 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
     // Verificar si es formato ADMIN:xxxx (sistema legacy)
     if (token.startsWith('ADMIN:')) {
       const adminKey = token.substring(6) // Remover "ADMIN:"
-      
-      // Buscar usuario por admin_key (legacy)
-      const user = await prisma.player.findFirst({
+
+      // Buscar usuarios con adminKey y verificar hash
+      const users = await prisma.player.findMany({
         where: {
-          adminKey: adminKey,
+          adminKey: { not: null },
           isActive: true
         },
         select: {
@@ -81,29 +81,29 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
           firstName: true,
           lastName: true,
           role: true,
+          adminKey: true,
           photoUrl: true
         }
       })
 
-      return user
+      // Verificar adminKey hasheado
+      for (const user of users) {
+        if (user.adminKey && await bcrypt.compare(adminKey, user.adminKey)) {
+          return {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            photoUrl: user.photoUrl || undefined
+          }
+        }
+      }
+
+      return null
     }
 
-    // Sistema legacy: adminKey directo (para compatibilidad)
-    const user = await prisma.player.findFirst({
-      where: {
-        adminKey: token,
-        isActive: true
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        photoUrl: true
-      }
-    })
-
-    return user
+    // No legacy fallback needed - all keys should be properly prefixed
+    return null
   } catch (error) {
     console.error('Error validating API access:', error)
     return null

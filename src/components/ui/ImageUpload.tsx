@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { Upload, X, Image as ImageIcon } from 'lucide-react'
 import { Button } from './button'
 import Image from 'next/image'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface ImageUploadProps {
   value?: string
@@ -46,23 +47,21 @@ export function ImageUpload({
       // Create FormData for upload
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('upload_preset', 'poker-enfermos') // Cloudinary preset
 
-      // Upload to Cloudinary
-      const response = await fetch(
-        'https://api.cloudinary.com/v1_1/dxqsydswd/image/upload',
-        {
-          method: 'POST',
-          body: formData
-        }
-      )
+      // Upload using our internal API endpoint
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        headers: buildAuthHeaders(),
+        body: formData
+      })
 
       if (!response.ok) {
-        throw new Error('Error al subir imagen')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Error al subir imagen')
       }
 
       const data = await response.json()
-      const imageUrl = data.secure_url
+      const imageUrl = data.url
 
       setPreview(imageUrl)
       onChange(imageUrl)

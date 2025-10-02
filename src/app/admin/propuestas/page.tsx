@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { ImageUpload } from '@/components/ui/ImageUpload'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { toast } from 'react-toastify'
-import { Lightbulb, Power, Edit, X } from 'lucide-react'
+import { Lightbulb, Power, Edit, X, Trash2 } from 'lucide-react'
 
 interface Proposal {
   id: number
@@ -37,6 +37,7 @@ export default function PropuestasAdminPage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [togglingId, setTogglingId] = useState<number | null>(null)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   const [editingProposal, setEditingProposal] = useState<Proposal | null>(null)
 
   const canManage = user?.role === 'Comision'
@@ -152,6 +153,39 @@ export default function PropuestasAdminPage() {
     setTitle('')
     setContent('')
     setImageUrl(null)
+  }
+
+  const deleteProposal = async (proposal: Proposal) => {
+    if (!confirm(`¿Estás seguro de que quieres eliminar la propuesta "${proposal.title}"? Esta acción no se puede deshacer.`)) {
+      return
+    }
+
+    try {
+      setDeletingId(proposal.id)
+      const response = await fetch(`/api/proposals/${proposal.id}`, {
+        method: 'DELETE',
+        headers: buildAuthHeaders()
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}))
+        throw new Error(payload.error ?? 'No se pudo eliminar la propuesta')
+      }
+
+      toast.success('Propuesta eliminada exitosamente')
+
+      // If we were editing this proposal, cancel the edit
+      if (editingProposal?.id === proposal.id) {
+        cancelEdit()
+      }
+
+      mutate()
+    } catch (deleteError) {
+      console.error(deleteError)
+      toast.error(deleteError instanceof Error ? deleteError.message : 'Error inesperado')
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   return (
@@ -281,13 +315,28 @@ export default function PropuestasAdminPage() {
                       variant="outline"
                       size="sm"
                       className="border-white/30 text-white hover:bg-white/10"
+                      disabled={deletingId === proposal.id}
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button
                       type="button"
+                      onClick={() => deleteProposal(proposal)}
+                      variant="outline"
+                      size="sm"
+                      className="border-red-500/40 text-red-400 hover:bg-red-500/20"
+                      disabled={deletingId === proposal.id || togglingId === proposal.id}
+                    >
+                      {deletingId === proposal.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
                       onClick={() => toggleProposal(proposal)}
-                      disabled={togglingId === proposal.id}
+                      disabled={togglingId === proposal.id || deletingId === proposal.id}
                       variant={proposal.isActive ? 'outline' : 'default'}
                       size="sm"
                       className={proposal.isActive ? 'border-poker-red/40 text-poker-red' : 'bg-poker-red text-white'}
