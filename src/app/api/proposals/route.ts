@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  return withComisionAuth(request, async (req) => {
+  return withComisionAuth(request, async (req, user) => {
     try {
       const { title, content, imageUrl } = await req.json()
 
