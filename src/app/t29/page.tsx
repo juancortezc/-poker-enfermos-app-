@@ -181,8 +181,8 @@ export default function T29Page() {
 
           {/* Comments Overview Button */}
           <Link href="/t29/comentarios">
-            <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20">
-              <MessageSquareText className="w-4 h-4 mr-2" />
+            <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-sm px-3 py-2 flex-shrink-0">
+              <MessageSquareText className="w-4 h-4 mr-1" />
               Ver Comentarios
             </Button>
           </Link>
@@ -222,6 +222,15 @@ export default function T29Page() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Final explanatory text */}
+      <section className="mt-8">
+        <Card className="bg-gradient-to-r from-gray-800/20 to-gray-700/10 border-gray-600/30 p-6">
+          <p className="text-white/70 text-sm leading-relaxed text-center">
+            Las propuestas aquí presentadas serán posteriormente analizadas por la Comisión y de acuerdo a su aceptación sometidas a votación final por parte del Grupo.
+          </p>
+        </Card>
       </section>
     </div>
   )

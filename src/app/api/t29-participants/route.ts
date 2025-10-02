@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 import { withAuth } from '@/lib/api-auth'
+
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const maxDuration = 10
+
+// Create a new Prisma instance for this route
+const prisma = new PrismaClient()
 
 // GET - Obtener todos los participantes registrados para T29
 export async function GET() {
@@ -29,10 +36,14 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Error fetching T29 participants:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+
+    // Return empty array instead of error to prevent UI breaking
+    return NextResponse.json({
+      participants: [],
+      count: 0
+    })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
@@ -71,6 +82,8 @@ export async function POST(request: NextRequest) {
         { error: 'Error interno del servidor' },
         { status: 500 }
       )
+    } finally {
+      await prisma.$disconnect()
     }
   })
 }

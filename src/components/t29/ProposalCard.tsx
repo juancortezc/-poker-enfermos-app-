@@ -116,7 +116,7 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
                 : 'bg-white/10 text-white/70 hover:bg-white/20'
             }`}
           >
-            {isExpanded ? 'Cerrar' : 'Ver más'}
+            {isExpanded ? 'Cerrar' : 'Detalles'}
           </button>
         </div>
       </div>
