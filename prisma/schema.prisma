@@ -43,6 +43,7 @@ model Player {
   runnerUpWins           TournamentWinners[]     @relation("RunnerUp")
   sietePositions         TournamentWinners[]     @relation("Siete")
   thirdPlaceWins         TournamentWinners[]     @relation("ThirdPlace")
+  t29Participation       T29Participant?
 
   @@map("players")
 }
@@ -302,4 +303,15 @@ enum TimerActionType {
 enum VoteType {
   thumbsUp
   thumbsDown
+}
+
+model T29Participant {
+  id          Int      @id @default(autoincrement())
+  playerId    String   @unique @map("player_id")
+  firstName   String   @map("first_name")
+  lastName    String   @map("last_name")
+  registeredAt DateTime @default(now()) @map("registered_at")
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("t29_participants")
 }
