@@ -16,6 +16,7 @@ export type FeaturePermission =
   | 'import'             // Importación de datos
   | 'eliminations'       // Registro de eliminaciones
   | 't29-proposals'      // Propuestas T29
+  | 'proposals-admin'    // Gestión de propuestas (admin)
 
 /**
  * Mapa de permisos por feature y rol
@@ -26,10 +27,10 @@ const PERMISSIONS_MAP: Record<FeaturePermission, UserRole[]> = {
   'regulations': ['Comision', 'Enfermo', 'Invitado'],
   'stats-days': ['Comision', 'Enfermo', 'Invitado'],
   't29-proposals': ['Comision', 'Enfermo', 'Invitado'],
-  
+
   // Solo Comisión y Enfermo
   'profile': ['Comision', 'Enfermo'],
-  
+
   // Solo Comisión (admin)
   'stats-parents': ['Comision'],
   'game-dates': ['Comision'],
@@ -37,6 +38,7 @@ const PERMISSIONS_MAP: Record<FeaturePermission, UserRole[]> = {
   'players': ['Comision'],
   'import': ['Comision'],
   'eliminations': ['Comision'],
+  'proposals-admin': ['Comision'],
 }
 
 /**
@@ -185,6 +187,13 @@ export function getDashboardFeatures(userRole: UserRole) {
       href: '/admin/stats',
       permission: 'stats-parents',
       ...withPermission('stats-parents')
+    },
+    {
+      id: 'proposals-admin',
+      title: 'PROPUESTAS',
+      href: '/admin/propuestas',
+      permission: 'proposals-admin',
+      ...withPermission('proposals-admin')
     }
   ]
 
@@ -215,6 +224,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
   if (route.startsWith('/admin/calendar')) return canAccess(userRole, 'calendar')
   if (route.startsWith('/admin/regulations')) return canAccess(userRole, 'regulations')
   if (route.startsWith('/admin/stats')) return canAccess(userRole, 'stats-parents')
+  if (route.startsWith('/admin/propuestas')) return canAccess(userRole, 'proposals-admin')
   
   // Rutas admin restringidas (solo Comisión)
   if (route.startsWith('/admin/')) return userRole === 'Comision'
