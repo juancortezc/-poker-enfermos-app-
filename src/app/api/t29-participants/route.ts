@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { withAuth } from '@/lib/api-auth'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const maxDuration = 10
-
-// Create a new Prisma instance for this route
-const prisma = new PrismaClient()
 
 export async function GET() {
   try {
