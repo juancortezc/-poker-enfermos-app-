@@ -9,9 +9,9 @@ export const maxDuration = 10
 // Create a new Prisma instance for this route
 const prisma = new PrismaClient()
 
-// GET - Obtener todos los participantes registrados para T29
 export async function GET() {
   try {
+    // Solo participantes registrados para T29
     const participants = await prisma.t29Participant.findMany({
       orderBy: { registeredAt: 'asc' },
       select: {
@@ -42,8 +42,6 @@ export async function GET() {
       participants: [],
       count: 0
     })
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
@@ -82,8 +80,6 @@ export async function POST(request: NextRequest) {
         { error: 'Error interno del servidor' },
         { status: 500 }
       )
-    } finally {
-      await prisma.$disconnect()
     }
   })
 }
