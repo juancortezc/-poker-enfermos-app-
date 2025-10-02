@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { withComisionAuth } from '@/lib/api-auth'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {

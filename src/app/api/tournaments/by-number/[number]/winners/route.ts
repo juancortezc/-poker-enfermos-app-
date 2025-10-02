@@ -7,10 +7,11 @@ import { prisma } from '@/lib/prisma'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { number: string } }
+  { params }: { params: Promise<{ number: string }> }
 ) {
   try {
-    const tournamentNumber = parseInt(params.number)
+    const { number } = await params
+    const tournamentNumber = parseInt(number)
     
     if (isNaN(tournamentNumber)) {
       return NextResponse.json(

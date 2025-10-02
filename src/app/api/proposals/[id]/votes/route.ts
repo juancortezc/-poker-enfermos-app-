@@ -125,11 +125,12 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuth(request, async (req, user) => {
     try {
-      const proposalId = parseInt(params.id)
+      const { id } = await params
+      const proposalId = parseInt(id)
 
       if (isNaN(proposalId)) {
         return NextResponse.json({ error: 'ID de propuesta inválido' }, { status: 400 })
