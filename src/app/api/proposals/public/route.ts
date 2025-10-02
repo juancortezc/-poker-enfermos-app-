@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const maxDuration = 10
+
+// Create a new Prisma instance for this route
+const prisma = new PrismaClient()
 
 export async function GET() {
   try {
-    // Ensure Prisma connection
-    await prisma.$connect()
-
     // Solo propuestas activas para la vista pública
     const proposals = await prisma.proposal.findMany({
       where: { isActive: true },
@@ -27,7 +29,5 @@ export async function GET() {
 
     // Return empty array instead of error to prevent UI breaking
     return NextResponse.json({ proposals: [] })
-  } finally {
-    await prisma.$disconnect()
   }
 }
