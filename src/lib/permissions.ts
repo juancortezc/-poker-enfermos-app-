@@ -17,6 +17,7 @@ export type FeaturePermission =
   | 'eliminations'       // Registro de eliminaciones
   | 't29-proposals'      // Propuestas T29
   | 'proposals-admin'    // Gestión de propuestas (admin)
+  | 'my-proposals'       // Mis propuestas
 
 /**
  * Mapa de permisos por feature y rol
@@ -30,6 +31,7 @@ const PERMISSIONS_MAP: Record<FeaturePermission, UserRole[]> = {
 
   // Solo Comisión y Enfermo
   'profile': ['Comision', 'Enfermo'],
+  'my-proposals': ['Comision', 'Enfermo'],
 
   // Solo Comisión (admin)
   'stats-parents': ['Comision'],
@@ -142,6 +144,13 @@ export function getDashboardFeatures(userRole: UserRole) {
       href: '/t29',
       permission: 't29-proposals',
       ...withPermission('t29-proposals')
+    },
+    {
+      id: 'my-proposals',
+      title: 'MIS PROPUESTAS',
+      href: '/mis-propuestas',
+      permission: 'my-proposals',
+      ...withPermission('my-proposals')
     }
   ]
 

@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
           title: String(title).trim(),
           content: String(content).trim(),
           imageUrl: imageUrl ? String(imageUrl).trim() : null,
+          createdById: user.id
         }
       })
 

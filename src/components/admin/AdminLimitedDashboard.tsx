@@ -13,6 +13,7 @@ import {
   CalendarPlus,
   FileSpreadsheet,
   FileText,
+  FileUser,
   Flame,
   HeartPulse,
   Lightbulb,
@@ -37,6 +38,7 @@ const iconMap = {
   stats: BarChart3,
   't29-proposals': Lightbulb,
   'proposals-admin': MessageSquarePlus,
+  'my-proposals': FileUser,
 }
 
 export default function AdminLimitedDashboard() {
