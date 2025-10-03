@@ -36,7 +36,7 @@ interface ProposalV2 {
 
 interface ProposalCardProps {
   proposal: ProposalV2
-  onEdit?: (proposal: ProposalV2) => void
+  onEdit?: (proposal: ProposalV2) => void | Promise<void>
   onUpdate?: () => void
   showActions?: boolean
   isExpanded?: boolean

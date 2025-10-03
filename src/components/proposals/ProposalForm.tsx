@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea'
@@ -42,6 +42,29 @@ export function ProposalForm({
   const [imagePreview, setImagePreview] = useState<string | null>(
     initialData?.imageUrl || null
   )
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        id: initialData.id,
+        title: initialData.title || '',
+        objective: initialData.objective || '',
+        situation: initialData.situation || '',
+        proposal: initialData.proposal || '',
+        imageUrl: initialData.imageUrl || ''
+      })
+      setImagePreview(initialData.imageUrl || null)
+    } else {
+      setFormData({
+        title: '',
+        objective: '',
+        situation: '',
+        proposal: '',
+        imageUrl: ''
+      })
+      setImagePreview(null)
+    }
+  }, [initialData])
 
   const handleInputChange = (field: keyof ProposalData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))

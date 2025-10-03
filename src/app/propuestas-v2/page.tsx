@@ -37,6 +37,7 @@ export default function PropuestasV2Page() {
   // Form state
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingProposal, setEditingProposal] = useState<ProposalV2 | null>(null)
+  const [isFetchingProposal, setIsFetchingProposal] = useState(false)
   const [expandedProposal, setExpandedProposal] = useState<number | null>(null)
 
   useEffect(() => {
@@ -78,9 +79,33 @@ export default function PropuestasV2Page() {
     fetchMyProposals()
   }
 
-  const handleEdit = (proposal: ProposalV2) => {
-    setEditingProposal(proposal)
+  const handleEdit = async (proposal: ProposalV2) => {
     setShowCreateForm(false)
+    setExpandedProposal(null)
+    setEditingProposal(null)
+    setIsFetchingProposal(true)
+
+    try {
+      const response = await fetch(`/api/proposals-v2/${proposal.id}`, {
+        headers: buildAuthHeaders()
+      })
+
+      const data = await response.json().catch(() => ({})) as {
+        proposal?: ProposalV2
+        error?: string
+      }
+
+      if (!response.ok || !data?.proposal) {
+        throw new Error(data?.error || 'No se pudo cargar la propuesta seleccionada')
+      }
+
+      setEditingProposal(data.proposal)
+    } catch (error) {
+      console.error('Error loading proposal for edit:', error)
+      toast.error(error instanceof Error ? error.message : 'Error al cargar la propuesta')
+    } finally {
+      setIsFetchingProposal(false)
+    }
   }
 
   const handleCancelEdit = () => {
@@ -146,8 +171,16 @@ export default function PropuestasV2Page() {
         />
       )}
 
+      {/* Loading proposal for editing */}
+      {isFetchingProposal && (
+        <Card className="admin-card p-6 text-center text-white/70">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-poker-red mx-auto mb-4"></div>
+          Cargando propuesta seleccionada...
+        </Card>
+      )}
+
       {/* Edit Form */}
-      {editingProposal && (
+      {editingProposal && !isFetchingProposal && (
         <ProposalForm
           initialData={editingProposal}
           isEditing={true}

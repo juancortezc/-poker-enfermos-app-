@@ -14,7 +14,10 @@ export async function GET() {
       select: {
         id: true,
         title: true,
-        content: true,
+        objective: true,
+        situation: true,
+        proposal: true,
+        imageUrl: true,
         createdAt: true,
         createdBy: {
           select: {
