@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Lightbulb, MessageSquareText, Users, CheckCircle } from 'lucide-react'
 import { ProposalCard } from '@/components/t29/ProposalCard'
+import { buildAuthHeaders } from '@/lib/client-auth'
 import Link from 'next/link'
 
 interface Proposal {
@@ -91,7 +92,7 @@ export default function T29Page() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.adminKey}`
+          ...buildAuthHeaders()
         }
       })
 
@@ -133,10 +134,10 @@ export default function T29Page() {
               {isUserRegistered ? (
                 <Button
                   disabled
-                  className="bg-green-600/20 text-green-300 border border-green-600/30 cursor-not-allowed min-w-[200px]"
+                  className="bg-gray-600 text-gray-300 cursor-not-allowed min-w-[200px]"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  YA ESTÁS REGISTRADO
+                  Confirmada Participación
                 </Button>
               ) : (
                 <Button
@@ -168,21 +169,15 @@ export default function T29Page() {
       </section>
 
       <section className="space-y-6">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-poker-red/20 text-poker-red">
-              <Lightbulb className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-white">Propuestas T29</h1>
-              <p className="text-sm text-white/60">Vota y comenta las propuestas para el torneo</p>
-            </div>
+        <header className="flex items-center justify-between gap-4">
+          <div className="text-center flex-1">
+            <h1 className="text-2xl font-semibold text-white">Propuestas T29</h1>
+            <p className="text-sm text-white/60 text-center">Vota y comenta las propuestas</p>
           </div>
 
           {/* Comments Overview Button */}
           <Link href="/t29/comentarios">
-            <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-sm px-3 py-2 flex-shrink-0">
-              <MessageSquareText className="w-4 h-4 mr-1" />
+            <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs px-2 py-1 flex-shrink-0">
               Ver Comentarios
             </Button>
           </Link>

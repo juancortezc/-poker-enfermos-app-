@@ -148,7 +148,7 @@ export function getDashboardFeatures(userRole: UserRole) {
     {
       id: 'my-proposals',
       title: 'MIS PROPUESTAS',
-      href: '/mis-propuestas',
+      href: '/propuestas-v2',
       permission: 'my-proposals',
       ...withPermission('my-proposals')
     }

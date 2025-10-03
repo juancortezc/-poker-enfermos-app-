@@ -126,7 +126,7 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
         <>
           {/* Proposal Content */}
           <div className="p-5 border-b border-white/10 space-y-4">
-            <p className="text-white/85 leading-relaxed whitespace-pre-line">
+            <p className="text-sm font-normal text-white/90 leading-relaxed whitespace-pre-line">
               {proposal.content}
             </p>
 
