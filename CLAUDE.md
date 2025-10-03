@@ -5,7 +5,7 @@
 ### Stack
 - **Frontend**: React, TypeScript, Next.js, TailwindCSS
 - **Backend**: Node.js, Prisma ORM, PostgreSQL
-- **Design**: Mobile-First, Enfermos Design System (Rojo #E10600, Negro, Gris)
+- **Design**: Mobile-First, PokerNew Design System (Sophisticated Dark Theme)
 
 ### Core Commands
 ```bash
@@ -68,6 +68,15 @@ GET  /api/eliminations/game-date/[id]
 GET  /api/tournaments/[id]/ranking
 GET  /api/tournaments/winners
 GET  /api/tournaments/podium-stats
+
+# Proposals System (T29)
+GET  /api/proposals/public           # Public proposals for T29
+GET  /api/proposals-v2/my           # User's own proposals
+GET  /api/proposals-v2/admin        # Admin view (Commission only)
+POST /api/proposals-v2              # Create proposal
+PATCH /api/proposals-v2/[id]        # Edit proposal
+DELETE /api/proposals-v2/[id]       # Delete proposal
+PATCH /api/proposals-v2/[id]/toggle # Activate/deactivate proposal
 ```
 
 ---
@@ -101,6 +110,13 @@ GET  /api/tournaments/podium-stats
 - Transactional imports
 - Historical data support
 
+### Proposals Management System ✅
+- Complete CRUD operations for T29 proposals
+- Role-based permissions (users edit own, Commission manages all)
+- Structured proposal format: título, objetivo, situación, propuesta, imagen
+- Real-time updates with loading indicators
+- Public display in T29 section with voting and comments
+
 ---
 
 ## 🛠️ Component Structure
@@ -111,6 +127,9 @@ GET  /api/tournaments/podium-stats
 - `/timer` - Blind level timer
 - `/admin` - Role-based admin panel
 - `/admin/resultados` - Historical results (3 tabs)
+- `/admin/propuestas` - Commission proposals management
+- `/propuestas-v2` - User proposal management
+- `/t29` - Tournament 29 proposals display and participation
 - `/game-dates/config` - Single-page date configuration
 
 ### Core Components
@@ -118,6 +137,9 @@ GET  /api/tournaments/podium-stats
 - `EliminationForm` - Live elimination entry
 - `TournamentRankingTable` - ELIMINA 2 scoring
 - `PlayerSelector/GuestSelector` - Participant management
+- `ProposalForm` - Create/edit proposals with validation
+- `ProposalCard` - Display proposals with expand/collapse
+- `VotingButtons` - Proposal voting interface
 
 ---
 
@@ -128,6 +150,9 @@ GET  /api/tournaments/podium-stats
 | Timer Control | ✅ | 🔒 | 🔒 |
 | Eliminations | ✅ | 🔒 | 🔒 |
 | Tournament Mgmt | ✅ | 🔒 | 🔒 |
+| Manage All Proposals | ✅ | 🔒 | 🔒 |
+| Create/Edit Own Proposals | ✅ | ✅ | ✅ |
+| Vote on Proposals | ✅ | ✅ | ✅ |
 | View Rankings | ✅ | ✅ | ✅ |
 | View Calendar | ✅ | ✅ | ✅ |
 | Profile Access | ✅ | ✅ | 🔒 |
@@ -136,7 +161,15 @@ GET  /api/tournaments/podium-stats
 
 ## 🚨 Recent Updates
 
-### Latest (2025-09-23)
+### Latest (2025-10-03)
+- ✅ Complete T29 Proposals Management System implemented
+- ✅ PokerNew Design System with sophisticated dark theme
+- ✅ User and Commission proposal interfaces
+- ✅ Real-time loading indicators and microanimations
+- ✅ Role-based permissions and ownership validation
+- ✅ Structured proposal format with image support
+
+### Previous (2025-09-23)
 - ✅ Results section with interactive tabs & tooltips
 - ✅ Dead code removed (500+ lines)
 - ✅ ESLint 100% error-free
@@ -149,6 +182,79 @@ GET  /api/tournaments/podium-stats
 - **Testing**: Automated tests passing
 - **Performance**: Mobile-optimized
 - **Security**: Role-based auth implemented
+
+---
+
+## 🎨 PokerNew Design System
+
+### Color Palette
+**Layered Dark Backgrounds:**
+- Primary: `#201c30 → #1b1c2b → #131422` (main layouts)
+- Secondary: `#1b1d2f → #181a2c → #121321` (cards and panels)
+- Accents: Emerald (`#10b981`) and Rose (`#f43f5e`) variants
+
+**Hero CTA Gradient:**
+- `from-poker-red via-[#ff5d8f] to-[#ff9f6a]`
+- Shadow: `0 14px 30px rgba(255,93,143,0.35)`
+- Hover: `0 18px 40px rgba(255,93,143,0.45)`
+
+**Borders:**
+- Standard: `border-white/10` to `border-white/15`
+- Interactive: `border-white/20` with hover `border-white/35`
+- Accent: `border-poker-red/40` for highlights
+
+### Typography
+**Hierarchy:**
+- Titles: `text-xl/2xl font-semibold tracking-tight`
+- Section Labels: `text-xs uppercase tracking-[0.24em]` with accent colors
+- Body Text: `text-sm text-white/70` with `leading-relaxed`
+- Badges: `uppercase tracking-[0.16-0.2em]` for modern look
+
+### Button System
+**Primary CTAs:**
+- `variant="ghost"` with custom gradients
+- `rounded-full` with deep shadows
+- Hover: `hover:-translate-y-0.5` microanimation
+
+**Secondary Actions:**
+- `border border-white/15 text-white/70`
+- Hover: increased contrast and border opacity
+
+**States:**
+- Disabled: `from-neutral-700 to-neutral-700/70` no shadow
+- Loading: Spinner with `border-white/80`
+
+### Card System
+**Structure:**
+- Border: `border-white/12`
+- Background: Gradients with optional `backdrop-blur`
+- Shadow: `0 18px 40px rgba(11,12,32,0.35)`
+- Hover: `hover:-translate-y-1 hover:border-poker-red/60`
+
+**Content Layout:**
+- Minimal padding: `p-5` for content areas
+- Sections: `space-y-4` between elements
+- Headers: Gradient overlay `from-white/8`
+
+### Microanimations
+- Card hover: `hover:-translate-y-1` with shadow enhancement
+- Button hover: `hover:-translate-y-0.5` for CTAs
+- Vote buttons: Same translate effect on interaction
+- Loading states: Standard spinner with brand colors
+
+### State Patterns
+**Loading:**
+- Card with tinted gradient background
+- Spinner: `h-8 w-8 border-b-2 border-poker-red`
+
+**Error:**
+- Rose gradient: `from-rose-500/15 via-[#191a2c] to-[#10111b]`
+- Text: `text-rose-200`
+
+**Empty:**
+- Dark card with accent icon
+- Copy: `text-sm text-white/55`
+- CTA: Hero gradient button
 
 ---
 
@@ -180,4 +286,5 @@ npx tsx scripts/fix-gamedate-participants.ts
 ---
 
 **Status**: PRODUCTION READY ✅
-**Last Update**: 2025-09-23
+**Last Update**: 2025-10-03
+**Design System**: PokerNew v1.0

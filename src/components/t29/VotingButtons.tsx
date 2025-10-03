@@ -68,31 +68,35 @@ export function VotingButtons({ proposalId, initialStats, userVote, onVoteChange
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-4">
       <button
         onClick={() => handleVote('thumbsUp')}
         disabled={isVoting}
-        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+        className={`group flex items-center gap-1.5 text-sm font-semibold tracking-wide transition-colors ${
           currentUserVote === 'thumbsUp'
-            ? 'bg-green-500 text-white'
-            : 'bg-white/10 text-white/70 hover:bg-green-500/20 hover:text-green-400'
-        } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            ? 'text-emerald-300 drop-shadow'
+            : 'text-white/60 hover:text-emerald-200'
+        } ${isVoting ? 'opacity-40 cursor-not-allowed' : ''}`}
       >
-        <ThumbsUp className="w-4 h-4" />
-        <span>{stats.thumbsUp}</span>
+        <ThumbsUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+        <span className="text-xs font-medium text-white/60 group-hover:text-inherit">
+          {stats.thumbsUp}
+        </span>
       </button>
 
       <button
         onClick={() => handleVote('thumbsDown')}
         disabled={isVoting}
-        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+        className={`group flex items-center gap-1.5 text-sm font-semibold tracking-wide transition-colors ${
           currentUserVote === 'thumbsDown'
-            ? 'bg-red-500 text-white'
-            : 'bg-white/10 text-white/70 hover:bg-red-500/20 hover:text-red-400'
-        } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            ? 'text-rose-300 drop-shadow'
+            : 'text-white/60 hover:text-rose-300'
+        } ${isVoting ? 'opacity-40 cursor-not-allowed' : ''}`}
       >
-        <ThumbsDown className="w-4 h-4" />
-        <span>{stats.thumbsDown}</span>
+        <ThumbsDown className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+        <span className="text-xs font-medium text-white/60 group-hover:text-inherit">
+          {stats.thumbsDown}
+        </span>
       </button>
     </div>
   )

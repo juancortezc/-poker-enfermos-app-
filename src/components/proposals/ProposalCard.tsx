@@ -71,13 +71,13 @@ export function ProposalCard({
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'Comision':
-        return 'bg-poker-red text-white'
+        return 'border border-poker-red/40 bg-poker-red/20 text-poker-red'
       case 'Enfermo':
-        return 'bg-gray-600 text-white'
+        return 'border border-white/20 bg-white/10 text-white/80'
       case 'Invitado':
-        return 'bg-orange-600 text-white'
+        return 'border border-amber-500/40 bg-amber-500/20 text-amber-200'
       default:
-        return 'bg-gray-500 text-white'
+        return 'border border-white/15 bg-white/10 text-white/70'
     }
   }
 
@@ -139,93 +139,89 @@ export function ProposalCard({
   }
 
   return (
-    <Card className={`admin-card overflow-hidden transition-all duration-200 ${
-      !proposal.isActive ? 'opacity-60' : ''
-    }`}>
+    <Card
+      className={`overflow-hidden border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] transition-all duration-500 hover:-translate-y-1 hover:border-poker-red/60 hover:shadow-[0_24px_60px_rgba(255,93,143,0.25)] shadow-[0_18px_40px_rgba(11,12,32,0.45)] ${
+        proposal.isActive ? '' : 'opacity-90'
+      }`}
+    >
       {/* Header */}
-      <div className="p-4 border-b border-white/10">
-        <div className="flex items-start justify-between mb-3">
+      <div className="px-5 py-4 border-b border-white/10 bg-gradient-to-r from-white/6 via-transparent to-transparent">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-semibold text-white">
+            <div className="flex items-center gap-2">
+              <h3 className="text-white text-lg font-semibold tracking-tight">
                 {proposal.title}
               </h3>
               {!proposal.isActive && (
-                <span className="px-2 py-1 text-xs rounded-full bg-gray-600 text-gray-300">
+                <span className="rounded-full bg-slate-700/60 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200">
                   Inactiva
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-white/60">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-white/60">
               {proposal.createdBy && (
                 <>
-                  <User className="w-4 h-4" />
-                  <span>{proposal.createdBy.firstName} {proposal.createdBy.lastName}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(proposal.createdBy.role)}`}>
+                  <User className="h-4 w-4" />
+                  <span className="text-white/80">
+                    {proposal.createdBy.firstName} {proposal.createdBy.lastName}
+                  </span>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] ${getRoleBadgeColor(proposal.createdBy.role)}`}>
                     {proposal.createdBy.role}
                   </span>
-                  <span>•</span>
+                  <span className="text-white/30">•</span>
                 </>
               )}
-              <Calendar className="w-4 h-4" />
+              <Calendar className="h-4 w-4" />
               <span>{formatDate(proposal.createdAt)}</span>
             </div>
+
+            {!isExpanded && (
+              <p className="mt-3 line-clamp-2 text-sm text-white/70">
+                {proposal.objective}
+              </p>
+            )}
           </div>
 
           {onToggleExpand && (
             <Button
+              variant="ghost"
               onClick={onToggleExpand}
-              variant="outline"
-              size="sm"
-              className="border-white/20 text-white hover:bg-white/5"
+              className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-all ${
+                isExpanded
+                  ? 'bg-gradient-to-r from-poker-red/85 to-poker-red text-white shadow-[0_14px_30px_rgba(255,93,143,0.3)]'
+                  : 'border border-white/15 text-white/70 hover:text-white hover:border-white/35'
+              }`}
             >
-              {isExpanded ? (
-                <>
-                  <EyeOff className="w-4 h-4 mr-2" />
-                  Contraer
-                </>
-              ) : (
-                <>
-                  <Eye className="w-4 h-4 mr-2" />
-                  Ver Detalles
-                </>
-              )}
+              {isExpanded ? 'Contraer' : 'Detalles'}
             </Button>
           )}
         </div>
-
-        {/* Preview del objetivo si no está expandido */}
-        {!isExpanded && (
-          <p className="text-white/70 text-sm line-clamp-2">
-            {proposal.objective}
-          </p>
-        )}
       </div>
 
       {/* Contenido expandido */}
       {isExpanded && (
-        <div className="p-4 space-y-4">
+        <div className="px-5 pb-5 pt-4 space-y-4">
           {/* Objetivo */}
           <div>
-            <h4 className="text-sm font-medium text-poker-red mb-2">Objetivo</h4>
-            <p className="text-white/85 text-sm leading-relaxed">
+            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red/80">Objetivo</h4>
+            <p className="text-sm leading-relaxed text-white/75">
               {proposal.objective}
             </p>
           </div>
 
           {/* Situación a modificar */}
           <div>
-            <h4 className="text-sm font-medium text-poker-red mb-2">Situación a Modificar</h4>
-            <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">
+            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red/80">Situación a Modificar</h4>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-white/75">
               {proposal.situation}
             </p>
           </div>
 
           {/* Propuesta */}
           <div>
-            <h4 className="text-sm font-medium text-poker-red mb-2">Propuesta</h4>
-            <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">
+            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red/80">Propuesta</h4>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-white/75">
               {proposal.proposal}
             </p>
           </div>
@@ -233,20 +229,20 @@ export function ProposalCard({
           {/* Imagen */}
           {proposal.imageUrl && (
             <div>
-              <h4 className="text-sm font-medium text-poker-red mb-2 flex items-center gap-2">
+              <h4 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red/80">
                 <ImageIcon className="w-4 h-4" />
                 Imagen
               </h4>
-              <div className="rounded-lg overflow-hidden border border-white/20">
+              <div className="overflow-hidden rounded-lg border border-white/15">
                 <img
                   src={proposal.imageUrl}
                   alt="Imagen de la propuesta"
-                  className="w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                  className="h-auto w-full cursor-pointer transition-all hover:opacity-95"
                   style={{ maxHeight: '300px', objectFit: 'contain' }}
                   onClick={() => window.open(proposal.imageUrl!, '_blank')}
                 />
               </div>
-              <p className="text-xs text-white/50 mt-2 text-center">
+              <p className="mt-2 text-center text-[11px] uppercase tracking-[0.2em] text-white/45">
                 Click para ver en tamaño completo
               </p>
             </div>
@@ -256,32 +252,30 @@ export function ProposalCard({
 
       {/* Acciones */}
       {showActions && (canEdit || canDelete) && (
-        <div className="p-4 border-t border-white/10">
-          <div className="flex gap-2">
+        <div className="border-t border-white/10 px-5 py-4">
+          <div className="flex flex-wrap gap-2">
             {canEdit && onEdit && (
               <Button
+                variant="ghost"
                 onClick={() => onEdit(proposal)}
-                variant="outline"
-                size="sm"
-                className="border-white/20 text-white hover:bg-white/5"
+                className="rounded-full border border-white/15 bg-transparent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/75 transition-all hover:border-white/35 hover:text-white"
               >
-                <Edit className="w-4 h-4 mr-2" />
+                <Edit className="mr-2 h-4 w-4" />
                 Editar
               </Button>
             )}
 
             {canEdit && (
               <Button
+                variant="ghost"
                 onClick={handleToggleStatus}
                 disabled={toggling}
-                variant="outline"
-                size="sm"
-                className="border-white/20 text-white hover:bg-white/5"
+                className="rounded-full border border-white/15 bg-transparent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/75 transition-all hover:border-white/35 hover:text-white"
               >
                 {toggling ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                 ) : (
-                  <Power className="w-4 h-4 mr-2" />
+                  <Power className="mr-2 h-4 w-4" />
                 )}
                 {proposal.isActive ? 'Desactivar' : 'Activar'}
               </Button>
@@ -289,16 +283,15 @@ export function ProposalCard({
 
             {canDelete && (
               <Button
+                variant="ghost"
                 onClick={handleDelete}
                 disabled={deleting}
-                variant="outline"
-                size="sm"
-                className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                className="rounded-full border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-rose-200 transition-all hover:border-rose-400 hover:text-white"
               >
                 {deleting ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400 mr-2"></div>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-rose-200"></div>
                 ) : (
-                  <Trash2 className="w-4 h-4 mr-2" />
+                  <Trash2 className="mr-2 h-4 w-4" />
                 )}
                 Eliminar
               </Button>

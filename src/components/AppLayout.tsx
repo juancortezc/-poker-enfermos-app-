@@ -83,25 +83,25 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
   const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
       case UserRole.Comision:
-        return 'bg-poker-red text-white'
+        return 'border border-poker-red/40 bg-poker-red/15 text-poker-red'
       case UserRole.Enfermo:
-        return 'bg-gray-600 text-white'
+        return 'border border-white/20 bg-white/10 text-white/80'
       case UserRole.Invitado:
-        return 'bg-orange-600 text-white'
+        return 'border border-amber-400/40 bg-amber-500/15 text-amber-200'
     }
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-[#0d0f1a] via-[#0b0d18] to-[#08090f] text-white flex flex-col">
       {/* Header */}
-      <header className="bg-poker-card shadow-lg border-b border-white/10 sticky top-0 z-[60] relative before:absolute before:inset-0 before:bg-black/80 before:content-[''] before:backdrop-blur-sm">
-        <div className={`${needsFullWidth ? 'container mx-auto max-w-none' : 'max-w-md mx-auto'} p-4 relative z-10`}>
-          <div className="flex justify-between items-center">
+      <header className="sticky top-0 z-[60] border-b border-white/10 bg-gradient-to-br from-[#1f1a2d]/95 via-[#1b1c2b]/90 to-[#131422]/95 backdrop-blur-xl shadow-[0_18px_40px_rgba(11,12,32,0.45)]">
+        <div className={`${needsFullWidth ? 'mx-auto max-w-6xl' : 'mx-auto max-w-4xl'} px-4 sm:px-6 py-4`}>
+          <div className="flex items-center justify-between gap-6">
             {/* Logo y usuario */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-4">
               <Link
                 href="/"
-                className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-black/40 p-1.5 shadow-inner transition-colors hover:bg-[rgba(215,142,82,0.25)]"
+                className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-1.5 shadow-[0_10px_24px_rgba(8,9,15,0.4)] transition-transform hover:-translate-y-0.5"
                 aria-label="Ir al inicio"
               >
                 <Image
@@ -112,16 +112,16 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
                   className="h-full w-full object-contain"
                 />
               </Link>
-              <div>
-                <h1 className="text-lg font-bold text-noir-primary">
+              <div className="space-y-1">
+                <h1 className="text-xl font-semibold text-white tracking-tight">
                   Poker de Enfermos
                 </h1>
-                <div className="flex items-center gap-2">
-                  <User size={14} className="text-noir-muted" />
-                  <span className="text-sm text-noir-muted">
+                <div className="flex flex-wrap items-center gap-2 text-sm text-white/60">
+                  <User size={14} className="text-white/50" />
+                  <span>
                     {user.firstName} {user.lastName}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRoleBadgeColor(user.role)}`}>
+                  <span className={`text-[11px] uppercase tracking-[0.18em] px-3 py-0.5 rounded-full font-semibold ${getRoleBadgeColor(user.role)}`}>
                     {user.role}
                   </span>
                 </div>
@@ -135,44 +135,45 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
 
           {/* Search and Add Button - Only on Players Page */}
           {isPlayersPage && (
-            <div className="flex items-center space-x-3 mt-4">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-noir-muted w-4 h-4" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
                 <Input
                   type="text"
                   placeholder="Buscar por nombre o alias..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-black/25 border-noir text-noir-primary placeholder:text-noir-muted focus:border-[rgba(212,138,79,0.8)] focus:ring-[rgba(212,138,79,0.28)] h-12"
+                  className="h-12 rounded-full border border-white/12 bg-white/5 pl-12 pr-4 text-sm text-white placeholder:text-white/35 focus:border-poker-red/60 focus:ring-poker-red/30"
                 />
               </div>
               {showAddButton && (
                 <div className="relative" ref={dropdownRef}>
-                  <Button 
+                  <Button
+                    variant="ghost"
                     onClick={handleAddClick}
-                    className="noir-button h-12 px-6 font-medium"
+                    className="h-12 rounded-full border border-white/12 bg-gradient-to-r from-poker-red via-[#ff5d8f] to-[#ff9f6a] px-6 text-sm font-semibold tracking-[0.1em] text-white shadow-[0_14px_30px_rgba(255,93,143,0.35)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(255,93,143,0.45)]"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar
                     <ChevronDown className="w-4 h-4 ml-2" />
                   </Button>
-                  
+
                   {showDropdown && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-noir-card border border-noir rounded-lg shadow-lg z-dropdown">
-                      <div className="py-1">
+                    <div className="absolute top-full right-0 mt-2 w-52 rounded-2xl border border-white/12 bg-[#16172a]/95 shadow-[0_20px_45px_rgba(8,9,15,0.55)] backdrop-blur-lg">
+                      <div className="py-2">
                         <button
                           onClick={() => handlePlayerTypeSelect('invitado')}
-                          className="w-full text-left px-4 py-2 text-noir-primary hover:bg-black/35 transition-colors"
+                          className="w-full text-left px-4 py-2 text-sm text-white/80 transition-colors hover:bg-white/10"
                         >
-                          <div className="font-medium">Invitado</div>
-                          <div className="text-sm text-noir-muted">Invitado por un Enfermo</div>
+                          <div className="font-semibold text-white">Invitado</div>
+                          <div className="text-xs text-white/55">Invitado por un Enfermo</div>
                         </button>
                         <button
                           onClick={() => handlePlayerTypeSelect('enfermo')}
-                          className="w-full text-left px-4 py-2 text-noir-primary hover:bg-black/35 transition-colors"
+                          className="w-full text-left px-4 py-2 text-sm text-white/80 transition-colors hover:bg-white/10"
                         >
-                          <div className="font-medium">Enfermo/Comisión</div>
-                          <div className="text-sm text-noir-muted">Miembro del grupo</div>
+                          <div className="font-semibold text-white">Enfermo/Comisión</div>
+                          <div className="text-xs text-white/55">Miembro del grupo</div>
                         </button>
                       </div>
                     </div>
@@ -186,9 +187,9 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
 
       {/* Contenido principal con scroll */}
       <main
-        className={`${needsFullWidth ? 'container mx-auto max-w-none px-4' : 'max-w-md mx-auto px-4'} flex-1 overflow-y-auto pt-6 pb-24 text-noir-primary`}
+        className={`${needsFullWidth ? 'mx-auto max-w-6xl px-4 sm:px-6' : 'mx-auto max-w-4xl px-4'} flex-1 overflow-y-auto pt-6 pb-28 text-white/85`}
       >
-        <div className="animate-enter">
+        <div className="animate-enter space-y-6">
           {children}
         </div>
       </main>

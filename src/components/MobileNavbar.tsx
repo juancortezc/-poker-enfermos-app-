@@ -7,7 +7,6 @@ import { canCRUD } from '@/lib/auth'
 import { useState, useEffect } from 'react'
 import {
   HomeIcon,
-  TimerIcon,
   TrophyIcon,
   UsersIcon,
   SettingsIcon,
@@ -18,7 +17,6 @@ import {
 
 const navItems = [
   { href: '/', label: 'Inicio', icon: HomeIcon, roles: ['all'] },
-  { href: '/timer', label: 'Timer', icon: TimerIcon, roles: ['Comision'] },
   { href: '/ranking', label: 'Tabla', icon: TrophyIcon, roles: ['all'] },
   { href: '/t29', label: 'T29', icon: Lightbulb, roles: ['all'] },
   { href: '/admin', label: 'Menu', icon: SettingsIcon, roles: ['all'] },
@@ -84,12 +82,12 @@ export default function MobileNavbar() {
   }
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-[100] border-t border-white/10 bg-poker-card px-3 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] before:absolute before:inset-0 before:bg-black/85 before:content-[''] before:backdrop-blur-sm safe-bottom">
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-[100] border-t border-white/10 bg-gradient-to-br from-[#1a1b2b]/92 via-[#141625]/92 to-[#10111b]/92 px-3 py-2 shadow-[0_-18px_40px_rgba(8,9,15,0.6)] backdrop-blur-xl">
       <div className="relative z-10 mx-auto flex w-full max-w-2xl items-center justify-between gap-3">
         <button
           type="button"
           onClick={handleBack}
-          className="flex min-w-[72px] flex-col items-center rounded-xl bg-white/5 px-3 py-2 text-xs font-medium text-white transition-all duration-200 hover:bg-white/10 active:scale-95"
+          className="flex min-w-[72px] flex-col items-center rounded-2xl border border-white/12 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 active:scale-95"
         >
           <ArrowLeft size={20} />
           <span className="mt-1">Volver</span>
@@ -105,11 +103,11 @@ export default function MobileNavbar() {
                 key={item.href}
                 href={item.href}
                 className={`
-                  flex flex-col items-center rounded-xl px-3 py-2 text-xs min-w-[60px]
+                  flex flex-col items-center rounded-2xl px-3 py-2 text-[11px] min-w-[64px]
                   transition-all duration-200 transform active:scale-95
                   ${isActive 
-                    ? 'text-white bg-poker-red shadow-lg shadow-poker-red/30' 
-                    : 'text-poker-muted hover:text-poker-text hover:bg-white/5'
+                    ? 'text-white bg-gradient-to-r from-poker-red/85 to-poker-red shadow-lg shadow-poker-red/30 border border-poker-red/40' 
+                    : 'text-white/55 border border-transparent hover:text-white hover:border-white/15 hover:bg-white/10'
                   }
                   animate-stagger animate-stagger-${index + 1}
                 `}
@@ -120,7 +118,7 @@ export default function MobileNavbar() {
                     <div className="absolute -top-1 -right-1 h-2 w-2 animate-pulse rounded-full bg-poker-red" />
                   )}
                 </div>
-                <span className={`mt-1 font-medium ${isActive ? 'font-bold' : ''}`}>
+                <span className={`mt-1 font-semibold uppercase tracking-[0.18em] ${isActive ? 'text-white' : 'text-white/60'}`}>
                   {item.label}
                 </span>
               </Link>
