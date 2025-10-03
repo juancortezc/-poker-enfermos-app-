@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       const authorId = searchParams.get('authorId')
 
       // Construir filtros
-      const where: any = {}
+      const where: Record<string, unknown> = {}
 
       if (!includeInactive) {
         where.isActive = true

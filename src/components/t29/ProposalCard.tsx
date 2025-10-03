@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MessageSquareText } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VotingButtons } from './VotingButtons'
@@ -30,12 +30,7 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
   const [commentCount, setCommentCount] = useState(0)
   const [isLoadingStats, setIsLoadingStats] = useState(true)
 
-  useEffect(() => {
-    fetchVoteStats()
-    fetchCommentCount()
-  }, [proposal.id])
-
-  const fetchVoteStats = async () => {
+  const fetchVoteStats = useCallback(async () => {
     try {
       const response = await fetch(`/api/proposals/${proposal.id}/votes`, {
         headers: buildAuthHeaders()
@@ -46,7 +41,7 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
         setVoteStats(data.stats)
 
         // Check if current user has voted
-        const userVoteRecord = data.votes.find((vote: any) => vote.player.id === user?.id)
+        const userVoteRecord = data.votes.find((vote: { player: { id: string }; voteType: string }) => vote.player.id === user?.id)
         setUserVote(userVoteRecord?.voteType || null)
       }
     } catch (error) {
@@ -54,9 +49,9 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
     } finally {
       setIsLoadingStats(false)
     }
-  }
+  }, [proposal.id, user?.id])
 
-  const fetchCommentCount = async () => {
+  const fetchCommentCount = useCallback(async () => {
     try {
       const response = await fetch(`/api/proposals/${proposal.id}/comments`, {
         headers: buildAuthHeaders()
@@ -69,8 +64,12 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
     } catch (error) {
       console.error('Error fetching comment count:', error)
     }
-  }
+  }, [proposal.id])
 
+  useEffect(() => {
+    fetchVoteStats()
+    fetchCommentCount()
+  }, [proposal.id, fetchVoteStats, fetchCommentCount])
 
   const handleVoteChange = (newStats: typeof voteStats, newUserVote: 'thumbsUp' | 'thumbsDown' | null) => {
     setVoteStats(newStats)

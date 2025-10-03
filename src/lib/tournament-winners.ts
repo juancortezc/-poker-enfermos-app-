@@ -132,3 +132,89 @@ export async function getTournamentWinnerByNumber(prisma: PrismaClient, tourname
   const winners = await getTournamentWinnersWithFallback(prisma)
   return winners.find(winner => winner.tournamentNumber === tournamentNumber) ?? null
 }
+
+/**
+ * Automatically generates TournamentWinners record from tournament final ranking
+ * This ensures historical tournament results are preserved when a tournament completes
+ */
+export async function generateTournamentWinners(prisma: PrismaClient, tournamentId: number) {
+  try {
+    // Get tournament info
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { number: true, status: true }
+    })
+
+    if (!tournament) {
+      throw new Error(`Tournament with ID ${tournamentId} not found`)
+    }
+
+    // Check if TournamentWinners already exists
+    const existingWinners = await prisma.tournamentWinners.findFirst({
+      where: { tournamentNumber: tournament.number }
+    })
+
+    if (existingWinners) {
+      console.log(`⚠️  TournamentWinners already exists for Tournament ${tournament.number}`)
+      return existingWinners
+    }
+
+    // Import ranking function here to avoid circular dependencies
+    const { calculateTournamentRanking } = await import('./ranking-utils')
+
+    // Get final tournament ranking
+    const rankingData = await calculateTournamentRanking(tournamentId)
+
+    if (!rankingData || rankingData.rankings.length === 0) {
+      throw new Error(`Cannot generate winners: No ranking data available for tournament ${tournament.number}`)
+    }
+
+    const { rankings } = rankingData
+
+    // Validate we have minimum required positions
+    if (rankings.length < 7) {
+      throw new Error(`Cannot generate winners: Tournament ${tournament.number} has insufficient players (${rankings.length}, minimum 7 required)`)
+    }
+
+    // Extract winner positions based on final ranking
+    const champions = {
+      champion: rankings[0],         // 1st place
+      runnerUp: rankings[1],         // 2nd place
+      thirdPlace: rankings[2],       // 3rd place
+      siete: rankings[6],            // 7th place
+      dos: rankings[rankings.length - 1]  // Last place
+    }
+
+    // Create TournamentWinners record
+    const tournamentWinners = await prisma.tournamentWinners.create({
+      data: {
+        tournamentNumber: tournament.number,
+        championId: champions.champion.playerId,
+        runnerUpId: champions.runnerUp.playerId,
+        thirdPlaceId: champions.thirdPlace.playerId,
+        sieteId: champions.siete.playerId,
+        dosId: champions.dos.playerId
+      },
+      include: {
+        champion: { select: playerSelection },
+        runnerUp: { select: playerSelection },
+        thirdPlace: { select: playerSelection },
+        siete: { select: playerSelection },
+        dos: { select: playerSelection }
+      }
+    })
+
+    console.log(`✅ Auto-generated TournamentWinners for Tournament ${tournament.number}:`)
+    console.log(`   🥇 Champion: ${champions.champion.playerName}`)
+    console.log(`   🥈 Runner-up: ${champions.runnerUp.playerName}`)
+    console.log(`   🥉 Third: ${champions.thirdPlace.playerName}`)
+    console.log(`   7️⃣ Siete: ${champions.siete.playerName}`)
+    console.log(`   2️⃣ Dos: ${champions.dos.playerName}`)
+
+    return tournamentWinners
+
+  } catch (error) {
+    console.error(`❌ Error generating TournamentWinners for tournament ${tournamentId}:`, error)
+    throw error
+  }
+}

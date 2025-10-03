@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withComisionAuth } from '@/lib/api-auth'
+import { generateTournamentWinners } from '@/lib/tournament-winners'
 
 // POST /api/tournaments/[id]/complete - Completar torneo activo
 export async function POST(
@@ -101,9 +102,25 @@ export async function POST(
           }
         })
 
+        // Auto-generate TournamentWinners record
+        let winnersGenerated = false
+        let winnersError = null
+
+        try {
+          await generateTournamentWinners(prisma, tournamentId)
+          winnersGenerated = true
+          console.log(`✅ TournamentWinners auto-generated for Tournament ${updatedTournament.number}`)
+        } catch (error) {
+          winnersError = error instanceof Error ? error.message : 'Unknown error'
+          console.error(`⚠️  Failed to auto-generate TournamentWinners for Tournament ${updatedTournament.number}:`, error)
+          // Continue without failing the tournament completion
+        }
+
         return NextResponse.json({
           message: 'Torneo completado correctamente',
-          tournament: updatedTournament
+          tournament: updatedTournament,
+          winnersGenerated,
+          winnersError
         })
       }
     } catch (error) {
