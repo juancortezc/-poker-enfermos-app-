@@ -35,6 +35,7 @@ model Player {
   proposalComments       ProposalComment[]
   proposalVotes          ProposalVote[]
   createdProposals       Proposal[]              @relation("ProposalCreator")
+  createdProposalsV2     ProposalV2[]            @relation("ProposalV2Creator")
   t29Participation       T29Participant?
   timerActions           TimerAction[]
   tournamentParticipants TournamentParticipant[]
@@ -262,6 +263,19 @@ model ProposalVote {
 
   @@unique([proposalId, playerId])
   @@map("proposal_votes")
+}
+
+// New simplified proposal model for rebuild
+model ProposalV2 {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  createdById String?  @map("created_by_id")
+  createdBy   Player?  @relation("ProposalV2Creator", fields: [createdById], references: [id])
+
+  @@map("proposals_v2")
 }
 
 model T29Participant {

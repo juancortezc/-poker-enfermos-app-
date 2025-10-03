@@ -7,16 +7,22 @@ export const maxDuration = 10
 
 export async function GET() {
   try {
-    // Solo propuestas activas para la vista pública
-    const proposals = await prisma.proposal.findMany({
+    // Solo propuestas activas para la vista pública (usando v2)
+    const proposals = await prisma.proposalV2.findMany({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         title: true,
         content: true,
-        imageUrl: true,
-        createdAt: true
+        createdAt: true,
+        createdBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+            role: true
+          }
+        }
       }
     })
 

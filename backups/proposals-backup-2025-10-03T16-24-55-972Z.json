@@ -1,0 +1,71 @@
+{
+  "timestamp": "2025-10-03T16:24:55.973Z",
+  "totalProposals": 5,
+  "proposals": [
+    {
+      "id": 7,
+      "title": "CAMBIO FECHA DE JUEGO",
+      "content": "Se propone cambiar la fecha de juego al dia lunes",
+      "isActive": true,
+      "createdAt": "2025-10-02T17:07:19.415Z",
+      "updatedAt": "2025-10-02T17:07:19.415Z",
+      "imageUrl": null,
+      "createdById": null,
+      "createdBy": null,
+      "comments": [],
+      "votes": []
+    },
+    {
+      "id": 6,
+      "title": "INVITADOS",
+      "content": "Que los invitados puedan venir cualquier fecha quitando la excepción de las dos últimas fechas",
+      "isActive": true,
+      "createdAt": "2025-10-02T16:53:53.496Z",
+      "updatedAt": "2025-10-02T16:53:53.496Z",
+      "imageUrl": null,
+      "createdById": null,
+      "createdBy": null,
+      "comments": [],
+      "votes": []
+    },
+    {
+      "id": 5,
+      "title": "OPCION 2 BLINDS",
+      "content": "•⁠  ⁠subir a 25mil fichas\n•⁠  ⁠Que el blind termine en 5k-10k (o que se revise hasta que blind no se vuelve un lottery poker)",
+      "isActive": true,
+      "createdAt": "2025-10-02T16:51:03.900Z",
+      "updatedAt": "2025-10-02T16:51:03.900Z",
+      "imageUrl": null,
+      "createdById": null,
+      "createdBy": null,
+      "comments": [],
+      "votes": []
+    },
+    {
+      "id": 4,
+      "title": "CATERING TODAS LAS FECHAS",
+      "content": "Mejorando la Experiencia Gastronómica en Nuestros Torneos\n\nSITUACIÓN ACTUAL\nSistema de Anfitriones Actual:\nCada jugador asume responsabilidad de organizar fechas\nVariabilidad en calidad de comida y servicio\nCarga logística significativa para los anfitriones\nCosto actual: $25 USD por jugador\nDesafíos Identificados:\nInconsistencia en la experiencia: Cada fecha tiene estándares diferentes\nCarga para los jugadores: Responsabilidad adicional que puede generar estrés\nVariabilidad en costos: Algunos anfitriones absorben costos extras\nCalidad fluctuante: Dependiente del tiempo y recursos de cada anfitrión\n\nPROPUESTA: SISTEMA DE CATERING PROFESIONAL\nObjetivos del Nuevo Sistema:\nLiberar de responsabilidad a los jugadores - Eliminar la carga logística\nEstandarizar calidad - Experiencia consistente en cada torneo\nProfesionalizar el servicio - Enfoque en el poker, no en la organización\nMantener la calidad social - Preservar el ambiente de compañerismo\n\nDETALLES DEL SERVICIO PROPUESTO\nCatering Profesional Incluye:\nMenú completo diseñado para jugadores de poker\nServicio profesional durante la pausa de cena\nVajilla de calidad - No más platos desechables\nCalentadores - Comida a temperatura ideal\nSetup y cleanup - Sin preocupaciones logísticas\nResponsabilidades de la Comisión:\nSnacks complementarios: Bebidas, café, golosinas\nCoordinación general con el proveedor\nSupervisión de calidad en cada evento\nAntecedentes de Calidad:\nTorneo 28: Servicio de catering probado con éxito\nComentarios excelentes de todos los participantes\nEmpresa confiable con experiencia en eventos",
+      "isActive": true,
+      "createdAt": "2025-10-02T16:50:08.498Z",
+      "updatedAt": "2025-10-02T16:50:08.498Z",
+      "imageUrl": null,
+      "createdById": null,
+      "createdBy": null,
+      "comments": [],
+      "votes": []
+    },
+    {
+      "id": 3,
+      "title": "ESTRUCTURA BLINDS",
+      "content": "Transformando Nuestro Torneo de Lottery a Deepstack\n\nSITUACIÓN ACTUAL\nProblema Principal: Nuestro torneo actual termina siendo \"lottery poker\" en las fases finales, donde las decisiones se reducen principalmente a all-in o fold, eliminando el elemento de skill que caracteriza al Texas Hold'em.\nEstructura Actual:\nStack inicial: 20,000 fichas\nBlinds iniciales: 50/100\nMúltiples cambios de blinds\nFinal con blinds 10k-20k sin más aumentos\nResultado: Juego técnico limitado en las fases finales, dominado por la suerte más que por la habilidad.\n\nPROPUESTA: ESTRUCTURA DEEPSTACK\nObjetivos de la Nueva Estructura:\nEliminar el \"Lottery Poker\" - Mantener elementos de skill hasta el final\nMaximizar el juego estratégico - Permitir decisiones post-flop complejas\nReducir cambios de blinds - Menos interrupciones, más concentración en el juego\nMantener timing actual - 19:20 a 01:30 con pausa para cena\n\nVENTAJAS DE LA NUEVA ESTRUCTURA\n1. Deepstack Verdadero\nStack inicial 35,000 fichas: Permite construcción de pots significativos\n350 BB iniciales: Vs 200 BB actuales - 75% más profundidad\nJuego post-flop prolongado: Decisiones complejas por más tiempo\n2. Eliminación del Lottery Poker\nBlinds finales fijas: 2,500/5,000 desde las 00:05 hasta el final\nStacks finales viables: Incluso con 25,000 fichas = 5 BB para jugar\nSkill vs Luck: El poker técnico domina hasta el heads-up\n3. Gestión Simplificada\nSolo 12 cambios: Vs múltiples cambios actuales\nMenos interrupciones: Más tiempo concentrados en el juego\nTiming predecible: Estructura clara y fácil de seguir\n4. Experiencia de Juego Mejorada\nMenos estrés del reloj: No hay presión constante de aumentos\nMás tiempo para decisiones: Especialmente en spots complejos\nJuego más satisfactorio: Gana el mejor jugador, no el más afortunado\n\nCOMPARACIÓN DE RESULTADOS ESPERADOS\nEstructura Actual:\n✗ Fases finales dominadas por all-in/fold\n✗ Decisiones limitadas por stack size\n✗ Factor suerte alto en las últimas mesas\n✗ Frustración por falta de opciones estratégicas\nEstructura Propuesta:\n✓ Juego estratégico hasta el final\n✓ Decisiones post-flop viables\n✓ Factor skill dominante\n✓ Experiencia satisfactoria para todos los niveles\n\n\nCONCLUSIÓN\nEsta propuesta transforma nuestro torneo de una experiencia de \"lottery poker\" a una competencia genuina de skill, manteniendo todos los aspectos positivos de nuestro formato actual mientras elimina las frustraciones de las fases finales dominadas por la suerte.",
+      "isActive": true,
+      "createdAt": "2025-10-02T16:47:25.616Z",
+      "updatedAt": "2025-10-02T16:47:25.616Z",
+      "imageUrl": "[BASE64_IMAGE_REMOVED]",
+      "createdById": null,
+      "createdBy": null,
+      "comments": [],
+      "votes": []
+    }
+  ]
+}
