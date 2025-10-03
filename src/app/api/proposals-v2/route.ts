@@ -31,8 +31,9 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching proposals v2:', error)
 
-    // Return empty array instead of error to prevent UI breaking
+    // Temporarily return the error to debug production issues
     return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error',
       proposals: [],
       count: 0
     })
