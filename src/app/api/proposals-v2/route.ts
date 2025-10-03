@@ -9,10 +9,6 @@ export const maxDuration = 10
 // GET - Obtener propuestas públicas (sin autenticación)
 export async function GET() {
   try {
-    // Debug: Check if proposalV2 exists in Prisma client
-    console.log('Prisma client keys:', Object.keys(prisma))
-    console.log('ProposalV2 available:', !!prisma.proposalV2)
-
     const proposals = await prisma.proposalV2.findMany({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' },
