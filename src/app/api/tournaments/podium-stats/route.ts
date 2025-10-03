@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
 
 /**
  * GET /api/tournaments/podium-stats
@@ -7,64 +8,43 @@ import { prisma } from '@/lib/prisma'
  */
 export async function GET() {
   try {
-    // Obtener todos los jugadores únicos que han estado en podios
-    const allPlayers = new Set<string>()
-    const allTournaments = await prisma.tournamentWinners.findMany({
-      select: { championId: true, runnerUpId: true, thirdPlaceId: true }
+    const winners = await getTournamentWinnersWithFallback(prisma)
+
+    const podiumMap = new Map<string, {
+      player: (typeof winners)[number]['champion']
+      firstPlaces: number
+      secondPlaces: number
+      thirdPlaces: number
+      totalPodiums: number
+    }>()
+
+    const increment = (
+      player: (typeof winners)[number]['champion'],
+      position: 'firstPlaces' | 'secondPlaces' | 'thirdPlaces'
+    ) => {
+      if (!player) return
+      const existing = podiumMap.get(player.id)
+      if (existing) {
+        existing[position] += 1
+        existing.totalPodiums += 1
+      } else {
+        podiumMap.set(player.id, {
+          player,
+          firstPlaces: position === 'firstPlaces' ? 1 : 0,
+          secondPlaces: position === 'secondPlaces' ? 1 : 0,
+          thirdPlaces: position === 'thirdPlaces' ? 1 : 0,
+          totalPodiums: 1
+        })
+      }
+    }
+
+    winners.forEach(winner => {
+      increment(winner.champion, 'firstPlaces')
+      increment(winner.runnerUp, 'secondPlaces')
+      increment(winner.thirdPlace, 'thirdPlaces')
     })
 
-    allTournaments.forEach(t => {
-      if (t.championId) allPlayers.add(t.championId)
-      if (t.runnerUpId) allPlayers.add(t.runnerUpId)
-      if (t.thirdPlaceId) allPlayers.add(t.thirdPlaceId)
-    })
-
-    // Calcular estadísticas para cada jugador
-    const podiumStats = await Promise.all(
-      Array.from(allPlayers).map(async (playerId) => {
-        // Información del jugador
-        const player = await prisma.player.findUnique({
-          where: { id: playerId },
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true,
-            aliases: true
-          }
-        })
-
-        if (!player) return null
-
-        // Contar posiciones
-        const firstPlaces = await prisma.tournamentWinners.count({
-          where: { championId: playerId }
-        })
-
-        const secondPlaces = await prisma.tournamentWinners.count({
-          where: { runnerUpId: playerId }
-        })
-
-        const thirdPlaces = await prisma.tournamentWinners.count({
-          where: { thirdPlaceId: playerId }
-        })
-
-        const totalPodiums = firstPlaces + secondPlaces + thirdPlaces
-
-        return {
-          player: player,
-          firstPlaces: firstPlaces,
-          secondPlaces: secondPlaces,
-          thirdPlaces: thirdPlaces,
-          totalPodiums: totalPodiums
-        }
-      })
-    )
-
-    // Filtrar nulls y ordenar por total de podios
-    const validStats = podiumStats
-      .filter((stat): stat is NonNullable<typeof stat> => stat !== null)
+    const validStats = Array.from(podiumMap.values())
       .sort((a, b) => {
         // Ordenar por total de podios, luego por primeros lugares
         if (b.totalPodiums !== a.totalPodiums) {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
 
 /**
  * GET /api/tournaments/champions-stats
@@ -7,45 +8,50 @@ import { prisma } from '@/lib/prisma'
  */
 export async function GET() {
   try {
-    // Obtener todos los campeonatos agrupados por jugador
-    const championStats = await prisma.tournamentWinners.groupBy({
-      by: ['championId'],
-      _count: { championId: true },
-      orderBy: { _count: { championId: 'desc' } }
+    const winners = await getTournamentWinnersWithFallback(prisma)
+
+    const championsMap = new Map<string, {
+      player: (typeof winners)[number]['champion']
+      championshipsCount: number
+      tournamentNumbers: number[]
+    }>()
+
+    winners.forEach(winner => {
+      const champion = winner.champion
+      if (!champion) return
+
+      const existing = championsMap.get(champion.id)
+      if (existing) {
+        existing.championshipsCount += 1
+        existing.tournamentNumbers.push(winner.tournamentNumber)
+      } else {
+        championsMap.set(champion.id, {
+          player: champion,
+          championshipsCount: 1,
+          tournamentNumbers: [winner.tournamentNumber]
+        })
+      }
     })
 
-    // Obtener detalles completos de cada campeón
-    const championsWithDetails = await Promise.all(
-      championStats.map(async (stat) => {
-        // Información del jugador
-        const player = await prisma.player.findUnique({
-          where: { id: stat.championId },
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true,
-            aliases: true
-          }
-        })
-
-        // Torneos ganados
-        const wonTournaments = await prisma.tournamentWinners.findMany({
-          where: { championId: stat.championId },
-          select: { tournamentNumber: true },
-          orderBy: { tournamentNumber: 'asc' }
-        })
-
-        return {
-          player: player,
-          championshipsCount: stat._count.championId,
-          tournamentNumbers: wonTournaments.map(t => t.tournamentNumber)
+    const championsWithDetails = Array.from(championsMap.values())
+      .sort((a, b) => {
+        if (b.championshipsCount !== a.championshipsCount) {
+          return b.championshipsCount - a.championshipsCount
         }
-      })
-    )
 
-    // Separar top 3 del resto
+        // Si empatan, el que ganó más recientemente primero
+        const latestA = Math.max(...a.tournamentNumbers)
+        const latestB = Math.max(...b.tournamentNumbers)
+        if (latestB !== latestA) {
+          return latestB - latestA
+        }
+
+        // Como último criterio, ordenar alfabéticamente
+        const nameA = `${a.player.firstName} ${a.player.lastName}`.toLowerCase()
+        const nameB = `${b.player.firstName} ${b.player.lastName}`.toLowerCase()
+        return nameA.localeCompare(nameB)
+      })
+
     const top3Champions = championsWithDetails.slice(0, 3)
     const otherChampions = championsWithDetails.slice(3)
 

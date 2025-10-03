@@ -78,7 +78,9 @@ export default function ChampionshipsTable() {
   if (loading) {
     return (
       <div className="p-6">
-        <LoadingState message="Cargando torneos históricos..." />
+        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/70">
+          <LoadingState message="Cargando torneos históricos..." />
+        </div>
       </div>
     )
   }
@@ -86,11 +88,11 @@ export default function ChampionshipsTable() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="text-center py-8">
-          <p className="text-red-400 mb-4">Error: {error}</p>
+        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#1b1c2b] to-[#111221] p-8 text-center text-rose-100">
+          <p className="mb-4 text-sm">Error: {error}</p>
           <button
             onClick={fetchTournaments}
-            className="px-4 py-2 bg-poker-red text-white rounded hover:bg-red-700 transition-colors"
+            className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/80 transition-all hover:border-white/40 hover:text-white"
           >
             Reintentar
           </button>
@@ -102,8 +104,8 @@ export default function ChampionshipsTable() {
   if (!tournaments.length) {
     return (
       <div className="p-6">
-        <div className="text-center py-8">
-          <p className="text-poker-muted">No hay datos de torneos históricos</p>
+        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/65">
+          <p>No hay datos de torneos históricos</p>
         </div>
       </div>
     )
@@ -124,13 +126,13 @@ export default function ChampionshipsTable() {
     if (!player) return null
 
     return (
-      <div className="flex items-center gap-3 bg-black/25 border border-white/10 rounded-xl px-4 py-3">
-        <div className={`w-10 h-10 text-sm font-bold rounded-full flex items-center justify-center ${badgeClass}`}>
+      <div className="flex items-center gap-3 rounded-2xl border border-white/12 bg-white/5 px-4 py-3 backdrop-blur-sm">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${badgeClass}`}>
           {badge}
         </div>
         <div className="flex-1 text-left">
-          <p className={`text-xs uppercase tracking-wide font-semibold ${labelClass}`}>{label}</p>
-          <p className="text-white font-semibold leading-tight">{formatPlayerName(player)}</p>
+          <p className={`text-[11px] uppercase tracking-[0.2em] font-semibold ${labelClass}`}>{label}</p>
+          <p className="text-sm font-semibold text-white leading-tight">{formatPlayerName(player)}</p>
           {getPlayerAlias(player) && (
             <p className="text-xs text-white/60">({getPlayerAlias(player)})</p>
           )}
@@ -161,12 +163,12 @@ export default function ChampionshipsTable() {
               </div>
 
               <div
-                className={`relative bg-gradient-to-b from-white/5 via-black/40 to-black/70 border border-white/10 rounded-3xl px-6 pt-20 pb-6 flex flex-col items-center text-center h-full overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:border-white/25 ${
-                  isHistorical ? 'opacity-90 border-gray-500/60' : ''
+                className={`relative rounded-3xl border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] px-6 pt-20 pb-6 flex flex-col items-center text-center h-full overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:border-poker-red/40 ${
+                  isHistorical ? 'opacity-85 border-white/20' : ''
                 }`}
               >
                 <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_55%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_60%)]" />
                 </div>
 
                 <div className="relative z-10 flex flex-col items-center gap-6 w-full">
@@ -190,7 +192,7 @@ export default function ChampionshipsTable() {
 
                   {/* Champion info */}
                   <div className="flex flex-col items-center gap-1">
-                    <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+                    <h2 className="text-2xl font-semibold text-white drop-shadow-lg">
                       {formatPlayerName(tournament.champion)}
                     </h2>
                     {getPlayerAlias(tournament.champion) && (
@@ -207,10 +209,10 @@ export default function ChampionshipsTable() {
 
                   {/* Positions */}
                   <div className="w-full space-y-3 text-sm">
-                    {renderPositionRow('Subcampeón', '2º', 'bg-gray-500 text-white', 'text-gray-300', tournament.runnerUp)}
-                    {renderPositionRow('Tercero', '3º', 'bg-orange-500 text-white', 'text-orange-300', tournament.thirdPlace)}
-                    {renderPositionRow('7', '7º', 'bg-red-500 text-white', 'text-red-300', tournament.siete)}
-                    {renderPositionRow('2', '2º', 'bg-purple-500 text-white', 'text-purple-300', tournament.dos)}
+                    {renderPositionRow('Subcampeón', '2º', 'bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-[0_6px_16px_rgba(148,163,184,0.35)]', 'text-white/60', tournament.runnerUp)}
+                    {renderPositionRow('Tercero', '3º', 'bg-gradient-to-br from-amber-500 to-orange-400 text-white shadow-[0_6px_16px_rgba(249,115,22,0.35)]', 'text-orange-200/80', tournament.thirdPlace)}
+                    {renderPositionRow('Siete', '7º', 'bg-gradient-to-br from-rose-500 to-rose-400 text-white shadow-[0_6px_16px_rgba(244,63,94,0.35)]', 'text-rose-200/80', tournament.siete)}
+                    {renderPositionRow('Dos', '2', 'bg-gradient-to-br from-purple-500 to-purple-400 text-white shadow-[0_6px_16px_rgba(168,85,247,0.35)]', 'text-purple-200/80', tournament.dos)}
                   </div>
                 </div>
               </div>

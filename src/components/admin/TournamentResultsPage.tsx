@@ -38,51 +38,58 @@ export default function TournamentResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#0d0f1a] via-[#0b0d18] to-[#08090f] text-white">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 space-y-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">
-            Resultados Históricos
-          </h1>
-        </div>
+        <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#201c30] via-[#1b1c2b] to-[#131422] p-6 shadow-[0_24px_60px_rgba(15,15,45,0.45)]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2">
+              <p className="text-[12px] uppercase tracking-[0.35em] text-white/55">Historial</p>
+              <h1 className="text-3xl font-semibold tracking-tight text-white">Resultados de Torneos</h1>
+              <p className="max-w-2xl text-sm text-white/65">
+                Consulta campeones, podios y desempeño histórico del grupo. Incluye los resultados oficiales del Torneo 28.
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-poker-red" />
+              PokerNew
+            </div>
+          </div>
+        </section>
 
         {/* Tabs */}
-        <div className="mb-6">
-          <div className="border-b border-gray-700/60">
-            <nav className="flex flex-wrap gap-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                const isActive = activeTab === tab.id
-                
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`
-                      inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all duration-200
-                      border-b-2 rounded-t-md
-                      ${isActive
-                        ? 'border-poker-red text-white bg-poker-card/40 shadow-lg'
-                        : 'border-transparent text-gray-300 hover:text-white hover:border-white/30'
-                      }
-                    `}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-        </div>
+        <section className="space-y-6">
+          <nav className="flex flex-wrap gap-3">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
 
-        {/* Tab Content */}
-        <div className="bg-poker-card rounded-lg shadow-xl tournament-results-container relative overflow-visible">
-          <div className="relative">
-            {renderTabContent()}
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-all ${
+                    isActive
+                      ? 'border-poker-red/60 bg-gradient-to-r from-poker-red via-[#ff5d8f] to-[#ff9f6a] text-white shadow-[0_12px_28px_rgba(255,93,143,0.35)]'
+                      : 'border-white/12 bg-white/5 text-white/70 hover:text-white hover:border-white/35'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{tab.label}</span>
+                </button>
+              )
+            })}
+          </nav>
+
+          <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] p-0 shadow-[0_24px_60px_rgba(8,9,15,0.45)]">
+            <div className="relative overflow-hidden rounded-3xl">
+              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_55%)]" />
+              <div className="relative">
+                {renderTabContent()}
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   )

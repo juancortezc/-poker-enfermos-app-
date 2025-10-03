@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
 
 /**
  * GET /api/tournaments/winners
@@ -7,63 +8,7 @@ import { prisma } from '@/lib/prisma'
  */
 export async function GET() {
   try {
-    const winners = await prisma.tournamentWinners.findMany({
-      include: {
-        champion: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true,
-            aliases: true
-          }
-        },
-        runnerUp: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true,
-            aliases: true
-          }
-        },
-        thirdPlace: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true,
-            aliases: true
-          }
-        },
-        siete: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true,
-            aliases: true
-          }
-        },
-        dos: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true,
-            aliases: true
-          }
-        }
-      },
-      orderBy: {
-        tournamentNumber: 'asc'
-      }
-    })
+    const winners = await getTournamentWinnersWithFallback(prisma)
 
     return NextResponse.json({
       success: true,

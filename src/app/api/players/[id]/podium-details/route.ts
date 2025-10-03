@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
 
 /**
  * GET /api/players/[id]/podium-details
@@ -34,28 +35,22 @@ export async function GET(
     }
 
     // Obtener todas las posiciones del jugador
-    const allWinners = await prisma.tournamentWinners.findMany({
-      where: {
-        OR: [
-          { championId: playerId },
-          { runnerUpId: playerId },
-          { thirdPlaceId: playerId },
-          { sieteId: playerId },
-          { dosId: playerId }
-        ]
-      },
-      select: {
-        tournamentNumber: true,
-        championId: true,
-        runnerUpId: true,
-        thirdPlaceId: true,
-        sieteId: true,
-        dosId: true
-      },
-      orderBy: {
-        tournamentNumber: 'asc'
-      }
-    })
+    const allWinners = (await getTournamentWinnersWithFallback(prisma))
+      .filter(winner => [
+        winner.championId,
+        winner.runnerUpId,
+        winner.thirdPlaceId,
+        winner.sieteId,
+        winner.dosId
+      ].includes(playerId))
+      .map(winner => ({
+        tournamentNumber: winner.tournamentNumber,
+        championId: winner.championId,
+        runnerUpId: winner.runnerUpId,
+        thirdPlaceId: winner.thirdPlaceId,
+        sieteId: winner.sieteId,
+        dosId: winner.dosId
+      }))
 
     // Contar posiciones
     let firstPlaces = 0

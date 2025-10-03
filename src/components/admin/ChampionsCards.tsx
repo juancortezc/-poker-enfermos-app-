@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import LoadingState from '@/components/ui/LoadingState'
-import ChampionCard from './ChampionCard'
 
 interface Player {
   id: string
@@ -61,7 +60,9 @@ export default function ChampionsCards() {
   if (loading) {
     return (
       <div className="p-6">
-        <LoadingState message="Cargando estadísticas de campeones..." />
+        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/70">
+          <LoadingState message="Cargando estadísticas de campeones..." />
+        </div>
       </div>
     )
   }
@@ -69,11 +70,11 @@ export default function ChampionsCards() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="text-center py-8">
-          <p className="text-red-400 mb-4">Error: {error}</p>
+        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#1b1c2b] to-[#111221] p-8 text-center text-rose-100">
+          <p className="mb-4 text-sm">Error: {error}</p>
           <button
             onClick={fetchChampionsStats}
-            className="px-4 py-2 bg-poker-red text-white rounded hover:bg-red-700 transition-colors"
+            className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/80 transition-all hover:border-white/40 hover:text-white"
           >
             Reintentar
           </button>
@@ -85,20 +86,11 @@ export default function ChampionsCards() {
   if (!championsData) {
     return (
       <div className="p-6">
-        <div className="text-center py-8">
-          <p className="text-poker-muted">No hay datos de campeones</p>
+        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/65">
+          <p>No hay datos de campeones</p>
         </div>
       </div>
     )
-  }
-
-  const getMedalEmoji = (position: number) => {
-    switch (position) {
-      case 1: return '🥇'
-      case 2: return '🥈'
-      case 3: return '🥉'
-      default: return '🏆'
-    }
   }
 
   // Separate champions by active status and sort them
@@ -130,7 +122,7 @@ export default function ChampionsCards() {
   }
 
   return (
-    <div className="w-full p-6">
+    <div className="w-full space-y-6 p-6">
       {/* Top 3 Podium - Similar to home page */}
       {topThree.length > 0 && (
         <div className="mb-4">
@@ -139,6 +131,11 @@ export default function ChampionsCards() {
               const isFirst = index === 0
               const isSecond = index === 1
               const isThird = index === 2
+              const gradientClass = isFirst
+                ? 'from-yellow-500/60 via-amber-400/20 to-yellow-300/10'
+                : isSecond
+                ? 'from-slate-500/60 via-slate-400/20 to-slate-300/10'
+                : 'from-orange-500/60 via-orange-400/20 to-amber-300/10'
               
               return (
                 <div
@@ -146,9 +143,11 @@ export default function ChampionsCards() {
                   className="relative flex flex-col items-center"
                 >
                   {/* Card del podio */}
-                  <div className={`relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer group ${
-                    !champion.player.isActive ? 'border-2 border-gray-400' : ''
-                  }`}>
+                  <div
+                    className={`group relative w-24 sm:w-28 h-32 sm:h-36 rounded-2xl border border-white/12 bg-gradient-to-br ${gradientClass} px-3 py-4 transition-transform duration-200 hover:-translate-y-1 ${
+                      !champion.player.isActive ? 'opacity-85 border-white/20' : ''
+                    }`}
+                  >
                     {/* Círculo de posición */}
                     <div className={`
                       absolute -top-2 -left-2 w-8 h-8 rounded-full 
@@ -169,7 +168,7 @@ export default function ChampionsCards() {
 
                     {/* Foto como fondo del card */}
                     {champion.player.photoUrl ? (
-                      <div className="absolute inset-0 rounded-lg overflow-hidden">
+                      <div className="absolute inset-0 overflow-hidden rounded-2xl">
                         <img
                           src={champion.player.photoUrl}
                           alt={getPlayerName(champion)}
@@ -179,7 +178,7 @@ export default function ChampionsCards() {
                       </div>
                     ) : (
                       <div className={`
-                        absolute inset-0 rounded-lg
+                        absolute inset-0 rounded-2xl
                         ${isFirst 
                           ? 'bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20' 
                           : isSecond 
@@ -190,11 +189,11 @@ export default function ChampionsCards() {
                     )}
 
                     {/* Contenido sobre la foto */}
-                    <div className="relative flex flex-col items-center justify-end h-full pb-2">
+                    <div className="relative flex h-full flex-col items-center justify-end pb-2">
                       {/* Si no hay foto, mostrar icono */}
                       {!champion.player.photoUrl && (
                         <div className="mb-auto mt-4">
-                          <div className="w-12 sm:w-16 h-12 sm:h-16 text-white/50 flex items-center justify-center">
+                          <div className="flex h-12 w-12 items-center justify-center text-white/60 sm:h-16 sm:w-16">
                             🏆
                           </div>
                         </div>
@@ -241,17 +240,17 @@ export default function ChampionsCards() {
               return (
                 <div
                   key={champion.player.id}
-                  className={`relative dashboard-card rounded-lg p-2 cursor-pointer group ${
-                    !champion.player.isActive ? 'border-2 border-gray-400' : ''
+                  className={`group relative rounded-2xl border border-white/12 bg-white/5 px-3 py-3 transition-transform duration-200 hover:-translate-y-1 ${
+                    !champion.player.isActive ? 'opacity-85 border-white/20' : ''
                   }`}
                 >
                   {/* Círculo de posición */}
-                  <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs border border-white/20 shadow-md">
+                  <div className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full border border-white/20 bg-black text-xs font-bold text-white shadow-md">
                     {position}
                   </div>
 
                   {/* Tooltip con torneos ganados */}
-                  <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 bg-black text-white px-3 py-2 rounded-lg text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg border border-gray-600" style={{zIndex: 9999}}>
+                  <div className="pointer-events-none absolute -top-14 left-1/2 -translate-x-1/2 rounded-lg border border-white/20 bg-black px-3 py-2 text-xs text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100" style={{zIndex: 9999}}>
                     <div className="font-semibold mb-1">Campeón en:</div>
                     <div>T{champion.tournamentNumbers.join(', T')}</div>
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
@@ -261,22 +260,22 @@ export default function ChampionsCards() {
                   
                   <div className="flex justify-between items-center pt-2 h-full">
                     <div>
-                      <h4 className="font-semibold text-white text-xs">
+                      <h4 className="text-xs font-semibold text-white">
                         {firstName}
                       </h4>
                       {getPlayerAlias(champion) && (
-                        <p className="text-orange-400 text-xs">
+                        <p className="text-xs text-orange-400">
                           ({getPlayerAlias(champion)})
                         </p>
                       )}
                       {!champion.player.isActive && (
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-xs text-white/45">
                           Histórico
                         </p>
                       )}
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="text-orange-400 font-bold text-sm">{champion.championshipsCount}</span>
+                      <span className="text-sm font-bold text-orange-400">{champion.championshipsCount}</span>
                     </div>
                   </div>
                 </div>

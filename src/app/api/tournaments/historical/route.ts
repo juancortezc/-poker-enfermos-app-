@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
 
 /**
  * GET /api/tournaments/historical
@@ -8,58 +9,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     // Obtener todos los ganadores históricos
-    const winners = await prisma.tournamentWinners.findMany({
-      include: {
-        champion: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        },
-        runnerUp: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        },
-        thirdPlace: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        },
-        siete: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        },
-        dos: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        }
-      },
-      orderBy: {
-        tournamentNumber: 'asc'
-      }
-    })
+    const winners = await getTournamentWinnersWithFallback(prisma)
 
     // Calcular estadísticas por jugador
     const playerStats = new Map()

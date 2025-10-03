@@ -85,25 +85,12 @@ export default function PodiumStatsTable() {
     setSelectedPlayerId(null)
   }
 
-  const getRowBackgroundClass = (stat: PodiumStat, index: number) => {
-    // Destacar los primeros 3 lugares
-    if (index === 0) return 'bg-yellow-500/10' // Oro
-    if (index === 1) return 'bg-gray-400/10'   // Plata
-    if (index === 2) return 'bg-orange-500/10' // Bronce
-    return index % 2 === 1 ? 'bg-gray-50' : ''
-  }
-
-  const getTextColorClass = (stat: PodiumStat, index: number) => {
-    if (index === 0) return 'text-yellow-600 font-bold'
-    if (index === 1) return 'text-gray-600 font-semibold'
-    if (index === 2) return 'text-orange-600 font-semibold'
-    return 'text-black'
-  }
-
   if (loading) {
     return (
       <div className="p-6">
-        <LoadingState message="Cargando estadísticas de podios..." />
+        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/70">
+          <LoadingState message="Cargando estadísticas de podios..." />
+        </div>
       </div>
     )
   }
@@ -111,11 +98,11 @@ export default function PodiumStatsTable() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="text-center py-8">
-          <p className="text-red-400 mb-4">Error: {error}</p>
+        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#1b1c2b] to-[#111221] p-8 text-center text-rose-100">
+          <p className="mb-4 text-sm">Error: {error}</p>
           <button
             onClick={fetchPodiumStats}
-            className="px-4 py-2 bg-poker-red text-white rounded hover:bg-red-700 transition-colors"
+            className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/80 transition-all hover:border-white/40 hover:text-white"
           >
             Reintentar
           </button>
@@ -127,8 +114,8 @@ export default function PodiumStatsTable() {
   if (!podiumData) {
     return (
       <div className="p-6">
-        <div className="text-center py-8">
-          <p className="text-poker-muted">No hay datos de podios</p>
+        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/65">
+          <p>No hay datos de podios</p>
         </div>
       </div>
     )
@@ -153,91 +140,75 @@ export default function PodiumStatsTable() {
   }
 
   return (
-    <div className="w-full p-6">
+    <div className="w-full space-y-6 p-6">
       {/* Top 3 Podium Leaders - Podium style */}
       {topThree.length > 0 && (
         <div className="mb-4">
-          <div className="flex justify-center items-center gap-2 sm:gap-3">
+          <div className="flex items-center justify-center gap-2 sm:gap-3">
             {topThree.map((stat, index) => {
-              const isFirst = index === 0
-              const isSecond = index === 1
-              const isThird = index === 2
-              
+              const gradientClass = index === 0
+                ? 'from-yellow-500/60 via-amber-400/20 to-yellow-300/10'
+                : index === 1
+                ? 'from-slate-500/60 via-slate-400/20 to-slate-300/10'
+                : 'from-orange-500/60 via-orange-400/20 to-amber-300/10'
+
               return (
-                <div
-                  key={stat.player.id}
-                  className="relative flex flex-col items-center"
-                >
-                  {/* Card del podio */}
-                  <div 
-                    className={`relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer hover:scale-105 transition-transform duration-200 ${
-                      !stat.player.isActive ? 'border-2 border-gray-400' : ''
+                <div key={stat.player.id} className="relative flex flex-col items-center">
+                  <div
+                    className={`group relative h-32 w-24 rounded-2xl border border-white/12 bg-gradient-to-br ${gradientClass} px-3 py-4 transition-transform duration-200 hover:-translate-y-1 sm:h-36 sm:w-28 ${
+                      !stat.player.isActive ? 'opacity-85 border-white/20' : ''
                     }`}
                     onClick={() => openPlayerModal(stat.player.id)}
                   >
-                    {/* Círculo de posición */}
-                    <div className={`
-                      absolute -top-2 -left-2 w-8 h-8 rounded-full 
-                      flex items-center justify-center font-bold text-sm z-10
-                      ${getPositionColor(index)}
-                    `}>
+                    <div
+                      className={`absolute -top-2 -left-2 flex h-8 w-8 items-center justify-center rounded-full font-bold text-sm ${getPositionColor(index)}`}
+                    >
                       {index + 1}
                     </div>
 
-                    {/* Foto como fondo del card */}
                     {stat.player.photoUrl ? (
-                      <div className="absolute inset-0 rounded-lg overflow-hidden">
+                      <div className="absolute inset-0 overflow-hidden rounded-2xl">
                         <img
                           src={stat.player.photoUrl}
                           alt={formatPlayerName(stat.player)}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       </div>
                     ) : (
-                      <div className={`
-                        absolute inset-0 rounded-lg
-                        ${isFirst 
-                          ? 'bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20' 
-                          : isSecond 
-                          ? 'bg-gradient-to-br from-gray-600/40 via-gray-500/30 to-gray-400/20' 
+                      <div className={`absolute inset-0 rounded-2xl ${
+                        index === 0
+                          ? 'bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20'
+                          : index === 1
+                          ? 'bg-gradient-to-br from-gray-600/40 via-gray-500/30 to-gray-400/20'
                           : 'bg-gradient-to-br from-orange-900/40 via-orange-700/30 to-orange-500/20'
-                        }
-                      `} />
+                      }`} />
                     )}
 
-                    {/* Contenido sobre la foto */}
-                    <div className="relative flex flex-col items-center justify-end h-full pb-2">
-                      {/* Si no hay foto, mostrar icono */}
+                    <div className="relative flex h-full flex-col items-center justify-end pb-2">
                       {!stat.player.photoUrl && (
-                        <div className="mb-auto mt-4">
-                          <div className="w-12 sm:w-16 h-12 sm:h-16 text-white/50 flex items-center justify-center text-2xl">
-                            🏆
-                          </div>
+                        <div className="mb-auto mt-4 flex h-12 w-12 items-center justify-center text-2xl text-white/60 sm:h-16 sm:w-16">
+                          🏆
                         </div>
                       )}
 
-                      {/* Nombre en la base */}
-                      <h3 className="text-white font-bold text-xs sm:text-sm text-center drop-shadow-lg">
-                        {formatPlayerName(stat.player).split(' ')[0]}
+                      <h3 className="text-center text-xs font-semibold text-white drop-shadow-lg sm:text-sm">
+                        {formatPlayerName(stat.player)}
                       </h3>
                       {getPlayerAlias(stat.player) && (
-                        <div className="text-xs text-orange-400 mt-1">
+                        <div className="mt-1 text-xs text-orange-400">
                           ({getPlayerAlias(stat.player)})
                         </div>
                       )}
                       {!stat.player.isActive && (
-                        <div className="text-xs text-gray-400 mt-1">
-                          Histórico
-                        </div>
+                        <div className="mt-1 text-xs text-white/45">Histórico</div>
                       )}
                     </div>
                   </div>
-                  
-                  {/* Podios bajo la foto */}
-                  <div className="text-right mt-1">
+
+                  <div className="mt-1 text-right">
                     <div className="flex flex-col items-end">
-                      <span className="text-orange-400 font-bold text-sm">{stat.totalPodiums}</span>
+                      <span className="text-sm font-bold text-orange-400">{stat.totalPodiums}</span>
                     </div>
                   </div>
                 </div>
@@ -252,40 +223,36 @@ export default function PodiumStatsTable() {
         <div className="mb-4">
           <div className="grid grid-cols-3 gap-2 px-2">
             {gridStats.map((stat, index) => {
-              const firstName = formatPlayerName(stat.player).split(' ')[0]
               const position = topThree.length + index + 1
-              
+
               return (
                 <div
                   key={stat.player.id}
-                  className={`relative dashboard-card rounded-lg p-2 cursor-pointer hover:scale-105 transition-transform duration-200 ${
-                    !stat.player.isActive ? 'border-2 border-gray-400' : ''
+                  className={`group relative cursor-pointer rounded-2xl border border-white/12 bg-white/5 px-3 py-3 transition-transform duration-200 hover:-translate-y-1 ${
+                    !stat.player.isActive ? 'opacity-85 border-white/20' : ''
                   }`}
                   onClick={() => openPlayerModal(stat.player.id)}
                 >
-                  {/* Círculo de posición */}
-                  <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs border border-white/20 shadow-md">
+                  <div className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full border border-white/20 bg-black text-xs font-bold text-white shadow-md">
                     {position}
                   </div>
-                  
-                  <div className="flex justify-between items-center pt-2 h-full">
+
+                  <div className="flex h-full items-center justify-between pt-2">
                     <div>
-                      <h4 className="font-semibold text-white text-xs">
-                        {firstName}
+                      <h4 className="text-xs font-semibold text-white">
+                        {formatPlayerName(stat.player)}
                       </h4>
                       {getPlayerAlias(stat.player) && (
-                        <p className="text-orange-400 text-xs">
+                        <p className="text-xs text-orange-400">
                           ({getPlayerAlias(stat.player)})
                         </p>
                       )}
                       {!stat.player.isActive && (
-                        <p className="text-gray-400 text-xs">
-                          Histórico
-                        </p>
+                        <p className="text-xs text-white/45">Histórico</p>
                       )}
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="text-orange-400 font-bold text-sm">{stat.totalPodiums}</span>
+                      <span className="text-sm font-bold text-orange-400">{stat.totalPodiums}</span>
                     </div>
                   </div>
                 </div>

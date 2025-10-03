@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getTournamentWinnerByNumber } from '@/lib/tournament-winners'
 
 /**
  * GET /api/tournaments/[number]/winners
@@ -23,58 +24,7 @@ export async function GET(
       )
     }
 
-    const winners = await prisma.tournamentWinners.findUnique({
-      where: {
-        tournamentNumber: tournamentNumber
-      },
-      include: {
-        champion: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        },
-        runnerUp: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        },
-        thirdPlace: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        },
-        siete: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        },
-        dos: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
-        }
-      }
-    })
+    const winners = await getTournamentWinnerByNumber(prisma, tournamentNumber)
 
     if (!winners) {
       return NextResponse.json(
