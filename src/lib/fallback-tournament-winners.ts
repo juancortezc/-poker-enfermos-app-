@@ -11,9 +11,9 @@ export const FALLBACK_TOURNAMENT_WINNERS: FallbackTournamentWinnerDefinition[] =
   {
     tournamentNumber: 28,
     champion: 'Roddy Naranjo',
-    runnerUp: 'Miguel Chiesa',
-    thirdPlace: 'Juan Antonio Cortez',
-    siete: 'Carlos Chacón',
-    dos: 'Agustin Guerrero'
+    runnerUp: 'Freddy Lopez',
+    thirdPlace: 'Fernando Peña',
+    siete: 'Sean Willis',
+    dos: 'Jose Luis Toral'
   }
 ]
