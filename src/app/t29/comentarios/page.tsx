@@ -41,20 +41,18 @@ export default function ComentariosPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (user) {
+    if (!loading) {
       fetchAllComments()
     }
-  }, [user])
+  }, [loading])
 
   const fetchAllComments = async () => {
     try {
       setIsLoading(true)
       setError(null)
 
-      // First, get all active proposals
-      const proposalsResponse = await fetch('/api/proposals', {
-        headers: buildAuthHeaders()
-      })
+      // First, get all active proposals (public endpoint)
+      const proposalsResponse = await fetch('/api/proposals/public')
 
       if (!proposalsResponse.ok) {
         throw new Error('Error al cargar propuestas')
@@ -62,8 +60,19 @@ export default function ComentariosPage() {
 
       const { proposals } = await proposalsResponse.json()
 
-      // Then, fetch comments for each proposal
+      // Then, fetch comments for each proposal (only if user is authenticated)
       const commentPromises = proposals.map(async (proposal: any) => {
+        if (!user) {
+          return {
+            proposalId: proposal.id,
+            proposal: {
+              id: proposal.id,
+              title: proposal.title
+            },
+            comments: []
+          }
+        }
+
         const commentsResponse = await fetch(`/api/proposals/${proposal.id}/comments`, {
           headers: buildAuthHeaders()
         })
@@ -85,7 +94,14 @@ export default function ComentariosPage() {
             }))
           }
         }
-        return null
+        return {
+          proposalId: proposal.id,
+          proposal: {
+            id: proposal.id,
+            title: proposal.title
+          },
+          comments: []
+        }
       })
 
       const results = await Promise.all(commentPromises)
@@ -135,10 +151,6 @@ export default function ComentariosPage() {
 
   if (loading) {
     return <LoadingState />
-  }
-
-  if (!user) {
-    return null
   }
 
   const totalComments = Object.values(groupedComments).reduce(
@@ -219,7 +231,7 @@ export default function ComentariosPage() {
 
               {/* Comments List */}
               <div className="p-5 space-y-4">
-                {group.comments.map((comment) => (
+                {group.comments.map((comment: Comment) => (
                   <div key={comment.id} className="bg-white/5 rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
