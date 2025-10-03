@@ -43,16 +43,17 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   return withAuth(request, async (req, user) => {
     try {
-      const { title, content } = await req.json()
+      const { title, objective, situation, proposal, imageUrl } = await req.json()
 
       // Validaciones básicas
-      if (!title || !content) {
+      if (!title || !objective || !situation || !proposal) {
         return NextResponse.json(
-          { error: 'Título y contenido son obligatorios' },
+          { error: 'Título, objetivo, situación y propuesta son obligatorios' },
           { status: 400 }
         )
       }
 
+      // Validaciones de longitud
       if (title.length > 200) {
         return NextResponse.json(
           { error: 'El título no puede exceder 200 caracteres' },
@@ -60,18 +61,47 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      if (content.length > 5000) {
+      if (objective.length > 1000) {
         return NextResponse.json(
-          { error: 'El contenido no puede exceder 5000 caracteres' },
+          { error: 'El objetivo no puede exceder 1000 caracteres' },
           { status: 400 }
         )
       }
 
+      if (situation.length > 2000) {
+        return NextResponse.json(
+          { error: 'La situación a modificar no puede exceder 2000 caracteres' },
+          { status: 400 }
+        )
+      }
+
+      if (proposal.length > 3000) {
+        return NextResponse.json(
+          { error: 'La propuesta no puede exceder 3000 caracteres' },
+          { status: 400 }
+        )
+      }
+
+      // Validar URL de imagen si se proporciona
+      if (imageUrl && imageUrl.trim()) {
+        try {
+          new URL(imageUrl.trim())
+        } catch {
+          return NextResponse.json(
+            { error: 'La URL de la imagen no es válida' },
+            { status: 400 }
+          )
+        }
+      }
+
       // Crear propuesta
-      const proposal = await prisma.proposalV2.create({
+      const newProposal = await prisma.proposalV2.create({
         data: {
           title: String(title).trim(),
-          content: String(content).trim(),
+          objective: String(objective).trim(),
+          situation: String(situation).trim(),
+          proposal: String(proposal).trim(),
+          imageUrl: imageUrl && imageUrl.trim() ? String(imageUrl).trim() : null,
           createdById: user.id
         },
         include: {
@@ -86,7 +116,7 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      return NextResponse.json({ proposal }, { status: 201 })
+      return NextResponse.json({ proposal: newProposal }, { status: 201 })
     } catch (error) {
       console.error('Error creating proposal v2:', error)
       return NextResponse.json(

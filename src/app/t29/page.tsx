@@ -14,7 +14,9 @@ import Link from 'next/link'
 interface Proposal {
   id: number
   title: string
-  content: string
+  objective: string
+  situation: string
+  proposal: string
   imageUrl?: string | null
 }
 

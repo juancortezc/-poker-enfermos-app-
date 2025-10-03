@@ -11,7 +11,9 @@ import { useAuth } from '@/contexts/AuthContext'
 interface Proposal {
   id: number
   title: string
-  content: string
+  objective: string
+  situation: string
+  proposal: string
   imageUrl?: string | null
 }
 
@@ -126,9 +128,29 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
         <>
           {/* Proposal Content */}
           <div className="p-5 border-b border-white/10 space-y-4">
-            <p className="text-sm font-normal text-white/90 leading-relaxed whitespace-pre-line">
-              {proposal.content}
-            </p>
+            {/* Objetivo */}
+            <div>
+              <h4 className="text-sm font-medium text-poker-red mb-2">Objetivo</h4>
+              <p className="text-sm font-normal text-white/90 leading-relaxed">
+                {proposal.objective}
+              </p>
+            </div>
+
+            {/* Situación a modificar */}
+            <div>
+              <h4 className="text-sm font-medium text-poker-red mb-2">Situación a Modificar</h4>
+              <p className="text-sm font-normal text-white/90 leading-relaxed whitespace-pre-line">
+                {proposal.situation}
+              </p>
+            </div>
+
+            {/* Propuesta */}
+            <div>
+              <h4 className="text-sm font-medium text-poker-red mb-2">Propuesta</h4>
+              <p className="text-sm font-normal text-white/90 leading-relaxed whitespace-pre-line">
+                {proposal.proposal}
+              </p>
+            </div>
 
             {/* Image Display */}
             {proposal.imageUrl && (
