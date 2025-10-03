@@ -9,7 +9,8 @@
     "build:prod": "NODE_ENV=production npm run build:css && next build",
     "start": "next start",
     "lint": "eslint",
-    "analyze": "npm run build && npx @next/bundle-analyzer"
+    "analyze": "npm run build && npx @next/bundle-analyzer",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
