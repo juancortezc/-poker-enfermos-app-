@@ -35,6 +35,7 @@ model Player {
   proposalComments       ProposalComment[]
   proposalVotes          ProposalVote[]
   createdProposals       Proposal[]              @relation("ProposalCreator")
+  t29Participation       T29Participant?
   timerActions           TimerAction[]
   tournamentParticipants TournamentParticipant[]
   tournamentRankings     TournamentRanking[]
@@ -43,7 +44,6 @@ model Player {
   runnerUpWins           TournamentWinners[]     @relation("RunnerUp")
   sietePositions         TournamentWinners[]     @relation("Siete")
   thirdPlaceWins         TournamentWinners[]     @relation("ThirdPlace")
-  t29Participation       T29Participant?
 
   @@map("players")
 }
@@ -224,17 +224,17 @@ model TournamentWinners {
 }
 
 model Proposal {
-  id         Int               @id @default(autoincrement())
-  title      String
-  content    String
-  isActive   Boolean           @default(true) @map("is_active")
-  createdAt  DateTime          @default(now()) @map("created_at")
-  updatedAt  DateTime          @default(now()) @updatedAt @map("updated_at")
-  imageUrl   String?           @map("image_url")
-  createdById String?          @map("created_by_id")
-  createdBy  Player?           @relation("ProposalCreator", fields: [createdById], references: [id])
-  comments   ProposalComment[]
-  votes      ProposalVote[]
+  id          Int               @id @default(autoincrement())
+  title       String
+  content     String
+  isActive    Boolean           @default(true) @map("is_active")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @default(now()) @updatedAt @map("updated_at")
+  imageUrl    String?           @map("image_url")
+  createdById String?           @map("created_by_id")
+  comments    ProposalComment[]
+  votes       ProposalVote[]
+  createdBy   Player?           @relation("ProposalCreator", fields: [createdById], references: [id])
 
   @@map("proposals")
 }
@@ -262,6 +262,17 @@ model ProposalVote {
 
   @@unique([proposalId, playerId])
   @@map("proposal_votes")
+}
+
+model T29Participant {
+  id           Int      @id @default(autoincrement())
+  playerId     String   @unique @map("player_id")
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  registeredAt DateTime @default(now()) @map("registered_at")
+  player       Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("t29_participants")
 }
 
 enum UserRole {
@@ -303,15 +314,4 @@ enum TimerActionType {
 enum VoteType {
   thumbsUp
   thumbsDown
-}
-
-model T29Participant {
-  id          Int      @id @default(autoincrement())
-  playerId    String   @unique @map("player_id")
-  firstName   String   @map("first_name")
-  lastName    String   @map("last_name")
-  registeredAt DateTime @default(now()) @map("registered_at")
-  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
-
-  @@map("t29_participants")
 }
