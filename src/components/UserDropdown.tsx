@@ -2,15 +2,17 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { LogOut, User, ChevronDown, Bell, Download, Share2 } from 'lucide-react'
+import { LogOut, User, ChevronDown, Bell, Download, Share2, MessageCircle } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { UserAvatar } from './UserAvatar'
 import { canAccess } from '@/lib/permissions'
+import { QuickNotificationModal } from './notifications/QuickNotificationModal'
 
 export function UserDropdown() {
   const { user, logout } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
+  const [showQuickNotification, setShowQuickNotification] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -39,6 +41,11 @@ export function UserDropdown() {
   const handleNotificationsClick = () => {
     setIsOpen(false)
     router.push('/notificaciones')
+  }
+
+  const handleQuickNotificationClick = () => {
+    setIsOpen(false)
+    setShowQuickNotification(true)
   }
 
   const getRoleBadgeColor = (role: UserRole) => {
@@ -112,7 +119,18 @@ export function UserDropdown() {
                   <Bell size={18} className="text-poker-muted" />
                   <span>Notificaciones</span>
                 </button>
-                
+
+                {/* Send Quick Notification - Solo para Comisión */}
+                {user.role === 'Comision' && (
+                  <button
+                    onClick={handleQuickNotificationClick}
+                    className="w-full text-left flex items-center space-x-3 px-4 py-3 text-white hover:bg-poker-red/20 transition-colors"
+                  >
+                    <MessageCircle size={18} className="text-poker-red" />
+                    <span>Enviar Mensaje</span>
+                  </button>
+                )}
+
                 <div className="border-t border-white/10 my-1"></div>
                 
                 <button
@@ -157,6 +175,12 @@ export function UserDropdown() {
           </div>
         </div>
       )}
+
+      {/* Quick Notification Modal */}
+      <QuickNotificationModal
+        isOpen={showQuickNotification}
+        onClose={() => setShowQuickNotification(false)}
+      />
     </div>
   )
 }

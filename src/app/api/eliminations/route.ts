@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withComisionAuth } from '@/lib/api-auth';
 import { calculatePointsForPosition } from '@/lib/tournament-utils';
 import { updateParentChildStats } from '@/lib/parent-child-stats';
+import { sendNotificationIfEnabled } from '@/lib/notification-config';
 
 export async function POST(request: NextRequest) {
   return withComisionAuth(request, async (_req, _user) => {
@@ -128,11 +129,39 @@ export async function POST(request: NextRequest) {
       const victoryDate = gameDate.scheduledDate.toLocaleDateString('es-EC'); // DD/MM/YYYY format
       await prisma.player.update({
         where: { id: eliminatedPlayerId },
-        data: { 
+        data: {
           lastVictoryDate: victoryDate
         }
       });
       console.log('[ELIMINATION API] Updated lastVictoryDate for manual winner:', eliminatedPlayerId, 'Date:', victoryDate);
+
+      // Send winner notification (if enabled)
+      await sendNotificationIfEnabled(
+        'winner_declared',
+        '🏆 ¡Tenemos Ganador!',
+        `${elimination.eliminatedPlayer.firstName} ${elimination.eliminatedPlayer.lastName} ha ganado la fecha con ${points} puntos`,
+        {
+          playerId: eliminatedPlayerId,
+          playerName: `${elimination.eliminatedPlayer.firstName} ${elimination.eliminatedPlayer.lastName}`,
+          points,
+          gameDateId,
+          position: 1
+        }
+      )
+    } else {
+      // Send elimination notification for other positions (if enabled)
+      await sendNotificationIfEnabled(
+        'player_eliminated',
+        '💀 Jugador Eliminado',
+        `${elimination.eliminatedPlayer.firstName} ${elimination.eliminatedPlayer.lastName} eliminado en posición ${position}°`,
+        {
+          playerId: eliminatedPlayerId,
+          playerName: `${elimination.eliminatedPlayer.firstName} ${elimination.eliminatedPlayer.lastName}`,
+          position,
+          points,
+          gameDateId
+        }
+      )
     }
 
     // Actualizar estadísticas padre-hijo si hay eliminador

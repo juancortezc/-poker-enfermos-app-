@@ -70,7 +70,7 @@ export default function TournamentResultsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-all ${
                     isActive
-                      ? 'border-poker-red/60 bg-gradient-to-r from-poker-red via-[#ff5d8f] to-[#ff9f6a] text-white shadow-[0_12px_28px_rgba(255,93,143,0.35)]'
+                      ? 'border-poker-red/60 bg-gradient-to-r from-poker-red via-[#d73552] to-[#ff4b2b] text-white shadow-[0_12px_28px_rgba(215,53,82,0.45)]'
                       : 'border-white/12 bg-white/5 text-white/70 hover:text-white hover:border-white/35'
                   }`}
                 >

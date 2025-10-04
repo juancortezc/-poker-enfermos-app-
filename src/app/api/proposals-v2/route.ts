@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withAuth } from '@/lib/api-auth'
+import { sendNotificationIfEnabled } from '@/lib/notification-config'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -115,6 +116,21 @@ export async function POST(request: NextRequest) {
           }
         }
       })
+
+      // Send notification about new proposal (if enabled)
+      await sendNotificationIfEnabled(
+        'proposal_created',
+        '📝 Nueva Propuesta',
+        `${newProposal.createdBy?.firstName} ${newProposal.createdBy?.lastName} ha creado una nueva propuesta: ${newProposal.title}`,
+        {
+          proposalId: newProposal.id,
+          proposalTitle: newProposal.title,
+          authorId: user.id,
+          authorName: `${newProposal.createdBy?.firstName} ${newProposal.createdBy?.lastName}`,
+          excludePlayerIds: [user.id] // Don't notify the proposal creator
+        },
+        user.id // Track who created the proposal
+      )
 
       return NextResponse.json({ proposal: newProposal }, { status: 201 })
     } catch (error) {

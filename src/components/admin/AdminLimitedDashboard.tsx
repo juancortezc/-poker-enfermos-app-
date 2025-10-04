@@ -1,13 +1,16 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 import { getDashboardFeatures } from '@/lib/permissions'
 import type { DashboardFeature } from '@/lib/permissions'
 import { AdminCard } from '@/components/ui/RestrictedCard'
+import { BroadcastNotification } from '@/components/admin/BroadcastNotification'
 import {
   Award,
   BarChart3,
+  Bell,
   CalendarCheck,
   CalendarDays,
   CalendarPlus,
@@ -18,6 +21,7 @@ import {
   HeartPulse,
   Lightbulb,
   MessageSquarePlus,
+  Radio,
   Sparkles,
   Trophy,
   Users
@@ -39,11 +43,13 @@ const iconMap = {
   't29-proposals': Lightbulb,
   'proposals-admin': MessageSquarePlus,
   'my-proposals': FileUser,
+  notifications: Bell,
+  broadcast: Radio,
 }
 
 export default function AdminLimitedDashboard() {
   const { user } = useAuth()
-  
+
   if (!user) return null
 
   const features = getDashboardFeatures(user.role)
@@ -79,6 +85,46 @@ export default function AdminLimitedDashboard() {
     )
   }
 
+  const renderBroadcastCard = (index: number) => {
+    const [showBroadcast, setShowBroadcast] = useState(false)
+
+    if (showBroadcast) {
+      return (
+        <div key="broadcast-content" className="col-span-2 sm:col-span-3">
+          <div className="rounded-2xl border border-poker-red/20 bg-gradient-to-br from-[#1a1b2b]/95 via-[#141625]/95 to-[#10111b]/95 p-5 backdrop-blur-md">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Broadcast Notifications</h3>
+              <button
+                onClick={() => setShowBroadcast(false)}
+                className="rounded-full p-2 text-white/60 hover:bg-white/10 hover:text-white"
+              >
+                ×
+              </button>
+            </div>
+            <BroadcastNotification />
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <button
+        key="broadcast"
+        onClick={() => setShowBroadcast(true)}
+        className="block w-full"
+      >
+        <AdminCard
+          title="Broadcast"
+          icon={Radio}
+          accessible={true}
+          restricted={false}
+          userRole={user.role}
+          index={index}
+        />
+      </button>
+    )
+  }
+
   return (
     <div className="relative px-4 pt-16 pb-28">
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80" aria-hidden />
@@ -109,9 +155,11 @@ export default function AdminLimitedDashboard() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
               {features.admin.map((feature, index) => renderFeature(feature, index, features.base.length))}
+              {user.role === 'Comision' && renderBroadcastCard(features.admin.length + features.base.length)}
             </div>
           </section>
         )}
+
 
         {user.role !== 'Comision' && (
           <div className="rounded-3xl border border-white/10 bg-white/10 p-4 text-center text-sm text-white/70">

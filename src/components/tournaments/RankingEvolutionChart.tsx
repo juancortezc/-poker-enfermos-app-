@@ -21,13 +21,15 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-poker-red border-2 border-poker-gold rounded-lg p-3 shadow-xl">
-        <p className="text-white font-semibold">Fecha {label}</p>
-        <p className="text-poker-gold">
-          Posición: {data.position}°
+      <div className="rounded-2xl border border-white/20 bg-gradient-to-br from-[#1f1a2d] via-[#181a2c] to-[#111221] px-4 py-3 shadow-[0_16px_36px_rgba(8,9,15,0.45)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/55 mb-1">
+          Fecha {label}
         </p>
-        <p className="text-poker-orange">
-          Puntos: {data.points}
+        <p className="text-sm font-semibold text-white">
+          Posición: <span className="text-poker-gold">{data.position}°</span>
+        </p>
+        <p className="text-sm font-semibold text-white/80">
+          Puntos: <span className="text-rose-300">{data.points}</span>
         </p>
       </div>
     );
@@ -63,7 +65,7 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
   const padding = Math.max(1, Math.ceil((maxPosition - minPosition) * 0.1));
 
   return (
-    <div className="bg-poker-table border-2 border-poker-red rounded-lg p-6">
+    <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] p-6">
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
@@ -75,19 +77,26 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
               bottom: 20,
             }}
           >
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              stroke="rgba(229, 9, 20, 0.2)" 
-            />
+            <defs>
+              <linearGradient id="pokerNewLine" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#d73552" />
+                <stop offset="100%" stopColor="#ff4b2b" />
+              </linearGradient>
+              <linearGradient id="pokerNewGrid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.08)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0.03)" />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="4 8" stroke="url(#pokerNewGrid)" />
             <XAxis
               dataKey="label"
-              stroke="rgba(255, 255, 255, 0.6)"
+              stroke="rgba(255, 255, 255, 0.45)"
               fontSize={12}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              stroke="rgba(255, 255, 255, 0.6)"
+              stroke="rgba(255, 255, 255, 0.45)"
               fontSize={12}
               tickLine={false}
               axisLine={false}
@@ -97,24 +106,24 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
             />
             <Tooltip 
               content={<CustomTooltip />}
-              cursor={{ stroke: '#E50914', strokeWidth: 2 }}
+              cursor={{ stroke: 'rgba(255,93,143,0.6)', strokeWidth: 2 }}
             />
             <Line
               type="monotone"
               dataKey="position"
-              stroke="#E50914"
-              strokeWidth={6}
-              dot={{ 
-                fill: '#FF8C00', 
-                strokeWidth: 3, 
-                stroke: '#E50914',
-                r: 10 
+              stroke="url(#pokerNewLine)"
+              strokeWidth={5}
+              dot={{
+                fill: '#d73552',
+                strokeWidth: 2,
+                stroke: '#ff4b2b',
+                r: 8
               }}
-              activeDot={{ 
-                r: 14, 
-                fill: '#FFD700',
-                stroke: '#E50914',
-                strokeWidth: 3
+              activeDot={{
+                r: 12,
+                fill: '#ff4b2b',
+                stroke: '#ffffff',
+                strokeWidth: 2
               }}
             />
           </LineChart>
@@ -123,17 +132,17 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
       
       {/* Chart info */}
       <div className="mt-4 text-center">
-        <p className="text-poker-muted text-sm">
+        <p className="text-sm text-white/60">
           Evolución de {playerName} a través de {data.length} fechas jugadas
         </p>
         <div className="flex justify-center items-center gap-4 mt-2 text-xs">
           <div className="flex items-center gap-1">
-            <div className="w-4 h-1 bg-poker-red rounded"></div>
-            <span className="text-white">Posición en ranking</span>
+            <div className="h-1 w-6 rounded-full bg-gradient-to-r from-[#d73552] to-[#ff4b2b]" />
+            <span className="text-white/70">Posición en ranking</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-poker-orange rounded-full"></div>
-            <span className="text-white">Fecha jugada</span>
+            <div className="h-2 w-2 rounded-full bg-[#ff4b2b]" />
+            <span className="text-white/70">Fecha jugada</span>
           </div>
         </div>
       </div>

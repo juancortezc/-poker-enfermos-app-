@@ -168,7 +168,7 @@ export default function T29Page() {
                   variant="ghost"
                   onClick={handleRegisterParticipation}
                   disabled={isRegistering}
-                  className="relative min-w-[220px] rounded-full bg-gradient-to-r from-poker-red via-[#ff5d8f] to-[#ff9f6a] text-white font-semibold shadow-[0_14px_30px_rgba(255,93,143,0.35)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(255,93,143,0.45)]"
+                  className="relative min-w-[220px] rounded-full bg-gradient-to-r from-poker-red via-[#d73552] to-[#ff4b2b] text-white font-semibold shadow-[0_14px_30px_rgba(215,53,82,0.45)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(215,53,82,0.55)]"
                 >
                   {isRegistering ? (
                     <>

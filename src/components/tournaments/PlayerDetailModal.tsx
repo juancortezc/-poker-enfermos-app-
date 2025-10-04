@@ -63,6 +63,11 @@ export default function PlayerDetailModal({
     (champion) => champion.player?.id === playerId
   );
 
+  const totalCompletedDates = details?.datePerformance
+    ? details.datePerformance.filter(date => date && date.status === 'completed').length
+    : 0;
+  const totalDates = details?.datePerformance?.length ?? 0;
+
   if (!isOpen) return null;
 
   return (
@@ -71,240 +76,246 @@ export default function PlayerDetailModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center p-2 sm:p-4 pt-4 sm:pt-8 overflow-hidden"
+        className="fixed inset-0 z-50 flex items-start justify-center overflow-hidden bg-black/75 backdrop-blur-sm p-3 sm:p-6"
         onClick={onClose}
       >
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
+          initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-poker-table border-2 border-poker-red rounded-xl w-full max-w-6xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto scrollbar-custom"
+          exit={{ scale: 0.95, opacity: 0 }}
+          className="relative w-full max-w-6xl max-h-[92vh] overflow-y-auto rounded-3xl border border-white/12 bg-gradient-to-br from-[#1c1e32] via-[#181a2c] to-[#10111b] shadow-[0_40px_120px_rgba(8,9,15,0.6)]"
           onClick={(e) => e.stopPropagation()}
         >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_55%)]" />
+
           {loading || !details ? (
-            <div className="p-8 text-center">
-              <div className="animate-spin w-8 h-8 border-2 border-poker-red border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-white">Cargando detalles del jugador...</p>
+            <div className="relative z-10 p-10 text-center">
+              <div className="mb-5 flex justify-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/15">
+                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/40 border-t-transparent" />
+                </div>
+              </div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">
+                Cargando detalles del jugador...
+              </p>
               {error && (
-                <p className="text-red-400 text-sm mt-2">{error}</p>
+                <p className="mt-3 text-sm text-rose-300">{error}</p>
               )}
             </div>
           ) : (
-            <div className="p-4 sm:p-6 lg:p-8">
-              {/* Header with close button */}
-              <div className="flex justify-between items-start mb-6">
-                <h2 className="text-xl font-bold text-white">Detalles del Jugador</h2>
+            <div className="relative z-10 space-y-8 p-5 sm:p-8 lg:p-10">
+              {/* Header */}
+              <header className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-col gap-6 md:flex-row md:items-center">
+                  <div className="relative mx-auto flex h-40 w-40 items-center justify-center rounded-3xl border border-white/12 bg-white/5 p-2 shadow-[0_24px_60px_rgba(8,9,15,0.45)] md:mx-0">
+                    <div className="relative h-full w-full overflow-hidden rounded-2xl">
+                      {details.player.photoUrl ? (
+                        <Image
+                          src={details.player.photoUrl}
+                          alt={details.player.firstName}
+                          fill
+                          sizes="160px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-400/20 text-4xl text-white/60">
+                          🏆
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 text-center md:text-left">
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/55">Jugador destacado</p>
+                      <h2 className="text-3xl font-semibold tracking-tight text-white">
+                        {details.player.firstName} {details.player.lastName}
+                      </h2>
+                      {details.player.aliases.length > 0 && (
+                        <p className="text-sm text-orange-400">
+                          ({details.player.aliases.join(', ')})
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap justify-center gap-3 md:justify-start">
+                      <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                        <Crown className="h-4 w-4 text-poker-gold" />
+                        {playerChampionships?.championshipsCount ? (
+                          <span>
+                            {playerChampionships.championshipsCount} Campeonato{playerChampionships.championshipsCount > 1 ? 's' : ''}
+                          </span>
+                        ) : (
+                          <span>Sin títulos</span>
+                        )}
+                      </div>
+
+                      {details.player.lastVictoryDate ? (() => {
+                        const [day, month, year] = details.player.lastVictoryDate.split('/').map(Number)
+                        const victoryDate = new Date(year, month - 1, day)
+                        const today = new Date()
+                        const daysWithoutVictory = Math.floor(
+                          (today.getTime() - victoryDate.getTime()) / (1000 * 3600 * 24)
+                        )
+
+                        return (
+                          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                            <Target className="h-4 w-4 text-white" />
+                            <span>{daysWithoutVictory} días sin ganar</span>
+                          </div>
+                        )
+                      })() : (
+                        <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+                          <Target className="h-4 w-4 text-white" />
+                          <span>Sin victorias registradas</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
-                    onClose();
+                    e.stopPropagation()
+                    onClose()
                   }}
-                  className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/15 bg-white/5 text-white/70 transition-all hover:border-white/35 hover:text-white"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="h-5 w-5" />
                 </button>
-              </div>
+              </header>
 
-              {/* Player Header Section */}
-              <div className="text-center mb-8">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full overflow-hidden card-poker p-2">
-                  {details.player.photoUrl ? (
-                    <Image
-                      src={details.player.photoUrl}
-                      alt={details.player.firstName}
-                      width={128}
-                      height={128}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-poker-gold">
-                      <Trophy className="w-16 h-16" />
-                    </div>
-                  )}
-                </div>
-                
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {details.player.firstName}
-                </h3>
-                
-                {details.player.aliases.length > 0 && (
-                  <p className="text-orange-400 mb-2">
-                    ({details.player.aliases.join(', ')})
-                  </p>
-                )}
-
-                {/* Campeonatos Ganados */}
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Crown className="w-6 h-6 text-poker-gold" />
-                  <span className="text-poker-gold font-bold text-xl">
-                    {playerChampionships?.championshipsCount > 0 
-                      ? `${playerChampionships.championshipsCount} Campeonato${playerChampionships.championshipsCount > 1 ? 's' : ''}`
-                      : 'Sin títulos'
+              {/* Highlights */}
+              <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  {
+                    label: 'Puntos acumulados',
+                    value: `${details.currentStats.totalPoints}`,
+                    accent: 'text-poker-gold'
+                  },
+                  details.currentStats.finalScore !== undefined
+                    ? {
+                        label: 'Puntaje final proyectado',
+                        value: `${details.currentStats.finalScore}`,
+                        accent: 'text-orange-300'
+                      }
+                    : null,
+                  {
+                    label: 'Posición actual',
+                    value: `${details.currentStats.position}°`,
+                    accent: 'text-white'
+                  },
+                  {
+                    label: 'Mejor resultado',
+                    value: details.bestResult,
+                    accent: 'text-emerald-300'
+                  },
+                  {
+                    label: 'Fechas jugadas',
+                    value: `${totalCompletedDates}`,
+                    suffix: totalDates ? `/${totalDates}` : undefined,
+                    accent: 'text-white'
+                  }
+                ]
+                  .filter(Boolean)
+                  .map((card, index) => {
+                    const { label, value, accent = 'text-white', suffix } = card as {
+                      label: string
+                      value: string
+                      accent?: string
+                      suffix?: string
                     }
-                  </span>
-                </div>
-                
-                {/* Días sin ganar */}
-                <div className="mb-4">
-                  {details.player.lastVictoryDate ? (() => {
-                    // Calcular días sin ganar
-                    const [day, month, year] = details.player.lastVictoryDate.split('/').map(Number);
-                    const lastVictoryDate = new Date(year, month - 1, day);
-                    const today = new Date();
-                    const timeDiff = today.getTime() - lastVictoryDate.getTime();
-                    const daysWithoutVictory = Math.floor(timeDiff / (1000 * 3600 * 24));
-                    
-                    return (
-                      <div className="flex flex-col items-center">
-                        <span className={`
-                          text-3xl font-bold
-                          ${daysWithoutVictory > 100 ? 'text-poker-red' : 
-                            daysWithoutVictory > 60 ? 'text-poker-orange' : 
-                            daysWithoutVictory > 30 ? 'text-poker-gold' : 
-                            'text-poker-orange'}
-                        `}>
-                          {daysWithoutVictory}
-                        </span>
-                        <span className="text-sm text-gray-400 mt-1">
-                          días sin ganar
-                        </span>
-                        <span className="text-xs text-gray-500 mt-1">
-                          Última victoria: {details.player.lastVictoryDate}
-                        </span>
-                      </div>
-                    );
-                  })() : (
-                    <div className="text-gray-500 text-sm">
-                      Sin victorias registradas
-                    </div>
-                  )}
-                </div>
 
-                <div className="flex justify-center items-center gap-4 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-poker-gold" />
-                    <span className="text-poker-gold font-bold text-lg score-emphasis">
-                      {details.currentStats.totalPoints} pts
-                    </span>
-                  </div>
-                  {details.currentStats.finalScore !== undefined && (
-                    <div className="flex items-center gap-2">
-                      <Crown className="w-5 h-5 text-orange-400" />
-                      <span className="text-orange-400 font-bold text-lg score-emphasis">
-                        {details.currentStats.finalScore} final
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-white" />
-                    <span className="text-white font-bold text-lg score-emphasis">
-                      {details.currentStats.position}° lugar
-                    </span>
-                  </div>
-                </div>
-              </div>
+                    return (
+                      <div
+                        key={`${label}-${index}`}
+                        className="rounded-2xl border border-white/12 bg-white/5 p-4 text-center"
+                      >
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/55">
+                          {label}
+                        </p>
+                        <p className={`mt-2 text-3xl font-bold ${accent}`}>
+                          {value}
+                          {suffix && <span className="ml-1 text-sm text-white/45">{suffix}</span>}
+                        </p>
+                      </div>
+                    )
+                  })}
+              </section>
 
               {/* Date Performance Grid */}
-              <div className="mb-8">
-                <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <Crown className="w-5 h-5 text-poker-red" />
-                  Performance por Fecha
-                </h4>
-                <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-3">
-                  {Array.from({ length: 12 }, (_, i) => {
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-9 w-9 rounded-2xl border border-white/15 bg-white/5 text-center text-lg leading-9 text-poker-red">F</div>
+                  <h3 className="text-lg font-semibold text-white tracking-tight">Performance por fecha</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+                  {Array.from({ length: Math.max(totalDates, 12) }, (_, i) => {
                     const dateNumber = i + 1;
                     const date = details.datePerformance.find(d => d.dateNumber === dateNumber);
                     
                     if (!date || date.status === 'pending' || date.status === 'CREATED') {
-                      // Gray card for pending dates
                       return (
                         <div
                           key={dateNumber}
-                          className="dashboard-card opacity-50 rounded-lg p-3 text-center"
-                          style={{ borderColor: '#4a4a4a' }}
+                          className="rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-center opacity-60"
                         >
-                          <div className="text-xs text-gray-400 mb-1">
-                            F{dateNumber}
-                          </div>
-                          <div className="text-sm text-gray-500 mb-1">---</div>
-                          <div className="text-sm text-gray-500 mb-1">---</div>
-                          <div className="text-xs text-gray-500">---</div>
+                          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">F{dateNumber}</div>
+                          <div className="mt-1 text-sm text-white/40">Pendiente</div>
                         </div>
                       );
                     }
 
                     if (date.status === 'in_progress') {
-                      // Orange card for in-progress dates
                       return (
                         <div
                           key={dateNumber}
-                          className="dashboard-card rounded-lg p-3 text-center"
-                          style={{ borderColor: '#f59e0b' }}
+                          className="rounded-2xl border border-amber-400/60 bg-amber-400/10 px-4 py-3 text-center"
                         >
-                          <div className="text-xs text-poker-muted mb-1">
-                            F{dateNumber}
-                          </div>
-                          <div className="text-sm text-orange-400 mb-1">EN VIVO</div>
-                          <div className="text-poker-gold font-bold text-sm mb-1 score-emphasis">
-                            {date.points} pts
-                          </div>
-                          <div className="text-xs text-orange-400">JUGANDO</div>
+                          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">F{dateNumber}</div>
+                          <div className="mt-1 text-sm font-semibold text-amber-300">EN VIVO</div>
+                          <div className="text-lg font-bold text-white">{date.points} pts</div>
                         </div>
                       );
                     }
 
-                    // Check if this date is part of ELIMINA 2 (worst dates)
                     const isElimina2Date = date.points === details.currentStats.elimina1 || 
                                           date.points === details.currentStats.elimina2;
                     
-                    // Completed date
                     return (
-                      <div
-                        key={dateNumber}
-                        className="dashboard-card rounded-lg p-3 text-center"
-                        style={{ borderColor: isElimina2Date ? '#6b7280' : 'var(--poker-red)' }}
-                      >
-                        <div className="text-xs text-poker-muted mb-1">
-                          F{dateNumber}
+                      <div key={dateNumber} className={`rounded-2xl border px-4 py-3 text-center ${
+                        isElimina2Date
+                          ? 'border-white/12 bg-white/5'
+                          : 'border-poker-red/50 bg-gradient-to-br from-poker-red/20 via-[#d73552]/10 to-transparent'
+                      }`}>
+                        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">F{dateNumber}</div>
+                        <div className="mt-1 text-sm font-semibold text-white">
+                          {date.isAbsent ? 'Ausente' : date.eliminationPosition ? `${date.eliminationPosition}° lugar` : 'Ganador'}
                         </div>
-                        <div className="text-sm font-bold mb-1">
-                          {date.isAbsent ? (
-                            <span className="text-gray-400">AUSENTE</span>
-                          ) : date.eliminationPosition ? (
-                            <span className="text-white">{date.eliminationPosition}°</span>
-                          ) : (
-                            <span className="text-white">GANÓ</span>
-                          )}
-                        </div>
-                        <div className="text-poker-gold font-bold text-sm mb-1 score-emphasis">
-                          {date.points} pts
-                        </div>
-                        <div className={`text-xs ${date.eliminatedBy?.isGuest ? 'text-pink-500' : 'text-orange-400'}`}>
-                          {date.isAbsent ? (
-                            <span className="text-gray-400">NO PARTICIPÓ</span>
-                          ) : date.eliminationPosition ? (
-                            date.eliminatedBy?.isGuest ? 'Invitado' : date.eliminatedBy?.alias || date.eliminatedBy?.name
-                          ) : (
-                            'CAMPEÓN'
-                          )}
+                        <div className="text-lg font-bold text-poker-gold">{date.points} pts</div>
+                        <div className={`text-xs ${date.eliminatedBy?.isGuest ? 'text-pink-300' : 'text-orange-300'}`}>
+                          {date.isAbsent ? 'No participó' : date.eliminationPosition ? (date.eliminatedBy?.alias || date.eliminatedBy?.name || 'Eliminado') : 'Campeón'}
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              </div>
-
+              </section>
 
               {/* Ranking Evolution Chart */}
-              <div className="mb-6">
-                <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  📈 Evolución en el Ranking
-                </h4>
-                <RankingEvolutionChart 
-                  data={details.rankingEvolution}
-                  playerName={details.player.firstName}
-                />
-              </div>
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-9 w-9 rounded-2xl border border-white/15 bg-white/5 text-center text-lg leading-9 text-emerald-300">📈</div>
+                  <h3 className="text-lg font-semibold text-white tracking-tight">Evolución en el ranking</h3>
+                </div>
+                <div className="rounded-2xl border border-white/12 bg-white/5 p-4">
+                  <RankingEvolutionChart 
+                    data={details.rankingEvolution}
+                    playerName={details.player.firstName}
+                  />
+                </div>
+              </section>
             </div>
           )}
         </motion.div>

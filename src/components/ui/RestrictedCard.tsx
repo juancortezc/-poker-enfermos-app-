@@ -60,7 +60,7 @@ export function RestrictedCard({
           flex h-12 w-12 items-center justify-center rounded-xl border sm:h-14 sm:w-14
           ${isBlocked
             ? 'border-white/10 bg-white/8'
-            : 'border-poker-red/40 bg-gradient-to-br from-poker-red/85 to-[#ff7a6a] shadow-[0_0_22px_rgba(255,93,143,0.35)]'
+            : 'border-poker-red/40 bg-gradient-to-br from-black to-[#E50914] shadow-[0_0_22px_rgba(229,9,20,0.35)]'
           }
         `}>
           <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${

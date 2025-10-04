@@ -16,7 +16,7 @@ export async function GET(
         return NextResponse.json({ error: 'ID de propuesta inválido' }, { status: 400 })
       }
 
-      const votes = await prisma.proposalVote.findMany({
+      const votes = await prisma.proposalV2Vote.findMany({
         where: { proposalId },
         include: {
           player: {
@@ -64,7 +64,7 @@ export async function POST(
       }
 
       // Verify proposal exists and is active
-      const proposal = await prisma.proposal.findUnique({
+      const proposal = await prisma.proposalV2.findUnique({
         where: { id: proposalId }
       })
 
@@ -77,7 +77,7 @@ export async function POST(
       }
 
       // Use upsert to handle vote changes (user can change their vote)
-      const vote = await prisma.proposalVote.upsert({
+      const vote = await prisma.proposalV2Vote.upsert({
         where: {
           proposalId_playerId: {
             proposalId,
@@ -105,7 +105,7 @@ export async function POST(
       })
 
       // Get updated vote stats
-      const allVotes = await prisma.proposalVote.findMany({
+      const allVotes = await prisma.proposalV2Vote.findMany({
         where: { proposalId }
       })
 
@@ -137,7 +137,7 @@ export async function DELETE(
       }
 
       // Delete user's vote
-      await prisma.proposalVote.deleteMany({
+      await prisma.proposalV2Vote.deleteMany({
         where: {
           proposalId,
           playerId: user.id
@@ -145,7 +145,7 @@ export async function DELETE(
       })
 
       // Get updated vote stats
-      const allVotes = await prisma.proposalVote.findMany({
+      const allVotes = await prisma.proposalV2Vote.findMany({
         where: { proposalId }
       })
 

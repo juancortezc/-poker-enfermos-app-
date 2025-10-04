@@ -15,7 +15,7 @@ export async function GET(
         return NextResponse.json({ error: 'ID de propuesta inválido' }, { status: 400 })
       }
 
-      const comments = await prisma.proposalComment.findMany({
+      const comments = await prisma.proposalV2Comment.findMany({
         where: { proposalId },
         include: {
           player: {
@@ -62,7 +62,7 @@ export async function POST(
       }
 
       // Verify proposal exists
-      const proposal = await prisma.proposal.findUnique({
+      const proposal = await prisma.proposalV2.findUnique({
         where: { id: proposalId }
       })
 
@@ -74,7 +74,7 @@ export async function POST(
         return NextResponse.json({ error: 'No se pueden comentar propuestas inactivas' }, { status: 403 })
       }
 
-      const comment = await prisma.proposalComment.create({
+      const comment = await prisma.proposalV2Comment.create({
         data: {
           proposalId,
           playerId: user.id,

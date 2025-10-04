@@ -83,18 +83,35 @@ export class NotificationService {
       const existing = await pushManager.getSubscription();
       if (existing) {
         this.pushSubscription = existing;
+        // Send subscription to server
+        await this.sendSubscriptionToServer(existing);
         return existing;
+      }
+
+      // Get VAPID public key from server if not provided
+      let vapidKey = applicationServerKey;
+      if (!vapidKey) {
+        const response = await fetch('/api/notifications/vapid-key');
+        if (response.ok) {
+          const data = await response.json();
+          vapidKey = data.publicKey;
+        }
+      }
+
+      if (!vapidKey) {
+        throw new Error('VAPID key not available');
       }
 
       const subscribeOptions: PushSubscriptionOptionsInit = {
         userVisibleOnly: true,
+        applicationServerKey: this.toUint8Array(vapidKey),
       };
 
-      if (applicationServerKey) {
-        subscribeOptions.applicationServerKey = this.toUint8Array(applicationServerKey);
-      }
-
       this.pushSubscription = await pushManager.subscribe(subscribeOptions);
+
+      // Send subscription to server
+      await this.sendSubscriptionToServer(this.pushSubscription);
+
       return this.pushSubscription;
     } catch (error) {
       console.error('Failed to subscribe to push notifications:', error);
@@ -107,6 +124,9 @@ export class NotificationService {
     if (!subscription) return false;
 
     try {
+      // Notify server before unsubscribing
+      await this.removeSubscriptionFromServer(subscription);
+
       const success = await subscription.unsubscribe();
       if (success) {
         this.pushSubscription = null;
@@ -115,6 +135,52 @@ export class NotificationService {
     } catch (error) {
       console.error('Failed to unsubscribe from push notifications:', error);
       return false;
+    }
+  }
+
+  private async sendSubscriptionToServer(subscription: PushSubscription) {
+    try {
+      const response = await fetch('/api/notifications/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subscription: {
+            endpoint: subscription.endpoint,
+            keys: {
+              p256dh: subscription.getKey('p256dh') ?
+                btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')!))) : '',
+              auth: subscription.getKey('auth') ?
+                btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')!))) : ''
+            }
+          },
+          userAgent: navigator.userAgent
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send subscription to server');
+      }
+
+      console.log('Push subscription sent to server successfully');
+    } catch (error) {
+      console.error('Error sending subscription to server:', error);
+      throw error;
+    }
+  }
+
+  private async removeSubscriptionFromServer(subscription: PushSubscription) {
+    try {
+      const response = await fetch(`/api/notifications/subscribe?endpoint=${encodeURIComponent(subscription.endpoint)}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        console.warn('Failed to remove subscription from server');
+      }
+    } catch (error) {
+      console.error('Error removing subscription from server:', error);
     }
   }
 

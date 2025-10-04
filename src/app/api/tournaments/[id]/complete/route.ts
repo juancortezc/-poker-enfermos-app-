@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withComisionAuth } from '@/lib/api-auth'
 import { generateTournamentWinners } from '@/lib/tournament-winners'
+import { sendNotificationIfEnabled } from '@/lib/notification-config'
 
 // POST /api/tournaments/[id]/complete - Completar torneo activo
 export async function POST(
@@ -115,6 +116,17 @@ export async function POST(
           console.error(`⚠️  Failed to auto-generate TournamentWinners for Tournament ${updatedTournament.number}:`, error)
           // Continue without failing the tournament completion
         }
+
+        // Send notification about tournament completion (if enabled)
+        await sendNotificationIfEnabled(
+          'tournament_completed',
+          '🏆 Torneo Completado',
+          `El Torneo ${updatedTournament.number} ha sido finalizado oficialmente`,
+          {
+            tournamentId: updatedTournament.id,
+            tournamentNumber: updatedTournament.number
+          }
+        )
 
         return NextResponse.json({
           message: 'Torneo completado correctamente',

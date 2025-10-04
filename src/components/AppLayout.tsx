@@ -151,7 +151,7 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
                   <Button
                     variant="ghost"
                     onClick={handleAddClick}
-                    className="h-12 rounded-full border border-white/12 bg-gradient-to-r from-poker-red via-[#ff5d8f] to-[#ff9f6a] px-6 text-sm font-semibold tracking-[0.1em] text-white shadow-[0_14px_30px_rgba(255,93,143,0.35)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(255,93,143,0.45)]"
+                  className="h-12 rounded-full border border-white/12 bg-gradient-to-r from-poker-red via-[#d73552] to-[#ff4b2b] px-6 text-sm font-semibold tracking-[0.1em] text-white shadow-[0_14px_30px_rgba(215,53,82,0.45)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(215,53,82,0.55)]"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Agregar

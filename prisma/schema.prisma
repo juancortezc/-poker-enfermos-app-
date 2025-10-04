@@ -34,10 +34,13 @@ model Player {
   invitees               Player[]                @relation("PlayerInviter")
   proposalComments       ProposalComment[]
   proposalVotes          ProposalVote[]
+  proposalCommentsV2     ProposalV2Comment[]
+  proposalVotesV2        ProposalV2Vote[]
   createdProposals       Proposal[]              @relation("ProposalCreator")
   createdProposalsV2     ProposalV2[]            @relation("ProposalV2Creator")
   t29Participation       T29Participant?
   timerActions           TimerAction[]
+  pushSubscriptions      PushSubscription[]
   tournamentParticipants TournamentParticipant[]
   tournamentRankings     TournamentRanking[]
   championWins           TournamentWinners[]     @relation("Champion")
@@ -45,6 +48,7 @@ model Player {
   runnerUpWins           TournamentWinners[]     @relation("RunnerUp")
   sietePositions         TournamentWinners[]     @relation("Siete")
   thirdPlaceWins         TournamentWinners[]     @relation("ThirdPlace")
+  sentNotifications      NotificationHistory[]
 
   @@map("players")
 }
@@ -277,8 +281,35 @@ model ProposalV2 {
   createdAt   DateTime @default(now()) @map("created_at")
   createdById String?  @map("created_by_id")
   createdBy   Player?  @relation("ProposalV2Creator", fields: [createdById], references: [id])
+  comments    ProposalV2Comment[]
+  votes       ProposalV2Vote[]
 
   @@map("proposals_v2")
+}
+
+model ProposalV2Comment {
+  id         Int         @id @default(autoincrement())
+  proposalId Int         @map("proposal_id")
+  playerId   String      @map("player_id")
+  content    String
+  createdAt  DateTime    @default(now()) @map("created_at")
+  player     Player      @relation(fields: [playerId], references: [id])
+  proposal   ProposalV2  @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  @@map("proposal_v2_comments")
+}
+
+model ProposalV2Vote {
+  id         Int         @id @default(autoincrement())
+  proposalId Int         @map("proposal_id")
+  playerId   String      @map("player_id")
+  voteType   VoteType    @map("vote_type")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  player     Player      @relation(fields: [playerId], references: [id])
+  proposal   ProposalV2  @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  @@unique([proposalId, playerId])
+  @@map("proposal_v2_votes")
 }
 
 model T29Participant {
@@ -331,4 +362,58 @@ enum TimerActionType {
 enum VoteType {
   thumbsUp
   thumbsDown
+}
+
+model PushSubscription {
+  id          String   @id @default(cuid())
+  playerId    String   @map("player_id")
+  endpoint    String   @unique
+  p256dh      String   @map("p256dh")
+  auth        String   @map("auth")
+  userAgent   String?  @map("user_agent")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("push_subscriptions")
+}
+
+model NotificationSettings {
+  id          String   @id @default(cuid())
+  eventType   String   @map("event_type") // 'tournament_start', 'blind_change', 'elimination', etc.
+  isEnabled   Boolean  @default(true) @map("is_enabled")
+  settings    Json?    // Configuración específica por tipo de evento
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([eventType])
+  @@map("notification_settings")
+}
+
+model NotificationHistory {
+  id              String              @id @default(cuid())
+  eventType       String?             @map("event_type")
+  notificationType NotificationType   @map("notification_type")
+  title           String
+  body            String
+  sentTo          Int                 @map("sent_to") // Número de destinatarios
+  totalSubscriptions Int             @map("total_subscriptions")
+  success         Boolean
+  errorMessage    String?             @map("error_message")
+  sentByPlayerId  String?             @map("sent_by_player_id")
+  metadata        Json?               // Datos adicionales del evento
+  createdAt       DateTime            @default(now()) @map("created_at")
+
+  sentBy          Player?             @relation(fields: [sentByPlayerId], references: [id])
+
+  @@map("notification_history")
+}
+
+enum NotificationType {
+  manual      // Enviado manualmente por admin
+  automatic   // Enviado automáticamente por evento
+  scheduled   // Enviado por programación
+  test        // Enviado como prueba
 }

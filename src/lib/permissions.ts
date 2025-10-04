@@ -18,6 +18,7 @@ export type FeaturePermission =
   | 't29-proposals'      // Propuestas T29
   | 'proposals-admin'    // Gestión de propuestas (admin)
   | 'my-proposals'       // Mis propuestas
+  | 'notifications-config' // Configuración de notificaciones
 
 /**
  * Mapa de permisos por feature y rol
@@ -41,6 +42,7 @@ const PERMISSIONS_MAP: Record<FeaturePermission, UserRole[]> = {
   'import': ['Comision'],
   'eliminations': ['Comision'],
   'proposals-admin': ['Comision'],
+  'notifications-config': ['Comision'],
 }
 
 /**
@@ -203,6 +205,13 @@ export function getDashboardFeatures(userRole: UserRole) {
       href: '/admin/propuestas',
       permission: 'proposals-admin',
       ...withPermission('proposals-admin')
+    },
+    {
+      id: 'notifications',
+      title: 'NOTIFICACIONES',
+      href: '/admin/notificaciones',
+      permission: 'notifications-config',
+      ...withPermission('notifications-config')
     }
   ]
 
@@ -234,7 +243,8 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
   if (route.startsWith('/admin/regulations')) return canAccess(userRole, 'regulations')
   if (route.startsWith('/admin/stats')) return canAccess(userRole, 'stats-parents')
   if (route.startsWith('/admin/propuestas')) return canAccess(userRole, 'proposals-admin')
-  
+  if (route.startsWith('/admin/notificaciones')) return canAccess(userRole, 'notifications-config')
+
   // Rutas admin restringidas (solo Comisión)
   if (route.startsWith('/admin/')) return userRole === 'Comision'
   if (route.startsWith('/tournaments')) return canAccess(userRole, 'tournaments')
