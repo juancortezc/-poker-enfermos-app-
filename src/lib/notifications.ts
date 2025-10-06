@@ -5,6 +5,7 @@ import {
   type NotificationCategory,
   type NotificationPreferenceType,
 } from '@/lib/notification-types';
+import { getAuthHeaderValue } from '@/lib/client-auth';
 
 interface InternalNotificationPayload {
   title: string;
@@ -140,10 +141,16 @@ export class NotificationService {
 
   private async sendSubscriptionToServer(subscription: PushSubscription) {
     try {
+      const authHeader = getAuthHeaderValue();
+      if (!authHeader) {
+        throw new Error('Missing authentication credentials for push subscription');
+      }
+
       const response = await fetch('/api/notifications/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': authHeader,
         },
         body: JSON.stringify({
           subscription: {
@@ -172,8 +179,16 @@ export class NotificationService {
 
   private async removeSubscriptionFromServer(subscription: PushSubscription) {
     try {
+      const authHeader = getAuthHeaderValue();
+      if (!authHeader) {
+        throw new Error('Missing authentication credentials for push unsubscription');
+      }
+
       const response = await fetch(`/api/notifications/subscribe?endpoint=${encodeURIComponent(subscription.endpoint)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': authHeader,
+        },
       });
 
       if (!response.ok) {
