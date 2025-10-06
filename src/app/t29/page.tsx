@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Lightbulb, MessageSquareText, Users, CheckCircle } from 'lucide-react'
 import { ProposalCard } from '@/components/t29/ProposalCard'
+import { T29ParticipantsModal, type T29Participant } from '@/components/t29/T29ParticipantsModal'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import Link from 'next/link'
 
@@ -18,17 +19,6 @@ interface Proposal {
   situation: string
   proposal: string
   imageUrl?: string | null
-}
-
-interface T29Participant {
-  id: number
-  firstName: string
-  lastName: string
-  registeredAt: string
-  player: {
-    id: string
-    photoUrl: string | null
-  }
 }
 
 interface T29ParticipantsResponse {
@@ -58,9 +48,14 @@ export default function T29Page() {
   const [isRegistering, setIsRegistering] = useState(false)
   const [hasRegistered, setHasRegistered] = useState(false)
   const [registrationMessage, setRegistrationMessage] = useState<string>('')
+  const [showParticipantsModal, setShowParticipantsModal] = useState(false)
 
   const { data, isLoading, error } = useSWR('/api/proposals/public', publicFetcher)
-  const { data: participantsData, mutate: mutateParticipants } = useSWR(
+  const {
+    data: participantsData,
+    mutate: mutateParticipants,
+    isLoading: participantsLoading
+  } = useSWR(
     '/api/t29-participants',
     participantsFetcher
   )
@@ -141,17 +136,27 @@ export default function T29Page() {
       <section className="relative">
         <Card className="bg-gradient-to-br from-[#1f1a2d] via-[#1a1b2a] to-[#141623] border border-white/10 p-5 shadow-[0_18px_40px_rgba(15,15,45,0.35)]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-poker-red/30 ring-1 ring-poker-red/40">
+            <button
+              type="button"
+              onClick={() => setShowParticipantsModal(true)}
+              className="group flex items-center gap-4 rounded-2xl text-left transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poker-red/60"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-poker-red/30 ring-1 ring-poker-red/40 transition-colors group-hover:ring-poker-red/60">
                 <Users className="w-7 h-7 text-white drop-shadow" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">Participación T29</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-white">Participación T29</h2>
+                  <span className="hidden rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/60 transition-colors group-hover:border-white/25 group-hover:text-white/80 sm:inline-flex">
+                    Ver lista
+                  </span>
+                </div>
                 <p className="text-sm text-white/60">
                   {participantsCount} {participantsCount === 1 ? 'participante registrado' : 'participantes registrados'}
+                  {participantsCount > 0 ? ' • Toca para ver quiénes confirmaron' : ''}
                 </p>
               </div>
-            </div>
+            </button>
 
             <div className="flex flex-col gap-3">
               {isParticipationConfirmed ? (
@@ -255,6 +260,14 @@ export default function T29Page() {
           </p>
         </Card>
       </section>
+
+      <T29ParticipantsModal
+        isOpen={showParticipantsModal}
+        onClose={() => setShowParticipantsModal(false)}
+        participants={participants}
+        isLoading={participantsLoading}
+        totalCount={participantsCount}
+      />
     </div>
   )
 }
