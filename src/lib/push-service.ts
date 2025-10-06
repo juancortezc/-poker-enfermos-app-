@@ -1,15 +1,32 @@
 import webpush from 'web-push'
 import { prisma } from './prisma'
 
-// Configure VAPID keys - these should be generated and stored as environment variables
-if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-  console.warn('⚠️  VAPID keys not configured. Push notifications will not work.')
-} else {
-  webpush.setVapidDetails(
-    'mailto:admin@poker-enfermos.com',
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  )
+// Initialize VAPID configuration
+let vapidConfigured = false
+
+function ensureVapidConfiguration() {
+  if (vapidConfigured) return
+
+  const publicKey = process.env.VAPID_PUBLIC_KEY
+  const privateKey = process.env.VAPID_PRIVATE_KEY
+
+  if (!publicKey || !privateKey) {
+    console.warn('⚠️  VAPID keys not configured. Push notifications will not work.')
+    return
+  }
+
+  try {
+    webpush.setVapidDetails(
+      'mailto:admin@poker-enfermos.com',
+      publicKey,
+      privateKey
+    )
+    vapidConfigured = true
+    console.log('✅ VAPID keys configured successfully')
+  } catch (error) {
+    console.error('❌ Failed to configure VAPID keys:', error)
+    throw error
+  }
 }
 
 export interface PushNotificationPayload {
@@ -45,6 +62,7 @@ export async function sendPushNotification(
   payload: PushNotificationPayload
 ): Promise<PushResult> {
   try {
+    ensureVapidConfiguration()
     // Get active subscriptions for the player
     const subscriptions = await prisma.pushSubscription.findMany({
       where: {
@@ -140,6 +158,7 @@ export async function broadcastPushNotification(
   options: BroadcastOptions = {}
 ): Promise<PushResult> {
   try {
+    ensureVapidConfiguration()
     // Build where clause for filtering subscriptions
     const whereClause: Record<string, unknown> = {
       isActive: true
