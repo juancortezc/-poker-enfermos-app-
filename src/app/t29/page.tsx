@@ -254,15 +254,6 @@ export default function T29Page() {
         )}
       </section>
 
-      {/* Final explanatory text */}
-      <section className="mt-8">
-        <Card className="bg-gradient-to-br from-[#17192b] via-[#141626] to-[#10111b] border-white/10 p-5 shadow-[0_18px_40px_rgba(11,12,32,0.35)]">
-          <p className="text-white/65 text-sm leading-relaxed text-center">
-            Las propuestas aquí presentadas serán posteriormente analizadas por la Comisión y de acuerdo a su aceptación sometidas a votación final por parte del Grupo.
-          </p>
-        </Card>
-      </section>
-
       <T29ParticipantsModal
         isOpen={showParticipantsModal}
         onClose={() => setShowParticipantsModal(false)}
