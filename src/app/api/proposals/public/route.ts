@@ -18,6 +18,7 @@ export async function GET() {
         situation: true,
         proposal: true,
         imageUrl: true,
+        votingClosed: true,
         createdAt: true,
         createdBy: {
           select: {

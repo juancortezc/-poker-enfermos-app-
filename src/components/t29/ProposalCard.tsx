@@ -21,9 +21,10 @@ interface ProposalCardProps {
   proposal: Proposal
   isExpanded: boolean
   onToggle: () => void
+  votingClosed?: boolean
 }
 
-export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardProps) {
+export function ProposalCard({ proposal, isExpanded, onToggle, votingClosed = false }: ProposalCardProps) {
   const { user } = useAuth()
   const [voteStats, setVoteStats] = useState({ thumbsUp: 0, thumbsDown: 0, total: 0 })
   const [userVote, setUserVote] = useState<'thumbsUp' | 'thumbsDown' | null>(null)
@@ -105,6 +106,7 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
                 initialStats={voteStats}
                 userVote={userVote}
                 onVoteChange={handleVoteChange}
+                disabled={votingClosed}
               />
             )}
           </div>
@@ -177,6 +179,7 @@ export function ProposalCard({ proposal, isExpanded, onToggle }: ProposalCardPro
             proposalId={proposal.id}
             isExpanded={isExpanded}
             onCommentCountChange={handleCommentCountChange}
+            disabled={votingClosed}
           />
         </>
       )}

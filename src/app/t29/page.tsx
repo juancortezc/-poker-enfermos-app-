@@ -19,6 +19,7 @@ interface Proposal {
   situation: string
   proposal: string
   imageUrl?: string | null
+  votingClosed: boolean
 }
 
 interface T29ParticipantsResponse {
@@ -246,6 +247,7 @@ export default function T29Page() {
                 proposal={proposal}
                 isExpanded={activeProposalId === proposal.id}
                 onToggle={() => toggleProposal(proposal.id)}
+                votingClosed={proposal.votingClosed}
               />
             ))}
           </div>

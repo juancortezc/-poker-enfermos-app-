@@ -76,6 +76,10 @@ export async function POST(
         return NextResponse.json({ error: 'No se pueden votar propuestas inactivas' }, { status: 403 })
       }
 
+      if (proposal.votingClosed) {
+        return NextResponse.json({ error: 'La votación ha sido cerrada para esta propuesta' }, { status: 403 })
+      }
+
       // Use upsert to handle vote changes (user can change their vote)
       const vote = await prisma.proposalV2Vote.upsert({
         where: {

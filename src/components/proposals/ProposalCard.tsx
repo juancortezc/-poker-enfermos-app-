@@ -14,7 +14,9 @@ import {
   User,
   Eye,
   EyeOff,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Lock,
+  Unlock
 } from 'lucide-react'
 
 interface ProposalV2 {
@@ -25,6 +27,7 @@ interface ProposalV2 {
   proposal: string
   imageUrl?: string | null
   isActive: boolean
+  votingClosed?: boolean
   createdAt: string
   createdBy?: {
     id: string
@@ -54,9 +57,11 @@ export function ProposalCard({
   const { user } = useAuth()
   const [toggling, setToggling] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [togglingVoting, setTogglingVoting] = useState(false)
 
   const canEdit = user && (user.role === 'Comision' || proposal.createdBy?.id === user.id)
   const canDelete = user?.role === 'Comision'
+  const canToggleVoting = user?.role === 'Comision'
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-MX', {
@@ -138,6 +143,39 @@ export function ProposalCard({
     }
   }
 
+  const handleToggleVoting = async () => {
+    const action = proposal.votingClosed ? 'reabrir' : 'cerrar'
+    if (!confirm(`¿Estás seguro de que quieres ${action} la votación para "${proposal.title}"?`)) {
+      return
+    }
+
+    try {
+      setTogglingVoting(true)
+      const method = proposal.votingClosed ? 'PUT' : 'PATCH'
+      const response = await fetch(`/api/proposals-v2/${proposal.id}/close-voting`, {
+        method,
+        headers: buildAuthHeaders()
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || `Error al ${action} votación`)
+      }
+
+      const data = await response.json()
+      toast.success(data.message)
+
+      if (onUpdate) {
+        onUpdate()
+      }
+    } catch (error) {
+      console.error('Error toggling voting:', error)
+      toast.error(error instanceof Error ? error.message : 'Error al cambiar estado de votación')
+    } finally {
+      setTogglingVoting(false)
+    }
+  }
+
   return (
     <Card
       className={`overflow-hidden border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] transition-all duration-500 hover:-translate-y-1 hover:border-poker-red/60 hover:shadow-[0_24px_60px_rgba(255,93,143,0.25)] shadow-[0_18px_40px_rgba(11,12,32,0.45)] ${
@@ -155,6 +193,12 @@ export function ProposalCard({
               {!proposal.isActive && (
                 <span className="rounded-full bg-slate-700/60 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200">
                   Inactiva
+                </span>
+              )}
+              {proposal.votingClosed && (
+                <span className="rounded-full bg-amber-700/60 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200 flex items-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  Cerrada
                 </span>
               )}
             </div>
@@ -251,7 +295,7 @@ export function ProposalCard({
       )}
 
       {/* Acciones */}
-      {showActions && (canEdit || canDelete) && (
+      {showActions && (canEdit || canDelete || canToggleVoting) && (
         <div className="border-t border-white/10 px-5 py-4">
           <div className="flex flex-wrap gap-2">
             {canEdit && onEdit && (
@@ -278,6 +322,24 @@ export function ProposalCard({
                   <Power className="mr-2 h-4 w-4" />
                 )}
                 {proposal.isActive ? 'Desactivar' : 'Activar'}
+              </Button>
+            )}
+
+            {canToggleVoting && proposal.isActive && (
+              <Button
+                variant="ghost"
+                onClick={handleToggleVoting}
+                disabled={togglingVoting}
+                className="rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-200 transition-all hover:border-amber-400 hover:text-white"
+              >
+                {togglingVoting ? (
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-amber-200"></div>
+                ) : proposal.votingClosed ? (
+                  <Unlock className="mr-2 h-4 w-4" />
+                ) : (
+                  <Lock className="mr-2 h-4 w-4" />
+                )}
+                {proposal.votingClosed ? 'Reabrir Votación' : 'Cerrar Votación'}
               </Button>
             )}
 
