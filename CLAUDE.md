@@ -70,13 +70,19 @@ GET  /api/tournaments/winners
 GET  /api/tournaments/podium-stats
 
 # Proposals System (T29)
-GET  /api/proposals/public           # Public proposals for T29
-GET  /api/proposals-v2/my           # User's own proposals
-GET  /api/proposals-v2/admin        # Admin view (Commission only)
-POST /api/proposals-v2              # Create proposal
-PATCH /api/proposals-v2/[id]        # Edit proposal
-DELETE /api/proposals-v2/[id]       # Delete proposal
-PATCH /api/proposals-v2/[id]/toggle # Activate/deactivate proposal
+GET    /api/proposals/public                  # Public proposals for T29
+GET    /api/proposals-v2/my                   # User's own proposals
+GET    /api/proposals-v2/admin                # Admin view (Commission only)
+POST   /api/proposals-v2                      # Create proposal
+PATCH  /api/proposals-v2/[id]                 # Edit proposal
+DELETE /api/proposals-v2/[id]                 # Delete proposal
+PATCH  /api/proposals-v2/[id]/toggle          # Activate/deactivate proposal
+PATCH  /api/proposals-v2/[id]/close-voting    # Close voting (Commission only)
+PUT    /api/proposals-v2/[id]/close-voting    # Reopen voting (Commission only)
+POST   /api/proposals/[id]/votes              # Vote on proposal
+DELETE /api/proposals/[id]/votes              # Remove vote
+POST   /api/proposals/[id]/comments           # Comment on proposal
+GET    /api/proposals/[id]/comments           # Get comments
 ```
 
 ---
@@ -116,6 +122,8 @@ PATCH /api/proposals-v2/[id]/toggle # Activate/deactivate proposal
 - Structured proposal format: título, objetivo, situación, propuesta, imagen
 - Real-time updates with loading indicators
 - Public display in T29 section with voting and comments
+- Voting closure system: Commission can close/reopen voting
+- Disabled voting & comments when votingClosed = true
 
 ---
 
@@ -151,17 +159,27 @@ PATCH /api/proposals-v2/[id]/toggle # Activate/deactivate proposal
 | Eliminations | ✅ | 🔒 | 🔒 |
 | Tournament Mgmt | ✅ | 🔒 | 🔒 |
 | Manage All Proposals | ✅ | 🔒 | 🔒 |
+| Close/Reopen Voting | ✅ | 🔒 | 🔒 |
 | Create/Edit Own Proposals | ✅ | ✅ | ✅ |
-| Vote on Proposals | ✅ | ✅ | ✅ |
+| Vote on Proposals | ✅* | ✅* | ✅* |
 | View Rankings | ✅ | ✅ | ✅ |
 | View Calendar | ✅ | ✅ | ✅ |
 | Profile Access | ✅ | ✅ | 🔒 |
+
+\* Voting/commenting disabled when proposal voting is closed
 
 ---
 
 ## 🚨 Recent Updates
 
-### Latest (2025-10-03)
+### Latest (2025-10-07)
+- ✅ Voting closure system for T29 proposals
+- ✅ Commission can close/reopen voting via admin panel
+- ✅ Voting and commenting disabled when voting is closed
+- ✅ "Cerrada" badge displayed on closed proposals
+- ✅ API validation prevents votes/comments on closed proposals
+
+### Previous (2025-10-03)
 - ✅ Complete T29 Proposals Management System implemented
 - ✅ PokerNew Design System with sophisticated dark theme
 - ✅ User and Commission proposal interfaces
@@ -286,5 +304,5 @@ npx tsx scripts/fix-gamedate-participants.ts
 ---
 
 **Status**: PRODUCTION READY ✅
-**Last Update**: 2025-10-03
+**Last Update**: 2025-10-07
 **Design System**: PokerNew v1.0
