@@ -290,9 +290,9 @@ export default function StatsPage() {
                 valueLabel="Podios"
               />
 
-              {/* 7/2 */}
+              {/* Últimos */}
               <AwardCard
-                title="7/2"
+                title="Últimos"
                 description="Últimas dos posiciones"
                 icon="target"
                 accentColor="rose"

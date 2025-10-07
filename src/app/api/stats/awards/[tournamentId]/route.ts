@@ -235,10 +235,12 @@ export async function GET(
       }
     })
 
-    const victorias = Array.from(victoriasByPlayer.values()).sort((a, b) => b.count - a.count)
+    const victorias = Array.from(victoriasByPlayer.values())
+      .filter(p => p.count > 1) // Only show players with more than 1 victory
+      .sort((a, b) => b.count - a.count)
 
     // ============================================================
-    // 5. 7/2 - Most last two positions (only registered players)
+    // 5. ÚLTIMOS - Most last two positions (only registered players)
     // ============================================================
     const sieteYDosByPlayer = new Map<string, { player: AwardPlayer; count: number }>()
 

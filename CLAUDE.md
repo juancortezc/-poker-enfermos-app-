@@ -68,6 +68,7 @@ GET  /api/eliminations/game-date/[id]
 GET  /api/tournaments/[id]/ranking
 GET  /api/tournaments/winners
 GET  /api/tournaments/podium-stats
+GET  /api/stats/awards/[tournamentId]       # Tournament awards (8 categories)
 
 # Proposals System (T29)
 GET    /api/proposals/public                  # Public proposals for T29
@@ -125,6 +126,15 @@ GET    /api/proposals/[id]/comments           # Get comments
 - Voting closure system: Commission can close/reopen voting
 - Disabled voting & comments when votingClosed = true
 
+### Tournament Awards System ✅
+- 8 award categories per tournament: Varón, Gay, Podios, Victorias, 7/2, Sin Podio, Faltas, Mesas Finales
+- Ranking by points (not position) for accurate results
+- Participant filtering (only registered tournament players)
+- Faltas calculated as total dates minus dates played
+- Tournament selector (T28 onwards) in stats page
+- PokerNew-themed award cards with gradient backgrounds
+- Separate "Premios" and "P&H" subtabs in admin stats
+
 ---
 
 ## 🛠️ Component Structure
@@ -135,6 +145,7 @@ GET    /api/proposals/[id]/comments           # Get comments
 - `/timer` - Blind level timer
 - `/admin` - Role-based admin panel
 - `/admin/resultados` - Historical results (3 tabs)
+- `/admin/stats` - Statistics with P&H and Premios subtabs
 - `/admin/propuestas` - Commission proposals management
 - `/propuestas-v2` - User proposal management
 - `/t29` - Tournament 29 proposals display and participation
@@ -148,6 +159,7 @@ GET    /api/proposals/[id]/comments           # Get comments
 - `ProposalForm` - Create/edit proposals with validation
 - `ProposalCard` - Display proposals with expand/collapse
 - `VotingButtons` - Proposal voting interface
+- `AwardCard` - Display tournament award categories with rankings
 
 ---
 
@@ -173,11 +185,14 @@ GET    /api/proposals/[id]/comments           # Get comments
 ## 🚨 Recent Updates
 
 ### Latest (2025-10-07)
+- ✅ Tournament Awards System with 8 categories
+- ✅ Award rankings by points with participant filtering
+- ✅ Faltas calculation (total dates - dates played)
+- ✅ Tournament selector (T28+) in stats page
+- ✅ PokerNew-themed award cards with gradients
 - ✅ Voting closure system for T29 proposals
 - ✅ Commission can close/reopen voting via admin panel
-- ✅ Voting and commenting disabled when voting is closed
 - ✅ "Cerrada" badge displayed on closed proposals
-- ✅ API validation prevents votes/comments on closed proposals
 
 ### Previous (2025-10-03)
 - ✅ Complete T29 Proposals Management System implemented
