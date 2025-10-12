@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react'
 import Image from 'next/image'
 import useSWR from 'swr'
 import {
-  ArrowClockwise,
+  RotateCw,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -194,7 +194,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
         <p className="text-sm text-[#d7c59a]">{errorMessage}</p>
         <div className="flex items-center justify-center">
           <NoirButton onClick={refresh} className="gap-2">
-            <ArrowClockwise className="h-4 w-4" />
+            <RotateCw className="h-4 w-4" />
             Reintentar
           </NoirButton>
         </div>
@@ -280,7 +280,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
               onClick={refresh}
               className="self-start gap-2 px-3 py-2 text-[10px]"
             >
-              <ArrowClockwise className="h-4 w-4" />
+              <RotateCw className="h-4 w-4" />
               Actualizar
             </NoirButton>
           </div>
