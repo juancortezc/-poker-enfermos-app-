@@ -79,63 +79,54 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-[100] px-4 pb-4 pt-2">
-      <div className="mx-auto max-w-3xl">
-        <div className="relative flex items-center gap-3 rounded-[32px] border border-[#e0b66c]/25 bg-[rgba(19,12,9,0.92)] px-3 py-3 shadow-[0_-24px_60px_rgba(11,6,3,0.75)] backdrop-blur-xl">
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-[100] px-2.5 pb-2.5 pt-1">
+      <div className="mx-auto max-w-sm">
+        <div className="flex items-center gap-1.5 rounded-[22px] border border-[#e0b66c]/25 bg-[rgba(19,12,9,0.92)] px-2 py-1.5 shadow-[0_-12px_28px_rgba(11,6,3,0.55)] backdrop-blur-xl">
           <NoirButton
             variant="ghost"
             size="sm"
             onClick={handleBack}
-            className="min-w-[96px] px-4 py-2 text-[10px] tracking-[0.22em]"
+            className="flex h-9 min-w-[60px] items-center justify-center rounded-xl px-2.5 text-[8px] uppercase tracking-[0.2em]"
           >
             Volver
           </NoirButton>
 
-          <div className="flex flex-1 items-center justify-evenly gap-2">
+          <div className="flex flex-1 items-center justify-between gap-1">
             {filteredItems.map((item) => {
               const isActive = pathname === item.href
 
               return (
-                <NoirButton
+                <Link
                   key={item.href}
-                  asChild
-                  variant={isActive ? 'primary' : 'ghost'}
-                  size="lg"
+                  href={item.href}
                   className={cn(
-                    'group flex min-w-[90px] flex-col items-center justify-between gap-1 rounded-2xl px-3 py-3 text-[10px] uppercase tracking-[0.24em] h-auto',
-                    isActive ? 'text-[#1f1410]' : 'text-[#d7c59a]/75 hover:text-[#f3e6c5]'
+                    'group flex h-12 w-14 flex-col items-center justify-center rounded-2xl border border-transparent px-1.5 py-1 text-[8px] uppercase tracking-[0.18em] transition-all duration-200',
+                    isActive
+                      ? 'border-[#e0b66c]/45 bg-[linear-gradient(135deg,rgba(224,182,108,0.3),rgba(169,68,28,0.25))] text-[#1f1410]'
+                      : 'text-[#d7c59a]/75 hover:border-[#e0b66c]/35 hover:text-[#f3e6c5]'
                   )}
                 >
-                  <Link href={item.href} className="flex h-full w-full flex-col items-center gap-1">
-                    <span
+                  <span
+                    className={cn(
+                      'mb-1 flex h-8 w-8 items-center justify-center rounded-full border border-transparent bg-[rgba(42,26,20,0.78)] shadow-[0_4px_12px_rgba(11,6,3,0.4)] transition-all duration-200',
+                      isActive
+                        ? 'border-[#2b1209] bg-[linear-gradient(135deg,rgba(224,182,108,0.4),rgba(169,68,28,0.35))]'
+                        : 'group-hover:border-[#e0b66c]/35 group-hover:bg-[rgba(42,26,20,0.9)]'
+                    )}
+                  >
+                    <Image
+                      src={item.icon}
+                      alt={item.label}
+                      width={20}
+                      height={20}
                       className={cn(
-                        'flex h-12 w-12 items-center justify-center rounded-full border border-transparent bg-[rgba(42,26,20,0.78)] shadow-[0_10px_26px_rgba(11,6,3,0.55)] transition-all duration-200',
-                        isActive
-                          ? 'border-[#2b1209] bg-[linear-gradient(135deg,rgba(224,182,108,0.45),rgba(169,68,28,0.4))]'
-                          : 'group-hover:border-[#e0b66c]/35 group-hover:bg-[rgba(42,26,20,0.9)]'
+                        'transition-all duration-200',
+                        isActive ? 'opacity-100 drop-shadow-[0_0_8px_rgba(224,182,108,0.45)]' : 'opacity-85 group-hover:opacity-100'
                       )}
-                    >
-                      <Image
-                        src={item.icon}
-                        alt={item.label}
-                        width={28}
-                        height={28}
-                        className={cn(
-                          'transition-all duration-200',
-                          isActive ? 'opacity-100 drop-shadow-[0_0_12px_rgba(224,182,108,0.55)]' : 'opacity-85 group-hover:opacity-100'
-                        )}
-                      />
-                    </span>
-                    <span
-                      className={cn(
-                        'font-semibold transition-colors duration-200',
-                        isActive ? 'text-[#1f1410]' : 'text-current'
-                      )}
-                    >
-                      {item.label}
-                    </span>
-                  </Link>
-                </NoirButton>
+                    />
+                  </span>
+                  <span className="font-semibold">{item.label}</span>
+                </Link>
               )
             })}
           </div>

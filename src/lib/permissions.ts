@@ -106,27 +106,6 @@ export function getDashboardFeatures(userRole: UserRole) {
       ...withPermission()
     },
     {
-      id: 'sin-ganar',
-      title: 'SIN GANAR',
-      href: '/admin/sin-ganar',
-      permission: 'stats-days',
-      ...withPermission('stats-days')
-    },
-    {
-      id: 'club-1000',
-      title: 'CLUB 1000',
-      href: '/admin/club-1000',
-      permission: undefined,
-      ...withPermission()
-    },
-    {
-      id: 'enfermos-base',
-      title: 'ENFERMOS',
-      href: '/admin/enfermos',
-      permission: undefined,
-      ...withPermission()
-    },
-    {
       id: 'calendar',
       title: 'CALENDARIO',
       href: '/admin/calendar',
@@ -141,18 +120,25 @@ export function getDashboardFeatures(userRole: UserRole) {
       ...withPermission('regulations')
     },
     {
-      id: 't29-proposals',
-      title: 'T29',
-      href: '/t29',
-      permission: 't29-proposals',
-      ...withPermission('t29-proposals')
+      id: 'enfermos-base',
+      title: 'ENFERMOS',
+      href: '/admin/enfermos',
+      permission: undefined,
+      ...withPermission()
     },
     {
-      id: 'my-proposals',
-      title: 'MIS PROPUESTAS',
-      href: '/propuestas-v2',
-      permission: 'my-proposals',
-      ...withPermission('my-proposals')
+      id: 'sin-ganar',
+      title: 'SIN GANAR',
+      href: '/admin/sin-ganar',
+      permission: 'stats-days',
+      ...withPermission('stats-days')
+    },
+    {
+      id: 'club-1000',
+      title: '1000 DÍAS',
+      href: '/admin/club-1000',
+      permission: undefined,
+      ...withPermission()
     }
   ]
 
@@ -165,32 +151,11 @@ export function getDashboardFeatures(userRole: UserRole) {
       ...withPermission('game-dates')
     },
     {
-      id: 'tournaments',
-      title: 'CREAR TORNEO',
-      href: '/tournaments',
-      permission: 'tournaments',
-      ...withPermission('tournaments')
-    },
-    {
-      id: 'calendar-builder',
-      title: 'CREAR CALENDARIO',
-      href: '/admin/calendar/create',
-      permission: 'game-dates',
-      ...withPermission('game-dates')
-    },
-    {
       id: 'players',
       title: 'JUGADORES',
       href: '/players',
       permission: 'players',
       ...withPermission('players')
-    },
-    {
-      id: 'import',
-      title: 'IMPORTAR',
-      href: '/admin/import',
-      permission: 'import',
-      ...withPermission('import')
     },
     {
       id: 'stats',
@@ -200,6 +165,20 @@ export function getDashboardFeatures(userRole: UserRole) {
       ...withPermission('stats-parents')
     },
     {
+      id: 'calendar-builder',
+      title: 'CREAR CALENDARIO',
+      href: '/admin/calendar/create',
+      permission: 'game-dates',
+      ...withPermission('game-dates')
+    },
+    {
+      id: 'tournaments',
+      title: 'CREAR TORNEO',
+      href: '/tournaments',
+      permission: 'tournaments',
+      ...withPermission('tournaments')
+    },
+    {
       id: 'proposals-admin',
       title: 'PROPUESTAS',
       href: '/admin/propuestas',
@@ -207,11 +186,11 @@ export function getDashboardFeatures(userRole: UserRole) {
       ...withPermission('proposals-admin')
     },
     {
-      id: 'notifications',
-      title: 'NOTIFICACIONES',
-      href: '/admin/notificaciones',
-      permission: 'notifications-config',
-      ...withPermission('notifications-config')
+      id: 'import',
+      title: 'IMPORTAR',
+      href: '/admin/import',
+      permission: 'import',
+      ...withPermission('import')
     }
   ]
 

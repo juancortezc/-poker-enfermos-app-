@@ -80,14 +80,23 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
     return <LoginForm />
   }
 
-  const getRoleBadgeColor = (role: UserRole) => {
+  const getRoleBadgeClasses = (role: UserRole) => {
     switch (role) {
       case UserRole.Comision:
-        return 'border border-[#e0b66c]/55 bg-[#e0b66c]/15 text-[#e0b66c]'
+        return {
+          base: 'border border-[#e0b66c]/45 bg-[linear-gradient(135deg,rgba(224,182,108,0.35),rgba(169,68,28,0.25))] text-[#f3e6c5] shadow-[0_0_10px_rgba(224,182,108,0.35)]',
+          label: 'C'
+        }
       case UserRole.Enfermo:
-        return 'border border-[#d7c59a]/35 bg-[#2a1a14]/80 text-[#d7c59a]'
+        return {
+          base: 'border border-[#d7c59a]/35 bg-[#2a1a14]/80 text-[#f3e6c5]',
+          label: 'E'
+        }
       case UserRole.Invitado:
-        return 'border border-[#c9783f]/40 bg-[#c9783f]/18 text-[#f3e6c5]'
+        return {
+          base: 'border border-[#c9783f]/40 bg-[#c9783f]/28 text-[#f3e6c5]',
+          label: 'I'
+        }
     }
   }
 
@@ -95,10 +104,10 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
     <div className="relative flex min-h-screen flex-col text-[#f3e6c5]">
       {/* Header */}
       <header className="sticky top-0 z-[60] border-b border-[#e0b66c]/12 bg-[rgba(19,12,9,0.92)] backdrop-blur-xl shadow-[0_24px_60px_rgba(11,6,3,0.6)]">
-        <div className={`${needsFullWidth ? 'mx-auto max-w-6xl' : 'mx-auto max-w-4xl'} px-4 sm:px-6 py-4`}>
-          <div className="flex items-center justify-between gap-6">
+        <div className={`${needsFullWidth ? 'mx-auto max-w-6xl' : 'mx-auto max-w-4xl'} px-4 sm:px-6 py-2`}>
+          <div className="flex items-center justify-between gap-3">
             {/* Logo y usuario */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Link
                 href="/"
                 className="relative flex h-12 w-12 items-center justify-center rounded-3xl border border-[#e0b66c]/25 bg-[rgba(31,20,16,0.85)] p-2 shadow-[0_16px_36px_rgba(11,6,3,0.55)] transition-transform hover:-translate-y-0.5 hover:border-[#e0b66c]/45"
@@ -112,18 +121,21 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
                   className="h-full w-full object-contain"
                 />
               </Link>
-              <div className="space-y-1">
-                <h1 className="font-heading text-[1.3rem] uppercase tracking-[0.24em] text-[#f3e6c5]">
+              <div className="space-y-0.5">
+                <h1 className="font-heading text-sm uppercase tracking-[0.24em] text-[#f3e6c5]">
                   Poker de Enfermos
                 </h1>
-                <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-[#d7c59a]/75">
+                <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.2em] text-[#d7c59a]/75">
                   <User size={14} className="text-[#d7c59a]/55" />
-                  <span className="text-[#f3e6c5]">
-                    {user.firstName} {user.lastName}
-                  </span>
-                  <span className={`text-[11px] uppercase tracking-[0.18em] px-3 py-0.5 rounded-full font-semibold ${getRoleBadgeColor(user.role)}`}>
-                    {user.role}
-                  </span>
+                  <span className="text-[#f3e6c5]">{user.firstName}</span>
+                  {(() => {
+                    const badge = getRoleBadgeClasses(user.role)
+                    return (
+                      <span className={`ml-1 rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] ${badge?.base ?? ''}`}>
+                        {badge?.label}
+                      </span>
+                    )
+                  })()}
                 </div>
               </div>
             </div>
@@ -135,7 +147,7 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
 
           {/* Search and Add Button - Only on Players Page */}
           {isPlayersPage && (
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#d7c59a]/60" />
                 <Input
