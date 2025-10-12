@@ -18,28 +18,23 @@ export const TOURNAMENT_PRESETS: TournamentPreset[] = [
   {
     id: 'standard',
     name: 'Estándar',
-    description: 'Configuración tradicional del grupo (3-4 horas)',
+    description: 'Configuración tradicional del grupo (4-5 horas con pausa cena)',
     icon: '⚖️',
-    estimatedDuration: '3-4 horas',
+    estimatedDuration: '4-5 horas',
     blindLevels: [
-      { level: 1, smallBlind: 50, bigBlind: 100, duration: 12 },
-      { level: 2, smallBlind: 100, bigBlind: 200, duration: 12 },
-      { level: 3, smallBlind: 150, bigBlind: 300, duration: 12 },
-      { level: 4, smallBlind: 200, bigBlind: 400, duration: 12 },
-      { level: 5, smallBlind: 300, bigBlind: 600, duration: 12 },
-      { level: 6, smallBlind: 400, bigBlind: 800, duration: 12 },
-      { level: 7, smallBlind: 500, bigBlind: 1000, duration: 16 },
-      { level: 8, smallBlind: 600, bigBlind: 1200, duration: 16 },
-      { level: 9, smallBlind: 800, bigBlind: 1600, duration: 16 },
-      { level: 10, smallBlind: 1000, bigBlind: 2000, duration: 16 },
-      { level: 11, smallBlind: 1500, bigBlind: 3000, duration: 16 },
-      { level: 12, smallBlind: 2000, bigBlind: 4000, duration: 10 },
-      { level: 13, smallBlind: 3000, bigBlind: 6000, duration: 10 },
-      { level: 14, smallBlind: 4000, bigBlind: 8000, duration: 10 },
-      { level: 15, smallBlind: 5000, bigBlind: 10000, duration: 10 },
-      { level: 16, smallBlind: 6000, bigBlind: 12000, duration: 10 },
-      { level: 17, smallBlind: 8000, bigBlind: 16000, duration: 10 },
-      { level: 18, smallBlind: 10000, bigBlind: 20000, duration: 0 }
+      { level: 1, smallBlind: 50, bigBlind: 100, duration: 25 },
+      { level: 2, smallBlind: 100, bigBlind: 200, duration: 25 },
+      { level: 3, smallBlind: 150, bigBlind: 300, duration: 25 },
+      // PAUSA PARA CENA: 30 minutos (pausar timer manualmente)
+      { level: 4, smallBlind: 250, bigBlind: 500, duration: 25 },
+      { level: 5, smallBlind: 400, bigBlind: 800, duration: 25 },
+      { level: 6, smallBlind: 600, bigBlind: 1200, duration: 20 },
+      { level: 7, smallBlind: 800, bigBlind: 1600, duration: 20 },
+      { level: 8, smallBlind: 1000, bigBlind: 2000, duration: 20 },
+      { level: 9, smallBlind: 1250, bigBlind: 2500, duration: 20 },
+      { level: 10, smallBlind: 1500, bigBlind: 3000, duration: 20 },
+      { level: 11, smallBlind: 2000, bigBlind: 4000, duration: 15 },
+      { level: 12, smallBlind: 2500, bigBlind: 5000, duration: 0 }
     ]
   },
   {

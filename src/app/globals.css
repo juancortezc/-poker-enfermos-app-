@@ -5,39 +5,72 @@
    TAILWIND v4 THEME INLINE CONFIGURATION
    ============================================ */
 @theme inline {
-  /* Paleta de Colores Consolidada - Poker Enfermos */
-  --color-poker-red-500: #E50914;
-  --color-poker-dark-950: #1B1B1B;
-  --color-poker-dark-900: #2A2A2A;
-  --color-poker-dark-800: #3B3B3B;
-  --color-poker-gold-500: #FFD700;
-  --color-poker-blue-500: #1E90FF;
-  --color-poker-orange-500: #FF8C00;
-  --color-poker-silver-500: #C0C0C0;
-  --color-poker-bronze-500: #CD7F32;
+  /* Noir Jazz design tokens */
+  --color-noir-brown-950: #0b0706;
+  --color-noir-brown-900: #1f1410;
+  --color-noir-brown-800: #2a1a14;
+  --color-noir-brown-700: #3a231a;
+  --color-noir-amber-600: #e0b66c;
+  --color-noir-copper-600: #a9441c;
+  --color-noir-ivory-400: #f3e6c5;
+  --color-noir-ivory-300: #d7c59a;
 
-  /* Semantic Design Tokens */
-  --color-primary: var(--color-poker-red-500);
-  --color-secondary: var(--color-poker-orange-500);
-  --color-accent: var(--color-poker-blue-500);
-  --color-background: var(--color-poker-dark-950);
-  --color-surface: var(--color-poker-dark-900);
-  --color-surface-elevated: var(--color-poker-dark-800);
-  --color-text-primary: rgba(255, 255, 255, 0.95);
-  --color-text-secondary: rgba(255, 255, 255, 0.75);
-  --color-text-muted: rgba(255, 255, 255, 0.5);
-  
-  /* Typography Tokens */
-  --font-family-sans: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-weight-normal: 600;
+  /* Legacy token aliases (maintain tailwind class compatibility) */
+  --color-poker-red-500: #a9441c;
+  --color-poker-red-600: #8e3818;
+  --color-poker-red-700: #662813;
+  --color-poker-dark-950: #120b08;
+  --color-poker-dark-900: #1f1410;
+  --color-poker-dark-800: #2a1a14;
+  --color-poker-gold-500: #e0b66c;
+  --color-poker-gold-600: #b8823b;
+  --color-poker-blue-500: #5f6279;
+  --color-poker-orange-500: #c9783f;
+  --color-poker-silver-500: #d6d3cf;
+  --color-poker-bronze-500: #b68351;
+  --color-poker-text: #f3e6c5;
+  --color-poker-muted: #d7c59a;
+  --color-poker-card: #2a1a14;
+
+  /* Semantic tokens */
+  --color-primary: var(--color-noir-amber-600);
+  --color-secondary: var(--color-noir-copper-600);
+  --color-accent: #f0d49f;
+  --color-background: var(--color-noir-brown-900);
+  --color-surface: var(--color-noir-brown-800);
+  --color-surface-elevated: var(--color-noir-brown-700);
+  --color-text-primary: rgba(243, 230, 197, 0.95);
+  --color-text-secondary: rgba(243, 230, 197, 0.75);
+  --color-text-muted: rgba(243, 230, 197, 0.55);
+
+  /* Typography tokens */
+  --font-family-sans: 'Inter', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-display: 'Cinzel', 'Times New Roman', serif;
+  --font-weight-normal: 500;
   --font-weight-bold: 700;
   --font-weight-black: 800;
-  
-  /* Border Radius System */
-  --radius: 0.625rem;
-  --radius-sm: 0.375rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.25rem;
+
+  /* Radius system */
+  --radius: 0.75rem;
+  --radius-sm: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+:root {
+  --bg: #1f1410;
+  --bg-elev: #2a1a14;
+  --paper: #3a231a;
+  --ink: #0b0706;
+  --text: #f3e6c5;
+  --muted: #d7c59a;
+  --accent: #e0b66c;
+  --accent-2: #a9441c;
+  --line: #3c2219;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --noise-texture: url('/textures/noise.png');
+  --paper-texture: url('/textures/paper.jpg');
+  --transition-soft: 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ============================================
@@ -48,26 +81,28 @@
   *,
   *::before,
   *::after {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(243, 230, 197, 0.12);
   }
   
-  /* Body Principal - Fondo Mesa de Póker */
+  /* Body base */
   body {
-    background: radial-gradient(ellipse at center, #2A2A2A 0%, #1B1B1B 70%, #0A0A0A 100%);
-    color: rgba(255, 255, 255, 0.95);
-    font-family: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
     -webkit-font-smoothing: antialiased;
     font-size: 18px; /* Base 18px para +50 años */
     line-height: 1.6;
-    font-weight: 600;
+    font-weight: 500;
     min-height: 100vh;
+    background-attachment: fixed;
   }
   
   /* Sistema de Tipografía - Tamaños Grandes */
   h1, h2, h3, h4, h5, h6 {
-    color: rgba(255, 255, 255, 0.95);
-    font-weight: 700;
-    letter-spacing: -0.025em;
+    color: var(--text);
+    font-family: var(--font-heading, 'Cinzel', 'Times New Roman', serif);
+    font-weight: 600;
+    letter-spacing: 0.04em;
     line-height: 1.3;
   }
   
@@ -79,9 +114,9 @@
   h6 { font-size: 1rem; } /* 16px */
   
   p, span, div {
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--text);
     line-height: 1.6;
-    font-weight: 600;
+    font-weight: 500;
   }
   
   /* Accesibilidad - Tamaños Mínimos de Touch */
@@ -99,9 +134,9 @@
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: 2px solid var(--color-poker-red-500);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.3);
+    box-shadow: 0 0 0 4px rgba(224, 182, 108, 0.35);
   }
 }
 
@@ -109,6 +144,59 @@
    LAYER: COMPONENTS - Componentes Reutilizables
    ============================================ */
 @layer components {
+  .noir-bg {
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(circle at 10% 10%, rgba(224, 182, 108, 0.08), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(169, 68, 28, 0.1), transparent 55%),
+      var(--noise-texture);
+    background-blend-mode: screen, multiply, normal;
+    background-size: 100% 100%, 100% 100%, 520px;
+    color: var(--text);
+  }
+
+  .paper {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(135deg, rgba(224, 182, 108, 0.08), transparent 40%),
+      var(--paper-texture);
+    background-size: cover, 800px;
+    border: 1px solid rgba(224, 182, 108, 0.18);
+    box-shadow: var(--shadow);
+    color: var(--text);
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .noir-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.4));
+    background-color: var(--bg-elev);
+    border: 1px solid rgba(243, 230, 197, 0.12);
+    box-shadow: 0 18px 45px rgba(11, 6, 3, 0.48);
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .noir-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 15% 15%, rgba(224, 182, 108, 0.12), transparent 60%);
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity var(--transition-soft);
+  }
+
+  .noir-card:hover::before {
+    opacity: 1;
+  }
+
+  .noir-photo {
+    filter: saturate(0.85) contrast(1.1) sepia(0.35);
+  }
+
   /* Botón Principal Poker */
   .btn-poker {
     background: linear-gradient(135deg, #E50914 0%, #B30500 50%, #822727 100%);

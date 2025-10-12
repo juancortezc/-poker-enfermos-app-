@@ -82,10 +82,10 @@ export function ProposalCard({ proposal, isExpanded, onToggle, votingClosed = fa
   }
 
   return (
-    <Card className="overflow-hidden border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#121321] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:border-poker-red/60 hover:shadow-[0_24px_60px_rgba(255,93,143,0.25)] shadow-[0_18px_40px_rgba(11,12,32,0.45)]">
+    <Card className="noir-card overflow-hidden border border-[#e0b66c]/15 bg-[rgba(24,14,10,0.9)] transition-all duration-500 hover:-translate-y-1 hover:border-[#e0b66c]/45 hover:shadow-[0_28px_70px_rgba(11,6,3,0.6)]">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-white/10 bg-gradient-to-r from-white/8 via-transparent to-transparent">
-        <h3 className="text-white text-lg font-semibold tracking-tight mb-2 line-clamp-2">
+      <div className="border-b border-[#e0b66c]/12 px-5 py-4 bg-[radial-gradient(circle_at_top,_rgba(224,182,108,0.12),_transparent_70%)]">
+        <h3 className="mb-2 line-clamp-2 font-heading text-lg uppercase tracking-[0.2em] text-[#f3e6c5]">
           {proposal.title}
         </h3>
 
@@ -93,10 +93,10 @@ export function ProposalCard({ proposal, isExpanded, onToggle, votingClosed = fa
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-5">
             {/* Comment Count */}
-            <div className="flex items-center gap-2 text-xs font-medium text-white/60 tracking-wide uppercase">
-              <MessageSquareText className="w-4 h-4 text-poker-red" />
-              <span className="text-white">{commentCount}</span>
-              <span className="text-white/40">Comentarios</span>
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-[#d7c59a]/75">
+              <MessageSquareText className="h-4 w-4 text-[#e0b66c]" />
+              <span className="text-[#f3e6c5]">{commentCount}</span>
+              <span className="text-[#d7c59a]/55">Comentarios</span>
             </div>
 
             {/* Vote Stats */}
@@ -114,10 +114,10 @@ export function ProposalCard({ proposal, isExpanded, onToggle, votingClosed = fa
           {/* Expand Button */}
           <button
             onClick={onToggle}
-            className={`px-4 py-2 rounded-full text-xs font-semibold tracking-[0.2em] transition-all uppercase ${
+            className={`rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] transition-all ${
               isExpanded
-                ? 'bg-gradient-to-r from-poker-red/85 to-poker-red text-white shadow-[0_14px_30px_rgba(255,93,143,0.3)]'
-                : 'border border-white/15 text-white/70 hover:text-white hover:border-white/35'
+                ? 'bg-[linear-gradient(135deg,rgba(224,182,108,0.9),rgba(169,68,28,0.85))] text-[#1f1410] shadow-[0_18px_40px_rgba(224,182,108,0.28)]'
+                : 'border border-[#e0b66c]/25 text-[#d7c59a]/80 hover:border-[#e0b66c]/45 hover:text-[#f3e6c5]'
             }`}
           >
             {isExpanded ? 'Cerrar' : 'Detalles'}
@@ -129,27 +129,33 @@ export function ProposalCard({ proposal, isExpanded, onToggle, votingClosed = fa
       {isExpanded && (
         <>
           {/* Proposal Content */}
-          <div className="px-5 pb-5 pt-4 border-b border-white/10 space-y-4">
+          <div className="space-y-4 border-b border-[#e0b66c]/12 px-5 pb-5 pt-4">
             {/* Objetivo */}
             <div>
-              <h4 className="text-xs font-semibold tracking-[0.24em] text-poker-red/80 uppercase mb-1.5">Objetivo</h4>
-              <p className="text-sm text-white/75 leading-relaxed">
+              <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-[#e0b66c]">
+                Objetivo
+              </h4>
+              <p className="text-sm leading-relaxed text-[#f3e6c5]/85">
                 {proposal.objective}
               </p>
             </div>
 
             {/* Situación a modificar */}
             <div>
-              <h4 className="text-xs font-semibold tracking-[0.24em] text-poker-red/80 uppercase mb-1.5">Situación a Modificar</h4>
-              <p className="text-sm text-white/75 leading-relaxed whitespace-pre-line">
+              <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-[#e0b66c]">
+                Situación a modificar
+              </h4>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-[#f3e6c5]/85">
                 {proposal.situation}
               </p>
             </div>
 
             {/* Propuesta */}
             <div>
-              <h4 className="text-xs font-semibold tracking-[0.24em] text-poker-red/80 uppercase mb-1.5">Propuesta</h4>
-              <p className="text-sm text-white/75 leading-relaxed whitespace-pre-line">
+              <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.26em] text-[#e0b66c]">
+                Propuesta
+              </h4>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-[#f3e6c5]/85">
                 {proposal.proposal}
               </p>
             </div>
@@ -160,14 +166,14 @@ export function ProposalCard({ proposal, isExpanded, onToggle, votingClosed = fa
                 <img
                   src={proposal.imageUrl}
                   alt="Imagen de la propuesta"
-                  className="w-full h-auto rounded-lg border border-white/15 cursor-pointer hover:border-white/35 transition-all"
+                  className="h-auto w-full cursor-pointer rounded-lg border border-[#e0b66c]/20 transition-all hover:border-[#e0b66c]/40"
                   style={{ maxHeight: '400px', objectFit: 'contain' }}
                   onClick={() => {
                     // Open image in new tab for full view
                     window.open(proposal.imageUrl, '_blank')
                   }}
                 />
-                <p className="text-xs text-white/45 mt-2 text-center tracking-wide">
+                <p className="mt-2 text-center text-xs tracking-[0.2em] text-[#d7c59a]/60">
                   Click para ver en tamaño completo
                 </p>
               </div>

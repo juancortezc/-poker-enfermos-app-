@@ -29,7 +29,7 @@ npx tsx scripts/test-permission-system.ts  # Permission validation
 - **Players**: 29 active (Comision/Enfermo/Invitado roles)
 - **Tournaments**: PROXIMO → ACTIVO → FINALIZADO states
 - **GameDate**: pending → CREATED → in_progress → completed
-- **BlindLevel**: 18 levels (50/100 to 10000/20000)
+- **BlindLevel**: 12 levels (50/100 to 2500/5000) + 30min dinner break after level 3
 - **Eliminations**: Position-based point system (max 30pts)
 - **TournamentWinners**: Historical podium tracking
 
@@ -188,7 +188,15 @@ GET    /api/proposals/[id]/comments           # Get comments
 
 ## 🚨 Recent Updates
 
-### Latest (2025-10-08)
+### Latest (2025-10-11)
+- ✅ New 12-level blinds structure (down from 18 levels)
+- ✅ Longer durations: 25min early levels, 20min mid-levels, 15min final
+- ✅ 30-minute dinner break after level 3 (manual timer pause)
+- ✅ Max blinds reduced to 2500/5000 (from 10000/20000)
+- ✅ Backend API, frontend form, and presets synchronized
+- ✅ Estimated duration: 4-5 hours with dinner break
+
+### Previous (2025-10-08)
 - ✅ P&H Detail Modal System with elimination history
 - ✅ Clickable P&H cards with hover effects
 - ✅ Fixed P&H stats calculation errors (recalculated T28)

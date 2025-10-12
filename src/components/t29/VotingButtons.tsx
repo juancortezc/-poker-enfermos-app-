@@ -73,14 +73,14 @@ export function VotingButtons({ proposalId, initialStats, userVote, onVoteChange
       <button
         onClick={() => handleVote('thumbsUp')}
         disabled={isVoting || disabled}
-        className={`group flex items-center gap-1.5 text-sm font-semibold tracking-wide transition-colors ${
+        className={`group flex items-center gap-1.5 text-sm font-semibold uppercase tracking-[0.2em] transition-colors ${
           currentUserVote === 'thumbsUp'
-            ? 'text-emerald-300 drop-shadow'
-            : 'text-white/60 hover:text-emerald-200'
-        } ${isVoting || disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+            ? 'text-[#7bdba5] drop-shadow'
+            : 'text-[#d7c59a]/70 hover:text-[#7bdba5]'
+        } ${isVoting || disabled ? 'cursor-not-allowed opacity-40' : ''}`}
       >
-        <ThumbsUp className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
-        <span className="text-xs font-medium text-white/60 group-hover:text-inherit">
+        <ThumbsUp className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
+        <span className="text-xs font-medium text-[#d7c59a]/65 group-hover:text-inherit">
           {stats.thumbsUp}
         </span>
       </button>
@@ -88,14 +88,14 @@ export function VotingButtons({ proposalId, initialStats, userVote, onVoteChange
       <button
         onClick={() => handleVote('thumbsDown')}
         disabled={isVoting || disabled}
-        className={`group flex items-center gap-1.5 text-sm font-semibold tracking-wide transition-colors ${
+        className={`group flex items-center gap-1.5 text-sm font-semibold uppercase tracking-[0.2em] transition-colors ${
           currentUserVote === 'thumbsDown'
-            ? 'text-rose-300 drop-shadow'
-            : 'text-white/60 hover:text-rose-300'
-        } ${isVoting || disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+            ? 'text-[#f38b7d] drop-shadow'
+            : 'text-[#d7c59a]/70 hover:text-[#f38b7d]'
+        } ${isVoting || disabled ? 'cursor-not-allowed opacity-40' : ''}`}
       >
-        <ThumbsDown className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
-        <span className="text-xs font-medium text-white/60 group-hover:text-inherit">
+        <ThumbsDown className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
+        <span className="text-xs font-medium text-[#d7c59a]/65 group-hover:text-inherit">
           {stats.thumbsDown}
         </span>
       </button>

@@ -8,6 +8,11 @@ import { Card } from '@/components/ui/card'
 import { ArrowLeft, MessageSquareText, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 
+interface Proposal {
+  id: number
+  title: string
+}
+
 interface Comment {
   id: number
   content: string
@@ -61,7 +66,7 @@ export default function ComentariosPage() {
       const { proposals } = await proposalsResponse.json()
 
       // Then, fetch comments for each proposal (only if user is authenticated)
-      const commentPromises = proposals.map(async (proposal: any) => {
+      const commentPromises = proposals.map(async (proposal: Proposal) => {
         if (!user) {
           return {
             proposalId: proposal.id,
@@ -85,7 +90,7 @@ export default function ComentariosPage() {
               id: proposal.id,
               title: proposal.title
             },
-            comments: comments.map((comment: any) => ({
+            comments: comments.map((comment: Comment) => ({
               ...comment,
               proposal: {
                 id: proposal.id,

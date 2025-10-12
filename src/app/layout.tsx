@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Cinzel } from "next/font/google";
 import "./globals.css";
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -10,15 +10,19 @@ import { SWRProvider } from '@/lib/swr-config'
 import { OfflineIndicator } from '@/components/OfflineIndicator'
 import { NotificationInitializer } from '@/components/NotificationInitializer'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-body',
+  display: 'swap'
+})
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const cinzel = Cinzel({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-heading',
+  display: 'swap'
+})
 
 export const metadata: Metadata = {
   title: "Poker de Enfermos",
@@ -30,26 +34,20 @@ export const metadata: Metadata = {
     title: "Poker Enfermos",
     startupImage: [
       {
-        url: "/icons/icon-192x192.svg",
+        url: "/icons/favicon-512.png",
         media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
       }
     ]
   },
   icons: {
     icon: [
-      { url: "/icons/icon-32x32.svg", sizes: "32x32", type: "image/svg+xml" },
-      { url: "/icons/icon-16x16.svg", sizes: "16x16", type: "image/svg+xml" }
+      { url: "/icons/favicon-64.png", sizes: "64x64", type: "image/png" },
+      { url: "/icons/favicon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/favicon-512.png", sizes: "512x512", type: "image/png" }
     ],
     apple: [
-      { url: "/icons/icon-57x57.svg", sizes: "57x57", type: "image/svg+xml" },
-      { url: "/icons/icon-60x60.svg", sizes: "60x60", type: "image/svg+xml" },
-      { url: "/icons/icon-72x72.svg", sizes: "72x72", type: "image/svg+xml" },
-      { url: "/icons/icon-76x76.svg", sizes: "76x76", type: "image/svg+xml" },
-      { url: "/icons/icon-114x114.svg", sizes: "114x114", type: "image/svg+xml" },
-      { url: "/icons/icon-120x120.svg", sizes: "120x120", type: "image/svg+xml" },
-      { url: "/icons/icon-144x144.svg", sizes: "144x144", type: "image/svg+xml" },
-      { url: "/icons/icon-152x152.svg", sizes: "152x152", type: "image/svg+xml" },
-      { url: "/icons/icon-180x180.svg", sizes: "180x180", type: "image/svg+xml" }
+      { url: "/icons/favicon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/favicon-512.png", sizes: "512x512", type: "image/png" }
     ]
   },
   other: {
@@ -58,8 +56,8 @@ export const metadata: Metadata = {
     "apple-mobile-web-app-status-bar-style": "black-translucent",
     "apple-mobile-web-app-title": "Poker Enfermos",
     "application-name": "Poker Enfermos",
-    "msapplication-TileColor": "#E10600",
-    "msapplication-TileImage": "/icons/icon-144x144.svg"
+    "msapplication-TileColor": "#1f1410",
+    "msapplication-TileImage": "/icons/favicon-192.png"
   }
 };
 
@@ -68,7 +66,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#E10600"
+  themeColor: "#1f1410"
 };
 
 export default function RootLayout({
@@ -78,7 +76,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}>
+      <body className={`${inter.variable} ${cinzel.variable} antialiased noir-bg`}>
         <SWRProvider>
           <AuthProvider>
             <PlayerSearchProvider>

@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { useAuth } from '@/contexts/AuthContext'
 import LoadingState from '@/components/ui/LoadingState'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Lightbulb, MessageSquareText, Users, CheckCircle } from 'lucide-react'
+import { Lightbulb, Users, CheckCircle } from 'lucide-react'
 import { ProposalCard } from '@/components/t29/ProposalCard'
 import { T29ParticipantsModal, type T29Participant } from '@/components/t29/T29ParticipantsModal'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { NoirButton } from '@/components/noir/NoirButton'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
 interface Proposal {
   id: number
@@ -61,14 +62,6 @@ export default function T29Page() {
     participantsFetcher
   )
 
-  if (loading) {
-    return <LoadingState />
-  }
-
-  if (!user) {
-    return null
-  }
-
   const proposals = data?.proposals ?? []
   const participants = participantsData?.participants ?? []
   const participantsCount = participantsData?.count ?? 0
@@ -88,6 +81,14 @@ export default function T29Page() {
       setHasRegistered(false)
     }
   }, [user])
+
+  if (loading) {
+    return <LoadingState />
+  }
+
+  if (!user) {
+    return null
+  }
 
   const toggleProposal = (proposalId: number) => {
     setActiveProposalId((current) => (current === proposalId ? null : proposalId))
@@ -135,24 +136,26 @@ export default function T29Page() {
     <div className="pb-24 space-y-6">
       {/* Sección de Participación T29 */}
       <section className="relative">
-        <Card className="bg-gradient-to-br from-[#1f1a2d] via-[#1a1b2a] to-[#141623] border border-white/10 p-5 shadow-[0_18px_40px_rgba(15,15,45,0.35)]">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <Card className="noir-card border border-[#e0b66c]/18 bg-[rgba(24,14,10,0.92)] p-6">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
               onClick={() => setShowParticipantsModal(true)}
-              className="group flex items-center gap-4 rounded-2xl text-left transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-poker-red/60"
+              className="group flex items-center gap-4 rounded-3xl border border-[#e0b66c]/15 bg-[rgba(31,20,16,0.78)] px-4 py-3 text-left transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#e0b66c]/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e0b66c]/40"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-poker-red/30 ring-1 ring-poker-red/40 transition-colors group-hover:ring-poker-red/60">
-                <Users className="w-7 h-7 text-white drop-shadow" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-3xl border border-[#e0b66c]/35 bg-[rgba(42,26,20,0.75)] text-[#e0b66c] shadow-[0_12px_28px_rgba(11,6,3,0.55)] transition-colors group-hover:border-[#e0b66c]/55">
+                <Users className="h-7 w-7" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold text-white">Participación T29</h2>
-                  <span className="hidden rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/60 transition-colors group-hover:border-white/25 group-hover:text-white/80 sm:inline-flex">
+                  <h2 className="font-heading text-lg uppercase tracking-[0.22em] text-[#f3e6c5]">
+                    Participación T29
+                  </h2>
+                  <span className="hidden rounded-full border border-[#e0b66c]/20 bg-[#e0b66c]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#e0b66c]/80 transition-colors group-hover:border-[#e0b66c]/40 group-hover:text-[#e0b66c] sm:inline-flex">
                     Ver lista
                   </span>
                 </div>
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-[#d7c59a]/75">
                   {participantsCount} {participantsCount === 1 ? 'participante registrado' : 'participantes registrados'}
                   {participantsCount > 0 ? ' • Toca para ver quiénes confirmaron' : ''}
                 </p>
@@ -161,36 +164,38 @@ export default function T29Page() {
 
             <div className="flex flex-col gap-3">
               {isParticipationConfirmed ? (
-                <Button
-                  variant="ghost"
+                <NoirButton
+                  variant="secondary"
                   disabled
-                  className="min-w-[220px] rounded-full bg-gradient-to-r from-neutral-700 to-neutral-700/70 text-neutral-200 font-semibold cursor-not-allowed shadow-none"
+                  className="min-w-[220px] cursor-not-allowed opacity-80"
                 >
-                  <CheckCircle className="w-4 h-4 mr-2" />
+                  <CheckCircle className="mr-2 h-4 w-4" />
                   Confirmada Participación
-                </Button>
+                </NoirButton>
               ) : (
-                <Button
-                  variant="ghost"
+                <NoirButton
                   onClick={handleRegisterParticipation}
                   disabled={isRegistering}
-                  className="relative min-w-[220px] rounded-full bg-gradient-to-r from-poker-red via-[#d73552] to-[#ff4b2b] text-white font-semibold shadow-[0_14px_30px_rgba(215,53,82,0.45)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(215,53,82,0.55)]"
+                  className="relative min-w-[220px] justify-center"
                 >
                   {isRegistering ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white/80 mr-2"></div>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-[#1f1410]/60"></div>
                       REGISTRANDO...
                     </>
                   ) : (
                     'QUIERO PARTICIPAR'
                   )}
-                </Button>
+                </NoirButton>
               )}
 
               {registrationMessage && (
-                <p className={`text-sm text-center ${
-                  registrationMessage.includes('Error') ? 'text-red-400' : 'text-green-400'
-                }`}>
+                <p
+                  className={cn(
+                    'text-center text-sm',
+                    registrationMessage.includes('Error') ? 'text-[#f38b7d]' : 'text-[#7bdba5]'
+                  )}
+                >
                   {registrationMessage}
                 </p>
               )}
@@ -200,41 +205,49 @@ export default function T29Page() {
       </section>
 
       <section className="space-y-6">
-        <header className="flex items-center justify-between gap-4">
-          <div className="text-center flex-1">
-            <h1 className="text-2xl font-semibold text-white tracking-tight">Propuestas T29</h1>
-            <p className="text-sm text-white/55 text-center">Vota y comenta las propuestas</p>
+        <header className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+          <div className="flex-1 space-y-1">
+            <h1 className="font-heading text-2xl uppercase tracking-[0.22em] text-[#f3e6c5]">
+              Propuestas T29
+            </h1>
+            <p className="text-sm text-[#d7c59a]/70">
+              Revisa, comenta y vota las ideas de la comisión Noir Jazz
+            </p>
           </div>
 
           {/* Comments Overview Button */}
-          <Link href="/t29/comentarios">
-            <Button
-              variant="ghost"
-              className="flex-shrink-0 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/75 transition-all hover:border-poker-red/60 hover:text-white hover:bg-poker-red/20"
-            >
-              Ver Comentarios
-            </Button>
-          </Link>
+          <NoirButton
+            asChild
+            variant="ghost"
+            size="sm"
+            className="flex-shrink-0 px-4 py-2 text-[10px]"
+          >
+            <Link href="/t29/comentarios">Ver comentarios</Link>
+          </NoirButton>
         </header>
 
         {isLoading && (
-          <Card className="admin-card p-7 text-center text-white/60 border-white/15 bg-gradient-to-r from-white/10 via-transparent to-transparent">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-poker-red mx-auto mb-4"></div>
-            Cargando propuestas...
+          <Card className="paper flex flex-col items-center gap-3 px-6 py-8 text-[#d7c59a]">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#e0b66c] border-t-transparent" />
+            <span>Cargando propuestas...</span>
           </Card>
         )}
 
         {error && (
-          <Card className="admin-card p-7 text-center text-poker-red border-white/15 bg-gradient-to-r from-rose-500/10 via-transparent to-transparent">
+          <Card className="paper px-6 py-8 text-center text-[#f38b7d]">
             {(error as Error).message}
           </Card>
         )}
 
         {!isLoading && !error && proposals.length === 0 && (
-          <Card className="admin-card p-7 text-center text-white/60 border-white/15 bg-gradient-to-br from-[#1b1d2f] via-[#18192d] to-[#131422]">
-            <Lightbulb className="w-10 h-10 mx-auto mb-3 text-poker-red" />
-            <h3 className="text-base font-semibold mb-1 text-white">Aún no hay propuestas</h3>
-            <p className="text-sm text-white/55">Las propuestas aparecerán aquí cuando sean activadas por la comisión.</p>
+          <Card className="paper px-6 py-10 text-center text-[#d7c59a]">
+            <Lightbulb className="mx-auto mb-3 h-10 w-10 text-[#e0b66c]" />
+            <h3 className="font-heading text-base uppercase tracking-[0.2em] text-[#f3e6c5]">
+              Aún no hay propuestas
+            </h3>
+            <p className="mt-2 text-sm text-[#d7c59a]/70">
+              Las propuestas aparecerán aquí cuando la comisión active la fase de votación.
+            </p>
           </Card>
         )}
 

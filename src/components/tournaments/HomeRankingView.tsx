@@ -1,381 +1,267 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { User } from 'lucide-react';
-import Image from 'next/image';
-import PlayerDetailModal from './PlayerDetailModal';
-import { useTournamentRanking } from '@/hooks/useTournamentRanking';
+import { useState, type ReactNode } from 'react'
+import Image from 'next/image'
+import {
+  ArrowClockwise,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  User
+} from 'lucide-react'
+
+import { useTournamentRanking } from '@/hooks/useTournamentRanking'
+import PlayerDetailModal from './PlayerDetailModal'
+import { RankCard } from '@/components/noir/RankCard'
+import { NoirButton } from '@/components/noir/NoirButton'
+import type { PlayerRanking } from '@/lib/ranking-utils'
+import { cn } from '@/lib/utils'
 
 interface HomeRankingViewProps {
-  tournamentId: number;
+  tournamentId: number
+}
+
+type RowTrend = 'up' | 'down' | 'steady'
+
+const trendStyles: Record<RowTrend, { label: string; className: string; icon: ReactNode }> = {
+  up: {
+    label: 'Sube',
+    className: 'text-[#7bdba5]',
+    icon: <TrendingUp className="h-3.5 w-3.5" />
+  },
+  down: {
+    label: 'Baja',
+    className: 'text-[#f38b7d]',
+    icon: <TrendingDown className="h-3.5 w-3.5" />
+  },
+  steady: {
+    label: 'Sin cambios',
+    className: 'text-[#d7c59a]',
+    icon: <Minus className="h-3.5 w-3.5" />
+  }
+}
+
+interface PlayerRowProps {
+  player: PlayerRanking
+  onSelect: (playerId: string) => void
+}
+
+function PlayerRow({ player, onSelect }: PlayerRowProps) {
+  const trend = player.trend === 'up' ? 'up' : player.trend === 'down' ? 'down' : 'steady'
+  const trendInfo = trendStyles[trend]
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(player.playerId)}
+      className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-[#e0b66c]/12 bg-[rgba(31,20,16,0.78)] px-4 py-3 text-left transition-all duration-200 hover:border-[#e0b66c]/35 hover:bg-[rgba(31,20,16,0.92)]"
+    >
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e0b66c]/30 bg-[#24160f] font-semibold text-[11px] uppercase tracking-[0.22em] text-[#e0b66c]">
+          #{String(player.position).padStart(2, '0')}
+        </span>
+
+        {player.playerPhoto ? (
+          <div className="relative h-10 w-10 overflow-hidden rounded-full border border-[#e0b66c]/25 bg-[#2a1a14]">
+            <Image
+              src={player.playerPhoto}
+              alt={player.playerName}
+              fill
+              sizes="40px"
+              className="object-cover noir-photo"
+            />
+          </div>
+        ) : (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e0b66c]/25 bg-[#2a1a14] text-[#d7c59a]">
+            <User className="h-5 w-5" />
+          </div>
+        )}
+
+        <div>
+          <p className="text-sm font-medium text-[#f3e6c5]">
+            {player.playerName}
+          </p>
+          {player.playerAlias && (
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[#d7c59a]/65">
+              {player.playerAlias}
+            </p>
+          )}
+          <div className="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.22em]">
+            <span className={cn('flex items-center gap-1', trendInfo.className)}>
+              {trendInfo.icon}
+              {trendInfo.label}
+            </span>
+            <span className="text-[#d7c59a]/55">
+              {player.datesPlayed} fechas
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="text-right">
+        <p className="font-heading text-xl tracking-[0.18em] text-[#e0b66c]">
+          {player.finalScore ?? player.totalPoints}
+        </p>
+        <p className="text-[10px] uppercase tracking-[0.22em] text-[#d7c59a]/60">
+          Total {player.totalPoints}
+        </p>
+      </div>
+    </button>
+  )
 }
 
 export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) {
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Use SWR hook for tournament ranking data
-  const { 
-    ranking: rankingData, 
-    isLoading: loading, 
+  const {
+    ranking: rankingData,
+    isLoading,
     isError,
     errorMessage,
-    refresh 
+    refresh
   } = useTournamentRanking(tournamentId, {
-    refreshInterval: 30000, // Refresh every 30 seconds
+    refreshInterval: 30000,
     revalidateOnFocus: true
-  });
+  })
 
   const openPlayerModal = (playerId: string) => {
-    setSelectedPlayerId(playerId);
-    setIsModalOpen(true);
-  };
+    setSelectedPlayerId(playerId)
+    setIsModalOpen(true)
+  }
 
   const closePlayerModal = () => {
-    setIsModalOpen(false);
-    setSelectedPlayerId(null);
-  };
+    setIsModalOpen(false)
+    setSelectedPlayerId(null)
+  }
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="animate-pulse px-4">
-        <div className="h-40 bg-white/10 rounded-lg mb-2"></div>
-        <div className="grid grid-cols-3 gap-2">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-16 bg-white/5 rounded-lg"></div>
+      <div className="space-y-6">
+        <div className="mx-auto h-6 w-56 animate-pulse rounded-full bg-[#2a1a14]/60" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {[...Array(3)].map((_, index) => (
+            <div
+              key={`skeleton-${index}`}
+              className="h-48 animate-pulse rounded-3xl border border-[#e0b66c]/12 bg-[rgba(31,20,16,0.65)]"
+            />
+          ))}
+        </div>
+        <div className="space-y-3 rounded-2xl border border-[#e0b66c]/12 bg-[rgba(31,20,16,0.65)] p-6">
+          {[...Array(4)].map((_, index) => (
+            <div
+              key={`row-skeleton-${index}`}
+              className="h-14 animate-pulse rounded-xl bg-[#24160f]"
+            />
           ))}
         </div>
       </div>
-    );
+    )
   }
 
   if (isError) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-400 text-lg mb-4">Error al cargar el ranking</p>
-        <p className="text-poker-muted text-sm mb-4">{errorMessage}</p>
-        <button
-          onClick={refresh}
-          className="bg-poker-red hover:bg-poker-red/80 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          Reintentar
-        </button>
+      <div className="paper space-y-4 px-6 py-8 text-center">
+        <h3 className="font-heading text-lg uppercase tracking-[0.24em] text-[#e0b66c]">
+          Error al cargar el ranking
+        </h3>
+        <p className="text-sm text-[#d7c59a]">{errorMessage}</p>
+        <div className="flex items-center justify-center">
+          <NoirButton onClick={refresh} className="gap-2">
+            <ArrowClockwise className="h-4 w-4" />
+            Reintentar
+          </NoirButton>
+        </div>
       </div>
-    );
+    )
   }
 
   if (!rankingData || rankingData.rankings.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-poker-muted text-lg">No hay datos de ranking disponibles</p>
+      <div className="paper px-6 py-8 text-center">
+        <p className="text-[#d7c59a]">
+          No hay datos de ranking disponibles todavía. Regresa cuando tengamos nuevas fechas.
+        </p>
       </div>
-    );
+    )
   }
 
-  const { rankings } = rankingData;
-  
-  // Separar los jugadores por posición
-  const topThree = rankings.slice(0, 3);
-  const middle = rankings.slice(3, -2);
-  const lastTwo = rankings.slice(-2);
-
-  const firstPlace = topThree.find((player) => player?.position === 1) || null;
-  const podiumBase = topThree
-    .filter((player) => player && player.position !== 1)
-    .sort((a, b) => (a?.position || 0) - (b?.position || 0));
+  const { rankings, tournament } = rankingData
+  const topThree = rankings.slice(0, 3)
+  const others = rankings.slice(3)
+  const highlightOrder: Array<'gold' | 'silver' | 'bronze'> = ['gold', 'silver', 'bronze']
 
   return (
-    <div className="w-full overflow-visible">
-      {/* Título compacto */}
-      <div className="text-center mb-4">
-        <h1 className="text-2xl font-bold text-white mb-1">Torneo #{rankingData.tournament.number}</h1>
-        <div className="text-xs text-poker-muted">
-          {rankings.length} jugadores • {rankingData.tournament.completedDates}/{rankingData.tournament.totalDates} fechas
-        </div>
+    <section className="space-y-8">
+      <header className="text-center space-y-2">
+        <p className="text-[11px] uppercase tracking-[0.28em] text-[#d7c59a]/75">
+          Torneo #{tournament.number} · {tournament.name}
+        </p>
+        <h2 className="font-heading text-3xl uppercase tracking-[0.22em] text-[#f3e6c5]">
+          Tabla General
+        </h2>
+        <p className="text-sm text-[#d7c59a]/70">
+          {rankings.length} jugadores · {tournament.completedDates}/{tournament.totalDates} fechas completadas
+        </p>
+      </header>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {topThree.map((player, index) => (
+          <button
+            key={player.playerId}
+            type="button"
+            onClick={() => openPlayerModal(player.playerId)}
+            className="text-left"
+          >
+            <RankCard
+              position={player.position}
+              name={player.playerName}
+              alias={player.playerAlias}
+              points={player.finalScore ?? player.totalPoints}
+              trend={player.trend === 'up' ? 'up' : player.trend === 'down' ? 'down' : 'steady'}
+              meta={`Total ${player.totalPoints} pts • ${player.datesPlayed} fechas`}
+              highlight={highlightOrder[index] ?? 'default'}
+              avatarUrl={player.playerPhoto}
+              footer={`Victorias ${player.firstPlaces} · Podios ${player.secondPlaces + player.thirdPlaces}`}
+            />
+          </button>
+        ))}
       </div>
 
-      {/* Podio - Top 3 */}
-      <div className="mb-6">
-        {/* Ganador centrado */}
-        {firstPlace && (
-          <div className="flex justify-center mb-6">
-            <div className="relative flex flex-col items-center">
-              <div
-                className="relative dashboard-card podium-border-gold rounded-lg p-3 w-28 sm:w-32 h-36 sm:h-40 cursor-pointer"
-                onClick={() => openPlayerModal(firstPlace.playerId)}
-              >
-                <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm z-50 shadow-lg position-1st">
-                  {firstPlace.position}
-                </div>
-
-                {firstPlace.playerPhoto ? (
-                  <div className="absolute inset-0 rounded-lg overflow-hidden">
-                    <Image
-                      src={firstPlace.playerPhoto}
-                      alt={firstPlace.playerName}
-                      width={160}
-                      height={192}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  </div>
-                ) : (
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-yellow-900/40 via-yellow-700/30 to-yellow-500/20" />
-                )}
-
-                <div className="relative flex flex-col items-center justify-end h-full pb-10">
-                  {!firstPlace.playerPhoto && (
-                    <div className="mb-auto mt-4">
-                      <User className="w-14 sm:w-16 h-14 sm:h-16 text-white/50" />
-                    </div>
-                  )}
-
-                  <h3 className="text-white font-bold text-sm sm:text-base text-center drop-shadow-lg">
-                    {firstPlace.playerName.split(' ')[0]}
-                  </h3>
-                </div>
-
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50">
-                  <div className="bg-black/75 backdrop-blur-sm border border-white/10 rounded-full px-5 py-1.5 shadow-lg">
-                    <span className="text-orange-400 font-black text-2xl sm:text-3xl leading-none tracking-tight">
-                      {firstPlace.finalScore ?? firstPlace.totalPoints}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-2">
-                <div className="flex flex-col items-center">
-                  <span className="text-poker-gold font-semibold text-xs">{firstPlace.totalPoints}</span>
-                </div>
-              </div>
-            </div>
+      {others.length > 0 && (
+        <div className="paper space-y-4 px-5 py-6 sm:px-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="font-heading text-sm uppercase tracking-[0.26em] text-[#e0b66c]">
+              Clasificación extendida
+            </h3>
+            <NoirButton
+              variant="ghost"
+              size="sm"
+              onClick={refresh}
+              className="self-start gap-2 px-3 py-2 text-[10px]"
+            >
+              <ArrowClockwise className="h-4 w-4" />
+              Actualizar
+            </NoirButton>
           </div>
-        )}
 
-        {/* Segundo y tercero como base */}
-        <div className="flex justify-center gap-6 sm:gap-8">
-          {podiumBase.map((player) => {
-              if (!player) return null;
-
-              const isSecond = player.position === 2;
-
-              return (
-                <div key={player.playerId} className="relative flex flex-col items-center">
-                  <div
-                    className={`relative dashboard-card rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer ${
-                      isSecond ? 'podium-border-silver' : 'podium-border-bronze'
-                    }`}
-                    onClick={() => openPlayerModal(player.playerId)}
-                  >
-                    <div className={`
-                      absolute -top-2 -left-2 w-9 h-9 rounded-full 
-                      flex items-center justify-center font-bold text-sm z-50 shadow-lg
-                      ${isSecond ? 'position-2nd' : 'position-3rd'}
-                    `}>
-                      {player.position}
-                    </div>
-
-                    {player.playerPhoto ? (
-                      <div className="absolute inset-0 rounded-lg overflow-hidden">
-                        <Image
-                          src={player.playerPhoto}
-                          alt={player.playerName}
-                          width={144}
-                          height={176}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      </div>
-                    ) : (
-                      <div className={`
-                        absolute inset-0 rounded-lg
-                        ${isSecond
-                          ? 'bg-gradient-to-br from-gray-600/40 via-gray-500/30 to-gray-400/20'
-                          : 'bg-gradient-to-br from-orange-900/40 via-orange-700/30 to-orange-500/20'
-                        }
-                      `} />
-                    )}
-
-                    <div className="relative flex flex-col items-center justify-end h-full pb-8">
-                      {!player.playerPhoto && (
-                        <div className="mb-auto mt-4">
-                          <User className="w-12 sm:w-16 h-12 sm:h-16 text-white/50" />
-                        </div>
-                      )}
-
-                      <h3 className="text-white font-bold text-xs sm:text-sm text-center drop-shadow-lg">
-                        {player.playerName.split(' ')[0]}
-                      </h3>
-                    </div>
-
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50">
-                      <div className="bg-black/75 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 shadow-lg">
-                        <span className="text-orange-400 font-black text-xl sm:text-2xl leading-none tracking-tight">
-                          {player.finalScore ?? player.totalPoints}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-1">
-                    <div className="flex flex-col items-center">
-                      <span className="text-poker-gold font-semibold text-xs">{player.totalPoints}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-      </div>
-
-      {/* Posiciones 4+ en cards - Grid 2 columnas */}
-      {middle.length > 0 && (
-        <div className="mb-4 overflow-visible">
-          <div className="grid grid-cols-2 gap-3 max-w-md mx-auto px-2 overflow-visible">
-            {middle.map((player) => {
-              const firstName = player.playerName.split(' ')[0];
-              
-              return (
-                <div
-                  key={player.playerId}
-                  className="relative dashboard-card rounded-lg p-3 cursor-pointer overflow-visible"
-                  onClick={() => openPlayerModal(player.playerId)}
-                >
-                  {/* Círculo de posición mejorado */}
-                  <div className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-xs border-2 border-gray-600 shadow-lg z-50">
-                    {player.position}
-                  </div>
-                  
-                  <div className="flex justify-between items-center gap-3 pt-2 h-full">
-                    <div className="flex items-center gap-3">
-                      {player.playerPhoto ? (
-                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-black/20">
-                          <Image
-                            src={player.playerPhoto}
-                            alt={player.playerName}
-                            width={48}
-                            height={48}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-12 h-12 rounded-md bg-white/10 flex items-center justify-center">
-                          <User className="w-7 h-7 text-white/50" />
-                        </div>
-                      )}
-                      <div>
-                        <h4 className="font-semibold text-white text-xs">
-                          {firstName}
-                        </h4>
-                        {player.playerAlias && (
-                          <p className="text-orange-400 text-xs">
-                            ({player.playerAlias})
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-orange-400 font-bold score-emphasis text-sm">{player.finalScore || player.totalPoints}</span>
-                      <span className="text-poker-gold font-semibold text-xs">{player.totalPoints}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid gap-3 md:grid-cols-2">
+            {others.map((player) => (
+              <PlayerRow
+                key={player.playerId}
+                player={player}
+                onSelect={openPlayerModal}
+              />
+            ))}
           </div>
         </div>
       )}
 
-      {/* Últimas 2 posiciones - Mismo diseño que Top 3 con círculo rosa */}
-      {lastTwo.length > 0 && (
-        <div className="mt-3">
-          <div className="flex justify-center gap-2 sm:gap-3">
-            {lastTwo.map((player) => {
-              const firstName = player.playerName.split(' ')[0];
-              
-              return (
-                <div
-                  key={player.playerId}
-                  className="relative flex flex-col items-center"
-                >
-                  <div 
-                    className="relative dashboard-card card-last-position rounded-lg p-3 w-24 sm:w-28 h-32 sm:h-36 cursor-pointer"
-                    onClick={() => openPlayerModal(player.playerId)}
-                  >
-                    {/* Círculo de posición rosa mejorado */}
-                    <div className="absolute -top-2 -left-2 w-9 h-9 rounded-full bg-pink-500 text-white flex items-center justify-center font-bold text-sm border-2 border-pink-400 z-50 shadow-lg">
-                      {player.position}
-                    </div>
-
-                    {/* Foto como fondo del card */}
-                    {player.playerPhoto ? (
-                      <div className="absolute inset-0 rounded-lg overflow-hidden">
-                        <Image
-                          src={player.playerPhoto}
-                          alt={player.playerName}
-                          width={144}
-                          height={176}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-pink-900/50 to-pink-600/30" />
-                    )}
-
-                    {/* Contenido sobre la foto */}
-                    <div className="relative flex flex-col items-center justify-end h-full pb-8">
-                      {/* Si no hay foto, mostrar icono */}
-                      {!player.playerPhoto && (
-                        <div className="mb-auto mt-4">
-                          <User className="w-12 sm:w-16 h-12 sm:h-16 text-white/50" />
-                        </div>
-                      )}
-
-                      {/* Nombre en la base */}
-                      <h3 className="text-white font-bold text-xs sm:text-sm text-center drop-shadow-lg">
-                        {firstName}
-                      </h3>
-                    </div>
-
-                    {/* Puntaje final destacado sobre el borde inferior */}
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50">
-                      <div className="bg-black/75 backdrop-blur-sm border border-pink-400/40 rounded-full px-4 py-1.5 shadow-lg">
-                        <span className="text-pink-400 font-black text-xl sm:text-2xl leading-none tracking-tight">
-                          {player.finalScore ?? player.totalPoints}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Puntos bajo la foto, alineados a la derecha */}
-                  <div className="text-right mt-1">
-                    <div className="flex flex-col items-end text-sm">
-                      <span className="text-poker-gold font-bold">{player.totalPoints}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Información adicional */}
-      <div className="mt-3 text-center text-poker-muted text-xs">
-        <p>{rankings.length} jugadores • {rankingData.tournament.completedDates}/{rankingData.tournament.totalDates} fechas</p>
-      </div>
-
-      {/* Player Detail Modal */}
-      {selectedPlayerId && (
-        <PlayerDetailModal
-          isOpen={isModalOpen}
-          onClose={closePlayerModal}
-          playerId={selectedPlayerId}
-          tournamentId={tournamentId}
-        />
-      )}
-    </div>
-  );
+      <PlayerDetailModal
+        isOpen={isModalOpen}
+        onClose={closePlayerModal}
+        playerId={selectedPlayerId}
+      />
+    </section>
+  )
 }

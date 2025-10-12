@@ -9,113 +9,111 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
-      // Paleta de Colores Consolidada - Poker Enfermos
       colors: {
-        // Colores Principales del Proyecto
         'poker-red': {
-          DEFAULT: '#E50914', // Rojo principal
-          50: '#FFF5F5',
-          100: '#FED7D7',
-          200: '#FEB2B2',
-          300: '#FC8181',
-          400: '#F56565',
-          500: '#E50914',
-          600: '#B30500',
-          700: '#9B2C2C',
-          800: '#822727',
-          900: '#742A2A',
-          950: '#451A1A',
+          DEFAULT: '#a9441c',
+          50: '#f6e6df',
+          100: '#f1d3c4',
+          200: '#e4ac96',
+          300: '#d6836a',
+          400: '#c96345',
+          500: '#a9441c',
+          600: '#8e3818',
+          700: '#662813',
+          800: '#4b1d0e',
+          900: '#311208',
+          950: '#1a0a05',
         },
         'poker-dark': {
-          DEFAULT: '#1B1B1B', // Gris oscuro base
-          light: '#2A2A2A',   // Gris carbón
-          50: '#F7F7F7',
-          100: '#E1E1E1',
-          200: '#CFCFCF',
-          300: '#B1B1B1',
-          400: '#9E9E9E',
-          500: '#7E7E7E',
-          600: '#626262',
-          700: '#515151',
-          800: '#3B3B3B',
-          900: '#2A2A2A',
-          950: '#1B1B1B',
+          DEFAULT: '#1f1410',
+          light: '#2a1a14',
+          50: '#f6ede3',
+          100: '#ead4c4',
+          200: '#d6b28f',
+          300: '#b98b66',
+          400: '#956646',
+          500: '#7a4e33',
+          600: '#5f3825',
+          700: '#422419',
+          800: '#2f1811',
+          900: '#1f1410',
+          950: '#120b08',
         },
         'poker-gold': {
-          DEFAULT: '#FFD700', // Dorado
-          50: '#FFFBEB',
-          100: '#FEF3C7',
-          200: '#FDE68A',
-          300: '#FCD34D',
-          400: '#FBBF24',
-          500: '#FFD700',
-          600: '#D97706',
-          700: '#B45309',
-          800: '#92400E',
-          900: '#78350F',
-          950: '#451A03',
+          DEFAULT: '#e0b66c',
+          50: '#fdf5e4',
+          100: '#f8e8c4',
+          200: '#f1d69c',
+          300: '#e6bf75',
+          400: '#ddb164',
+          500: '#e0b66c',
+          600: '#c99750',
+          700: '#a17239',
+          800: '#765129',
+          900: '#4d331b',
+          950: '#28190d',
         },
         'poker-blue': {
-          DEFAULT: '#1E90FF', // Azul eléctrico
-          50: '#EBF8FF',
-          100: '#BEE3F8',
-          200: '#90CDF4',
-          300: '#63B3ED',
-          400: '#4299E1',
-          500: '#1E90FF',
-          600: '#2B77E6',
-          700: '#2C5282',
-          800: '#2A4365',
-          900: '#1A365D',
-          950: '#0A1929',
+          DEFAULT: '#5f6279',
+          50: '#f0f1f6',
+          100: '#d9dbe4',
+          200: '#b9bdcb',
+          300: '#9aa0b3',
+          400: '#7b829a',
+          500: '#5f6279',
+          600: '#4b4d61',
+          700: '#383a4a',
+          800: '#252633',
+          900: '#141520',
+          950: '#09090f',
         },
         'poker-orange': {
-          DEFAULT: '#FF8C00', // Naranja
-          50: '#FFF7ED',
-          100: '#FFEDD5',
-          200: '#FED7AA',
-          300: '#FDBA74',
-          400: '#FB923C',
-          500: '#FF8C00',
-          600: '#EA580C',
-          700: '#C2410C',
-          800: '#9A3412',
-          900: '#7C2D12',
-          950: '#431407',
+          DEFAULT: '#c9783f',
+          50: '#fdf2e5',
+          100: '#f8ddc2',
+          200: '#f1bf8d',
+          300: '#e79c5a',
+          400: '#dd7f39',
+          500: '#c9783f',
+          600: '#a35a2d',
+          700: '#7c4121',
+          800: '#562b16',
+          900: '#34190d',
+          950: '#1a0b06',
         },
-        // Colores para posiciones
-        'gold': '#FFD700',
-        'silver': '#C0C0C0',
-        'bronze': '#CD7F32',
-        // Color base
-        'white': '#FFFFFF',
-        // Semantic mappings
-        primary: '#E50914',
-        secondary: '#FF8C00',
-        accent: '#1E90FF',
-        background: '#1B1B1B',
-        surface: '#2A2A2A',
-        'surface-elevated': '#3B3B3B',
+        'poker-muted': '#d7c59a',
+        'poker-text': '#f3e6c5',
+        'poker-line': '#3c2219',
+        'poker-card': '#2a1a14',
+        gold: '#f4d68a',
+        silver: '#d6d3cf',
+        bronze: '#b68351',
+        white: '#f9f5ec',
+        primary: '#e0b66c',
+        secondary: '#a9441c',
+        accent: '#d7c59a',
+        background: '#1f1410',
+        surface: '#2a1a14',
+        'surface-elevated': '#3a231a',
       },
       // Typography system - Optimizado para +50 años
       fontFamily: {
-        'sans': ['Inter', 'Montserrat', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        'sans': ['var(--font-body)', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        'heading': ['var(--font-heading)', 'Cinzel', 'Times New Roman', 'serif'],
       },
       fontSize: {
-        // Tamaños grandes con alto contraste
-        'xs': ['0.875rem', { lineHeight: '1.6', fontWeight: '600' }],  // Mínimo 14px
-        'sm': ['1rem', { lineHeight: '1.6', fontWeight: '600' }],      // 16px
-        'base': ['1.125rem', { lineHeight: '1.6', fontWeight: '600' }], // 18px
-        'lg': ['1.25rem', { lineHeight: '1.5', fontWeight: '700' }],   // 20px
-        'xl': ['1.5rem', { lineHeight: '1.4', fontWeight: '700' }],    // 24px
-        '2xl': ['1.875rem', { lineHeight: '1.3', fontWeight: '800' }], // 30px
-        '3xl': ['2.25rem', { lineHeight: '1.2', fontWeight: '800' }],  // 36px
-        '4xl': ['3rem', { lineHeight: '1.1', fontWeight: '900' }],     // 48px
-        // Nombres semánticos
-        'body': ['1.125rem', { lineHeight: '1.6', fontWeight: '600' }],
-        'body-lg': ['1.25rem', { lineHeight: '1.5', fontWeight: '600' }],
-        'heading': ['1.5rem', { lineHeight: '1.4', fontWeight: '700' }],
-        'display': ['2.25rem', { lineHeight: '1.2', fontWeight: '800' }],
+        xs: ['0.875rem', { lineHeight: '1.6', fontWeight: '500' }],
+        sm: ['1rem', { lineHeight: '1.6', fontWeight: '500' }],
+        base: ['1.125rem', { lineHeight: '1.65', fontWeight: '500' }],
+        lg: ['1.25rem', { lineHeight: '1.5', fontWeight: '600' }],
+        xl: ['1.5rem', { lineHeight: '1.4', fontWeight: '600' }],
+        '2xl': ['1.875rem', { lineHeight: '1.3', fontWeight: '600' }],
+        '3xl': ['2.25rem', { lineHeight: '1.2', fontWeight: '700' }],
+        '4xl': ['3rem', { lineHeight: '1.1', fontWeight: '700' }],
+        body: ['1.125rem', { lineHeight: '1.65', fontWeight: '500' }],
+        'body-lg': ['1.25rem', { lineHeight: '1.5', fontWeight: '500' }],
+        heading: ['1.5rem', { lineHeight: '1.35', fontWeight: '600', letterSpacing: '0.04em' }],
+        display: ['2.5rem', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '0.08em' }],
       },
       // Spacing system
       spacing: {
@@ -125,28 +123,24 @@ const config: Config = {
       },
       // Border radius system
       borderRadius: {
-        'poker': '0.625rem', // 10px - main radius
-        'poker-sm': '0.375rem', // 6px
-        'poker-lg': '0.875rem', // 14px
-        'poker-xl': '1.25rem', // 20px
+        'poker': '1rem',
+        'poker-sm': '0.75rem',
+        'poker-lg': '1.25rem',
+        'poker-xl': '1.75rem',
       },
       // Sombras y Glow Effects - Mesa de Póker
       boxShadow: {
-        // Sombras difusas para volumen
-        'poker-diffuse': '0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4)',
-        'poker-card': '0 4px 20px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3)',
-        // Glow suave para elementos importantes (Top 3, botones principales)
-        'glow-gold': '0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4), 0 4px 20px rgba(0, 0, 0, 0.3)',
-        'glow-silver': '0 0 20px rgba(192, 192, 192, 0.6), 0 0 40px rgba(192, 192, 192, 0.4), 0 4px 20px rgba(0, 0, 0, 0.3)',
-        'glow-bronze': '0 0 20px rgba(205, 127, 50, 0.6), 0 0 40px rgba(205, 127, 50, 0.4), 0 4px 20px rgba(0, 0, 0, 0.3)',
-        'glow-red': '0 0 20px rgba(229, 9, 20, 0.6), 0 0 40px rgba(229, 9, 20, 0.4), 0 4px 20px rgba(0, 0, 0, 0.3)',
-        // Sombras estándar
-        'sm': '0 2px 8px rgba(0, 0, 0, 0.3)',
-        'DEFAULT': '0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2)',
-        'lg': '0 8px 32px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)',
-        'xl': '0 16px 64px rgba(0, 0, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.4)',
-        // Inner shadows
-        'inner': 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        'poker-diffuse': '0 18px 45px rgba(11, 6, 3, 0.55), 0 8px 18px rgba(11, 6, 3, 0.35)',
+        'poker-card': '0 24px 60px rgba(11, 6, 3, 0.55), 0 10px 28px rgba(11, 6, 3, 0.4)',
+        'glow-gold': '0 0 30px rgba(224, 182, 108, 0.45), 0 0 60px rgba(224, 182, 108, 0.25)',
+        'glow-silver': '0 0 30px rgba(214, 211, 207, 0.35), 0 0 55px rgba(214, 211, 207, 0.2)',
+        'glow-bronze': '0 0 30px rgba(181, 131, 81, 0.4), 0 0 55px rgba(181, 131, 81, 0.22)',
+        'glow-red': '0 0 30px rgba(169, 68, 28, 0.45), 0 0 55px rgba(169, 68, 28, 0.25)',
+        'sm': '0 2px 8px rgba(12, 7, 5, 0.35)',
+        'DEFAULT': '0 12px 35px rgba(11, 6, 3, 0.45), 0 6px 18px rgba(11, 6, 3, 0.35)',
+        'lg': '0 20px 55px rgba(11, 6, 3, 0.55), 0 10px 30px rgba(11, 6, 3, 0.4)',
+        'xl': '0 30px 80px rgba(11, 6, 3, 0.6), 0 14px 45px rgba(11, 6, 3, 0.45)',
+        'inner': 'inset 0 1px 0 rgba(224, 182, 108, 0.12), inset 0 -12px 24px rgba(11, 6, 3, 0.65)',
       },
       // Animation system
       animation: {
@@ -170,18 +164,14 @@ const config: Config = {
       },
       // Gradient system - Texturas de Mesa de Póker
       backgroundImage: {
-        // Fondo general gris carbón texturizado
-        'poker-table': 'radial-gradient(ellipse at center, #2A2A2A 0%, #1B1B1B 70%, #0A0A0A 100%)',
-        'poker-card': 'linear-gradient(145deg, #2A2A2A 0%, #1B1B1B 50%, #171717 100%)',
-        // Botones principales con gradientes
-        'poker-button': 'linear-gradient(135deg, #E50914 0%, #B30500 50%, #822727 100%)',
-        'poker-admin': 'linear-gradient(135deg, #E50914 0%, #FF8C00 50%, #FFD700 100%)',
-        // Metales con efectos realistas
-        'gold-gradient': 'linear-gradient(135deg, #FFD700 0%, #FFC107 30%, #FFB300 70%, #FF8F00 100%)',
-        'silver-gradient': 'linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 30%, #A8A8A8 70%, #909090 100%)',
-        'bronze-gradient': 'linear-gradient(135deg, #CD7F32 0%, #B8860B 30%, #A0522D 70%, #8B4513 100%)',
-        // Efectos especiales
-        'glow-overlay': 'radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%)',
+        'poker-table': "radial-gradient(circle at 10% 10%, rgba(224, 182, 108, 0.12), transparent 55%), radial-gradient(circle at 80% 80%, rgba(169, 68, 28, 0.12), transparent 58%), url('/textures/noise.png')",
+        'poker-card': "linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(11, 6, 3, 0.65))",
+        'poker-button': 'linear-gradient(135deg, rgba(224, 182, 108, 0.95), rgba(169, 68, 28, 0.85))',
+        'poker-admin': 'linear-gradient(135deg, rgba(224, 182, 108, 0.85), rgba(169, 68, 28, 0.9), rgba(92, 38, 23, 0.92))',
+        'gold-gradient': 'linear-gradient(135deg, #f4d68a 0%, #d9a85f 45%, #a9743f 100%)',
+        'silver-gradient': 'linear-gradient(135deg, #e7e3e0 0%, #cfcac6 50%, #a9a4a0 100%)',
+        'bronze-gradient': 'linear-gradient(135deg, #d1a171 0%, #b68351 50%, #7b4a24 100%)',
+        'glow-overlay': 'radial-gradient(circle at center, rgba(224, 182, 108, 0.18) 0%, transparent 70%)',
       },
       // Scale transforms
       scale: {

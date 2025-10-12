@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { MessageSquareText, Send } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { toast } from 'react-toastify'
-import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { NoirButton } from '@/components/noir/NoirButton'
 
 interface Comment {
   id: number
@@ -26,7 +26,19 @@ interface CommentSectionProps {
   disabled?: boolean
 }
 
-export function CommentSection({ proposalId, isExpanded, onCommentCountChange, disabled = false }: CommentSectionProps) {
+const roleStyles: Record<string, string> = {
+  Comision: 'border border-[#e0b66c]/35 bg-[#e0b66c]/15 text-[#e0b66c]',
+  Enfermo: 'border border-[#d7c59a]/30 bg-[#2a1a14]/80 text-[#d7c59a]',
+  Invitado: 'border border-[#c9783f]/35 bg-[#c9783f]/22 text-[#f3e6c5]',
+  default: 'border border-[#d7c59a]/25 bg-[#2a1a14]/70 text-[#d7c59a]'
+}
+
+export function CommentSection({
+  proposalId,
+  isExpanded,
+  onCommentCountChange,
+  disabled = false
+}: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -34,7 +46,6 @@ export function CommentSection({ proposalId, isExpanded, onCommentCountChange, d
 
   const remainingChars = 500 - newComment.length
 
-  // Fetch comments when expanded
   useEffect(() => {
     if (isExpanded) {
       fetchComments()
@@ -94,38 +105,25 @@ export function CommentSection({ proposalId, isExpanded, onCommentCountChange, d
     }
   }
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'Comision':
-        return 'bg-poker-red text-white'
-      case 'Enfermo':
-        return 'bg-gray-600 text-white'
-      case 'Invitado':
-        return 'bg-orange-600 text-white'
-      default:
-        return 'bg-gray-500 text-white'
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('es-MX', {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleString('es-MX', {
       day: '2-digit',
       month: '2-digit',
       hour: '2-digit',
       minute: '2-digit'
     })
-  }
 
   if (!isExpanded) return null
 
   return (
-    <div className="border-t border-white/10 bg-white/5 px-5 py-4 space-y-4">
-      {/* Comment Form */}
+    <div className="space-y-4 border-t border-[#e0b66c]/18 bg-[rgba(31,20,16,0.62)] px-5 py-4">
       {!disabled && (
         <form onSubmit={handleSubmitComment} className="space-y-3">
-          <div className="flex items-center gap-2 text-white/70">
-            <MessageSquareText className="w-4 h-4" />
-            <span className="text-sm font-medium">Agregar comentario</span>
+          <div className="flex items-center gap-2 text-[#d7c59a]/75">
+            <MessageSquareText className="h-4 w-4 text-[#e0b66c]" />
+            <span className="text-sm font-medium uppercase tracking-[0.2em]">
+              Agregar comentario
+            </span>
           </div>
 
           <div className="space-y-2">
@@ -138,68 +136,73 @@ export function CommentSection({ proposalId, isExpanded, onCommentCountChange, d
               }}
               placeholder="Escribe tu comentario..."
               rows={3}
-              className="resize-none bg-white/10 border-white/20 text-white placeholder:text-white/50"
+              className="resize-none border border-[#e0b66c]/22 bg-[rgba(42,26,20,0.78)] text-[#f3e6c5] placeholder:text-[#d7c59a]/60 focus:border-[#e0b66c]/45 focus:ring-[#e0b66c]/20"
               maxLength={500}
             />
 
             <div className="flex items-center justify-between">
-              <span className="text-xs text-white/40">
+              <span className="text-xs text-[#d7c59a]/60">
                 {remainingChars} caracteres restantes
               </span>
 
-              <Button
+              <NoirButton
                 type="submit"
                 disabled={!newComment.trim() || isSubmitting}
-                className="bg-poker-red hover:bg-red-700 text-white px-4 py-2 text-sm"
+                className="gap-2 px-4 py-2 text-[11px]"
               >
                 {isSubmitting ? (
                   'Enviando...'
                 ) : (
                   <>
-                    <Send className="w-4 h-4 mr-2" />
+                    <Send className="h-4 w-4" />
                     Enviar
                   </>
                 )}
-              </Button>
+              </NoirButton>
             </div>
           </div>
         </form>
       )}
 
       {disabled && (
-        <div className="text-center text-white/50 py-3 border border-white/10 rounded-lg bg-white/5">
-          <p className="text-sm">La votación ha sido cerrada para esta propuesta</p>
+        <div className="rounded-lg border border-[#e0b66c]/18 bg-[rgba(31,20,16,0.6)] py-3 text-center text-sm text-[#d7c59a]/70">
+          La votación ha sido cerrada para esta propuesta
         </div>
       )}
 
-      {/* Comments List */}
       <div className="space-y-3">
         {isLoading ? (
-          <div className="text-center text-white/60 py-4">
+          <div className="py-4 text-center text-[#d7c59a]/70">
             Cargando comentarios...
           </div>
         ) : comments.length === 0 ? (
-          <div className="text-center text-white/60 py-4">
+          <div className="py-4 text-center text-[#d7c59a]/70">
             Aún no hay comentarios. ¡Sé el primero!
           </div>
         ) : (
           comments.map((comment) => (
-            <div key={comment.id} className="bg-white/5 rounded-lg p-3 space-y-2">
+            <div
+              key={comment.id}
+              className="space-y-2 rounded-lg border border-[#e0b66c]/18 bg-[rgba(31,20,16,0.72)] p-3"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-medium text-sm">
+                  <span className="text-sm font-medium text-[#f3e6c5]">
                     {comment.player.firstName} {comment.player.lastName}
                   </span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getRoleBadgeColor(comment.player.role)}`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      roleStyles[comment.player.role] ?? roleStyles.default
+                    }`}
+                  >
                     {comment.player.role}
                   </span>
                 </div>
-                <span className="text-xs text-white/50">
+                <span className="text-xs text-[#d7c59a]/55">
                   {formatDate(comment.createdAt)}
                 </span>
               </div>
-
-              <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">
+              <p className="text-sm leading-relaxed text-[#f3e6c5]/85">
                 {comment.content}
               </p>
             </div>

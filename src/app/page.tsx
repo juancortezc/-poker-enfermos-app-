@@ -15,37 +15,36 @@ export default function Home() {
   // Loading state
   if (isLoading) {
     return (
-      <div>
-        <div className="pt-2">
-          <div className="text-center py-16">
-            <h1 className="text-4xl font-bold text-white mb-4">Poker de Enfermos</h1>
-            <div className="animate-pulse">
-              <div className="h-4 bg-white/10 rounded w-48 mx-auto mb-2"></div>
-              <div className="h-3 bg-white/5 rounded w-32 mx-auto"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <section className="space-y-6">
+        <header className="text-center space-y-2 py-12">
+          <h1 className="font-heading text-3xl uppercase tracking-[0.24em] text-[#f3e6c5]">
+            Poker de Enfermos
+          </h1>
+          <p className="text-sm text-[#d7c59a]/70">
+            Preparando el Noir Jazz Lounge...
+          </p>
+          <div className="mx-auto mt-6 h-16 w-16 animate-spin rounded-full border-4 border-[#e0b66c] border-t-transparent" />
+        </header>
+      </section>
     )
   }
 
   return (
-    <div>
-      <div className="pt-2">
-        {/* Widget de Ranking */}
-        {activeTournament ? (
-          <HomeRankingView tournamentId={activeTournament.tournament?.id || activeTournament.id} />
-        ) : (
-          <div className="text-center py-16">
-            <h1 className="text-4xl font-bold text-white mb-4">Poker de Enfermos</h1>
-            <p className="text-poker-muted text-lg">
-              {isNotFound || !user
-                ? 'No hay torneo activo esta noche. Prepara tus fichas para la próxima partida.'
-                : 'No pudimos cargar el torneo. Intenta refrescar o vuelve a iniciar sesión.'}
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+    <section className="space-y-8">
+      {activeTournament ? (
+        <HomeRankingView tournamentId={activeTournament.tournament?.id || activeTournament.id} />
+      ) : (
+        <div className="paper px-6 py-10 text-center">
+          <h2 className="font-heading text-2xl uppercase tracking-[0.22em] text-[#f3e6c5]">
+            Poker de Enfermos
+          </h2>
+          <p className="mt-4 text-[#d7c59a]">
+            {isNotFound || !user
+              ? 'No hay torneo activo esta noche. La mesa abrirá pronto; mantén listo tu mejor juego.'
+              : 'No pudimos cargar el torneo. Refresca la página o inicia sesión nuevamente para continuar.'}
+          </p>
+        </div>
+      )}
+    </section>
   )
 }

@@ -261,7 +261,7 @@ export function QuickNotificationModal({ isOpen, onClose }: QuickNotificationMod
                     <AlertCircle className="w-5 h-5 text-amber-400" />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-amber-200">
-                        You're not subscribed to notifications
+                        You&apos;re not subscribed to notifications
                       </p>
                       <p className="text-xs text-amber-300/80">
                         Subscribe to receive notifications yourself

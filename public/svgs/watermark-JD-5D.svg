@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="300" viewBox="0 0 800 300">
+  <g fill="none" stroke="#8c3b2a" stroke-width="8" opacity=".2">
+    <rect x="40" y="40" width="180" height="240" rx="16" ry="16"/>
+    <rect x="260" y="40" width="180" height="240" rx="16" ry="16"/>
+  </g>
+  <g fill="#bf4b2f" opacity=".22">
+    <polygon points="130,105 120,150 130,195 140,150"/>
+    <polygon points="350,105 340,150 350,195 360,150"/>
+  </g>
+  <text x="100" y="95" font-size="72" font-family="Georgia" fill="#bf4b2f" opacity=".28">J</text>
+  <text x="325" y="95" font-size="72" font-family="Georgia" fill="#bf4b2f" opacity=".28">5</text>
+</svg>

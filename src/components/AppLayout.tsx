@@ -1,10 +1,9 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import MobileNavbar from './MobileNavbar'
+import { BottomNav } from './navigation/BottomNav'
 import LoginForm from './LoginForm'
 import { User, Search, Plus, ChevronDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,6 +14,7 @@ import { useState, useRef, useEffect } from 'react'
 import { UserDropdown } from './UserDropdown'
 import { PwaInstallPrompt } from './PwaInstallPrompt'
 import { ProfileCompletionPrompt } from './ProfileCompletionPrompt'
+import { NoirButton } from './noir/NoirButton'
 
 
 interface AppLayoutProps {
@@ -64,13 +64,13 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-poker-dark">
-        <div className="text-center animate-enter">
-          <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-poker-card"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-poker-red border-t-transparent animate-spin"></div>
+      <div className="flex min-h-screen items-center justify-center bg-[#1f1410]">
+        <div className="text-center animate-enter text-[#f3e6c5]">
+          <div className="relative mx-auto mb-4 h-16 w-16">
+            <div className="absolute inset-0 rounded-full border-4 border-[#3c2219]/80"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-[#e0b66c] border-t-transparent animate-spin"></div>
           </div>
-          <p className="text-poker-muted">Cargando...</p>
+          <p className="text-[#d7c59a]">Cargando...</p>
         </div>
       </div>
     )
@@ -83,25 +83,25 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
   const getRoleBadgeColor = (role: UserRole) => {
     switch (role) {
       case UserRole.Comision:
-        return 'border border-poker-red/40 bg-poker-red/15 text-poker-red'
+        return 'border border-[#e0b66c]/55 bg-[#e0b66c]/15 text-[#e0b66c]'
       case UserRole.Enfermo:
-        return 'border border-white/20 bg-white/10 text-white/80'
+        return 'border border-[#d7c59a]/35 bg-[#2a1a14]/80 text-[#d7c59a]'
       case UserRole.Invitado:
-        return 'border border-amber-400/40 bg-amber-500/15 text-amber-200'
+        return 'border border-[#c9783f]/40 bg-[#c9783f]/18 text-[#f3e6c5]'
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0d0f1a] via-[#0b0d18] to-[#08090f] text-white flex flex-col">
+    <div className="relative flex min-h-screen flex-col text-[#f3e6c5]">
       {/* Header */}
-      <header className="sticky top-0 z-[60] border-b border-white/10 bg-gradient-to-br from-[#1f1a2d]/95 via-[#1b1c2b]/90 to-[#131422]/95 backdrop-blur-xl shadow-[0_18px_40px_rgba(11,12,32,0.45)]">
+      <header className="sticky top-0 z-[60] border-b border-[#e0b66c]/12 bg-[rgba(19,12,9,0.92)] backdrop-blur-xl shadow-[0_24px_60px_rgba(11,6,3,0.6)]">
         <div className={`${needsFullWidth ? 'mx-auto max-w-6xl' : 'mx-auto max-w-4xl'} px-4 sm:px-6 py-4`}>
           <div className="flex items-center justify-between gap-6">
             {/* Logo y usuario */}
             <div className="flex items-center gap-4">
               <Link
                 href="/"
-                className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-1.5 shadow-[0_10px_24px_rgba(8,9,15,0.4)] transition-transform hover:-translate-y-0.5"
+                className="relative flex h-12 w-12 items-center justify-center rounded-3xl border border-[#e0b66c]/25 bg-[rgba(31,20,16,0.85)] p-2 shadow-[0_16px_36px_rgba(11,6,3,0.55)] transition-transform hover:-translate-y-0.5 hover:border-[#e0b66c]/45"
                 aria-label="Ir al inicio"
               >
                 <Image
@@ -113,12 +113,12 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
                 />
               </Link>
               <div className="space-y-1">
-                <h1 className="text-xl font-semibold text-white tracking-tight">
+                <h1 className="font-heading text-[1.3rem] uppercase tracking-[0.24em] text-[#f3e6c5]">
                   Poker de Enfermos
                 </h1>
-                <div className="flex flex-wrap items-center gap-2 text-sm text-white/60">
-                  <User size={14} className="text-white/50" />
-                  <span>
+                <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-[#d7c59a]/75">
+                  <User size={14} className="text-[#d7c59a]/55" />
+                  <span className="text-[#f3e6c5]">
                     {user.firstName} {user.lastName}
                   </span>
                   <span className={`text-[11px] uppercase tracking-[0.18em] px-3 py-0.5 rounded-full font-semibold ${getRoleBadgeColor(user.role)}`}>
@@ -137,43 +137,42 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
           {isPlayersPage && (
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#d7c59a]/60" />
                 <Input
                   type="text"
                   placeholder="Buscar por nombre o alias..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-12 rounded-full border border-white/12 bg-white/5 pl-12 pr-4 text-sm text-white placeholder:text-white/35 focus:border-poker-red/60 focus:ring-poker-red/30"
+                  className="h-12 rounded-full border border-[#e0b66c]/22 bg-[rgba(42,26,20,0.78)] pl-12 pr-4 text-sm text-[#f3e6c5] placeholder:text-[#d7c59a]/60 focus:border-[#e0b66c]/55 focus:ring-[#e0b66c]/25"
                 />
               </div>
               {showAddButton && (
                 <div className="relative" ref={dropdownRef}>
-                  <Button
-                    variant="ghost"
+                  <NoirButton
                     onClick={handleAddClick}
-                  className="h-12 rounded-full border border-white/12 bg-gradient-to-r from-poker-red via-[#d73552] to-[#ff4b2b] px-6 text-sm font-semibold tracking-[0.1em] text-white shadow-[0_14px_30px_rgba(215,53,82,0.45)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(215,53,82,0.55)]"
+                    className="min-w-[190px] justify-center"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="mr-2 h-4 w-4" />
                     Agregar
-                    <ChevronDown className="w-4 h-4 ml-2" />
-                  </Button>
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </NoirButton>
 
                   {showDropdown && (
-                    <div className="absolute top-full right-0 mt-2 w-52 rounded-2xl border border-white/12 bg-[#16172a]/95 shadow-[0_20px_45px_rgba(8,9,15,0.55)] backdrop-blur-lg">
+                    <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-[#e0b66c]/20 bg-[rgba(27,16,12,0.95)] shadow-[0_24px_48px_rgba(11,6,3,0.6)] backdrop-blur-xl">
                       <div className="py-2">
                         <button
                           onClick={() => handlePlayerTypeSelect('invitado')}
-                          className="w-full text-left px-4 py-2 text-sm text-white/80 transition-colors hover:bg-white/10"
+                          className="w-full px-4 py-2 text-left text-sm text-[#f3e6c5] transition-colors hover:bg-[#2a1a14]/70"
                         >
-                          <div className="font-semibold text-white">Invitado</div>
-                          <div className="text-xs text-white/55">Invitado por un Enfermo</div>
+                          <div className="font-semibold text-[#e0b66c]">Invitado</div>
+                          <div className="text-xs text-[#d7c59a]/70">Invitado por un Enfermo</div>
                         </button>
                         <button
                           onClick={() => handlePlayerTypeSelect('enfermo')}
-                          className="w-full text-left px-4 py-2 text-sm text-white/80 transition-colors hover:bg-white/10"
+                          className="w-full px-4 py-2 text-left text-sm text-[#f3e6c5] transition-colors hover:bg-[#2a1a14]/70"
                         >
-                          <div className="font-semibold text-white">Enfermo/Comisión</div>
-                          <div className="text-xs text-white/55">Miembro del grupo</div>
+                          <div className="font-semibold text-[#e0b66c]">Enfermo/Comisión</div>
+                          <div className="text-xs text-[#d7c59a]/70">Miembro del grupo</div>
                         </button>
                       </div>
                     </div>
@@ -187,7 +186,7 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
 
       {/* Contenido principal con scroll */}
       <main
-        className={`${needsFullWidth ? 'mx-auto max-w-6xl px-4 sm:px-6' : 'mx-auto max-w-4xl px-4'} flex-1 overflow-y-auto pt-6 pb-28 text-white/85`}
+        className={`${needsFullWidth ? 'mx-auto max-w-6xl px-4 sm:px-6' : 'mx-auto max-w-4xl px-4'} flex-1 overflow-y-auto pt-6 pb-32 text-[#f3e6c5]/90`}
       >
         <div className="animate-enter space-y-6">
           {children}
@@ -195,7 +194,7 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
       </main>
 
       {/* Navbar móvil fijo al bottom + prompts persistentes */}
-      <MobileNavbar />
+      <BottomNav />
       <PwaInstallPrompt />
       <ProfileCompletionPrompt />
     </div>

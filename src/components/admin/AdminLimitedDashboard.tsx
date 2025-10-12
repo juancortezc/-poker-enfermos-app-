@@ -49,6 +49,7 @@ const iconMap = {
 
 export default function AdminLimitedDashboard() {
   const { user } = useAuth()
+  const [showBroadcast, setShowBroadcast] = useState(false)
 
   if (!user) return null
 
@@ -86,8 +87,6 @@ export default function AdminLimitedDashboard() {
   }
 
   const renderBroadcastCard = (index: number) => {
-    const [showBroadcast, setShowBroadcast] = useState(false)
-
     if (showBroadcast) {
       return (
         <div key="broadcast-content" className="col-span-2 sm:col-span-3">
