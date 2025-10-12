@@ -187,7 +187,7 @@ function getDefaultBlindLevels() {
     { level: 9, smallBlind: 800, bigBlind: 1600, duration: 16 },
     { level: 10, smallBlind: 1000, bigBlind: 2000, duration: 16 },
     { level: 11, smallBlind: 1500, bigBlind: 3000, duration: 16 },
-    { level: 12, smallBlind: 2000, bigBlind: 4000, duration: 16 },
+    { level: 12, smallBlind: 2000, bigBlind: 4000, duration: 10 },
     { level: 13, smallBlind: 3000, bigBlind: 6000, duration: 10 },
     { level: 14, smallBlind: 4000, bigBlind: 8000, duration: 10 },
     { level: 15, smallBlind: 5000, bigBlind: 10000, duration: 10 },

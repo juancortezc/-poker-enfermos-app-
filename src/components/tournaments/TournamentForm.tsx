@@ -322,21 +322,39 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al guardar torneo')
+        const errorMessage = errorData.error || 'Error al guardar torneo'
+
+        // Log detallado del error para debugging
+        console.error('❌ Error creating tournament:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorMessage,
+          submitData: {
+            number: submitData.number,
+            datesCount: submitData.gameDates.length,
+            participantsCount: submitData.participantIds.length,
+            blindLevelsCount: submitData.blindLevels.length
+          }
+        })
+
+        throw new Error(errorMessage)
       }
 
       setLoadingMessage('Redirigiendo...')
-      
+
       // Limpiar draft al completar exitosamente
       clearDraft()
       await clearCalendarDraft()
-      
+
       // Mostrar notificación de éxito
       toast.success(`Torneo ${formData.tournamentNumber} ${isEditing ? 'Actualizado' : 'Creado'}`)
-      
+
       router.push('/tournaments')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido')
+      const errorMsg = err instanceof Error ? err.message : 'Error desconocido'
+      console.error('Tournament form error:', err)
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setLoading(false)
       setLoadingMessage('')
