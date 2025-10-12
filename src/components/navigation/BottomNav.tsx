@@ -91,47 +91,51 @@ export function BottomNav() {
             Volver
           </NoirButton>
 
-          <div className="flex flex-1 items-center justify-evenly gap-1">
+          <div className="flex flex-1 items-center justify-evenly gap-2">
             {filteredItems.map((item) => {
               const isActive = pathname === item.href
 
               return (
-                <Link
+                <NoirButton
                   key={item.href}
-                  href={item.href}
-                  className={`
-                    group relative flex min-w-[80px] flex-col items-center gap-1 rounded-3xl px-3 py-2 text-[10px]
-                    transition-all duration-200 ${isActive ? '-translate-y-1' : ''}
-                  `}
+                  asChild
+                  variant={isActive ? 'primary' : 'ghost'}
+                  size="lg"
+                  className={cn(
+                    'group flex min-w-[90px] flex-col items-center justify-between gap-1 rounded-2xl px-3 py-3 text-[10px] uppercase tracking-[0.24em] h-auto',
+                    isActive ? 'text-[#1f1410]' : 'text-[#d7c59a]/75 hover:text-[#f3e6c5]'
+                  )}
                 >
-                  <div
-                    className={cn(
-                      'flex h-12 w-12 items-center justify-center rounded-full border border-transparent bg-[rgba(42,26,20,0.75)] shadow-[0_8px_22px_rgba(11,6,3,0.55)] transition-all duration-200',
-                      isActive
-                        ? 'border-[#e0b66c]/65 bg-[linear-gradient(135deg,rgba(224,182,108,0.35),rgba(169,68,28,0.35))]'
-                        : 'group-hover:border-[#e0b66c]/35 group-hover:bg-[rgba(42,26,20,0.9)]'
-                    )}
-                  >
-                    <Image
-                      src={item.icon}
-                      alt={item.label}
-                      width={28}
-                      height={28}
+                  <Link href={item.href} className="flex h-full w-full flex-col items-center gap-1">
+                    <span
                       className={cn(
-                        'transition-opacity duration-200',
-                        isActive ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'
+                        'flex h-12 w-12 items-center justify-center rounded-full border border-transparent bg-[rgba(42,26,20,0.78)] shadow-[0_10px_26px_rgba(11,6,3,0.55)] transition-all duration-200',
+                        isActive
+                          ? 'border-[#2b1209] bg-[linear-gradient(135deg,rgba(224,182,108,0.45),rgba(169,68,28,0.4))]'
+                          : 'group-hover:border-[#e0b66c]/35 group-hover:bg-[rgba(42,26,20,0.9)]'
                       )}
-                    />
-                  </div>
-                  <span
-                    className={cn(
-                      'font-semibold uppercase tracking-[0.22em] transition-colors duration-200',
-                      isActive ? 'text-[#e0b66c]' : 'text-[#d7c59a]/70 group-hover:text-[#f3e6c5]'
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
+                    >
+                      <Image
+                        src={item.icon}
+                        alt={item.label}
+                        width={28}
+                        height={28}
+                        className={cn(
+                          'transition-all duration-200',
+                          isActive ? 'opacity-100 drop-shadow-[0_0_12px_rgba(224,182,108,0.55)]' : 'opacity-85 group-hover:opacity-100'
+                        )}
+                      />
+                    </span>
+                    <span
+                      className={cn(
+                        'font-semibold transition-colors duration-200',
+                        isActive ? 'text-[#1f1410]' : 'text-current'
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                </NoirButton>
               )
             })}
           </div>

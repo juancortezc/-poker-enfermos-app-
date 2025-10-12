@@ -5,7 +5,7 @@
 ### Stack
 - **Frontend**: React, TypeScript, Next.js, TailwindCSS
 - **Backend**: Node.js, Prisma ORM, PostgreSQL
-- **Design**: Mobile-First, PokerNew Design System (Sophisticated Dark Theme)
+- **Design**: Noir Jazz Theme (Cinzel/Inter, amber & copper palette)
 
 ### Core Commands
 ```bash
@@ -164,6 +164,23 @@ GET    /api/proposals/[id]/comments           # Get comments
 - `AwardCard` - Display tournament award categories with rankings
 - `ParentChildCard` - Clickable P&H relation cards
 - `ParentChildDetailModal` - Modal with elimination history details
+- `NoirButton` / `RankCard` / `BottomNav` - Noir Jazz UI core components
+
+---
+
+## 🎨 Noir Jazz UI System
+
+- **Palette**: `#1F1410` background, accents `#E0B66C` (gold) & `#A9441C` (copper), text `#F3E6C5`, muted `#D7C59A`, borders `#3C2219`
+- **Typography**: Cinzel for headings/overlines, Inter for body copy (base 18px, generous letter spacing on labels)
+- **Textures**: `textures/paper.jpg` overlayed with `textures/noise.png` for aged-lounge feel
+- **Components**:
+  - `noir-card` gradient panels with radial highlights & deep shadows
+  - `NoirButton` gradient gold primary, ghost/outline secondaries
+  - `RankCard` podium frames (gold/silver/bronze SVG overlays)
+  - Bottom navigation with PNG icons (`public/icons/nav-*.png`) & Noir buttons
+  - T29 proposals: cards, voting buttons, modal lists restyled to Noir Jazz spec
+- **Assets**: favicon set (`favicon-64/192/512.png`), frame SVGs, watermark JD-5D (optional)
+- **Focus & Motion**: 200–220ms ease transitions, glow pulses for active nav, gold focus rings
 
 ---
 

@@ -5,7 +5,7 @@ Next.js 14 poker tournament management application with TypeScript, Tailwind CSS
 ## Tech Stack
 
 - **Frontend**: Next.js 14, React 19, TypeScript
-- **Styling**: Tailwind CSS 4, Enfermo Design System
+- **Styling**: Tailwind CSS 4, Noir Jazz Design System (Cinzel + Inter)
 - **Database**: PostgreSQL with Prisma ORM
 - **Auth**: Custom admin key authentication
 - **Real-time**: Socket.IO (planned)
@@ -74,51 +74,49 @@ GET    /api/game-dates/next-available  - Get next available date for active tour
 POST   /api/game-dates                 - Create new game date (Comision only)
 ```
 
-## Enfermo Design System
+## Noir Jazz Design System
 
-### Color Palette
+### Palette & Tokens
 ```css
---poker-dark: #1A1A1A      /* Primary background */
---poker-card: #242424      /* Elevated surfaces */
---poker-red: #E10600       /* F1 accent - buttons, active states */
---poker-cyan: #00D2BE      /* Live updates, aliases, highlights */
---poker-green: #16a34a     /* Success states, Enfermo badges */
---poker-text: rgba(255,255,255,0.9)   /* Primary text */
---poker-muted: rgba(255,255,255,0.6)  /* Secondary text */
+--bg: #1F1410;         /* Primary background (deep brown) */
+--bg-elev: #2A1A14;    /* Elevated surfaces */
+--paper: #3A231A;      /* Textured panels */
+--text: #F3E6C5;       /* Headings & body copy */
+--muted: #D7C59A;      /* Secondary text/detail */
+--accent: #E0B66C;     /* Buttons, highlights, glows */
+--accent-2: #A9441C;   /* Emphasis, alerts */
+--line: #3C2219;       /* Borders */
 ```
 
 ### Typography
-- **Base Size**: 16px minimum for accessibility
-- **Time Displays**: 20px minimum 
-- **Font Stack**: Geist Sans (primary), Geist Mono (code)
-- **Line Height**: 1.6 default for readability
+- **Display**: Cinzel (400–700) for headings, nav labels, hero overlines
+- **Body**: Inter (400–700) for paragraphs, UI controls
+- **Base Size**: 18px for accessibility (optimized for +50 audience)
+- **Tracking**: Use `tracking-[0.18em+]` on overlines/badges to mirror Art Deco feel
 
 ### Layout Principles
-- **Mobile-First**: All interfaces designed for 375px+ mobile screens
-- **Single Screen View**: Minimize scrolling - everything fits in viewport when possible
-- **Touch Targets**: 48px minimum height for interactive elements
-- **Circular Avatars**: Player photos always circular, 48px standard size
-- **Card Spacing**: 16px padding inside cards, 8px between cards
+- Noir lounge mood — warm lighting, layered gradients, paper/noise textures
+- Rounded corners (`1rem+`), thick borders with golden glows on marquee elements
+- Touch targets ≥48px; high-contrast focus outlines in `#E0B66C`
+- Mobile-first: persistent bottom navigation with custom PNG icons
 
 ### Component Patterns
-- **Cards**: `bg-poker-card` with subtle border, hover states
-- **Badges**: Role-based colors (red=Comision, green=Enfermo, blue=Invitado)
-- **Buttons**: `bg-poker-red` primary, ghost variants for secondary actions
-- **Inputs**: Dark backgrounds with cyan focus states
-- **Tabs**: Active in red, inactive in gray with rounded corners
+- **Buttons**: `NoirButton` variants (primary=gold gradient, ghost=transparent outline)
+- **Cards**: `noir-card` backgrounds with subtle radial highlights and metallic frames for podiums
+- **Rankings**: `RankCard` top-three frames (gold/silver/bronze SVG overlays)
+- **Modals / Menus**: Backdrop blur, layered parchment panels, consistent Cinzel headings
+- **Inputs**: Dark paper surfaces with amber focus rings; placeholder text desaturated ivory
 
 ### Animations
-- **Entry**: Staggered fade-in with 50ms delays
-- **Live Indicators**: Pulsing green dots for real-time status
-- **Transitions**: 200ms ease-in-out for smooth interactions
-- **Loading**: Spinning red border on gray background
+- Gentle translate/opacity on hover (`transition 220ms ease`)
+- Pulsing glows for active nav, loaders with golden spinners
+- Staggered entrance for ranking grids and proposal cards
 
-### Mobile Responsiveness
-- **Bottom Navigation**: Fixed navbar with 4 main sections
-- **Header**: Sticky with logo, user info, live status
-- **Content**: Scrollable when needed, single-column layout
-- **Forms**: Full-screen modals on mobile
-- **Search**: Integrated in header, full-width on mobile
+### Assets
+- **Textures**: `/public/textures/paper.jpg`, `/public/textures/noise.png`
+- **Icons**: Noir Jazz PNG set under `/public/icons/nav-*.png` and favicons
+- **Frames**: Metal SVG frames (`/public/svgs/frame-*.svg`) for podium/highlight cards
+- **Watermark**: `watermark-JD-5D.svg` (reserved for special layouts)
 
 ## Development Commands
 

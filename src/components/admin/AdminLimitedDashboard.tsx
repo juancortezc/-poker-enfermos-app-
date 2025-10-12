@@ -130,10 +130,10 @@ export default function AdminLimitedDashboard() {
 
       <div className="relative mx-auto flex w-full max-w-xl flex-col gap-8">
         {features.base.length > 0 && (
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+          <section className="rounded-3xl border-2 border-[#2b1209] bg-[#2a1a14]/60 p-4 shadow-[0_20px_60px_rgba(11,6,3,0.55)] backdrop-blur-xl">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-white/70">Accesos rápidos</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#d7c59a]">Accesos rápidos</span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#e0b66c]/30 bg-[#e0b66c]/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#f3e6c5]">
                 Menu
               </span>
             </div>
@@ -144,11 +144,11 @@ export default function AdminLimitedDashboard() {
         )}
 
         {(user.role === 'Comision' || features.admin.some(f => f.accessible || f.restricted)) && (
-          <section className="rounded-3xl border border-poker-red/20 bg-poker-red/5 p-4 shadow-[0_16px_50px_rgba(229,9,20,0.18)] backdrop-blur-xl">
+          <section className="rounded-3xl border-2 border-[#a9441c]/40 bg-[#a9441c]/10 p-4 shadow-[0_16px_50px_rgba(169,68,28,0.25)] backdrop-blur-xl">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-white/70">Comisión</span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-poker-red/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
-                <span className="h-2 w-2 rounded-full bg-poker-red animate-pulse" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#d7c59a]">Comisión</span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/40 bg-[#a9441c]/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#f3e6c5]">
+                <span className="h-2 w-2 rounded-full bg-[#e0b66c] animate-pulse shadow-[0_0_8px_rgba(224,182,108,0.5)]" />
                 Exclusivo
               </span>
             </div>
@@ -161,7 +161,7 @@ export default function AdminLimitedDashboard() {
 
 
         {user.role !== 'Comision' && (
-          <div className="rounded-3xl border border-white/10 bg-white/10 p-4 text-center text-sm text-white/70">
+          <div className="rounded-3xl border-2 border-[#3c2219] bg-[#2a1a14]/40 p-4 text-center text-sm text-[#d7c59a]">
             {user.role === 'Enfermo'
               ? 'Como Enfermo tienes acceso directo a resultados, calendario y estadísticas públicas.'
               : 'Como Invitado puedes consultar la información general del torneo desde este menú.'
