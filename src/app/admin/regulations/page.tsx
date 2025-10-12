@@ -18,7 +18,7 @@ export default function RegulationsPage() {
     <div className="min-h-screen bg-poker-dark p-4">
       <div className="max-w-6xl mx-auto">
         <iframe
-          src="https://storage.googleapis.com/poker-enfermos/REGLAMENTO%20POKER%20DE%20ENFERMOS.pdf"
+          src="https://storage.googleapis.com/poker-enfermos/RT29.pdf"
           className="w-full border-0 rounded-lg"
           style={{ height: 'calc(100vh - 140px)' }}
         />
