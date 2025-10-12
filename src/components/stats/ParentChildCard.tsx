@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import Image from 'next/image'
+import ParentChildDetailModal from './ParentChildDetailModal'
 
 interface Player {
   id: string
@@ -23,10 +25,12 @@ interface ParentChildRelation {
 interface ParentChildCardProps {
   relation: ParentChildRelation
   index: number
+  tournamentId: number
 }
 
-export default function ParentChildCard({ relation, index }: ParentChildCardProps) {
+export default function ParentChildCard({ relation, index, tournamentId }: ParentChildCardProps) {
   const { parentPlayer, childPlayer, eliminationCount } = relation
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const getPlayerName = (player: Player) => {
     return player.firstName.toUpperCase()
@@ -53,11 +57,27 @@ export default function ParentChildCard({ relation, index }: ParentChildCardProp
   )
 
   return (
-    <div className={`
-      bg-gray-800 border-2 border-poker-red rounded-lg p-4 md:p-6 mb-4
-      animate-stagger animate-stagger-${index + 1}
-      transition-all duration-300
-    `}>
+    <>
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className={`
+          w-full bg-gray-800 border-2 border-poker-red rounded-lg p-4 md:p-6 mb-4
+          animate-stagger animate-stagger-${index + 1}
+          transition-all duration-300
+          hover:border-poker-red/80 hover:shadow-lg hover:shadow-poker-red/20
+          hover:-translate-y-1 cursor-pointer
+          focus:outline-none focus:ring-2 focus:ring-poker-red/50
+          relative group
+        `}
+      >
+      {/* Click indicator */}
+      <div className="absolute top-2 right-2 text-white/30 group-hover:text-white/60 transition-colors">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+      </div>
+
       {/* Layout horizontal: Padre | Eliminaciones | Hijo */}
       <div className="grid grid-cols-3 items-center gap-2 md:gap-6">
         
@@ -98,6 +118,14 @@ export default function ParentChildCard({ relation, index }: ParentChildCardProp
         </div>
 
       </div>
-    </div>
+      </button>
+
+      <ParentChildDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        tournamentId={tournamentId}
+        relationId={relation.id}
+      />
+    </>
   )
 }

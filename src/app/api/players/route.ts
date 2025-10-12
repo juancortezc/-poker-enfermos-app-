@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
 import { withAuth, withComisionAuth } from '@/lib/api-auth'
+import { validateAndHashPin } from '@/lib/pin-utils'
 
 // GET /api/players - Lista de jugadores con filtros
 export async function GET(req: NextRequest) {
@@ -111,12 +112,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Validar PIN si se proporciona
-    if (pin && !/^\d{4}$/.test(pin)) {
-      return NextResponse.json(
-        { error: 'El PIN debe ser de 4 dígitos' },
-        { status: 400 }
-      )
+    // Validar y hashear PIN si se proporciona
+    let hashedPin: string | null = null
+    if (pin) {
+      const pinValidation = await validateAndHashPin(pin)
+      if (!pinValidation.success) {
+        return NextResponse.json(
+          { error: pinValidation.error },
+          { status: 400 }
+        )
+      }
+      hashedPin = pinValidation.hashedPin
     }
 
     // Para invitados, asignar foto genérica si no se proporciona
@@ -139,7 +145,7 @@ export async function POST(req: NextRequest) {
         joinYear: joinYear || new Date().getFullYear(),
         role,
         aliases,
-        pin,
+        pin: hashedPin,
         birthDate,
         phone,
         email,

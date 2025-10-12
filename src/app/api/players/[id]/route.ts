@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
 import { withAuth, withComisionAuth } from '@/lib/api-auth'
+import { validateAndHashPin } from '@/lib/pin-utils'
 
 // GET /api/players/:id - Obtener jugador específico
 export async function GET(
@@ -98,14 +99,6 @@ export async function PUT(
       )
     }
 
-    // Validar PIN si se proporciona
-    if (pin && !/^\d{4}$/.test(pin)) {
-      return NextResponse.json(
-        { error: 'El PIN debe ser de 4 dígitos' },
-        { status: 400 }
-      )
-    }
-
     // Verificar que el jugador existe
     const existingPlayer = await prisma.player.findUnique({
       where: { id }
@@ -118,9 +111,22 @@ export async function PUT(
       )
     }
 
+    // Validar y hashear PIN si se proporciona
+    let hashedPin: string | undefined = undefined
+    if (pin !== undefined) {
+      const pinValidation = await validateAndHashPin(pin, id)
+      if (!pinValidation.success) {
+        return NextResponse.json(
+          { error: pinValidation.error },
+          { status: 400 }
+        )
+      }
+      hashedPin = pinValidation.hashedPin
+    }
+
     // Preparar datos de actualización
     const updateData: Record<string, unknown> = {}
-    
+
     if (firstName !== undefined) updateData.firstName = firstName
     if (lastName !== undefined) updateData.lastName = lastName
     if (aliases !== undefined) {
@@ -132,7 +138,7 @@ export async function PUT(
 
       updateData.aliases = { set: sanitizedAliases }
     }
-    if (pin !== undefined) updateData.pin = pin
+    if (hashedPin !== undefined) updateData.pin = hashedPin
     if (birthDate !== undefined) updateData.birthDate = birthDate
     if (phone !== undefined) updateData.phone = phone
     if (email !== undefined) updateData.email = email

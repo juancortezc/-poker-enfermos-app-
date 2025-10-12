@@ -68,7 +68,9 @@ GET  /api/eliminations/game-date/[id]
 GET  /api/tournaments/[id]/ranking
 GET  /api/tournaments/winners
 GET  /api/tournaments/podium-stats
-GET  /api/stats/awards/[tournamentId]       # Tournament awards (8 categories)
+GET  /api/stats/awards/[tournamentId]                    # Tournament awards (8 categories)
+GET  /api/stats/parent-child/[tournamentId]              # P&H relations (active only)
+GET  /api/stats/parent-child/[tournamentId]/[relationId] # P&H relation detail with eliminations
 
 # Proposals System (T29)
 GET    /api/proposals/public                  # Public proposals for T29
@@ -160,6 +162,8 @@ GET    /api/proposals/[id]/comments           # Get comments
 - `ProposalCard` - Display proposals with expand/collapse
 - `VotingButtons` - Proposal voting interface
 - `AwardCard` - Display tournament award categories with rankings
+- `ParentChildCard` - Clickable P&H relation cards
+- `ParentChildDetailModal` - Modal with elimination history details
 
 ---
 
@@ -184,7 +188,14 @@ GET    /api/proposals/[id]/comments           # Get comments
 
 ## 🚨 Recent Updates
 
-### Latest (2025-10-07)
+### Latest (2025-10-08)
+- ✅ P&H Detail Modal System with elimination history
+- ✅ Clickable P&H cards with hover effects
+- ✅ Fixed P&H stats calculation errors (recalculated T28)
+- ✅ New API endpoint for relation details
+- ✅ PokerNew-themed modal with timeline view
+
+### Previous (2025-10-07)
 - ✅ Tournament Awards System with 8 categories
 - ✅ Award rankings by points with participant filtering
 - ✅ Faltas calculation (total dates - dates played)

@@ -142,8 +142,11 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
         throw new Error('Apellido es obligatorio')
       }
 
-      if (formData.pin && formData.pin !== '****' && !/^\d{4}$/.test(formData.pin)) {
-        throw new Error('El PIN debe ser de 4 dígitos')
+      // Validar PIN solo si se está ingresando uno nuevo
+      if (formData.pin && formData.pin !== '****') {
+        if (!/^\d{4}$/.test(formData.pin)) {
+          throw new Error('El PIN debe ser de 4 dígitos')
+        }
       }
 
       if (!formData.photoUrl.trim()) {
@@ -163,12 +166,23 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
       // Limpiar aliases vacíos
       const cleanAliases = formData.aliases.filter(alias => alias.trim())
 
+      // Determinar si debemos enviar el PIN
+      let pinToSend: string | undefined = undefined
+      if (formData.pin && formData.pin !== '****') {
+        // Usuario ingresó un nuevo PIN
+        pinToSend = formData.pin
+      } else if (!isEditing) {
+        // Es creación y no hay PIN, no enviar nada
+        pinToSend = undefined
+      }
+      // Si es edición y el PIN está en ****, no enviamos nada (se mantiene el actual)
+
       const submitData = {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         role: formData.role,
         aliases: cleanAliases,
-        pin: formData.pin && formData.pin !== '****' ? formData.pin : undefined,
+        pin: pinToSend,
         birthDate: formData.birthDate || undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
@@ -187,7 +201,14 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al guardar jugador')
+        const errorMessage = errorData.error || 'Error al guardar jugador'
+
+        // Resaltar errores de PIN duplicado
+        if (errorMessage.includes('PIN') && errorMessage.includes('uso')) {
+          throw new Error(`⚠️ ${errorMessage}. Por favor, elige otro PIN.`)
+        }
+
+        throw new Error(errorMessage)
       }
 
       router.push('/players')
@@ -304,22 +325,41 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
           {/* PIN */}
           <div>
-            <Label htmlFor="pin" className="text-poker-text">PIN (4 dígitos)</Label>
+            <Label htmlFor="pin" className="text-poker-text">
+              PIN (4 dígitos)
+              {isEditing && player?.pin && formData.pin === '****' && (
+                <span className="ml-2 text-xs text-white/50">
+                  (Dejar en blanco para mantener el actual)
+                </span>
+              )}
+            </Label>
             <Input
               id="pin"
               type="text"
+              inputMode="numeric"
               maxLength={4}
               pattern="\d{4}"
               value={formData.pin}
-              placeholder={player?.pin ? '****' : '1234'}
-              onFocus={() => {
+              placeholder={player?.pin ? 'Click para cambiar PIN' : '1234'}
+              onFocus={(e) => {
                 if (formData.pin === '****') {
                   updateFormData('pin', '')
+                  e.target.placeholder = 'Ingrese nuevo PIN'
+                }
+              }}
+              onBlur={(e) => {
+                // Si el usuario no ingresó nada y había un PIN antes, volver a mostrar ****
+                if (formData.pin === '' && player?.pin) {
+                  updateFormData('pin', '****')
+                  e.target.placeholder = 'Click para cambiar PIN'
                 }
               }}
               onChange={(e) => updateFormData('pin', e.target.value.replace(/\D/g, ''))}
               className="bg-poker-dark/50 border-white/10 text-white focus:border-poker-red"
             />
+            {formData.pin && formData.pin !== '****' && formData.pin.length !== 4 && (
+              <p className="text-xs text-yellow-400 mt-1">El PIN debe tener exactamente 4 dígitos</p>
+            )}
           </div>
 
           {/* Aliases */}

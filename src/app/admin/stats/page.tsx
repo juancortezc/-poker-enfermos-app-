@@ -236,6 +236,7 @@ export default function StatsPage() {
                   key={relation.id}
                   relation={relation}
                   index={index}
+                  tournamentId={selectedTournamentId}
                 />
               ))}
 
