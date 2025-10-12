@@ -13,6 +13,18 @@ interface Tournament {
   totalDates?: number
 }
 
+interface ActiveTournamentResponse {
+  tournament: Tournament
+  stats: {
+    completedDates: number
+    totalDates: number
+    nextDate?: unknown
+    startDate?: string
+    endDate?: string
+    isCompleted: boolean
+  }
+}
+
 interface UseActiveTournamentOptions {
   /** Auto-refresh interval in milliseconds. Default: 60000 (1 min) */
   refreshInterval?: number
@@ -25,7 +37,7 @@ interface UseActiveTournamentOptions {
 /**
  * Custom hook for active tournament data
  * Provides caching and auto-refresh for the currently active tournament
- * 
+ *
  * @param options - SWR configuration options
  * @returns SWR response with active tournament data
  */
@@ -36,20 +48,20 @@ export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
     revalidateOnReconnect = true
   } = options
 
-  const swrResponse = useSWR<Tournament>(
+  const swrResponse = useSWR<ActiveTournamentResponse>(
     swrKeys.activeTournament(),
     {
       refreshInterval,
       revalidateOnFocus,
       revalidateOnReconnect,
-      
+
       // Error handling
       shouldRetryOnError: (error) => {
         // Don't retry on 404 (no active tournament)
         if (error?.status === 404) return false
         return true
       },
-      
+
       // Performance
       dedupingInterval: 10000, // Dedupe requests within 10 seconds
       errorRetryInterval: 10000,
@@ -57,33 +69,35 @@ export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
     }
   )
 
+  const tournamentData = swrResponse.data?.tournament
+
   return {
     ...swrResponse,
-    
+
     // Convenience properties
-    tournament: swrResponse.data,
+    tournament: tournamentData,
     isLoading: !swrResponse.error && !swrResponse.data,
     isError: !!swrResponse.error,
-    hasActiveTournament: !!swrResponse.data,
-    
+    hasActiveTournament: !!tournamentData,
+
     // Enhanced error information
     errorMessage: swrResponse.error?.message || 'Error loading active tournament',
     isNotFound: swrResponse.error?.status === 404,
     isUnauthorized: swrResponse.error?.status === 401 || swrResponse.error?.status === 403,
-    
+
     // Utility functions
     refresh: () => swrResponse.mutate(),
-    
+
     // Tournament status checks
-    isActive: swrResponse.data?.status === 'ACTIVO',
-    isUpcoming: swrResponse.data?.status === 'PROXIMO',
-    isFinished: swrResponse.data?.status === 'FINALIZADO',
-    
+    isActive: tournamentData?.status === 'ACTIVO',
+    isUpcoming: tournamentData?.status === 'PROXIMO',
+    isFinished: tournamentData?.status === 'FINALIZADO',
+
     // Progress information
-    progress: swrResponse.data ? {
-      completed: swrResponse.data.completedDates || 0,
-      total: swrResponse.data.totalDates || 12,
-      percentage: Math.round(((swrResponse.data.completedDates || 0) / (swrResponse.data.totalDates || 12)) * 100)
+    progress: tournamentData ? {
+      completed: swrResponse.data?.stats.completedDates || 0,
+      total: swrResponse.data?.stats.totalDates || 12,
+      percentage: Math.round(((swrResponse.data?.stats.completedDates || 0) / (swrResponse.data?.stats.totalDates || 12)) * 100)
     } : null
   }
 }

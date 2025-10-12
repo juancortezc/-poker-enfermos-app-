@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <section className="space-y-8">
       {activeTournament ? (
-        <HomeRankingView tournamentId={activeTournament.tournament?.id || activeTournament.id} />
+        <HomeRankingView tournamentId={activeTournament.id} />
       ) : (
         <div className="paper px-6 py-10 text-center">
           <h2 className="font-heading text-2xl uppercase tracking-[0.22em] text-[#f3e6c5]">
