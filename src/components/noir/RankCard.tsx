@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -23,9 +24,9 @@ export interface RankCardProps {
   meta?: string
   highlight?: HighlightVariant
   avatarUrl?: string | null
-  badge?: React.ReactNode
-  footer?: React.ReactNode
-  actions?: React.ReactNode
+  badge?: ReactNode
+  footer?: ReactNode
+  actions?: ReactNode
 }
 
 const highlightStyles: Record<HighlightVariant, string> = {
@@ -35,7 +36,7 @@ const highlightStyles: Record<HighlightVariant, string> = {
   default: 'border-[#e0b66c]/15 shadow-[0_18px_40px_rgba(11,6,3,0.45)]',
 }
 
-const trendConfig: Record<TrendVariant, { label: string; className: string; icon: React.ReactNode }> = {
+const trendConfig: Record<TrendVariant, { label: string; className: string; icon: ReactNode }> = {
   up: {
     label: 'Sube',
     className: 'text-[#7bdba5]',
@@ -53,7 +54,7 @@ const trendConfig: Record<TrendVariant, { label: string; className: string; icon
   },
 }
 
-export function RankCard({
+function RankCardComponent({
   position,
   name,
   alias,
@@ -149,3 +150,8 @@ export function RankCard({
     </article>
   )
 }
+
+const RankCard = RankCardComponent
+
+export { RankCard }
+export default RankCard

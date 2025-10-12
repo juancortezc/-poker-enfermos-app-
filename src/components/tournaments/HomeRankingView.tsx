@@ -2,12 +2,14 @@
 
 import { useState, type ReactNode } from 'react'
 import Image from 'next/image'
+import useSWR from 'swr'
 import {
   ArrowClockwise,
   TrendingUp,
   TrendingDown,
   Minus,
-  User
+  User,
+  Trophy
 } from 'lucide-react'
 
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
@@ -125,6 +127,30 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
     revalidateOnFocus: true
   })
 
+  // Fallback: cargar torneo anterior si el actual está vacío
+  const shouldLoadPrevious = !isLoading && !isError && rankingData?.rankings.length === 0
+  const { data: previousTournamentData } = useSWR(
+    shouldLoadPrevious ? '/api/tournaments/previous' : null
+  )
+
+  // Usar ranking del torneo anterior si existe
+  const {
+    ranking: previousRankingData,
+    isLoading: isPreviousLoading
+  } = useTournamentRanking(
+    shouldLoadPrevious && previousTournamentData?.tournament?.id
+      ? previousTournamentData.tournament.id
+      : null,
+    {
+      refreshInterval: 0, // No auto-refresh para torneo anterior
+      revalidateOnFocus: false
+    }
+  )
+
+  // Determinar qué ranking mostrar
+  const isFallback = shouldLoadPrevious && previousRankingData && previousRankingData.rankings.length > 0
+  const displayRankingData = isFallback ? previousRankingData : rankingData
+
   const openPlayerModal = (playerId: string) => {
     setSelectedPlayerId(playerId)
     setIsModalOpen(true)
@@ -135,7 +161,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
     setSelectedPlayerId(null)
   }
 
-  if (isLoading) {
+  if (isLoading || isPreviousLoading) {
     return (
       <div className="space-y-6">
         <div className="mx-auto h-6 w-56 animate-pulse rounded-full bg-[#2a1a14]/60" />
@@ -176,7 +202,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
     )
   }
 
-  if (!rankingData || rankingData.rankings.length === 0) {
+  if (!displayRankingData || displayRankingData.rankings.length === 0) {
     return (
       <div className="paper px-6 py-8 text-center">
         <p className="text-[#d7c59a]">
@@ -186,23 +212,37 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
     )
   }
 
-  const { rankings, tournament } = rankingData
+  const { rankings, tournament } = displayRankingData
   const topThree = rankings.slice(0, 3)
   const others = rankings.slice(3)
   const highlightOrder: Array<'gold' | 'silver' | 'bronze'> = ['gold', 'silver', 'bronze']
 
   return (
     <section className="space-y-8">
-      <header className="text-center space-y-2">
+      <header className="text-center space-y-3">
+        {isFallback && (
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/40 bg-gradient-to-r from-[#e0b66c]/15 to-[#a9441c]/15 px-4 py-2 backdrop-blur-sm">
+            <Trophy className="h-4 w-4 text-[#e0b66c]" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#f3e6c5]">
+              Campeón Defensor
+            </span>
+          </div>
+        )}
         <p className="text-[11px] uppercase tracking-[0.28em] text-[#d7c59a]/75">
           Torneo #{tournament.number} · {tournament.name}
         </p>
         <h2 className="font-heading text-3xl uppercase tracking-[0.22em] text-[#f3e6c5]">
-          Tabla General
+          {isFallback ? 'Resultados Finales' : 'Tabla General'}
         </h2>
-        <p className="text-sm text-[#d7c59a]/70">
-          {rankings.length} jugadores · {tournament.completedDates}/{tournament.totalDates} fechas completadas
-        </p>
+        {isFallback ? (
+          <p className="text-sm text-[#d7c59a]/70">
+            El nuevo torneo comienza pronto. Aquí están los campeones del torneo anterior.
+          </p>
+        ) : (
+          <p className="text-sm text-[#d7c59a]/70">
+            {rankings.length} jugadores · {tournament.completedDates}/{tournament.totalDates} fechas completadas
+          </p>
+        )}
       </header>
 
       <div className="grid gap-4 md:grid-cols-3">

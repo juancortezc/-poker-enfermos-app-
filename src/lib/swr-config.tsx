@@ -96,6 +96,7 @@ export const swrKeys = {
   // Tournament related
   tournamentRanking: (tournamentId: number) => `/api/tournaments/${tournamentId}/ranking`,
   activeTournament: () => '/api/tournaments/active',
+  previousTournament: () => '/api/tournaments/previous',
   tournament: (tournamentId: number) => `/api/tournaments/${tournamentId}`,
   
   // Player related
