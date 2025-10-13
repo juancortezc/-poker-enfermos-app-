@@ -57,7 +57,7 @@ export default function ComentariosPage() {
       setError(null)
 
       // First, get all active proposals (public endpoint)
-      const proposalsResponse = await fetch('/api/proposals/public')
+      const proposalsResponse = await fetch('/api/proposals-v2/public')
 
       if (!proposalsResponse.ok) {
         throw new Error('Error al cargar propuestas')

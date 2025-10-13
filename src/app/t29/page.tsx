@@ -52,7 +52,7 @@ export default function T29Page() {
   const [registrationMessage, setRegistrationMessage] = useState<string>('')
   const [showParticipantsModal, setShowParticipantsModal] = useState(false)
 
-  const { data, isLoading, error } = useSWR('/api/proposals/public', publicFetcher)
+  const { data, isLoading, error } = useSWR('/api/proposals-v2/public', publicFetcher)
   const {
     data: participantsData,
     mutate: mutateParticipants,
