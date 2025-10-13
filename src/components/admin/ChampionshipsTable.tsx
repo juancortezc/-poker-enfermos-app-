@@ -78,7 +78,7 @@ export default function ChampionshipsTable() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/70">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
           <LoadingState message="Cargando torneos históricos..." />
         </div>
       </div>
@@ -88,11 +88,11 @@ export default function ChampionshipsTable() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#1b1c2b] to-[#111221] p-8 text-center text-rose-100">
+        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#24160f] to-[#1a1208] p-8 text-center text-rose-100">
           <p className="mb-4 text-sm">Error: {error}</p>
           <button
             onClick={fetchTournaments}
-            className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/80 transition-all hover:border-white/40 hover:text-white"
+            className="rounded-full border border-[#e0b66c]/30 bg-[#24160f] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#d7c59a] transition-all hover:border-[#e0b66c]/50 hover:text-[#f3e6c5]"
           >
             Reintentar
           </button>
@@ -104,7 +104,7 @@ export default function ChampionshipsTable() {
   if (!tournaments.length) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/65">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
           <p>No hay datos de torneos históricos</p>
         </div>
       </div>
@@ -126,15 +126,15 @@ export default function ChampionshipsTable() {
     if (!player) return null
 
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-white/12 bg-white/5 px-4 py-3 backdrop-blur-sm">
+      <div className="flex items-center gap-3 rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 px-4 py-3 backdrop-blur-sm">
         <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ${badgeClass}`}>
           {badge}
         </div>
         <div className="flex-1 text-left">
           <p className={`text-[11px] uppercase tracking-[0.2em] font-semibold ${labelClass}`}>{label}</p>
-          <p className="text-sm font-semibold text-white leading-tight">{formatPlayerName(player)}</p>
+          <p className="text-sm font-semibold text-[#f3e6c5] leading-tight">{formatPlayerName(player)}</p>
           {getPlayerAlias(player) && (
-            <p className="text-xs text-white/60">({getPlayerAlias(player)})</p>
+            <p className="text-xs text-[#d7c59a]">({getPlayerAlias(player)})</p>
           )}
         </div>
       </div>
@@ -151,24 +151,24 @@ export default function ChampionshipsTable() {
             <div key={tournament.tournamentNumber} className="relative pt-16">
               {/* Tournament badge */}
               <div className="absolute -top-10 left-1/2 -translate-x-1/2">
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-red-600/80 bg-black flex flex-col items-center justify-center shadow-[0_0_35px_rgba(229,9,20,0.45)]">
-                  <span className="text-[10px] uppercase tracking-[0.25em] text-white/70">Torneo</span>
-                  <span className="text-3xl sm:text-4xl font-black text-white leading-none mt-1">
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#a9441c]/80 bg-[#1a1208] flex flex-col items-center justify-center shadow-[0_0_35px_rgba(224,182,108,0.35)]">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[#d7c59a]">Torneo</span>
+                  <span className="text-3xl sm:text-4xl font-black text-[#f3e6c5] leading-none mt-1">
                     {tournament.tournamentNumber}
                   </span>
                 </div>
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase tracking-wide">
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#e0b66c] text-[#1a1208] text-xs font-bold px-3 py-1 rounded-full shadow-lg uppercase tracking-wide">
                   1º Campeón
                 </div>
               </div>
 
               <div
-                className={`relative rounded-3xl border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] px-6 pt-20 pb-6 flex flex-col items-center text-center h-full overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:border-poker-red/40 ${
-                  isHistorical ? 'opacity-85 border-white/20' : ''
+                className={`relative rounded-3xl border border-[#e0b66c]/20 bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1a1208] px-6 pt-20 pb-6 flex flex-col items-center text-center h-full overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:border-[#e0b66c]/40 ${
+                  isHistorical ? 'opacity-85 border-[#e0b66c]/30' : ''
                 }`}
               >
                 <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_60%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(224,182,108,0.15),_transparent_60%)]" />
                 </div>
 
                 <div className="relative z-10 flex flex-col items-center gap-6 w-full">

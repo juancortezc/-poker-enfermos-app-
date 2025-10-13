@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils'
 const baseNavItems = [
   { href: '/', label: 'Inicio', icon: '/icons/nav-home.png', roles: ['all'] as const },
   { href: '/ranking', label: 'Ranking', icon: '/icons/nav-ranking.png', roles: ['all'] as const },
-  { href: '/t29', label: 'T29', icon: '/icons/nav-t29.png', roles: ['all'] as const },
   { href: '/admin', label: 'Menú', icon: '/icons/nav-settings.png', roles: ['all'] as const },
 ]
 

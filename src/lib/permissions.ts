@@ -127,18 +127,18 @@ export function getDashboardFeatures(userRole: UserRole) {
       ...withPermission()
     },
     {
+      id: 't29',
+      title: 'T29',
+      href: '/t29',
+      permission: 't29-proposals',
+      ...withPermission('t29-proposals')
+    },
+    {
       id: 'sin-ganar',
       title: 'SIN GANAR',
       href: '/admin/sin-ganar',
       permission: 'stats-days',
       ...withPermission('stats-days')
-    },
-    {
-      id: 'club-1000',
-      title: '1000 DÍAS',
-      href: '/admin/club-1000',
-      permission: undefined,
-      ...withPermission()
     }
   ]
 

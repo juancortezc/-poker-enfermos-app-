@@ -60,7 +60,7 @@ export default function ChampionsCards() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/70">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
           <LoadingState message="Cargando estadísticas de campeones..." />
         </div>
       </div>
@@ -70,11 +70,11 @@ export default function ChampionsCards() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#1b1c2b] to-[#111221] p-8 text-center text-rose-100">
+        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#24160f] to-[#1a1208] p-8 text-center text-rose-100">
           <p className="mb-4 text-sm">Error: {error}</p>
           <button
             onClick={fetchChampionsStats}
-            className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/80 transition-all hover:border-white/40 hover:text-white"
+            className="rounded-full border border-[#e0b66c]/30 bg-[#24160f] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#d7c59a] transition-all hover:border-[#e0b66c]/50 hover:text-[#f3e6c5]"
           >
             Reintentar
           </button>
@@ -86,7 +86,7 @@ export default function ChampionsCards() {
   if (!championsData) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/65">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
           <p>No hay datos de campeones</p>
         </div>
       </div>
@@ -132,10 +132,10 @@ export default function ChampionsCards() {
               const isSecond = index === 1
               const isThird = index === 2
               const gradientClass = isFirst
-                ? 'from-yellow-500/60 via-amber-400/20 to-yellow-300/10'
+                ? 'from-[#e0b66c]/60 via-[#d4a053]/20 to-[#c48b3c]/10'
                 : isSecond
-                ? 'from-slate-500/60 via-slate-400/20 to-slate-300/10'
-                : 'from-orange-500/60 via-orange-400/20 to-amber-300/10'
+                ? 'from-[#8d7052]/60 via-[#7a5f44]/20 to-[#6b5238]/10'
+                : 'from-[#a9441c]/60 via-[#8d3717]/20 to-[#7a2f14]/10'
               
               return (
                 <div
@@ -144,8 +144,8 @@ export default function ChampionsCards() {
                 >
                   {/* Card del podio */}
                   <div
-                    className={`group relative w-24 sm:w-28 h-32 sm:h-36 rounded-2xl border border-white/12 bg-gradient-to-br ${gradientClass} px-3 py-4 transition-transform duration-200 hover:-translate-y-1 ${
-                      !champion.player.isActive ? 'opacity-85 border-white/20' : ''
+                    className={`group relative w-24 sm:w-28 h-32 sm:h-36 rounded-2xl border border-[#e0b66c]/20 bg-gradient-to-br ${gradientClass} px-3 py-4 transition-transform duration-200 hover:-translate-y-1 ${
+                      !champion.player.isActive ? 'opacity-85 border-[#e0b66c]/30' : ''
                     }`}
                   >
                     {/* Círculo de posición */}
@@ -204,22 +204,22 @@ export default function ChampionsCards() {
                         {getPlayerName(champion).split(' ')[0]}
                       </h3>
                       {getPlayerAlias(champion) && (
-                        <div className="text-xs text-orange-400 mt-1">
+                        <div className="text-xs text-[#e0b66c] mt-1">
                           ({getPlayerAlias(champion)})
                         </div>
                       )}
                       {!champion.player.isActive && (
-                        <div className="text-xs text-gray-400 mt-1">
+                        <div className="text-xs text-[#8d7052] mt-1">
                           Histórico
                         </div>
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Campeonatos bajo la foto */}
                   <div className="text-right mt-1">
                     <div className="flex flex-col items-end">
-                      <span className="text-orange-400 font-bold text-sm">{champion.championshipsCount}</span>
+                      <span className="text-[#e0b66c] font-bold text-sm">{champion.championshipsCount}</span>
                     </div>
                   </div>
                 </div>

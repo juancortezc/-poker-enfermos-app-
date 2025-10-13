@@ -88,7 +88,7 @@ export default function PodiumStatsTable() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/70">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
           <LoadingState message="Cargando estadísticas de podios..." />
         </div>
       </div>
@@ -98,11 +98,11 @@ export default function PodiumStatsTable() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#1b1c2b] to-[#111221] p-8 text-center text-rose-100">
+        <div className="rounded-2xl border border-rose-500/40 bg-gradient-to-br from-rose-500/20 via-[#24160f] to-[#1a1208] p-8 text-center text-rose-100">
           <p className="mb-4 text-sm">Error: {error}</p>
           <button
             onClick={fetchPodiumStats}
-            className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/80 transition-all hover:border-white/40 hover:text-white"
+            className="rounded-full border border-[#e0b66c]/30 bg-[#24160f] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#d7c59a] transition-all hover:border-[#e0b66c]/50 hover:text-[#f3e6c5]"
           >
             Reintentar
           </button>
@@ -114,7 +114,7 @@ export default function PodiumStatsTable() {
   if (!podiumData) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-white/12 bg-white/5 p-8 text-center text-white/65">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
           <p>No hay datos de podios</p>
         </div>
       </div>
@@ -147,16 +147,16 @@ export default function PodiumStatsTable() {
           <div className="flex items-center justify-center gap-2 sm:gap-3">
             {topThree.map((stat, index) => {
               const gradientClass = index === 0
-                ? 'from-yellow-500/60 via-amber-400/20 to-yellow-300/10'
+                ? 'from-[#e0b66c]/60 via-[#d4a053]/20 to-[#c48b3c]/10'
                 : index === 1
-                ? 'from-slate-500/60 via-slate-400/20 to-slate-300/10'
-                : 'from-orange-500/60 via-orange-400/20 to-amber-300/10'
+                ? 'from-[#8d7052]/60 via-[#7a5f44]/20 to-[#6b5238]/10'
+                : 'from-[#a9441c]/60 via-[#8d3717]/20 to-[#7a2f14]/10'
 
               return (
                 <div key={stat.player.id} className="relative flex flex-col items-center">
                   <div
-                    className={`group relative h-32 w-24 rounded-2xl border border-white/12 bg-gradient-to-br ${gradientClass} px-3 py-4 transition-transform duration-200 hover:-translate-y-1 sm:h-36 sm:w-28 ${
-                      !stat.player.isActive ? 'opacity-85 border-white/20' : ''
+                    className={`group relative h-32 w-24 rounded-2xl border border-[#e0b66c]/20 bg-gradient-to-br ${gradientClass} px-3 py-4 transition-transform duration-200 hover:-translate-y-1 sm:h-36 sm:w-28 ${
+                      !stat.player.isActive ? 'opacity-85 border-[#e0b66c]/30' : ''
                     }`}
                     onClick={() => openPlayerModal(stat.player.id)}
                   >
@@ -196,19 +196,19 @@ export default function PodiumStatsTable() {
                         {formatPlayerName(stat.player)}
                       </h3>
                       {getPlayerAlias(stat.player) && (
-                        <div className="mt-1 text-xs text-orange-400">
+                        <div className="mt-1 text-xs text-[#e0b66c]">
                           ({getPlayerAlias(stat.player)})
                         </div>
                       )}
                       {!stat.player.isActive && (
-                        <div className="mt-1 text-xs text-white/45">Histórico</div>
+                        <div className="mt-1 text-xs text-[#8d7052]">Histórico</div>
                       )}
                     </div>
                   </div>
 
                   <div className="mt-1 text-right">
                     <div className="flex flex-col items-end">
-                      <span className="text-sm font-bold text-orange-400">{stat.totalPodiums}</span>
+                      <span className="text-sm font-bold text-[#e0b66c]">{stat.totalPodiums}</span>
                     </div>
                   </div>
                 </div>
@@ -228,12 +228,12 @@ export default function PodiumStatsTable() {
               return (
                 <div
                   key={stat.player.id}
-                  className={`group relative cursor-pointer rounded-2xl border border-white/12 bg-white/5 px-3 py-3 transition-transform duration-200 hover:-translate-y-1 ${
-                    !stat.player.isActive ? 'opacity-85 border-white/20' : ''
+                  className={`group relative cursor-pointer rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 px-3 py-3 transition-transform duration-200 hover:-translate-y-1 ${
+                    !stat.player.isActive ? 'opacity-85 border-[#e0b66c]/30' : ''
                   }`}
                   onClick={() => openPlayerModal(stat.player.id)}
                 >
-                  <div className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full border border-white/20 bg-black text-xs font-bold text-white shadow-md">
+                  <div className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full border border-[#e0b66c]/30 bg-[#1a1208] text-xs font-bold text-[#f3e6c5] shadow-md">
                     {position}
                   </div>
 

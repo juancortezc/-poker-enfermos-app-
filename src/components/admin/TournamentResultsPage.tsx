@@ -38,21 +38,21 @@ export default function TournamentResultsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0d0f1a] via-[#0b0d18] to-[#08090f] text-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1208] via-[#0f0a04] to-[#0a0703] text-white">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 space-y-8">
         {/* Header */}
-        <section className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#201c30] via-[#1b1c2b] to-[#131422] p-6 shadow-[0_24px_60px_rgba(15,15,45,0.45)]">
+        <section className="rounded-3xl border border-[#e0b66c]/20 bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1a1208] p-6 shadow-[0_24px_60px_rgba(11,6,3,0.55)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              <p className="text-[12px] uppercase tracking-[0.35em] text-white/55">Historial</p>
-              <h1 className="text-3xl font-semibold tracking-tight text-white">Resultados de Torneos</h1>
-              <p className="max-w-2xl text-sm text-white/65">
+              <p className="text-[12px] uppercase tracking-[0.35em] text-[#d7c59a]">Historial</p>
+              <h1 className="text-3xl font-semibold tracking-tight text-[#f3e6c5]">Resultados de Torneos</h1>
+              <p className="max-w-2xl text-sm text-[#d7c59a]">
                 Consulta campeones, podios y desempeño histórico del grupo. Incluye los resultados oficiales del Torneo 28.
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-poker-red" />
-              PokerNew
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#24160f]/60 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d7c59a]">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-[#e0b66c]" />
+              Noir Jazz
             </div>
           </div>
         </section>
@@ -70,8 +70,8 @@ export default function TournamentResultsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-all ${
                     isActive
-                      ? 'border-poker-red/60 bg-gradient-to-r from-poker-red via-[#d73552] to-[#ff4b2b] text-white shadow-[0_12px_28px_rgba(215,53,82,0.45)]'
-                      : 'border-white/12 bg-white/5 text-white/70 hover:text-white hover:border-white/35'
+                      ? 'border-[#e0b66c]/60 bg-gradient-to-r from-[#a9441c] via-[#8d3717] to-[#a9441c] text-[#f3e6c5] shadow-[0_12px_28px_rgba(224,182,108,0.35)]'
+                      : 'border-[#e0b66c]/20 bg-[#24160f]/40 text-[#d7c59a] hover:text-[#f3e6c5] hover:border-[#e0b66c]/40'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -81,9 +81,9 @@ export default function TournamentResultsPage() {
             })}
           </nav>
 
-          <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] p-0 shadow-[0_24px_60px_rgba(8,9,15,0.45)]">
+          <div className="rounded-3xl border border-[#e0b66c]/20 bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1a1208] p-0 shadow-[0_24px_60px_rgba(11,6,3,0.45)]">
             <div className="relative overflow-hidden rounded-3xl">
-              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_55%)]" />
+              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top,_rgba(224,182,108,0.12),_transparent_55%)]" />
               <div className="relative">
                 {renderTabContent()}
               </div>
