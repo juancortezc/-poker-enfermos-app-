@@ -240,21 +240,23 @@ export async function GET(
       .sort((a, b) => b.count - a.count)
 
     // ============================================================
-    // 5. ÚLTIMOS - Most last two positions (only registered players)
+    // 5. ÚLTIMOS - Most last place finishes (only registered players)
     // ============================================================
     const sieteYDosByPlayer = new Map<string, { player: AwardPlayer; count: number }>()
 
-    // For each date, find the last two positions by points
+    // For each date, find only the last position (7º place)
     gameDates.forEach(gd => {
-      if (gd.eliminations.length < 2) return
+      if (gd.eliminations.length === 0) return
 
-      const rankedByPoints = [...gd.eliminations]
-        .sort((a, b) => b.points - a.points)
+      const totalPlayers = gd.eliminations.length
+      const lastPosition = totalPlayers // Último lugar (7º)
 
-      // Last two positions (lowest points)
-      const lastTwo = rankedByPoints.slice(-2)
+      // Find player(s) in last position
+      const lastPlaceElims = gd.eliminations.filter(
+        elim => elim.position === lastPosition
+      )
 
-      lastTwo.forEach(elim => {
+      lastPlaceElims.forEach(elim => {
         // Only count registered players
         if (!registeredPlayerIds.has(elim.eliminatedPlayer.id)) return
 
