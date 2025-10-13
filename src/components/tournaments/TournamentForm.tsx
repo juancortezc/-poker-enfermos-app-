@@ -831,12 +831,21 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
           {activeTab === 'participants' && (
             <div className="flex justify-center">
               <Button
-                type="button"
-                onClick={() => setActiveTab('dates')}
+                type="submit"
+                disabled={loading || !isValid}
                 className="px-6 bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5] text-sm py-2"
               >
-                <Save className="w-4 h-4 mr-2" />
-                Continuar a Fechas
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    {isEditing ? 'Guardar Participantes' : 'Continuar a Fechas'}
+                  </>
+                )}
               </Button>
             </div>
           )}
