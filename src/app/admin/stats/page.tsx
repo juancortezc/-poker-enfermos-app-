@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import ParentChildCard from '@/components/stats/ParentChildCard'
 import AwardCard from '@/components/stats/AwardCard'
+import EliminationsTab from '@/components/stats/EliminationsTab'
 import { Card } from '@/components/ui/card'
-import { Loader2, Users, ShieldAlert, Award } from 'lucide-react'
+import { Loader2, Users, ShieldAlert, Award, Target } from 'lucide-react'
 import { canAccess } from '@/lib/permissions'
 
 interface Player {
@@ -74,7 +75,7 @@ const fetcher = async (url: string) => {
   return response.json()
 }
 
-type TabType = 'ph' | 'premios'
+type TabType = 'ph' | 'premios' | 'eliminaciones'
 
 export default function StatsPage() {
   const { user, loading } = useAuth()
@@ -124,6 +125,75 @@ export default function StatsPage() {
         <div className="flex flex-col items-center space-y-4">
           <Loader2 className="w-8 h-8 text-poker-red animate-spin" />
           <p className="text-white">Cargando estadísticas...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (activeTab === 'eliminaciones') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark pb-24 pt-16">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4">
+          {/* Header */}
+          <header className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.4em] text-white/60">Uso comisión</p>
+                <h1 className="mt-2 text-2xl font-bold text-white">Stats · Torneo #{tournamentNumber}</h1>
+                <p className="mt-1 text-sm text-white/70">
+                  Control de eliminaciones por fecha.
+                </p>
+              </div>
+              <div className="hidden sm:flex h-12 w-12 items-center justify-center rounded-full bg-poker-red/20">
+                <Target className="h-6 w-6 text-poker-red" />
+              </div>
+            </div>
+          </header>
+
+          {/* Tournament Selector */}
+          {availableTournaments.length > 0 && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <label className="block text-xs uppercase tracking-[0.2em] text-white/60 mb-2">
+                Seleccionar Torneo
+              </label>
+              <select
+                value={selectedTournamentId}
+                onChange={(e) => setSelectedTournamentId(Number(e.target.value))}
+                className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white focus:border-poker-red/60 focus:outline-none focus:ring-2 focus:ring-poker-red/20"
+              >
+                {availableTournaments.map((tournament) => (
+                  <option key={tournament.id} value={tournament.id} className="bg-poker-dark">
+                    Torneo {tournament.number} - {tournament.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Tabs */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-1 flex gap-1">
+            <button
+              onClick={() => setActiveTab('ph')}
+              className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium transition-all text-white/60 hover:text-white/80 hover:bg-white/5"
+            >
+              P&H
+            </button>
+            <button
+              onClick={() => setActiveTab('premios')}
+              className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium transition-all text-white/60 hover:text-white/80 hover:bg-white/5"
+            >
+              Premios
+            </button>
+            <button
+              onClick={() => setActiveTab('eliminaciones')}
+              className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium transition-all bg-poker-red text-white shadow-lg"
+            >
+              Eliminaciones
+            </button>
+          </div>
+
+          {/* Content */}
+          <EliminationsTab tournamentId={selectedTournamentId} />
         </div>
       </div>
     )
@@ -223,6 +293,16 @@ export default function StatsPage() {
             }`}
           >
             Premios
+          </button>
+          <button
+            onClick={() => setActiveTab('eliminaciones')}
+            className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
+              activeTab === 'eliminaciones'
+                ? 'bg-poker-red text-white shadow-lg'
+                : 'text-white/60 hover:text-white/80 hover:bg-white/5'
+            }`}
+          >
+            Eliminaciones
           </button>
         </div>
 
