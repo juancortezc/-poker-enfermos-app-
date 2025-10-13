@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
+import { withComisionAuth } from '@/lib/api-auth'
 
-// PATCH /api/players/:id/role - Cambiar rol de jugador
+// PATCH /api/players/:id/role - Cambiar rol de jugador (solo Comisión)
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params
-    const { newRole, inviterId } = await req.json()
+  return withComisionAuth(req, async (request) => {
+    try {
+      const { id } = await params
+      const { newRole, inviterId } = await request.json()
 
     if (!newRole || !Object.values(UserRole).includes(newRole)) {
       return NextResponse.json(
@@ -65,15 +67,16 @@ export async function PATCH(
       }
     })
 
-    return NextResponse.json({
-      message: `Rol cambiado exitosamente a ${newRole}`,
-      player: updatedPlayer
-    })
-  } catch (error) {
-    console.error('Error changing player role:', error)
-    return NextResponse.json(
-      { error: 'Error al cambiar rol del jugador' },
-      { status: 500 }
-    )
-  }
+      return NextResponse.json({
+        message: `Rol cambiado exitosamente a ${newRole}`,
+        player: updatedPlayer
+      })
+    } catch (error) {
+      console.error('Error changing player role:', error)
+      return NextResponse.json(
+        { error: 'Error al cambiar rol del jugador' },
+        { status: 500 }
+      )
+    }
+  })
 }
