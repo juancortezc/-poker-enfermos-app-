@@ -29,6 +29,7 @@ interface PreTournamentHomeViewProps {
 export default function PreTournamentHomeView({ currentTournament }: PreTournamentHomeViewProps) {
   const { data: previousTournamentData } = useSWR('/api/tournaments/previous')
   const { data: winnersData } = useSWR('/api/tournaments/winners')
+  const { data: t29ParticipantsData } = useSWR('/api/t29-participants')
 
   const previousTournament = previousTournamentData?.tournament
 
@@ -41,7 +42,10 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
   const previousWinner = previousWinnerData?.champion
 
   const firstDate = currentTournament?.gameDates?.[0]
-  const participantsCount = currentTournament?.tournamentParticipants?.length || 0
+
+  // Use T29 participants count (confirmed registrations) instead of tournament participants
+  const participantsCount = t29ParticipantsData?.count || 0
+  const confirmedParticipants = t29ParticipantsData?.participants || []
 
   const formatDate = (date: Date | string) => {
     const d = new Date(date)
@@ -153,22 +157,22 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
                 Participantes confirmados
               </p>
               <div className="flex flex-wrap justify-center gap-1">
-                {currentTournament.tournamentParticipants.slice(0, 8).map((participant) => (
+                {confirmedParticipants.slice(0, 8).map((participant: { id: number; firstName: string; player: { id: string; photoUrl: string | null } }) => (
                   <div
-                    key={participant.player.id}
+                    key={participant.id}
                     className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-[#e0b66c]/30 bg-[#2a1a14]"
                   >
                     {participant.player.photoUrl ? (
                       <Image
                         src={participant.player.photoUrl}
-                        alt={participant.player.firstName}
+                        alt={participant.firstName}
                         width={32}
                         height={32}
                         className="h-full w-full object-cover"
                       />
                     ) : (
                       <span className="text-[10px] font-semibold text-[#d7c59a]">
-                        {participant.player.firstName.charAt(0)}
+                        {participant.firstName.charAt(0)}
                       </span>
                     )}
                   </div>
