@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import ParentChildCard from '@/components/stats/ParentChildCard'
 import AwardCard from '@/components/stats/AwardCard'
-import EliminationsTab from '@/components/stats/EliminationsTab'
+import PlayerEliminationsTab from '@/components/stats/PlayerEliminationsTab'
 import { Card } from '@/components/ui/card'
 import { Loader2, Users, ShieldAlert, Award, Target } from 'lucide-react'
 import { canAccess } from '@/lib/permissions'
@@ -130,6 +130,8 @@ export default function StatsPage() {
     )
   }
 
+  const tournamentNumber = (activeTab === 'ph' ? phData?.tournament?.number : awardsData?.tournament?.number) ?? selectedTournamentId
+
   if (activeTab === 'eliminaciones') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark pb-24 pt-16">
@@ -193,7 +195,7 @@ export default function StatsPage() {
           </div>
 
           {/* Content */}
-          <EliminationsTab tournamentId={selectedTournamentId} />
+          <PlayerEliminationsTab tournamentId={selectedTournamentId} />
         </div>
       </div>
     )
@@ -227,7 +229,6 @@ export default function StatsPage() {
 
   const relations = phData?.parentChildRelations ?? []
   const awards = awardsData?.awards
-  const tournamentNumber = (activeTab === 'ph' ? phData?.tournament?.number : awardsData?.tournament?.number) ?? 28
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark pb-24 pt-16">

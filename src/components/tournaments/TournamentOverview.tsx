@@ -69,25 +69,18 @@ export default function TournamentOverview() {
       }
       const headers = buildAuthHeaders()
 
-      // Fetch active and next tournaments in parallel
-      const [activeResponse, nextResponse] = await Promise.all([
-        fetch('/api/tournaments/active', {
-          headers
-        }),
-        fetch('/api/tournaments/next', {
-          headers
-        })
-      ])
+      // Fetch active tournament
+      const activeResponse = await fetch('/api/tournaments/active', {
+        headers
+      })
 
       if (activeResponse.ok) {
         const activeData = await activeResponse.json()
         setActiveTournament(activeData)
       }
 
-      if (nextResponse.ok) {
-        const nextData = await nextResponse.json()
-        setNextTournament(nextData)
-      }
+      // Next tournament is always null with current architecture
+      setNextTournament(null)
     } catch (error) {
       console.error('Error fetching tournaments:', error)
       setError('Error al cargar torneos')

@@ -611,7 +611,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                                 updateFormData('blindLevels', newBlinds)
                               }}
                               className="w-full px-3 py-2 bg-[#24160f] border border-[#e0b66c]/20 rounded-lg text-sm text-[#f3e6c5] focus:border-[#e0b66c] focus:ring-1 focus:ring-[#e0b66c]"
-                              min="1"
+                              min="0"
                               step="5"
                             />
                           </td>
