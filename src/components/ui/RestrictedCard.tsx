@@ -35,13 +35,13 @@ export function RestrictedCard({
 
   const cardContent = (
     <Card className={`
-      relative h-20 sm:h-24 overflow-hidden
+      relative h-28 sm:h-32 overflow-hidden
       border-2 bg-gradient-to-br backdrop-blur-md
       ${isBlocked
         ? 'cursor-not-allowed opacity-50 border-[#3c2219] from-[#2a1a14]/30 via-[#24160f]/30 to-[#1f1410]/30'
         : 'cursor-pointer border-[#2b1209] from-[#2a1a14]/80 via-[#24160f]/80 to-[#1f1410]/80 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#e0b66c]/60 hover:shadow-[0_12px_32px_rgba(224,182,108,0.25)]'
       }
-      flex flex-col items-center justify-between p-2.5 sm:p-3
+      flex flex-col items-center justify-center gap-2.5 p-3 sm:p-4
       ${className}
     `}>
       {/* Noir Jazz texture overlay */}
@@ -56,15 +56,15 @@ export function RestrictedCard({
         </div>
       )}
 
-      <div className="relative flex flex-1 items-center justify-center">
+      <div className="relative flex items-center justify-center">
         <div className={`
-          flex h-9 w-9 items-center justify-center rounded-lg border-2 sm:h-10 sm:w-10 transition-all duration-200
+          flex h-11 w-11 items-center justify-center rounded-lg border-2 sm:h-12 sm:w-12 transition-all duration-200
           ${isBlocked
             ? 'border-[#3c2219] bg-[#2a1a14]/30'
             : 'border-[#2b1209] bg-[linear-gradient(135deg,rgba(224,182,108,0.92),rgba(169,68,28,0.88))] shadow-[0_8px_20px_rgba(224,182,108,0.22)] hover:shadow-[0_10px_28px_rgba(224,182,108,0.3)]'
           }
         `}>
-          <Icon className={`h-5 w-5 sm:h-5.5 sm:w-5.5 ${
+          <Icon className={`h-6 w-6 sm:h-6.5 sm:w-6.5 ${
             isBlocked
               ? 'text-[#d7c59a]/30'
               : 'text-[#1f1410] drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)]'
@@ -72,8 +72,8 @@ export function RestrictedCard({
         </div>
       </div>
 
-      <div className="relative text-center mt-1">
-        <h3 className={`text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] leading-tight ${
+      <div className="relative text-center w-full px-1">
+        <h3 className={`text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] leading-snug ${
           isBlocked ? 'text-[#d7c59a]/40' : 'text-[#f3e6c5]'
         }`}>
           {title}

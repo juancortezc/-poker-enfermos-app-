@@ -1,11 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withAuth } from '@/lib/api-auth'
 
-// GET /api/tournaments/active - Obtener el torneo activo actual
-export async function GET(req: NextRequest) {
-  return withAuth(req, async (req) => {
-    try {
+// GET /api/tournaments/active - Obtener el torneo activo actual (público)
+export async function GET() {
+  try {
       // Buscar primero torneo activo, si no existe, el más reciente
       let activeTournament = await prisma.tournament.findFirst({
         where: { status: 'ACTIVO' },
@@ -100,5 +98,4 @@ export async function GET(req: NextRequest) {
         { status: 500 }
       )
     }
-  })
 }

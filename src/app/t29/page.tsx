@@ -138,31 +138,34 @@ export default function T29Page() {
       <section className="relative">
         <Card className="noir-card border border-[#e0b66c]/18 bg-[rgba(24,14,10,0.92)] p-6">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              type="button"
-              onClick={() => setShowParticipantsModal(true)}
-              className="group flex items-center gap-4 rounded-3xl border border-[#e0b66c]/15 bg-[rgba(31,20,16,0.78)] px-4 py-3 text-left transition-transform duration-200 hover:-translate-y-0.5 hover:border-[#e0b66c]/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e0b66c]/40"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-3xl border border-[#e0b66c]/35 bg-[rgba(42,26,20,0.75)] text-[#e0b66c] shadow-[0_12px_28px_rgba(11,6,3,0.55)] transition-colors group-hover:border-[#e0b66c]/55">
+            <div className="flex items-center gap-4 rounded-3xl border border-[#e0b66c]/15 bg-[rgba(31,20,16,0.78)] px-4 py-3">
+              <div className="flex h-14 w-14 items-center justify-center rounded-3xl border border-[#e0b66c]/35 bg-[rgba(42,26,20,0.75)] text-[#e0b66c] shadow-[0_12px_28px_rgba(11,6,3,0.55)]">
                 <Users className="h-7 w-7" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="font-heading text-lg uppercase tracking-[0.22em] text-[#f3e6c5]">
-                    Participación T29
-                  </h2>
-                  <span className="hidden rounded-full border border-[#e0b66c]/20 bg-[#e0b66c]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#e0b66c]/80 transition-colors group-hover:border-[#e0b66c]/40 group-hover:text-[#e0b66c] sm:inline-flex">
-                    Ver lista
-                  </span>
-                </div>
+                <h2 className="font-heading text-lg uppercase tracking-[0.22em] text-[#f3e6c5]">
+                  Participación T29
+                </h2>
                 <p className="text-sm text-[#d7c59a]/75">
                   {participantsCount} {participantsCount === 1 ? 'participante registrado' : 'participantes registrados'}
-                  {participantsCount > 0 ? ' • Toca para ver quiénes confirmaron' : ''}
                 </p>
               </div>
-            </button>
+            </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              {participantsCount > 0 && (
+                <NoirButton
+                  onClick={() => {
+                    setShowParticipantsModal(true)
+                    setShowParticipantsModal(true)
+                  }}
+                  variant="secondary"
+                  className="min-w-[180px] justify-center"
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Ver Registrados
+                </NoirButton>
+              )}
               {isParticipationConfirmed ? (
                 <NoirButton
                   variant="secondary"

@@ -2,13 +2,20 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import HomeRankingView from '@/components/tournaments/HomeRankingView'
+import PreTournamentHomeView from '@/components/tournaments/PreTournamentHomeView'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 
 export default function Home() {
   const { user } = useAuth()
-  
-  // Use SWR hook for active tournament with PIN authentication
-  const { tournament: activeTournament, isLoading, isNotFound } = useActiveTournament({
+
+  // Use SWR hook for active tournament (now public endpoint)
+  const {
+    tournament: activeTournament,
+    isLoading,
+    isNotFound,
+    progress,
+    data: fullData
+  } = useActiveTournament({
     refreshInterval: 60000 // 1 minute refresh
   })
 
@@ -29,10 +36,29 @@ export default function Home() {
     )
   }
 
+  // Debug: Log tournament data
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Home Debug:', {
+      activeTournament,
+      fullData,
+      progress,
+      isNotFound
+    })
+  }
+
+  // Check if tournament has started (has completed dates)
+  const hasResults = progress && progress.completed > 0
+
   return (
     <section className="space-y-8">
       {activeTournament ? (
-        <HomeRankingView tournamentId={activeTournament.id} />
+        hasResults ? (
+          <HomeRankingView tournamentId={activeTournament.id} />
+        ) : (
+          <PreTournamentHomeView
+            currentTournament={fullData?.tournament}
+          />
+        )
       ) : (
         <div className="paper px-6 py-10 text-center">
           <h2 className="font-heading text-2xl uppercase tracking-[0.22em] text-[#f3e6c5]">
