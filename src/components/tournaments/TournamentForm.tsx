@@ -36,6 +36,7 @@ interface BlindLevel {
 interface FormData {
   tournamentNumber: number
   gameDates: Array<{
+    id?: number
     dateNumber: number
     scheduledDate: string
   }>
@@ -84,7 +85,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
   
   const isEditing = !!tournamentId
-  const [activeTab, setActiveTab] = useState<'participants' | 'dates'>('participants')
+  const [activeTab, setActiveTab] = useState<'participants' | 'dates' | 'blinds'>('participants')
 
   // Función para generar fechas iniciales usando utilidad centralizada
   const generateInitialDates = () => {
@@ -165,12 +166,13 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
         setTournamentNumber(tournament.number)
         setFormData({
           tournamentNumber: tournament.number,
-          gameDates: tournament.gameDates.map((date: { dateNumber: number; scheduledDate: string }) => ({
+          gameDates: tournament.gameDates.map((date: { id: number; dateNumber: number; scheduledDate: string }) => ({
+            id: date.id,
             dateNumber: date.dateNumber,
             scheduledDate: date.scheduledDate.split('T')[0]
           })),
           participantIds: tournament.tournamentParticipants.map((tp: { player: { id: string } }) => tp.player.id),
-          blindLevels: tournament.blindLevels
+          blindLevels: tournament.blindLevels.length > 0 ? tournament.blindLevels : DEFAULT_BLIND_LEVELS
         })
       }
     } catch (err) {
@@ -471,7 +473,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
   }
 
   return (
-    <div className="min-h-screen bg-poker-dark pb-safe">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1208] via-[#0f0a04] to-[#0a0703] pb-safe">
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4">
@@ -479,27 +481,27 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
             variant="ghost"
             size="sm"
             onClick={() => router.push('/tournaments')}
-            className="text-poker-muted hover:text-white hover:bg-white/10"
+            className="text-[#d7c59a] hover:text-[#f3e6c5] hover:bg-[#24160f]/40"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver
           </Button>
           <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold text-white">
+            <h1 className="text-xl font-bold text-[#f3e6c5]">
               {isEditing ? `Editar Torneo ${tournamentNumber}` : `Nuevo Torneo ${tournamentNumber}`}
             </h1>
           </div>
         </div>
 
         {/* Tabs de navegación */}
-        <div className="bg-poker-card rounded-lg p-1">
+        <div className="bg-[#2a1a14]/60 rounded-lg p-1 border border-[#e0b66c]/20">
           <div className="flex space-x-1">
             <button
               onClick={() => setActiveTab('participants')}
               className={`flex-1 py-3 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 min-h-[44px] ${
                 activeTab === 'participants'
-                  ? 'bg-poker-red text-white shadow-lg'
-                  : 'text-poker-muted hover:text-poker-text hover:bg-white/5'
+                  ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
+                  : 'text-[#d7c59a] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
               }`}
             >
               <span className="text-xs sm:text-sm">
@@ -507,7 +509,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                 <span className="sm:hidden">Miembros</span>
               </span>
               {formData.participantIds.length > 0 && (
-                <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+                <span className="text-xs bg-[#e0b66c]/30 px-1.5 py-0.5 rounded-full">
                   {formData.participantIds.length}
                 </span>
               )}
@@ -516,54 +518,144 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
               onClick={() => setActiveTab('dates')}
               className={`flex-1 py-3 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 min-h-[44px] ${
                 activeTab === 'dates'
-                  ? 'bg-poker-red text-white shadow-lg'
-                  : 'text-poker-muted hover:text-poker-text hover:bg-white/5'
+                  ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
+                  : 'text-[#d7c59a] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
               }`}
             >
               <span className="text-xs sm:text-sm">Fechas</span>
               {formData.gameDates.filter(d => d.scheduledDate).length > 0 && (
-                <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+                <span className="text-xs bg-[#e0b66c]/30 px-1.5 py-0.5 rounded-full">
                   {formData.gameDates.filter(d => d.scheduledDate).length}/12
                 </span>
               )}
+            </button>
+            <button
+              onClick={() => setActiveTab('blinds')}
+              className={`flex-1 py-3 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 min-h-[44px] ${
+                activeTab === 'blinds'
+                  ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
+                  : 'text-[#d7c59a] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
+              }`}
+            >
+              <span className="text-xs sm:text-sm">Blinds</span>
+              <span className="text-xs bg-[#e0b66c]/30 px-1.5 py-0.5 rounded-full">
+                {formData.blindLevels.length}
+              </span>
             </button>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Tab: Blinds */}
+          {activeTab === 'blinds' && (
+            <div className="space-y-6 bg-[#2a1a14]/60 p-4 sm:p-6 rounded-lg border border-[#e0b66c]/20">
+              <div className="space-y-4">
+                <div className="bg-[#24160f]/50 p-3 rounded-lg border border-[#e0b66c]/10">
+                  <p className="text-xs text-[#d7c59a]">
+                    💡 Configura los niveles de ciegas para el torneo. Duración en minutos.
+                  </p>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-[#24160f]/70 border-b-2 border-[#e0b66c]/30">
+                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#e0b66c]">Nivel</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#e0b66c]">Ciega Chica</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#e0b66c]">Ciega Grande</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#e0b66c]">Duración (min)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {formData.blindLevels.map((blind, index) => (
+                        <tr key={index} className="border-b border-[#e0b66c]/10 hover:bg-[#24160f]/40 transition-colors">
+                          <td className="py-3 px-4">
+                            <span className="text-sm font-medium text-[#f3e6c5]">{blind.level}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <input
+                              type="number"
+                              value={blind.smallBlind}
+                              onChange={(e) => {
+                                const newBlinds = [...formData.blindLevels]
+                                newBlinds[index] = { ...newBlinds[index], smallBlind: parseInt(e.target.value) || 0 }
+                                updateFormData('blindLevels', newBlinds)
+                              }}
+                              className="w-full px-3 py-2 bg-[#24160f] border border-[#e0b66c]/20 rounded-lg text-sm text-[#f3e6c5] focus:border-[#e0b66c] focus:ring-1 focus:ring-[#e0b66c]"
+                              min="0"
+                              step="25"
+                            />
+                          </td>
+                          <td className="py-3 px-4">
+                            <input
+                              type="number"
+                              value={blind.bigBlind}
+                              onChange={(e) => {
+                                const newBlinds = [...formData.blindLevels]
+                                newBlinds[index] = { ...newBlinds[index], bigBlind: parseInt(e.target.value) || 0 }
+                                updateFormData('blindLevels', newBlinds)
+                              }}
+                              className="w-full px-3 py-2 bg-[#24160f] border border-[#e0b66c]/20 rounded-lg text-sm text-[#f3e6c5] focus:border-[#e0b66c] focus:ring-1 focus:ring-[#e0b66c]"
+                              min="0"
+                              step="50"
+                            />
+                          </td>
+                          <td className="py-3 px-4">
+                            <input
+                              type="number"
+                              value={blind.duration}
+                              onChange={(e) => {
+                                const newBlinds = [...formData.blindLevels]
+                                newBlinds[index] = { ...newBlinds[index], duration: parseInt(e.target.value) || 0 }
+                                updateFormData('blindLevels', newBlinds)
+                              }}
+                              className="w-full px-3 py-2 bg-[#24160f] border border-[#e0b66c]/20 rounded-lg text-sm text-[#f3e6c5] focus:border-[#e0b66c] focus:ring-1 focus:ring-[#e0b66c]"
+                              min="1"
+                              step="5"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Tab: Fechas */}
           {activeTab === 'dates' && (
-            <div className="space-y-6 bg-poker-card p-4 sm:p-6 rounded-lg border border-white/10">
+            <div className="space-y-6 bg-[#2a1a14]/60 p-4 sm:p-6 rounded-lg border border-[#e0b66c]/20">
 
               <div className="space-y-4 max-w-full">
-                <div className="bg-poker-dark/30 p-3 rounded-lg border border-white/5">
-                  <p className="text-xs text-poker-muted mb-2">
+                <div className="bg-[#24160f]/50 p-3 rounded-lg border border-[#e0b66c]/10">
+                  <p className="text-xs text-[#d7c59a] mb-2">
                     💡 Las fechas se generan automáticamente cada 15 días en martes. Solo configura la primera fecha.
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                   {formData.gameDates.map((gameDate, index) => (
-                    <div key={index} className="bg-poker-card border-2 border-poker-red/40 rounded-xl p-4 hover:border-poker-red/60 transition-all duration-200 hover:shadow-lg hover:shadow-poker-red/10">
+                    <div key={index} className="bg-[#24160f] border-2 border-[#a9441c]/40 rounded-xl p-4 hover:border-[#e0b66c]/60 transition-all duration-200 hover:shadow-lg hover:shadow-[#e0b66c]/10">
                       <div className="text-center space-y-3">
                         <div className="flex items-center justify-center space-x-2">
-                          <span className="text-xs text-poker-muted font-medium">Fecha {gameDate.dateNumber}</span>
+                          <span className="text-xs text-[#d7c59a] font-medium">Fecha {gameDate.dateNumber}</span>
                           {index === 0 && (
-                            <div className="w-2 h-2 bg-poker-red rounded-full"></div>
+                            <div className="w-2 h-2 bg-[#e0b66c] rounded-full"></div>
                           )}
                         </div>
-                        
+
                         {/* Fecha prominente */}
                         {(() => {
                           if (!gameDate.scheduledDate) {
                             return (
                               <div className="space-y-1">
-                                <div className="text-2xl sm:text-3xl font-bold text-poker-muted">--</div>
-                                <div className="text-lg sm:text-xl font-semibold text-poker-muted">---</div>
+                                <div className="text-2xl sm:text-3xl font-bold text-[#d7c59a]">--</div>
+                                <div className="text-lg sm:text-xl font-semibold text-[#d7c59a]">---</div>
                               </div>
                             )
                           }
-                          
+
                           const dateObj = new Date(gameDate.scheduledDate + 'T12:00:00')
                           if (isNaN(dateObj.getTime())) {
                             return (
@@ -573,14 +665,14 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                               </div>
                             )
                           }
-                          
+
                           return (
                             <div className="space-y-1">
-                              <div className="text-2xl sm:text-3xl font-bold text-white">
+                              <div className="text-2xl sm:text-3xl font-bold text-[#f3e6c5]">
                                 {dateObj.getDate()}
                               </div>
-                              <div className="text-lg sm:text-xl font-semibold text-orange-400">
-                                {dateObj.toLocaleDateString('es-ES', { 
+                              <div className="text-lg sm:text-xl font-semibold text-[#e0b66c]">
+                                {dateObj.toLocaleDateString('es-ES', {
                                   month: 'short'
                                 }).toUpperCase()}
                               </div>
@@ -608,34 +700,34 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
 
           {/* Tab: Participantes */}
           {activeTab === 'participants' && (
-            <div className="space-y-4 bg-poker-card p-6 rounded-lg border border-white/10">
+            <div className="space-y-4 bg-[#2a1a14]/60 p-6 rounded-lg border border-[#e0b66c]/20">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-[#f3e6c5]">
                   Participantes ({formData.participantIds.length})
                 </h3>
-                <p className="text-xs text-poker-muted">
+                <p className="text-xs text-[#d7c59a]">
                   Jugadores disponibles: {availablePlayers.length}
                 </p>
               </div>
-              
+
               {/* Debug info */}
               {availablePlayers.length === 0 && (
-                <div className="text-center py-4 text-poker-muted">
+                <div className="text-center py-4 text-[#d7c59a]">
                   Cargando participantes...
                 </div>
               )}
-              
+
               {/* Listado estilo Excel - 3 columnas */}
               {availablePlayers.length > 0 && (
-                <div className="max-h-96 overflow-y-auto border border-white/10 rounded-lg">
-                  <div className="grid grid-cols-3 gap-0 divide-x divide-white/5">
+                <div className="max-h-96 overflow-y-auto border border-[#e0b66c]/20 rounded-lg">
+                  <div className="grid grid-cols-3 gap-0 divide-x divide-[#e0b66c]/10">
                     {availablePlayers.map((player) => (
                     <label
                       key={player.id}
-                      className={`flex flex-col p-2 sm:p-3 cursor-pointer transition-all border-b border-white/5 hover:bg-poker-dark/30 min-h-[50px] border-l-2 ${
+                      className={`flex flex-col p-2 sm:p-3 cursor-pointer transition-all border-b border-[#e0b66c]/10 hover:bg-[#24160f]/50 min-h-[50px] border-l-2 ${
                         formData.participantIds.includes(player.id)
-                          ? 'border-l-red-500 bg-poker-card text-white'
-                          : 'border-l-gray-600 bg-poker-card text-poker-text hover:text-white'
+                          ? 'border-l-[#e0b66c] bg-[#24160f] text-[#f3e6c5]'
+                          : 'border-l-[#d7c59a]/30 bg-[#2a1a14] text-[#d7c59a] hover:text-[#f3e6c5]'
                       }`}
                     >
                       <div className="flex items-center mb-1">
@@ -651,7 +743,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                       </div>
                       {/* Mostrar primer alias si existe */}
                       {player.aliases && player.aliases.length > 0 && (
-                        <span className="text-xs text-orange-400 truncate ml-5">
+                        <span className="text-xs text-[#e0b66c] truncate ml-5">
                           {player.aliases[0]}
                         </span>
                       )}
@@ -659,7 +751,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                   ))}
                     {/* Rellenar celdas vacías para completar la grilla */}
                     {Array.from({ length: (3 - (availablePlayers.length % 3)) % 3 }).map((_, i) => (
-                      <div key={`empty-${i}`} className="p-2 sm:p-3 min-h-[50px] bg-poker-card border-b border-white/5 border-l-2 border-l-gray-600" />
+                      <div key={`empty-${i}`} className="p-2 sm:p-3 min-h-[50px] bg-[#2a1a14] border-b border-[#e0b66c]/10 border-l-2 border-l-[#d7c59a]/30" />
                     ))}
                   </div>
                 </div>
@@ -692,7 +784,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                   const resetDates = generateInitialDates()
                   updateFormData('gameDates', resetDates)
                 } : () => router.push('/tournaments')}
-                className="w-full sm:flex-1 border-white/20 text-poker-text hover:bg-white/5 text-sm py-2.5"
+                className="w-full sm:flex-1 border-[#e0b66c]/30 text-[#d7c59a] hover:bg-[#24160f]/40 hover:text-[#f3e6c5] text-sm py-2.5"
                 disabled={loading}
               >
                 {activeTab === 'dates' ? 'Reset' : 'Cancelar'}
@@ -703,7 +795,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                 className={`w-full sm:flex-1 text-sm py-2.5 transition-all ${
                   !isValid || !!numberValidationError
                     ? 'bg-gray-600 hover:bg-gray-700 text-gray-300 cursor-not-allowed'
-                    : 'bg-poker-red hover:bg-red-700 text-white'
+                    : 'bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5]'
                 }`}
               >
                 {loading ? (
@@ -741,10 +833,33 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
               <Button
                 type="button"
                 onClick={() => setActiveTab('dates')}
-                className="px-6 bg-poker-red hover:bg-red-700 text-white text-sm py-2"
+                className="px-6 bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5] text-sm py-2"
               >
                 <Save className="w-4 h-4 mr-2" />
                 Continuar a Fechas
+              </Button>
+            </div>
+          )}
+
+          {/* Botones para tab Blinds */}
+          {activeTab === 'blinds' && (
+            <div className="flex justify-center">
+              <Button
+                type="submit"
+                disabled={loading || !isValid}
+                className="px-6 bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5] text-sm py-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    {isEditing ? 'Actualizar Blinds' : 'Guardar Blinds'}
+                  </>
+                )}
               </Button>
             </div>
           )}
