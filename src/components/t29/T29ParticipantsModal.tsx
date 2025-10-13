@@ -60,7 +60,7 @@ export function T29ParticipantsModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b0706]/80 backdrop-blur-sm px-4 py-6"
+          className="fixed inset-0 z-[150] flex items-center justify-center bg-[#0b0706]/80 backdrop-blur-sm px-4 py-6"
           onClick={onClose}
         >
           <motion.div
@@ -73,43 +73,29 @@ export function T29ParticipantsModal({
           >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(224,182,108,0.16),_transparent_65%)]" />
 
-            <div className="relative z-10 p-6 sm:p-8">
-              <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-3xl border border-[#e0b66c]/35 bg-[rgba(42,26,20,0.85)] text-[#e0b66c] shadow-[0_18px_36px_rgba(11,6,3,0.55)]">
-                    <Users className="h-7 w-7" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#d7c59a]/70">
-                      Participantes
-                    </p>
-                    <h2 className="font-heading text-2xl uppercase tracking-[0.22em] text-[#f3e6c5]">
-                      Registro Torneo 29
-                    </h2>
-                    <p className="text-sm text-[#d7c59a]/75">
-                      {totalCount === 0
-                        ? 'Aún no hay registros confirmados.'
-                        : `${totalCount} ${totalCount === 1 ? 'jugador confirmado' : 'jugadores confirmados'}`}
-                    </p>
-                  </div>
-                </div>
+            {/* Close button - absolute position */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-4 right-4 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#e0b66c]/25 bg-[rgba(42,26,20,0.9)] text-[#d7c59a]/75 transition-colors hover:border-[#e0b66c]/45 hover:text-[#f3e6c5]"
+              aria-label="Cerrar listado de participantes"
+            >
+              <X className="h-4 w-4" />
+            </button>
 
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-3xl border border-[#e0b66c]/25 bg-[rgba(42,26,20,0.8)] text-[#d7c59a]/75 transition-colors hover:border-[#e0b66c]/45 hover:text-[#f3e6c5]"
-                  aria-label="Cerrar listado de participantes"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+            <div className="relative z-10 p-5 sm:p-6">
+              {/* Compact header - single line */}
+              <header className="flex items-center gap-3 pb-4">
+                <Users className="h-6 w-6 text-[#e0b66c]" />
+                <h2 className="font-heading text-lg uppercase tracking-[0.18em] text-[#f3e6c5]">
+                  {totalCount === 0
+                    ? 'Aún no hay registros confirmados'
+                    : `${totalCount} ${totalCount === 1 ? 'jugador confirmado' : 'jugadores confirmados'}`}
+                </h2>
               </header>
 
-              <div className="mt-6 flex items-center gap-2 rounded-2xl border border-[#e0b66c]/20 bg-[rgba(42,26,20,0.75)] px-4 py-3 text-sm text-[#d7c59a]/75">
-                <Sparkles className="h-4 w-4 text-[#e0b66c]" />
-                <span>El listado se actualiza en tiempo real cuando se suman nuevos enfermos al torneo.</span>
-              </div>
-
-              <div className="mt-6 max-h-[55vh] overflow-y-auto pr-1">
+              {/* Participants list with proper spacing for navbar */}
+              <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-1 pb-24">
                 <div className="space-y-3">
                   {isLoading ? (
                     skeletonItems.map((_, index) => (
@@ -175,6 +161,14 @@ export function T29ParticipantsModal({
                       ))
                   )}
                 </div>
+
+                {/* Info message at the bottom - after list */}
+                {participants.length > 0 && (
+                  <div className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-[#d7c59a]/60">
+                    <Sparkles className="h-3.5 w-3.5 text-[#e0b66c]/60" />
+                    <span>El listado se actualiza en tiempo real</span>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
