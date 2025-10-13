@@ -367,17 +367,17 @@ export default function StatsPage() {
                 description="Mayor cantidad de Top 3"
                 icon="medal"
                 accentColor="amber"
-                players={awards.podios.slice(0, 5).map(p => ({ player: p.player, value: p.count }))}
+                players={awards.podios.map(p => ({ player: p.player, value: p.count }))}
                 valueLabel="Podios"
               />
 
               {/* Últimos */}
               <AwardCard
                 title="Últimos"
-                description="Últimas dos posiciones"
+                description="Último lugar"
                 icon="target"
                 accentColor="rose"
-                players={awards.sieteYDos.slice(0, 5).map(s => ({ player: s.player, value: s.count }))}
+                players={awards.sieteYDos.map(s => ({ player: s.player, value: s.count }))}
                 valueLabel="Veces"
               />
 
@@ -396,7 +396,7 @@ export default function StatsPage() {
                 description="Mayor cantidad de ausencias"
                 icon="userx"
                 accentColor="rose"
-                players={awards.faltas.slice(0, 5).map(f => ({ player: f.player, value: f.count }))}
+                players={awards.faltas.map(f => ({ player: f.player, value: f.count }))}
                 valueLabel="Faltas"
               />
 
@@ -406,7 +406,7 @@ export default function StatsPage() {
                 description="Mayor cantidad en Top 9"
                 icon="users"
                 accentColor="emerald"
-                players={awards.mesasFinales.slice(0, 5).map(m => ({ player: m.player, value: m.count }))}
+                players={awards.mesasFinales.map(m => ({ player: m.player, value: m.count }))}
                 valueLabel="Veces"
               />
 
@@ -416,7 +416,7 @@ export default function StatsPage() {
                 description="Mayor cantidad de 1er lugar"
                 icon="crown"
                 accentColor="amber"
-                players={awards.victorias.slice(0, 5).map(v => ({ player: v.player, value: v.count }))}
+                players={awards.victorias.map(v => ({ player: v.player, value: v.count }))}
                 valueLabel="Victorias"
               />
             </div>
