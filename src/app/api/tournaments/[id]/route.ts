@@ -4,77 +4,75 @@ import { TournamentStatus } from '@prisma/client'
 import { withAuth, withComisionAuth } from '@/lib/api-auth'
 import { parseToUTCNoon } from '@/lib/date-utils'
 
-// GET /api/tournaments/[id] - Obtener torneo específico
+// GET /api/tournaments/[id] - Obtener torneo específico (público)
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withAuth(req, async (req) => {
-    try {
-      const { id } = await params
-      const tournamentId = parseInt(id)
+  try {
+    const { id } = await params
+    const tournamentId = parseInt(id)
 
-      if (isNaN(tournamentId)) {
-        return NextResponse.json(
-          { error: 'ID de torneo inválido' },
-          { status: 400 }
-        )
-      }
+    if (isNaN(tournamentId)) {
+      return NextResponse.json(
+        { error: 'ID de torneo inválido' },
+        { status: 400 }
+      )
+    }
 
-      const tournament = await prisma.tournament.findUnique({
-        where: { id: tournamentId },
-        include: {
-          gameDates: {
-            orderBy: { dateNumber: 'asc' }
-          },
-          tournamentParticipants: {
-            include: {
-              player: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  role: true,
-                  photoUrl: true,
-                  aliases: true
-                }
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      include: {
+        gameDates: {
+          orderBy: { dateNumber: 'asc' }
+        },
+        tournamentParticipants: {
+          include: {
+            player: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+                photoUrl: true,
+                aliases: true
               }
             }
-          },
-          blindLevels: {
-            orderBy: { level: 'asc' }
-          },
-          tournamentRankings: {
-            include: {
-              player: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  photoUrl: true
-                }
+          }
+        },
+        blindLevels: {
+          orderBy: { level: 'asc' }
+        },
+        tournamentRankings: {
+          include: {
+            player: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                photoUrl: true
               }
             }
           }
         }
-      })
-
-      if (!tournament) {
-        return NextResponse.json(
-          { error: 'Torneo no encontrado' },
-          { status: 404 }
-        )
       }
+    })
 
-      return NextResponse.json(tournament)
-    } catch (error) {
-      console.error('Error fetching tournament:', error)
+    if (!tournament) {
       return NextResponse.json(
-        { error: 'Error al obtener torneo' },
-        { status: 500 }
+        { error: 'Torneo no encontrado' },
+        { status: 404 }
       )
     }
-  })
+
+    return NextResponse.json(tournament)
+  } catch (error) {
+    console.error('Error fetching tournament:', error)
+    return NextResponse.json(
+      { error: 'Error al obtener torneo' },
+      { status: 500 }
+    )
+  }
 }
 
 // PUT /api/tournaments/[id] - Actualizar torneo
