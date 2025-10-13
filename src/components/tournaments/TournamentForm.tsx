@@ -302,6 +302,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
       const submitData = {
         number: formData.tournamentNumber,
         gameDates: formData.gameDates.map(d => ({
+          id: d.id, // Incluir ID para poder actualizar fechas existentes
           dateNumber: d.dateNumber,
           scheduledDate: d.scheduledDate
         })),
