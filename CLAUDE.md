@@ -18,7 +18,9 @@ npx prisma db push        # Apply schema changes
 
 ### Testing Scripts
 ```bash
-npx tsx scripts/test-permission-system.ts  # Permission validation
+npx tsx scripts/test-permission-system.ts   # Permission validation
+npx tsx scripts/test-api-optimization.ts    # API optimization tests
+npx tsx scripts/test-frontend-pages.ts      # Frontend pages verification
 ```
 
 ---
@@ -72,8 +74,8 @@ GET  /api/stats/awards/[tournamentId]                    # Tournament awards (8 
 GET  /api/stats/parent-child/[tournamentId]              # P&H relations (active only)
 GET  /api/stats/parent-child/[tournamentId]/[relationId] # P&H relation detail with eliminations
 
-# Proposals System (T29)
-GET    /api/proposals/public                  # Public proposals for T29
+# Proposals System (T29) - V2 Only
+GET    /api/proposals-v2/public               # Public proposals for T29
 GET    /api/proposals-v2/my                   # User's own proposals
 GET    /api/proposals-v2/admin                # Admin view (Commission only)
 POST   /api/proposals-v2                      # Create proposal
@@ -205,7 +207,16 @@ GET    /api/proposals/[id]/comments           # Get comments
 
 ## 🚨 Recent Updates
 
-### Latest (2025-10-11)
+### Latest (2025-10-13)
+- ✅ **API Optimization**: 8 endpoints eliminados (duplicados y legacy)
+- ✅ **Security Fix**: Endpoint `/players/[id]/role` ahora requiere auth Comisión
+- ✅ **Proposals V1→V2**: Sistema completamente migrado (V1 eliminado)
+- ✅ **Auth Estandarizada**: `admin/import` endpoints usan `withComisionAuth`
+- ✅ **Testing Suite**: Scripts automatizados para API y frontend
+- ✅ **Documentación**: `docs/API-PUBLIC-ENDPOINTS.md` con política de revisión
+- 📉 **Código Limpio**: ~600 líneas eliminadas, arquitectura más consistente
+
+### Previous (2025-10-11)
 - ✅ New 12-level blinds structure (down from 18 levels)
 - ✅ Longer durations: 25min early levels, 20min mid-levels, 15min final
 - ✅ 30-minute dinner break after level 3 (manual timer pause)
@@ -355,5 +366,6 @@ npx tsx scripts/fix-gamedate-participants.ts
 ---
 
 **Status**: PRODUCTION READY ✅
-**Last Update**: 2025-10-07
+**Last Update**: 2025-10-13
 **Design System**: PokerNew v1.0
+**API Audit**: Completada - Ver AUDITORIA-API.md y OPTIMIZACION-COMPLETADA.md
