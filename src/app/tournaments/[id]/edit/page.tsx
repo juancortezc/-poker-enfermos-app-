@@ -1,16 +1,22 @@
 import TournamentForm from '@/components/tournaments/TournamentForm'
 
-interface EditTournamentPageProps {
+interface PageProps {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ tab?: string }>
 }
 
-export default async function EditTournamentPage({ params }: EditTournamentPageProps) {
+export default async function EditTournamentPage({ params, searchParams }: PageProps) {
   const { id } = await params
-  
-  return <TournamentForm tournamentId={id} />
+  const { tab } = await searchParams
+
+  return (
+    <TournamentForm
+      tournamentId={id}
+    />
+  )
 }
 
 export const metadata = {
-  title: 'Editar Torneo - Poker Enfermos',
+  title: 'Editar Torneo - Poker de Enfermos',
   description: 'Editar configuración del torneo'
 }
