@@ -103,6 +103,7 @@ export default function ParentChildCard({ relation, index, tournamentId }: Paren
             </div>
           </div>
         </div>
+      </div>
       </button>
 
       <ParentChildDetailModal

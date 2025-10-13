@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { findPlayerByCSVName } from '@/lib/csv-import';
+import { withComisionAuth } from '@/lib/api-auth';
 
 interface CSVElimination {
   torneo: string;
@@ -150,20 +151,9 @@ async function findGameDateForImport(tournamentName: string, dateNumber: number)
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    // Check authentication
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Token de autorización requerido' },
-        { status: 401 }
-      );
-    }
-
-    // For now, we'll skip the actual auth validation since it would require database access
-    // In a production environment, you'd validate the token here
-
-    const body = await request.json();
+  return withComisionAuth(request, async (req) => {
+    try {
+      const body = await req.json();
     const { eliminations } = body;
 
     if (!eliminations || !Array.isArray(eliminations) || eliminations.length === 0) {
@@ -220,14 +210,15 @@ export async function POST(request: NextRequest) {
       dateNumber: gameDate.dateNumber
     });
 
-  } catch (error) {
-    console.error('💥 Error during import:', error);
-    return NextResponse.json(
-      { 
-        success: false,
-        error: `Error durante la importación: ${error instanceof Error ? error.message : 'Error desconocido'}` 
-      },
-      { status: 500 }
-    );
-  }
+    } catch (error) {
+      console.error('💥 Error during import:', error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Error durante la importación: ${error instanceof Error ? error.message : 'Error desconocido'}`
+        },
+        { status: 500 }
+      );
+    }
+  });
 }

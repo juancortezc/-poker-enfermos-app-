@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateCSVPlayerNames } from '@/lib/csv-import';
+import { withComisionAuth } from '@/lib/api-auth';
 
 interface CSVElimination {
   torneo: string;
@@ -137,21 +138,10 @@ async function validateCSVData(eliminations: CSVElimination[]): Promise<{
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    // Check authentication
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Token de autorización requerido' },
-        { status: 401 }
-      );
-    }
-
-    // For now, we'll skip the actual auth validation since it would require database access
-    // In a production environment, you'd validate the token here
-
-    // Get uploaded file
-    const formData = await request.formData();
+  return withComisionAuth(request, async (req) => {
+    try {
+      // Get uploaded file
+      const formData = await req.formData();
     const file = formData.get('file') as File;
     
     if (!file) {
@@ -227,11 +217,12 @@ export async function POST(request: NextRequest) {
       previewData
     });
 
-  } catch (error) {
-    console.error('💥 Error validating CSV:', error);
-    return NextResponse.json(
-      { error: `Error procesando archivo: ${error instanceof Error ? error.message : 'Error desconocido'}` },
-      { status: 500 }
-    );
-  }
+    } catch (error) {
+      console.error('💥 Error validating CSV:', error);
+      return NextResponse.json(
+        { error: `Error procesando archivo: ${error instanceof Error ? error.message : 'Error desconocido'}` },
+        { status: 500 }
+      );
+    }
+  });
 }
