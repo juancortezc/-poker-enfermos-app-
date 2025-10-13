@@ -36,6 +36,7 @@ const iconMap = {
   regulations: FileText,
   'game-dates': CalendarCheck,
   tournaments: Trophy,
+  'torneo-anterior': Trophy,
   'calendar-builder': CalendarPlus,
   players: Users,
   import: FileSpreadsheet,

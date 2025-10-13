@@ -165,6 +165,13 @@ export function getDashboardFeatures(userRole: UserRole) {
       ...withPermission('stats-parents')
     },
     {
+      id: 'torneo-anterior',
+      title: 'TORNEO ANTERIOR',
+      href: '/admin/torneo-anterior',
+      permission: 'tournaments',
+      ...withPermission('tournaments')
+    },
+    {
       id: 'calendar-builder',
       title: 'CREAR CALENDARIO',
       href: '/admin/calendar/create',
