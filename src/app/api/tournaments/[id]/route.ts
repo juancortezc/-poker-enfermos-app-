@@ -150,11 +150,11 @@ export async function PUT(
       // Actualizar fechas si se proporcionaron
       if (gameDates && Array.isArray(gameDates)) {
         await Promise.all(
-          gameDates.map((gameDate: { id: string; dateNumber: number; scheduledDate: string }) => 
+          gameDates.map((gameDate: { id?: number; dateNumber: number; scheduledDate: string; playersMin?: number; playersMax?: number }) =>
             prisma.gameDate.update({
-              where: { 
-                id: gameDate.id,
-                tournamentId: tournamentId 
+              where: {
+                id: gameDate.id!,
+                tournamentId: tournamentId
               },
               data: {
                 scheduledDate: parseToUTCNoon(gameDate.scheduledDate),
