@@ -16,6 +16,13 @@ const baseNavItems = [
   { href: '/admin', label: 'Menú', icon: '/icons/nav-settings.png', roles: ['all'] as const },
 ]
 
+const timerNavItem = {
+  href: '/timer',
+  label: 'Timer',
+  icon: '/icons/nav-timer.png',
+  roles: ['all'] as const, // Visible para todos cuando gameDate está in_progress
+}
+
 const registroNavItem = {
   href: '/registro',
   label: 'Registro',
@@ -28,6 +35,7 @@ export function BottomNav() {
   const router = useRouter()
   const { user } = useAuth()
   const [hasActiveGameDate, setHasActiveGameDate] = useState(false)
+  const [gameDateStatus, setGameDateStatus] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -40,9 +48,15 @@ export function BottomNav() {
         if (response.ok) {
           const data = await response.json()
           setHasActiveGameDate(Boolean(data))
+          setGameDateStatus(data?.status || null)
+        } else {
+          setHasActiveGameDate(false)
+          setGameDateStatus(null)
         }
       } catch (error) {
         console.error('Error checking active game date:', error)
+        setHasActiveGameDate(false)
+        setGameDateStatus(null)
       }
     }
 
@@ -61,8 +75,15 @@ export function BottomNav() {
 
   const navItems = [...baseNavItems]
 
+  // Timer visible para TODOS cuando gameDate está in_progress
+  if (hasActiveGameDate && gameDateStatus === 'in_progress') {
+    navItems.splice(2, 0, timerNavItem)
+  }
+
+  // Registro solo visible para Comisión cuando hay gameDate activa
   if (hasActiveGameDate && canCRUD(user.role)) {
-    navItems.splice(2, 0, registroNavItem)
+    const insertIndex = gameDateStatus === 'in_progress' ? 3 : 2
+    navItems.splice(insertIndex, 0, registroNavItem)
   }
 
   const filteredItems = navItems.filter(
