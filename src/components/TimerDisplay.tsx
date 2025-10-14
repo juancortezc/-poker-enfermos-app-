@@ -37,6 +37,7 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
   const {
     timerState,
     currentBlindLevel,
+    nextBlindLevel,
     formattedTimeRemaining,
     isLoading: timerLoading,
     isActive: timerActive,
@@ -64,6 +65,69 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
   const durationMinutes = activeBlind?.duration ?? 0
   const displayTime = durationMinutes === 0 ? 'SIN LÍMITE' : formattedTimeRemaining
   const isCriticalTime = durationMinutes > 0 && timeRemainingSeconds < 300
+
+  // Auto-avance cuando el timer llega a 0 (solo para usuarios con permisos de control)
+  useEffect(() => {
+    const shouldAutoAdvance =
+      canControl && // Solo usuarios de Comisión pueden auto-avanzar
+      timerState &&
+      timerActive &&
+      !timerPaused &&
+      timeRemainingSeconds <= 0 &&
+      durationMinutes > 0 &&
+      effectiveGameDateId
+
+    if (!shouldAutoAdvance || isControlling) return
+
+    const autoLevelUp = async () => {
+      const nextLevel = timerState.currentLevel + 1
+
+      // Verificar si existe siguiente nivel
+      if (!nextBlindLevel) {
+        console.log('No hay más niveles, timer finalizado')
+        return
+      }
+
+      console.log(`Auto-avanzando del nivel ${timerState.currentLevel} al ${nextLevel}`)
+      setIsControlling(true)
+
+      try {
+        const response = await fetch(`/api/timer/game-date/${effectiveGameDateId}/level-up`, {
+          method: 'POST',
+          headers: buildAuthHeaders({}, { includeJson: true }),
+          body: JSON.stringify({ toLevel: nextLevel })
+        })
+
+        if (response.ok) {
+          console.log(`Auto-avance exitoso al nivel ${nextLevel}`)
+          await Promise.all([refresh(), refreshTimer()])
+        } else {
+          const error = await response.json()
+          console.error('Error en auto-avance:', error)
+        }
+      } catch (error) {
+        console.error('Error ejecutando auto-avance:', error)
+      } finally {
+        setIsControlling(false)
+      }
+    }
+
+    // Pequeño delay para evitar múltiples llamadas
+    const timer = setTimeout(autoLevelUp, 500)
+    return () => clearTimeout(timer)
+  }, [
+    canControl,
+    timerState,
+    timerActive,
+    timerPaused,
+    timeRemainingSeconds,
+    durationMinutes,
+    effectiveGameDateId,
+    isControlling,
+    nextBlindLevel,
+    refresh,
+    refreshTimer
+  ])
 
   const handlePause = async () => {
     if (!effectiveGameDateId || isControlling) return
