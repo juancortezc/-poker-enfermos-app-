@@ -55,13 +55,18 @@ export default function RegistroPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Solo cargar timer si la fecha ya está in_progress (evita 404 cuando status='CREATED')
+  const timerGameDateId = activeGameDate?.status === 'in_progress'
+    ? activeGameDate.id
+    : null
+
   const {
     timerState,
     currentBlindLevel,
     formattedTimeRemaining,
     isActive: timerIsActive,
     isPaused: timerIsPaused
-  } = useTimerStateById(activeGameDate?.id ?? null)
+  } = useTimerStateById(timerGameDateId)
 
   // Función para obtener todos los datos
   const handleStartGame = async () => {
