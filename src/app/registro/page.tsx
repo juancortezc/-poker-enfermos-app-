@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { canCRUD } from '@/lib/auth'
-import { ArrowLeft } from 'lucide-react'
-import { TimerDisplay } from '@/components/registro/TimerDisplay'
+import { ArrowLeft, Pause, Play } from 'lucide-react'
+import { TimerDisplay as TimerDisplaySimple } from '@/components/registro/TimerDisplay'
 import { GameStatsCards } from '@/components/registro/GameStatsCards'
 import { EliminationForm } from '@/components/registro/EliminationForm'
 import { EliminationHistory } from '@/components/registro/EliminationHistory'
@@ -54,6 +54,7 @@ export default function RegistroPage() {
   const [eliminations, setEliminations] = useState<Elimination[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isControlling, setIsControlling] = useState(false)
 
   // Solo cargar timer si la fecha ya está in_progress (evita 404 cuando status='CREATED')
   const timerGameDateId = activeGameDate?.status === 'in_progress'
@@ -65,8 +66,54 @@ export default function RegistroPage() {
     currentBlindLevel,
     formattedTimeRemaining,
     isActive: timerIsActive,
-    isPaused: timerIsPaused
+    isPaused: timerIsPaused,
+    refresh: refreshTimer
   } = useTimerStateById(timerGameDateId)
+
+  // Control de timer (pausar/reiniciar)
+  const handlePauseTimer = async () => {
+    if (!activeGameDate || isControlling) return
+    setIsControlling(true)
+    try {
+      const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/pause`, {
+        method: 'POST',
+        headers: buildAuthHeaders({}, { includeJson: true })
+      })
+      if (response.ok) {
+        await Promise.all([fetchAllData(), refreshTimer()])
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Error al pausar timer')
+      }
+    } catch (error) {
+      console.error('Error pausing timer:', error)
+      setError('Error al pausar timer')
+    } finally {
+      setIsControlling(false)
+    }
+  }
+
+  const handleResumeTimer = async () => {
+    if (!activeGameDate || isControlling) return
+    setIsControlling(true)
+    try {
+      const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/resume`, {
+        method: 'POST',
+        headers: buildAuthHeaders({}, { includeJson: true })
+      })
+      if (response.ok) {
+        await Promise.all([fetchAllData(), refreshTimer()])
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Error al reiniciar timer')
+      }
+    } catch (error) {
+      console.error('Error resuming timer:', error)
+      setError('Error al reiniciar timer')
+    } finally {
+      setIsControlling(false)
+    }
+  }
 
   // Función para obtener todos los datos
   const handleStartGame = async () => {
@@ -247,12 +294,46 @@ export default function RegistroPage() {
               INICIAR FECHA
             </button>
           ) : (
-            <TimerDisplay 
-              timeRemaining={timerSeconds}
-              formattedTime={displayFormatted}
-              status={timerStatus}
-              currentBlind={displayBlind}
-            />
+            <>
+              <TimerDisplaySimple
+                timeRemaining={timerSeconds}
+                formattedTime={displayFormatted}
+                status={timerStatus}
+                currentBlind={displayBlind}
+              />
+
+              {/* Botones de control (solo para Comisión) */}
+              {user && canCRUD(user.role) && (
+                <div className="grid grid-cols-2 gap-2">
+                  {timerIsActive ? (
+                    <button
+                      onClick={handlePauseTimer}
+                      disabled={isControlling}
+                      className="px-4 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Pause className="w-4 h-4" />
+                      PAUSAR
+                    </button>
+                  ) : timerIsPaused ? (
+                    <button
+                      onClick={handleResumeTimer}
+                      disabled={isControlling}
+                      className="px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Play className="w-4 h-4" />
+                      REINICIAR
+                    </button>
+                  ) : null}
+
+                  <button
+                    onClick={() => router.push('/timer')}
+                    className="px-4 py-3 bg-poker-card hover:bg-poker-card/80 text-white font-semibold rounded-lg transition-colors"
+                  >
+                    VER TIMER
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           {/* Stats Cards */}

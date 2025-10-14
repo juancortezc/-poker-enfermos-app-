@@ -60,7 +60,7 @@ const formatTime = (seconds: number): string => {
 
 function useTimerStateInternal(key: string | null): UseTimerStateReturn {
   const { data, error, mutate } = useSWR<TimerStatePayload>(key, {
-    refreshInterval: 0,
+    refreshInterval: 1000, // Poll cada 1 segundo para actualización en tiempo real
     revalidateOnFocus: true,
     dedupingInterval: 400
   })
