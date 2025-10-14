@@ -7,8 +7,9 @@ import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { useGameDateLiveStatus } from '@/hooks/useGameDateLiveStatus'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useTimerStateById } from '@/hooks/useTimerState'
+import { useWakeLock } from '@/hooks/useWakeLock'
 import { Card, CardContent } from '@/components/ui/card'
-import { Play, Pause, Bell, BellOff } from 'lucide-react'
+import { Play, Pause, Bell, BellOff, Smartphone, SmartphoneNfc } from 'lucide-react'
 import { canCRUD } from '@/lib/auth'
 import { buildAuthHeaders } from '@/lib/client-auth'
 
@@ -57,6 +58,9 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
   const [isControlling, setIsControlling] = useState(false)
   const [lastNotifiedLevel, setLastNotifiedLevel] = useState<number | null>(null)
   const [lastWarningLevel, setLastWarningLevel] = useState<number | null>(null)
+
+  // Wake Lock para mantener pantalla activa
+  const { isSupported: wakeLockSupported, isActive: wakeLockActive, request: requestWakeLock, release: releaseWakeLock } = useWakeLock()
 
   const isGameActive = timerActive && !timerPaused
 
@@ -315,34 +319,66 @@ export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {isGameActive ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                {isGameActive ? (
+                  <button
+                    onClick={handlePause}
+                    disabled={isControlling}
+                    className="btn-admin-neutral h-14 flex items-center justify-center gap-2"
+                  >
+                    <Pause className="w-5 h-5" />
+                    PAUSAR
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleResume}
+                    disabled={isControlling}
+                    className="btn-admin-primary h-14 flex items-center justify-center gap-2"
+                  >
+                    <Play className="w-5 h-5" />
+                    REINICIAR
+                  </button>
+                )}
+
                 <button
-                  onClick={handlePause}
-                  disabled={isControlling}
-                  className="btn-admin-neutral h-14 flex items-center justify-center gap-2"
+                  onClick={() => window.location.href = '/notificaciones'}
+                  className="btn-admin-secondary h-14 flex items-center justify-center gap-2"
                 >
-                  <Pause className="w-5 h-5" />
-                  PAUSAR
+                  <Bell className="w-5 h-5" />
+                  CONFIG
                 </button>
-              ) : (
+              </div>
+
+              {/* Wake Lock Toggle */}
+              {wakeLockSupported && (
                 <button
-                  onClick={handleResume}
-                  disabled={isControlling}
-                  className="btn-admin-primary h-14 flex items-center justify-center gap-2"
+                  onClick={async () => {
+                    if (wakeLockActive) {
+                      await releaseWakeLock()
+                    } else {
+                      await requestWakeLock()
+                    }
+                  }}
+                  className={`w-full h-12 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                    wakeLockActive
+                      ? 'bg-green-600 hover:bg-green-700 text-white'
+                      : 'btn-admin-secondary'
+                  }`}
                 >
-                  <Play className="w-5 h-5" />
-                  REINICIAR
+                  {wakeLockActive ? (
+                    <>
+                      <SmartphoneNfc className="w-4 h-4" />
+                      PANTALLA ACTIVA
+                    </>
+                  ) : (
+                    <>
+                      <Smartphone className="w-4 h-4" />
+                      MANTENER ACTIVA
+                    </>
+                  )}
                 </button>
               )}
-
-              <button
-                onClick={() => window.location.href = '/notificaciones'}
-                className="btn-admin-secondary h-14 flex items-center justify-center gap-2"
-              >
-                <Bell className="w-5 h-5" />
-                CONFIG
-              </button>
             </div>
           </div>
         )}

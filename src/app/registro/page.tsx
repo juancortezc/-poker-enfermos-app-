@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { canCRUD } from '@/lib/auth'
-import { ArrowLeft, Pause, Play } from 'lucide-react'
+import { ArrowLeft, Pause, Play, Smartphone, SmartphoneNfc } from 'lucide-react'
 import { TimerDisplay as TimerDisplaySimple } from '@/components/registro/TimerDisplay'
 import { GameStatsCards } from '@/components/registro/GameStatsCards'
 import { EliminationForm } from '@/components/registro/EliminationForm'
@@ -12,6 +12,7 @@ import { EliminationHistory } from '@/components/registro/EliminationHistory'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { useTimerStateById } from '@/hooks/useTimerState'
+import { useWakeLock } from '@/hooks/useWakeLock'
 import { formatTime } from '@/lib/timer-utils'
 
 interface Player {
@@ -55,6 +56,9 @@ export default function RegistroPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isControlling, setIsControlling] = useState(false)
+
+  // Wake Lock para mantener pantalla activa
+  const { isSupported: wakeLockSupported, isActive: wakeLockActive, request: requestWakeLock, release: releaseWakeLock } = useWakeLock()
 
   // Solo cargar timer si la fecha ya está in_progress (evita 404 cuando status='CREATED')
   const timerGameDateId = activeGameDate?.status === 'in_progress'
@@ -304,33 +308,65 @@ export default function RegistroPage() {
 
               {/* Botones de control (solo para Comisión) */}
               {user && canCRUD(user.role) && (
-                <div className="grid grid-cols-2 gap-2">
-                  {timerIsActive ? (
-                    <button
-                      onClick={handlePauseTimer}
-                      disabled={isControlling}
-                      className="px-4 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Pause className="w-4 h-4" />
-                      PAUSAR
-                    </button>
-                  ) : timerIsPaused ? (
-                    <button
-                      onClick={handleResumeTimer}
-                      disabled={isControlling}
-                      className="px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Play className="w-4 h-4" />
-                      REINICIAR
-                    </button>
-                  ) : null}
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    {timerIsActive ? (
+                      <button
+                        onClick={handlePauseTimer}
+                        disabled={isControlling}
+                        className="px-4 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-yellow-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Pause className="w-4 h-4" />
+                        PAUSAR
+                      </button>
+                    ) : timerIsPaused ? (
+                      <button
+                        onClick={handleResumeTimer}
+                        disabled={isControlling}
+                        className="px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Play className="w-4 h-4" />
+                        REINICIAR
+                      </button>
+                    ) : null}
 
-                  <button
-                    onClick={() => router.push('/timer')}
-                    className="px-4 py-3 bg-poker-card hover:bg-poker-card/80 text-white font-semibold rounded-lg transition-colors"
-                  >
-                    VER TIMER
-                  </button>
+                    <button
+                      onClick={() => router.push('/timer')}
+                      className="px-4 py-3 bg-poker-card hover:bg-poker-card/80 text-white font-semibold rounded-lg transition-colors"
+                    >
+                      VER TIMER
+                    </button>
+                  </div>
+
+                  {/* Wake Lock Toggle */}
+                  {wakeLockSupported && (
+                    <button
+                      onClick={async () => {
+                        if (wakeLockActive) {
+                          await releaseWakeLock()
+                        } else {
+                          await requestWakeLock()
+                        }
+                      }}
+                      className={`w-full px-4 py-3 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                        wakeLockActive
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'bg-poker-card hover:bg-poker-card/80 text-white'
+                      }`}
+                    >
+                      {wakeLockActive ? (
+                        <>
+                          <SmartphoneNfc className="w-4 h-4" />
+                          PANTALLA ACTIVA
+                        </>
+                      ) : (
+                        <>
+                          <Smartphone className="w-4 h-4" />
+                          MANTENER PANTALLA ACTIVA
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               )}
             </>
