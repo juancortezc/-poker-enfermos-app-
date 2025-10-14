@@ -6,7 +6,8 @@ import { emitTimerEvent } from '@/lib/server-socket'
 
 /**
  * POST /api/timer/game-date/[id]/reset
- * Reinicia el timer al nivel 1 con tiempo completo
+ * Reinicia el tiempo del nivel ACTUAL con duración completa
+ * Útil para testing: permite reiniciar el nivel sin perder progreso
  * Solo para usuarios de Comisión
  */
 export async function POST(
@@ -64,26 +65,26 @@ export async function POST(
         )
       }
 
-      // Obtener el primer nivel de ciegas
-      const firstBlindLevel = gameDate.tournament.blindLevels.find(bl => bl.level === 1)
-      if (!firstBlindLevel) {
+      // Obtener el nivel actual de ciegas
+      const currentBlindLevel = gameDate.tournament.blindLevels.find(bl => bl.level === timerState.currentLevel)
+      if (!currentBlindLevel) {
         return NextResponse.json(
-          { error: 'No se encontró el nivel 1 en el torneo' },
+          { error: `No se encontró el nivel ${timerState.currentLevel} en el torneo` },
           { status: 400 }
         )
       }
 
-      const newTimeRemaining = firstBlindLevel.duration * 60
-      const updatePayload = deriveLevelChangeUpdate(timerState, 1, newTimeRemaining)
+      const newTimeRemaining = currentBlindLevel.duration * 60
+      const updatePayload = deriveLevelChangeUpdate(timerState, timerState.currentLevel, newTimeRemaining)
 
-      // Reiniciar el timer al nivel 1
+      // Reiniciar el tiempo del nivel actual (sin cambiar totalElapsed)
       const updatedTimer = await prisma.timerState.update({
         where: { id: timerState.id },
         data: {
           ...updatePayload,
           status: 'active', // Reiniciar como activo
-          totalElapsed: 0, // Resetear tiempo total
-          startTime: new Date(), // Nuevo tiempo de inicio
+          // NO resetear totalElapsed - preservar historial
+          levelStartTime: new Date(), // Nuevo tiempo de inicio del nivel
         }
       })
 
@@ -94,14 +95,14 @@ export async function POST(
           actionType: 'level_up',
           performedBy: user.id,
           fromLevel: timerState.currentLevel,
-          toLevel: 1,
+          toLevel: timerState.currentLevel,
           metadata: {
-            action: 'reset',
+            action: 'reset_level',
             resetAt: new Date().toISOString(),
-            previousLevel: timerState.currentLevel,
-            newDuration: firstBlindLevel.duration,
-            newSmallBlind: firstBlindLevel.smallBlind,
-            newBigBlind: firstBlindLevel.bigBlind,
+            level: timerState.currentLevel,
+            newDuration: currentBlindLevel.duration,
+            newSmallBlind: currentBlindLevel.smallBlind,
+            newBigBlind: currentBlindLevel.bigBlind,
             timeRemaining: updatePayload.timeRemaining
           }
         }
@@ -110,8 +111,8 @@ export async function POST(
       const responseBody = {
         success: true,
         timerState: updatedTimer,
-        blindLevel: firstBlindLevel,
-        message: 'Timer reiniciado al nivel 1 exitosamente'
+        blindLevel: currentBlindLevel,
+        message: `Timer del nivel ${timerState.currentLevel} reiniciado exitosamente`
       }
 
       await emitTimerEvent(gameDateId, 'timer-started')

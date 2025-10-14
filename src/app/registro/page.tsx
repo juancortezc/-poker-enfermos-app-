@@ -124,8 +124,8 @@ export default function RegistroPage() {
 
     // Confirmación antes de resetear
     const confirmed = window.confirm(
-      '¿Estás seguro de que quieres reiniciar el timer al nivel 1?\n\n' +
-      'Esta acción reiniciará completamente el timer.'
+      '¿Estás seguro de que quieres reiniciar el tiempo del nivel actual?\n\n' +
+      'Esto restablecerá el tiempo completo del nivel pero mantendrá el progreso del juego.'
     )
 
     if (!confirmed) return
@@ -369,14 +369,14 @@ export default function RegistroPage() {
                     </button>
                   </div>
 
-                  {/* Botón de reinicio de timer */}
+                  {/* Botón de reinicio de tiempo del nivel */}
                   <button
                     onClick={handleResetTimer}
                     disabled={isControlling}
-                    className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                    className="w-full px-4 py-3 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
                     <RotateCcw className="w-4 h-4" />
-                    REINICIAR TIMER A NIVEL 1
+                    REINICIAR TIEMPO DEL NIVEL
                   </button>
 
                   {/* Wake Lock Toggle */}
