@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { canCRUD } from '@/lib/auth'
-import { ArrowLeft, Pause, Play, Smartphone, SmartphoneNfc } from 'lucide-react'
+import { ArrowLeft, Pause, Play, Smartphone, SmartphoneNfc, RotateCcw } from 'lucide-react'
 import { TimerDisplay as TimerDisplaySimple } from '@/components/registro/TimerDisplay'
 import { GameStatsCards } from '@/components/registro/GameStatsCards'
 import { EliminationForm } from '@/components/registro/EliminationForm'
@@ -114,6 +114,37 @@ export default function RegistroPage() {
     } catch (error) {
       console.error('Error resuming timer:', error)
       setError('Error al reiniciar timer')
+    } finally {
+      setIsControlling(false)
+    }
+  }
+
+  const handleResetTimer = async () => {
+    if (!activeGameDate || isControlling) return
+
+    // Confirmación antes de resetear
+    const confirmed = window.confirm(
+      '¿Estás seguro de que quieres reiniciar el timer al nivel 1?\n\n' +
+      'Esta acción reiniciará completamente el timer.'
+    )
+
+    if (!confirmed) return
+
+    setIsControlling(true)
+    try {
+      const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/reset`, {
+        method: 'POST',
+        headers: buildAuthHeaders({}, { includeJson: true })
+      })
+      if (response.ok) {
+        await Promise.all([fetchAllData(), refreshTimer()])
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Error al resetear timer')
+      }
+    } catch (error) {
+      console.error('Error resetting timer:', error)
+      setError('Error al resetear timer')
     } finally {
       setIsControlling(false)
     }
@@ -326,7 +357,7 @@ export default function RegistroPage() {
                         className="px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
                         <Play className="w-4 h-4" />
-                        REINICIAR
+                        REANUDAR
                       </button>
                     ) : null}
 
@@ -337,6 +368,16 @@ export default function RegistroPage() {
                       VER TIMER
                     </button>
                   </div>
+
+                  {/* Botón de reinicio de timer */}
+                  <button
+                    onClick={handleResetTimer}
+                    disabled={isControlling}
+                    className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-600/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    REINICIAR TIMER A NIVEL 1
+                  </button>
 
                   {/* Wake Lock Toggle */}
                   {wakeLockSupported && (
