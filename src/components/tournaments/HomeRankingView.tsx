@@ -191,6 +191,10 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
   const others = rankings.slice(3)
   const highlightOrder: Array<'gold' | 'silver' | 'bronze'> = ['gold', 'silver', 'bronze']
 
+  // Identificar las 2 últimas posiciones para aplicar highlight pink (premio 7/2)
+  const totalPlayers = rankings.length
+  const lastTwoPositions = [totalPlayers - 1, totalPlayers] // Últimas 2 posiciones
+
   return (
     <section className="space-y-8">
       <header className="text-center space-y-3">
@@ -229,32 +233,69 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
       </div>
 
       {others.length > 0 && (
-        <div className="paper space-y-4 px-5 py-6 sm:px-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="font-heading text-sm uppercase tracking-[0.26em] text-[#e0b66c]">
-              Clasificación extendida
-            </h3>
-            <NoirButton
-              variant="ghost"
-              size="sm"
-              onClick={refresh}
-              className="self-start gap-2 px-3 py-2 text-[10px]"
-            >
-              <RotateCw className="h-4 w-4" />
-              Actualizar
-            </NoirButton>
+        <>
+          <div className="paper space-y-4 px-5 py-6 sm:px-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="font-heading text-sm uppercase tracking-[0.26em] text-[#e0b66c]">
+                Clasificación extendida
+              </h3>
+              <NoirButton
+                variant="ghost"
+                size="sm"
+                onClick={refresh}
+                className="self-start gap-2 px-3 py-2 text-[10px]"
+              >
+                <RotateCw className="h-4 w-4" />
+                Actualizar
+              </NoirButton>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              {others
+                .filter(player => !lastTwoPositions.includes(player.position))
+                .map((player) => (
+                  <PlayerRow
+                    key={player.playerId}
+                    player={player}
+                    onSelect={openPlayerModal}
+                  />
+                ))}
+            </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            {others.map((player) => (
-              <PlayerRow
-                key={player.playerId}
-                player={player}
-                onSelect={openPlayerModal}
-              />
-            ))}
-          </div>
-        </div>
+          {/* Sección 7/2: Últimas 2 posiciones con cards grandes y pink */}
+          {others.filter(player => lastTwoPositions.includes(player.position)).length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-center font-heading text-lg uppercase tracking-[0.24em] text-[#ec4899]">
+                Premio 7/2
+              </h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                {others
+                  .filter(player => lastTwoPositions.includes(player.position))
+                  .map((player) => (
+                    <button
+                      key={player.playerId}
+                      type="button"
+                      onClick={() => openPlayerModal(player.playerId)}
+                      className="text-left"
+                    >
+                      <RankCard
+                        position={player.position}
+                        name={player.playerName}
+                        alias={player.playerAlias}
+                        points={player.finalScore ?? player.totalPoints}
+                        trend={player.trend === 'up' ? 'up' : player.trend === 'down' ? 'down' : 'steady'}
+                        meta={`Total ${player.totalPoints} pts • ${player.datesPlayed} fechas`}
+                        highlight="pink"
+                        avatarUrl={player.playerPhoto}
+                        footer={`Victorias ${player.firstPlaces} · Podios ${player.secondPlaces + player.thirdPlaces}`}
+                      />
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <PlayerDetailModal
