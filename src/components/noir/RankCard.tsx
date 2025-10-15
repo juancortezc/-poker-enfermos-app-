@@ -31,8 +31,8 @@ export interface RankCardProps {
 
 const highlightStyles: Record<HighlightVariant, string> = {
   gold: 'border-[#e0b66c]/60 shadow-glow-gold bg-gradient-to-br from-[#e0b66c]/5 to-transparent',
-  silver: 'border-[#d6d3cf]/50 shadow-glow-silver bg-gradient-to-br from-[#d6d3cf]/5 to-transparent',
-  bronze: 'border-[#b68351]/50 shadow-glow-bronze bg-gradient-to-br from-[#b68351]/5 to-transparent',
+  silver: 'border-[#ec4899]/50 shadow-glow-pink bg-gradient-to-br from-[#ec4899]/8 to-transparent',
+  bronze: 'border-[#f472b6]/45 shadow-glow-pink-light bg-gradient-to-br from-[#f472b6]/8 to-transparent',
   default: 'border-[#e0b66c]/15 shadow-[0_18px_40px_rgba(11,6,3,0.45)] bg-[rgba(24,14,10,0.92)]',
 }
 
@@ -115,7 +115,13 @@ function RankCardComponent({
         {/* Foto Grande (Principal) */}
         <div className="relative mx-auto mb-4">
           {avatarUrl ? (
-            <div className="relative h-32 w-32 mx-auto overflow-hidden rounded-full border-3 border-[#e0b66c]/50 bg-[#2a1a14] shadow-[0_16px_40px_rgba(11,6,3,0.65)]">
+            <div className={cn(
+              "relative h-32 w-32 mx-auto overflow-hidden rounded-full border-3 bg-[#2a1a14] shadow-[0_16px_40px_rgba(11,6,3,0.65)]",
+              highlight === 'gold' && 'border-[#e0b66c]/60',
+              highlight === 'silver' && 'border-[#ec4899]/60',
+              highlight === 'bronze' && 'border-[#f472b6]/55',
+              highlight === 'default' && 'border-[#e0b66c]/35'
+            )}>
               <Image
                 src={avatarUrl}
                 alt={name}
@@ -126,7 +132,13 @@ function RankCardComponent({
               />
             </div>
           ) : (
-            <div className="flex h-32 w-32 mx-auto items-center justify-center rounded-full border-3 border-[#e0b66c]/35 bg-[#271911] text-3xl font-heading uppercase tracking-[0.24em] text-[#d7c59a] shadow-[0_16px_40px_rgba(11,6,3,0.65)]">
+            <div className={cn(
+              "flex h-32 w-32 mx-auto items-center justify-center rounded-full border-3 bg-[#271911] text-3xl font-heading uppercase tracking-[0.24em] text-[#d7c59a] shadow-[0_16px_40px_rgba(11,6,3,0.65)]",
+              highlight === 'gold' && 'border-[#e0b66c]/60',
+              highlight === 'silver' && 'border-[#ec4899]/60',
+              highlight === 'bronze' && 'border-[#f472b6]/55',
+              highlight === 'default' && 'border-[#e0b66c]/35'
+            )}>
               {name.slice(0, 2)}
             </div>
           )}

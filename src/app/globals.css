@@ -649,6 +649,15 @@
     box-shadow: 0 20px 50px rgba(182, 131, 81, 0.30), 0 0 30px rgba(182, 131, 81, 0.12);
   }
 
+  /* Shadow Glow Pink para posiciones 2 y 3 */
+  .shadow-glow-pink {
+    box-shadow: 0 20px 50px rgba(236, 72, 153, 0.35), 0 0 35px rgba(236, 72, 153, 0.18);
+  }
+
+  .shadow-glow-pink-light {
+    box-shadow: 0 20px 50px rgba(244, 114, 182, 0.30), 0 0 35px rgba(244, 114, 182, 0.15);
+  }
+
   /* Border utilities */
   .border-3 {
     border-width: 3px;
