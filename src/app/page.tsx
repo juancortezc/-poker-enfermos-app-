@@ -36,21 +36,19 @@ export default function Home() {
     )
   }
 
-  // Debug: Log tournament data
-  console.log('🏠 Home Debug:', {
-    activeTournament,
-    fullData,
-    progress,
-    isNotFound,
-    hasResults: progress && progress.completed > 0
-  })
+  // Check if tournament has started (has completed dates)
+  const hasResults = progress && progress.completed > 0
 
-  // Always show HomeRankingView when there's an active tournament
-  // The component itself will handle the fallback to previous tournament if needed
   return (
     <section className="space-y-8">
       {activeTournament ? (
-        <HomeRankingView tournamentId={activeTournament.id} />
+        hasResults ? (
+          <HomeRankingView tournamentId={activeTournament.id} />
+        ) : (
+          <PreTournamentHomeView
+            currentTournament={fullData?.tournament}
+          />
+        )
       ) : (
         <div className="paper px-6 py-10 text-center">
           <h2 className="font-heading text-2xl uppercase tracking-[0.22em] text-[#f3e6c5]">
