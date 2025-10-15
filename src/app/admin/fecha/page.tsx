@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Loader2, CalendarCheck, ShieldAlert } from 'lucide-react'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import AwardCard from '@/components/stats/AwardCard'
+import { fetcher } from '@/lib/swr-config'
 
 interface Player {
   id: string
@@ -34,20 +35,6 @@ interface DateAwardsResponse {
     sieteYDos: Player[]
     faltas: Player[]
   }
-}
-
-const fetcher = async (url: string) => {
-  const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-
-  if (!response.ok) {
-    throw new Error('Error fetching data')
-  }
-
-  return response.json()
 }
 
 export default function FechaPage() {
