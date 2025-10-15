@@ -131,9 +131,6 @@ export default function RankingPage() {
               <p className="text-[11px] uppercase tracking-[0.26em] text-[#d7c59a]/70">
                 Torneo #{activeTournament.number} · {activeTournament.name}
               </p>
-              <h1 className="font-heading text-2xl uppercase tracking-[0.22em] text-[#f3e6c5]">
-                Tabla general
-              </h1>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-[11px] uppercase tracking-[0.22em] text-[#d7c59a]/65">

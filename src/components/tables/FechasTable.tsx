@@ -151,87 +151,57 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
         </div>
       </div>
 
-      {/* Tabla de eliminaciones */}
+      {/* Lista de eliminaciones - estilo Registro */}
       {selectedDateId && (
-        <div className="sm:overflow-x-auto overflow-visible overflow-y-visible" style={{ backgroundColor: '#1a1a1a' }}>
-          {eliminationsLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="text-poker-muted">Cargando eliminaciones...</div>
-            </div>
-          ) : eliminations.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-poker-muted">No hay eliminaciones registradas para esta fecha</p>
-            </div>
-          ) : (
-            <>
-              <table className="excel-table w-full hidden sm:table sm:min-w-[600px]" style={{ backgroundColor: 'white' }}>
-                <thead>
-                  <tr>
-                    <th className="excel-header-gray" style={{color: '#000'}}>POS</th>
-                    <th className="excel-header" style={{color: '#000'}}>ENFERMO</th>
-                    <th className="excel-header" style={{color: '#000'}}>VACUNADO POR</th>
-                    <th className="excel-header excel-header-total" style={{color: '#000'}}>PUNTOS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {eliminations.map((elimination, index) => (
-                    <tr key={elimination.id} className={index % 2 === 1 ? 'bg-gray-50' : ''}>
-                      <td className="excel-cell excel-cell-gray text-center font-medium" style={{color: '#000'}}>
-                        {elimination.position}
-                      </td>
-                      <td className="excel-cell text-left" style={{color: '#000'}}>
-                        {getPlayerName(elimination.eliminatedPlayer)}
-                      </td>
-                      <td className="excel-cell text-left" style={{color: '#000'}}>
-                        {elimination.position === 1 
-                          ? '-'
-                          : elimination.eliminatorPlayer 
-                            ? getPlayerName(elimination.eliminatorPlayer) 
-                            : '-'
-                        }
-                      </td>
-                      <td className="excel-cell excel-cell-total text-center font-bold" style={{color: '#000'}}>
-                        {elimination.points}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="bg-poker-card rounded-lg border border-white/10">
+          <div className="p-6">
+            <h3 className="text-white font-semibold mb-4">Eliminaciones</h3>
 
-              <div className="sm:hidden space-y-3 px-1">
+            {eliminationsLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="text-poker-muted">Cargando eliminaciones...</div>
+              </div>
+            ) : eliminations.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-poker-muted">No hay eliminaciones registradas para esta fecha</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
                 {eliminations.map((elimination) => (
                   <div
                     key={elimination.id}
-                    className="rounded-lg border border-black/10 bg-white p-3 shadow-sm"
+                    className="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-white/5 transition-colors"
                   >
-                    <div className="flex items-center justify-between text-xs font-semibold text-black/70">
-                      <span>Posición</span>
-                      <span className="text-base font-bold text-black">{elimination.position}</span>
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-[11px] uppercase tracking-wide text-black/50">Enfermo</p>
-                      <p className="text-sm font-semibold text-black">{getPlayerName(elimination.eliminatedPlayer)}</p>
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-[11px] uppercase tracking-wide text-black/50">Vacunado por</p>
-                      <p className="text-sm font-semibold text-black">
-                        {elimination.position === 1
-                          ? '-'
-                          : elimination.eliminatorPlayer
-                            ? getPlayerName(elimination.eliminatorPlayer)
-                            : '-'
-                        }
-                      </p>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between">
-                      <p className="text-[11px] uppercase tracking-wide text-black/50">Puntos</p>
-                      <p className="text-base font-bold text-poker-red">{elimination.points}</p>
+                    <div className="flex items-center space-x-2 flex-1">
+                      <div className="w-6 text-center">
+                        <span className="text-white font-bold text-sm">{elimination.position}</span>
+                      </div>
+                      <div className="flex-1 text-white text-sm">
+                        <span className="truncate block">
+                          {getPlayerName(elimination.eliminatedPlayer)}
+                          {elimination.position !== 1 && (
+                            <span className="text-poker-muted">
+                              {' vs '}
+                              {elimination.eliminatorPlayer ?
+                                getPlayerName(elimination.eliminatorPlayer) :
+                                'N/A'
+                              }
+                            </span>
+                          )}
+                          {elimination.position === 1 && (
+                            <span className="text-poker-muted"> - Ganador</span>
+                          )}
+                        </span>
+                      </div>
+                      <div className="w-8 text-center">
+                        <span className="text-white font-semibold text-sm">{elimination.points}</span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       )}
 
