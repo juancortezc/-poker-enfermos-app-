@@ -63,6 +63,27 @@ export async function GET(
       eliminations: maxEliminations
     }))
 
+    // 1b. Gay de la Noche (least eliminations, excluding 0)
+    const eliminationCountsArray = Array.from(eliminationCounts.entries())
+      .filter(([_, count]) => count > 0)
+
+    const minEliminations = eliminationCountsArray.length > 0
+      ? Math.min(...eliminationCountsArray.map(([_, count]) => count))
+      : 0
+
+    const gayPlayerIds = eliminationCountsArray
+      .filter(([_, count]) => count === minEliminations)
+      .map(([playerId]) => playerId)
+
+    const gayPlayers = await prisma.player.findMany({
+      where: { id: { in: gayPlayerIds } }
+    })
+
+    const gay = gayPlayers.map(player => ({
+      player,
+      eliminations: minEliminations
+    }))
+
     // 2. Podio (top 3)
     const podioEliminations = gameDate.eliminations
       .filter(e => e.position >= 1 && e.position <= 3)
@@ -126,6 +147,7 @@ export async function GET(
       },
       awards: {
         varon,
+        gay,
         podio,
         mesaFinal,
         sieteYDos,

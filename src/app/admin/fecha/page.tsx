@@ -5,8 +5,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { Card } from '@/components/ui/card'
-import { Loader2, CalendarCheck, ShieldAlert, Trophy, Target, Users, UserX, Medal, Crown } from 'lucide-react'
+import { Loader2, CalendarCheck, ShieldAlert } from 'lucide-react'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
+import AwardCard from '@/components/stats/AwardCard'
 
 interface Player {
   id: string
@@ -23,17 +24,13 @@ interface GameDate {
   status: string
 }
 
-interface DateAwardPlayer {
-  player: Player
-  value?: number
-}
-
 interface DateAwardsResponse {
   gameDate: GameDate
   awards: {
     varon: { player: Player; eliminations: number }[]
-    mesaFinal: Player[]
+    gay: { player: Player; eliminations: number }[]
     podio: Player[]
+    mesaFinal: Player[]
     sieteYDos: Player[]
     faltas: Player[]
   }
@@ -51,72 +48,6 @@ const fetcher = async (url: string) => {
   }
 
   return response.json()
-}
-
-function AwardSection({
-  title,
-  description,
-  icon: Icon,
-  players,
-  accentColor = 'red',
-  valueLabel
-}: {
-  title: string
-  description: string
-  icon: React.ElementType
-  players: DateAwardPlayer[]
-  accentColor?: string
-  valueLabel?: string
-}) {
-  const colorClasses = {
-    red: 'from-red-500/20 border-red-500/30',
-    amber: 'from-amber-500/20 border-amber-500/30',
-    emerald: 'from-emerald-500/20 border-emerald-500/30',
-    blue: 'from-blue-500/20 border-blue-500/30',
-    purple: 'from-purple-500/20 border-purple-500/30',
-    rose: 'from-rose-500/20 border-rose-500/30'
-  }
-
-  return (
-    <div className={`rounded-2xl border bg-gradient-to-br ${colorClasses[accentColor as keyof typeof colorClasses] || colorClasses.red} to-transparent p-5 backdrop-blur-sm`}>
-      <div className="mb-4 flex items-start justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
-          <p className="mt-1 text-xs text-white/60">{description}</p>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-          <Icon className="h-5 w-5 text-white" />
-        </div>
-      </div>
-
-      {players.length > 0 ? (
-        <div className="space-y-2">
-          {players.map((item, idx) => (
-            <div
-              key={item.player.id}
-              className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 text-sm"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-white/40">#{idx + 1}</span>
-                <span className="text-white">
-                  {item.player.firstName} {item.player.lastName}
-                </span>
-              </div>
-              {item.value !== undefined && valueLabel && (
-                <span className="text-xs font-medium text-white/60">
-                  {item.value} {valueLabel}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-lg bg-white/5 px-4 py-6 text-center text-sm text-white/50">
-          Sin datos
-        </div>
-      )}
-    </div>
-  )
 }
 
 export default function FechaPage() {
@@ -155,7 +86,7 @@ export default function FechaPage() {
     }
   }, [availableGameDates, selectedGameDateId])
 
-  // Fetch date awards
+  // Fetch date awards - mismo endpoint que funciona en Stats
   const { data: awardsData, error: awardsError, isLoading: awardsLoading } = useSWR<DateAwardsResponse>(
     user && selectedGameDateId ? `/api/stats/date-awards/${selectedGameDateId}` : null,
     fetcher,
@@ -262,52 +193,62 @@ export default function FechaPage() {
           </div>
         )}
 
-        {/* Content */}
+        {/* Content - Mismo formato que Stats/Premios */}
         {awards ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Varón de la Noche */}
-            <AwardSection
+            <AwardCard
               title="Varón de la Noche"
-              description="Jugador con más eliminaciones"
-              icon={Trophy}
+              description="Mayor cantidad de eliminaciones"
+              icon="trophy"
               accentColor="red"
               players={awards.varon.map(v => ({ player: v.player, value: v.eliminations }))}
               valueLabel="Elims"
             />
 
+            {/* Gay de la Noche */}
+            <AwardCard
+              title="Gay de la Noche"
+              description="Menor cantidad de eliminaciones"
+              icon="userx"
+              accentColor="purple"
+              players={awards.gay.map(g => ({ player: g.player, value: g.eliminations }))}
+              valueLabel="Elims"
+            />
+
             {/* Podio */}
-            <AwardSection
+            <AwardCard
               title="Podio"
               description="Top 3 de la fecha"
-              icon={Medal}
+              icon="medal"
               accentColor="amber"
               players={awards.podio.map(p => ({ player: p }))}
             />
 
-            {/* Mesa Final */}
-            <AwardSection
-              title="Mesa Final"
-              description="Posiciones 1 a 9"
-              icon={Users}
-              accentColor="emerald"
-              players={awards.mesaFinal.map(p => ({ player: p }))}
-            />
-
             {/* 7/2 */}
-            <AwardSection
+            <AwardCard
               title="7/2"
               description="Primeros eliminados"
-              icon={Target}
+              icon="target"
               accentColor="rose"
               players={awards.sieteYDos.map(p => ({ player: p }))}
             />
 
+            {/* Mesa Final */}
+            <AwardCard
+              title="Mesa Final"
+              description="Posiciones 1 a 9"
+              icon="users"
+              accentColor="emerald"
+              players={awards.mesaFinal.map(p => ({ player: p }))}
+            />
+
             {/* Faltas */}
-            <AwardSection
+            <AwardCard
               title="Faltas"
               description="Jugadores ausentes"
-              icon={UserX}
-              accentColor="purple"
+              icon="userx"
+              accentColor="rose"
               players={awards.faltas.map(p => ({ player: p }))}
             />
           </div>

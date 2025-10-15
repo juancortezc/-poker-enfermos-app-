@@ -11,7 +11,7 @@ import { useActiveTournament } from '@/hooks/useActiveTournament';
 import { NoirButton } from '@/components/noir/NoirButton';
 import { cn } from '@/lib/utils';
 
-type TabType = 'resumen' | 'total' | 'fechas';
+type TabType = 'resumen' | 'total' | 'fechas' | 'resultados';
 
 export default function RankingPage() {
   const router = useRouter();
