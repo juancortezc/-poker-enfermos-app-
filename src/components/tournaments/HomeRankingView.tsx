@@ -261,6 +261,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
         isOpen={isModalOpen}
         onClose={closePlayerModal}
         playerId={selectedPlayerId}
+        tournamentId={tournamentId}
       />
     </section>
   )

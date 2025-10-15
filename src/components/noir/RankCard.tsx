@@ -30,27 +30,27 @@ export interface RankCardProps {
 }
 
 const highlightStyles: Record<HighlightVariant, string> = {
-  gold: 'border-[#e0b66c]/60 shadow-glow-gold',
-  silver: 'border-[#d6d3cf]/45 shadow-glow-silver',
-  bronze: 'border-[#b68351]/50 shadow-glow-bronze',
-  default: 'border-[#e0b66c]/15 shadow-[0_18px_40px_rgba(11,6,3,0.45)]',
+  gold: 'border-[#e0b66c]/60 shadow-glow-gold bg-gradient-to-br from-[#e0b66c]/5 to-transparent',
+  silver: 'border-[#d6d3cf]/50 shadow-glow-silver bg-gradient-to-br from-[#d6d3cf]/5 to-transparent',
+  bronze: 'border-[#b68351]/50 shadow-glow-bronze bg-gradient-to-br from-[#b68351]/5 to-transparent',
+  default: 'border-[#e0b66c]/15 shadow-[0_18px_40px_rgba(11,6,3,0.45)] bg-[rgba(24,14,10,0.92)]',
 }
 
 const trendConfig: Record<TrendVariant, { label: string; className: string; icon: ReactNode }> = {
   up: {
     label: 'Sube',
     className: 'text-[#7bdba5]',
-    icon: <TrendingUp className="h-4 w-4" />,
+    icon: <TrendingUp className="h-3.5 w-3.5" />,
   },
   down: {
     label: 'Baja',
     className: 'text-[#f38b7d]',
-    icon: <TrendingDown className="h-4 w-4" />,
+    icon: <TrendingDown className="h-3.5 w-3.5" />,
   },
   steady: {
     label: 'Sin cambios',
     className: 'text-[#d7c59a]',
-    icon: <Minus className="h-4 w-4" />,
+    icon: <Minus className="h-3.5 w-3.5" />,
   },
 }
 
@@ -73,7 +73,7 @@ function RankCardComponent({
   return (
     <article
       className={cn(
-        'relative overflow-hidden rounded-[20px] border bg-[rgba(24,14,10,0.92)] px-4 py-4 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,6,3,0.6)]',
+        'relative overflow-hidden rounded-2xl border backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(11,6,3,0.7)]',
         highlightStyles[highlight]
       )}
     >
@@ -83,70 +83,78 @@ function RankCardComponent({
           alt=""
           fill
           priority={false}
-          className="pointer-events-none select-none opacity-50 mix-blend-screen"
+          className="pointer-events-none select-none opacity-40 mix-blend-screen"
         />
       )}
 
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[#e0b66c]/35 bg-[#1a0f0c]/80 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#e0b66c] shadow-[0_6px_16px_rgba(11,6,3,0.55)]">
+      {/* Mobile-First Layout: Foto grande arriba */}
+      <div className="relative p-4">
+        {/* Header: Badge + Nombre */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border-2 border-[#e0b66c]/40 bg-[#1a0f0c]/90 text-[10px] font-bold uppercase tracking-[0.2em] text-[#e0b66c] shadow-lg">
             #{String(position).padStart(2, '0')}
             {badge && (
               <div className="absolute -right-1 -bottom-1">{badge}</div>
             )}
           </div>
 
-          <div className="min-w-0 flex-1">
-            <h3 className="font-heading text-base tracking-[0.14em] text-[#f3e6c5] uppercase leading-tight truncate">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-heading text-base tracking-[0.16em] text-[#f3e6c5] uppercase leading-tight truncate">
               {name}
             </h3>
             {alias && (
-              <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/70 mt-0.5 truncate">
+              <p className="text-[9px] uppercase tracking-[0.26em] text-[#d7c59a]/70 mt-0.5 truncate">
                 {alias}
               </p>
             )}
-            {meta && (
-              <p className="mt-1 text-[10px] text-[#d7c59a]/75 truncate">{meta}</p>
-            )}
           </div>
+
+          {actions}
         </div>
 
-        {actions}
-      </div>
+        {/* Foto Grande (Principal) */}
+        <div className="relative mx-auto mb-4">
+          {avatarUrl ? (
+            <div className="relative h-32 w-32 mx-auto overflow-hidden rounded-full border-3 border-[#e0b66c]/50 bg-[#2a1a14] shadow-[0_16px_40px_rgba(11,6,3,0.65)]">
+              <Image
+                src={avatarUrl}
+                alt={name}
+                fill
+                sizes="128px"
+                className="object-cover noir-photo"
+                priority={position <= 3}
+              />
+            </div>
+          ) : (
+            <div className="flex h-32 w-32 mx-auto items-center justify-center rounded-full border-3 border-[#e0b66c]/35 bg-[#271911] text-3xl font-heading uppercase tracking-[0.24em] text-[#d7c59a] shadow-[0_16px_40px_rgba(11,6,3,0.65)]">
+              {name.slice(0, 2)}
+            </div>
+          )}
+        </div>
 
-      <div className="relative mt-4 flex items-end justify-between gap-3">
-        <div>
-          <div className="text-[2rem] font-heading leading-none tracking-[0.16em] text-[#e0b66c]">
+        {/* Puntos y Trend */}
+        <div className="text-center mb-3">
+          <div className="text-[2.5rem] font-heading leading-none tracking-[0.14em] text-[#e0b66c] mb-2">
             {points}
           </div>
-          <div className={cn('mt-1.5 flex items-center gap-1.5 text-[10px]', trendInfo.className)}>
+          <div className={cn('inline-flex items-center gap-1.5 text-[10px]', trendInfo.className)}>
             {trendInfo.icon}
             <span className="uppercase tracking-[0.22em]">{trendInfo.label}</span>
           </div>
         </div>
 
-        {avatarUrl ? (
-          <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-[#e0b66c]/40 bg-[#2a1a14] shadow-[0_10px_24px_rgba(11,6,3,0.55)]">
-            <Image
-              src={avatarUrl}
-              alt={name}
-              fill
-              sizes="56px"
-              className="object-cover noir-photo"
-            />
-          </div>
-        ) : (
-          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border-2 border-[#e0b66c]/30 bg-[#271911] text-base font-heading uppercase tracking-[0.24em] text-[#d7c59a] shadow-[0_10px_24px_rgba(11,6,3,0.55)]">
-            {name.slice(0, 2)}
+        {/* Meta Info */}
+        {meta && (
+          <p className="text-center text-[10px] text-[#d7c59a]/75 mb-3">{meta}</p>
+        )}
+
+        {/* Footer */}
+        {footer && (
+          <div className="border-t border-[#e0b66c]/15 pt-3 text-center text-[10px] uppercase tracking-[0.18em] text-[#d7c59a]/70">
+            {footer}
           </div>
         )}
       </div>
-
-      {footer && (
-        <div className="relative mt-4 border-t border-[#e0b66c]/10 pt-3 text-[10px] uppercase tracking-[0.18em] text-[#d7c59a]/70">
-          {footer}
-        </div>
-      )}
     </article>
   )
 }
