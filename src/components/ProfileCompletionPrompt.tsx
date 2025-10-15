@@ -39,6 +39,16 @@ export function ProfileCompletionPrompt() {
   useEffect(() => {
     if (!user || shouldBypass) return
 
+    // Skip if no auth credentials are available
+    if (typeof window !== 'undefined') {
+      const hasPin = localStorage.getItem('poker-pin')
+      const hasAdminKey = localStorage.getItem('poker-adminkey')
+      if (!hasPin && !hasAdminKey) {
+        console.debug('Profile status check: No credentials found, skipping')
+        return
+      }
+    }
+
     let cancelled = false
 
     const fetchStatus = async () => {
@@ -49,6 +59,12 @@ export function ProfileCompletionPrompt() {
         const response = await fetch('/api/profile/status', { headers })
 
         if (!response.ok) {
+          // Si falla con 401, probablemente no hay credenciales válidas
+          // En lugar de mostrar error, simplemente no mostramos el prompt
+          if (response.status === 401) {
+            console.debug('Profile status check: Unauthorized, skipping prompt')
+            return
+          }
           throw new Error('Error al verificar el perfil')
         }
 
@@ -58,10 +74,9 @@ export function ProfileCompletionPrompt() {
           setVisible(!data.profileComplete)
         }
       } catch (err) {
-        console.warn('Profile status check failed:', err)
-        if (!cancelled) {
-          setError('No se pudo verificar tu perfil. Intenta más tarde.')
-        }
+        // Solo mostramos error si no es un 401 (que ya manejamos arriba)
+        console.debug('Profile status check failed:', err)
+        // No seteamos error visible para evitar spam al usuario
       } finally {
         if (!cancelled) {
           setLoading(false)
