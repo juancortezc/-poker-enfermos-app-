@@ -10,24 +10,31 @@ import { canCRUD } from '@/lib/auth'
 import { NoirButton } from '@/components/noir/NoirButton'
 import { cn } from '@/lib/utils'
 
-const baseNavItems = [
-  { href: '/', label: 'Inicio', icon: '/icons/nav-home.png', roles: ['all'] as const },
-  { href: '/ranking', label: 'Ranking', icon: '/icons/nav-ranking.png', roles: ['all'] as const },
-  { href: '/admin', label: 'Menú', icon: '/icons/nav-settings.png', roles: ['all'] as const },
+type NavItem = {
+  href: string
+  label: string
+  icon: string
+  roles: readonly ('all' | 'Comision')[]
+}
+
+const baseNavItems: NavItem[] = [
+  { href: '/', label: 'Inicio', icon: '/icons/nav-home.png', roles: ['all'] },
+  { href: '/ranking', label: 'Tabla', icon: '/icons/nav-ranking.png', roles: ['all'] },
+  { href: '/admin', label: 'Menú', icon: '/icons/nav-settings.png', roles: ['all'] },
 ]
 
-const timerNavItem = {
+const timerNavItem: NavItem = {
   href: '/timer',
   label: 'Timer',
   icon: '/icons/nav-timer.png',
-  roles: ['all'] as const, // Visible para todos cuando gameDate está in_progress
+  roles: ['all'], // Visible para todos cuando gameDate está in_progress
 }
 
-const registroNavItem = {
+const registroNavItem: NavItem = {
   href: '/registro',
   label: 'Registro',
   icon: '/icons/nav-profile.png',
-  roles: ['Comision'] as const,
+  roles: ['Comision'],
 }
 
 export function BottomNav() {
@@ -35,7 +42,6 @@ export function BottomNav() {
   const router = useRouter()
   const { user } = useAuth()
   const [hasActiveGameDate, setHasActiveGameDate] = useState(false)
-  const [gameDateStatus, setGameDateStatus] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -48,15 +54,12 @@ export function BottomNav() {
         if (response.ok) {
           const data = await response.json()
           setHasActiveGameDate(Boolean(data))
-          setGameDateStatus(data?.status || null)
         } else {
           setHasActiveGameDate(false)
-          setGameDateStatus(null)
         }
       } catch (error) {
         console.error('Error checking active game date:', error)
         setHasActiveGameDate(false)
-        setGameDateStatus(null)
       }
     }
 
@@ -76,14 +79,15 @@ export function BottomNav() {
   const navItems = [...baseNavItems]
 
   // Timer visible para TODOS cuando gameDate está in_progress
-  if (hasActiveGameDate && gameDateStatus === 'in_progress') {
-    navItems.splice(2, 0, timerNavItem)
-  }
+  // DESHABILITADO TEMPORALMENTE - no funciona correctamente
+  // if (hasActiveGameDate && gameDateStatus === 'in_progress') {
+  //   navItems.splice(2, 0, timerNavItem)
+  // }
 
   // Registro solo visible para Comisión cuando hay gameDate activa
   if (hasActiveGameDate && canCRUD(user.role)) {
-    const insertIndex = gameDateStatus === 'in_progress' ? 3 : 2
-    navItems.splice(insertIndex, 0, registroNavItem)
+    // Timer deshabilitado, siempre insertar en posición 2
+    navItems.splice(2, 0, registroNavItem)
   }
 
   const filteredItems = navItems.filter(

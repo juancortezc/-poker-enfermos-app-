@@ -28,7 +28,8 @@ import {
 } from 'lucide-react'
 
 const iconMap = {
-  resultados: Award,
+  fecha: CalendarCheck,
+  historico: Award,
   'sin-ganar': Flame,
   'club-1000': Sparkles,
   'enfermos-base': HeartPulse,
@@ -155,7 +156,8 @@ export default function AdminLimitedDashboard() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
               {features.admin.map((feature, index) => renderFeature(feature, index, features.base.length))}
-              {user.role === 'Comision' && renderBroadcastCard(features.admin.length + features.base.length)}
+              {/* Broadcast deshabilitado temporalmente */}
+              {/* {user.role === 'Comision' && renderBroadcastCard(features.admin.length + features.base.length)} */}
             </div>
           </section>
         )}

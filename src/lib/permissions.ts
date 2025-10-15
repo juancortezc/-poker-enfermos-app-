@@ -99,8 +99,15 @@ export function getDashboardFeatures(userRole: UserRole) {
 
   const baseFeatures: DashboardFeature[] = [
     {
-      id: 'resultados',
-      title: 'RESULTADOS',
+      id: 'fecha',
+      title: 'FECHA',
+      href: '/admin/fecha',
+      permission: undefined,
+      ...withPermission()
+    },
+    {
+      id: 'historico',
+      title: 'HISTÓRICO',
       href: '/admin/resultados',
       permission: undefined,
       ...withPermission()
@@ -125,13 +132,6 @@ export function getDashboardFeatures(userRole: UserRole) {
       href: '/admin/enfermos',
       permission: undefined,
       ...withPermission()
-    },
-    {
-      id: 't29',
-      title: 'T29',
-      href: '/t29',
-      permission: 't29-proposals',
-      ...withPermission('t29-proposals')
     },
     {
       id: 'sin-ganar',
@@ -225,6 +225,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
   if (route.startsWith('/admin/club-1000')) return true
   if (route.startsWith('/admin/enfermos')) return true
   if (route.startsWith('/admin/resultados')) return true
+  if (route.startsWith('/admin/fecha')) return true
   if (route.startsWith('/admin/calendar')) return canAccess(userRole, 'calendar')
   if (route.startsWith('/admin/regulations')) return canAccess(userRole, 'regulations')
   if (route.startsWith('/admin/stats')) return canAccess(userRole, 'stats-parents')
