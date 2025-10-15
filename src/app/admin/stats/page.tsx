@@ -10,6 +10,7 @@ import PlayerEliminationsTab from '@/components/stats/PlayerEliminationsTab'
 import { Card } from '@/components/ui/card'
 import { Loader2, Users, ShieldAlert, Award, Target } from 'lucide-react'
 import { canAccess } from '@/lib/permissions'
+import { useActiveTournament } from '@/hooks/useActiveTournament'
 
 interface Player {
   id: string
@@ -81,7 +82,13 @@ export default function StatsPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('ph')
-  const [selectedTournamentId, setSelectedTournamentId] = useState(1) // Default to T28
+
+  // Get active tournament to use as default
+  const { tournament: activeTournament, isLoading: activeTournamentLoading } = useActiveTournament({
+    refreshInterval: 60000
+  })
+
+  const [selectedTournamentId, setSelectedTournamentId] = useState<number | null>(null)
 
   const canSeeRelations = user ? canAccess(user.role, 'stats-parents') : false
 
@@ -91,9 +98,9 @@ export default function StatsPage() {
     }
   }, [user, loading, canSeeRelations, router])
 
-  // Fetch P&H data
+  // Fetch P&H data - use effectiveTournamentId
   const { data: phData, error: phError, isLoading: phLoading } = useSWR<StatsResponse>(
-    user && canSeeRelations && activeTab === 'ph' ? `/api/stats/parent-child/${selectedTournamentId}` : null,
+    user && canSeeRelations && activeTab === 'ph' && effectiveTournamentId ? `/api/stats/parent-child/${effectiveTournamentId}` : null,
     fetcher,
     {
       refreshInterval: 30000,
@@ -101,9 +108,9 @@ export default function StatsPage() {
     }
   )
 
-  // Fetch Awards data
+  // Fetch Awards data - use effectiveTournamentId
   const { data: awardsData, error: awardsError, isLoading: awardsLoading } = useSWR<AwardsResponse>(
-    user && canSeeRelations && activeTab === 'premios' ? `/api/stats/awards/${selectedTournamentId}` : null,
+    user && canSeeRelations && activeTab === 'premios' && effectiveTournamentId ? `/api/stats/awards/${effectiveTournamentId}` : null,
     fetcher,
     {
       refreshInterval: 30000,
@@ -119,7 +126,17 @@ export default function StatsPage() {
 
   const availableTournaments = tournaments?.filter(t => t.number >= 28) || []
 
-  if (loading || (activeTab === 'ph' && phLoading) || (activeTab === 'premios' && awardsLoading)) {
+  // Set default tournament to active tournament when available
+  useEffect(() => {
+    if (activeTournament && selectedTournamentId === null) {
+      setSelectedTournamentId(activeTournament.id)
+    }
+  }, [activeTournament, selectedTournamentId])
+
+  // Use default tournament ID if not yet set
+  const effectiveTournamentId = selectedTournamentId ?? activeTournament?.id ?? 1
+
+  if (loading || activeTournamentLoading || (activeTab === 'ph' && phLoading) || (activeTab === 'premios' && awardsLoading)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
@@ -130,7 +147,7 @@ export default function StatsPage() {
     )
   }
 
-  const tournamentNumber = (activeTab === 'ph' ? phData?.tournament?.number : awardsData?.tournament?.number) ?? selectedTournamentId
+  const tournamentNumber = (activeTab === 'ph' ? phData?.tournament?.number : awardsData?.tournament?.number) ?? effectiveTournamentId
 
   if (activeTab === 'eliminaciones') {
     return (
@@ -159,7 +176,7 @@ export default function StatsPage() {
                 Seleccionar Torneo
               </label>
               <select
-                value={selectedTournamentId}
+                value={effectiveTournamentId}
                 onChange={(e) => setSelectedTournamentId(Number(e.target.value))}
                 className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white focus:border-poker-red/60 focus:outline-none focus:ring-2 focus:ring-poker-red/20"
               >
@@ -195,7 +212,7 @@ export default function StatsPage() {
           </div>
 
           {/* Content */}
-          <PlayerEliminationsTab tournamentId={selectedTournamentId} />
+          <PlayerEliminationsTab tournamentId={effectiveTournamentId} />
         </div>
       </div>
     )
@@ -260,7 +277,7 @@ export default function StatsPage() {
               Seleccionar Torneo
             </label>
             <select
-              value={selectedTournamentId}
+              value={effectiveTournamentId}
               onChange={(e) => setSelectedTournamentId(Number(e.target.value))}
               className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white focus:border-poker-red/60 focus:outline-none focus:ring-2 focus:ring-poker-red/20"
             >
@@ -317,7 +334,7 @@ export default function StatsPage() {
                   key={relation.id}
                   relation={relation}
                   index={index}
-                  tournamentId={selectedTournamentId}
+                  tournamentId={effectiveTournamentId}
                 />
               ))}
 

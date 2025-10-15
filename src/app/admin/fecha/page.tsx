@@ -183,6 +183,15 @@ export default function FechaPage() {
         {/* Content - Mismo formato que Stats/Premios */}
         {awards ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Podio */}
+            <AwardCard
+              title="Podio"
+              description="Top 3 de la fecha"
+              icon="medal"
+              accentColor="amber"
+              players={awards.podio.map(p => ({ player: p }))}
+            />
+
             {/* Varón de la Noche */}
             <AwardCard
               title="Varón de la Noche"
@@ -193,23 +202,13 @@ export default function FechaPage() {
               valueLabel="Elims"
             />
 
-            {/* Gay de la Noche */}
+            {/* Mesa Final */}
             <AwardCard
-              title="Gay de la Noche"
-              description="Menor cantidad de eliminaciones"
-              icon="userx"
-              accentColor="purple"
-              players={awards.gay.map(g => ({ player: g.player, value: g.eliminations }))}
-              valueLabel="Elims"
-            />
-
-            {/* Podio */}
-            <AwardCard
-              title="Podio"
-              description="Top 3 de la fecha"
-              icon="medal"
-              accentColor="amber"
-              players={awards.podio.map(p => ({ player: p }))}
+              title="Mesa Final"
+              description="Posiciones 1 a 9"
+              icon="users"
+              accentColor="emerald"
+              players={awards.mesaFinal.map(p => ({ player: p }))}
             />
 
             {/* 7/2 */}
@@ -219,15 +218,6 @@ export default function FechaPage() {
               icon="target"
               accentColor="rose"
               players={awards.sieteYDos.map(p => ({ player: p }))}
-            />
-
-            {/* Mesa Final */}
-            <AwardCard
-              title="Mesa Final"
-              description="Posiciones 1 a 9"
-              icon="users"
-              accentColor="emerald"
-              players={awards.mesaFinal.map(p => ({ player: p }))}
             />
 
             {/* Faltas */}
