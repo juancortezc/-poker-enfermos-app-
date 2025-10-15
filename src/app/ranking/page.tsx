@@ -149,20 +149,27 @@ export default function RankingPage() {
         </div>
 
         <div className="paper space-y-6 px-4 py-6 sm:px-6">
-          <div className="flex flex-wrap items-center gap-3 border-b border-[#e0b66c]/15 pb-3">
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-[#e0b66c]/15 pb-3">
             {(
               [
                 { id: 'resumen', label: 'Última' },
                 { id: 'total', label: 'Total' },
-                { id: 'fechas', label: 'Eliminaciones' }
+                { id: 'fechas', label: 'Eliminados' },
+                { id: 'resultados', label: 'Resultados' }
               ] as const
             ).map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  if (tab.id === 'resultados') {
+                    router.push('/admin/fecha');
+                  } else {
+                    setActiveTab(tab.id as TabType);
+                  }
+                }}
                 className={cn(
-                  'px-4 py-2 text-[11px] uppercase tracking-[0.24em] transition-colors',
-                  activeTab === tab.id
+                  'px-2.5 py-2 text-[10px] uppercase tracking-[0.20em] transition-colors',
+                  activeTab === tab.id && tab.id !== 'resultados'
                     ? 'text-[#e0b66c] border-b-2 border-[#e0b66c]'
                     : 'text-[#d7c59a]/65 hover:text-[#f3e6c5]'
                 )}
