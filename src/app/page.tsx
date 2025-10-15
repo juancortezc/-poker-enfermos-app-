@@ -37,14 +37,13 @@ export default function Home() {
   }
 
   // Debug: Log tournament data
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Home Debug:', {
-      activeTournament,
-      fullData,
-      progress,
-      isNotFound
-    })
-  }
+  console.log('🏠 Home Debug:', {
+    activeTournament,
+    fullData,
+    progress,
+    isNotFound,
+    hasResults: progress && progress.completed > 0
+  })
 
   // Check if tournament has started (has completed dates)
   const hasResults = progress && progress.completed > 0

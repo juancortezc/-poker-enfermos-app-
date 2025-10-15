@@ -65,11 +65,29 @@ export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
       // Performance
       dedupingInterval: 10000, // Dedupe requests within 10 seconds
       errorRetryInterval: 10000,
-      errorRetryCount: 2
+      errorRetryCount: 2,
+
+      // Debug logging
+      onSuccess: (data) => {
+        console.log('✅ useActiveTournament success:', {
+          tournament: data?.tournament?.name,
+          completedDates: data?.stats?.completedDates
+        })
+      },
+      onError: (error) => {
+        console.error('❌ useActiveTournament error:', error)
+      }
     }
   )
 
   const tournamentData = swrResponse.data?.tournament
+
+  console.log('🎯 useActiveTournament state:', {
+    hasData: !!swrResponse.data,
+    hasError: !!swrResponse.error,
+    isLoading: !swrResponse.error && !swrResponse.data,
+    tournament: tournamentData?.name
+  })
 
   return {
     ...swrResponse,
