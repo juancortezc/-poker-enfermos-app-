@@ -73,7 +73,7 @@ function RankCardComponent({
   return (
     <article
       className={cn(
-        'relative overflow-hidden rounded-[24px] border bg-[rgba(24,14,10,0.92)] px-5 py-5 backdrop-blur-md transition-transform duration-300 hover:-translate-y-1',
+        'relative overflow-hidden rounded-[20px] border bg-[rgba(24,14,10,0.92)] px-4 py-4 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,6,3,0.6)]',
         highlightStyles[highlight]
       )}
     >
@@ -83,30 +83,30 @@ function RankCardComponent({
           alt=""
           fill
           priority={false}
-          className="pointer-events-none select-none opacity-60 mix-blend-screen"
+          className="pointer-events-none select-none opacity-50 mix-blend-screen"
         />
       )}
 
-      <div className="relative flex items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-[#e0b66c]/35 bg-[#1a0f0c]/80 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#e0b66c] shadow-[0_8px_18px_rgba(11,6,3,0.55)]">
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-[#e0b66c]/35 bg-[#1a0f0c]/80 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#e0b66c] shadow-[0_6px_16px_rgba(11,6,3,0.55)]">
             #{String(position).padStart(2, '0')}
             {badge && (
               <div className="absolute -right-1 -bottom-1">{badge}</div>
             )}
           </div>
 
-          <div>
-            <h3 className="font-heading text-lg tracking-[0.14em] text-[#f3e6c5] uppercase">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-heading text-base tracking-[0.14em] text-[#f3e6c5] uppercase leading-tight truncate">
               {name}
             </h3>
             {alias && (
-              <p className="text-xs uppercase tracking-[0.24em] text-[#d7c59a]/70">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/70 mt-0.5 truncate">
                 {alias}
               </p>
             )}
             {meta && (
-              <p className="mt-1 text-[11px] text-[#d7c59a]/75">{meta}</p>
+              <p className="mt-1 text-[10px] text-[#d7c59a]/75 truncate">{meta}</p>
             )}
           </div>
         </div>
@@ -114,36 +114,36 @@ function RankCardComponent({
         {actions}
       </div>
 
-      <div className="relative mt-6 flex items-end justify-between">
+      <div className="relative mt-4 flex items-end justify-between gap-3">
         <div>
-          <div className="text-[2.25rem] font-heading leading-none tracking-[0.16em] text-[#e0b66c]">
+          <div className="text-[2rem] font-heading leading-none tracking-[0.16em] text-[#e0b66c]">
             {points}
           </div>
-          <div className={cn('mt-2 flex items-center gap-1.5 text-[11px]', trendInfo.className)}>
+          <div className={cn('mt-1.5 flex items-center gap-1.5 text-[10px]', trendInfo.className)}>
             {trendInfo.icon}
             <span className="uppercase tracking-[0.22em]">{trendInfo.label}</span>
           </div>
         </div>
 
         {avatarUrl ? (
-          <div className="relative h-16 w-16 overflow-hidden rounded-full border border-[#e0b66c]/35 bg-[#2a1a14] shadow-[0_12px_28px_rgba(11,6,3,0.55)]">
+          <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-[#e0b66c]/40 bg-[#2a1a14] shadow-[0_10px_24px_rgba(11,6,3,0.55)]">
             <Image
               src={avatarUrl}
               alt={name}
               fill
-              sizes="64px"
+              sizes="56px"
               className="object-cover noir-photo"
             />
           </div>
         ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#e0b66c]/25 bg-[#271911] text-lg font-heading uppercase tracking-[0.24em] text-[#d7c59a] shadow-[0_12px_28px_rgba(11,6,3,0.55)]">
+          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border-2 border-[#e0b66c]/30 bg-[#271911] text-base font-heading uppercase tracking-[0.24em] text-[#d7c59a] shadow-[0_10px_24px_rgba(11,6,3,0.55)]">
             {name.slice(0, 2)}
           </div>
         )}
       </div>
 
       {footer && (
-        <div className="relative mt-5 border-t border-[#e0b66c]/10 pt-4 text-[11px] uppercase tracking-[0.18em] text-[#d7c59a]/70">
+        <div className="relative mt-4 border-t border-[#e0b66c]/10 pt-3 text-[10px] uppercase tracking-[0.18em] text-[#d7c59a]/70">
           {footer}
         </div>
       )}
