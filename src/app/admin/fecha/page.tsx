@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { Card } from '@/components/ui/card'
 import { Loader2, CalendarCheck, ShieldAlert, Trophy, Target, Users, UserX, Medal, Crown } from 'lucide-react'
+import { useActiveTournament } from '@/hooks/useActiveTournament'
 
 interface Player {
   id: string
@@ -123,15 +124,23 @@ export default function FechaPage() {
   const router = useRouter()
   const [selectedGameDateId, setSelectedGameDateId] = useState<number | null>(null)
 
+  // Get active tournament
+  const {
+    tournament: activeTournament,
+    isLoading: tournamentLoading
+  } = useActiveTournament({
+    refreshInterval: 60000
+  })
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/')
     }
   }, [user, loading, router])
 
-  // Fetch available game dates (completed and in_progress)
-  const { data: gameDates } = useSWR<GameDate[]>(
-    user ? '/api/game-dates' : null,
+  // Fetch available game dates from active tournament
+  const { data: gameDates, isLoading: gameDatesLoading } = useSWR<GameDate[]>(
+    user && activeTournament ? `/api/tournaments/${activeTournament.id}/dates` : null,
     fetcher
   )
 
@@ -156,7 +165,7 @@ export default function FechaPage() {
     }
   )
 
-  if (loading || awardsLoading) {
+  if (loading || tournamentLoading || gameDatesLoading || awardsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
@@ -169,6 +178,22 @@ export default function FechaPage() {
 
   if (!user) {
     return null
+  }
+
+  if (!activeTournament) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-poker-dark via-black to-poker-dark flex items-center justify-center px-4">
+        <Card className="admin-card p-6 text-center max-w-sm">
+          <div className="flex flex-col items-center gap-4">
+            <CalendarCheck className="w-10 h-10 text-white/40" />
+            <p className="text-white/70">No hay torneo activo</p>
+            <p className="text-white/50 text-sm">
+              Los resultados se mostrarán cuando haya un torneo en curso.
+            </p>
+          </div>
+        </Card>
+      </div>
+    )
   }
 
   if (awardsError) {
@@ -201,7 +226,9 @@ export default function FechaPage() {
         <header className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.45)] backdrop-blur-xl">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.4em] text-white/60">Resultados</p>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-white/60">
+                Torneo #{activeTournament.number} · {activeTournament.name}
+              </p>
               <h1 className="mt-2 text-2xl font-bold text-white">
                 Fecha {gameDate?.dateNumber || '—'}
               </h1>
