@@ -99,12 +99,12 @@ function RankCardComponent({
             )}
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pt-1">
             <h3 className="font-heading text-base tracking-[0.16em] text-[#f3e6c5] uppercase leading-tight truncate">
               {name}
             </h3>
             {alias && (
-              <p className="text-[9px] uppercase tracking-[0.26em] text-[#d7c59a]/70 mt-0.5 truncate">
+              <p className="text-[9px] uppercase tracking-[0.26em] text-[#d7c59a]/70 mt-1 truncate">
                 {alias}
               </p>
             )}

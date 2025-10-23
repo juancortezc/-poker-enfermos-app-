@@ -223,10 +223,10 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
               alias={player.playerAlias}
               points={player.finalScore ?? player.totalPoints}
               trend={player.trend === 'up' ? 'up' : player.trend === 'down' ? 'down' : 'steady'}
-              meta={`Total ${player.totalPoints} pts • ${player.datesPlayed} fechas`}
+              meta={`Total ${player.totalPoints} pts`}
               highlight={highlightOrder[index] ?? 'default'}
               avatarUrl={player.playerPhoto}
-              footer={`Victorias ${player.firstPlaces} · Podios ${player.secondPlaces + player.thirdPlaces}`}
+              footer={`Victorias ${player.firstPlaces} · Podios ${player.firstPlaces + player.secondPlaces + player.thirdPlaces}`}
             />
           </button>
         ))}
@@ -267,7 +267,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
           {others.filter(player => lastTwoPositions.includes(player.position)).length > 0 && (
             <div className="space-y-4">
               <h3 className="text-center font-heading text-lg uppercase tracking-[0.24em] text-[#ec4899]">
-                Premio 7/2
+                Malazos
               </h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {others
@@ -285,10 +285,10 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                         alias={player.playerAlias}
                         points={player.finalScore ?? player.totalPoints}
                         trend={player.trend === 'up' ? 'up' : player.trend === 'down' ? 'down' : 'steady'}
-                        meta={`Total ${player.totalPoints} pts • ${player.datesPlayed} fechas`}
+                        meta={`Total ${player.totalPoints} pts`}
                         highlight="pink"
                         avatarUrl={player.playerPhoto}
-                        footer={`Victorias ${player.firstPlaces} · Podios ${player.secondPlaces + player.thirdPlaces}`}
+                        footer={`Victorias ${player.firstPlaces} · Podios ${player.firstPlaces + player.secondPlaces + player.thirdPlaces}`}
                       />
                     </button>
                   ))}
@@ -298,12 +298,14 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
         </>
       )}
 
-      <PlayerDetailModal
-        isOpen={isModalOpen}
-        onClose={closePlayerModal}
-        playerId={selectedPlayerId}
-        tournamentId={tournamentId}
-      />
+      {selectedPlayerId && (
+        <PlayerDetailModal
+          isOpen={isModalOpen}
+          onClose={closePlayerModal}
+          playerId={selectedPlayerId}
+          tournamentId={tournamentId}
+        />
+      )}
     </section>
   )
 }
