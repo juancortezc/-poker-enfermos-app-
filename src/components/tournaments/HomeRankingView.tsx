@@ -44,7 +44,7 @@ function getTrendLabel(trend: 'up' | 'down' | 'same', positionsChanged: number):
     return 'Sin cambios';
   }
   const absChange = Math.abs(positionsChanged);
-  return `${absChange} ${absChange === 1 ? 'pos' : 'pos'}`;
+  return `${absChange}`;
 }
 
 interface PlayerRowProps {

@@ -59,7 +59,7 @@ function getTrendLabel(trend: TrendVariant, positionsChanged: number = 0): strin
     return 'Sin cambios';
   }
   const absChange = Math.abs(positionsChanged);
-  return `${absChange} ${absChange === 1 ? 'pos' : 'pos'}`;
+  return `${absChange}`;
 }
 
 function RankCardComponent({
