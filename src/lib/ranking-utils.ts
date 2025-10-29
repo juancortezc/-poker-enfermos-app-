@@ -11,9 +11,10 @@ export interface PlayerRanking {
   datesPlayed: number;
   pointsByDate: { [dateNumber: number]: number }; // Puntos por cada fecha
   trend: 'up' | 'down' | 'same'; // Tendencia respecto a ranking anterior
+  positionsChanged: number; // Número de posiciones que cambió (positivo = subió, negativo = bajó)
   // Sistema ELIMINA 2: peores fechas y puntuación final
   elimina1?: number; // Peor fecha (menor puntuación)
-  elimina2?: number; // Segunda peor fecha 
+  elimina2?: number; // Segunda peor fecha
   finalScore?: number; // Puntuación final (mejores 10 fechas)
   // Estadísticas para criterios de desempate
   firstPlaces: number;  // Cantidad de fechas ganadas (1er lugar)
@@ -365,9 +366,12 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
           const previousPosition = previousRankings.get(ranking.playerId);
 
           if (previousPosition !== undefined) {
-            if (ranking.position < previousPosition) {
+            const positionDiff = previousPosition - ranking.position; // Positivo = subió, negativo = bajó
+            ranking.positionsChanged = positionDiff;
+
+            if (positionDiff > 0) {
               ranking.trend = 'up';    // Mejoró (bajó número de posición)
-            } else if (ranking.position > previousPosition) {
+            } else if (positionDiff < 0) {
               ranking.trend = 'down';  // Empeoró (subió número de posición)
             } else {
               ranking.trend = 'same';  // Mantuvo posición
@@ -375,16 +379,23 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
           } else {
             // Jugador nuevo o sin datos previos
             ranking.trend = 'same';
+            ranking.positionsChanged = 0;
           }
         });
       } catch (error) {
         console.error('Error calculating trend:', error);
         // En caso de error, mantener todos como 'same'
-        sortedRankings.forEach(r => r.trend = 'same');
+        sortedRankings.forEach(r => {
+          r.trend = 'same';
+          r.positionsChanged = 0;
+        });
       }
     } else {
       // Primera fecha: todos mantienen 'same'
-      sortedRankings.forEach(r => r.trend = 'same');
+      sortedRankings.forEach(r => {
+        r.trend = 'same';
+        r.positionsChanged = 0;
+      });
     }
 
     return {

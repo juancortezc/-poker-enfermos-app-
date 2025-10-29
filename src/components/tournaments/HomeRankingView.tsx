@@ -23,22 +23,28 @@ interface HomeRankingViewProps {
 
 type RowTrend = 'up' | 'down' | 'steady'
 
-const trendStyles: Record<RowTrend, { label: string; className: string; icon: ReactNode }> = {
+const trendStyles: Record<RowTrend, { className: string; icon: ReactNode }> = {
   up: {
-    label: 'Sube',
     className: 'text-[#7bdba5]',
     icon: <TrendingUp className="h-3.5 w-3.5" />
   },
   down: {
-    label: 'Baja',
     className: 'text-[#f38b7d]',
     icon: <TrendingDown className="h-3.5 w-3.5" />
   },
   steady: {
-    label: 'Sin cambios',
     className: 'text-[#d7c59a]',
     icon: <Minus className="h-3.5 w-3.5" />
   }
+}
+
+// Helper para formatear el label de tendencia
+function getTrendLabel(trend: 'up' | 'down' | 'same', positionsChanged: number): string {
+  if (trend === 'same' || positionsChanged === 0) {
+    return 'Sin cambios';
+  }
+  const absChange = Math.abs(positionsChanged);
+  return `${absChange} ${absChange === 1 ? 'pos' : 'pos'}`;
 }
 
 interface PlayerRowProps {
@@ -49,6 +55,7 @@ interface PlayerRowProps {
 function PlayerRow({ player, onSelect }: PlayerRowProps) {
   const trend = player.trend === 'up' ? 'up' : player.trend === 'down' ? 'down' : 'steady'
   const trendInfo = trendStyles[trend]
+  const trendLabel = getTrendLabel(player.trend, player.positionsChanged)
 
   return (
     <button
@@ -89,7 +96,7 @@ function PlayerRow({ player, onSelect }: PlayerRowProps) {
           <div className="mt-1 flex items-center gap-2 text-[10px] uppercase tracking-[0.22em]">
             <span className={cn('flex items-center gap-1', trendInfo.className)}>
               {trendInfo.icon}
-              {trendInfo.label}
+              {trendLabel}
             </span>
           </div>
         </div>
@@ -220,6 +227,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
               alias={player.playerAlias}
               points={player.finalScore ?? player.totalPoints}
               trend={player.trend === 'up' ? 'up' : player.trend === 'down' ? 'down' : 'steady'}
+              positionsChanged={player.positionsChanged}
               meta={`Total ${player.totalPoints} pts`}
               highlight={highlightOrder[index] ?? 'default'}
               avatarUrl={player.playerPhoto}
@@ -282,6 +290,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
                         alias={player.playerAlias}
                         points={player.finalScore ?? player.totalPoints}
                         trend={player.trend === 'up' ? 'up' : player.trend === 'down' ? 'down' : 'steady'}
+                        positionsChanged={player.positionsChanged}
                         meta={`Total ${player.totalPoints} pts`}
                         highlight="pink"
                         avatarUrl={player.playerPhoto}

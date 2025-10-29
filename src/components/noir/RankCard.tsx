@@ -21,6 +21,7 @@ export interface RankCardProps {
   alias?: string | null
   points: number | string
   trend?: TrendVariant
+  positionsChanged?: number
   meta?: string
   highlight?: HighlightVariant
   avatarUrl?: string | null
@@ -37,22 +38,28 @@ const highlightStyles: Record<HighlightVariant, string> = {
   default: 'border-[#e0b66c]/15 shadow-[0_18px_40px_rgba(11,6,3,0.45)] bg-[rgba(24,14,10,0.92)]',
 }
 
-const trendConfig: Record<TrendVariant, { label: string; className: string; icon: ReactNode }> = {
+const trendConfig: Record<TrendVariant, { className: string; icon: ReactNode }> = {
   up: {
-    label: 'Sube',
     className: 'text-[#7bdba5]',
     icon: <TrendingUp className="h-3.5 w-3.5" />,
   },
   down: {
-    label: 'Baja',
     className: 'text-[#f38b7d]',
     icon: <TrendingDown className="h-3.5 w-3.5" />,
   },
   steady: {
-    label: 'Sin cambios',
     className: 'text-[#d7c59a]',
     icon: <Minus className="h-3.5 w-3.5" />,
   },
+}
+
+// Helper para formatear el label de tendencia
+function getTrendLabel(trend: TrendVariant, positionsChanged: number = 0): string {
+  if (trend === 'steady' || positionsChanged === 0) {
+    return 'Sin cambios';
+  }
+  const absChange = Math.abs(positionsChanged);
+  return `${absChange} ${absChange === 1 ? 'pos' : 'pos'}`;
 }
 
 function RankCardComponent({
@@ -61,6 +68,7 @@ function RankCardComponent({
   alias,
   points,
   trend = 'steady',
+  positionsChanged = 0,
   meta,
   highlight = 'default',
   avatarUrl,
@@ -70,6 +78,7 @@ function RankCardComponent({
 }: RankCardProps) {
   const frame = highlight !== 'default' ? frameMap[highlight] : null
   const trendInfo = trendConfig[trend]
+  const trendLabel = getTrendLabel(trend, positionsChanged)
 
   return (
     <article
@@ -154,7 +163,7 @@ function RankCardComponent({
           </div>
           <div className={cn('inline-flex items-center gap-1.5 text-[10px]', trendInfo.className)}>
             {trendInfo.icon}
-            <span className="uppercase tracking-[0.22em]">{trendInfo.label}</span>
+            <span className="uppercase tracking-[0.22em]">{trendLabel}</span>
           </div>
         </div>
 
