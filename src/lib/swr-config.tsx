@@ -41,10 +41,11 @@ const fetcher = async (url: string) => {
 const swrConfig = {
   fetcher,
   // Global settings
-  revalidateOnFocus: true, // Revalidate when user returns to tab
+  revalidateOnFocus: false, // OPTIMIZATION: Disabled globally (enable per-hook for critical data)
   revalidateOnReconnect: true, // Revalidate when internet reconnects
+  revalidateOnMount: true, // Always fetch on mount for fresh data
   refreshInterval: 0, // No auto-refresh by default (set per hook)
-  dedupingInterval: 5000, // Dedupe requests within 5 seconds
+  dedupingInterval: 30000, // OPTIMIZATION: Dedupe requests within 30 seconds (was 5s)
   errorRetryInterval: 5000, // Retry failed requests every 5 seconds
   errorRetryCount: 3, // Max 3 retries for failed requests
   

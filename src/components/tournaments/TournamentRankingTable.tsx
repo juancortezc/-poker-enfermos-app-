@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { TrophyIcon } from 'lucide-react';
 import Link from 'next/link';
 import type { TournamentRankingData } from '@/lib/ranking-utils';
@@ -60,30 +60,39 @@ export default function TournamentRankingTable({
   }
 
   const { tournament, rankings } = rankingData;
-  const displayRankings = compact ? rankings.slice(0, 5) : rankings;
 
-  // Obtener fechas completadas para mostrar columnas
-  const completedDates = Array.from({ length: tournament.completedDates }, (_, i) => i + 1)
-    .reverse(); // Más recientes primero
+  // OPTIMIZATION: Memoize display rankings to prevent recalculation on every render
+  const displayRankings = useMemo(() =>
+    compact ? rankings.slice(0, 5) : rankings,
+    [compact, rankings]
+  );
 
-  // Colores para posiciones
-  const getPositionColor = (position: number) => {
-    switch (position) {
-      case 1: return 'text-yellow-400'; // Oro
-      case 2: return 'text-gray-300';   // Plata
-      case 3: return 'text-orange-400'; // Bronce
-      default: return 'text-white';
-    }
-  };
+  // OPTIMIZATION: Memoize completed dates array
+  const completedDates = useMemo(() =>
+    Array.from({ length: tournament.completedDates }, (_, i) => i + 1).reverse(),
+    [tournament.completedDates]
+  );
 
-  const getPositionBg = (position: number) => {
-    switch (position) {
-      case 1: return 'bg-yellow-400/10 border-yellow-400/20';
-      case 2: return 'bg-gray-300/10 border-gray-300/20';
-      case 3: return 'bg-orange-400/10 border-orange-400/20';
-      default: return 'bg-transparent border-white/5';
-    }
-  };
+  // OPTIMIZATION: Memoize position color functions (constant values)
+  const positionColors = useMemo(() => ({
+    1: 'text-yellow-400',  // Oro
+    2: 'text-gray-300',    // Plata
+    3: 'text-orange-400',  // Bronce
+    default: 'text-white'
+  }), []);
+
+  const positionBgs = useMemo(() => ({
+    1: 'bg-yellow-400/10 border-yellow-400/20',
+    2: 'bg-gray-300/10 border-gray-300/20',
+    3: 'bg-orange-400/10 border-orange-400/20',
+    default: 'bg-transparent border-white/5'
+  }), []);
+
+  const getPositionColor = (position: number) =>
+    positionColors[position as keyof typeof positionColors] || positionColors.default;
+
+  const getPositionBg = (position: number) =>
+    positionBgs[position as keyof typeof positionBgs] || positionBgs.default;
 
   return (
     <div className="bg-poker-card border border-white/10 rounded-lg overflow-hidden">

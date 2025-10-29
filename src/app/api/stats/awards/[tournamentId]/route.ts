@@ -81,6 +81,32 @@ export async function GET(
       dates: { dateNumber: number; points: number; rankByPoints: number }[]
     }>()
 
+    // Collect all unique falta player IDs across all game dates (OPTIMIZATION: single query)
+    const allFaltasIds = new Set<string>()
+    gameDates.forEach(gd => {
+      const eliminatedPlayerIds = new Set(gd.eliminations.map(e => e.eliminatedPlayerId))
+      const faltasIds = gd.playerIds.filter(id => !eliminatedPlayerIds.has(id))
+      faltasIds.forEach(id => allFaltasIds.add(id))
+    })
+
+    // Fetch all falta players in a single query (OPTIMIZATION: N+1 fix)
+    const faltaPlayersMap = new Map<string, AwardPlayer & { role: string }>()
+    if (allFaltasIds.size > 0) {
+      const faltaPlayers = await prisma.player.findMany({
+        where: { id: { in: Array.from(allFaltasIds) } },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          photoUrl: true,
+          role: true
+        }
+      })
+      faltaPlayers.forEach(player => {
+        faltaPlayersMap.set(player.id, player)
+      })
+    }
+
     // Process each game date
     for (const gd of gameDates) {
       // Rank players by points (DESC) to get true final positions
@@ -115,33 +141,23 @@ export async function GET(
       const eliminatedPlayerIds = new Set(gd.eliminations.map(e => e.eliminatedPlayerId))
       const faltasIds = gd.playerIds.filter(id => !eliminatedPlayerIds.has(id))
 
-      if (faltasIds.length > 0) {
-        const faltaPlayers = await prisma.player.findMany({
-          where: { id: { in: faltasIds } },
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            role: true
-          }
-        })
+      faltasIds.forEach(faltaId => {
+        const player = faltaPlayersMap.get(faltaId)
+        if (!player) return // Should not happen but safety check
 
-        faltaPlayers.forEach(player => {
-          if (!playerResults.has(player.id)) {
-            playerResults.set(player.id, {
-              player,
-              dates: []
-            })
-          }
-
-          playerResults.get(player.id)!.dates.push({
-            dateNumber: gd.dateNumber,
-            points: 0,
-            rankByPoints: gd.eliminations.length + 1 // Last position
+        if (!playerResults.has(faltaId)) {
+          playerResults.set(faltaId, {
+            player,
+            dates: []
           })
+        }
+
+        playerResults.get(faltaId)!.dates.push({
+          dateNumber: gd.dateNumber,
+          points: 0,
+          rankByPoints: gd.eliminations.length + 1 // Last position
         })
-      }
+      })
     }
 
     // Get all eliminations for Varón/Gay calculation

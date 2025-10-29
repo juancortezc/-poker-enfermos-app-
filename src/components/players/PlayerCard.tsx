@@ -86,6 +86,7 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
                 alt={`${player.firstName} ${player.lastName}`}
                 width={48}
                 height={48}
+                loading="lazy"
                 className="w-full h-full object-cover"
                 onError={() => setImageError(true)}
               />

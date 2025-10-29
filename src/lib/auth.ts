@@ -103,17 +103,3 @@ export async function authenticateUser(adminKey: string): Promise<AuthUser | nul
     return null
   }
 }
-
-export function hasPermission(userRole: UserRole, requiredRole: UserRole): boolean {
-  const roleHierarchy = {
-    [UserRole.Comision]: 3,
-    [UserRole.Enfermo]: 2,
-    [UserRole.Invitado]: 1,
-  }
-
-  return roleHierarchy[userRole] >= roleHierarchy[requiredRole]
-}
-
-export function canCRUD(userRole: UserRole): boolean {
-  return userRole === UserRole.Comision
-}

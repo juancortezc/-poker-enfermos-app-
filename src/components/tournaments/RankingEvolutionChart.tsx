@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface RankingEvolutionChartProps {
@@ -51,18 +52,24 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
     );
   }
 
-  // Prepare data for the chart
-  const chartData = data.map(item => ({
-    dateNumber: item.dateNumber,
-    position: item.position,
-    points: item.points,
-    label: `F${item.dateNumber}`
-  }));
+  // OPTIMIZATION: Memoize chart data transformation
+  const chartData = useMemo(() =>
+    data.map(item => ({
+      dateNumber: item.dateNumber,
+      position: item.position,
+      points: item.points,
+      label: `F${item.dateNumber}`
+    })),
+    [data]
+  );
 
-  // Calculate Y-axis domain (invert since position 1 should be at top)
-  const maxPosition = Math.max(...data.map(d => d.position));
-  const minPosition = Math.min(...data.map(d => d.position));
-  const padding = Math.max(1, Math.ceil((maxPosition - minPosition) * 0.1));
+  // OPTIMIZATION: Memoize Y-axis domain calculations
+  const { maxPosition, minPosition, padding } = useMemo(() => {
+    const max = Math.max(...data.map(d => d.position));
+    const min = Math.min(...data.map(d => d.position));
+    const pad = Math.max(1, Math.ceil((max - min) * 0.1));
+    return { maxPosition: max, minPosition: min, padding: pad };
+  }, [data]);
 
   return (
     <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] p-6">
