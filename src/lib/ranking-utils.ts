@@ -110,6 +110,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         datesPlayed: 0,
         pointsByDate: {},
         trend: 'same',
+        positionsChanged: 0,
         // Inicializar estadísticas de desempate
         firstPlaces: 0,
         secondPlaces: 0,
