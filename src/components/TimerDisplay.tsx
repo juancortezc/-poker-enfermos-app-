@@ -10,7 +10,6 @@ import { useTimerStateById } from '@/hooks/useTimerState'
 import { useWakeLock } from '@/hooks/useWakeLock'
 import { Card, CardContent } from '@/components/ui/card'
 import { Play, Pause, Bell, BellOff, Smartphone, SmartphoneNfc } from 'lucide-react'
-import { canCRUD } from '@/lib/auth'
 import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface TimerDisplayProps {
@@ -20,7 +19,7 @@ interface TimerDisplayProps {
 export default function TimerDisplay({ gameDateId }: TimerDisplayProps) {
   const router = useRouter()
   const { user } = useAuth()
-  const canControl = user && canCRUD(user.role)
+  const canControl = user && user.role === 'Comision'
   
   // Obtener fecha activa si no se especifica gameDateId
   const { gameDate: activeGameDate } = useActiveGameDate()

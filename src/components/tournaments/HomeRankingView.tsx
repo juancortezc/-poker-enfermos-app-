@@ -91,9 +91,6 @@ function PlayerRow({ player, onSelect }: PlayerRowProps) {
               {trendInfo.icon}
               {trendInfo.label}
             </span>
-            <span className="text-[#d7c59a]/55">
-              {player.datesPlayed} fechas
-            </span>
           </div>
         </div>
       </div>

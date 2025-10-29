@@ -2,7 +2,6 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
-import { canCRUD } from '@/lib/auth'
 import TimerDisplay from '@/components/TimerDisplay'
 import { Clock } from 'lucide-react'
 
@@ -11,7 +10,7 @@ export default function TimerPage() {
   const { gameDate: activeGameDate, isLoading } = useActiveGameDate()
 
   // Verificar permisos
-  if (!user || !canCRUD(user.role)) {
+  if (!user || !user.role === 'Comision') {
     return (
       <div className="flex items-center justify-center p-4">
         <div className="admin-card-error p-8 text-center max-w-md">

@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { canCRUD } from '@/lib/auth'
 import { NoirButton } from '@/components/noir/NoirButton'
 import { cn } from '@/lib/utils'
 
@@ -85,13 +84,13 @@ export function BottomNav() {
   // }
 
   // Registro solo visible para Comisión cuando hay gameDate activa
-  if (hasActiveGameDate && canCRUD(user.role)) {
+  if (hasActiveGameDate && user.role === 'Comision') {
     // Timer deshabilitado, siempre insertar en posición 2
     navItems.splice(2, 0, registroNavItem)
   }
 
   const filteredItems = navItems.filter(
-    (item) => item.roles.includes('all') || (canCRUD(user.role) && item.roles.includes('Comision'))
+    (item) => item.roles.includes('all') || (user.role === 'Comision' && item.roles.includes('Comision'))
   )
 
   const handleBack = () => {

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { usePlayerSearch } from '@/contexts/PlayerSearchContext'
-import { canCRUD } from '@/lib/auth'
 import { UserRole } from '@prisma/client'
 import PlayerList from './PlayerList'
 import PlayerForm from './PlayerForm'
@@ -43,7 +42,7 @@ export default function PlayersPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
 
-  const canEdit = !!(user && canCRUD(user.role))
+  const canEdit = !!(user && user.role === 'Comision')
 
   const getRolePriority = (role: UserRole) => {
     switch (role) {

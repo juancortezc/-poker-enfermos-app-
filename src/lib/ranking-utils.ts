@@ -280,6 +280,113 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       ranking.position = currentPosition;
     });
 
+    // CALCULAR TENDENCIA (TREND): Comparar posición actual vs fecha anterior
+    // Solo tiene sentido si hay al menos 2 fechas completadas
+    if (tournament.gameDates.length >= 2) {
+      try {
+        // Clonar estructura de rankings para calcular posiciones de fecha anterior
+        const previousRankings = new Map<string, number>(); // playerId -> posición anterior
+
+        // Obtener todas las fechas excepto la última
+        const previousGameDates = tournament.gameDates.slice(0, -1);
+
+        // Recalcular puntos y posiciones SIN la última fecha
+        const tempRankings = new Map<string, { totalPoints: number; finalScore?: number }>();
+
+        // Inicializar rankings temporales
+        registeredPlayers.forEach(player => {
+          tempRankings.set(player.id, {
+            totalPoints: 0,
+            finalScore: undefined
+          });
+        });
+
+        // Procesar fechas anteriores (sin la última)
+        previousGameDates.forEach(gameDate => {
+          const totalPlayersInDate = gameDate.playerIds.length;
+
+          gameDate.playerIds.forEach(playerId => {
+            if (registeredPlayers.some(rp => rp.id === playerId)) {
+              const tempRanking = tempRankings.get(playerId)!;
+              const elimination = gameDate.eliminations.find(e => e.eliminatedPlayerId === playerId);
+
+              if (elimination) {
+                tempRanking.totalPoints += elimination.points;
+              } else {
+                // Ganador
+                const eliminatedCount = gameDate.eliminations.length;
+                const activePlayersCount = totalPlayersInDate - eliminatedCount;
+
+                if (activePlayersCount === 1 || gameDate.status === 'completed') {
+                  const secondPlace = gameDate.eliminations.find(e => e.position === 2);
+                  const winnerPoints = secondPlace
+                    ? secondPlace.points + 3
+                    : calculatePointsForPosition(1, totalPlayersInDate);
+                  tempRanking.totalPoints += winnerPoints;
+                }
+              }
+            }
+          });
+        });
+
+        // Aplicar ELIMINA 2 si aplica (>= 6 fechas anteriores)
+        if (previousGameDates.length >= 6) {
+          tempRankings.forEach((tempRanking, playerId) => {
+            const ranking = playerRankings.get(playerId)!;
+            const prevDateNumbers = previousGameDates.map(gd => gd.dateNumber);
+            const prevScores = prevDateNumbers.map(dn => ranking.pointsByDate[dn] || 0);
+            const sortedPrevScores = [...prevScores].sort((a, b) => a - b);
+
+            const elimina1 = sortedPrevScores[0];
+            const elimina2 = sortedPrevScores[1];
+            tempRanking.finalScore = tempRanking.totalPoints - (elimina1 + elimina2);
+          });
+        } else {
+          tempRankings.forEach(tempRanking => {
+            tempRanking.finalScore = tempRanking.totalPoints;
+          });
+        }
+
+        // Ordenar rankings temporales por puntuación
+        const sortedTempRankings = Array.from(tempRankings.entries())
+          .map(([playerId, data]) => ({
+            playerId,
+            score: data.finalScore ?? data.totalPoints
+          }))
+          .sort((a, b) => b.score - a.score);
+
+        // Asignar posiciones anteriores
+        sortedTempRankings.forEach((entry, index) => {
+          previousRankings.set(entry.playerId, index + 1);
+        });
+
+        // Comparar posiciones actuales vs anteriores y asignar trend
+        sortedRankings.forEach(ranking => {
+          const previousPosition = previousRankings.get(ranking.playerId);
+
+          if (previousPosition !== undefined) {
+            if (ranking.position < previousPosition) {
+              ranking.trend = 'up';    // Mejoró (bajó número de posición)
+            } else if (ranking.position > previousPosition) {
+              ranking.trend = 'down';  // Empeoró (subió número de posición)
+            } else {
+              ranking.trend = 'same';  // Mantuvo posición
+            }
+          } else {
+            // Jugador nuevo o sin datos previos
+            ranking.trend = 'same';
+          }
+        });
+      } catch (error) {
+        console.error('Error calculating trend:', error);
+        // En caso de error, mantener todos como 'same'
+        sortedRankings.forEach(r => r.trend = 'same');
+      }
+    } else {
+      // Primera fecha: todos mantienen 'same'
+      sortedRankings.forEach(r => r.trend = 'same');
+    }
+
     return {
       tournament: {
         id: tournament.id,

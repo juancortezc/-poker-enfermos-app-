@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { canCRUD } from '@/lib/auth'
 import { ArrowLeft, Pause, Play, Smartphone, SmartphoneNfc, RotateCcw } from 'lucide-react'
 import { TimerDisplay as TimerDisplaySimple } from '@/components/registro/TimerDisplay'
 import { GameStatsCards } from '@/components/registro/GameStatsCards'
@@ -230,7 +229,7 @@ export default function RegistroPage() {
   }, [user, fetchAllData])
 
   // Verificación de permisos
-  if (!user || !canCRUD(user.role)) {
+  if (!user || !user.role === 'Comision') {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-center text-white">
@@ -338,7 +337,7 @@ export default function RegistroPage() {
               />
 
               {/* Botones de control (solo para Comisión) */}
-              {user && canCRUD(user.role) && (
+              {user && user.role === 'Comision' && (
                 <div className="space-y-2">
                   <div className="grid grid-cols-2 gap-2">
                     {timerIsActive ? (

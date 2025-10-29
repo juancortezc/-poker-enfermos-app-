@@ -8,7 +8,6 @@ import LoadingState from '@/components/ui/LoadingState'
 import TournamentCompletionModal from './TournamentCompletionModal'
 import TournamentCancellationModal from './TournamentCancellationModal'
 import { ArrowLeft, Users, Play, X, Loader2 } from 'lucide-react'
-import { canCRUD } from '@/lib/auth'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 interface Tournament {
@@ -54,7 +53,7 @@ export default function TournamentOverview() {
   const [showCancellationModal, setShowCancellationModal] = useState(false)
   const [cancellationType, setCancellationType] = useState<'active' | 'next'>('active')
 
-  const canEdit = canCRUD(user?.role)
+  const canEdit = user?.role === 'Comision'
 
   useEffect(() => {
     fetchTournaments()

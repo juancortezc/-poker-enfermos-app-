@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import ProgressBar, { CircularProgress } from '@/components/ui/ProgressBar'
 import LoadingState, { CardSkeleton } from '@/components/ui/LoadingState'
 import { Plus, Trophy, Calendar, Users, Clock } from 'lucide-react'
-import { canCRUD } from '@/lib/auth'
 import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Tournament {
@@ -45,7 +44,7 @@ export default function TournamentsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'activos' | 'finalizados'>('activos')
 
-  const canEdit = canCRUD(user?.role)
+  const canEdit = user?.role === 'Comision'
 
   const fetchTournaments = useCallback(async () => {
     try {
