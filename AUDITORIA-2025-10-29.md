@@ -55,15 +55,19 @@
 - **Uso**: Ninguno en frontend
 - **Impacto**: 0 breaking changes
 
-#### ❌ `/api/tournaments/podium-stats`
-- **Razón**: No usado en ningún componente
-- **Uso**: Ninguno en frontend
+#### ❌ `/api/tournaments/podium-stats` ⚠️ RESTAURADO (2025-11-07)
+- **Razón original**: No usado en ningún componente
+- **Uso original**: Ninguno en frontend
 - **Impacto**: 0 breaking changes
+- **⚠️ CORRECCIÓN**: Este endpoint SÍ estaba siendo usado en `src/components/admin/PodiumStatsTable.tsx:50`
+- **Estado**: ✅ RESTAURADO en 2025-11-07 - La pestaña "Podios" en `/admin/resultados` requiere este endpoint
 
-#### ❌ `/api/stats/date-awards/[gameDateId]`
-- **Razón**: No usado, posible duplicado de stats/awards
-- **Uso**: Ninguno en frontend
+#### ❌ `/api/stats/date-awards/[gameDateId]` ⚠️ RESTAURADO (2025-11-07)
+- **Razón original**: No usado, posible duplicado de stats/awards
+- **Uso original**: Ninguno en frontend
 - **Impacto**: 0 breaking changes
+- **⚠️ CORRECCIÓN**: Este endpoint SÍ estaba siendo usado en `src/app/admin/fecha/page.tsx:78`
+- **Estado**: ✅ RESTAURADO en 2025-11-07 - La página `/admin/fecha` requiere este endpoint para mostrar premios de la noche (Varón, Gay, Podio, Mesa Final, 7/2, Faltas)
 
 **Total líneas eliminadas**: ~150 líneas de código API
 
