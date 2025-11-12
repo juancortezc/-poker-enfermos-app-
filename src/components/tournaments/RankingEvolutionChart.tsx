@@ -39,6 +39,26 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 };
 
 export default function RankingEvolutionChart({ data, playerName }: RankingEvolutionChartProps) {
+  // OPTIMIZATION: Memoize chart data transformation
+  const chartData = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    return data.map(item => ({
+      dateNumber: item.dateNumber,
+      position: item.position,
+      points: item.points,
+      label: `F${item.dateNumber}`
+    }));
+  }, [data]);
+
+  // OPTIMIZATION: Memoize Y-axis domain calculations
+  const { maxPosition, minPosition, padding } = useMemo(() => {
+    if (!data || data.length === 0) return { maxPosition: 1, minPosition: 1, padding: 0 };
+    const max = Math.max(...data.map(d => d.position));
+    const min = Math.min(...data.map(d => d.position));
+    const pad = Math.max(1, Math.ceil((max - min) * 0.1));
+    return { maxPosition: max, minPosition: min, padding: pad };
+  }, [data]);
+
   if (!data || data.length === 0) {
     return (
       <div className="bg-poker-card border border-white/10 rounded-lg p-6 h-64">
@@ -51,25 +71,6 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
       </div>
     );
   }
-
-  // OPTIMIZATION: Memoize chart data transformation
-  const chartData = useMemo(() =>
-    data.map(item => ({
-      dateNumber: item.dateNumber,
-      position: item.position,
-      points: item.points,
-      label: `F${item.dateNumber}`
-    })),
-    [data]
-  );
-
-  // OPTIMIZATION: Memoize Y-axis domain calculations
-  const { maxPosition, minPosition, padding } = useMemo(() => {
-    const max = Math.max(...data.map(d => d.position));
-    const min = Math.min(...data.map(d => d.position));
-    const pad = Math.max(1, Math.ceil((max - min) * 0.1));
-    return { maxPosition: max, minPosition: min, padding: pad };
-  }, [data]);
 
   return (
     <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] p-6">

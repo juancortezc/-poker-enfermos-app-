@@ -40,6 +40,33 @@ export default function TournamentRankingTable({
     fetchRanking();
   }, [tournamentId]);
 
+  // OPTIMIZATION: Memoize display rankings to prevent recalculation on every render
+  const displayRankings = useMemo(() => {
+    if (!rankingData) return [];
+    return compact ? rankingData.rankings.slice(0, 5) : rankingData.rankings;
+  }, [compact, rankingData]);
+
+  // OPTIMIZATION: Memoize completed dates array
+  const completedDates = useMemo(() => {
+    if (!rankingData) return [];
+    return Array.from({ length: rankingData.tournament.completedDates }, (_, i) => i + 1).reverse();
+  }, [rankingData]);
+
+  // OPTIMIZATION: Memoize position color functions (constant values)
+  const positionColors = useMemo(() => ({
+    1: 'text-yellow-400',  // Oro
+    2: 'text-gray-300',    // Plata
+    3: 'text-orange-400',  // Bronce
+    default: 'text-white'
+  }), []);
+
+  const positionBgs = useMemo(() => ({
+    1: 'bg-yellow-400/10 border-yellow-400/20',
+    2: 'bg-gray-300/10 border-gray-300/20',
+    3: 'bg-orange-400/10 border-orange-400/20',
+    default: 'bg-transparent border-white/5'
+  }), []);
+
   if (loading) {
     return (
       <div className="animate-pulse">
@@ -60,33 +87,6 @@ export default function TournamentRankingTable({
   }
 
   const { tournament, rankings } = rankingData;
-
-  // OPTIMIZATION: Memoize display rankings to prevent recalculation on every render
-  const displayRankings = useMemo(() =>
-    compact ? rankings.slice(0, 5) : rankings,
-    [compact, rankings]
-  );
-
-  // OPTIMIZATION: Memoize completed dates array
-  const completedDates = useMemo(() =>
-    Array.from({ length: tournament.completedDates }, (_, i) => i + 1).reverse(),
-    [tournament.completedDates]
-  );
-
-  // OPTIMIZATION: Memoize position color functions (constant values)
-  const positionColors = useMemo(() => ({
-    1: 'text-yellow-400',  // Oro
-    2: 'text-gray-300',    // Plata
-    3: 'text-orange-400',  // Bronce
-    default: 'text-white'
-  }), []);
-
-  const positionBgs = useMemo(() => ({
-    1: 'bg-yellow-400/10 border-yellow-400/20',
-    2: 'bg-gray-300/10 border-gray-300/20',
-    3: 'bg-orange-400/10 border-orange-400/20',
-    default: 'bg-transparent border-white/5'
-  }), []);
 
   const getPositionColor = (position: number) =>
     positionColors[position as keyof typeof positionColors] || positionColors.default;

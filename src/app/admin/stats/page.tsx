@@ -98,6 +98,16 @@ export default function StatsPage() {
     }
   }, [user, loading, canSeeRelations, router])
 
+  // Set default tournament to active tournament when available
+  useEffect(() => {
+    if (activeTournament && selectedTournamentId === null) {
+      setSelectedTournamentId(activeTournament.id)
+    }
+  }, [activeTournament, selectedTournamentId])
+
+  // Use default tournament ID if not yet set
+  const effectiveTournamentId = selectedTournamentId ?? activeTournament?.id ?? 1
+
   // Fetch P&H data - use effectiveTournamentId
   const { data: phData, error: phError, isLoading: phLoading } = useSWR<StatsResponse>(
     user && canSeeRelations && activeTab === 'ph' && effectiveTournamentId ? `/api/stats/parent-child/${effectiveTournamentId}` : null,
@@ -125,16 +135,6 @@ export default function StatsPage() {
   )
 
   const availableTournaments = tournaments?.filter(t => t.number >= 28) || []
-
-  // Set default tournament to active tournament when available
-  useEffect(() => {
-    if (activeTournament && selectedTournamentId === null) {
-      setSelectedTournamentId(activeTournament.id)
-    }
-  }, [activeTournament, selectedTournamentId])
-
-  // Use default tournament ID if not yet set
-  const effectiveTournamentId = selectedTournamentId ?? activeTournament?.id ?? 1
 
   if (loading || activeTournamentLoading || (activeTab === 'ph' && phLoading) || (activeTab === 'premios' && awardsLoading)) {
     return (
