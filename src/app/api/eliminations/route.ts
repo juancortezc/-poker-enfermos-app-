@@ -4,6 +4,7 @@ import { withComisionAuth } from '@/lib/api-auth';
 import { calculatePointsForPosition } from '@/lib/tournament-utils';
 import { updateParentChildStats } from '@/lib/parent-child-stats';
 import { sendNotificationIfEnabled } from '@/lib/notification-config';
+import { getEcuadorDate } from '@/lib/date-utils';
 
 export async function POST(request: NextRequest) {
   return withComisionAuth(request, async (_req, _user) => {
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
     const totalPlayers = gameDate.playerIds.length;
     const points = calculatePointsForPosition(position, totalPlayers);
 
-    // Crear la eliminación
+    // Crear la eliminación (usar hora de Ecuador)
     const elimination = await prisma.elimination.create({
       data: {
         gameDateId,
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
         eliminatedPlayerId: eliminatedPlayerId,
         eliminatorPlayerId: eliminatorPlayerId,
         points,
-        eliminationTime: new Date().toISOString()
+        eliminationTime: getEcuadorDate().toISOString()
       },
       include: {
         eliminatedPlayer: {
@@ -201,7 +202,7 @@ export async function POST(request: NextRequest) {
             eliminatedPlayerId: eliminatorPlayerId,
             eliminatorPlayerId,
             points: winnerPoints,
-            eliminationTime: new Date().toISOString()
+            eliminationTime: getEcuadorDate().toISOString()
           }
         });
 

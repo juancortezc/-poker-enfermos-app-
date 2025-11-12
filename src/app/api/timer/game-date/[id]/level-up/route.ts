@@ -103,7 +103,7 @@ export async function POST(
           fromLevel: timerState.currentLevel,
           toLevel: toLevel,
           metadata: {
-            levelUpAt: new Date().toISOString(),
+            levelUpAt: getEcuadorDate().toISOString(),
             newDuration: targetBlindLevel.duration,
             newSmallBlind: targetBlindLevel.smallBlind,
             newBigBlind: targetBlindLevel.bigBlind,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withComisionAuth } from '@/lib/api-auth'
-import { parseToUTCNoon, validateTuesdayDate } from '@/lib/date-utils'
+import { parseToUTCNoon, validateTuesdayDate, getEcuadorDate } from '@/lib/date-utils'
 
 // GET - Obtener detalles de una fecha específica
 export async function GET(
@@ -113,12 +113,12 @@ export async function PUT(
 
         // Usar transacción para asegurar consistencia
         const result = await prisma.$transaction(async (tx) => {
-          // 1. Actualizar GameDate status y startTime
+          // 1. Actualizar GameDate status y startTime (usar hora de Ecuador)
           const updatedGameDate = await tx.gameDate.update({
             where: { id: gameDateId },
             data: {
               status: 'in_progress',
-              startTime: new Date() // Hora actual de Ecuador
+              startTime: getEcuadorDate()
             },
             include: {
               tournament: {
@@ -131,15 +131,16 @@ export async function PUT(
             }
           })
 
-          // 2. Crear TimerState inicial
+          // 2. Crear TimerState inicial (usar hora de Ecuador)
+          const ecuadorNow = getEcuadorDate()
           const timerState = await tx.timerState.create({
             data: {
               gameDateId: gameDateId,
               status: 'active',
               currentLevel: 1,
               timeRemaining: existingDate.tournament.blindLevels[0]?.duration * 60 || 720, // en segundos
-              startTime: new Date(),
-              levelStartTime: new Date(),
+              startTime: ecuadorNow,
+              levelStartTime: ecuadorNow,
               blindLevels: existingDate.tournament.blindLevels.map(level => ({
                 level: level.level,
                 smallBlind: level.smallBlind,
@@ -159,7 +160,7 @@ export async function PUT(
               toLevel: 1,
               metadata: {
                 totalPlayers: updatedGameDate.playerIds.length,
-                startedAt: new Date()
+                startedAt: ecuadorNow
               }
             }
           })

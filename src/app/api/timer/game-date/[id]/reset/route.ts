@@ -3,6 +3,7 @@ import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveLevelChangeUpdate } from '@/lib/timer-state'
 import { emitTimerEvent } from '@/lib/server-socket'
+import { getEcuadorDate } from '@/lib/date-utils'
 
 /**
  * POST /api/timer/game-date/[id]/reset
@@ -84,7 +85,7 @@ export async function POST(
           ...updatePayload,
           status: 'active', // Reiniciar como activo
           // NO resetear totalElapsed - preservar historial
-          levelStartTime: new Date(), // Nuevo tiempo de inicio del nivel
+          levelStartTime: getEcuadorDate(), // Nuevo tiempo de inicio del nivel (hora de Ecuador)
         }
       })
 
@@ -98,7 +99,7 @@ export async function POST(
           toLevel: timerState.currentLevel,
           metadata: {
             action: 'reset_level',
-            resetAt: new Date().toISOString(),
+            resetAt: getEcuadorDate().toISOString(),
             level: timerState.currentLevel,
             newDuration: currentBlindLevel.duration,
             newSmallBlind: currentBlindLevel.smallBlind,

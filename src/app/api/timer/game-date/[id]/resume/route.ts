@@ -3,6 +3,7 @@ import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveResumeUpdate } from '@/lib/timer-state'
 import { emitTimerEvent } from '@/lib/server-socket'
+import { getEcuadorDate } from '@/lib/date-utils'
 
 export async function POST(
   request: NextRequest,
@@ -74,7 +75,7 @@ export async function POST(
           fromLevel: timerState.currentLevel,
           toLevel: timerState.currentLevel,
           metadata: {
-            resumedAt: new Date().toISOString(),
+            resumedAt: getEcuadorDate().toISOString(),
             timeRemaining: updatePayload.timeRemaining
           }
         }

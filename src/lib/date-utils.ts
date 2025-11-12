@@ -147,3 +147,50 @@ export function isDateInPast(date: Date): boolean {
   )
   return date < today
 }
+
+/**
+ * Gets the current date/time in Ecuador timezone (America/Guayaquil, UTC-5)
+ * Ecuador does not observe daylight saving time
+ */
+export function getEcuadorDate(): Date {
+  // Get current UTC time
+  const now = new Date()
+
+  // Ecuador is UTC-5 (no DST)
+  const ecuadorOffset = -5 * 60 // minutes
+  const localOffset = now.getTimezoneOffset() // minutes
+
+  // Calculate the difference and adjust
+  const offsetDiff = localOffset - ecuadorOffset
+  const ecuadorTime = new Date(now.getTime() + offsetDiff * 60 * 1000)
+
+  return ecuadorTime
+}
+
+/**
+ * Formats a date to Ecuador timezone for display
+ */
+export function formatEcuadorDateTime(date: Date): string {
+  return date.toLocaleString('es-EC', {
+    timeZone: 'America/Guayaquil',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  })
+}
+
+/**
+ * Formats a date to Ecuador timezone date only
+ */
+export function formatEcuadorDate(date: Date): string {
+  return date.toLocaleDateString('es-EC', {
+    timeZone: 'America/Guayaquil',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+}
