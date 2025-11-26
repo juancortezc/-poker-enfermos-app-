@@ -46,12 +46,15 @@ Header: Authorization: Bearer {adminKey}
 
 ### Core Endpoints
 ```
+# Players (Public)
+GET  /api/players                                        # Public - Player directory with filters
+
 # Tournaments
 GET  /api/tournaments/active
 POST /api/tournaments/[id]/activate
 POST /api/tournaments/[id]/complete
 
-# Game Dates  
+# Game Dates
 GET  /api/game-dates/active
 PUT  /api/game-dates/[id]  # action: 'start'|'update'
 GET  /api/game-dates/[id]/live-status

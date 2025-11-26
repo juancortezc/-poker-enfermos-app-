@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
-import { withAuth, withComisionAuth } from '@/lib/api-auth'
+import { withComisionAuth } from '@/lib/api-auth'
 import { validateAndHashPin } from '@/lib/pin-utils'
 
-// GET /api/players - Lista de jugadores con filtros
+// GET /api/players - Lista de jugadores con filtros (público para mostrar directorio)
 export async function GET(req: NextRequest) {
-  return withAuth(req, async (req, user) => {
   try {
     const { searchParams } = new URL(req.url)
     const roleParam = searchParams.get('role')
@@ -14,7 +13,7 @@ export async function GET(req: NextRequest) {
     const includeInactive = searchParams.get('includeInactive') === 'true'
 
     const where: Record<string, unknown> = {}
-    
+
     if (roleParam) {
       // Handle multiple roles separated by comma
       const roles = roleParam.split(',').map(r => r.trim() as UserRole)
@@ -24,7 +23,7 @@ export async function GET(req: NextRequest) {
         where.role = { in: roles }
       }
     }
-    
+
     if (!includeInactive) {
       where.isActive = true
     }
@@ -81,7 +80,6 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     )
   }
-  })
 }
 
 // POST /api/players - Crear nuevo jugador
