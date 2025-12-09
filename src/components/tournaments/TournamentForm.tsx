@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { DatePicker } from '@/components/ui/date-picker'
 import { ValidationSummary } from '@/components/ui/ValidationMessage'
 import LoadingState, { FormSkeleton } from '@/components/ui/LoadingState'
@@ -12,7 +13,7 @@ import { useFormValidation, useFormDraft } from '@/hooks/useFormDraft'
 import { validateTournamentForm, validateTournamentNumber } from '@/lib/tournament-validation'
 import { TOURNAMENT_PRESETS, getPresetById } from '@/lib/tournament-presets'
 import { generateTournamentDates } from '@/lib/date-utils'
-import { ArrowLeft, Save, Loader2, Check, AlertCircle, Target, X } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Check, AlertCircle, Target, X, Trash2 } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
 import { fetchCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
@@ -83,7 +84,9 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
   const [selectedPreset, setSelectedPreset] = useState<string>('standard')
   const [showPresetModal, setShowPresetModal] = useState(false)
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
-  
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const isEditing = !!tournamentId
   const [activeTab, setActiveTab] = useState<'participants' | 'dates' | 'blinds'>('participants')
 
@@ -362,10 +365,34 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
     }
   }
 
+  const handleDeleteTournament = async () => {
+    try {
+      setIsDeleting(true)
+      const response = await fetch(`/api/tournaments/${tournamentId}`, {
+        method: 'DELETE',
+        headers: buildAuthHeaders()
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Error al eliminar torneo')
+      }
+
+      toast.success(`Torneo ${tournamentNumber} eliminado correctamente`)
+      setShowDeleteConfirm(false)
+      router.push('/tournaments')
+    } catch (error) {
+      console.error('Error deleting tournament:', error)
+      toast.error(error instanceof Error ? error.message : 'Error al eliminar torneo')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const updateFormData = useCallback((field: keyof FormData, value: FormData[keyof FormData]) => {
     const newData = { ...formData, [field]: value }
     setFormData(newData)
-    
+
     // Validate with debounce
     validateWithDebounce(newData)
   }, [formData, validateWithDebounce])
@@ -477,21 +504,37 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
     <div className="min-h-screen bg-gradient-to-br from-[#1a1208] via-[#0f0a04] to-[#0a0703] pb-safe">
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/tournaments')}
-            className="text-[#d7c59a] hover:text-[#f3e6c5] hover:bg-[#24160f]/40"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver
-          </Button>
-          <div className="flex items-center space-x-3">
-            <h1 className="text-xl font-bold text-[#f3e6c5]">
-              {isEditing ? `Editar Torneo ${tournamentNumber}` : `Nuevo Torneo ${tournamentNumber}`}
-            </h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push('/tournaments')}
+              className="text-[#d7c59a] hover:text-[#f3e6c5] hover:bg-[#24160f]/40"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver
+            </Button>
+            <div className="flex items-center space-x-3">
+              <h1 className="text-xl font-bold text-[#f3e6c5]">
+                {isEditing ? `Editar Torneo ${tournamentNumber}` : `Nuevo Torneo ${tournamentNumber}`}
+              </h1>
+            </div>
           </div>
+
+          {/* Delete Tournament Button - Only when editing */}
+          {isEditing && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+              title="Cancelar torneo"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Cancelar Torneo
+            </Button>
+          )}
         </div>
 
         {/* Tabs de navegación */}
@@ -1005,6 +1048,19 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
           </div>
         </div>
       )}
+
+      {/* Confirm Delete Tournament Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteTournament}
+        title="Cancelar Torneo"
+        description={`¿Estás seguro que deseas cancelar el Torneo ${tournamentNumber}? Esta acción eliminará todas las fechas, participantes, rankings y datos relacionados. Esta operación NO se puede deshacer.`}
+        confirmText="Sí, Cancelar Torneo"
+        cancelText="No, Mantener Torneo"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   )
 }

@@ -3,9 +3,12 @@
 import { useState } from 'react'
 import { UserRole } from '@prisma/client'
 import { Button } from '@/components/ui/button'
-import { Edit2, User } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { Edit2, User, UserX } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { buildAuthHeaders } from '@/lib/client-auth'
+import { toast } from 'react-toastify'
 
 interface Player {
   id: string
@@ -32,11 +35,14 @@ interface Player {
 interface PlayerCardProps {
   player: Player
   canEdit: boolean
+  onPlayerDeactivated?: () => void
 }
 
-export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
+export default function PlayerCard({ player, canEdit, onPlayerDeactivated }: PlayerCardProps) {
   const router = useRouter()
   const [imageError, setImageError] = useState(false)
+  const [showConfirmDeactivate, setShowConfirmDeactivate] = useState(false)
+  const [isDeactivating, setIsDeactivating] = useState(false)
   const getRoleBadge = (role: UserRole) => {
     switch (role) {
       case UserRole.Comision:
@@ -67,6 +73,33 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
       router.push(`/players/edit-invitado/${player.id}`)
     } else {
       router.push(`/players/edit/${player.id}`)
+    }
+  }
+
+  const handleDeactivate = async () => {
+    try {
+      setIsDeactivating(true)
+      const response = await fetch(`/api/players/${player.id}`, {
+        method: 'DELETE',
+        headers: buildAuthHeaders()
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Error al desactivar jugador')
+      }
+
+      toast.success(`${player.firstName} ${player.lastName} ha sido desactivado`)
+      setShowConfirmDeactivate(false)
+
+      if (onPlayerDeactivated) {
+        onPlayerDeactivated()
+      }
+    } catch (error) {
+      console.error('Error deactivating player:', error)
+      toast.error(error instanceof Error ? error.message : 'Error al desactivar jugador')
+    } finally {
+      setIsDeactivating(false)
     }
   }
 
@@ -115,18 +148,43 @@ export default function PlayerCard({ player, canEdit }: PlayerCardProps) {
           </div>
         </div>
 
-        {/* Right side - Edit button */}
+        {/* Right side - Action buttons */}
         {canEdit && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleEdit}
-            className="text-gray-400 hover:text-white hover:bg-white/10 p-2"
-          >
-            <Edit2 className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowConfirmDeactivate(true)}
+              className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 p-2"
+              title="Desactivar jugador"
+            >
+              <UserX className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleEdit}
+              className="text-gray-400 hover:text-white hover:bg-white/10 p-2"
+              title="Editar jugador"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
+          </div>
         )}
       </div>
+
+      {/* Confirm Deactivate Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDeactivate}
+        onClose={() => setShowConfirmDeactivate(false)}
+        onConfirm={handleDeactivate}
+        title="Desactivar Jugador"
+        description={`¿Estás seguro que deseas desactivar a ${player.firstName} ${player.lastName}? Esta acción ocultará al jugador de las listas activas pero no eliminará su historial.`}
+        confirmText="Desactivar"
+        cancelText="Cancelar"
+        variant="danger"
+        isLoading={isDeactivating}
+      />
     </div>
   )
 }

@@ -113,6 +113,13 @@ export function getDashboardFeatures(userRole: UserRole) {
       ...withPermission()
     },
     {
+      id: 'my-proposals',
+      title: 'MIS PROPUESTAS',
+      href: '/propuestas-v2',
+      permission: 'my-proposals',
+      ...withPermission('my-proposals')
+    },
+    {
       id: 'calendar',
       title: 'CALENDARIO',
       href: '/admin/calendar',

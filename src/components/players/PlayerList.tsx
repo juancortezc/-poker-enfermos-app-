@@ -29,14 +29,16 @@ interface PlayerListProps {
   players: Player[]
   canEdit: boolean
   onEditPlayer: (player: Player) => void
+  onPlayerDeactivated?: () => void
   activeTab: 'enfermos' | 'invitados'
 }
 
-export default function PlayerList({ 
-  players, 
-  canEdit, 
-  onEditPlayer, 
-  activeTab 
+export default function PlayerList({
+  players,
+  canEdit,
+  onEditPlayer,
+  onPlayerDeactivated,
+  activeTab
 }: PlayerListProps) {
   if (players.length === 0) {
     return (
@@ -64,6 +66,7 @@ export default function PlayerList({
           key={player.id}
           player={player}
           canEdit={canEdit}
+          onPlayerDeactivated={onPlayerDeactivated}
         />
       ))}
     </div>

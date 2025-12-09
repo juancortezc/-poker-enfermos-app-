@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { AuthUser } from '@/lib/auth'
-import { clearStoredAuthTokens, storePin, storeAdminKey } from '@/lib/client-auth'
+import { clearStoredAuthTokens, storePin, storeAdminKey, getStoredAuthToken } from '@/lib/client-auth'
 
 interface AuthContextType {
   user: AuthUser | null
@@ -81,10 +81,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('poker-user')
-    clearStoredAuthTokens()
+  const logout = async () => {
+    try {
+      // Invalidar cache del servidor
+      const token = getStoredAuthToken()
+      if (token) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error during logout:', error)
+    } finally {
+      // Siempre limpiar cliente aunque falle el servidor
+      setUser(null)
+      localStorage.removeItem('poker-user')
+      clearStoredAuthTokens()
+    }
   }
 
   return (

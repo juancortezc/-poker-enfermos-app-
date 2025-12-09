@@ -22,15 +22,15 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="rounded-2xl border border-white/20 bg-gradient-to-br from-[#1f1a2d] via-[#181a2c] to-[#111221] px-4 py-3 shadow-[0_16px_36px_rgba(8,9,15,0.45)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/55 mb-1">
+      <div className="rounded-2xl border border-[#e0b66c]/20 bg-gradient-to-br from-[#2a1a14]/95 via-[#24160f]/95 to-[#1f1410]/95 px-4 py-3 shadow-[0_16px_36px_rgba(11,6,3,0.55)] backdrop-blur-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d7c59a] mb-1">
           Fecha {label}
         </p>
-        <p className="text-sm font-semibold text-white">
-          Posición: <span className="text-poker-gold">{data.position}°</span>
+        <p className="text-sm font-semibold text-[#f3e6c5]">
+          Posición: <span className="text-[#e0b66c]">{data.position}°</span>
         </p>
-        <p className="text-sm font-semibold text-white/80">
-          Puntos: <span className="text-rose-300">{data.points}</span>
+        <p className="text-sm font-semibold text-[#f3e6c5]/80">
+          Puntos: <span className="text-[#a9441c]">{data.points}</span>
         </p>
       </div>
     );
@@ -73,7 +73,7 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
   }
 
   return (
-    <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] p-6">
+    <div className="rounded-3xl border border-[#e0b66c]/15 bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1f1410] p-6 shadow-[0_18px_40px_rgba(11,12,32,0.35)]">
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
@@ -86,16 +86,16 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
             }}
           >
             <defs>
-              <linearGradient id="pokerNewLine" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#d73552" />
-                <stop offset="100%" stopColor="#ff4b2b" />
+              <linearGradient id="noirJazzLine" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#e0b66c" />
+                <stop offset="100%" stopColor="#a9441c" />
               </linearGradient>
-              <linearGradient id="pokerNewGrid" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(255,255,255,0.08)" />
-                <stop offset="100%" stopColor="rgba(255,255,255,0.03)" />
+              <linearGradient id="noirJazzGrid" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(224,182,108,0.08)" />
+                <stop offset="100%" stopColor="rgba(224,182,108,0.03)" />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="4 8" stroke="url(#pokerNewGrid)" />
+            <CartesianGrid strokeDasharray="4 8" stroke="url(#noirJazzGrid)" />
             <XAxis
               dataKey="label"
               stroke="rgba(255, 255, 255, 0.45)"
@@ -112,25 +112,25 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
               reversed={true} // Invert Y-axis so position 1 is at top
               tickFormatter={(value) => `${value}°`}
             />
-            <Tooltip 
+            <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: 'rgba(255,93,143,0.6)', strokeWidth: 2 }}
+              cursor={{ stroke: 'rgba(224,182,108,0.6)', strokeWidth: 2 }}
             />
             <Line
               type="monotone"
               dataKey="position"
-              stroke="url(#pokerNewLine)"
+              stroke="url(#noirJazzLine)"
               strokeWidth={5}
               dot={{
-                fill: '#d73552',
+                fill: '#e0b66c',
                 strokeWidth: 2,
-                stroke: '#ff4b2b',
+                stroke: '#a9441c',
                 r: 8
               }}
               activeDot={{
                 r: 12,
-                fill: '#ff4b2b',
-                stroke: '#ffffff',
+                fill: '#e0b66c',
+                stroke: '#f3e6c5',
                 strokeWidth: 2
               }}
             />

@@ -229,6 +229,7 @@ export default function PlayersPage() {
           players={filteredPlayers}
           canEdit={canEdit}
           onEditPlayer={handleEditPlayer}
+          onPlayerDeactivated={fetchPlayers}
           activeTab={activeTab}
         />
       </div>

@@ -138,7 +138,7 @@ export default function PropuestasV2Page() {
     <div className="pb-24 space-y-7">
       {/* Header */}
       <section>
-        <Card className="bg-gradient-to-br from-[#201c30] via-[#1b1c2b] to-[#131422] border border-white/10 p-5 shadow-[0_18px_40px_rgba(15,15,45,0.35)]">
+        <Card className="bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1f1410] border border-[#e0b66c]/15 p-5 shadow-[0_18px_40px_rgba(11,12,32,0.35)]">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-poker-red/25 ring-1 ring-poker-red/40 text-poker-red">
