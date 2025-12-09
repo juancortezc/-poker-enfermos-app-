@@ -75,6 +75,7 @@ function PlayerRow({ player, onSelect }: PlayerRowProps) {
               alt={player.playerName}
               fill
               sizes="40px"
+              loading="lazy"
               className="object-cover noir-photo"
             />
           </div>

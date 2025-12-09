@@ -50,6 +50,7 @@ export default function ParentChildCard({ relation, index, tournamentId }: Paren
         alt={getPlayerName(player)}
         fill
         sizes="(max-width: 768px) 48px, 64px"
+        loading="lazy"
         className="rounded-full border border-[#e0b66c]/35 object-cover shadow-[0_6px_16px_rgba(11,6,3,0.45)]"
       />
     </div>

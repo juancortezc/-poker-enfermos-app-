@@ -111,6 +111,7 @@ export default function AwardCard({
                     src={item.player.photoUrl}
                     alt={`${item.player.firstName} ${item.player.lastName}`}
                     fill
+                    loading="lazy"
                     className="object-cover"
                   />
                 ) : (

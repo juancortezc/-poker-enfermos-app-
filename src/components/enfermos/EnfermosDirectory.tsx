@@ -84,6 +84,7 @@ export default function EnfermosDirectory() {
               alt={`${player.firstName} ${player.lastName}`}
               fill
               sizes="48px"
+              loading="lazy"
               className="object-cover"
             />
           ) : (

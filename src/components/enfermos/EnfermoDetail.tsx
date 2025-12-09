@@ -270,6 +270,7 @@ export default function EnfermoDetail({ playerId }: EnfermoDetailProps) {
                     alt={`${player.firstName} ${player.lastName}`}
                     fill
                     sizes="112px"
+                    loading="lazy"
                     className="object-cover"
                   />
                 ) : (

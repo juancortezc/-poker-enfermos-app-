@@ -131,6 +131,7 @@ export default function ParentChildDetailModal({
                         src={getPlayerImage(relation.parentPlayer)}
                         alt={getPlayerName(relation.parentPlayer)}
                         fill
+                        loading="lazy"
                         className="rounded-full border border-[#e0b66c]/45 object-cover shadow-[0_8px_18px_rgba(11,6,3,0.45)]"
                       />
                     </div>
@@ -148,6 +149,7 @@ export default function ParentChildDetailModal({
                         src={getPlayerImage(relation.childPlayer)}
                         alt={getPlayerName(relation.childPlayer)}
                         fill
+                        loading="lazy"
                         className="rounded-full border border-[#d7c59a]/35 object-cover shadow-[0_8px_18px_rgba(11,6,3,0.35)]"
                       />
                     </div>
