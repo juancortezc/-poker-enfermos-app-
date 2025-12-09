@@ -1,8 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import LoadingState from '@/components/ui/LoadingState'
-import PodiumResultsModal from '@/components/tournaments/PodiumResultsModal'
+
+// Dynamic import para modal de resultados de podio
+const PodiumResultsModal = dynamic(() => import('@/components/tournaments/PodiumResultsModal'), {
+  loading: () => null,
+  ssr: false
+})
 
 interface Player {
   id: string

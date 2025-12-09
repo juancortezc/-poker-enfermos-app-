@@ -2,7 +2,13 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import ParentChildDetailModal from './ParentChildDetailModal'
+import dynamic from 'next/dynamic'
+
+// Dynamic import para modal de detalles (solo carga cuando se abre)
+const ParentChildDetailModal = dynamic(() => import('./ParentChildDetailModal'), {
+  loading: () => null,
+  ssr: false
+})
 
 interface Player {
   id: string

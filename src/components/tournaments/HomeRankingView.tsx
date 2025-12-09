@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import {
   RotateCw,
   TrendingUp,
@@ -11,11 +12,16 @@ import {
 } from 'lucide-react'
 
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
-import PlayerDetailModal from './PlayerDetailModal'
 import { RankCard } from '@/components/noir/RankCard'
 import { NoirButton } from '@/components/noir/NoirButton'
 import type { PlayerRanking } from '@/lib/ranking-utils'
 import { cn } from '@/lib/utils'
+
+// Dynamic import para modal pesado (solo carga cuando se abre)
+const PlayerDetailModal = dynamic(() => import('./PlayerDetailModal'), {
+  loading: () => null, // No mostrar loader, el modal aparecerá cuando esté listo
+  ssr: false // Modal no necesita SSR
+})
 
 interface HomeRankingViewProps {
   tournamentId: number
