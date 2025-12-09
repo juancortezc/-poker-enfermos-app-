@@ -19,6 +19,7 @@ export type FeaturePermission =
   | 'proposals-admin'    // Gestión de propuestas (admin)
   | 'my-proposals'       // Mis propuestas
   | 'notifications-config' // Configuración de notificaciones
+  | 'technical-docs'     // Documentación técnica
 
 /**
  * Mapa de permisos por feature y rol
@@ -43,6 +44,7 @@ const PERMISSIONS_MAP: Record<FeaturePermission, UserRole[]> = {
   'eliminations': ['Comision'],
   'proposals-admin': ['Comision'],
   'notifications-config': ['Comision'],
+  'technical-docs': ['Comision'],
 }
 
 /**
@@ -205,6 +207,13 @@ export function getDashboardFeatures(userRole: UserRole) {
       href: '/admin/import',
       permission: 'import',
       ...withPermission('import')
+    },
+    {
+      id: 'technical-docs',
+      title: 'TÉCNICO',
+      href: '/admin/tecnico',
+      permission: 'technical-docs',
+      ...withPermission('technical-docs')
     }
   ]
 
@@ -238,6 +247,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
   if (route.startsWith('/admin/stats')) return canAccess(userRole, 'stats-parents')
   if (route.startsWith('/admin/propuestas')) return canAccess(userRole, 'proposals-admin')
   if (route.startsWith('/admin/notificaciones')) return canAccess(userRole, 'notifications-config')
+  if (route.startsWith('/admin/tecnico')) return canAccess(userRole, 'technical-docs')
 
   // Rutas admin restringidas (solo Comisión)
   if (route.startsWith('/admin/')) return userRole === 'Comision'
