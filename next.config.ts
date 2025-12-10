@@ -10,10 +10,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Disable ESLint and TypeScript during builds on Vercel to prevent failures
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Disable TypeScript during builds on Vercel to prevent failures
   typescript: {
     ignoreBuildErrors: true,
   },
