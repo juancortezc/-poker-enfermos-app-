@@ -1,45 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { bootstrapInfrastructure } from '@/infrastructure/bootstrap';
+import { getGetEliminationsUseCase } from '@/infrastructure';
+import { handleEliminationError } from '@/infrastructure/http/errorHandler';
 
+// Ensure dependencies are registered
+bootstrapInfrastructure();
+
+/**
+ * GET /api/eliminations/game-date/[id]
+ *
+ * Gets all eliminations for a game date, ordered by position descending.
+ * Public endpoint (no auth required).
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const gameDateId = parseInt((await params).id);
+    const { id } = await params;
+    const gameDateId = parseInt(id);
 
-    // Obtener todas las eliminaciones de la fecha
-    const eliminations = await prisma.elimination.findMany({
-      where: {
-        gameDateId
-      },
-      include: {
-        eliminatedPlayer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        },
-        eliminatorPlayer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        }
-      },
-      orderBy: {
-        position: 'desc' // Orden descendente para mostrar las más recientes primero
-      }
-    });
+    if (isNaN(gameDateId)) {
+      return NextResponse.json(
+        { error: 'Invalid game date ID' },
+        { status: 400 }
+      );
+    }
+
+    // Execute use case
+    const useCase = getGetEliminationsUseCase();
+    const eliminations = await useCase.execute({ gameDateId });
 
     return NextResponse.json(eliminations);
   } catch (error) {
-    console.error('Error fetching eliminations:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch eliminations' },
-      { status: 500 }
-    );
+    return handleEliminationError(error);
   }
 }
