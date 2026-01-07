@@ -1,12 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { calculateTournamentRanking } from '@/lib/ranking-utils';
+import { bootstrapInfrastructure } from '@/infrastructure/bootstrap';
+import { getGetTournamentRankingUseCase } from '@/infrastructure';
+import { handleRankingError } from '@/infrastructure/http/rankingErrorHandler';
 
+// Ensure dependencies are registered
+bootstrapInfrastructure();
+
+/**
+ * GET /api/tournaments/[id]/ranking
+ *
+ * Gets the complete ranking for a tournament.
+ * Public endpoint (no auth required).
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const tournamentId = parseInt((await params).id);
+    const { id } = await params;
+    const tournamentId = parseInt(id);
 
     if (isNaN(tournamentId)) {
       return NextResponse.json(
@@ -15,8 +27,9 @@ export async function GET(
       );
     }
 
-    // Calcular el ranking completo del torneo
-    const rankingData = await calculateTournamentRanking(tournamentId);
+    // Execute use case
+    const useCase = getGetTournamentRankingUseCase();
+    const rankingData = await useCase.execute({ tournamentId });
 
     if (!rankingData) {
       return NextResponse.json(
@@ -25,12 +38,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(rankingData);
+    // Transform to match existing API response format
+    return NextResponse.json({
+      tournament: rankingData.tournament,
+      rankings: rankingData.rankings,
+      lastUpdated: new Date(rankingData.lastUpdated),
+    });
   } catch (error) {
-    console.error('Error fetching tournament ranking:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tournament ranking' },
-      { status: 500 }
-    );
+    return handleRankingError(error);
   }
 }

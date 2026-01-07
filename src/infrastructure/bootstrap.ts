@@ -1,4 +1,5 @@
 import { registerEliminationDependencies } from './di/elimination';
+import { registerRankingDependencies } from './di/ranking';
 
 let initialized = false;
 
@@ -16,8 +17,10 @@ export function bootstrapInfrastructure(): void {
   // Register Elimination bounded context
   registerEliminationDependencies();
 
+  // Register Ranking bounded context
+  registerRankingDependencies();
+
   // Future: Register other bounded contexts here
-  // registerRankingDependencies();
   // registerTournamentDependencies();
 
   initialized = true;

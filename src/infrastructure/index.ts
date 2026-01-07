@@ -20,10 +20,19 @@ export {
   ELIMINATION_DEPS,
 } from './di/elimination';
 
+// Ranking context dependencies
+export {
+  registerRankingDependencies,
+  getGetTournamentRankingUseCase,
+  getGetPlayerRankingUseCase,
+  RANKING_DEPS,
+} from './di/ranking';
+
 // Repositories (for direct access if needed)
 export { PrismaEliminationRepository } from './persistence/prisma/repositories/PrismaEliminationRepository';
 export { PrismaGameDateRepository } from './persistence/prisma/repositories/PrismaGameDateRepository';
 export { PrismaPlayerRepository } from './persistence/prisma/repositories/PrismaPlayerRepository';
+export { PrismaTournamentRankingRepository } from './persistence/prisma/repositories/PrismaTournamentRankingRepository';
 
 // Services
 export { NotificationServiceAdapter } from './services/NotificationServiceAdapter';
