@@ -1,5 +1,9 @@
 import { registerEliminationDependencies } from './di/elimination';
 import { registerRankingDependencies } from './di/ranking';
+import { registerTournamentDependencies } from './di/tournament';
+import { registerPlayerDependencies } from './di/player';
+import { registerTimerDependencies } from './di/timer';
+import { registerProposalDependencies } from './di/proposal';
 
 let initialized = false;
 
@@ -20,8 +24,17 @@ export function bootstrapInfrastructure(): void {
   // Register Ranking bounded context
   registerRankingDependencies();
 
-  // Future: Register other bounded contexts here
-  // registerTournamentDependencies();
+  // Register Tournament bounded context
+  registerTournamentDependencies();
+
+  // Register Player bounded context
+  registerPlayerDependencies();
+
+  // Register Timer bounded context
+  registerTimerDependencies();
+
+  // Register Proposal bounded context
+  registerProposalDependencies();
 
   initialized = true;
   console.log('[Infrastructure] Dependencies registered');
