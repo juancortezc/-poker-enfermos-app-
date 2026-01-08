@@ -13,12 +13,19 @@ interface Tournament {
   totalDates?: number
 }
 
+interface GameDate {
+  id: number
+  dateNumber: number
+  scheduledDate: string | null
+  status: string
+}
+
 interface ActiveTournamentResponse {
   tournament: Tournament
   stats: {
     completedDates: number
     totalDates: number
-    nextDate?: unknown
+    nextDate?: GameDate
     startDate?: string
     endDate?: string
     isCompleted: boolean
@@ -116,7 +123,10 @@ export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
       completed: swrResponse.data?.stats.completedDates || 0,
       total: swrResponse.data?.stats.totalDates || 12,
       percentage: Math.round(((swrResponse.data?.stats.completedDates || 0) / (swrResponse.data?.stats.totalDates || 12)) * 100)
-    } : null
+    } : null,
+
+    // Next scheduled date
+    nextDate: swrResponse.data?.stats.nextDate || null
   }
 }
 

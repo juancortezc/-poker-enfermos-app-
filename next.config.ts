@@ -8,6 +8,11 @@ const nextConfig: NextConfig = {
         hostname: 'storage.googleapis.com',
         pathname: '/poker-enfermos/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        pathname: '/poker-enfermos-media/**',
+      },
     ],
   },
   // Disable TypeScript during builds on Vercel to prevent failures

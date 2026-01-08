@@ -73,7 +73,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     errorMessage: rankingErrorMessage,
     refresh: refreshRanking
   } = useTournamentRanking(tournamentId, {
-    refreshInterval: 30000
+    refreshInterval: 0 // No auto-refresh in modal
   });
 
   const {
@@ -83,7 +83,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     errorMessage: datesErrorMessage,
     refresh: refreshDates
   } = useGameDates(tournamentId, {
-    refreshInterval: 30000
+    refreshInterval: 0 // No auto-refresh in modal
   });
 
   const {

@@ -1,0 +1,134 @@
+/* ============================================
+   CLEAN POKER - Design System Tokens
+   Material Design 3 Dark Theme + Glassmorphism
+   ============================================ */
+
+:root {
+  /* === BACKGROUND === */
+  --cp-background: #000000;
+  --cp-background-subtle: #0a0a0a;
+
+  /* === SURFACE (Cards with glassmorphism) === */
+  --cp-surface: rgba(38, 38, 38, 0.75);
+  --cp-surface-solid: #1a1a1a;
+  --cp-surface-border: rgba(255, 255, 255, 0.06);
+  --cp-surface-blur: 16px;
+
+  /* === TEXT === */
+  --cp-on-surface: #ffffff;
+  --cp-on-surface-medium: #b3b3b3;
+  --cp-on-surface-variant: #808080;
+  --cp-on-surface-muted: #5a5a5a;
+
+  /* === PRIMARY (Red) === */
+  --cp-primary: #E53935;
+  --cp-primary-variant: #C62828;
+  --cp-on-primary: #ffffff;
+
+  /* === FEEDBACK === */
+  --cp-positive: #4CAF50;
+  --cp-negative: #808080;
+  --cp-neutral: #666666;
+
+  /* === PODIUM === */
+  --cp-gold: #FFD700;
+  --cp-silver: #C0C0C0;
+  --cp-bronze: #CD7F32;
+
+  /* === LIVE === */
+  --cp-live: #E53935;
+  --cp-live-glow: rgba(229, 57, 53, 0.4);
+
+  /* === SHAPE === */
+  --cp-radius-sm: 8px;
+  --cp-radius-md: 12px;
+  --cp-radius-lg: 16px;
+  --cp-radius-xl: 20px;
+  --cp-radius-full: 9999px;
+
+  /* === SPACING === */
+  --cp-space-1: 4px;
+  --cp-space-2: 8px;
+  --cp-space-3: 12px;
+  --cp-space-4: 16px;
+  --cp-space-5: 20px;
+  --cp-space-6: 24px;
+
+  /* === ELEVATION === */
+  --cp-elevation-1:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.2);
+  --cp-elevation-2:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+
+  /* === TYPOGRAPHY === */
+  --cp-font: 'Inter', system-ui, -apple-system, sans-serif;
+  --cp-font-impact: 'Impact', 'Arial Black', 'Helvetica Neue', sans-serif;
+
+  /* Display - Position numbers (#10) */
+  --cp-display-size: 40px;
+  --cp-display-weight: 800;
+
+  /* Title - Names */
+  --cp-title-size: 18px;
+  --cp-title-weight: 600;
+
+  /* Body - Content */
+  --cp-body-size: 14px;
+  --cp-body-weight: 500;
+
+  /* Label - Small text, stats */
+  --cp-label-size: 12px;
+  --cp-label-weight: 500;
+
+  /* Caption - Helper text */
+  --cp-caption-size: 11px;
+  --cp-caption-weight: 400;
+
+  /* === MOTION === */
+  --cp-duration-fast: 150ms;
+  --cp-duration-normal: 250ms;
+  --cp-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === BASE STYLES === */
+.cp-app {
+  font-family: var(--cp-font);
+  background: var(--cp-background);
+  color: var(--cp-on-surface);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === GLASS CARD === */
+.cp-card {
+  background: var(--cp-surface);
+  backdrop-filter: blur(var(--cp-surface-blur));
+  -webkit-backdrop-filter: blur(var(--cp-surface-blur));
+  border: 1px solid var(--cp-surface-border);
+  border-radius: var(--cp-radius-lg);
+  box-shadow: var(--cp-elevation-1);
+}
+
+/* === ANIMATIONS === */
+@keyframes cp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cp-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cp-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

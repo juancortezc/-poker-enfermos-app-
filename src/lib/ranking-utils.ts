@@ -20,6 +20,7 @@ export interface PlayerRanking {
   firstPlaces: number;  // Cantidad de fechas ganadas (1er lugar)
   secondPlaces: number; // Cantidad de segundos lugares
   thirdPlaces: number;  // Cantidad de terceros lugares
+  lastPlaces: number;   // Cantidad de últimos lugares (primer eliminado / 7-2)
   absences: number;     // Cantidad de ausencias (0 puntos)
 }
 
@@ -105,7 +106,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         playerId: player.id,
         playerName: player.name,
         playerAlias: player.alias,
-        playerPhoto: player.photo,
+        playerPhoto: player.photo ?? undefined,
         totalPoints: 0,
         datesPlayed: 0,
         pointsByDate: {},
@@ -115,6 +116,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         firstPlaces: 0,
         secondPlaces: 0,
         thirdPlaces: 0,
+        lastPlaces: 0,
         absences: 0
       });
     });
@@ -149,6 +151,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
             if (elimination.position === 1) ranking.firstPlaces++;  // Contar victorias
             if (elimination.position === 2) ranking.secondPlaces++;
             if (elimination.position === 3) ranking.thirdPlaces++;
+            if (elimination.position === totalPlayersInDate) ranking.lastPlaces++;  // Primer eliminado (7-2)
           } else {
             // Jugador no fue eliminado
             // Solo asignar puntos si es el único jugador restante (ganador) o la fecha está completada

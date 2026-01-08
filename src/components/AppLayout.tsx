@@ -29,7 +29,10 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
   const { searchTerm, setSearchTerm, showAddButton } = usePlayerSearch()
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  
+
+  // Pages that use Clean Poker design system (bypass old Noir Jazz layout)
+  const isCleanPokerPage = pathname === '/home-new' || pathname === '/posiciones'
+
   const isPlayersPage = pathname === '/players'
   // Auto-detect if page needs full width (stats pages, admin pages with tables)
   const needsFullWidth =
@@ -60,6 +63,11 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
     } else {
       router.push('/players/new?type=invitado')
     }
+  }
+
+  // Clean Poker pages handle their own layout, auth, loading states
+  if (isCleanPokerPage) {
+    return <>{children}</>
   }
 
   if (loading) {
