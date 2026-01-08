@@ -63,9 +63,9 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
       setAvailableDates(dates);
 
       if (dates.length > 0) {
-        const activeDate = dates.find(date => date.status === 'in_progress') || dates[0];
+        const activeDate = dates.find((date: AvailableDate) => date.status === 'in_progress') || dates[0];
         setSelectedDateId(currentId => {
-          if (currentId && dates.some(date => date.id === currentId)) {
+          if (currentId && dates.some((date: AvailableDate) => date.id === currentId)) {
             return currentId;
           }
           return activeDate.id;
@@ -94,8 +94,6 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
     }
   }, [eliminationsData, eliminationsLoading]);
 
-  // TODO: Re-enable time formatting when needed
-
   const getPlayerName = (player: Player) => {
     return `${player.firstName} ${player.lastName}`;
   };
@@ -103,7 +101,7 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
   if (tournamentLoading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="text-poker-muted">Cargando fechas...</div>
+        <div style={{ color: 'var(--cp-on-surface-muted)' }}>Cargando fechas...</div>
       </div>
     );
   }
@@ -118,83 +116,141 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
 
   if (availableDates.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-poker-muted text-lg">No hay fechas disponibles</p>
-        <p className="text-poker-muted mt-2">Las eliminaciones se mostrarán aquí cuando se registre una fecha.</p>
+      <div className="text-center py-8 px-4">
+        <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-body-size)' }}>
+          No hay fechas disponibles
+        </p>
+        <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)', marginTop: '8px' }}>
+          Las eliminaciones se mostrarán aquí cuando se registre una fecha.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-6">
-      {/* Dropdown para selección de fecha */}
+    <div className="w-full space-y-4 p-4" style={{ background: 'var(--cp-background)' }}>
+      {/* Date Selector - CleanPoker style */}
       <div className="flex justify-center">
         <div className="relative">
           <select
             value={selectedDateId || ''}
             onChange={(e) => setSelectedDateId(parseInt(e.target.value))}
-            className="
-              appearance-none bg-poker-card border border-white/20 rounded-lg 
-              px-4 py-3 pr-10 text-white font-medium min-w-[200px]
-              hover:border-white/30 focus:border-poker-red focus:outline-none
-              transition-colors duration-200
-            "
+            className="appearance-none rounded px-4 py-3 pr-10 font-medium min-w-[200px] cursor-pointer transition-all"
+            style={{
+              background: 'var(--cp-surface)',
+              border: '1px solid var(--cp-surface-border)',
+              color: 'var(--cp-on-surface)',
+              fontSize: 'var(--cp-body-size)',
+            }}
           >
-            <option value="">Seleccionar Fecha</option>
             {availableDates.map(date => (
-              <option key={date.id} value={date.id}>
-                {`Fecha ${date.dateNumber}${date.status === 'in_progress' ? ' (En curso)' : ''}`}
+              <option key={date.id} value={date.id} style={{ background: '#1a1a1a' }}>
+                Fecha {date.dateNumber}{date.status === 'in_progress' ? ' (En curso)' : ''}
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-poker-muted pointer-events-none" />
+          <ChevronDown
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+            style={{ color: 'var(--cp-on-surface-muted)' }}
+          />
         </div>
       </div>
 
-      {/* Lista de eliminaciones - estilo Registro */}
+      {/* Eliminations Card - CleanPoker style */}
       {selectedDateId && (
-        <div className="bg-poker-card rounded-lg border border-white/10">
-          <div className="p-6">
-            <h3 className="text-white font-semibold mb-4">Eliminaciones</h3>
+        <div
+          className="rounded-2xl"
+          style={{
+            background: 'var(--cp-surface)',
+            border: '1px solid var(--cp-surface-border)',
+          }}
+        >
+          <div className="p-4">
+            <h3
+              className="font-semibold mb-4"
+              style={{
+                color: 'var(--cp-on-surface)',
+                fontSize: 'var(--cp-body-size)',
+              }}
+            >
+              Eliminaciones
+            </h3>
 
             {eliminationsLoading ? (
               <div className="flex justify-center py-8">
-                <div className="text-poker-muted">Cargando eliminaciones...</div>
+                <div style={{ color: 'var(--cp-on-surface-muted)' }}>Cargando eliminaciones...</div>
               </div>
             ) : eliminations.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-poker-muted">No hay eliminaciones registradas para esta fecha</p>
+                <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }}>
+                  No hay eliminaciones registradas para esta fecha
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
                 {eliminations.map((elimination) => (
                   <div
                     key={elimination.id}
-                    className="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-white/5 transition-colors"
+                    className="flex items-center justify-between py-3 px-3 rounded-xl transition-colors"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                    }}
                   >
-                    <div className="flex items-center space-x-2 flex-1">
-                      <div className="w-6 text-center">
-                        <span className="text-white font-bold text-sm">{elimination.position}</span>
+                    <div className="flex items-center space-x-3 flex-1">
+                      {/* Position */}
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center font-bold"
+                        style={{
+                          background: elimination.position === 1 ? '#E5393520' : 'rgba(255, 255, 255, 0.08)',
+                          color: elimination.position === 1 ? '#E53935' : 'var(--cp-on-surface)',
+                          fontSize: 'var(--cp-caption-size)',
+                        }}
+                      >
+                        {elimination.position}
                       </div>
-                      <div className="flex-1 text-white text-sm">
-                        <span className="truncate block">
+
+                      {/* Player info */}
+                      <div className="flex-1 min-w-0">
+                        <span
+                          className="truncate font-medium"
+                          style={{
+                            color: 'var(--cp-on-surface)',
+                            fontSize: 'var(--cp-caption-size)',
+                          }}
+                        >
                           {getPlayerName(elimination.eliminatedPlayer)}
                           {elimination.position !== 1 && (
-                            <span className="text-poker-muted">
-                              {' vs '}
-                              {elimination.eliminatorPlayer ?
-                                getPlayerName(elimination.eliminatorPlayer) :
-                                'N/A'
-                              }
+                            <span
+                              style={{
+                                color: 'var(--cp-on-surface-muted)',
+                              }}
+                            >
+                              {' '}vs {elimination.eliminatorPlayer ? getPlayerName(elimination.eliminatorPlayer) : 'N/A'}
                             </span>
                           )}
                           {elimination.position === 1 && (
-                            <span className="text-poker-muted"> - Ganador</span>
+                            <span
+                              style={{
+                                color: '#E53935',
+                              }}
+                            >
+                              {' '}- Ganador
+                            </span>
                           )}
                         </span>
                       </div>
-                      <div className="w-8 text-center">
-                        <span className="text-white font-semibold text-sm">{elimination.points}</span>
+
+                      {/* Points */}
+                      <div
+                        className="px-2 py-1 rounded-lg font-semibold"
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          color: 'var(--cp-on-surface)',
+                          fontSize: 'var(--cp-caption-size)',
+                        }}
+                      >
+                        {elimination.points}
                       </div>
                     </div>
                   </div>
@@ -205,12 +261,12 @@ export default function FechasTable({ tournamentId }: FechasTableProps) {
         </div>
       )}
 
-      {/* Información adicional */}
+      {/* Footer info */}
       {selectedDateId && eliminations.length > 0 && (
-        <div className="flex justify-center">
-          <div className="text-poker-muted text-sm">
+        <div className="text-center pt-2">
+          <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }}>
             {eliminations.length} eliminacion{eliminations.length !== 1 ? 'es' : ''} registrada{eliminations.length !== 1 ? 's' : ''}
-          </div>
+          </p>
         </div>
       )}
     </div>
