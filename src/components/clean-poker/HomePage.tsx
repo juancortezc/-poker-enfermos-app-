@@ -10,6 +10,7 @@ import Link from 'next/link'
 
 import { CPHeader } from './CPHeader'
 import { CPBottomNav } from './CPBottomNav'
+import { CPAppShell } from './CPAppShell'
 import { PositionCard } from './PositionCard'
 import { PodioCard } from './PodioCard'
 import { MalazoCard } from './MalazoCard'
@@ -177,28 +178,27 @@ export function HomePage() {
 // ============================================
 function HomeLoading() {
   return (
-    <div
-      className="cp-app min-h-screen flex items-center justify-center"
-      style={{ background: 'var(--cp-background)' }}
-    >
-      <div className="text-center">
-        <div
-          className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
-          style={{
-            borderColor: 'var(--cp-surface-border)',
-            borderTopColor: 'var(--cp-primary)'
-          }}
-        />
-        <p
-          style={{
-            fontSize: 'var(--cp-body-size)',
-            color: 'var(--cp-on-surface-variant)'
-          }}
-        >
-          Cargando...
-        </p>
+    <CPAppShell>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div
+            className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
+            style={{
+              borderColor: 'var(--cp-surface-border)',
+              borderTopColor: 'var(--cp-primary)'
+            }}
+          />
+          <p
+            style={{
+              fontSize: 'var(--cp-body-size)',
+              color: 'var(--cp-on-surface-variant)'
+            }}
+          >
+            Cargando...
+          </p>
+        </div>
       </div>
-    </div>
+    </CPAppShell>
   )
 }
 
@@ -291,10 +291,8 @@ interface HomeNotAuthenticatedProps {
 
 function HomeNotAuthenticated({ leader, gamesPlayed, totalGames }: HomeNotAuthenticatedProps) {
   return (
-    <div
-      className="cp-app min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ background: 'var(--cp-background)' }}
-    >
+    <CPAppShell>
+      <div className="min-h-screen flex flex-col items-center justify-center px-6">
       {/* Logo */}
       <div className="mb-6">
         <Image
@@ -351,7 +349,8 @@ function HomeNotAuthenticated({ leader, gamesPlayed, totalGames }: HomeNotAuthen
       >
         Ingresar
       </Link>
-    </div>
+      </div>
+    </CPAppShell>
   )
 }
 
@@ -421,15 +420,13 @@ function HomeAuthenticated({
   const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
 
   return (
-    <div
-      className="cp-app min-h-screen"
-      style={{ background: 'var(--cp-background)' }}
-    >
+    <CPAppShell>
       {/* Header */}
       <CPHeader
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
+        isComision={isCommission}
       />
 
       {/* Content */}
@@ -494,7 +491,7 @@ function HomeAuthenticated({
         playerId={user.id}
         tournamentId={tournamentId}
       />
-    </div>
+    </CPAppShell>
   )
 }
 
@@ -557,15 +554,13 @@ function HomeWithLiveGame({
   const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
 
   return (
-    <div
-      className="cp-app min-h-screen"
-      style={{ background: 'var(--cp-background)' }}
-    >
+    <CPAppShell>
       {/* Header */}
       <CPHeader
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
+        isComision={isCommission}
       />
 
       {/* Content */}
@@ -620,7 +615,7 @@ function HomeWithLiveGame({
         playerId={user.id}
         tournamentId={tournamentId}
       />
-    </div>
+    </CPAppShell>
   )
 }
 

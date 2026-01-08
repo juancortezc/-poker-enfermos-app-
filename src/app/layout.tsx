@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Cinzel } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -12,15 +12,8 @@ import { NotificationInitializer } from '@/components/NotificationInitializer'
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-body',
-  display: 'swap'
-})
-
-const cinzel = Cinzel({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-heading',
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-inter',
   display: 'swap'
 })
 
@@ -76,7 +69,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} ${cinzel.variable} antialiased noir-bg`}>
+      <body className={`${inter.variable} antialiased noir-bg`}>
         <SWRProvider>
           <AuthProvider>
             <PlayerSearchProvider>

@@ -31,7 +31,7 @@ export function AppLayout({ children, fullWidth = false }: AppLayoutProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Pages that use Clean Poker design system (bypass old Noir Jazz layout)
-  const isCleanPokerPage = pathname === '/home-new' || pathname === '/posiciones' || pathname === '/tabla' || pathname === '/stats' || pathname === '/info' || pathname === '/perfil-new'
+  const isCleanPokerPage = pathname === '/home-new' || pathname === '/posiciones' || pathname === '/tabla' || pathname === '/stats' || pathname === '/info' || pathname === '/perfil-new' || pathname === '/admin-new'
 
   const isPlayersPage = pathname === '/players'
   // Auto-detect if page needs full width (stats pages, admin pages with tables)

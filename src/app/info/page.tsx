@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
+import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import CalendarioTab from '@/components/info/CalendarioTab'
 import ReglamentoTab from '@/components/info/ReglamentoTab'
 import EnfermosTab from '@/components/info/EnfermosTab'
@@ -29,10 +30,8 @@ export default function InfoPage() {
   // Loading state
   if (authLoading || tournamentLoading) {
     return (
-      <div
-        className="cp-app min-h-screen flex items-center justify-center"
-        style={{ background: 'var(--cp-background)' }}
-      >
+      <CPAppShell>
+        <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div
             className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
@@ -50,17 +49,16 @@ export default function InfoPage() {
             Cargando informacion...
           </p>
         </div>
-      </div>
+        </div>
+      </CPAppShell>
     )
   }
 
   // Not authenticated
   if (!user) {
     return (
-      <div
-        className="cp-app min-h-screen flex flex-col"
-        style={{ background: 'var(--cp-background)' }}
-      >
+      <CPAppShell>
+        <div className="min-h-screen flex flex-col">
         <CPHeader
           userInitials="?"
           tournamentNumber={29}
@@ -93,23 +91,23 @@ export default function InfoPage() {
           </div>
         </main>
         <CPBottomNav />
-      </div>
+        </div>
+      </CPAppShell>
     )
   }
 
   const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
   const tournamentNumber = activeTournament?.number ?? 29
+  const isComision = user.role === 'Comision'
 
   return (
-    <div
-      className="cp-app min-h-screen"
-      style={{ background: 'var(--cp-background)' }}
-    >
+    <CPAppShell>
       {/* Header */}
       <CPHeader
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
+        isComision={isComision}
       />
 
       {/* Content */}
@@ -141,6 +139,6 @@ export default function InfoPage() {
 
       {/* Bottom Nav */}
       <CPBottomNav />
-    </div>
+    </CPAppShell>
   )
 }

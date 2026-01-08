@@ -46,11 +46,11 @@ export function CPBottomNav() {
     if (href === '/home-new') {
       return pathname === '/home-new' || pathname === '/'
     }
-    return pathname.startsWith(href)
+    return pathname?.startsWith(href) ?? false
   }
 
   // Show back button when not on home page
-  const isHomePage = pathname === '/home-new' || pathname === '/'
+  const isHomePage = pathname === '/home-new' || pathname === '/' || pathname === null
 
   const handleBack = () => {
     router.back()
@@ -58,12 +58,18 @@ export function CPBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50"
+      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center"
       style={{
-        background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.95) 100%)',
         paddingBottom: 'env(safe-area-inset-bottom, 0)',
       }}
     >
+      {/* Container that matches CPAppShell max-width */}
+      <div
+        className="w-full max-w-md"
+        style={{
+          background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.95) 100%)',
+        }}
+      >
       <div className="flex items-center justify-around py-2 px-4">
         {/* Back button - only show when not on home */}
         {!isHomePage && (
@@ -107,6 +113,7 @@ export function CPBottomNav() {
             </Link>
           )
         })}
+      </div>
       </div>
     </nav>
   )

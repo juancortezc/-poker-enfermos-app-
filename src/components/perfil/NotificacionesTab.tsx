@@ -15,24 +15,25 @@ import {
   ChevronRight
 } from 'lucide-react'
 
-// MD3 Switch Component
-function MD3Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+// Clean Checkbox (16x16, compact)
+function CleanSwitch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
-      role="switch"
+      role="checkbox"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="relative w-[52px] h-[32px] rounded-full transition-all duration-200"
+      className="w-4 h-4 rounded border transition-all duration-200 flex items-center justify-center flex-shrink-0"
       style={{
-        background: checked ? '#E53935' : 'var(--cp-surface-border)',
+        borderColor: checked ? '#E53935' : 'rgba(255, 255, 255, 0.3)',
+        background: checked ? '#E53935' : 'transparent',
+        borderWidth: '1.5px',
       }}
     >
-      <span
-        className="absolute top-[4px] w-[24px] h-[24px] rounded-full bg-white shadow-md transition-all duration-200"
-        style={{
-          left: checked ? '24px' : '4px',
-        }}
-      />
+      {checked && (
+        <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      )}
     </button>
   )
 }
@@ -255,7 +256,7 @@ export default function NotificacionesTab() {
           label="Notificaciones Push"
           description={pushEnabled ? 'Activas en segundo plano' : 'Recibe alertas con la app cerrada'}
           trailing={
-            <MD3Switch
+            <CleanSwitch
               checked={pushEnabled}
               onChange={async (v) => {
                 if (v) {
@@ -279,7 +280,7 @@ export default function NotificacionesTab() {
         <ListItem
           label="Aviso 1 minuto antes"
           trailing={
-            <MD3Switch
+            <CleanSwitch
               checked={preferences.timer.oneMinuteWarning}
               onChange={(v) => handlePreferenceChange('timer', 'oneMinuteWarning', v)}
             />
@@ -288,7 +289,7 @@ export default function NotificacionesTab() {
         <ListItem
           label="Cambio de blinds"
           trailing={
-            <MD3Switch
+            <CleanSwitch
               checked={preferences.timer.blindChange}
               onChange={(v) => handlePreferenceChange('timer', 'blindChange', v)}
             />
@@ -297,7 +298,7 @@ export default function NotificacionesTab() {
         <ListItem
           label="Timer pausado"
           trailing={
-            <MD3Switch
+            <CleanSwitch
               checked={preferences.timer.timerPaused}
               onChange={(v) => handlePreferenceChange('timer', 'timerPaused', v)}
             />
@@ -310,7 +311,7 @@ export default function NotificacionesTab() {
         <ListItem
           label="Jugador eliminado"
           trailing={
-            <MD3Switch
+            <CleanSwitch
               checked={preferences.game.playerEliminated}
               onChange={(v) => handlePreferenceChange('game', 'playerEliminated', v)}
             />
@@ -319,7 +320,7 @@ export default function NotificacionesTab() {
         <ListItem
           label="Ganador declarado"
           trailing={
-            <MD3Switch
+            <CleanSwitch
               checked={preferences.game.winnerDeclared}
               onChange={(v) => handlePreferenceChange('game', 'winnerDeclared', v)}
             />
@@ -335,7 +336,7 @@ export default function NotificacionesTab() {
         <ListItem
           label="Sonidos"
           trailing={
-            <MD3Switch
+            <CleanSwitch
               checked={preferences.sound.enabled}
               onChange={(v) => handlePreferenceChange('sound', 'enabled', v)}
             />
@@ -378,7 +379,7 @@ export default function NotificacionesTab() {
         <ListItem
           label="Vibración"
           trailing={
-            <MD3Switch
+            <CleanSwitch
               checked={preferences.vibration.enabled}
               onChange={(v) => handlePreferenceChange('vibration', 'enabled', v)}
             />
@@ -386,22 +387,18 @@ export default function NotificacionesTab() {
         />
         {preferences.vibration.enabled && (
           <div className="py-3">
-            <div className="flex gap-2">
+            {/* CleanTabs style - text with red underline */}
+            <div className="flex justify-center gap-6">
               {(['light', 'medium', 'heavy'] as const).map((intensity) => (
                 <button
                   key={intensity}
                   onClick={() => handlePreferenceChange('vibration', 'intensity', intensity)}
-                  className="flex-1 py-2 rounded-lg text-xs font-medium transition-all"
+                  className="pb-2 transition-all duration-200 cursor-pointer"
                   style={{
-                    background: preferences.vibration.intensity === intensity
-                      ? 'rgba(229, 57, 53, 0.15)'
-                      : 'transparent',
-                    color: preferences.vibration.intensity === intensity
-                      ? '#E53935'
-                      : 'var(--cp-on-surface-muted)',
-                    border: preferences.vibration.intensity === intensity
-                      ? '1px solid rgba(229, 57, 53, 0.3)'
-                      : '1px solid var(--cp-surface-border)',
+                    fontSize: 'var(--cp-body-size)',
+                    fontWeight: preferences.vibration.intensity === intensity ? 700 : 400,
+                    color: preferences.vibration.intensity === intensity ? 'var(--cp-on-surface)' : 'var(--cp-on-surface-muted)',
+                    borderBottom: preferences.vibration.intensity === intensity ? '2px solid #E53935' : '2px solid transparent',
                   }}
                 >
                   {intensity === 'light' ? 'Suave' : intensity === 'medium' ? 'Media' : 'Fuerte'}
@@ -410,7 +407,7 @@ export default function NotificacionesTab() {
             </div>
             <button
               onClick={() => vibrate()}
-              className="mt-2 text-xs font-medium"
+              className="mt-3 text-xs font-medium block mx-auto"
               style={{ color: '#E53935' }}
             >
               Probar vibración

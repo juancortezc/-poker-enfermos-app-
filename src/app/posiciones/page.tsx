@@ -8,6 +8,7 @@ import Image from 'next/image'
 
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
+import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import { CPPlayerDetailModal } from '@/components/clean-poker/CPPlayerDetailModal'
 
 export default function PosicionesPage() {
@@ -29,34 +30,34 @@ export default function PosicionesPage() {
   // Loading state
   if (authLoading || tournamentLoading || rankingLoading) {
     return (
-      <div
-        className="cp-app min-h-screen flex items-center justify-center"
-        style={{ background: 'var(--cp-background)' }}
-      >
-        <div className="text-center">
-          <div
-            className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
-            style={{
-              borderColor: 'var(--cp-surface-border)',
-              borderTopColor: 'var(--cp-primary)'
-            }}
-          />
-          <p
-            style={{
-              fontSize: 'var(--cp-body-size)',
-              color: 'var(--cp-on-surface-variant)'
-            }}
-          >
-            Cargando posiciones...
-          </p>
+      <CPAppShell>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div
+              className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
+              style={{
+                borderColor: 'var(--cp-surface-border)',
+                borderTopColor: 'var(--cp-primary)'
+              }}
+            />
+            <p
+              style={{
+                fontSize: 'var(--cp-body-size)',
+                color: 'var(--cp-on-surface-variant)'
+              }}
+            >
+              Cargando posiciones...
+            </p>
+          </div>
         </div>
-      </div>
+      </CPAppShell>
     )
   }
 
   const rankings = rankingData?.rankings || []
   const tournamentNumber = activeTournament?.number ?? 29
   const userInitials = user?.firstName?.slice(0, 2).toUpperCase() || 'PE'
+  const isComision = user?.role === 'Comision'
 
   // Split rankings into sections
   const top3 = rankings.slice(0, 3)
@@ -64,15 +65,13 @@ export default function PosicionesPage() {
   const bottom2 = rankings.length >= 2 ? rankings.slice(-2) : []
 
   return (
-    <div
-      className="cp-app min-h-screen"
-      style={{ background: 'var(--cp-background)' }}
-    >
+    <CPAppShell>
       {/* Header */}
       <CPHeader
         userInitials={userInitials}
         userPhotoUrl={user?.photoUrl}
         tournamentNumber={tournamentNumber}
+        isComision={isComision}
       />
 
       {/* Content */}
@@ -161,7 +160,7 @@ export default function PosicionesPage() {
         playerId={selectedPlayerId || ''}
         tournamentId={activeTournament?.id || 0}
       />
-    </div>
+    </CPAppShell>
   )
 }
 

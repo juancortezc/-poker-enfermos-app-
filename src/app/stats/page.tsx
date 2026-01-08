@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
+import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import CPTorneosTab from '@/components/stats/CPTorneosTab'
 import CPCampeonesTab from '@/components/stats/CPCampeonesTab'
 import CPPodiosTab from '@/components/stats/CPPodiosTab'
@@ -31,10 +32,8 @@ export default function StatsPage() {
   // Loading state
   if (authLoading || tournamentLoading) {
     return (
-      <div
-        className="cp-app min-h-screen flex items-center justify-center"
-        style={{ background: 'var(--cp-background)' }}
-      >
+      <CPAppShell>
+        <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div
             className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
@@ -52,17 +51,16 @@ export default function StatsPage() {
             Cargando estadisticas...
           </p>
         </div>
-      </div>
+        </div>
+      </CPAppShell>
     )
   }
 
   // Not authenticated
   if (!user) {
     return (
-      <div
-        className="cp-app min-h-screen flex flex-col"
-        style={{ background: 'var(--cp-background)' }}
-      >
+      <CPAppShell>
+        <div className="min-h-screen flex flex-col">
         <CPHeader
           userInitials="?"
           tournamentNumber={29}
@@ -95,23 +93,23 @@ export default function StatsPage() {
           </div>
         </main>
         <CPBottomNav />
-      </div>
+        </div>
+      </CPAppShell>
     )
   }
 
   const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
   const tournamentNumber = activeTournament?.number ?? 29
+  const isComision = user.role === 'Comision'
 
   return (
-    <div
-      className="cp-app min-h-screen"
-      style={{ background: 'var(--cp-background)' }}
-    >
+    <CPAppShell>
       {/* Header */}
       <CPHeader
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
+        isComision={isComision}
       />
 
       {/* Content */}
@@ -144,6 +142,6 @@ export default function StatsPage() {
 
       {/* Bottom Nav */}
       <CPBottomNav />
-    </div>
+    </CPAppShell>
   )
 }

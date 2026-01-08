@@ -64,7 +64,6 @@
 
   /* === TYPOGRAPHY === */
   --cp-font: 'Inter', system-ui, -apple-system, sans-serif;
-  --cp-font-impact: 'Impact', 'Arial Black', 'Helvetica Neue', sans-serif;
 
   /* Display - Position numbers (#10) */
   --cp-display-size: 40px;
