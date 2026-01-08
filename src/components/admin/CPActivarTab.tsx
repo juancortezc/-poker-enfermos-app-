@@ -226,7 +226,7 @@ export default function CPActivarTab() {
   }
 
   const handleCreateGuest = () => {
-    router.push('/players/new?type=invitado&returnTo=/admin-new')
+    router.push('/players/new?type=invitado&returnTo=/admin')
   }
 
   const handleDateChange = async (newDateString: string) => {

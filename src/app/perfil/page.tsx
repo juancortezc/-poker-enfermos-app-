@@ -1,294 +1,115 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Save } from 'lucide-react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { UserAvatar } from '@/components/UserAvatar'
-import { buildAuthHeaders } from '@/lib/client-auth'
+import { X } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
+import CPBottomNav from '@/components/clean-poker/CPBottomNav'
+import CPAppShell from '@/components/clean-poker/CPAppShell'
+import LoginForm from '@/components/LoginForm'
+import DatosTab from '@/components/perfil/DatosTab'
+import NotificacionesTab from '@/components/perfil/NotificacionesTab'
+import AplicacionTab from '@/components/perfil/AplicacionTab'
+import CerrarSesionTab from '@/components/perfil/CerrarSesionTab'
 
-interface PlayerProfile {
-  id: string
-  firstName: string
-  lastName: string
-  aliases: string[]
-  pin?: string
-  birthDate?: string
-  email?: string
-  phone?: string
-  photoUrl?: string
-  role: string
-  lastVictoryDate?: string | null
-}
+type TabType = 'datos' | 'notificaciones' | 'aplicacion' | 'cerrar-sesion'
 
-export default function ProfilePage() {
-  const { user } = useAuth()
+const TABS = [
+  { id: 'datos' as const, label: 'Datos' },
+  { id: 'notificaciones' as const, label: 'Alertas' },
+  { id: 'aplicacion' as const, label: 'App' },
+  { id: 'cerrar-sesion' as const, label: 'Salir' },
+]
+
+export default function PerfilPage() {
+  const { user, loading } = useAuth()
   const router = useRouter()
-  const [profile, setProfile] = useState<PlayerProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [activeTab, setActiveTab] = useState<TabType>('datos')
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile()
-    }
-  }, [user])
-
-  const fetchProfile = async (options: { silent?: boolean } = {}) => {
-    const { silent = false } = options
-    try {
-      const headers = buildAuthHeaders({}, { includeJson: true })
-
-      if (!silent) {
-        setLoading(true)
-      }
-
-      const response = await fetch('/api/profile', { headers })
-
-      if (response.ok) {
-        const data = await response.json()
-        setProfile(data)
-      } else {
-        setError('Error al cargar el perfil')
-      }
-    } catch (error) {
-      setError('Error de conexión')
-    } finally {
-      if (!silent) {
-        setLoading(false)
-      }
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!profile) return
-
-    setSaving(true)
-    setError('')
-    setSuccess('')
-
-    try {
-      const response = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: buildAuthHeaders({}, { includeJson: true }),
-        body: JSON.stringify({
-          pin: profile.pin === '****' ? undefined : profile.pin || undefined,
-          birthDate: profile.birthDate || undefined,
-          email: profile.email || undefined,
-          phone: profile.phone || undefined,
-        }),
-      })
-
-      if (response.ok) {
-        setSuccess('Perfil actualizado correctamente')
-        await fetchProfile({ silent: true })
-      } else {
-        const data = await response.json()
-        setError(data.message || 'Error al actualizar el perfil')
-      }
-    } catch (error) {
-      setError('Error de conexión')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleInputChange = (field: keyof PlayerProfile, value: string) => {
-    if (!profile) return
-    setProfile({
-      ...profile,
-      [field]: value
-    })
-  }
-
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center animate-enter">
-          <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-poker-card"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-poker-red border-t-transparent animate-spin"></div>
+      <CPAppShell>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="relative w-12 h-12 mx-auto mb-3">
+              <div
+                className="absolute inset-0 rounded-full border-4"
+                style={{ borderColor: 'var(--cp-surface-border)' }}
+              />
+              <div
+                className="absolute inset-0 rounded-full border-4 border-t-transparent animate-spin"
+                style={{ borderColor: '#E53935', borderTopColor: 'transparent' }}
+              />
+            </div>
+            <p style={{ color: 'var(--cp-on-surface-muted)' }}>Cargando...</p>
           </div>
-          <p className="text-poker-muted">Cargando perfil...</p>
         </div>
-      </div>
+      </CPAppShell>
     )
   }
 
-  if (!profile) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-poker-text">No se pudo cargar el perfil</p>
-      </div>
-    )
-  }
-
-  const aliasesText = profile.aliases.join(', ') || 'Sin alias'
-  
-  // Calcular días sin ganar
-  let daysWithoutVictory = null;
-  let formattedLastVictory = null;
-  
-  if (profile.lastVictoryDate) {
-    // Parsear fecha desde formato DD/MM/YYYY
-    const [day, month, year] = profile.lastVictoryDate.split('/').map(Number);
-    const lastVictoryDate = new Date(year, month - 1, day);
-    const today = new Date();
-    const timeDiff = today.getTime() - lastVictoryDate.getTime();
-    daysWithoutVictory = Math.floor(timeDiff / (1000 * 3600 * 24));
-    formattedLastVictory = profile.lastVictoryDate;
+  // Not authenticated
+  if (!user) {
+    return <LoginForm />
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-xl font-bold text-poker-text">Mi Perfil</h1>
-      </div>
-
-      {/* Profile Photo and Name */}
-      <div className="text-center py-8">
-        <div className="flex justify-center mb-4">
-          <UserAvatar user={profile} size="xl" className="shadow-lg" />
-        </div>
-        <h2 className="text-2xl font-bold text-poker-text">
-          {profile.firstName} {profile.lastName}
-        </h2>
-        <p className="text-orange-400 mt-1 font-medium">
-          {aliasesText}
-        </p>
-        
-        {/* Días sin ganar */}
-        <div className="mt-4">
-          {daysWithoutVictory !== null ? (
-            <div className="flex flex-col items-center">
-              <span className={`
-                text-2xl font-bold
-                ${daysWithoutVictory > 100 ? 'text-red-400' : 
-                  daysWithoutVictory > 60 ? 'text-orange-400' : 
-                  daysWithoutVictory > 30 ? 'text-yellow-400' : 
-                  'text-green-400'}
-              `}>
-                {daysWithoutVictory}
-              </span>
-              <span className="text-sm text-gray-400 mt-1">
-                días sin ganar
-              </span>
-              <span className="text-xs text-gray-500 mt-1">
-                Última victoria: {formattedLastVictory}
-              </span>
-            </div>
-          ) : (
-            <div className="text-gray-500 text-sm">
-              Sin victorias registradas
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* PIN */}
-        <div className="space-y-2">
-          <Label htmlFor="pin" className="text-poker-text font-medium">
-            PIN de Acceso
-          </Label>
-          <Input
-            id="pin"
-            type="password"
-            placeholder="4 dígitos"
-            value={profile.pin || ''}
-            onChange={(e) => handleInputChange('pin', e.target.value)}
-            maxLength={4}
-            className="bg-poker-card/50 border-white/10 text-white placeholder:text-gray-400 focus:border-poker-red focus:ring-poker-red/30"
-          />
-          <p className="text-sm text-gray-400">
-            PIN único para acceder al sistema
-          </p>
-        </div>
-
-        {/* Fecha de Cumpleaños */}
-        <div className="space-y-2">
-          <Label htmlFor="birthDate" className="text-poker-text font-medium">
-            Fecha de Cumpleaños
-          </Label>
-          <Input
-            id="birthDate"
-            type="date"
-            value={profile.birthDate || '1975-01-01'}
-            onChange={(e) => handleInputChange('birthDate', e.target.value)}
-            className="bg-poker-card/50 border-white/10 text-white focus:border-poker-red focus:ring-poker-red/30"
-          />
-        </div>
-
-        {/* Email */}
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-poker-text font-medium">
-            Correo Electrónico
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="tu@email.com"
-            value={profile.email || ''}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            className="bg-poker-card/50 border-white/10 text-white placeholder:text-gray-400 focus:border-poker-red focus:ring-poker-red/30"
-          />
-        </div>
-
-        {/* Celular */}
-        <div className="space-y-2">
-          <Label htmlFor="phone" className="text-poker-text font-medium">
-            Número de Celular
-          </Label>
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="099 123 4567"
-            value={profile.phone || ''}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            className="bg-poker-card/50 border-white/10 text-white placeholder:text-gray-400 focus:border-poker-red focus:ring-poker-red/30"
-          />
-        </div>
-
-        {/* Messages */}
-        {error && (
-          <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
-            <p className="text-green-400 text-sm">{success}</p>
-          </div>
-        )}
-
-        {/* Save Button */}
-        <Button
-          type="submit"
-          disabled={saving}
-          className="w-full bg-poker-red hover:bg-red-700 text-white font-medium h-12"
+    <CPAppShell>
+      <div className="min-h-screen pb-24">
+        {/* Header with Close Button */}
+        <div
+          className="sticky top-0 z-10 px-4 pt-4 pb-3"
+          style={{ background: 'var(--cp-background)' }}
         >
-          {saving ? (
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Guardando...</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center space-x-2">
-              <Save size={18} />
-              <span>Guardar Cambios</span>
-            </div>
-          )}
-        </Button>
-      </form>
-    </div>
+        {/* Title with Close Button */}
+        <div className="relative flex items-center justify-center mb-4">
+          <h1
+            className="text-lg font-bold"
+            style={{ color: 'var(--cp-on-surface)' }}
+          >
+            Mi Perfil
+          </h1>
+          <button
+            onClick={() => router.back()}
+            className="absolute right-0 p-2 rounded-full transition-colors hover:bg-white/10"
+            style={{ color: 'var(--cp-on-surface-muted)' }}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* CleanTabs - Text with red underline */}
+        <div className="flex justify-center gap-6">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className="pb-2 transition-all duration-200 cursor-pointer"
+              style={{
+                fontSize: 'var(--cp-body-size)',
+                fontWeight: activeTab === tab.id ? 700 : 400,
+                color: activeTab === tab.id ? 'var(--cp-on-surface)' : 'var(--cp-on-surface-muted)',
+                borderBottom: activeTab === tab.id ? '2px solid #E53935' : '2px solid transparent',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 pt-4">
+        {activeTab === 'datos' && <DatosTab />}
+        {activeTab === 'notificaciones' && <NotificacionesTab />}
+        {activeTab === 'aplicacion' && <AplicacionTab />}
+        {activeTab === 'cerrar-sesion' && <CerrarSesionTab />}
+      </div>
+
+        {/* Bottom Navigation */}
+        <CPBottomNav />
+      </div>
+    </CPAppShell>
   )
 }

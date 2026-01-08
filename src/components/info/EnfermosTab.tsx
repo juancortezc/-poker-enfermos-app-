@@ -230,7 +230,7 @@ export default function EnfermosTab() {
                       )}
                       {isCurrentUser && (
                         <Link
-                          href="/perfil-new"
+                          href="/perfil"
                           className="ml-auto p-1.5 rounded-lg transition-colors cursor-pointer hover:bg-white/10"
                           style={{ color: '#E53935' }}
                         >

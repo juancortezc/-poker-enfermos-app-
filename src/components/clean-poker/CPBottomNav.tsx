@@ -15,7 +15,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     id: 'home',
     label: 'Inicio',
-    href: '/home-new',
+    href: '/home',
     icon: <Home className="w-5 h-5" />,
   },
   {
@@ -43,14 +43,14 @@ export function CPBottomNav() {
   const router = useRouter()
 
   const isActive = (href: string) => {
-    if (href === '/home-new') {
-      return pathname === '/home-new' || pathname === '/'
+    if (href === '/home') {
+      return pathname === '/home' || pathname === '/'
     }
     return pathname?.startsWith(href) ?? false
   }
 
   // Show back button when not on home page
-  const isHomePage = pathname === '/home-new' || pathname === '/' || pathname === null
+  const isHomePage = pathname === '/home' || pathname === '/' || pathname === null
 
   const handleBack = () => {
     router.back()

@@ -70,7 +70,7 @@ export function CPHeader({
         {/* Admin Button - Only for Comision */}
         {isComision && (
           <Link
-            href="/admin-new"
+            href="/admin"
             className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/10"
             style={{
               background: 'rgba(229, 57, 53, 0.15)',
@@ -86,7 +86,7 @@ export function CPHeader({
 
         {/* Avatar / Menu - Links to Profile */}
         <Link
-          href="/perfil-new"
+          href="/perfil"
           className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center transition-opacity hover:opacity-80"
           style={{
             background: 'var(--cp-surface)',
