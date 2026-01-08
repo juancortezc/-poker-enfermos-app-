@@ -89,7 +89,7 @@ export function CPHeader({
           href="/perfil-new"
           className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center transition-opacity hover:opacity-80"
           style={{
-            background: userPhotoUrl ? 'transparent' : 'var(--cp-surface)',
+            background: 'var(--cp-surface)',
             border: '1px solid var(--cp-surface-border)',
           }}
         >
@@ -99,19 +99,23 @@ export function CPHeader({
               alt="Avatar"
               width={36}
               height={36}
-              className="object-cover"
-            />
-          ) : (
-            <span
-              className="font-semibold"
-              style={{
-                fontSize: 'var(--cp-label-size)',
-                color: 'var(--cp-on-surface-medium)',
+              className="object-cover w-full h-full"
+              onError={(e) => {
+                // Hide image on error, show initials instead
+                e.currentTarget.style.display = 'none'
               }}
-            >
-              {userInitials}
-            </span>
-          )}
+            />
+          ) : null}
+          {/* Initials fallback - always rendered behind image */}
+          <span
+            className="font-semibold absolute"
+            style={{
+              fontSize: 'var(--cp-label-size)',
+              color: 'var(--cp-on-surface-medium)',
+            }}
+          >
+            {userInitials}
+          </span>
         </Link>
       </div>
     </header>
