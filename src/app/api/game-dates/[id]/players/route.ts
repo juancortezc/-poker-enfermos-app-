@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withComisionAuth } from '@/lib/api-auth';
+import { calculatePointsForPosition } from '@/lib/tournament-utils';
 
 export async function GET(
   request: NextRequest,
@@ -55,4 +57,130 @@ export async function GET(
       { status: 500 }
     );
   }
+}
+
+// DELETE - Remover un participante de la fecha (solo Comision, solo in_progress)
+// Recalcula posiciones y puntos de eliminaciones
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return withComisionAuth(request, async (_req, _user) => {
+    try {
+      const gameDateId = parseInt((await params).id);
+      const body = await request.json();
+      const { playerId } = body;
+
+      if (!playerId) {
+        return NextResponse.json(
+          { error: 'Se requiere playerId' },
+          { status: 400 }
+        );
+      }
+
+      // Obtener la fecha
+      const gameDate = await prisma.gameDate.findUnique({
+        where: { id: gameDateId },
+        select: {
+          id: true,
+          status: true,
+          playerIds: true,
+          tournamentId: true
+        }
+      });
+
+      if (!gameDate) {
+        return NextResponse.json(
+          { error: 'Fecha no encontrada' },
+          { status: 404 }
+        );
+      }
+
+      // Solo permitir en fechas in_progress
+      if (gameDate.status !== 'in_progress') {
+        return NextResponse.json(
+          { error: 'Solo se pueden remover participantes de fechas en progreso' },
+          { status: 400 }
+        );
+      }
+
+      // Verificar que el jugador está registrado
+      if (!gameDate.playerIds.includes(playerId)) {
+        return NextResponse.json(
+          { error: 'El jugador no está registrado en esta fecha' },
+          { status: 400 }
+        );
+      }
+
+      // Usar transacción para asegurar consistencia
+      const result = await prisma.$transaction(async (tx) => {
+        // 1. Obtener todas las eliminaciones de esta fecha
+        const allEliminations = await tx.elimination.findMany({
+          where: { gameDateId },
+          orderBy: { position: 'desc' } // Del último eliminado al primero
+        });
+
+        // 2. Verificar si el jugador ya fue eliminado
+        const playerElimination = allEliminations.find(e => e.eliminatedPlayerId === playerId);
+
+        // 3. Eliminar la eliminación del jugador si existe
+        if (playerElimination) {
+          await tx.elimination.delete({
+            where: { id: playerElimination.id }
+          });
+        }
+
+        // 4. Remover jugador del array playerIds
+        const newPlayerIds = gameDate.playerIds.filter(id => id !== playerId);
+
+        await tx.gameDate.update({
+          where: { id: gameDateId },
+          data: { playerIds: newPlayerIds }
+        });
+
+        // 5. Recalcular posiciones y puntos de las eliminaciones restantes
+        const newTotalPlayers = newPlayerIds.length;
+        const remainingEliminations = allEliminations.filter(e => e.eliminatedPlayerId !== playerId);
+
+        // Ordenar por posición descendente (últimos eliminados primero)
+        remainingEliminations.sort((a, b) => b.position - a.position);
+
+        // Recalcular posiciones secuencialmente
+        let currentPosition = newTotalPlayers;
+        for (const elim of remainingEliminations) {
+          const newPoints = calculatePointsForPosition(currentPosition, newTotalPlayers);
+
+          await tx.elimination.update({
+            where: { id: elim.id },
+            data: {
+              position: currentPosition,
+              points: newPoints
+            }
+          });
+
+          currentPosition--;
+        }
+
+        return {
+          removedPlayerId: playerId,
+          wasEliminated: !!playerElimination,
+          newTotalPlayers,
+          recalculatedEliminations: remainingEliminations.length
+        };
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Participante removido${result.wasEliminated ? ' y eliminación borrada' : ''}. Recalculadas ${result.recalculatedEliminations} posiciones.`,
+        ...result
+      });
+
+    } catch (error) {
+      console.error('Error removing player from game date:', error);
+      return NextResponse.json(
+        { error: 'Error interno del servidor' },
+        { status: 500 }
+      );
+    }
+  });
 }

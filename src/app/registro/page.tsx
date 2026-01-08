@@ -591,6 +591,15 @@ export default function RegistroPage() {
               gameDateId={activeGameDate.id}
               onEliminationUpdated={fetchAllData}
             />
+
+            {/* Participants List - With option to remove */}
+            <CPParticipantsList
+              players={players}
+              eliminations={eliminations}
+              gameDateId={activeGameDate.id}
+              tournamentId={activeGameDate.tournament.id}
+              onPlayerRemoved={fetchAllData}
+            />
           </div>
         </div>
 
@@ -1182,6 +1191,284 @@ function CPEliminationHistory({
               )}
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// CP PARTICIPANTS LIST COMPONENT
+// ============================================
+import { UserMinus, AlertTriangle } from 'lucide-react'
+
+interface CPParticipantsListProps {
+  players: Player[]
+  eliminations: Elimination[]
+  gameDateId: number
+  tournamentId: number
+  onPlayerRemoved: () => void
+}
+
+function CPParticipantsList({
+  players,
+  eliminations,
+  gameDateId,
+  tournamentId,
+  onPlayerRemoved
+}: CPParticipantsListProps) {
+  const { mutate } = useSWRConfig()
+  const [isRemoving, setIsRemoving] = useState(false)
+  const [removeError, setRemoveError] = useState<string | null>(null)
+  const [confirmingPlayerId, setConfirmingPlayerId] = useState<string | null>(null)
+
+  // Jugadores activos (no eliminados)
+  const activePlayers = useMemo(() => {
+    const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId)
+    return players.filter(player => !eliminatedIds.includes(player.id))
+  }, [players, eliminations])
+
+  // Jugadores eliminados
+  const eliminatedPlayers = useMemo(() => {
+    const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId)
+    return players.filter(player => eliminatedIds.includes(player.id))
+  }, [players, eliminations])
+
+  const handleRemovePlayer = async (playerId: string) => {
+    setIsRemoving(true)
+    setRemoveError(null)
+
+    try {
+      const response = await fetch(`/api/game-dates/${gameDateId}/players`, {
+        method: 'DELETE',
+        headers: buildAuthHeaders({}, { includeJson: true }),
+        body: JSON.stringify({ playerId })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al remover participante')
+      }
+
+      setConfirmingPlayerId(null)
+      onPlayerRemoved()
+
+      // Refrescar caches
+      mutate(swrKeys.activeGameDate())
+      mutate(swrKeys.activeTournament())
+      mutate(swrKeys.gameDateEliminations(gameDateId))
+      mutate(swrKeys.gameDate(gameDateId))
+      mutate(swrKeys.gameDates(tournamentId))
+      mutate(swrKeys.tournamentRanking(tournamentId))
+
+    } catch (error) {
+      console.error('Error removing player:', error)
+      setRemoveError(error instanceof Error ? error.message : 'Error desconocido')
+    } finally {
+      setIsRemoving(false)
+    }
+  }
+
+  const getPlayerName = (player: Player) => `${player.firstName} ${player.lastName}`
+
+  return (
+    <div
+      style={{
+        background: 'var(--cp-surface)',
+        border: '1px solid var(--cp-surface-border)',
+        borderRadius: '4px',
+      }}
+    >
+      <div className="p-4">
+        <h3 className="font-semibold mb-4" style={{ color: 'var(--cp-on-surface)' }}>
+          Participantes ({players.length})
+        </h3>
+
+        {removeError && (
+          <div
+            className="mb-3 p-3"
+            style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '4px',
+            }}
+          >
+            <p className="text-sm" style={{ color: '#ef4444' }}>{removeError}</p>
+          </div>
+        )}
+
+        {/* Jugadores activos */}
+        {activePlayers.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs mb-2" style={{ color: 'var(--cp-on-surface-muted)' }}>
+              En juego ({activePlayers.length})
+            </p>
+            <div className="space-y-1">
+              {activePlayers.map((player) => (
+                <div
+                  key={player.id}
+                  className="flex items-center justify-between py-2 px-2"
+                  style={{ borderRadius: '4px' }}
+                >
+                  {confirmingPlayerId === player.id ? (
+                    // Modo confirmación
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle size={16} style={{ color: '#f97316' }} />
+                        <span className="text-sm" style={{ color: 'var(--cp-on-surface)' }}>
+                          ¿Eliminar a {getPlayerName(player)}?
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleRemovePlayer(player.id)}
+                          disabled={isRemoving}
+                          className="px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50"
+                          style={{
+                            background: '#E53935',
+                            color: 'white',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          {isRemoving ? '...' : 'Sí, eliminar'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmingPlayerId(null)}
+                          disabled={isRemoving}
+                          className="px-3 py-1 text-xs transition-colors"
+                          style={{ color: 'var(--cp-on-surface-muted)' }}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // Modo normal
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: '#16a34a' }}
+                        />
+                        <span className="text-sm" style={{ color: 'var(--cp-on-surface)' }}>
+                          {getPlayerName(player)}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setConfirmingPlayerId(player.id)}
+                        className="p-1.5 transition-colors hover:bg-white/10"
+                        style={{
+                          color: 'var(--cp-on-surface-muted)',
+                          borderRadius: '4px',
+                        }}
+                        title="Remover participante"
+                      >
+                        <UserMinus size={14} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Jugadores eliminados */}
+        {eliminatedPlayers.length > 0 && (
+          <div>
+            <p className="text-xs mb-2" style={{ color: 'var(--cp-on-surface-muted)' }}>
+              Eliminados ({eliminatedPlayers.length})
+            </p>
+            <div className="space-y-1">
+              {eliminatedPlayers.map((player) => {
+                const elimination = eliminations.find(e => e.eliminatedPlayerId === player.id)
+                return (
+                  <div
+                    key={player.id}
+                    className="flex items-center justify-between py-2 px-2"
+                    style={{ borderRadius: '4px' }}
+                  >
+                    {confirmingPlayerId === player.id ? (
+                      // Modo confirmación
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle size={16} style={{ color: '#f97316' }} />
+                          <span className="text-sm" style={{ color: 'var(--cp-on-surface)' }}>
+                            ¿Eliminar a {getPlayerName(player)}?
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleRemovePlayer(player.id)}
+                            disabled={isRemoving}
+                            className="px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50"
+                            style={{
+                              background: '#E53935',
+                              color: 'white',
+                              borderRadius: '4px',
+                            }}
+                          >
+                            {isRemoving ? '...' : 'Sí, eliminar'}
+                          </button>
+                          <button
+                            onClick={() => setConfirmingPlayerId(null)}
+                            disabled={isRemoving}
+                            className="px-3 py-1 text-xs transition-colors"
+                            style={{ color: 'var(--cp-on-surface-muted)' }}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      // Modo normal
+                      <>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{ background: 'var(--cp-on-surface-muted)' }}
+                          />
+                          <span className="text-sm" style={{ color: 'var(--cp-on-surface-muted)' }}>
+                            {getPlayerName(player)}
+                          </span>
+                          {elimination && (
+                            <span className="text-xs" style={{ color: 'var(--cp-on-surface-muted)' }}>
+                              (Pos {elimination.position})
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setConfirmingPlayerId(player.id)}
+                          className="p-1.5 transition-colors hover:bg-white/10"
+                          style={{
+                            color: 'var(--cp-on-surface-muted)',
+                            borderRadius: '4px',
+                          }}
+                          title="Remover participante (recalculará posiciones)"
+                        >
+                          <UserMinus size={14} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Info */}
+        <div
+          className="mt-4 p-3"
+          style={{
+            background: 'rgba(249, 115, 22, 0.1)',
+            border: '1px solid rgba(249, 115, 22, 0.3)',
+            borderRadius: '4px',
+          }}
+        >
+          <p className="text-xs" style={{ color: '#f97316' }}>
+            Al remover un participante se recalculan automáticamente las posiciones y puntos de todos los jugadores.
+          </p>
         </div>
       </div>
     </div>
