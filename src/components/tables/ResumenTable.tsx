@@ -5,9 +5,10 @@ import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 interface ResumenTableProps {
   tournamentId: number;
   userPin?: string | null;
+  currentUserId?: string | null;
 }
 
-export default function ResumenTable({ tournamentId }: ResumenTableProps) {
+export default function ResumenTable({ tournamentId, currentUserId }: ResumenTableProps) {
 
   // Use SWR hook for ranking data with PIN authentication
   const { 

@@ -3,32 +3,30 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
-import ResumenTable from '@/components/tables/ResumenTable'
-import TotalTable from '@/components/tables/TotalTable'
-import FechasTable from '@/components/tables/FechasTable'
-import ResultadosTable from '@/components/tables/ResultadosTable'
-
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
+import CPTorneosTab from '@/components/stats/CPTorneosTab'
+import CPCampeonesTab from '@/components/stats/CPCampeonesTab'
+import CPPodiosTab from '@/components/stats/CPPodiosTab'
+import SinGanarTab from '@/components/stats/SinGanarTab'
 
-type TabType = 'resumen' | 'total' | 'fechas' | 'resultados'
+type TabType = 'torneos' | 'campeones' | 'podios' | 'sin-ganar'
 
 const TABS = [
-  { id: 'resumen' as const, label: 'Resumen' },
-  { id: 'total' as const, label: 'Por Fecha' },
-  { id: 'fechas' as const, label: 'Eliminados' },
-  { id: 'resultados' as const, label: 'Resultados' },
+  { id: 'sin-ganar' as const, label: 'Sin Ganar' },
+  { id: 'torneos' as const, label: 'Torneos' },
+  { id: 'campeones' as const, label: 'Campeonatos' },
+  { id: 'podios' as const, label: 'Podios' },
 ]
 
-export default function TablaPage() {
+export default function StatsPage() {
   const { user, loading: authLoading } = useAuth()
-  const [activeTab, setActiveTab] = useState<TabType>('resumen')
+  const [activeTab, setActiveTab] = useState<TabType>('sin-ganar')
 
   const {
     tournament: activeTournament,
     isLoading: tournamentLoading,
-    isNotFound
-  } = useActiveTournament({ refreshInterval: 300000 }) // 5 minutes
+  } = useActiveTournament({ refreshInterval: 300000 })
 
   // Loading state
   if (authLoading || tournamentLoading) {
@@ -51,7 +49,7 @@ export default function TablaPage() {
               color: 'var(--cp-on-surface-variant)'
             }}
           >
-            Cargando tabla...
+            Cargando estadisticas...
           </p>
         </div>
       </div>
@@ -92,53 +90,7 @@ export default function TablaPage() {
                 color: 'var(--cp-on-surface-muted)',
               }}
             >
-              Debes iniciar sesion para ver la tabla completa.
-            </p>
-          </div>
-        </main>
-        <CPBottomNav />
-      </div>
-    )
-  }
-
-  // No active tournament
-  if (!activeTournament) {
-    return (
-      <div
-        className="cp-app min-h-screen flex flex-col"
-        style={{ background: 'var(--cp-background)' }}
-      >
-        <CPHeader
-          userInitials={user.firstName?.slice(0, 2).toUpperCase() || 'PE'}
-          userPhotoUrl={user.photoUrl}
-          tournamentNumber={29}
-        />
-        <main className="flex-1 flex items-center justify-center px-4">
-          <div
-            className="rounded-2xl p-6 text-center max-w-sm"
-            style={{
-              background: 'rgba(0, 0, 0, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-            }}
-          >
-            <p
-              className="mb-2"
-              style={{
-                fontSize: 'var(--cp-body-size)',
-                color: 'var(--cp-on-surface)',
-              }}
-            >
-              {isNotFound ? 'No hay torneo activo' : 'Error al cargar'}
-            </p>
-            <p
-              style={{
-                fontSize: 'var(--cp-caption-size)',
-                color: 'var(--cp-on-surface-muted)',
-              }}
-            >
-              {isNotFound
-                ? 'La tabla se mostrara cuando inicie un nuevo torneo.'
-                : 'Verifica tu conexion e intenta de nuevo.'}
+              Debes iniciar sesion para ver las estadisticas.
             </p>
           </div>
         </main>
@@ -148,7 +100,7 @@ export default function TablaPage() {
   }
 
   const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
-  const tournamentNumber = activeTournament.number ?? 29
+  const tournamentNumber = activeTournament?.number ?? 29
 
   return (
     <div
@@ -183,45 +135,11 @@ export default function TablaPage() {
           ))}
         </div>
 
-        {/* Table Container - white background for tables, transparent for CleanPoker tabs */}
-        {(activeTab === 'resumen' || activeTab === 'total') && (
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{
-              background: 'rgba(255, 255, 255, 0.98)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            {activeTab === 'resumen' && (
-              <ResumenTable
-                tournamentId={activeTournament.id}
-                userPin={user?.pin}
-              />
-            )}
-
-            {activeTab === 'total' && (
-              <TotalTable
-                tournamentId={activeTournament.id}
-                userPin={user?.pin}
-                currentUserId={user?.id}
-              />
-            )}
-          </div>
-        )}
-
-        {activeTab === 'fechas' && (
-          <FechasTable
-            tournamentId={activeTournament.id}
-            userPin={user?.pin}
-          />
-        )}
-
-        {activeTab === 'resultados' && (
-          <ResultadosTable
-            tournamentId={activeTournament.id}
-            userPin={user?.pin}
-          />
-        )}
+        {/* Tab Content */}
+        {activeTab === 'torneos' && <CPTorneosTab />}
+        {activeTab === 'campeones' && <CPCampeonesTab />}
+        {activeTab === 'podios' && <CPPodiosTab />}
+        {activeTab === 'sin-ganar' && <SinGanarTab />}
       </main>
 
       {/* Bottom Nav */}

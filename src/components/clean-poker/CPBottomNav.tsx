@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, BarChart3, ChevronLeft, Table2 } from 'lucide-react'
+import { Home, ChevronLeft, Table2, TrendingUp, Info } from 'lucide-react'
 
 interface NavItem {
   id: string
@@ -19,16 +19,22 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Home className="w-5 h-5" />,
   },
   {
-    id: 'posiciones',
-    label: 'Posiciones',
-    href: '/posiciones',
-    icon: <BarChart3 className="w-5 h-5" />,
-  },
-  {
     id: 'tabla',
     label: 'Tabla',
     href: '/tabla',
     icon: <Table2 className="w-5 h-5" />,
+  },
+  {
+    id: 'stats',
+    label: 'Stats',
+    href: '/stats',
+    icon: <TrendingUp className="w-5 h-5" />,
+  },
+  {
+    id: 'info',
+    label: 'Info',
+    href: '/info',
+    icon: <Info className="w-5 h-5" />,
   },
 ]
 

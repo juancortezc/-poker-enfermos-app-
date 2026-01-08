@@ -12,7 +12,7 @@ interface CPHeaderProps {
   onAvatarClick?: () => void
 }
 
-export function CPHeader({ userInitials = 'PE', userPhotoUrl, tournamentNumber = 29, onAvatarClick }: CPHeaderProps) {
+export function CPHeader({ userInitials = 'PE', userPhotoUrl, tournamentNumber = 29 }: CPHeaderProps) {
   return (
     <header className="relative flex items-center justify-center px-4 py-3">
       {/* Logo - Left */}
@@ -39,9 +39,9 @@ export function CPHeader({ userInitials = 'PE', userPhotoUrl, tournamentNumber =
         Torneo {tournamentNumber}
       </span>
 
-      {/* Avatar / Menu - Right */}
-      <button
-        onClick={onAvatarClick}
+      {/* Avatar / Menu - Right - Links to Profile */}
+      <Link
+        href="/perfil-new"
         className="absolute right-4 w-9 h-9 rounded-full overflow-hidden flex items-center justify-center transition-opacity hover:opacity-80"
         style={{
           background: userPhotoUrl ? 'transparent' : 'var(--cp-surface)',
@@ -67,7 +67,7 @@ export function CPHeader({ userInitials = 'PE', userPhotoUrl, tournamentNumber =
             {userInitials}
           </span>
         )}
-      </button>
+      </Link>
     </header>
   )
 }

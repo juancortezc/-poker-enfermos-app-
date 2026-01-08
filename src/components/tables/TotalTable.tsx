@@ -6,9 +6,10 @@ import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 interface TotalTableProps {
   tournamentId: number;
   userPin?: string | null;
+  currentUserId?: string | null;
 }
 
-export default function TotalTable({ tournamentId }: TotalTableProps) {
+export default function TotalTable({ tournamentId, currentUserId }: TotalTableProps) {
   const [completedDates, setCompletedDates] = useState<number[]>([]);
 
   // Use SWR hook for ranking data with PIN authentication
@@ -98,13 +99,20 @@ export default function TotalTable({ tournamentId }: TotalTableProps) {
             </tr>
           </thead>
           <tbody>
-            {rankingData.rankings.map((player, index) => (
-              <tr key={player.playerId} className={index % 2 === 1 ? 'bg-gray-50' : ''}>
-                <td className="excel-cell excel-cell-gray text-center font-medium" style={{color: '#000', padding: '8px 4px'}}>
+            {rankingData.rankings.map((player, index) => {
+              const isCurrentUser = currentUserId && player.playerId === currentUserId;
+              return (
+              <tr
+                key={player.playerId}
+                className={index % 2 === 1 ? 'bg-gray-50' : ''}
+                style={isCurrentUser ? { backgroundColor: '#FEF3C7' } : undefined}
+              >
+                <td className="excel-cell excel-cell-gray text-center font-medium" style={{color: '#000', padding: '8px 4px', backgroundColor: isCurrentUser ? '#FDE68A' : undefined}}>
                   {player.position}
                 </td>
-                <td className="excel-cell text-left" style={{color: '#000', padding: '8px 4px'}}>
+                <td className="excel-cell text-left font-semibold" style={{color: '#000', padding: '8px 4px', backgroundColor: isCurrentUser ? '#FEF3C7' : undefined}}>
                   {formatPlayerName(player.playerName, nameFormat)}
+                  {isCurrentUser && <span style={{color: '#B45309', marginLeft: '4px', fontSize: '10px'}}>◀ TÚ</span>}
                 </td>
                 {completedDates.map(dateNumber => (
                   <td key={dateNumber} className="excel-cell text-center" style={{color: '#000', padding: '8px 4px'}}>
@@ -124,7 +132,8 @@ export default function TotalTable({ tournamentId }: TotalTableProps) {
                   {player.finalScore !== undefined ? player.finalScore : '-'}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
