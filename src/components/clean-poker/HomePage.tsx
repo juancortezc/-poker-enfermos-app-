@@ -427,6 +427,7 @@ function HomeAuthenticated({
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
         isComision={isCommission}
+        hasActiveGameDate={hasActiveDate}
       />
 
       {/* Content */}
@@ -561,6 +562,7 @@ function HomeWithLiveGame({
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
         isComision={isCommission}
+        hasActiveGameDate={true}
       />
 
       {/* Content */}

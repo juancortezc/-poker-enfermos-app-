@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Settings } from 'lucide-react'
+import { Settings, ClipboardList } from 'lucide-react'
 
 const LOGO_URL = 'https://storage.googleapis.com/poker-enfermos/logo.png'
 
@@ -11,6 +11,7 @@ interface CPHeaderProps {
   userPhotoUrl?: string
   tournamentNumber?: number
   isComision?: boolean
+  hasActiveGameDate?: boolean
   onAvatarClick?: () => void
 }
 
@@ -18,7 +19,8 @@ export function CPHeader({
   userInitials = 'PE',
   userPhotoUrl,
   tournamentNumber = 29,
-  isComision = false
+  isComision = false,
+  hasActiveGameDate = false
 }: CPHeaderProps) {
   return (
     <header className="relative flex items-center justify-center px-4 py-3">
@@ -46,8 +48,25 @@ export function CPHeader({
         Torneo {tournamentNumber}
       </span>
 
-      {/* Right side - Admin button (Comision only) + Avatar */}
+      {/* Right side - Registro + Admin button (Comision only) + Avatar */}
       <div className="absolute right-4 flex items-center gap-2">
+        {/* Registro Button - Only for Comision when game date is active */}
+        {isComision && hasActiveGameDate && (
+          <Link
+            href="/registro"
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/10"
+            style={{
+              background: 'rgba(249, 115, 22, 0.15)',
+              border: '1px solid rgba(249, 115, 22, 0.3)',
+            }}
+          >
+            <ClipboardList
+              size={16}
+              style={{ color: '#f97316' }}
+            />
+          </Link>
+        )}
+
         {/* Admin Button - Only for Comision */}
         {isComision && (
           <Link

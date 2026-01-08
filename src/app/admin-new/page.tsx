@@ -8,22 +8,24 @@ import CPBottomNav from '@/components/clean-poker/CPBottomNav'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
 import CPHeader from '@/components/clean-poker/CPHeader'
 import LoginForm from '@/components/LoginForm'
+import CPActivarTab from '@/components/admin/CPActivarTab'
 import CPCrearTorneoTab from '@/components/admin/CPCrearTorneoTab'
 import CPJugadoresTab from '@/components/admin/CPJugadoresTab'
 import CPPremiacionTab from '@/components/admin/CPPremiacionTab'
 
-type TabType = 'torneo' | 'jugadores' | 'premiacion'
+type TabType = 'activar' | 'torneo' | 'jugadores' | 'premiacion'
 
 const TABS = [
+  { id: 'activar' as const, label: 'Activar' },
   { id: 'torneo' as const, label: 'Torneo' },
   { id: 'jugadores' as const, label: 'Jugadores' },
-  { id: 'premiacion' as const, label: 'Premiacion' },
+  { id: 'premiacion' as const, label: 'Premios' },
 ]
 
 export default function AdminNewPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<TabType>('torneo')
+  const [activeTab, setActiveTab] = useState<TabType>('activar')
 
   const {
     tournament: activeTournament,
@@ -156,6 +158,7 @@ export default function AdminNewPage() {
 
         {/* Content */}
         <div className="px-4 pt-4">
+          {activeTab === 'activar' && <CPActivarTab />}
           {activeTab === 'torneo' && <CPCrearTorneoTab />}
           {activeTab === 'jugadores' && <CPJugadoresTab />}
           {activeTab === 'premiacion' && <CPPremiacionTab tournamentId={activeTournament?.id} />}
