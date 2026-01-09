@@ -13,6 +13,7 @@ export { TournamentCard } from './TournamentCard'
 export { NextDateCard } from './NextDateCard'
 export { LiveGameCard } from './LiveGameCard'
 export { LeaderCard } from './LeaderCard'
+export { CPTimerCard } from './CPTimerCard'
 
 // Pages
 export { HomePage } from './HomePage'

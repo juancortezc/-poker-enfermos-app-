@@ -65,6 +65,7 @@ export async function GET(
 
       return NextResponse.json({
         success: true,
+        serverTime: Date.now(), // Para sincronización de reloj cliente-servidor
         timerState: {
           ...timerState,
           timeRemaining: computed.timeRemaining,

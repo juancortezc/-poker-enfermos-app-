@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { Pause, Play, Smartphone, SmartphoneNfc, RotateCcw } from 'lucide-react'
+import { Pause, Play, Smartphone, SmartphoneNfc, RotateCcw, FastForward } from 'lucide-react'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { useTimerStateById } from '@/hooks/useTimerState'
@@ -66,6 +66,7 @@ export default function RegistroPage() {
   const {
     timerState,
     currentBlindLevel,
+    nextBlindLevel,
     formattedTimeRemaining,
     isActive: timerIsActive,
     isPaused: timerIsPaused,
@@ -143,6 +144,42 @@ export default function RegistroPage() {
     } catch (error) {
       console.error('Error resetting timer:', error)
       setError('Error al resetear timer')
+    } finally {
+      setIsControlling(false)
+    }
+  }
+
+  const handleLevelUp = async () => {
+    if (!activeGameDate || isControlling || !timerState || !nextBlindLevel) return
+
+    const nextLevel = timerState.currentLevel + 1
+
+    // Confirmación antes de avanzar
+    const confirmed = window.confirm(
+      `¿Avanzar al siguiente nivel de blinds?\n\n` +
+      `Nivel actual: ${timerState.currentLevel} (${currentBlindLevel?.smallBlind}/${currentBlindLevel?.bigBlind})\n` +
+      `Siguiente nivel: ${nextLevel} (${nextBlindLevel.smallBlind}/${nextBlindLevel.bigBlind})\n\n` +
+      `El timer se reiniciará con el tiempo del nuevo nivel.`
+    )
+
+    if (!confirmed) return
+
+    setIsControlling(true)
+    try {
+      const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/level-up`, {
+        method: 'POST',
+        headers: buildAuthHeaders({}, { includeJson: true }),
+        body: JSON.stringify({ toLevel: nextLevel })
+      })
+      if (response.ok) {
+        await Promise.all([fetchAllData(), refreshTimer()])
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Error al avanzar nivel')
+      }
+    } catch (error) {
+      console.error('Error advancing level:', error)
+      setError('Error al avanzar nivel')
     } finally {
       setIsControlling(false)
     }
@@ -477,6 +514,22 @@ export default function RegistroPage() {
                       >
                         <RotateCcw className="w-4 h-4" />
                       </button>
+
+                      {/* Level Up / Fast Forward */}
+                      {nextBlindLevel && (
+                        <button
+                          onClick={handleLevelUp}
+                          disabled={isControlling}
+                          className="w-9 h-9 flex items-center justify-center rounded transition-colors disabled:opacity-50"
+                          style={{
+                            background: '#E53935',
+                            color: 'white',
+                          }}
+                          title={`Avanzar a nivel ${(timerState?.currentLevel ?? 0) + 1} (${nextBlindLevel.smallBlind}/${nextBlindLevel.bigBlind})`}
+                        >
+                          <FastForward className="w-4 h-4" />
+                        </button>
+                      )}
 
                       {/* Wake Lock */}
                       {wakeLockSupported && (

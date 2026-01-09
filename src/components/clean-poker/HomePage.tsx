@@ -16,6 +16,7 @@ import { PodioCard } from './PodioCard'
 import { MalazoCard } from './MalazoCard'
 import { LiveGameCard } from './LiveGameCard'
 import { LeaderCard } from './LeaderCard'
+import { CPTimerCard } from './CPTimerCard'
 import { CPPlayerDetailModal } from './CPPlayerDetailModal'
 
 // Logo URL
@@ -567,6 +568,9 @@ function HomeWithLiveGame({
 
       {/* Content */}
       <main className="pb-20 px-4 space-y-4">
+        {/* Timer Card */}
+        <CPTimerCard />
+
         {/* Live Game Card */}
         <LiveGameCard
           dateNumber={activeGameDate.dateNumber}

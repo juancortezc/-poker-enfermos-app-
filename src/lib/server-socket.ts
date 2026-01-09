@@ -34,6 +34,14 @@ export function initSocketServer(server: HTTPServer): SocketIOServer {
       if (!gameDateId) return
       socket.leave(getTimerRoom(gameDateId))
     })
+
+    // Sincronización de tiempo servidor-cliente
+    socket.on('sync-time', (data: { clientTime: number }) => {
+      socket.emit('time-sync', {
+        serverTime: Date.now(),
+        clientTime: data.clientTime
+      })
+    })
   })
 
   global.__socketServer = io
@@ -42,6 +50,7 @@ export function initSocketServer(server: HTTPServer): SocketIOServer {
 
 interface TimerBroadcastPayload {
   gameDateId: number
+  serverTime: number // Timestamp del servidor para sincronización
   timerState: ReturnType<typeof computeTimerState>
   currentBlind: {
     level: number
@@ -89,6 +98,7 @@ export async function emitTimerState(gameDateId: number) {
 
   const payload: TimerBroadcastPayload = {
     gameDateId,
+    serverTime: Date.now(),
     timerState: computed,
     currentBlind: currentBlind
       ? {
