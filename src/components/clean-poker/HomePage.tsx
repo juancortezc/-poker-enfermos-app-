@@ -16,6 +16,7 @@ import { MalazoCard } from './MalazoCard'
 import { LiveGameCard } from './LiveGameCard'
 import { CPTimerCard } from './CPTimerCard'
 import { CPPlayerDetailModal } from './CPPlayerDetailModal'
+import { CelebrationsCard } from './CelebrationsCard'
 
 // Logo URL
 const LOGO_URL = 'https://storage.googleapis.com/poker-enfermos/logo.png'
@@ -577,6 +578,9 @@ function HomeAuthenticated({
             }))}
           />
         )}
+
+        {/* Celebrations - Birthdays and Victory Droughts */}
+        <CelebrationsCard />
       </main>
 
       {/* Bottom Nav */}
@@ -707,6 +711,9 @@ function HomeWithLiveGame({
             }))}
           />
         )}
+
+        {/* Celebrations - Birthdays and Victory Droughts */}
+        <CelebrationsCard />
       </main>
 
       {/* Bottom Nav */}
