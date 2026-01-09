@@ -14,7 +14,7 @@
   --color-noir-amber-600: #e0b66c;
   --color-noir-copper-600: #a9441c;
   --color-noir-ivory-400: #f3e6c5;
-  --color-noir-ivory-300: #d7c59a;
+  --color-noir-ivory-300: #e8e3e3;
 
   /* Legacy token aliases (maintain tailwind class compatibility) */
   --color-poker-red-500: #a9441c;
@@ -30,7 +30,7 @@
   --color-poker-silver-500: #d6d3cf;
   --color-poker-bronze-500: #b68351;
   --color-poker-text: #f3e6c5;
-  --color-poker-muted: #d7c59a;
+  --color-poker-muted: #e8e3e3;
   --color-poker-card: #2a1a14;
 
   /* Semantic tokens */
@@ -64,7 +64,7 @@
   --paper: #3a231a;
   --ink: #0b0706;
   --text: #f3e6c5;
-  --muted: #d7c59a;
+  --muted: #e8e3e3;
   --accent: #e0b66c;
   --accent-2: #a9441c;
   --line: #3c2219;
