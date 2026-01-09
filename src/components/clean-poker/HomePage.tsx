@@ -139,7 +139,7 @@ export function HomePage() {
     if (!dateStr) return 'Por definir'
     const date = new Date(dateStr)
     const formattedDate = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })
-    return dateNumber ? `${dateNumber}: ${formattedDate}` : formattedDate
+    return dateNumber ? `Fecha ${dateNumber}: ${formattedDate}` : formattedDate
   }
 
   // Estado C: Fecha en vivo
