@@ -126,7 +126,7 @@ export function BottomNav() {
                     'group flex h-12 w-14 flex-col items-center justify-center rounded-2xl border border-transparent px-1.5 py-1 text-[8px] uppercase tracking-[0.18em] transition-all duration-200',
                     isActive
                       ? 'border-[#e0b66c]/45 bg-[linear-gradient(135deg,rgba(224,182,108,0.3),rgba(169,68,28,0.25))] text-[#1f1410]'
-                      : 'text-[#d7c59a]/75 hover:border-[#e0b66c]/35 hover:text-[#f3e6c5]'
+                      : 'text-[#e8e3e3]/75 hover:border-[#e0b66c]/35 hover:text-[#f3e6c5]'
                   )}
                 >
                   <span

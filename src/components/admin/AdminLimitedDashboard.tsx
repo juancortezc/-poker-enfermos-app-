@@ -134,7 +134,7 @@ export default function AdminLimitedDashboard() {
         {features.base.length > 0 && (
           <section className="rounded-3xl border-2 border-[#2b1209] bg-[#2a1a14]/60 p-4 shadow-[0_20px_60px_rgba(11,6,3,0.55)] backdrop-blur-xl">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#d7c59a]">Accesos rápidos</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#e8e3e3]">Accesos rápidos</span>
               <span className="inline-flex items-center gap-1 rounded-full border border-[#e0b66c]/30 bg-[#e0b66c]/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#f3e6c5]">
                 Menu
               </span>
@@ -148,7 +148,7 @@ export default function AdminLimitedDashboard() {
         {(user.role === 'Comision' || features.admin.some(f => f.accessible || f.restricted)) && (
           <section className="rounded-3xl border-2 border-[#a9441c]/40 bg-[#a9441c]/10 p-4 shadow-[0_16px_50px_rgba(169,68,28,0.25)] backdrop-blur-xl">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#d7c59a]">Comisión</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#e8e3e3]">Comisión</span>
               <span className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/40 bg-[#a9441c]/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#f3e6c5]">
                 <span className="h-2 w-2 rounded-full bg-[#e0b66c] animate-pulse shadow-[0_0_8px_rgba(224,182,108,0.5)]" />
                 Exclusivo
@@ -164,7 +164,7 @@ export default function AdminLimitedDashboard() {
 
 
         {user.role !== 'Comision' && (
-          <div className="rounded-3xl border-2 border-[#3c2219] bg-[#2a1a14]/40 p-4 text-center text-sm text-[#d7c59a]">
+          <div className="rounded-3xl border-2 border-[#3c2219] bg-[#2a1a14]/40 p-4 text-center text-sm text-[#e8e3e3]">
             {user.role === 'Enfermo'
               ? 'Como Enfermo tienes acceso directo a resultados, calendario y estadísticas públicas.'
               : 'Como Invitado puedes consultar la información general del torneo desde este menú.'

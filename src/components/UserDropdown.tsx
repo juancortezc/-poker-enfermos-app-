@@ -54,7 +54,7 @@ export function UserDropdown() {
       case UserRole.Comision:
         return 'border border-[#e0b66c]/55 bg-[#e0b66c]/15 text-[#e0b66c]'
       case UserRole.Enfermo:
-        return 'border border-[#d7c59a]/35 bg-[#2a1a14]/85 text-[#d7c59a]'
+        return 'border border-[#e8e3e3]/35 bg-[#2a1a14]/85 text-[#e8e3e3]'
       case UserRole.Invitado:
         return 'border border-[#c9783f]/35 bg-[#c9783f]/18 text-[#f3e6c5]'
     }
@@ -155,7 +155,7 @@ export function UserDropdown() {
                 <div className="my-2 border-t border-[#e0b66c]/15" />
 
                 <div className="space-y-2 px-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/60">Instalar aplicación</p>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#e8e3e3]/60">Instalar aplicación</p>
                   <NoirButton
                     variant="primary"
                     size="sm"

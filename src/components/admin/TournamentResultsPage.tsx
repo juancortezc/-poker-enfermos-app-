@@ -44,13 +44,13 @@ export default function TournamentResultsPage() {
         <section className="rounded-3xl border border-[#e0b66c]/20 bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1a1208] p-6 shadow-[0_24px_60px_rgba(11,6,3,0.55)]">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-2">
-              <p className="text-[12px] uppercase tracking-[0.35em] text-[#d7c59a]">Historial</p>
+              <p className="text-[12px] uppercase tracking-[0.35em] text-[#e8e3e3]">Historial</p>
               <h1 className="text-3xl font-semibold tracking-tight text-[#f3e6c5]">Resultados de Torneos</h1>
-              <p className="max-w-2xl text-sm text-[#d7c59a]">
+              <p className="max-w-2xl text-sm text-[#e8e3e3]">
                 Consulta campeones, podios y desempeño histórico del grupo. Incluye los resultados oficiales del Torneo 28.
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#24160f]/60 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#d7c59a]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#24160f]/60 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#e8e3e3]">
               <span className="h-2 w-2 animate-pulse rounded-full bg-[#e0b66c]" />
               Noir Jazz
             </div>
@@ -71,7 +71,7 @@ export default function TournamentResultsPage() {
                   className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition-all ${
                     isActive
                       ? 'border-[#e0b66c]/60 bg-gradient-to-r from-[#a9441c] via-[#8d3717] to-[#a9441c] text-[#f3e6c5] shadow-[0_12px_28px_rgba(224,182,108,0.35)]'
-                      : 'border-[#e0b66c]/20 bg-[#24160f]/40 text-[#d7c59a] hover:text-[#f3e6c5] hover:border-[#e0b66c]/40'
+                      : 'border-[#e0b66c]/20 bg-[#24160f]/40 text-[#e8e3e3] hover:text-[#f3e6c5] hover:border-[#e0b66c]/40'
                   }`}
                 >
                   <Icon className="h-4 w-4" />

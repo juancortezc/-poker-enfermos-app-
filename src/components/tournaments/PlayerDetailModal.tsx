@@ -96,7 +96,7 @@ export default function PlayerDetailModal({
                   <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#e0b66c]/60 border-t-transparent" />
                 </div>
               </div>
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#d7c59a]/70">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#e8e3e3]/70">
                 Cargando detalles del jugador...
               </p>
               {error && (
@@ -120,7 +120,7 @@ export default function PlayerDetailModal({
                           className="object-cover noir-photo"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#e0b66c]/20 via-[#a9441c]/15 to-[#3c2219]/10 text-4xl text-[#d7c59a]/60">
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#e0b66c]/20 via-[#a9441c]/15 to-[#3c2219]/10 text-4xl text-[#e8e3e3]/60">
                           🏆
                         </div>
                       )}
@@ -130,7 +130,7 @@ export default function PlayerDetailModal({
 
                   <div className="space-y-4 text-center md:text-left">
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#d7c59a]/60">Jugador destacado</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#e8e3e3]/60">Jugador destacado</p>
                       <h2 className="font-heading text-3xl uppercase tracking-[0.16em] text-[#f3e6c5]">
                         {details.player.firstName} {details.player.lastName}
                       </h2>
@@ -142,7 +142,7 @@ export default function PlayerDetailModal({
                     </div>
 
                     <div className="flex flex-wrap justify-center gap-3 md:justify-start">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#2a1a14]/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#d7c59a]">
+                      <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#2a1a14]/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#e8e3e3]">
                         <Crown className="h-4 w-4 text-[#e0b66c]" />
                         {playerChampionships?.championshipsCount ? (
                           <span>
@@ -162,14 +162,14 @@ export default function PlayerDetailModal({
                         )
 
                         return (
-                          <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#2a1a14]/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#d7c59a]">
-                            <Target className="h-4 w-4 text-[#d7c59a]" />
+                          <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#2a1a14]/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#e8e3e3]">
+                            <Target className="h-4 w-4 text-[#e8e3e3]" />
                             <span>{daysWithoutVictory} días sin ganar</span>
                           </div>
                         )
                       })() : (
-                        <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#2a1a14]/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#d7c59a]">
-                          <Target className="h-4 w-4 text-[#d7c59a]" />
+                        <div className="inline-flex items-center gap-2 rounded-full border border-[#e0b66c]/25 bg-[#2a1a14]/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#e8e3e3]">
+                          <Target className="h-4 w-4 text-[#e8e3e3]" />
                           <span>Sin victorias registradas</span>
                         </div>
                       )}
@@ -183,7 +183,7 @@ export default function PlayerDetailModal({
                     e.stopPropagation()
                     onClose()
                   }}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[#e0b66c]/25 bg-[#2a1a14]/60 text-[#d7c59a] transition-all hover:border-[#e0b66c]/45 hover:text-[#f3e6c5]"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[#e0b66c]/25 bg-[#2a1a14]/60 text-[#e8e3e3] transition-all hover:border-[#e0b66c]/45 hover:text-[#f3e6c5]"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -235,12 +235,12 @@ export default function PlayerDetailModal({
                         key={`${label}-${index}`}
                         className="rounded-2xl border border-[#e0b66c]/15 bg-[#2a1a14]/60 p-4 text-center backdrop-blur-sm"
                       >
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#d7c59a]/70">
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#e8e3e3]/70">
                           {label}
                         </p>
                         <p className={`mt-2 font-heading text-3xl ${accent}`}>
                           {value}
-                          {suffix && <span className="ml-1 text-sm text-[#d7c59a]/50">{suffix}</span>}
+                          {suffix && <span className="ml-1 text-sm text-[#e8e3e3]/50">{suffix}</span>}
                         </p>
                       </div>
                     )
@@ -264,8 +264,8 @@ export default function PlayerDetailModal({
                           key={dateNumber}
                           className="rounded-2xl border border-[#e0b66c]/12 bg-[#2a1a14]/40 px-4 py-3 text-center opacity-60"
                         >
-                          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d7c59a]/50">F{dateNumber}</div>
-                          <div className="mt-1 text-sm text-[#d7c59a]/40">Pendiente</div>
+                          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#e8e3e3]/50">F{dateNumber}</div>
+                          <div className="mt-1 text-sm text-[#e8e3e3]/40">Pendiente</div>
                         </div>
                       );
                     }
@@ -292,7 +292,7 @@ export default function PlayerDetailModal({
                           ? 'border-[#e0b66c]/12 bg-[#2a1a14]/40'
                           : 'border-[#a9441c]/40 bg-gradient-to-br from-[#a9441c]/15 via-[#a9441c]/8 to-transparent'
                       }`}>
-                        <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d7c59a]/70">F{dateNumber}</div>
+                        <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[#e8e3e3]/70">F{dateNumber}</div>
                         <div className="mt-1 text-sm font-semibold text-[#f3e6c5]">
                           {date.isAbsent ? 'Ausente' : date.eliminationPosition ? `${date.eliminationPosition}° lugar` : 'Ganador'}
                         </div>

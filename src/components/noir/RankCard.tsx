@@ -48,7 +48,7 @@ const trendConfig: Record<TrendVariant, { className: string; icon: ReactNode }> 
     icon: <TrendingDown className="h-3.5 w-3.5" />,
   },
   steady: {
-    className: 'text-[#d7c59a]',
+    className: 'text-[#e8e3e3]',
     icon: <Minus className="h-3.5 w-3.5" />,
   },
 }
@@ -113,7 +113,7 @@ function RankCardComponent({
               {name}
             </h3>
             {alias && (
-              <p className="text-[9px] uppercase tracking-[0.26em] text-[#d7c59a]/70 mt-1 truncate">
+              <p className="text-[9px] uppercase tracking-[0.26em] text-[#e8e3e3]/70 mt-1 truncate">
                 {alias}
               </p>
             )}
@@ -144,7 +144,7 @@ function RankCardComponent({
             </div>
           ) : (
             <div className={cn(
-              "flex h-32 w-32 mx-auto items-center justify-center rounded-full border-3 bg-[#271911] text-3xl font-heading uppercase tracking-[0.24em] text-[#d7c59a] shadow-[0_16px_40px_rgba(11,6,3,0.65)]",
+              "flex h-32 w-32 mx-auto items-center justify-center rounded-full border-3 bg-[#271911] text-3xl font-heading uppercase tracking-[0.24em] text-[#e8e3e3] shadow-[0_16px_40px_rgba(11,6,3,0.65)]",
               highlight === 'gold' && 'border-[#e0b66c]/60',
               highlight === 'silver' && 'border-[#d6d3cf]/60',
               highlight === 'bronze' && 'border-[#b68351]/55',
@@ -169,12 +169,12 @@ function RankCardComponent({
 
         {/* Meta Info */}
         {meta && (
-          <p className="text-center text-[10px] text-[#d7c59a]/75 mb-3">{meta}</p>
+          <p className="text-center text-[10px] text-[#e8e3e3]/75 mb-3">{meta}</p>
         )}
 
         {/* Footer */}
         {footer && (
-          <div className="border-t border-[#e0b66c]/15 pt-3 text-center text-[10px] uppercase tracking-[0.18em] text-[#d7c59a]/70">
+          <div className="border-t border-[#e0b66c]/15 pt-3 text-center text-[10px] uppercase tracking-[0.18em] text-[#e8e3e3]/70">
             {footer}
           </div>
         )}

@@ -94,7 +94,7 @@ export default function PodiumStatsTable() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#e8e3e3]">
           <LoadingState message="Cargando estadísticas de podios..." />
         </div>
       </div>
@@ -108,7 +108,7 @@ export default function PodiumStatsTable() {
           <p className="mb-4 text-sm">Error: {error}</p>
           <button
             onClick={fetchPodiumStats}
-            className="rounded-full border border-[#e0b66c]/30 bg-[#24160f] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#d7c59a] transition-all hover:border-[#e0b66c]/50 hover:text-[#f3e6c5]"
+            className="rounded-full border border-[#e0b66c]/30 bg-[#24160f] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8e3e3] transition-all hover:border-[#e0b66c]/50 hover:text-[#f3e6c5]"
           >
             Reintentar
           </button>
@@ -120,7 +120,7 @@ export default function PodiumStatsTable() {
   if (!podiumData) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#e8e3e3]">
           <p>No hay datos de podios</p>
         </div>
       </div>

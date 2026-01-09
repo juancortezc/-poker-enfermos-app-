@@ -96,13 +96,13 @@ export default function ParentChildDetailModal({
               <h2 className="font-heading text-lg uppercase tracking-[0.22em] text-[#f3e6c5]">
                 Detalle de Relación P&H
               </h2>
-              <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#d7c59a]/75">
+              <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#e8e3e3]/75">
                 Historial completo de eliminaciones
               </p>
             </div>
             <button
               onClick={onClose}
-              className="rounded-full border border-[#e0b66c]/25 bg-[rgba(42,26,20,0.78)] p-2 text-[#d7c59a]/70 transition-colors hover:border-[#e0b66c]/45 hover:text-[#f3e6c5]"
+              className="rounded-full border border-[#e0b66c]/25 bg-[rgba(42,26,20,0.78)] p-2 text-[#e8e3e3]/70 transition-colors hover:border-[#e0b66c]/45 hover:text-[#f3e6c5]"
               aria-label="Cerrar"
             >
               <X className="h-5 w-5" />
@@ -114,7 +114,7 @@ export default function ParentChildDetailModal({
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-[#e0b66c]" />
-              <p className="mt-4 text-sm text-[#d7c59a]/75">Cargando detalles...</p>
+              <p className="mt-4 text-sm text-[#e8e3e3]/75">Cargando detalles...</p>
             </div>
           ) : error ? (
             <div className="rounded-2xl border border-rose-500/35 bg-rose-500/15 p-6 text-center text-rose-100">
@@ -124,7 +124,7 @@ export default function ParentChildDetailModal({
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
                 <div className="rounded-2xl border border-[#e0b66c]/18 bg-[rgba(31,20,16,0.78)] p-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/70">Padre</p>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">Padre</p>
                   <div className="mt-2 flex items-center gap-3">
                     <div className="relative h-12 w-12 flex-shrink-0">
                       <Image
@@ -142,7 +142,7 @@ export default function ParentChildDetailModal({
                 </div>
 
                 <div className="rounded-2xl border border-[#e0b66c]/18 bg-[rgba(31,20,16,0.78)] p-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/70">Hijo</p>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">Hijo</p>
                   <div className="mt-2 flex items-center gap-3">
                     <div className="relative h-12 w-12 flex-shrink-0">
                       <Image
@@ -150,7 +150,7 @@ export default function ParentChildDetailModal({
                         alt={getPlayerName(relation.childPlayer)}
                         fill
                         loading="lazy"
-                        className="rounded-full border border-[#d7c59a]/35 object-cover shadow-[0_8px_18px_rgba(11,6,3,0.35)]"
+                        className="rounded-full border border-[#e8e3e3]/35 object-cover shadow-[0_8px_18px_rgba(11,6,3,0.35)]"
                       />
                     </div>
                     <p className="text-sm font-semibold tracking-[0.14em] text-[#f3e6c5]">
@@ -172,20 +172,20 @@ export default function ParentChildDetailModal({
                 </div>
 
                 <div className="rounded-2xl border border-[#e0b66c]/18 bg-[rgba(31,20,16,0.78)] p-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/70">Período</p>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">Período</p>
                   <div className="mt-2 space-y-1 text-xs text-[#f3e6c5]/85">
                     <p>
-                      <span className="text-[#d7c59a]/65">Inicio:</span> {formatDate(relation.firstElimination)}
+                      <span className="text-[#e8e3e3]/65">Inicio:</span> {formatDate(relation.firstElimination)}
                     </p>
                     <p>
-                      <span className="text-[#d7c59a]/65">Última:</span> {formatDate(relation.lastElimination)}
+                      <span className="text-[#e8e3e3]/65">Última:</span> {formatDate(relation.lastElimination)}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-[#e0b66c]/18 bg-[rgba(31,20,16,0.78)] p-4">
-                <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/70">Detalle de Eliminaciones</p>
+                <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">Detalle de Eliminaciones</p>
                 <div className="space-y-3">
                   {eliminations.map((elimination, index) => (
                     <div
@@ -199,16 +199,16 @@ export default function ParentChildDetailModal({
                           </div>
                           <div>
                             <div className="flex items-center gap-2 text-sm font-medium tracking-[0.12em] text-[#f3e6c5]">
-                              <Calendar className="h-3.5 w-3.5 text-[#d7c59a]/70" />
+                              <Calendar className="h-3.5 w-3.5 text-[#e8e3e3]/70" />
                               Fecha {elimination.dateNumber}
                             </div>
-                            <p className="mt-1 text-xs text-[#d7c59a]/75">
+                            <p className="mt-1 text-xs text-[#e8e3e3]/75">
                               {formatDate(elimination.scheduledDate)}
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] uppercase tracking-[0.18em] text-[#d7c59a]/70">Posición</p>
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-[#e8e3e3]/70">Posición</p>
                           <p className="text-2xl font-bold tracking-[0.1em] text-[#f3e6c5]">{elimination.position}</p>
                         </div>
                       </div>
@@ -216,7 +216,7 @@ export default function ParentChildDetailModal({
                   ))}
 
                   {eliminations.length === 0 && (
-                    <p className="text-center text-sm text-[#d7c59a]/70">
+                    <p className="text-center text-sm text-[#e8e3e3]/70">
                       No hay eliminaciones registradas.
                     </p>
                   )}

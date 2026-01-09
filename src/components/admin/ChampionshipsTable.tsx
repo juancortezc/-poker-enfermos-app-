@@ -78,7 +78,7 @@ export default function ChampionshipsTable() {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#e8e3e3]">
           <LoadingState message="Cargando torneos históricos..." />
         </div>
       </div>
@@ -92,7 +92,7 @@ export default function ChampionshipsTable() {
           <p className="mb-4 text-sm">Error: {error}</p>
           <button
             onClick={fetchTournaments}
-            className="rounded-full border border-[#e0b66c]/30 bg-[#24160f] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#d7c59a] transition-all hover:border-[#e0b66c]/50 hover:text-[#f3e6c5]"
+            className="rounded-full border border-[#e0b66c]/30 bg-[#24160f] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#e8e3e3] transition-all hover:border-[#e0b66c]/50 hover:text-[#f3e6c5]"
           >
             Reintentar
           </button>
@@ -104,7 +104,7 @@ export default function ChampionshipsTable() {
   if (!tournaments.length) {
     return (
       <div className="p-6">
-        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#d7c59a]">
+        <div className="rounded-2xl border border-[#e0b66c]/20 bg-[#24160f]/40 p-8 text-center text-[#e8e3e3]">
           <p>No hay datos de torneos históricos</p>
         </div>
       </div>
@@ -134,7 +134,7 @@ export default function ChampionshipsTable() {
           <p className={`text-[11px] uppercase tracking-[0.2em] font-semibold ${labelClass}`}>{label}</p>
           <p className="text-sm font-semibold text-[#f3e6c5] leading-tight">{formatPlayerName(player)}</p>
           {getPlayerAlias(player) && (
-            <p className="text-xs text-[#d7c59a]">({getPlayerAlias(player)})</p>
+            <p className="text-xs text-[#e8e3e3]">({getPlayerAlias(player)})</p>
           )}
         </div>
       </div>
@@ -152,7 +152,7 @@ export default function ChampionshipsTable() {
               {/* Tournament badge */}
               <div className="absolute -top-10 left-1/2 -translate-x-1/2">
                 <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#a9441c]/80 bg-[#1a1208] flex flex-col items-center justify-center shadow-[0_0_35px_rgba(224,182,108,0.35)]">
-                  <span className="text-[10px] uppercase tracking-[0.25em] text-[#d7c59a]">Torneo</span>
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[#e8e3e3]">Torneo</span>
                   <span className="text-3xl sm:text-4xl font-black text-[#f3e6c5] leading-none mt-1">
                     {tournament.tournamentNumber}
                   </span>

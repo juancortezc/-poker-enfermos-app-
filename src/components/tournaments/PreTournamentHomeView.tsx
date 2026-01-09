@@ -60,7 +60,7 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
   if (!currentTournament) {
     return (
       <div className="paper px-6 py-10 text-center">
-        <p className="text-[#d7c59a]">
+        <p className="text-[#e8e3e3]">
           Cargando información del torneo...
         </p>
       </div>
@@ -70,13 +70,13 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
   return (
     <section className="space-y-8">
       <header className="text-center space-y-3 py-8">
-        <p className="text-[11px] uppercase tracking-[0.28em] text-[#d7c59a]/75">
+        <p className="text-[11px] uppercase tracking-[0.28em] text-[#e8e3e3]/75">
           Torneo #{currentTournament.number} · {currentTournament.name}
         </p>
         <h2 className="font-heading text-3xl uppercase tracking-[0.22em] text-[#f3e6c5]">
           Noir Jazz Lounge
         </h2>
-        <p className="text-sm text-[#d7c59a]/70">
+        <p className="text-sm text-[#e8e3e3]/70">
           El torneo está por comenzar. Prepárate para el desafío.
         </p>
       </header>
@@ -106,7 +106,7 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <User className="h-16 w-16 text-[#d7c59a]/50" />
+                    <User className="h-16 w-16 text-[#e8e3e3]/50" />
                   )}
                 </div>
 
@@ -114,7 +114,7 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
                   <h4 className="font-heading text-2xl uppercase tracking-[0.18em] text-[#f3e6c5]">
                     {previousWinner.firstName} {previousWinner.lastName}
                   </h4>
-                  <p className="mt-2 text-[11px] uppercase tracking-[0.24em] text-[#d7c59a]/70">
+                  <p className="mt-2 text-[11px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">
                     Campeón T{previousTournament?.number}
                   </p>
                 </div>
@@ -124,7 +124,7 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
                 </div>
               </>
             ) : (
-              <div className="py-12 text-[#d7c59a]/60">
+              <div className="py-12 text-[#e8e3e3]/60">
                 <p className="text-sm">Cargando campeón anterior...</p>
               </div>
             )}
@@ -147,13 +147,13 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
               <div className="text-[4rem] font-heading leading-none tracking-[0.12em] text-[#e0b66c]">
                 {participantsCount}
               </div>
-              <p className="mt-3 text-[11px] uppercase tracking-[0.24em] text-[#d7c59a]/70">
+              <p className="mt-3 text-[11px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">
                 {participantsCount === 1 ? 'Jugador' : 'Jugadores'}
               </p>
             </div>
 
             <div className="space-y-2 rounded-2xl border border-[#e0b66c]/20 bg-[#1a0f0c]/40 p-4">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-[#d7c59a]/60">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#e8e3e3]/60">
                 Participantes confirmados
               </p>
               <div className="flex flex-wrap justify-center gap-1">
@@ -171,14 +171,14 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span className="text-[10px] font-semibold text-[#d7c59a]">
+                      <span className="text-[10px] font-semibold text-[#e8e3e3]">
                         {participant.firstName.charAt(0)}
                       </span>
                     )}
                   </div>
                 ))}
                 {participantsCount > 8 && (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e0b66c]/30 bg-[#2a1a14] text-[10px] font-semibold text-[#d7c59a]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e0b66c]/30 bg-[#2a1a14] text-[10px] font-semibold text-[#e8e3e3]">
                     +{participantsCount - 8}
                   </div>
                 )}
@@ -207,7 +207,7 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
                       <div className="text-[3rem] font-heading leading-none tracking-[0.12em] text-[#e0b66c]">
                         {new Date(firstDate.scheduledDate).getDate()}
                       </div>
-                      <div className="mt-1 text-[11px] uppercase tracking-[0.24em] text-[#d7c59a]/70">
+                      <div className="mt-1 text-[11px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">
                         {new Date(firstDate.scheduledDate).toLocaleDateString('es-ES', { month: 'short' })}
                       </div>
                     </div>
@@ -219,14 +219,14 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
                 </div>
 
                 <div className="space-y-2 rounded-2xl border border-[#e0b66c]/20 bg-[#1a0f0c]/40 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-[#d7c59a]/60">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-[#e8e3e3]/60">
                     Fecha completa
                   </p>
                   <p className="text-sm capitalize text-[#f3e6c5]">
                     {formatDate(firstDate.scheduledDate)}
                   </p>
                   {firstDate.location && (
-                    <p className="mt-2 text-[11px] text-[#d7c59a]/70">
+                    <p className="mt-2 text-[11px] text-[#e8e3e3]/70">
                       📍 {firstDate.location}
                     </p>
                   )}
@@ -237,7 +237,7 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
                 </div>
               </>
             ) : (
-              <div className="py-12 text-[#d7c59a]/60">
+              <div className="py-12 text-[#e8e3e3]/60">
                 <p className="text-sm">No hay fechas programadas aún</p>
               </div>
             )}
@@ -246,7 +246,7 @@ export default function PreTournamentHomeView({ currentTournament }: PreTourname
       </div>
 
       <div className="rounded-3xl border-2 border-[#3c2219] bg-[#2a1a14]/40 p-6 text-center">
-        <p className="text-sm text-[#d7c59a]">
+        <p className="text-sm text-[#e8e3e3]">
           Las cartas están sobre la mesa. Cuando tengamos los primeros resultados,
           verás aquí la tabla de clasificación completa.
         </p>

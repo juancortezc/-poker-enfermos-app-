@@ -66,7 +66,7 @@ export function RestrictedCard({
         `}>
           <Icon className={`h-6 w-6 sm:h-6.5 sm:w-6.5 ${
             isBlocked
-              ? 'text-[#d7c59a]/30'
+              ? 'text-[#e8e3e3]/30'
               : 'text-[#1f1410] drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)]'
           }`} />
         </div>
@@ -74,14 +74,14 @@ export function RestrictedCard({
 
       <div className="relative text-center w-full px-1">
         <h3 className={`text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] leading-snug ${
-          isBlocked ? 'text-[#d7c59a]/40' : 'text-[#f3e6c5]'
+          isBlocked ? 'text-[#e8e3e3]/40' : 'text-[#f3e6c5]'
         }`}>
           {title}
         </h3>
 
         {/* Restriction message */}
         {showLock && userRole && feature && (
-          <p className="mt-0.5 text-[9px] leading-tight text-[#d7c59a]/50">
+          <p className="mt-0.5 text-[9px] leading-tight text-[#e8e3e3]/50">
             {getRestrictionMessage(userRole, feature)}
           </p>
         )}

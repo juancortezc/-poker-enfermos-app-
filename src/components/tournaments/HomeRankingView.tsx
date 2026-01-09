@@ -39,7 +39,7 @@ const trendStyles: Record<RowTrend, { className: string; icon: ReactNode }> = {
     icon: <TrendingDown className="h-3.5 w-3.5" />
   },
   steady: {
-    className: 'text-[#d7c59a]',
+    className: 'text-[#e8e3e3]',
     icon: <Minus className="h-3.5 w-3.5" />
   }
 }
@@ -86,7 +86,7 @@ function PlayerRow({ player, onSelect }: PlayerRowProps) {
             />
           </div>
         ) : (
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e0b66c]/25 bg-[#2a1a14] text-[#d7c59a]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e0b66c]/25 bg-[#2a1a14] text-[#e8e3e3]">
             <User className="h-5 w-5" />
           </div>
         )}
@@ -96,7 +96,7 @@ function PlayerRow({ player, onSelect }: PlayerRowProps) {
             {player.playerName}
           </p>
           {player.playerAlias && (
-            <p className="text-[11px] uppercase tracking-[0.24em] text-[#d7c59a]/65">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-[#e8e3e3]/65">
               {player.playerAlias}
             </p>
           )}
@@ -113,7 +113,7 @@ function PlayerRow({ player, onSelect }: PlayerRowProps) {
         <p className="font-heading text-xl tracking-[0.18em] text-[#e0b66c]">
           {player.finalScore ?? player.totalPoints}
         </p>
-        <p className="text-[10px] uppercase tracking-[0.22em] text-[#d7c59a]/60">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-[#e8e3e3]/60">
           Total {player.totalPoints}
         </p>
       </div>
@@ -176,7 +176,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
         <h3 className="font-heading text-lg uppercase tracking-[0.24em] text-[#e0b66c]">
           Error al cargar el ranking
         </h3>
-        <p className="text-sm text-[#d7c59a]">{errorMessage}</p>
+        <p className="text-sm text-[#e8e3e3]">{errorMessage}</p>
         <div className="flex items-center justify-center">
           <NoirButton onClick={refresh} className="gap-2">
             <RotateCw className="h-4 w-4" />
@@ -190,7 +190,7 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
   if (!rankingData || rankingData.rankings.length === 0) {
     return (
       <div className="paper px-6 py-8 text-center">
-        <p className="text-[#d7c59a]">
+        <p className="text-[#e8e3e3]">
           No hay datos de ranking disponibles todavía. Regresa cuando tengamos nuevas fechas.
         </p>
       </div>
@@ -209,13 +209,13 @@ export default function HomeRankingView({ tournamentId }: HomeRankingViewProps) 
   return (
     <section className="space-y-8">
       <header className="text-center space-y-3">
-        <p className="text-[11px] uppercase tracking-[0.28em] text-[#d7c59a]/75">
+        <p className="text-[11px] uppercase tracking-[0.28em] text-[#e8e3e3]/75">
           Torneo #{tournament.number} · {tournament.name}
         </p>
         <h2 className="font-heading text-3xl uppercase tracking-[0.22em] text-[#f3e6c5]">
           Tabla General
         </h2>
-        <p className="text-sm text-[#d7c59a]/70">
+        <p className="text-sm text-[#e8e3e3]/70">
           {rankings.length} jugadores · {tournament.completedDates}/{tournament.totalDates} fechas completadas
         </p>
       </header>

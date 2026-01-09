@@ -95,7 +95,7 @@ export default function TournamentsPage() {
       )
     }
     return (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#8d7052]/20 text-[#d7c59a] border border-[#8d7052]/30">
+      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#8d7052]/20 text-[#e8e3e3] border border-[#8d7052]/30">
         <Trophy className="w-3 h-3 mr-1" />
         Finalizado
       </span>
@@ -140,7 +140,7 @@ export default function TournamentsPage() {
               className={`px-6 py-3 font-semibold rounded-lg text-sm uppercase tracking-wider transition-all ${
                 activeTab === 'activos'
                   ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
-                  : 'bg-transparent text-[#d7c59a] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
+                  : 'bg-transparent text-[#e8e3e3] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
               }`}
             >
               Torneos Activos
@@ -150,7 +150,7 @@ export default function TournamentsPage() {
               className={`px-6 py-3 font-semibold rounded-lg text-sm uppercase tracking-wider transition-all ${
                 activeTab === 'finalizados'
                   ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
-                  : 'bg-transparent text-[#d7c59a] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
+                  : 'bg-transparent text-[#e8e3e3] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
               }`}
             >
               Finalizados
@@ -162,8 +162,8 @@ export default function TournamentsPage() {
         <div className="space-y-4">
           {tournaments.length === 0 ? (
             <div className="text-center py-12 bg-[#2a1a14]/40 rounded-3xl border border-[#e0b66c]/20">
-              <Trophy className="w-16 h-16 mx-auto text-[#d7c59a] mb-4" />
-              <p className="text-[#d7c59a]">
+              <Trophy className="w-16 h-16 mx-auto text-[#e8e3e3] mb-4" />
+              <p className="text-[#e8e3e3]">
                 {activeTab === 'activos'
                   ? 'No hay torneos activos'
                   : 'No hay torneos finalizados'
@@ -200,7 +200,7 @@ export default function TournamentsPage() {
                         {getStatusBadge(tournament.status)}
                       </div>
 
-                      <h4 className="text-lg text-[#d7c59a] mb-4 truncate">
+                      <h4 className="text-lg text-[#e8e3e3] mb-4 truncate">
                         {tournament.name}
                       </h4>
 
@@ -208,7 +208,7 @@ export default function TournamentsPage() {
                       {tournament.status === 'ACTIVO' && (
                         <div className="mb-4 space-y-2">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-[#d7c59a]">Progreso del torneo</span>
+                            <span className="text-[#e8e3e3]">Progreso del torneo</span>
                             <span className="text-[#e0b66c] font-medium">{completedDates}/{totalDates} fechas</span>
                           </div>
                           <ProgressBar
@@ -221,17 +221,17 @@ export default function TournamentsPage() {
                       )}
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-4">
-                        <div className="flex items-center space-x-2 text-[#d7c59a]">
+                        <div className="flex items-center space-x-2 text-[#e8e3e3]">
                           <Users className="w-4 h-4 text-[#e0b66c]" />
                           <span>{tournament._count.tournamentParticipants} participantes</span>
                         </div>
 
-                        <div className="flex items-center space-x-2 text-[#d7c59a]">
+                        <div className="flex items-center space-x-2 text-[#e8e3e3]">
                           <Calendar className="w-4 h-4 text-[#10b981]" />
                           <span>{completedDates}/{totalDates} fechas</span>
                         </div>
 
-                        <div className="flex items-center space-x-2 text-[#d7c59a]">
+                        <div className="flex items-center space-x-2 text-[#e8e3e3]">
                           <Clock className="w-4 h-4 text-[#e0b66c]" />
                           <span>{formatDate(tournament.createdAt)}</span>
                         </div>

@@ -23,7 +23,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     const data = payload[0].payload;
     return (
       <div className="rounded-2xl border border-[#e0b66c]/20 bg-gradient-to-br from-[#2a1a14]/95 via-[#24160f]/95 to-[#1f1410]/95 px-4 py-3 shadow-[0_16px_36px_rgba(11,6,3,0.55)] backdrop-blur-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d7c59a] mb-1">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#e8e3e3] mb-1">
           Fecha {label}
         </p>
         <p className="text-sm font-semibold text-[#f3e6c5]">

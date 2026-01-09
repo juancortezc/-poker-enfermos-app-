@@ -79,7 +79,7 @@ export default function ParentChildCard({ relation, index, tournamentId }: Paren
 
       <div className="relative grid grid-cols-3 items-center gap-2 md:gap-6">
         <div className="text-center">
-          <span className="text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/70">
+          <span className="text-[10px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">
             Padre
           </span>
           <div className="mt-2 flex flex-col items-center md:mt-3">
@@ -100,7 +100,7 @@ export default function ParentChildCard({ relation, index, tournamentId }: Paren
         </div>
 
         <div className="text-center">
-          <span className="text-[10px] uppercase tracking-[0.24em] text-[#d7c59a]/70">
+          <span className="text-[10px] uppercase tracking-[0.24em] text-[#e8e3e3]/70">
             Hijo
           </span>
           <div className="mt-2 flex flex-col items-center md:mt-3">
