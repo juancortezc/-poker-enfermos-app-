@@ -322,14 +322,14 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
   return { details, loading: combinedLoading, error: combinedError, refetch };
 }
 
-// Helper function to calculate ranking evolution
+// Helper function to calculate ranking evolution with ELIMINA 2 system
 function calculateRankingEvolution(
   playerPointsByDate: { [dateNumber: number]: number },
-  allRankings: Array<{ playerId: string; [key: string]: unknown }>,
+  allRankings: Array<{ playerId: string; pointsByDate: { [key: number]: number }; [key: string]: unknown }>,
   targetPlayerId: string
 ): Array<{ dateNumber: number; position: number; points: number }> {
   const evolution: Array<{ dateNumber: number; position: number; points: number }> = [];
-  
+
   // Get all date numbers that have been played by anyone
   const allPlayedDates = new Set<number>();
   allRankings.forEach(ranking => {
@@ -337,36 +337,49 @@ function calculateRankingEvolution(
       allPlayedDates.add(Number(date));
     });
   });
-  
+
   const sortedDates = Array.from(allPlayedDates).sort((a, b) => a - b);
-  
+
+  // Function to calculate final score with ELIMINA 2 system
+  const calculateFinalScore = (pointsByDate: { [key: number]: number }, upToDateNumber: number): number => {
+    const datesUpTo = sortedDates.filter(d => d <= upToDateNumber);
+    const scores = datesUpTo.map(d => pointsByDate[d] || 0);
+    const totalPoints = scores.reduce((sum, pts) => sum + pts, 0);
+
+    // Apply ELIMINA 2 only if >= 6 dates
+    if (datesUpTo.length >= 6) {
+      const sortedScores = [...scores].sort((a, b) => a - b);
+      const elimina1 = sortedScores[0];
+      const elimina2 = sortedScores[1];
+      return totalPoints - (elimina1 + elimina2);
+    }
+
+    return totalPoints;
+  };
+
   sortedDates.forEach(dateNumber => {
-    // Calculate cumulative points up to this date for the target player
-    const cumulativePoints = sortedDates
-      .filter(d => d <= dateNumber)
-      .reduce((sum, d) => sum + (playerPointsByDate[d] || 0), 0);
-    
-    // Calculate what the ranking would be after this date
+    // Calculate final score up to this date for the target player
+    const playerFinalScore = calculateFinalScore(playerPointsByDate, dateNumber);
+
+    // Calculate what the ranking would be after this date using finalScore
     const rankingsAtDate = allRankings.map(ranking => {
-      const cumulativePointsAtDate = sortedDates
-        .filter(d => d <= dateNumber)
-        .reduce((sum, d) => sum + (ranking.pointsByDate[d] || 0), 0);
-      
+      const finalScore = calculateFinalScore(ranking.pointsByDate, dateNumber);
+
       return {
         playerId: ranking.playerId,
-        points: cumulativePointsAtDate
+        finalScore
       };
-    }).sort((a, b) => b.points - a.points);
-    
+    }).sort((a, b) => b.finalScore - a.finalScore);
+
     // Find the target player's ranking position
     const position = rankingsAtDate.findIndex(r => r.playerId === targetPlayerId) + 1;
-    
+
     evolution.push({
       dateNumber,
       position: position > 0 ? position : allRankings.length + 1,
-      points: cumulativePoints
+      points: playerFinalScore
     });
   });
-  
+
   return evolution;
 }
