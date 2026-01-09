@@ -82,7 +82,7 @@ export function PodioCard({ players }: PodioCardProps) {
           Podio Torneo
         </p>
         <Link
-          href="/tabla"
+          href="/ranking"
           className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity hover:opacity-80"
         >
           <span style={{ color: '#E53935', fontSize: '12px' }}>Todos</span>
