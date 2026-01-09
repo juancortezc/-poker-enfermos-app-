@@ -3,6 +3,7 @@ import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveLevelChangeUpdate } from '@/lib/timer-state'
 import { emitTimerEvent } from '@/lib/server-socket'
+import { getEcuadorDate } from '@/lib/date-utils'
 
 export async function POST(
   request: NextRequest,
