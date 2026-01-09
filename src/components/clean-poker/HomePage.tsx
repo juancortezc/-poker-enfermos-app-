@@ -251,7 +251,7 @@ function NextDateWithCalendar({ nextDate, scheduledDate }: NextDateWithCalendarP
           color: 'var(--cp-on-surface-variant)',
         }}
       >
-        Próxima Fecha: {nextDate}
+        {nextDate}
       </p>
       {canAddToCalendar && (
         <button
