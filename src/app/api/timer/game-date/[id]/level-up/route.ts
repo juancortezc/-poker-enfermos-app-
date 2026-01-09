@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { deriveLevelChangeUpdate } from '@/lib/timer-state'
 import { emitTimerEvent } from '@/lib/server-socket'
 import { getEcuadorDate } from '@/lib/date-utils'
+import { broadcastPushNotification } from '@/lib/push-service'
 
 export async function POST(
   request: NextRequest,
@@ -121,6 +122,24 @@ export async function POST(
       }
 
       await emitTimerEvent(gameDateId, 'timer-level-changed')
+
+      // Send broadcast push notification for blind change
+      await broadcastPushNotification(
+        {
+          title: 'Cambio de Blind',
+          body: `Nivel ${toLevel}: ${targetBlindLevel.smallBlind}/${targetBlindLevel.bigBlind}`,
+          tag: `blind-change-${gameDateId}-${toLevel}`,
+          url: '/home',
+          data: {
+            type: 'blind_change',
+            gameDateId,
+            level: toLevel,
+            smallBlind: targetBlindLevel.smallBlind,
+            bigBlind: targetBlindLevel.bigBlind
+          }
+        },
+        { targetRoles: ['Comision', 'Enfermo'] }
+      ).catch(err => console.error('Failed to send blind change notification:', err))
 
       return NextResponse.json(responseBody)
 
