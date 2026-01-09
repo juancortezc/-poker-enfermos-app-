@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, Trophy, Users, Clock, AlertTriangle, DollarSign } from 'lucide-react'
+import { BookOpen, Trophy, Clock, AlertTriangle, Coins } from 'lucide-react'
 
 interface ReglamentoSection {
   icon: React.ReactNode
@@ -10,54 +10,46 @@ interface ReglamentoSection {
 
 const REGLAMENTO_SECTIONS: ReglamentoSection[] = [
   {
-    icon: <Users className="w-5 h-5" />,
-    title: 'Participantes',
-    items: [
-      'Solo pueden participar los Enfermos activos del grupo',
-      'Los invitados deben ser aprobados por la Comision',
-      'Cada Enfermo puede traer maximo 1 invitado por fecha',
-      'Los invitados no acumulan puntos en la tabla general'
-    ]
-  },
-  {
     icon: <Trophy className="w-5 h-5" />,
     title: 'Sistema de Puntos',
     items: [
-      '1er lugar: 100% de los puntos disponibles',
-      '2do lugar: 70% de los puntos',
-      '3er lugar: 50% de los puntos',
-      'Los puntos varian segun cantidad de jugadores',
-      'Bonus por eliminar al campeon vigente'
+      'Los puntos se calculan en base a la cantidad de jugadores de la fecha',
+      '1 punto para el primer eliminado, incrementando en 1 hasta la posicion 10',
+      'Posicion 9: 2 puntos mas que la 10',
+      'Posiciones 8 a 4: incrementan en 1 punto',
+      'Posicion 3: 3 puntos mas que posicion 4',
+      'Posicion 2: 3 puntos mas que posicion 3',
+      'Ganador: 3 puntos mas que posicion 2'
     ]
   },
   {
     icon: <Clock className="w-5 h-5" />,
     title: 'Horarios',
     items: [
-      'Inicio puntual a las 21:00 hrs',
-      'Registro hasta 21:15 hrs',
-      'Late registration hasta nivel 4',
-      'Breaks de 10 minutos cada hora'
+      'Hora de inicio: 19h20',
+      'La comida se calcula al final del blind 400/800',
+      'Registro para participar cierra el domingo anterior a las 20h00'
     ]
   },
   {
-    icon: <DollarSign className="w-5 h-5" />,
-    title: 'Buy-in y Premios',
+    icon: <Coins className="w-5 h-5" />,
+    title: 'Multas',
     items: [
-      'Buy-in fijo de $500 MXN',
-      'Rebuy disponible en primeros 4 niveles',
-      'Add-on al final del nivel 4',
-      'Premios: 50% primer lugar, 30% segundo, 20% tercero'
+      '1000 fichas por cada blind en el cual el jugador no participe por ausencia',
+      'Valor del small blind durante cada mesa que el jugador este ausente',
+      '5 puntos al puntaje general por no pagar la fecha hasta las 19h20'
     ]
   },
   {
     icon: <AlertTriangle className="w-5 h-5" />,
     title: 'Conducta',
     items: [
-      'Respeto entre todos los participantes',
-      'Prohibido mostrar cartas antes de terminar la mano',
-      'No se permite coaching durante el juego',
-      'Decisiones del TD son finales'
+      'Si se enseña las cartas a 1 jugador, todos deben poder verlas al final de la mesa',
+      'Cuando un jugador declara all in, la mesa no puede hablar, excepto quien tiene que aceptar o pasar la apuesta',
+      'Lo declarado manda sobre la cantidad de fichas movidas',
+      'Si no se declara la apuesta, las fichas determinan el valor - no se puede cambiar declarando posteriormente',
+      'Las cartas colocadas despues de la linea blanca se consideran fold',
+      'Si un jugador solo enseña una carta, solo juega con esa carta y 4 de la mesa - no se acepta abrir las cartas de manera individual'
     ]
   }
 ]
