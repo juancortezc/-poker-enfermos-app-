@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
-import HomeRankingView from '@/components/tournaments/HomeRankingView'
+import { CPRankingView } from '@/components/clean-poker/CPRankingView'
 
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
@@ -149,7 +149,7 @@ export default function RankingPage() {
 
       {/* Content */}
       <main className="pb-20 px-4">
-        <HomeRankingView tournamentId={activeTournament.id} />
+        <CPRankingView tournamentId={activeTournament.id} />
       </main>
 
       {/* Bottom Nav */}
