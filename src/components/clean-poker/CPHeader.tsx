@@ -87,7 +87,7 @@ export function CPHeader({
         {/* Avatar / Menu - Links to Profile */}
         <Link
           href="/perfil"
-          className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center transition-opacity hover:opacity-80"
+          className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center transition-opacity hover:opacity-80 relative"
           style={{
             background: 'var(--cp-surface)',
             border: '1px solid var(--cp-surface-border)',
@@ -99,23 +99,20 @@ export function CPHeader({
               alt="Avatar"
               width={36}
               height={36}
-              className="object-cover w-full h-full"
-              onError={(e) => {
-                // Hide image on error, show initials instead
-                e.currentTarget.style.display = 'none'
-              }}
+              className="object-cover w-full h-full absolute inset-0"
+              unoptimized
             />
-          ) : null}
-          {/* Initials fallback - always rendered behind image */}
-          <span
-            className="font-semibold absolute"
-            style={{
-              fontSize: 'var(--cp-label-size)',
-              color: 'var(--cp-on-surface-medium)',
-            }}
-          >
-            {userInitials}
-          </span>
+          ) : (
+            <span
+              className="font-semibold"
+              style={{
+                fontSize: 'var(--cp-label-size)',
+                color: 'var(--cp-on-surface-medium)',
+              }}
+            >
+              {userInitials}
+            </span>
+          )}
         </Link>
       </div>
     </header>

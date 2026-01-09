@@ -56,6 +56,7 @@ export async function GET(
         lastName: true,
         photoUrl: true,
         lastVictoryDate: true,
+        joinDate: true,
         role: true
       },
       orderBy: [
@@ -65,23 +66,55 @@ export async function GET(
     });
 
     const today = new Date();
-    
+
+    // Helper para parsear fechas en varios formatos
+    const parseDate = (dateStr: string): Date | null => {
+      if (!dateStr) return null;
+
+      // Formato YYYY-MM-DD (ISO)
+      if (dateStr.includes('-') && dateStr.length === 10) {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day);
+      }
+
+      // Formato DD/MM/YYYY
+      if (dateStr.includes('/')) {
+        const [day, month, year] = dateStr.split('/').map(Number);
+        return new Date(year, month - 1, day);
+      }
+
+      return null;
+    };
+
     // Calcular días sin ganar para cada jugador
     const playersWithVictoryData: PlayerWithVictoryData[] = activePlayers.map(player => {
       let daysWithoutVictory = 0;
       let hasNeverWon = true;
+      let referenceDate: string | null = null;
 
       if (player.lastVictoryDate) {
+        // Tiene victoria previa - calcular desde esa fecha
         hasNeverWon = false;
-        // Parsear fecha desde formato DD/MM/YYYY
-        const [day, month, year] = player.lastVictoryDate.split('/').map(Number);
-        const lastVictoryDate = new Date(year, month - 1, day); // month - 1 porque Date usa 0-based months
-        
-        const timeDiff = today.getTime() - lastVictoryDate.getTime();
-        daysWithoutVictory = Math.floor(timeDiff / (1000 * 3600 * 24));
+        const lastVictoryDate = parseDate(player.lastVictoryDate);
+
+        if (lastVictoryDate) {
+          const timeDiff = today.getTime() - lastVictoryDate.getTime();
+          daysWithoutVictory = Math.floor(timeDiff / (1000 * 3600 * 24));
+          referenceDate = player.lastVictoryDate;
+        }
+      } else if (player.joinDate) {
+        // Nunca ha ganado pero tiene fecha de ingreso - calcular desde esa fecha
+        hasNeverWon = false; // Lo tratamos como si tuviera una "victoria virtual" al unirse
+        const joinDate = parseDate(player.joinDate);
+
+        if (joinDate) {
+          const timeDiff = today.getTime() - joinDate.getTime();
+          daysWithoutVictory = Math.floor(timeDiff / (1000 * 3600 * 24));
+          // Mostrar la fecha de ingreso como referencia
+          referenceDate = player.joinDate;
+        }
       } else {
-        // Si nunca ha ganado, calcular días desde el inicio del torneo
-        // Para efectos de este reporte, usaremos un valor muy alto para ordenar al final
+        // Ni victoria ni fecha de ingreso - marcar como N/A
         daysWithoutVictory = 999999;
       }
 
@@ -90,9 +123,9 @@ export async function GET(
         firstName: player.firstName,
         lastName: player.lastName,
         photoUrl: player.photoUrl,
-        lastVictoryDate: player.lastVictoryDate,
+        lastVictoryDate: referenceDate, // Usamos referenceDate para mostrar
         daysWithoutVictory,
-        hasNeverWon
+        hasNeverWon: !player.lastVictoryDate && !player.joinDate // Solo N/A si no tiene ninguna fecha
       };
     });
 

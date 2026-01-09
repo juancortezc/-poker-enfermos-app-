@@ -6,7 +6,6 @@ import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
 import useSWR from 'swr'
 import Image from 'next/image'
-import Link from 'next/link'
 
 import { CPHeader } from './CPHeader'
 import { CPBottomNav } from './CPBottomNav'
@@ -15,7 +14,6 @@ import { PositionCard } from './PositionCard'
 import { PodioCard } from './PodioCard'
 import { MalazoCard } from './MalazoCard'
 import { LiveGameCard } from './LiveGameCard'
-import { LeaderCard } from './LeaderCard'
 import { CPTimerCard } from './CPTimerCard'
 import { CPPlayerDetailModal } from './CPPlayerDetailModal'
 
@@ -91,13 +89,21 @@ export function HomePage() {
     return <HomeLoading />
   }
 
+  // Format next date for login screen
+  const formatNextDateSimple = (dateNumber: number | undefined, dateStr: string | null) => {
+    if (!dateStr) return 'Por definir'
+    const date = new Date(dateStr)
+    const formattedDate = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })
+    return dateNumber ? `Fecha ${dateNumber}: ${formattedDate}` : formattedDate
+  }
+
   // Estado A: No logueado
   if (!user) {
     return (
       <HomeNotAuthenticated
         leader={rankingData?.rankings?.[0]}
-        gamesPlayed={progress?.completed || 0}
-        totalGames={progress?.total || 12}
+        nextDate={formatNextDateSimple(nextGameDateFromTournament?.dateNumber, nextGameDateFromTournament?.scheduledDate ?? null)}
+        tournamentNumber={activeTournament?.number ?? 29}
       />
     )
   }
@@ -278,7 +284,7 @@ function NextDateWithCalendar({ nextDate, scheduledDate }: NextDateWithCalendarP
 }
 
 // ============================================
-// ESTADO A: NO LOGUEADO (Landing)
+// ESTADO A: NO LOGUEADO (Landing con Login)
 // ============================================
 interface HomeNotAuthenticatedProps {
   leader?: {
@@ -286,70 +292,157 @@ interface HomeNotAuthenticatedProps {
     totalPoints: number
     finalScore?: number
   }
-  gamesPlayed: number
-  totalGames: number
+  nextDate: string
+  tournamentNumber: number
 }
 
-function HomeNotAuthenticated({ leader, gamesPlayed, totalGames }: HomeNotAuthenticatedProps) {
+function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAuthenticatedProps) {
+  const [pin, setPin] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const { login } = useAuth()
+
+  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 4)
+    setPin(value)
+    setError('')
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (pin.length !== 4) return
+
+    setLoading(true)
+    setError('')
+
+    const success = await login(pin)
+
+    if (!success) {
+      setError('PIN invalido')
+      setPin('')
+    }
+
+    setLoading(false)
+  }
+
   return (
     <CPAppShell>
-      <div className="min-h-screen flex flex-col items-center justify-center px-6">
-      {/* Logo */}
-      <div className="mb-6">
-        <Image
-          src={LOGO_URL}
-          alt="Poker Enfermos"
-          width={80}
-          height={80}
-          className="rounded-full"
-        />
-      </div>
-
-      {/* Title */}
-      <h1
-        className="font-bold mb-1"
-        style={{
-          fontSize: 'var(--cp-title-size)',
-          color: 'var(--cp-on-surface)'
-        }}
-      >
-        POKER ENFERMOS
-      </h1>
-      <p
-        className="mb-8"
-        style={{
-          fontSize: 'var(--cp-body-size)',
-          color: 'var(--cp-on-surface-variant)'
-        }}
-      >
-        Temporada 29
-      </p>
-
-      {/* Leader Card */}
-      {leader && (
-        <div className="w-full max-w-sm mb-6">
-          <LeaderCard
-            name={leader.playerName}
-            points={leader.finalScore ?? leader.totalPoints}
-            gamesPlayed={gamesPlayed}
-            totalGames={totalGames}
+      <div className="min-h-screen flex flex-col px-6 pt-16">
+        {/* Logo - Grande y arriba */}
+        <div className="flex justify-center mb-4">
+          <Image
+            src={LOGO_URL}
+            alt="Poker Enfermos"
+            width={140}
+            height={140}
+            className="rounded-full"
+            priority
           />
         </div>
-      )}
 
-      {/* CTA Button */}
-      <Link
-        href="/api/auth/login"
-        className="w-full max-w-sm py-3 text-center font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
-        style={{
-          backgroundColor: 'var(--cp-primary)',
-          color: 'var(--cp-on-primary)',
-          borderRadius: 'var(--cp-radius-full)',
-          fontSize: 'var(--cp-body-size)',
-        }}
-      >
-        Ingresar
-      </Link>
+        {/* Title */}
+        <h1
+          className="font-bold text-center mb-1"
+          style={{
+            fontSize: '24px',
+            color: 'var(--cp-on-surface)',
+            letterSpacing: '0.05em'
+          }}
+        >
+          POKER ENFERMOS
+        </h1>
+        <p
+          className="text-center mb-8"
+          style={{
+            fontSize: 'var(--cp-body-size)',
+            color: 'var(--cp-on-surface-variant)'
+          }}
+        >
+          Temporada {tournamentNumber}
+        </p>
+
+        {/* PIN Input Form */}
+        <form onSubmit={handleSubmit} className="w-full max-w-xs mx-auto mb-8">
+          <input
+            type="password"
+            inputMode="numeric"
+            pattern="\d{4}"
+            placeholder="Ingresa tu PIN"
+            value={pin}
+            onChange={handlePinChange}
+            disabled={loading}
+            autoComplete="off"
+            className="w-full h-12 px-4 text-center text-lg rounded-xl transition-all focus:outline-none focus:ring-2"
+            style={{
+              background: 'var(--cp-surface)',
+              border: error ? '1px solid #E53935' : '1px solid var(--cp-surface-border)',
+              color: 'var(--cp-on-surface)',
+              fontSize: '18px',
+              letterSpacing: '0.3em'
+            }}
+          />
+          {error && (
+            <p className="text-center mt-2" style={{ color: '#E53935', fontSize: '13px' }}>
+              {error}
+            </p>
+          )}
+          {loading && (
+            <div className="flex justify-center mt-3">
+              <div
+                className="w-5 h-5 border-2 rounded-full animate-spin"
+                style={{
+                  borderColor: 'var(--cp-surface-border)',
+                  borderTopColor: 'var(--cp-primary)'
+                }}
+              />
+            </div>
+          )}
+        </form>
+
+        {/* Leader Info - Compact */}
+        {leader && (
+          <div className="text-center mb-4">
+            <p
+              style={{
+                fontSize: '12px',
+                color: 'var(--cp-on-surface-muted)',
+                marginBottom: '4px'
+              }}
+            >
+              Lider Actual
+            </p>
+            <p
+              style={{
+                fontSize: 'var(--cp-body-size)',
+                color: 'var(--cp-on-surface)',
+                fontWeight: 600
+              }}
+            >
+              {leader.playerName}
+            </p>
+          </div>
+        )}
+
+        {/* Next Date Info */}
+        <div className="text-center">
+          <p
+            style={{
+              fontSize: '12px',
+              color: 'var(--cp-on-surface-muted)',
+              marginBottom: '4px'
+            }}
+          >
+            Proxima Fecha
+          </p>
+          <p
+            style={{
+              fontSize: 'var(--cp-caption-size)',
+              color: 'var(--cp-on-surface-variant)'
+            }}
+          >
+            {nextDate}
+          </p>
+        </div>
       </div>
     </CPAppShell>
   )
@@ -362,6 +455,7 @@ interface HomeAuthenticatedProps {
   user: {
     id: string
     firstName?: string
+    lastName?: string
     photoUrl?: string
   }
   myRanking?: {
@@ -418,7 +512,9 @@ function HomeAuthenticated({
   tournamentId
 }: HomeAuthenticatedProps) {
   const [showDetailModal, setShowDetailModal] = useState(false)
-  const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
+  const userInitials = user.firstName && user.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : 'PE'
 
   return (
     <CPAppShell>
@@ -504,6 +600,7 @@ interface HomeWithLiveGameProps {
   user: {
     id: string
     firstName?: string
+    lastName?: string
     photoUrl?: string
   }
   myRanking?: {
@@ -553,7 +650,9 @@ function HomeWithLiveGame({
   tournamentId
 }: HomeWithLiveGameProps) {
   const [showDetailModal, setShowDetailModal] = useState(false)
-  const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
+  const userInitials = user.firstName && user.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : 'PE'
 
   return (
     <CPAppShell>

@@ -98,7 +98,9 @@ export default function StatsPage() {
     )
   }
 
-  const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
+  const userInitials = user.firstName && user.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : 'PE'
   const tournamentNumber = activeTournament?.number ?? 29
   const isComision = user.role === 'Comision'
 

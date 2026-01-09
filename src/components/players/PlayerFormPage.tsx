@@ -149,7 +149,8 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
         }
       }
 
-      if (!formData.photoUrl.trim()) {
+      // La imagen solo es obligatoria al crear un nuevo jugador
+      if (!isEditing && !formData.photoUrl.trim()) {
         throw new Error('URL de imagen es obligatoria')
       }
 
@@ -186,7 +187,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
         birthDate: formData.birthDate || undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
-        photoUrl: formData.photoUrl.trim(),
+        photoUrl: formData.photoUrl.trim() || undefined,
         joinYear: year
       }
 
@@ -402,7 +403,14 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
           {/* URL de foto */}
           <div>
-            <Label htmlFor="photoUrl" className="text-poker-text">URL de imagen *</Label>
+            <Label htmlFor="photoUrl" className="text-poker-text">
+              URL de imagen {!isEditing && '*'}
+              {isEditing && player?.photoUrl && (
+                <span className="ml-2 text-xs text-white/50">
+                  (Dejar en blanco para mantener la actual)
+                </span>
+              )}
+            </Label>
             <Input
               id="photoUrl"
               type="url"
@@ -410,7 +418,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
               onChange={(e) => updateFormData('photoUrl', e.target.value)}
               className="bg-poker-dark/50 border-white/10 text-white focus:border-poker-red"
               placeholder="https://..."
-              required
+              required={!isEditing}
             />
           </div>
 

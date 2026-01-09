@@ -106,7 +106,7 @@ export default function TablaPage() {
       <CPAppShell>
         <div className="min-h-screen flex flex-col">
         <CPHeader
-          userInitials={user.firstName?.slice(0, 2).toUpperCase() || 'PE'}
+          userInitials={user.firstName && user.lastName ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 'PE'}
           userPhotoUrl={user.photoUrl}
           tournamentNumber={29}
         />
@@ -145,7 +145,9 @@ export default function TablaPage() {
     )
   }
 
-  const userInitials = user.firstName?.slice(0, 2).toUpperCase() || 'PE'
+  const userInitials = user.firstName && user.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : 'PE'
   const tournamentNumber = activeTournament.number ?? 29
   const isComision = user.role === 'Comision'
 

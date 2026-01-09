@@ -20,7 +20,7 @@ const TABS = [
   { id: 'activar' as const, label: 'Activar' },
   { id: 'torneo' as const, label: 'Torneo' },
   { id: 'blinds' as const, label: 'Blinds' },
-  { id: 'jugadores' as const, label: 'Jugadores' },
+  { id: 'jugadores' as const, label: 'Enfermos' },
   { id: 'premiacion' as const, label: 'Premios' },
 ]
 

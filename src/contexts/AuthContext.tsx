@@ -18,11 +18,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Refresh user data from server
+  const refreshUserData = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/auth/me?id=${userId}`)
+      if (response.ok) {
+        const freshUser = await response.json()
+        setUser(freshUser)
+        localStorage.setItem('poker-user', JSON.stringify(freshUser))
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error)
+    }
+  }
+
   useEffect(() => {
     // Check if user is already logged in
     const storedUser = localStorage.getItem('poker-user')
     if (storedUser) {
-      setUser(JSON.parse(storedUser))
+      const parsedUser = JSON.parse(storedUser)
+      setUser(parsedUser)
+      // Refresh user data from server in background
+      refreshUserData(parsedUser.id)
     }
     setLoading(false)
   }, [])
