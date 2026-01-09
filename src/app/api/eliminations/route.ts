@@ -39,6 +39,9 @@ export async function POST(request: NextRequest) {
 
       // Send broadcast push notification to all users
       const eliminatedName = `${result.eliminatedPlayer.firstName} ${result.eliminatedPlayer.lastName}`;
+      const eliminatorName = result.eliminatorPlayer
+        ? `${result.eliminatorPlayer.firstName} ${result.eliminatorPlayer.lastName}`
+        : null;
 
       if (position === 1) {
         // Winner notification
@@ -54,10 +57,14 @@ export async function POST(request: NextRequest) {
         ).catch(err => console.error('Failed to send winner notification:', err));
       } else {
         // Regular elimination notification
+        const eliminationMessage = eliminatorName
+          ? `${eliminatedName} eliminado en posicion ${position} (${result.points} pts), eliminado por ${eliminatorName}`
+          : `${eliminatedName} eliminado en posicion ${position} (${result.points} pts)`;
+
         await broadcastPushNotification(
           {
             title: 'Jugador eliminado',
-            body: `${eliminatedName} eliminado en posicion ${position} (${result.points} pts)`,
+            body: eliminationMessage,
             tag: `elimination-${gameDateId}-${position}`,
             url: '/home',
             data: { type: 'elimination', gameDateId, position, playerId: eliminatedPlayerId }
