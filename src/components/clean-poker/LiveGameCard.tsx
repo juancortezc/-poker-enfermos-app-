@@ -1,6 +1,6 @@
 'use client'
 
-import { Users, Skull, Timer, ClipboardList, List } from 'lucide-react'
+import { Users, Skull, LayoutList } from 'lucide-react'
 import Link from 'next/link'
 
 interface LastElimination {
@@ -15,10 +15,8 @@ interface LiveGameCardProps {
   playersRemaining: number
   playersTotal: number
   lastElimination?: LastElimination | null
-  timerHref?: string
-  registerHref?: string
-  eliminationsHref?: string
-  isCommission?: boolean
+  tablaHref?: string
+  eliminadosHref?: string
 }
 
 export function LiveGameCard({
@@ -26,10 +24,8 @@ export function LiveGameCard({
   playersRemaining,
   playersTotal,
   lastElimination,
-  timerHref = '/timer',
-  registerHref = '/registro',
-  eliminationsHref = '/tabla',
-  isCommission = false
+  tablaHref = '/tabla',
+  eliminadosHref = '/registro'
 }: LiveGameCardProps) {
   const eliminationsCount = playersTotal - playersRemaining
 
@@ -245,7 +241,7 @@ export function LiveGameCard({
       {/* Action Buttons */}
       <div className="flex gap-2">
         <Link
-          href={timerHref}
+          href={tablaHref}
           className="flex-1 flex items-center justify-center gap-2 py-2 font-medium transition-all hover:opacity-90"
           style={{
             border: '1px solid var(--cp-surface-border)',
@@ -254,12 +250,11 @@ export function LiveGameCard({
             borderRadius: '4px'
           }}
         >
-          <Timer className="w-4 h-4" />
-          Timer
+          <LayoutList className="w-4 h-4" />
+          Tabla
         </Link>
-
         <Link
-          href={eliminationsHref}
+          href={eliminadosHref}
           className="flex-1 flex items-center justify-center gap-2 py-2 font-medium transition-all hover:opacity-90"
           style={{
             border: '1px solid var(--cp-surface-border)',
@@ -268,25 +263,9 @@ export function LiveGameCard({
             borderRadius: '4px'
           }}
         >
-          <List className="w-4 h-4" />
-          Ver Fecha
+          <Skull className="w-4 h-4" />
+          Eliminados
         </Link>
-
-        {isCommission && (
-          <Link
-            href={registerHref}
-            className="flex-1 flex items-center justify-center gap-2 py-2 font-medium transition-all hover:opacity-90 active:scale-[0.98]"
-            style={{
-              backgroundColor: 'var(--cp-primary)',
-              color: 'var(--cp-on-primary)',
-              fontSize: 'var(--cp-label-size)',
-              borderRadius: '4px'
-            }}
-          >
-            <ClipboardList className="w-4 h-4" />
-            Registro
-          </Link>
-        )}
       </div>
     </div>
   )

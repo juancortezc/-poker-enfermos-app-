@@ -573,7 +573,6 @@ function HomeWithLiveGame({
           playersRemaining={playersRemaining}
           playersTotal={activeGameDate.playersCount}
           lastElimination={lastElimination}
-          isCommission={isCommission}
         />
 
         {/* Mi Posición */}

@@ -401,156 +401,126 @@ export default function RegistroPage() {
               </button>
             ) : (
               <>
-                {/* Timer Display - CleanPoker Style */}
+                {/* Timer Controls - Compact Row */}
                 <div
-                  className={`p-4 transition-opacity duration-300 ${timerStatus === 'paused' ? 'opacity-70' : ''}`}
-                  style={{
-                    background: '#E53935',
-                    borderRadius: '4px',
-                    color: 'white',
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className={`text-xl md:text-2xl font-bold font-mono tracking-wider ${isCritical ? 'animate-pulse' : ''}`}>
-                      {timerStatus === 'paused' && '⏸ '}
-                      {displayFormatted}
-                    </div>
-                    <div className="text-sm md:text-base font-semibold">
-                      Blinds: {displayBlind ? `${displayBlind.smallBlind}/${displayBlind.bigBlind}` : 'Sin información'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Botones de control (solo para Comisión) */}
-                {user && user.role === 'Comision' && (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      {timerIsActive ? (
-                        <button
-                          onClick={handlePauseTimer}
-                          disabled={isControlling}
-                          className="px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                          style={{
-                            background: '#ca8a04',
-                            color: 'white',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          <Pause className="w-4 h-4" />
-                          PAUSAR
-                        </button>
-                      ) : timerIsPaused ? (
-                        <button
-                          onClick={handleResumeTimer}
-                          disabled={isControlling}
-                          className="px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                          style={{
-                            background: '#16a34a',
-                            color: 'white',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          <Play className="w-4 h-4" />
-                          REANUDAR
-                        </button>
-                      ) : null}
-
-                      <button
-                        onClick={() => router.push('/timer')}
-                        className="px-4 py-3 font-semibold transition-colors"
-                        style={{
-                          background: 'var(--cp-surface)',
-                          border: '1px solid var(--cp-surface-border)',
-                          color: 'var(--cp-on-surface)',
-                          borderRadius: '4px',
-                        }}
-                      >
-                        VER TIMER
-                      </button>
-                    </div>
-
-                    {/* Botón de reinicio de tiempo del nivel */}
-                    <button
-                      onClick={handleResetTimer}
-                      disabled={isControlling}
-                      className="w-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                      style={{
-                        background: '#ea580c',
-                        color: 'white',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      REINICIAR TIEMPO DEL NIVEL
-                    </button>
-
-                    {/* Wake Lock Toggle */}
-                    {wakeLockSupported && (
-                      <button
-                        onClick={async () => {
-                          if (wakeLockActive) {
-                            await releaseWakeLock()
-                          } else {
-                            await requestWakeLock()
-                          }
-                        }}
-                        className="w-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2"
-                        style={{
-                          background: wakeLockActive ? '#16a34a' : 'var(--cp-surface)',
-                          border: wakeLockActive ? 'none' : '1px solid var(--cp-surface-border)',
-                          color: wakeLockActive ? 'white' : 'var(--cp-on-surface)',
-                          borderRadius: '4px',
-                        }}
-                      >
-                        {wakeLockActive ? (
-                          <>
-                            <SmartphoneNfc className="w-4 h-4" />
-                            PANTALLA ACTIVA
-                          </>
-                        ) : (
-                          <>
-                            <Smartphone className="w-4 h-4" />
-                            MANTENER PANTALLA ACTIVA
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Stats Cards - CleanPoker Style */}
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { label: 'Jugando', value: activePlayers, highlight: true },
-                { label: 'Jugadores', value: totalPlayers, highlight: false },
-                { label: 'Pts Max', value: winnerPoints, highlight: false },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="p-4 text-center"
+                  className="flex items-center justify-between p-3"
                   style={{
                     background: 'var(--cp-surface)',
                     border: '1px solid var(--cp-surface-border)',
                     borderRadius: '4px',
                   }}
                 >
-                  <div
-                    className="text-sm mb-1"
-                    style={{ color: 'var(--cp-on-surface-muted)' }}
-                  >
-                    {stat.label}
+                  {/* Blinds */}
+                  <div className="text-center">
+                    <p className="text-xs" style={{ color: 'var(--cp-on-surface-muted)' }}>Blinds</p>
+                    <p className="font-bold" style={{ color: 'var(--cp-on-surface)', fontSize: 'var(--cp-body-size)' }}>
+                      {displayBlind ? `${displayBlind.smallBlind}/${displayBlind.bigBlind}` : '--'}
+                    </p>
                   </div>
+
+                  {/* Timer */}
                   <div
-                    className="text-2xl font-bold"
-                    style={{ color: stat.highlight ? '#E53935' : 'var(--cp-on-surface)' }}
+                    className={`text-center px-4 py-1.5 rounded ${isCritical ? 'animate-pulse' : ''}`}
+                    style={{
+                      background: timerStatus === 'paused' ? 'rgba(202, 138, 4, 0.2)' : 'rgba(229, 57, 53, 0.15)',
+                    }}
                   >
-                    {stat.value}
+                    <p className="text-xs" style={{ color: 'var(--cp-on-surface-muted)' }}>Tiempo</p>
+                    <p
+                      className="font-bold font-mono"
+                      style={{
+                        color: timerStatus === 'paused' ? '#ca8a04' : '#E53935',
+                        fontSize: 'var(--cp-title-size)',
+                      }}
+                    >
+                      {displayFormatted}
+                    </p>
                   </div>
+
+                  {/* Control Icons - Only for Comision */}
+                  {user && user.role === 'Comision' && (
+                    <div className="flex items-center gap-2">
+                      {/* Pause/Play */}
+                      {timerIsActive ? (
+                        <button
+                          onClick={handlePauseTimer}
+                          disabled={isControlling}
+                          className="w-9 h-9 flex items-center justify-center rounded transition-colors disabled:opacity-50"
+                          style={{ background: '#ca8a04', color: 'white' }}
+                          title="Pausar"
+                        >
+                          <Pause className="w-4 h-4" />
+                        </button>
+                      ) : timerIsPaused ? (
+                        <button
+                          onClick={handleResumeTimer}
+                          disabled={isControlling}
+                          className="w-9 h-9 flex items-center justify-center rounded transition-colors disabled:opacity-50"
+                          style={{ background: '#16a34a', color: 'white' }}
+                          title="Reanudar"
+                        >
+                          <Play className="w-4 h-4" />
+                        </button>
+                      ) : null}
+
+                      {/* Reset */}
+                      <button
+                        onClick={handleResetTimer}
+                        disabled={isControlling}
+                        className="w-9 h-9 flex items-center justify-center rounded transition-colors disabled:opacity-50"
+                        style={{
+                          background: 'var(--cp-surface-solid)',
+                          border: '1px solid var(--cp-surface-border)',
+                          color: 'var(--cp-on-surface)',
+                        }}
+                        title="Reiniciar nivel"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+
+                      {/* Wake Lock */}
+                      {wakeLockSupported && (
+                        <button
+                          onClick={async () => {
+                            if (wakeLockActive) {
+                              await releaseWakeLock()
+                            } else {
+                              await requestWakeLock()
+                            }
+                          }}
+                          className="w-9 h-9 flex items-center justify-center rounded transition-colors"
+                          style={{
+                            background: wakeLockActive ? '#16a34a' : 'var(--cp-surface-solid)',
+                            border: wakeLockActive ? 'none' : '1px solid var(--cp-surface-border)',
+                            color: wakeLockActive ? 'white' : 'var(--cp-on-surface)',
+                          }}
+                          title={wakeLockActive ? 'Pantalla activa' : 'Mantener pantalla activa'}
+                        >
+                          {wakeLockActive ? (
+                            <SmartphoneNfc className="w-4 h-4" />
+                          ) : (
+                            <Smartphone className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
+
+            {/* Stats Cards - CleanPoker Style */}
+            <CPStatsCards
+              activePlayers={activePlayers}
+              totalPlayers={totalPlayers}
+              winnerPoints={winnerPoints}
+              isComision={user?.role === 'Comision'}
+              players={players}
+              eliminations={eliminations}
+              gameDateId={activeGameDate.id}
+              tournamentId={activeGameDate.tournament.id}
+              onPlayersChanged={fetchAllData}
+            />
 
             {/* Elimination Form - CleanPoker Style */}
             {activePlayers > 1 && (
@@ -590,15 +560,6 @@ export default function RegistroPage() {
               tournamentId={activeGameDate.tournament.id}
               gameDateId={activeGameDate.id}
               onEliminationUpdated={fetchAllData}
-            />
-
-            {/* Participants List - With option to remove */}
-            <CPParticipantsList
-              players={players}
-              eliminations={eliminations}
-              gameDateId={activeGameDate.id}
-              tournamentId={activeGameDate.tournament.id}
-              onPlayerRemoved={fetchAllData}
             />
           </div>
         </div>
@@ -1018,9 +979,26 @@ function CPEliminationHistory({
     }
   }
 
-  const getPlayerName = (playerId: string) => {
-    const player = players.find(p => p.id === playerId)
-    return player ? `${player.firstName} ${player.lastName}` : 'Desconocido'
+  // Helper to get player name - prefer elimination data, fallback to players array
+  const getPlayerName = (elimination: Elimination, type: 'eliminated' | 'eliminator') => {
+    if (type === 'eliminated') {
+      // Use data from elimination object first (comes from API)
+      if (elimination.eliminatedPlayer) {
+        return `${elimination.eliminatedPlayer.firstName} ${elimination.eliminatedPlayer.lastName}`
+      }
+      // Fallback to players array
+      const player = players.find(p => p.id === elimination.eliminatedPlayerId)
+      return player ? `${player.firstName} ${player.lastName}` : 'Desconocido'
+    } else {
+      // Use data from elimination object first
+      if (elimination.eliminatorPlayer) {
+        return `${elimination.eliminatorPlayer.firstName} ${elimination.eliminatorPlayer.lastName}`
+      }
+      // Fallback to players array
+      if (!elimination.eliminatorPlayerId) return 'N/A'
+      const player = players.find(p => p.id === elimination.eliminatorPlayerId)
+      return player ? `${player.firstName} ${player.lastName}` : 'Desconocido'
+    }
   }
 
   // Ordenar eliminaciones por posición ascendente (más recientes primero - posiciones más bajas)
@@ -1158,14 +1136,11 @@ function CPEliminationHistory({
                     </div>
                     <div className="flex-1 text-sm" style={{ color: 'var(--cp-on-surface)' }}>
                       <span className="truncate block">
-                        {getPlayerName(elimination.eliminatedPlayerId)}
+                        {getPlayerName(elimination, 'eliminated')}
                         {elimination.position !== 1 && (
                           <span style={{ color: 'var(--cp-on-surface-muted)' }}>
                             {' vs '}
-                            {elimination.eliminatorPlayer ?
-                              getPlayerName(elimination.eliminatorPlayerId!) :
-                              'N/A'
-                            }
+                            {getPlayerName(elimination, 'eliminator')}
                           </span>
                         )}
                         {elimination.position === 1 && (
@@ -1198,51 +1173,258 @@ function CPEliminationHistory({
 }
 
 // ============================================
-// CP PARTICIPANTS LIST COMPONENT
+// CP STATS CARDS COMPONENT (with players modal)
 // ============================================
-import { UserMinus, AlertTriangle } from 'lucide-react'
+import { Users, UserMinus, UserPlus, AlertTriangle, X as XIcon, Settings } from 'lucide-react'
 
-interface CPParticipantsListProps {
+interface CPStatsCardsProps {
+  activePlayers: number
+  totalPlayers: number
+  winnerPoints: number
+  isComision: boolean
   players: Player[]
   eliminations: Elimination[]
   gameDateId: number
   tournamentId: number
-  onPlayerRemoved: () => void
+  onPlayersChanged: () => void
 }
 
-function CPParticipantsList({
+function CPStatsCards({
+  activePlayers,
+  totalPlayers,
+  winnerPoints,
+  isComision,
   players,
   eliminations,
   gameDateId,
   tournamentId,
-  onPlayerRemoved
-}: CPParticipantsListProps) {
-  const { mutate } = useSWRConfig()
-  const [isRemoving, setIsRemoving] = useState(false)
-  const [removeError, setRemoveError] = useState<string | null>(null)
-  const [confirmingPlayerId, setConfirmingPlayerId] = useState<string | null>(null)
+  onPlayersChanged
+}: CPStatsCardsProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Jugadores activos (no eliminados)
-  const activePlayers = useMemo(() => {
+  return (
+    <>
+      <div className="grid grid-cols-3 gap-3">
+        {/* Jugando */}
+        <div
+          className="p-4 text-center"
+          style={{
+            background: 'var(--cp-surface)',
+            border: '1px solid var(--cp-surface-border)',
+            borderRadius: '4px',
+          }}
+        >
+          <div className="text-sm mb-1" style={{ color: 'var(--cp-on-surface-muted)' }}>
+            Jugando
+          </div>
+          <div className="text-2xl font-bold" style={{ color: '#E53935' }}>
+            {activePlayers}
+          </div>
+        </div>
+
+        {/* Jugadores - Clickable for Comision */}
+        <button
+          onClick={() => isComision && setIsModalOpen(true)}
+          disabled={!isComision}
+          className={`p-4 text-center relative ${isComision ? 'cursor-pointer hover:ring-1 hover:ring-white/20' : ''}`}
+          style={{
+            background: 'var(--cp-surface)',
+            border: '1px solid var(--cp-surface-border)',
+            borderRadius: '4px',
+          }}
+        >
+          <div className="text-sm mb-1" style={{ color: 'var(--cp-on-surface-muted)' }}>
+            Jugadores
+          </div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--cp-on-surface)' }}>
+            {totalPlayers}
+          </div>
+          {isComision && (
+            <Settings
+              size={12}
+              className="absolute top-2 right-2"
+              style={{ color: 'var(--cp-on-surface-muted)' }}
+            />
+          )}
+        </button>
+
+        {/* Pts Max */}
+        <div
+          className="p-4 text-center"
+          style={{
+            background: 'var(--cp-surface)',
+            border: '1px solid var(--cp-surface-border)',
+            borderRadius: '4px',
+          }}
+        >
+          <div className="text-sm mb-1" style={{ color: 'var(--cp-on-surface-muted)' }}>
+            Pts Max
+          </div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--cp-on-surface)' }}>
+            {winnerPoints}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal de gestión de participantes */}
+      {isModalOpen && (
+        <CPPlayersModal
+          players={players}
+          eliminations={eliminations}
+          gameDateId={gameDateId}
+          tournamentId={tournamentId}
+          onPlayersChanged={onPlayersChanged}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+// ============================================
+// CP PLAYERS MODAL (add/remove with double confirmation)
+// ============================================
+interface CPPlayersModalProps {
+  players: Player[]
+  eliminations: Elimination[]
+  gameDateId: number
+  tournamentId: number
+  onPlayersChanged: () => void
+  onClose: () => void
+}
+
+function CPPlayersModal({
+  players,
+  eliminations,
+  gameDateId,
+  tournamentId,
+  onPlayersChanged,
+  onClose
+}: CPPlayersModalProps) {
+  const { mutate } = useSWRConfig()
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+  const [confirmationStep, setConfirmationStep] = useState<1 | 2>(1)
+  const [actionType, setActionType] = useState<'add' | 'remove' | null>(null)
+  const [allPlayers, setAllPlayers] = useState<Player[]>([])
+  const [loadingAllPlayers, setLoadingAllPlayers] = useState(true)
+
+  // Cargar todos los jugadores del sistema para poder agregar
+  useEffect(() => {
+    const fetchAllPlayers = async () => {
+      try {
+        const response = await fetch('/api/players', {
+          headers: buildAuthHeaders()
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setAllPlayers(data)
+        }
+      } catch (err) {
+        console.error('Error fetching all players:', err)
+      } finally {
+        setLoadingAllPlayers(false)
+      }
+    }
+    fetchAllPlayers()
+  }, [])
+
+  // Jugadores activos (no eliminados) en la fecha
+  const activePlayersInDate = useMemo(() => {
     const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId)
     return players.filter(player => !eliminatedIds.includes(player.id))
   }, [players, eliminations])
 
-  // Jugadores eliminados
-  const eliminatedPlayers = useMemo(() => {
+  // Jugadores eliminados en la fecha
+  const eliminatedPlayersInDate = useMemo(() => {
     const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId)
     return players.filter(player => eliminatedIds.includes(player.id))
   }, [players, eliminations])
 
-  const handleRemovePlayer = async (playerId: string) => {
-    setIsRemoving(true)
-    setRemoveError(null)
+  // Jugadores disponibles para agregar (no están en la fecha)
+  const availableToAdd = useMemo(() => {
+    const registeredIds = players.map(p => p.id)
+    return allPlayers.filter(p => !registeredIds.includes(p.id))
+  }, [allPlayers, players])
+
+  const handleSelectForRemove = (playerId: string) => {
+    setSelectedPlayerId(playerId)
+    setActionType('remove')
+    setConfirmationStep(1)
+    setError(null)
+  }
+
+  const handleSelectForAdd = (playerId: string) => {
+    setSelectedPlayerId(playerId)
+    setActionType('add')
+    setConfirmationStep(1)
+    setError(null)
+  }
+
+  const handleFirstConfirm = () => {
+    setConfirmationStep(2)
+  }
+
+  const handleCancelConfirm = () => {
+    setSelectedPlayerId(null)
+    setActionType(null)
+    setConfirmationStep(1)
+    setError(null)
+  }
+
+  const refreshCaches = () => {
+    mutate(swrKeys.activeGameDate())
+    mutate(swrKeys.activeTournament())
+    mutate(swrKeys.gameDateEliminations(gameDateId))
+    mutate(swrKeys.gameDate(gameDateId))
+    mutate(swrKeys.gameDates(tournamentId))
+    mutate(swrKeys.tournamentRanking(tournamentId))
+  }
+
+  const handleAddPlayer = async () => {
+    if (!selectedPlayerId) return
+
+    setIsProcessing(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/game-dates/${gameDateId}/players`, {
+        method: 'POST',
+        headers: buildAuthHeaders({}, { includeJson: true }),
+        body: JSON.stringify({ playerId: selectedPlayerId })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al agregar participante')
+      }
+
+      setSelectedPlayerId(null)
+      setActionType(null)
+      setConfirmationStep(1)
+      onPlayersChanged()
+      refreshCaches()
+
+    } catch (err) {
+      console.error('Error adding player:', err)
+      setError(err instanceof Error ? err.message : 'Error desconocido')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleRemovePlayer = async () => {
+    if (!selectedPlayerId) return
+
+    setIsProcessing(true)
+    setError(null)
 
     try {
       const response = await fetch(`/api/game-dates/${gameDateId}/players`, {
         method: 'DELETE',
         headers: buildAuthHeaders({}, { includeJson: true }),
-        body: JSON.stringify({ playerId })
+        body: JSON.stringify({ playerId: selectedPlayerId })
       })
 
       if (!response.ok) {
@@ -1250,224 +1432,311 @@ function CPParticipantsList({
         throw new Error(errorData.error || 'Error al remover participante')
       }
 
-      setConfirmingPlayerId(null)
-      onPlayerRemoved()
+      setSelectedPlayerId(null)
+      setActionType(null)
+      setConfirmationStep(1)
+      onPlayersChanged()
+      refreshCaches()
 
-      // Refrescar caches
-      mutate(swrKeys.activeGameDate())
-      mutate(swrKeys.activeTournament())
-      mutate(swrKeys.gameDateEliminations(gameDateId))
-      mutate(swrKeys.gameDate(gameDateId))
-      mutate(swrKeys.gameDates(tournamentId))
-      mutate(swrKeys.tournamentRanking(tournamentId))
-
-    } catch (error) {
-      console.error('Error removing player:', error)
-      setRemoveError(error instanceof Error ? error.message : 'Error desconocido')
+    } catch (err) {
+      console.error('Error removing player:', err)
+      setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {
-      setIsRemoving(false)
+      setIsProcessing(false)
+    }
+  }
+
+  const handleConfirmAction = () => {
+    if (actionType === 'add') {
+      handleAddPlayer()
+    } else if (actionType === 'remove') {
+      handleRemovePlayer()
     }
   }
 
   const getPlayerName = (player: Player) => `${player.firstName} ${player.lastName}`
+  const selectedPlayer = actionType === 'add'
+    ? allPlayers.find(p => p.id === selectedPlayerId)
+    : players.find(p => p.id === selectedPlayerId)
 
   return (
     <div
-      style={{
-        background: 'var(--cp-surface)',
-        border: '1px solid var(--cp-surface-border)',
-        borderRadius: '4px',
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isProcessing) onClose()
       }}
     >
-      <div className="p-4">
-        <h3 className="font-semibold mb-4" style={{ color: 'var(--cp-on-surface)' }}>
-          Participantes ({players.length})
-        </h3>
-
-        {removeError && (
-          <div
-            className="mb-3 p-3"
-            style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '4px',
-            }}
+      <div
+        className="w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col"
+        style={{
+          background: 'var(--cp-background)',
+          border: '1px solid var(--cp-surface-border)',
+          borderRadius: '4px',
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between p-4"
+          style={{ borderBottom: '1px solid var(--cp-surface-border)' }}
+        >
+          <h2 className="font-semibold" style={{ color: 'var(--cp-on-surface)' }}>
+            Gestionar Jugadores
+          </h2>
+          <button
+            onClick={onClose}
+            disabled={isProcessing}
+            className="p-1 transition-colors"
+            style={{ color: 'var(--cp-on-surface-muted)' }}
           >
-            <p className="text-sm" style={{ color: '#ef4444' }}>{removeError}</p>
-          </div>
-        )}
+            <XIcon size={20} />
+          </button>
+        </div>
 
-        {/* Jugadores activos */}
-        {activePlayers.length > 0 && (
-          <div className="mb-4">
-            <p className="text-xs mb-2" style={{ color: 'var(--cp-on-surface-muted)' }}>
-              En juego ({activePlayers.length})
-            </p>
-            <div className="space-y-1">
-              {activePlayers.map((player) => (
-                <div
-                  key={player.id}
-                  className="flex items-center justify-between py-2 px-2"
-                  style={{ borderRadius: '4px' }}
-                >
-                  {confirmingPlayerId === player.id ? (
-                    // Modo confirmación
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle size={16} style={{ color: '#f97316' }} />
-                        <span className="text-sm" style={{ color: 'var(--cp-on-surface)' }}>
-                          ¿Eliminar a {getPlayerName(player)}?
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleRemovePlayer(player.id)}
-                          disabled={isRemoving}
-                          className="px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50"
-                          style={{
-                            background: '#E53935',
-                            color: 'white',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          {isRemoving ? '...' : 'Sí, eliminar'}
-                        </button>
-                        <button
-                          onClick={() => setConfirmingPlayerId(null)}
-                          disabled={isRemoving}
-                          className="px-3 py-1 text-xs transition-colors"
-                          style={{ color: 'var(--cp-on-surface-muted)' }}
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {error && (
+            <div
+              className="p-3"
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '4px',
+              }}
+            >
+              <p className="text-sm" style={{ color: '#ef4444' }}>{error}</p>
+            </div>
+          )}
+
+          {/* Confirmation panel */}
+          {selectedPlayerId && selectedPlayer && actionType && (
+            <div
+              className="p-4"
+              style={{
+                background: actionType === 'add' ? 'rgba(22, 163, 74, 0.1)' : 'rgba(249, 115, 22, 0.1)',
+                border: `1px solid ${actionType === 'add' ? 'rgba(22, 163, 74, 0.3)' : 'rgba(249, 115, 22, 0.3)'}`,
+                borderRadius: '4px',
+              }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                {actionType === 'add' ? (
+                  <UserPlus size={20} style={{ color: '#16a34a' }} />
+                ) : (
+                  <AlertTriangle size={20} style={{ color: '#f97316' }} />
+                )}
+                <span className="font-semibold" style={{ color: actionType === 'add' ? '#16a34a' : '#f97316' }}>
+                  {confirmationStep === 1
+                    ? (actionType === 'add' ? 'Confirmar agregar' : 'Confirmar quitar')
+                    : 'Confirmación final'}
+                </span>
+              </div>
+
+              <p className="text-sm mb-3" style={{ color: 'var(--cp-on-surface)' }}>
+                {confirmationStep === 1 ? (
+                  actionType === 'add' ? (
+                    <>¿Agregar a <strong>{getPlayerName(selectedPlayer)}</strong> a esta fecha?</>
                   ) : (
-                    // Modo normal
-                    <>
+                    <>¿Quitar a <strong>{getPlayerName(selectedPlayer)}</strong> de esta fecha?</>
+                  )
+                ) : (
+                  <>Se recalcularán todas las posiciones y puntos. ¿Confirmas?</>
+                )}
+              </p>
+
+              <div className="flex gap-2">
+                {confirmationStep === 1 ? (
+                  <>
+                    <button
+                      onClick={handleFirstConfirm}
+                      className="flex-1 px-4 py-2 text-sm font-semibold transition-colors"
+                      style={{
+                        background: actionType === 'add' ? '#16a34a' : '#f97316',
+                        color: 'white',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      Sí, continuar
+                    </button>
+                    <button
+                      onClick={handleCancelConfirm}
+                      className="flex-1 px-4 py-2 text-sm transition-colors"
+                      style={{
+                        background: 'var(--cp-surface)',
+                        border: '1px solid var(--cp-surface-border)',
+                        color: 'var(--cp-on-surface)',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleConfirmAction}
+                      disabled={isProcessing}
+                      className="flex-1 px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50"
+                      style={{
+                        background: actionType === 'add' ? '#16a34a' : '#E53935',
+                        color: 'white',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      {isProcessing ? 'Procesando...' : 'Confirmar'}
+                    </button>
+                    <button
+                      onClick={handleCancelConfirm}
+                      disabled={isProcessing}
+                      className="flex-1 px-4 py-2 text-sm transition-colors"
+                      style={{
+                        background: 'var(--cp-surface)',
+                        border: '1px solid var(--cp-surface-border)',
+                        color: 'var(--cp-on-surface)',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Jugadores en la fecha - Activos */}
+          {activePlayersInDate.length > 0 && (
+            <div>
+              <p className="text-xs mb-2 font-medium" style={{ color: 'var(--cp-on-surface-muted)' }}>
+                En juego ({activePlayersInDate.length})
+              </p>
+              <div className="space-y-1">
+                {activePlayersInDate.map((player) => (
+                  <div
+                    key={player.id}
+                    className={`flex items-center justify-between py-2 px-3 transition-colors ${
+                      selectedPlayerId === player.id && actionType === 'remove' ? 'ring-1 ring-orange-500' : ''
+                    }`}
+                    style={{
+                      background: selectedPlayerId === player.id && actionType === 'remove' ? 'rgba(249, 115, 22, 0.1)' : 'var(--cp-surface)',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full" style={{ background: '#16a34a' }} />
+                      <span className="text-sm" style={{ color: 'var(--cp-on-surface)' }}>
+                        {getPlayerName(player)}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleSelectForRemove(player.id)}
+                      disabled={isProcessing}
+                      className="p-1.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                      style={{ color: 'var(--cp-on-surface-muted)', borderRadius: '4px' }}
+                      title="Quitar de la fecha"
+                    >
+                      <UserMinus size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Jugadores eliminados */}
+          {eliminatedPlayersInDate.length > 0 && (
+            <div>
+              <p className="text-xs mb-2 font-medium" style={{ color: 'var(--cp-on-surface-muted)' }}>
+                Eliminados ({eliminatedPlayersInDate.length})
+              </p>
+              <div className="space-y-1">
+                {eliminatedPlayersInDate.map((player) => {
+                  const elimination = eliminations.find(e => e.eliminatedPlayerId === player.id)
+                  return (
+                    <div
+                      key={player.id}
+                      className={`flex items-center justify-between py-2 px-3 transition-colors ${
+                        selectedPlayerId === player.id && actionType === 'remove' ? 'ring-1 ring-orange-500' : ''
+                      }`}
+                      style={{
+                        background: selectedPlayerId === player.id && actionType === 'remove' ? 'rgba(249, 115, 22, 0.1)' : 'var(--cp-surface)',
+                        borderRadius: '4px',
+                      }}
+                    >
                       <div className="flex items-center gap-2">
-                        <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ background: '#16a34a' }}
-                        />
+                        <span className="w-2 h-2 rounded-full" style={{ background: 'var(--cp-on-surface-muted)' }} />
+                        <span className="text-sm" style={{ color: 'var(--cp-on-surface-muted)' }}>
+                          {getPlayerName(player)}
+                        </span>
+                        {elimination && (
+                          <span className="text-xs" style={{ color: 'var(--cp-on-surface-muted)' }}>
+                            (Pos {elimination.position})
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleSelectForRemove(player.id)}
+                        disabled={isProcessing}
+                        className="p-1.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                        style={{ color: 'var(--cp-on-surface-muted)', borderRadius: '4px' }}
+                        title="Quitar de la fecha"
+                      >
+                        <UserMinus size={14} />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Agregar jugadores */}
+          {availableToAdd.length > 0 && (
+            <div>
+              <p className="text-xs mb-2 font-medium" style={{ color: 'var(--cp-on-surface-muted)' }}>
+                Disponibles para agregar ({availableToAdd.length})
+              </p>
+              {loadingAllPlayers ? (
+                <p className="text-xs" style={{ color: 'var(--cp-on-surface-muted)' }}>Cargando...</p>
+              ) : (
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {availableToAdd.map((player) => (
+                    <div
+                      key={player.id}
+                      className={`flex items-center justify-between py-2 px-3 transition-colors ${
+                        selectedPlayerId === player.id && actionType === 'add' ? 'ring-1 ring-green-500' : ''
+                      }`}
+                      style={{
+                        background: selectedPlayerId === player.id && actionType === 'add' ? 'rgba(22, 163, 74, 0.1)' : 'var(--cp-surface)',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full" style={{ background: 'var(--cp-surface-border)' }} />
                         <span className="text-sm" style={{ color: 'var(--cp-on-surface)' }}>
                           {getPlayerName(player)}
                         </span>
                       </div>
                       <button
-                        onClick={() => setConfirmingPlayerId(player.id)}
-                        className="p-1.5 transition-colors hover:bg-white/10"
-                        style={{
-                          color: 'var(--cp-on-surface-muted)',
-                          borderRadius: '4px',
-                        }}
-                        title="Remover participante"
+                        onClick={() => handleSelectForAdd(player.id)}
+                        disabled={isProcessing}
+                        className="p-1.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                        style={{ color: '#16a34a', borderRadius: '4px' }}
+                        title="Agregar a la fecha"
                       >
-                        <UserMinus size={14} />
+                        <UserPlus size={14} />
                       </button>
-                    </>
-                  )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Jugadores eliminados */}
-        {eliminatedPlayers.length > 0 && (
-          <div>
-            <p className="text-xs mb-2" style={{ color: 'var(--cp-on-surface-muted)' }}>
-              Eliminados ({eliminatedPlayers.length})
-            </p>
-            <div className="space-y-1">
-              {eliminatedPlayers.map((player) => {
-                const elimination = eliminations.find(e => e.eliminatedPlayerId === player.id)
-                return (
-                  <div
-                    key={player.id}
-                    className="flex items-center justify-between py-2 px-2"
-                    style={{ borderRadius: '4px' }}
-                  >
-                    {confirmingPlayerId === player.id ? (
-                      // Modo confirmación
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-2">
-                          <AlertTriangle size={16} style={{ color: '#f97316' }} />
-                          <span className="text-sm" style={{ color: 'var(--cp-on-surface)' }}>
-                            ¿Eliminar a {getPlayerName(player)}?
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleRemovePlayer(player.id)}
-                            disabled={isRemoving}
-                            className="px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50"
-                            style={{
-                              background: '#E53935',
-                              color: 'white',
-                              borderRadius: '4px',
-                            }}
-                          >
-                            {isRemoving ? '...' : 'Sí, eliminar'}
-                          </button>
-                          <button
-                            onClick={() => setConfirmingPlayerId(null)}
-                            disabled={isRemoving}
-                            className="px-3 py-1 text-xs transition-colors"
-                            style={{ color: 'var(--cp-on-surface-muted)' }}
-                          >
-                            Cancelar
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      // Modo normal
-                      <>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="w-2 h-2 rounded-full"
-                            style={{ background: 'var(--cp-on-surface-muted)' }}
-                          />
-                          <span className="text-sm" style={{ color: 'var(--cp-on-surface-muted)' }}>
-                            {getPlayerName(player)}
-                          </span>
-                          {elimination && (
-                            <span className="text-xs" style={{ color: 'var(--cp-on-surface-muted)' }}>
-                              (Pos {elimination.position})
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => setConfirmingPlayerId(player.id)}
-                          className="p-1.5 transition-colors hover:bg-white/10"
-                          style={{
-                            color: 'var(--cp-on-surface-muted)',
-                            borderRadius: '4px',
-                          }}
-                          title="Remover participante (recalculará posiciones)"
-                        >
-                          <UserMinus size={14} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Info */}
-        <div
-          className="mt-4 p-3"
-          style={{
-            background: 'rgba(249, 115, 22, 0.1)',
-            border: '1px solid rgba(249, 115, 22, 0.3)',
-            borderRadius: '4px',
-          }}
-        >
-          <p className="text-xs" style={{ color: '#f97316' }}>
-            Al remover un participante se recalculan automáticamente las posiciones y puntos de todos los jugadores.
+        {/* Footer info */}
+        <div className="p-4" style={{ borderTop: '1px solid var(--cp-surface-border)' }}>
+          <p className="text-xs" style={{ color: 'var(--cp-on-surface-muted)' }}>
+            Al modificar participantes se recalculan automáticamente las posiciones y puntos.
           </p>
         </div>
       </div>
