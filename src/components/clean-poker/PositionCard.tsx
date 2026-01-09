@@ -36,13 +36,24 @@ export function PositionCard({
 
   return (
     <div
-      className="p-4 pt-5 rounded-2xl"
+      className="p-4 pt-5 rounded-2xl relative"
       style={{
         background: 'linear-gradient(90deg, rgba(26, 26, 26, 0.95) 0%, rgba(64, 64, 64, 0.85) 100%)',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3)',
         border: '1px solid rgba(255, 255, 255, 0.06)',
       }}
     >
+      {/* Detail Link - Top Right */}
+      {onDetailClick && (
+        <button
+          onClick={onDetailClick}
+          className="absolute top-3 right-3 flex items-center gap-1 transition-opacity hover:opacity-80"
+        >
+          <span style={{ color: '#E53935', fontSize: '12px' }}>Detalle</span>
+          <span style={{ color: '#E53935', fontSize: '12px' }}>→</span>
+        </button>
+      )}
+
       {/* Main Row: Position centered + KPIs distributed */}
       <div className="flex items-center">
         {/* Position - centered vertically with "Mi Posición" label */}
@@ -153,19 +164,10 @@ export function PositionCard({
             color: 'var(--cp-on-surface-muted)',
           }}
         >
-          Te faltan <span style={{ color: 'var(--cp-on-surface-variant)' }}>{pointsToLeader}</span> pts para liderar
+          Te faltan <span style={{ color: '#e0b66c', fontWeight: 600 }}>{pointsToLeader}</span> pts para liderar
           {' · '}
-          Estás a <span style={{ color: 'var(--cp-on-surface-variant)' }}>{pointsFromLast}</span> del malazo
+          Estás a <span style={{ color: '#e0b66c', fontWeight: 600 }}>{pointsFromLast}</span> del malazo
         </p>
-        {onDetailClick && (
-          <button
-            onClick={onDetailClick}
-            className="absolute right-0 bottom-0 flex items-center gap-1 transition-opacity hover:opacity-80"
-          >
-            <span style={{ color: '#E53935', fontSize: '12px' }}>Detalle</span>
-            <span style={{ color: '#E53935', fontSize: '12px' }}>→</span>
-          </button>
-        )}
       </div>
     </div>
   )
