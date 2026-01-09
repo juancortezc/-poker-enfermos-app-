@@ -556,8 +556,8 @@ function HomeAuthenticated({
               totalPoints: p.totalPoints,
               finalPoints: p.finalScore ?? p.totalPoints,
               trend: p.positionsChanged,
-              victories: p.victories ?? 0,
-              podiums: p.podiums ?? 0,
+              victories: p.firstPlaces ?? 0,
+              podiums: (p.firstPlaces ?? 0) + (p.secondPlaces ?? 0) + (p.thirdPlaces ?? 0),
             }))}
           />
         )}
@@ -702,8 +702,8 @@ function HomeWithLiveGame({
               totalPoints: p.totalPoints,
               finalPoints: p.finalScore ?? p.totalPoints,
               trend: p.positionsChanged,
-              victories: p.victories ?? 0,
-              podiums: p.podiums ?? 0,
+              victories: p.firstPlaces ?? 0,
+              podiums: (p.firstPlaces ?? 0) + (p.secondPlaces ?? 0) + (p.thirdPlaces ?? 0),
             }))}
           />
         )}

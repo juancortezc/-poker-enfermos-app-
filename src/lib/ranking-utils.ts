@@ -124,34 +124,37 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
     // Procesar cada fecha completada
     tournament.gameDates.forEach(gameDate => {
       const totalPlayersInDate = gameDate.playerIds.length;
-      
+
       // Calcular posiciones para esta fecha (necesario para estadísticas de desempate)
       const datePositions = new Map<string, number>();
-      
-      // Determinar ganador y posiciones
-      
+
+      // Encontrar la posición más alta (primer eliminado = último lugar = 7/2)
+      const maxPosition = gameDate.eliminations.length > 0
+        ? Math.max(...gameDate.eliminations.map(e => e.position))
+        : totalPlayersInDate;
+
       // Registrar puntos para jugadores que participaron
       gameDate.playerIds.forEach(playerId => {
         if (registeredPlayers.some(rp => rp.id === playerId)) {
           const ranking = playerRankings.get(playerId)!;
           ranking.datesPlayed += 1;
-          
+
           // Buscar si fue eliminado en esta fecha
           const elimination = gameDate.eliminations.find(e => e.eliminatedPlayerId === playerId);
-          
+
           if (elimination) {
             // Jugador fue eliminado, usar puntos guardados en la eliminación
             ranking.pointsByDate[gameDate.dateNumber] = elimination.points;
             ranking.totalPoints += elimination.points;
-            
+
             // Registrar posición para estadísticas de desempate
             datePositions.set(playerId, elimination.position);
-            
+
             // Actualizar estadísticas de desempate
             if (elimination.position === 1) ranking.firstPlaces++;  // Contar victorias
             if (elimination.position === 2) ranking.secondPlaces++;
             if (elimination.position === 3) ranking.thirdPlaces++;
-            if (elimination.position === totalPlayersInDate) ranking.lastPlaces++;  // Primer eliminado (7-2)
+            if (elimination.position === maxPosition) ranking.lastPlaces++;  // Primer eliminado (7-2)
           } else {
             // Jugador no fue eliminado
             // Solo asignar puntos si es el único jugador restante (ganador) o la fecha está completada
