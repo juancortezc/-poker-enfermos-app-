@@ -32,7 +32,7 @@ export default function GameDateConfirmPage() {
   const [loading, setLoading] = useState(true)
   const [starting, setStarting] = useState(false)
 
-  const gameDateId = params.id as string
+  const gameDateId = params?.id as string
 
   useEffect(() => {
     if (user && gameDateId) {

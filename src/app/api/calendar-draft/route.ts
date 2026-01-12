@@ -23,9 +23,10 @@ export async function POST(request: NextRequest) {
   return withComisionAuth(request, async (req, user) => {
     try {
       const body = await req.json()
-      const { tournamentNumber, gameDates } = body as {
+      const { tournamentNumber, gameDates, approved } = body as {
         tournamentNumber?: number | null
         gameDates: Array<{ dateNumber: number; scheduledDate: string }>
+        approved?: boolean
       }
 
       if (!Array.isArray(gameDates) || gameDates.length !== 12) {
@@ -56,11 +57,13 @@ export async function POST(request: NextRequest) {
           id: DRAFT_ID,
           tournamentNumber: tournamentNumber ?? null,
           gameDates,
+          approved: approved ?? false,
           updatedBy: user.id
         },
         update: {
           tournamentNumber: tournamentNumber ?? null,
           gameDates,
+          approved: approved ?? false,
           updatedBy: user.id
         }
       })

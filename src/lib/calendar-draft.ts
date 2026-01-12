@@ -8,6 +8,7 @@ export interface CalendarDraftEntry {
 export interface CalendarDraft {
   tournamentNumber?: number | null
   gameDates: CalendarDraftEntry[]
+  approved?: boolean
   createdAt?: string
   updatedAt?: string
   updatedBy?: string | null
@@ -50,7 +51,8 @@ export async function saveCalendarDraft(draft: CalendarDraft): Promise<CalendarD
       headers: buildAuthHeaders({}, { includeJson: true }),
       body: JSON.stringify({
         tournamentNumber: draft.tournamentNumber ?? null,
-        gameDates: draft.gameDates
+        gameDates: draft.gameDates,
+        approved: draft.approved ?? false
       })
     })
 

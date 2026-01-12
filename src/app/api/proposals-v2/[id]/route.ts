@@ -9,10 +9,11 @@ export const maxDuration = 10
 // GET - Obtener propuesta específica
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
+    const { id: idParam } = await params
+    const id = parseInt(idParam)
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'ID de propuesta inválido' },
@@ -54,11 +55,12 @@ export async function GET(
 // PATCH - Editar propuesta (requiere autenticación y ownership/comisión)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: idParam } = await params
   return withAuth(request, async (req, user) => {
     try {
-      const id = parseInt(params.id)
+      const id = parseInt(idParam)
       if (isNaN(id)) {
         return NextResponse.json(
           { error: 'ID de propuesta inválido' },
@@ -175,8 +177,9 @@ export async function PATCH(
 // DELETE - Eliminar propuesta (solo Comisión)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: idParam } = await params
   return withAuth(request, async (req, user) => {
     try {
       // Solo Comisión puede eliminar propuestas
@@ -187,7 +190,7 @@ export async function DELETE(
         )
       }
 
-      const id = parseInt(params.id)
+      const id = parseInt(idParam)
       if (isNaN(id)) {
         return NextResponse.json(
           { error: 'ID de propuesta inválido' },

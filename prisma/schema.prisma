@@ -49,6 +49,7 @@ model Player {
   sietePositions         TournamentWinners[]     @relation("Siete")
   thirdPlaceWins         TournamentWinners[]     @relation("ThirdPlace")
   sentNotifications      NotificationHistory[]
+  calendarDrafts         CalendarDraft[]
 
   @@map("players")
 }
@@ -417,4 +418,19 @@ enum NotificationType {
   automatic   // Enviado automáticamente por evento
   scheduled   // Enviado por programación
   test        // Enviado como prueba
+}
+
+// Borrador de calendario para nuevo torneo
+model CalendarDraft {
+  id               Int      @id @default(1)
+  tournamentNumber Int?     @map("tournament_number")
+  gameDates        Json     @map("game_dates") // Array of { dateNumber, scheduledDate }
+  approved         Boolean  @default(false)
+  updatedBy        String?  @map("updated_by")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  updatedByPlayer  Player?  @relation(fields: [updatedBy], references: [id])
+
+  @@map("calendar_drafts")
 }

@@ -173,7 +173,7 @@ export function NotificationTest() {
           {/* Notification Type */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Notification Type</label>
-            <Select value={notificationType} onValueChange={(value: 'send' | 'broadcast') => setNotificationType(value)}>
+            <Select value={notificationType} onValueChange={(value) => setNotificationType(value as 'send' | 'broadcast')}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -210,7 +210,7 @@ export function NotificationTest() {
           {notificationType === 'broadcast' && (
             <div className="space-y-2">
               <label className="text-sm font-medium">Target Role</label>
-              <Select value={targetRole} onValueChange={(value: typeof targetRole) => setTargetRole(value)}>
+              <Select value={targetRole} onValueChange={(value) => setTargetRole(value as typeof targetRole)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

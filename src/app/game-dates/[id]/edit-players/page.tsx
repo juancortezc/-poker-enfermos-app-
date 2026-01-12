@@ -43,7 +43,7 @@ export default function EditPlayersPage() {
   const [saving, setSaving] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
-  const gameDateId = params.id as string
+  const gameDateId = params?.id as string
 
   useEffect(() => {
     if (user && gameDateId) {

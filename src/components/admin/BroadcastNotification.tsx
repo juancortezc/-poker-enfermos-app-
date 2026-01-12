@@ -269,7 +269,7 @@ export function BroadcastNotification() {
         <label className="text-xs font-semibold uppercase tracking-[0.24em] text-white/80">
           Tipo de Envío
         </label>
-        <Select value={notificationType} onValueChange={(value: 'send' | 'broadcast') => setNotificationType(value)}>
+        <Select value={notificationType} onValueChange={(value) => setNotificationType(value as 'send' | 'broadcast')}>
           <SelectTrigger className="bg-white/5 border-white/15 text-white hover:border-white/35 transition-all duration-200">
             <SelectValue />
           </SelectTrigger>
@@ -322,7 +322,7 @@ export function BroadcastNotification() {
           <label className="text-xs font-semibold uppercase tracking-[0.24em] text-white/80">
             Audiencia
           </label>
-          <Select value={targetRole} onValueChange={(value: typeof targetRole) => setTargetRole(value)}>
+          <Select value={targetRole} onValueChange={(value) => setTargetRole(value as typeof targetRole)}>
             <SelectTrigger className="bg-white/5 border-white/15 text-white hover:border-white/35 transition-all duration-200">
               <SelectValue />
             </SelectTrigger>

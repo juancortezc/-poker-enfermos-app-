@@ -9,8 +9,9 @@ export const maxDuration = 10
 // PATCH - Cerrar votación (Solo Comisión)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: idParam } = await params
   return withAuth(request, async (req, user) => {
     try {
       // Solo la Comisión puede cerrar votación
@@ -21,7 +22,7 @@ export async function PATCH(
         )
       }
 
-      const id = parseInt(params.id)
+      const id = parseInt(idParam)
       if (isNaN(id)) {
         return NextResponse.json(
           { error: 'ID de propuesta inválido' },
@@ -76,8 +77,9 @@ export async function PATCH(
 // PUT - Reabrir votación (Solo Comisión)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: idParam } = await params
   return withAuth(request, async (req, user) => {
     try {
       // Solo la Comisión puede reabrir votación
@@ -88,7 +90,7 @@ export async function PUT(
         )
       }
 
-      const id = parseInt(params.id)
+      const id = parseInt(idParam)
       if (isNaN(id)) {
         return NextResponse.json(
           { error: 'ID de propuesta inválido' },

@@ -135,6 +135,12 @@ export async function POST(
           winnersError
         })
       }
+
+      // Fallback - should never reach here due to action validation above
+      return NextResponse.json(
+        { error: 'Acción no procesada' },
+        { status: 400 }
+      )
     } catch (error) {
       console.error('Error completing tournament:', error)
       return NextResponse.json(

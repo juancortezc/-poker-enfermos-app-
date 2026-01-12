@@ -310,7 +310,7 @@ export function QuickNotificationModal({ isOpen, onClose }: QuickNotificationMod
               {/* Notification Type */}
               <div className="space-y-3">
                 <label className="text-sm font-medium text-white">Notification Type</label>
-                <Select value={notificationType} onValueChange={(value: 'send' | 'broadcast') => setNotificationType(value)}>
+                <Select value={notificationType} onValueChange={(value) => setNotificationType(value as 'send' | 'broadcast')}>
                   <SelectTrigger className="bg-white/5 border-white/10 text-white">
                     <SelectValue />
                   </SelectTrigger>
@@ -345,7 +345,7 @@ export function QuickNotificationModal({ isOpen, onClose }: QuickNotificationMod
               ) : (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-white">Target Audience</label>
-                  <Select value={targetRole} onValueChange={(value: typeof targetRole) => setTargetRole(value)}>
+                  <Select value={targetRole} onValueChange={(value) => setTargetRole(value as typeof targetRole)}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>

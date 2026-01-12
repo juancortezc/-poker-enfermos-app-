@@ -399,7 +399,12 @@ function CPAwardCard({
   players,
   valueLabel
 }: CPAwardCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
   if (players.length === 0) return null
+
+  const displayedPlayers = isExpanded ? players : players.slice(0, 5)
+  const hasMore = players.length > 5
 
   return (
     <div
@@ -427,7 +432,7 @@ function CPAwardCard({
         >
           <span style={{ color: accentColor }}>{icon}</span>
         </div>
-        <div>
+        <div className="flex-1">
           <p style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-on-surface)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {title}
           </p>
@@ -435,16 +440,29 @@ function CPAwardCard({
             {description}
           </p>
         </div>
+        {/* Total count badge */}
+        <span
+          className="px-2 py-0.5"
+          style={{
+            fontSize: '11px',
+            fontWeight: 600,
+            color: accentColor,
+            background: `${accentColor}15`,
+            borderRadius: '4px',
+          }}
+        >
+          {players.length}
+        </span>
       </div>
 
       {/* Players */}
       <div style={{ background: 'var(--cp-background)' }}>
-        {players.slice(0, 5).map((item, index) => (
+        {displayedPlayers.map((item, index) => (
           <div
             key={item.player.id}
             className="px-4 py-2 flex items-center gap-3"
             style={{
-              borderBottom: index < Math.min(players.length, 5) - 1 ? '1px solid var(--cp-surface-border)' : 'none',
+              borderBottom: index < displayedPlayers.length - 1 ? '1px solid var(--cp-surface-border)' : 'none',
             }}
           >
             {/* Avatar */}
@@ -517,19 +535,30 @@ function CPAwardCard({
         ))}
       </div>
 
-      {/* More indicator */}
-      {players.length > 5 && (
-        <div
-          className="px-4 py-2 text-center"
+      {/* Expand/Collapse button */}
+      {hasMore && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full px-4 py-2 text-center transition-colors hover:bg-white/5"
           style={{
             background: 'var(--cp-background)',
             borderTop: '1px solid var(--cp-surface-border)',
           }}
         >
-          <span style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-on-surface-muted)' }}>
-            +{players.length - 5} mas
+          <span className="flex items-center justify-center gap-1" style={{ fontSize: 'var(--cp-caption-size)', color: accentColor }}>
+            {isExpanded ? (
+              <>
+                <ChevronDown size={14} style={{ transform: 'rotate(180deg)' }} />
+                Ver menos
+              </>
+            ) : (
+              <>
+                <ChevronDown size={14} />
+                Ver {players.length - 5} más
+              </>
+            )}
           </span>
-        </div>
+        </button>
       )}
     </div>
   )

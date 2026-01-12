@@ -9,11 +9,12 @@ export const maxDuration = 10
 // PUT - Toggle estado activo/inactivo de propuesta
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: idParam } = await params
   return withAuth(request, async (req, user) => {
     try {
-      const id = parseInt(params.id)
+      const id = parseInt(idParam)
       if (isNaN(id)) {
         return NextResponse.json(
           { error: 'ID de propuesta inválido' },
