@@ -25,6 +25,7 @@ model Player {
   phone                  String?
   email                  String?
   isActive               Boolean                 @default(true) @map("is_active")
+  lastActiveAt           DateTime?               @map("last_active_at")
   eliminations           Elimination[]           @relation("EliminatedPlayer")
   eliminationsGiven      Elimination[]           @relation("EliminatorPlayer")
   gameResults            GameResult[]

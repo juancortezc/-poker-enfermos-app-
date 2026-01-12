@@ -24,6 +24,35 @@ interface CachedUser {
 const tokenCache = new Map<string, CachedUser>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutos
 
+// Cache para evitar actualizar lastActiveAt en cada request
+// Solo actualiza si han pasado más de 5 minutos
+const lastActivityUpdateCache = new Map<string, number>()
+const ACTIVITY_UPDATE_INTERVAL = 5 * 60 * 1000 // 5 minutos
+
+/**
+ * Actualiza lastActiveAt del usuario de forma asíncrona (fire-and-forget)
+ * Solo actualiza si han pasado más de 5 minutos desde la última actualización
+ */
+function updateUserActivity(userId: string): void {
+  const now = Date.now()
+  const lastUpdate = lastActivityUpdateCache.get(userId) || 0
+
+  if (now - lastUpdate < ACTIVITY_UPDATE_INTERVAL) {
+    return // Aún no es tiempo de actualizar
+  }
+
+  // Marcar como actualizado inmediatamente para evitar duplicados
+  lastActivityUpdateCache.set(userId, now)
+
+  // Actualizar en background (no bloqueamos la respuesta)
+  prisma.player.update({
+    where: { id: userId },
+    data: { lastActiveAt: new Date() }
+  }).catch(err => {
+    console.error('Error updating lastActiveAt:', err)
+  })
+}
+
 // Limpieza periódica del cache (cada 10 minutos)
 setInterval(() => {
   const now = Date.now()
@@ -199,10 +228,13 @@ export async function withAuth(
   handler: (req: NextRequest, user: AuthenticatedUser) => Promise<Response>
 ): Promise<Response> {
   const user = await validateApiAccess(req)
-  
+
   if (!user) {
     return createAuthResponse('Acceso no autorizado')
   }
+
+  // Actualizar actividad del usuario (fire-and-forget)
+  updateUserActivity(user.id)
 
   return handler(req, user)
 }
@@ -221,6 +253,9 @@ export async function withComisionAuth(
   if (!canModifyPlayers(user.role)) {
     return createAuthResponse('Sin permisos suficientes', 403)
   }
+
+  // Actualizar actividad del usuario (fire-and-forget)
+  updateUserActivity(user.id)
 
   return handler(req, user)
 }
