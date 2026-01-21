@@ -90,28 +90,32 @@ export default function LoginForm() {
               />
             </div>
 
+            {/* Botón INGRESAR - visible justo debajo del input */}
+            <Button
+              type="submit"
+              disabled={loading || pin.length !== 4}
+              className="w-full h-16 btn-enhanced text-white font-bold text-xl disabled:opacity-50 touch-manipulation mt-2"
+              style={{
+                backgroundColor: pin.length === 4 ? '#E53935' : undefined,
+                minHeight: '64px'
+              }}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                  Verificando...
+                </>
+              ) : (
+                'INGRESAR'
+              )}
+            </Button>
+
             {/* Error */}
             {error && (
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
                 <p className="text-red-400 text-sm text-center">{error}</p>
               </div>
             )}
-
-            {/* Botón */}
-            <Button
-              type="submit"
-              disabled={loading || pin.length !== 4}
-              className="w-full h-14 btn-enhanced text-white font-semibold text-lg disabled:opacity-50 touch-manipulation"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Verificando...
-                </>
-              ) : (
-                'Ingresar'
-              )}
-            </Button>
           </form>
 
           {/* Footer */}
