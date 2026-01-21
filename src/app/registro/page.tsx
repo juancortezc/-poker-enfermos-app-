@@ -662,7 +662,8 @@ function CPEliminationForm({
 
   // Filtrar jugadores activos (no eliminados)
   const activePlayers = useMemo(() => {
-    const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId)
+    // Support both API formats: eliminatedPlayerId (legacy) or eliminatedPlayer.id (new)
+    const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId || e.eliminatedPlayer?.id).filter(Boolean)
     return players.filter(player => !eliminatedIds.includes(player.id))
   }, [players, eliminations])
 
@@ -979,8 +980,8 @@ function CPEliminationHistory({
   const handleStartEdit = (elimination: Elimination) => {
     setEditingId(elimination.id)
     setEditForm({
-      eliminatedPlayerId: elimination.eliminatedPlayerId,
-      eliminatorPlayerId: elimination.eliminatorPlayerId || ''
+      eliminatedPlayerId: elimination.eliminatedPlayerId || elimination.eliminatedPlayer?.id || '',
+      eliminatorPlayerId: elimination.eliminatorPlayerId || elimination.eliminatorPlayer?.id || ''
     })
     setUpdateError(null)
   }
@@ -1040,7 +1041,8 @@ function CPEliminationHistory({
         return `${elimination.eliminatedPlayer.firstName} ${elimination.eliminatedPlayer.lastName}`
       }
       // Fallback to players array
-      const player = players.find(p => p.id === elimination.eliminatedPlayerId)
+      const playerId = elimination.eliminatedPlayerId || elimination.eliminatedPlayer?.id
+      const player = players.find(p => p.id === playerId)
       return player ? `${player.firstName} ${player.lastName}` : 'Desconocido'
     } else {
       // Use data from elimination object first
@@ -1048,8 +1050,9 @@ function CPEliminationHistory({
         return `${elimination.eliminatorPlayer.firstName} ${elimination.eliminatorPlayer.lastName}`
       }
       // Fallback to players array
-      if (!elimination.eliminatorPlayerId) return 'N/A'
-      const player = players.find(p => p.id === elimination.eliminatorPlayerId)
+      const eliminatorId = elimination.eliminatorPlayerId || elimination.eliminatorPlayer?.id
+      if (!eliminatorId) return 'N/A'
+      const player = players.find(p => p.id === eliminatorId)
       return player ? `${player.firstName} ${player.lastName}` : 'Desconocido'
     }
   }
@@ -1385,13 +1388,13 @@ function CPPlayersModal({
 
   // Jugadores activos (no eliminados) en la fecha
   const activePlayersInDate = useMemo(() => {
-    const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId)
+    const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId || e.eliminatedPlayer?.id).filter(Boolean)
     return players.filter(player => !eliminatedIds.includes(player.id))
   }, [players, eliminations])
 
   // Jugadores eliminados en la fecha
   const eliminatedPlayersInDate = useMemo(() => {
-    const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId)
+    const eliminatedIds = eliminations.map(e => e.eliminatedPlayerId || e.eliminatedPlayer?.id).filter(Boolean)
     return players.filter(player => eliminatedIds.includes(player.id))
   }, [players, eliminations])
 
@@ -1703,7 +1706,7 @@ function CPPlayersModal({
               </p>
               <div className="space-y-1">
                 {eliminatedPlayersInDate.map((player) => {
-                  const elimination = eliminations.find(e => e.eliminatedPlayerId === player.id)
+                  const elimination = eliminations.find(e => (e.eliminatedPlayerId || e.eliminatedPlayer?.id) === player.id)
                   return (
                     <div
                       key={player.id}
