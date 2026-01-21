@@ -1,5 +1,6 @@
 import { prisma } from './prisma';
 import { calculatePointsForPosition } from './tournament-utils';
+import { getPlayerPhotoUrl } from './player-utils';
 
 export interface PlayerRanking {
   position: number;
@@ -88,11 +89,12 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
     }
 
     // Obtener solo los jugadores registrados (participantes del torneo)
+    // Usar getPlayerPhotoUrl para asegurar que invitados usen la imagen del pato
     const registeredPlayers = tournament.tournamentParticipants.map(tp => ({
       id: tp.player.id,
       name: `${tp.player.firstName} ${tp.player.lastName}`,
       alias: tp.player.aliases?.[0] || '',
-      photo: tp.player.photoUrl || null,
+      photo: getPlayerPhotoUrl(tp.player.photoUrl, tp.player.role) || null,
       role: tp.player.role
     }));
 
