@@ -73,7 +73,10 @@ export function HomePage() {
   // Fetch active game date
   const { data: activeGameDate } = useSWR<ActiveGameDate | null>(
     '/api/game-dates/active',
-    { refreshInterval: 60000 } // 1 minute for game status
+    {
+      refreshInterval: 30000, // 30 seconds for game status
+      revalidateOnFocus: true // Refresh when user comes back to tab
+    }
   )
 
 
@@ -82,7 +85,11 @@ export function HomePage() {
     activeGameDate?.status === 'in_progress'
       ? `/api/eliminations/game-date/${activeGameDate.id}`
       : null,
-    { refreshInterval: 15000 } // 15 seconds during live games
+    {
+      refreshInterval: 5000, // 5 seconds during live games for faster updates
+      revalidateOnFocus: true, // Refresh when user comes back to the tab
+      dedupingInterval: 2000 // Allow more frequent requests during live games
+    }
   )
 
   // Loading state
