@@ -157,6 +157,7 @@ export function HomePage() {
         user={user}
         myRanking={myRanking}
         top3={top3}
+        bottom2={bottom2}
         leaderPoints={leaderPoints}
         lastPoints={lastPoints}
         isCommission={isCommission}
@@ -632,6 +633,15 @@ interface HomeWithLiveGameProps {
     victories?: number
     podiums?: number
   }>
+  bottom2: Array<{
+    position: number
+    playerName: string
+    playerId: string
+    totalPoints: number
+    finalScore?: number
+    positionsChanged: number
+    playerPhoto?: string
+  }>
   leaderPoints: number
   lastPoints: number
   isCommission: boolean
@@ -651,6 +661,7 @@ function HomeWithLiveGame({
   user,
   myRanking,
   top3,
+  bottom2,
   leaderPoints,
   lastPoints,
   isCommission,
@@ -715,6 +726,19 @@ function HomeWithLiveGame({
               trend: p.positionsChanged,
               victories: p.firstPlaces ?? 0,
               podiums: (p.firstPlaces ?? 0) + (p.secondPlaces ?? 0) + (p.thirdPlaces ?? 0),
+            }))}
+          />
+        )}
+
+        {/* 7/2 - Malazos */}
+        {bottom2.length >= 2 && (
+          <MalazoCard
+            players={bottom2.map((p) => ({
+              name: p.playerName,
+              photoUrl: p.playerPhoto,
+              totalPoints: p.totalPoints,
+              finalPoints: p.finalScore ?? p.totalPoints,
+              trend: p.positionsChanged,
             }))}
           />
         )}

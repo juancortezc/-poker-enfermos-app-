@@ -108,6 +108,8 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
         savedElimination.points.value,
         command.gameDateId
       );
+      // Mark game date as completed when winner is registered
+      await this.gameDateRepository.markAsCompleted(command.gameDateId);
     } else {
       // Send elimination notification
       await this.notificationService.notifyPlayerEliminated({
