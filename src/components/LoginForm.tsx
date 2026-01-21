@@ -91,24 +91,33 @@ export default function LoginForm() {
             </div>
 
             {/* Botón INGRESAR - visible justo debajo del input */}
-            <Button
+            <button
               type="submit"
               disabled={loading || pin.length !== 4}
-              className="w-full h-16 btn-enhanced text-white font-bold text-xl disabled:opacity-50 touch-manipulation mt-2"
+              className="w-full flex items-center justify-center gap-2 touch-manipulation"
               style={{
-                backgroundColor: pin.length === 4 ? '#E53935' : undefined,
-                minHeight: '64px'
+                backgroundColor: pin.length === 4 ? '#E53935' : '#666666',
+                color: 'white',
+                fontSize: '20px',
+                fontWeight: 'bold',
+                padding: '20px',
+                borderRadius: '12px',
+                border: 'none',
+                marginTop: '16px',
+                minHeight: '64px',
+                opacity: loading || pin.length !== 4 ? 0.5 : 1,
+                cursor: loading || pin.length !== 4 ? 'not-allowed' : 'pointer',
               }}
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-6 h-6 mr-2 animate-spin" />
+                  <Loader2 className="w-6 h-6 animate-spin" />
                   Verificando...
                 </>
               ) : (
                 'INGRESAR'
               )}
-            </Button>
+            </button>
 
             {/* Error */}
             {error && (
