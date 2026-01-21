@@ -211,12 +211,16 @@ export default function CPPlayerForm({
       }}
     >
       <div
-        className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl"
-        style={{ background: 'var(--cp-background)' }}
+        className="w-full max-w-md rounded-t-2xl sm:rounded-2xl flex flex-col"
+        style={{
+          background: 'var(--cp-background)',
+          maxHeight: 'calc(90vh - 80px)', // Leave space for navbar
+          marginBottom: '70px', // Push up above navbar
+        }}
       >
         {/* Header */}
         <div
-          className="sticky top-0 z-10 px-4 py-4 flex items-center justify-between"
+          className="flex-shrink-0 px-4 py-4 flex items-center justify-between"
           style={{
             background: 'var(--cp-background)',
             borderBottom: '1px solid var(--cp-surface-border)',
@@ -237,8 +241,8 @@ export default function CPPlayerForm({
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        {/* Form - Scrollable area */}
+        <form onSubmit={handleSubmit} className="p-4 space-y-4 flex-1 overflow-y-auto">
           {/* CleanForm: Datos Basicos Card */}
           <div
             className="rounded-xl p-4 space-y-3"
@@ -507,13 +511,12 @@ export default function CPPlayerForm({
 
         </form>
 
-        {/* Buttons - Fixed at bottom */}
+        {/* Buttons - Fixed at bottom of modal */}
         <div
-          className="sticky bottom-0 px-4 py-4 flex gap-3"
+          className="flex-shrink-0 px-4 py-4 flex gap-3"
           style={{
             background: 'var(--cp-background)',
             borderTop: '1px solid var(--cp-surface-border)',
-            paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
           }}
         >
           <button
