@@ -505,43 +505,52 @@ export default function CPPlayerForm({
             </div>
           )}
 
-          {/* Buttons */}
-          <div className="flex gap-3 pt-2 pb-4">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="flex-1 py-2.5 font-medium transition-all"
-              style={{
-                background: 'var(--cp-surface)',
-                border: '1px solid var(--cp-surface-border)',
-                color: 'var(--cp-on-surface-muted)',
-                borderRadius: '8px',
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 py-2.5 font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-              style={{
-                background: '#E53935',
-                color: 'white',
-                borderRadius: '8px',
-              }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                player ? 'Actualizar' : 'Crear'
-              )}
-            </button>
-          </div>
         </form>
+
+        {/* Buttons - Fixed at bottom */}
+        <div
+          className="sticky bottom-0 px-4 py-4 flex gap-3"
+          style={{
+            background: 'var(--cp-background)',
+            borderTop: '1px solid var(--cp-surface-border)',
+            paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+            className="flex-1 py-3 font-medium transition-all"
+            style={{
+              background: 'var(--cp-surface)',
+              border: '1px solid var(--cp-surface-border)',
+              color: 'var(--cp-on-surface-muted)',
+              borderRadius: '8px',
+            }}
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="flex-1 py-3 font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+            style={{
+              background: '#E53935',
+              color: 'white',
+              borderRadius: '8px',
+            }}
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              player ? 'Actualizar' : 'Crear'
+            )}
+          </button>
+        </div>
       </div>
     </div>
   )
