@@ -390,21 +390,43 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
               letterSpacing: '0.3em'
             }}
           />
-          {error && (
-            <p className="text-center mt-2" style={{ color: '#E53935', fontSize: '13px' }}>
-              {error}
-            </p>
-          )}
-          {loading && (
-            <div className="flex justify-center mt-3">
+
+          {/* Botón INGRESAR */}
+          <button
+            type="submit"
+            disabled={loading || pin.length !== 4}
+            className="w-full flex items-center justify-center gap-2 touch-manipulation"
+            style={{
+              backgroundColor: pin.length === 4 ? '#E53935' : '#444444',
+              color: 'white',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              padding: '16px',
+              borderRadius: '12px',
+              border: 'none',
+              marginTop: '16px',
+              minHeight: '56px',
+              opacity: loading || pin.length !== 4 ? 0.5 : 1,
+              cursor: loading || pin.length !== 4 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loading ? (
               <div
                 className="w-5 h-5 border-2 rounded-full animate-spin"
                 style={{
-                  borderColor: 'var(--cp-surface-border)',
-                  borderTopColor: 'var(--cp-primary)'
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  borderTopColor: 'white'
                 }}
               />
-            </div>
+            ) : (
+              'INGRESAR'
+            )}
+          </button>
+
+          {error && (
+            <p className="text-center mt-3" style={{ color: '#E53935', fontSize: '13px' }}>
+              {error}
+            </p>
           )}
         </form>
 
