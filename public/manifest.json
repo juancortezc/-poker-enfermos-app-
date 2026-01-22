@@ -1,4 +1,5 @@
 {
+  "id": "poker-enfermos-app",
   "name": "Poker de Enfermos",
   "short_name": "Poker Enfermos",
   "description": "Aplicación para gestión de torneos de poker - Sistema ELIMINA 2",
@@ -13,63 +14,77 @@
   "categories": ["games", "sports"],
   "icons": [
     {
-      "src": "https://storage.googleapis.com/poker-enfermos/logo-96.png",
+      "src": "/icons/icon-96.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "https://storage.googleapis.com/poker-enfermos/logo-192.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "https://storage.googleapis.com/poker-enfermos/logo-512.png",
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Registro",
-      "short_name": "Registro", 
-      "description": "Registrar eliminaciones en vivo",
-      "url": "/registro",
-      "icons": [{ "src": "/icons/icon-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
-    },
-    {
       "name": "Ranking",
       "short_name": "Ranking",
       "description": "Ver ranking del torneo actual",
-      "url": "/ranking",
-      "icons": [{ "src": "/icons/icon-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
+      "url": "/tabla",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
     },
     {
-      "name": "Torneos",
-      "short_name": "Torneos",
-      "description": "Gestionar torneos",
-      "url": "/tournaments",
-      "icons": [{ "src": "/icons/icon-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
+      "name": "Estadísticas",
+      "short_name": "Stats",
+      "description": "Ver estadísticas del torneo",
+      "url": "/stats",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
     }
   ],
   "screenshots": [
     {
       "src": "/screenshots/home.png",
-      "sizes": "320x640",
+      "sizes": "512x512",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Pantalla principal"
     },
     {
-      "src": "/screenshots/ranking.png", 
-      "sizes": "320x640",
+      "src": "/screenshots/ranking.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Ranking del torneo"
+    },
+    {
+      "src": "/screenshots/wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Vista de escritorio"
     }
   ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "prefer_related_applications": false,
-  "related_applications": [],
-  "edge_side_panel": {
-    "preferred_width": 400
-  }
+  "related_applications": []
 }
