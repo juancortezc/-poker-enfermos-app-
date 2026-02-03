@@ -1,22 +1,18 @@
 'use client'
 
-import { Timer } from 'lucide-react'
-import { useTimerState } from '@/hooks/useTimerState'
-import { useTimerAutoAdvance } from '@/hooks/useTimerAutoAdvance'
+import { Timer, WifiOff } from 'lucide-react'
+import { useTimerSSE } from '@/hooks/useTimerSSE'
 
 export function CPTimerCard() {
   const {
-    timerState,
-    currentBlindLevel,
-    nextBlindLevel,
-    formattedTimeRemaining,
-    displayTimeRemaining,
+    data,
+    isConnected,
     isLoading,
-    isPaused
-  } = useTimerState()
-
-  // Hook para auto-avance y notificaciones
-  useTimerAutoAdvance()
+    error,
+    formattedTime,
+    isPaused,
+    reconnect
+  } = useTimerSSE()
 
   if (isLoading) {
     return (
@@ -29,12 +25,37 @@ export function CPTimerCard() {
     )
   }
 
-  if (!timerState || !currentBlindLevel) {
+  if (error) {
+    return (
+      <div
+        className="cp-card p-4"
+        style={{ borderLeft: '3px solid var(--cp-negative)' }}
+      >
+        <div className="flex items-center gap-3">
+          <WifiOff className="w-5 h-5" style={{ color: 'var(--cp-negative)' }} />
+          <div>
+            <p style={{ color: 'var(--cp-negative)', fontSize: 'var(--cp-body-size)' }}>
+              {error}
+            </p>
+            <button
+              onClick={reconnect}
+              className="text-sm underline mt-1"
+              style={{ color: 'var(--cp-primary)' }}
+            >
+              Reintentar conexión
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!data || data.status === 'inactive' || data.status === 'completed') {
     return null
   }
 
-  const isCritical = displayTimeRemaining > 0 && displayTimeRemaining <= 60
-  const isUnlimited = currentBlindLevel.duration === 0
+  const isCritical = data.timeRemaining > 0 && data.timeRemaining <= 60
+  const isUnlimited = data.timeRemaining === 0 && data.nextLevel === null
 
   return (
     <div
@@ -48,6 +69,15 @@ export function CPTimerCard() {
         className="absolute top-0 left-0 w-20 h-20 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl opacity-20"
         style={{ background: isPaused ? 'var(--cp-warning)' : 'var(--cp-primary)' }}
       />
+
+      {/* Connection indicator */}
+      {!isConnected && (
+        <div
+          className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse"
+          style={{ background: 'var(--cp-warning)' }}
+          title="Reconectando..."
+        />
+      )}
 
       <div className="flex items-center relative">
         {/* Left: Timer info */}
@@ -76,7 +106,7 @@ export function CPTimerCard() {
                   color: isCritical ? 'var(--cp-negative)' : 'var(--cp-on-surface)'
                 }}
               >
-                {isUnlimited ? 'SIN LÍMITE' : formattedTimeRemaining}
+                {isUnlimited ? 'SIN LÍMITE' : formattedTime}
               </span>
               {isPaused && (
                 <span
@@ -96,10 +126,10 @@ export function CPTimerCard() {
                 color: 'var(--cp-on-surface-variant)'
               }}
             >
-              Blinds: {currentBlindLevel.smallBlind}/{currentBlindLevel.bigBlind}
-              {nextBlindLevel && (
+              Nivel {data.currentLevel}: {data.smallBlind}/{data.bigBlind}
+              {data.nextSmallBlind !== null && data.nextBigBlind !== null && (
                 <span style={{ color: 'var(--cp-on-surface-muted)' }}>
-                  {' → '}{nextBlindLevel.smallBlind}/{nextBlindLevel.bigBlind}
+                  {' → '}{data.nextSmallBlind}/{data.nextBigBlind}
                 </span>
               )}
             </p>

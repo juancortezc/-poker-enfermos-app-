@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Pause, Play, Smartphone, SmartphoneNfc, RotateCcw, FastForward } from 'lucide-react'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { buildAuthHeaders } from '@/lib/client-auth'
-import { useTimerStateById } from '@/hooks/useTimerState'
+import { useTimerSSEById } from '@/hooks/useTimerSSE'
 import { useWakeLock } from '@/hooks/useWakeLock'
 import { formatTime } from '@/lib/timer-utils'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
@@ -64,14 +64,34 @@ export default function RegistroPage() {
     : null
 
   const {
-    timerState,
-    currentBlindLevel,
-    nextBlindLevel,
-    formattedTimeRemaining,
+    data: timerData,
+    formattedTime: formattedTimeRemaining,
     isActive: timerIsActive,
     isPaused: timerIsPaused,
-    refresh: refreshTimer
-  } = useTimerStateById(timerGameDateId)
+  } = useTimerSSEById(timerGameDateId)
+
+  // Extraer datos del timer para compatibilidad
+  const timerState = timerData ? {
+    currentLevel: timerData.currentLevel,
+    timeRemaining: timerData.timeRemaining,
+    status: timerData.status
+  } : null
+
+  const currentBlindLevel = timerData ? {
+    smallBlind: timerData.smallBlind,
+    bigBlind: timerData.bigBlind,
+    duration: 0 // No necesitamos esto para display
+  } : null
+
+  const nextBlindLevel = timerData?.nextLevel ? {
+    level: timerData.nextLevel,
+    smallBlind: timerData.nextSmallBlind!,
+    bigBlind: timerData.nextBigBlind!,
+    duration: 0
+  } : null
+
+  // Ya no necesitamos refreshTimer porque SSE se actualiza automáticamente
+  const refreshTimer = () => {}
 
   // Control de timer (pausar/reiniciar)
   const handlePauseTimer = async () => {
