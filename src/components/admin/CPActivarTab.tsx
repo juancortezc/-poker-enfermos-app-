@@ -41,6 +41,12 @@ interface GameDateData {
   playersCount: number
 }
 
+interface BlockedDate {
+  id: number
+  dateNumber: number
+  status: string
+}
+
 export default function CPActivarTab() {
   const { user } = useAuth()
   const router = useRouter()
@@ -67,6 +73,7 @@ export default function CPActivarTab() {
 
   // UI states
   const [activeTab, setActiveTab] = useState<'enfermos' | 'invitados'>('enfermos')
+  const [blockedDate, setBlockedDate] = useState<BlockedDate | null>(null)
 
   useEffect(() => {
     const token = getStoredAuthToken()
@@ -113,6 +120,7 @@ export default function CPActivarTab() {
 
         if (data.blocked) {
           setError(data.blockedReason || 'No se pueden crear fechas en este momento')
+          setBlockedDate(data.blockedDate || null)
           setAvailableDates([])
           setRegisteredPlayers([])
           setAdditionalPlayers([])
@@ -230,14 +238,16 @@ export default function CPActivarTab() {
     router.push('/players/new?type=invitado&returnTo=/admin')
   }
 
-  const handleDeleteDate = async () => {
-    if (!selectedDateId) return
+  const handleDeleteDate = async (dateIdToDelete?: number) => {
+    const targetId = dateIdToDelete || selectedDateId
+    if (!targetId) return
 
-    const selectedDateData = availableDates.find(d => d.id === selectedDateId)
-    if (!selectedDateData) return
+    // Obtener info de la fecha a eliminar
+    const selectedDateData = availableDates.find(d => d.id === targetId)
+    const dateNumber = selectedDateData?.dateNumber || blockedDate?.dateNumber || '?'
 
     const confirmDelete = window.confirm(
-      `¿Estás seguro de eliminar la Fecha ${selectedDateData.dateNumber}?\n\nEsta acción no se puede deshacer.`
+      `¿Estás seguro de eliminar la Fecha ${dateNumber}?\n\nEsta acción no se puede deshacer.`
     )
     if (!confirmDelete) return
 
@@ -245,14 +255,22 @@ export default function CPActivarTab() {
       setDeleting(true)
       setError('')
 
-      const response = await fetch(`/api/game-dates/${selectedDateId}`, {
+      const response = await fetch(`/api/game-dates/${targetId}`, {
         method: 'DELETE',
         headers: buildAuthHeaders()
       })
 
       if (response.ok) {
+        // Si era una fecha bloqueada, limpiar el estado y recargar
+        if (blockedDate && blockedDate.id === targetId) {
+          setBlockedDate(null)
+          setError('')
+          loadInitialData() // Recargar para obtener fechas disponibles
+          return
+        }
+
         // Remover la fecha eliminada de la lista
-        const updatedDates = availableDates.filter(d => d.id !== selectedDateId)
+        const updatedDates = availableDates.filter(d => d.id !== targetId)
         setAvailableDates(updatedDates)
 
         // Seleccionar la siguiente fecha disponible
@@ -349,8 +367,10 @@ export default function CPActivarTab() {
     )
   }
 
-  // Blocked state
+  // Blocked state - show delete button if it's a CREATED date
   if (error && error.includes('Existe una fecha')) {
+    const canDelete = blockedDate && blockedDate.status === 'CREATED'
+
     return (
       <div
         className="p-6 text-center"
@@ -367,6 +387,29 @@ export default function CPActivarTab() {
         <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }} className="mt-2">
           {error}
         </p>
+
+        {/* Botón para eliminar fecha CREATED */}
+        {canDelete && (
+          <button
+            onClick={() => handleDeleteDate(blockedDate.id)}
+            disabled={deleting}
+            className="mt-4 flex items-center justify-center gap-2 mx-auto px-4 py-2"
+            style={{
+              background: deleting ? 'rgba(229, 57, 53, 0.5)' : '#E53935',
+              color: 'white',
+              borderRadius: '4px',
+              fontWeight: 600,
+              fontSize: 'var(--cp-caption-size)',
+            }}
+          >
+            {deleting ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Trash2 size={16} />
+            )}
+            {deleting ? 'Eliminando...' : `Eliminar Fecha ${blockedDate.dateNumber}`}
+          </button>
+        )}
       </div>
     )
   }

@@ -29,7 +29,8 @@ export async function GET(request: NextRequest) {
           additionalPlayers: [],
           blocked: true,
           blockedReason: `Existe una fecha ${activeOrCreatedDate.dateNumber} en estado ${activeOrCreatedDate.status}`,
-          activeDate: {
+          blockedDate: {
+            id: activeOrCreatedDate.id,
             dateNumber: activeOrCreatedDate.dateNumber,
             status: activeOrCreatedDate.status
           }
