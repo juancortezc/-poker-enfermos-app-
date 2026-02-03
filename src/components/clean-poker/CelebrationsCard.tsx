@@ -1,8 +1,9 @@
 'use client'
 
+import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
 import useSWR from 'swr'
-import { Cake, Trophy, User } from 'lucide-react'
+import { Cake, Trophy, User, X } from 'lucide-react'
 
 interface BirthdayPlayer {
   id: string
@@ -26,26 +27,116 @@ interface CelebrationsData {
   droughts: DroughtPlayer[]
 }
 
+const DISMISSED_KEY = 'celebrations_dismissed'
+
+interface DismissedState {
+  birthdayIds: string[]
+  droughtIds: string[]
+  lastUpdated: string // ISO date for cleanup
+}
+
+function getDismissedState(): DismissedState {
+  if (typeof window === 'undefined') {
+    return { birthdayIds: [], droughtIds: [], lastUpdated: '' }
+  }
+
+  try {
+    const stored = localStorage.getItem(DISMISSED_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored) as DismissedState
+      // Reset if it's a new day (birthdays change daily)
+      const today = new Date().toISOString().split('T')[0]
+      if (parsed.lastUpdated !== today) {
+        // New day - clear birthday dismissals but keep drought dismissals
+        return {
+          birthdayIds: [],
+          droughtIds: parsed.droughtIds || [],
+          lastUpdated: today
+        }
+      }
+      return parsed
+    }
+  } catch {
+    // Invalid stored data
+  }
+
+  return {
+    birthdayIds: [],
+    droughtIds: [],
+    lastUpdated: new Date().toISOString().split('T')[0]
+  }
+}
+
+function setDismissedState(state: DismissedState) {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(DISMISSED_KEY, JSON.stringify(state))
+}
+
 export function CelebrationsCard() {
   const { data } = useSWR<CelebrationsData>('/api/players/celebrations', {
     refreshInterval: 3600000 // Refresh every hour
   })
 
-  // Don't render if no data or no celebrations
+  const [dismissed, setDismissed] = useState<DismissedState>(() => getDismissedState())
+
+  // Update localStorage when dismissed changes
+  useEffect(() => {
+    setDismissedState(dismissed)
+  }, [dismissed])
+
+  // Filter out dismissed players
+  const visibleBirthdays = useMemo(() => {
+    if (!data?.birthdays) return []
+    return data.birthdays.filter(p => !dismissed.birthdayIds.includes(p.id))
+  }, [data?.birthdays, dismissed.birthdayIds])
+
+  const visibleDroughts = useMemo(() => {
+    if (!data?.droughts) return []
+    return data.droughts.filter(p => !dismissed.droughtIds.includes(p.id))
+  }, [data?.droughts, dismissed.droughtIds])
+
+  const handleDismissBirthdays = () => {
+    if (!data?.birthdays) return
+    setDismissed(prev => ({
+      ...prev,
+      birthdayIds: [...prev.birthdayIds, ...data.birthdays.map(p => p.id)],
+      lastUpdated: new Date().toISOString().split('T')[0]
+    }))
+  }
+
+  const handleDismissDroughts = () => {
+    if (!data?.droughts) return
+    setDismissed(prev => ({
+      ...prev,
+      droughtIds: [...prev.droughtIds, ...data.droughts.map(p => p.id)],
+      lastUpdated: new Date().toISOString().split('T')[0]
+    }))
+  }
+
+  // Don't render if no data or no visible celebrations
   if (!data) return null
-  if (data.birthdays.length === 0 && data.droughts.length === 0) return null
+  if (visibleBirthdays.length === 0 && visibleDroughts.length === 0) return null
 
   return (
     <div className="space-y-3">
       {/* Birthday Notifications */}
-      {data.birthdays.length > 0 && (
+      {visibleBirthdays.length > 0 && (
         <div
-          className="rounded-2xl p-4"
+          className="rounded-2xl p-4 relative"
           style={{
             background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 152, 0, 0.1) 100%)',
             border: '1px solid rgba(255, 193, 7, 0.3)',
           }}
         >
+          {/* Dismiss button */}
+          <button
+            onClick={handleDismissBirthdays}
+            className="absolute top-3 right-3 p-1.5 rounded-full transition-colors hover:bg-white/10"
+            aria-label="Cerrar"
+          >
+            <X className="w-4 h-4" style={{ color: 'var(--cp-on-surface-muted)' }} />
+          </button>
+
           <div className="flex items-center gap-2 mb-3">
             <Cake className="w-5 h-5" style={{ color: '#FFC107' }} />
             <span
@@ -57,7 +148,7 @@ export function CelebrationsCard() {
           </div>
 
           <div className="space-y-2">
-            {data.birthdays.map((player) => (
+            {visibleBirthdays.map((player) => (
               <div key={player.id} className="flex items-center gap-3">
                 {/* Avatar */}
                 <div
@@ -122,14 +213,23 @@ export function CelebrationsCard() {
       )}
 
       {/* Drought Notifications (1000+ days without winning) */}
-      {data.droughts.length > 0 && (
+      {visibleDroughts.length > 0 && (
         <div
-          className="rounded-2xl p-4"
+          className="rounded-2xl p-4 relative"
           style={{
             background: 'linear-gradient(135deg, rgba(156, 39, 176, 0.15) 0%, rgba(103, 58, 183, 0.1) 100%)',
             border: '1px solid rgba(156, 39, 176, 0.3)',
           }}
         >
+          {/* Dismiss button */}
+          <button
+            onClick={handleDismissDroughts}
+            className="absolute top-3 right-3 p-1.5 rounded-full transition-colors hover:bg-white/10"
+            aria-label="Cerrar"
+          >
+            <X className="w-4 h-4" style={{ color: 'var(--cp-on-surface-muted)' }} />
+          </button>
+
           <div className="flex items-center gap-2 mb-3">
             <Trophy className="w-5 h-5" style={{ color: '#9C27B0' }} />
             <span
@@ -141,7 +241,7 @@ export function CelebrationsCard() {
           </div>
 
           <div className="space-y-2">
-            {data.droughts.map((player) => (
+            {visibleDroughts.map((player) => (
               <div key={player.id} className="flex items-center gap-3">
                 {/* Avatar */}
                 <div

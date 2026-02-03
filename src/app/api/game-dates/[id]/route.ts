@@ -280,3 +280,53 @@ export async function PUT(
     }
   })
 }
+
+// DELETE - Eliminar una fecha en estado CREATED
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return withComisionAuth(request, async (_req, _user) => {
+    try {
+      const gameDateId = parseInt((await params).id)
+
+      // Verificar que la fecha existe
+      const existingDate = await prisma.gameDate.findUnique({
+        where: { id: gameDateId }
+      })
+
+      if (!existingDate) {
+        return NextResponse.json(
+          { error: 'Fecha no encontrada' },
+          { status: 404 }
+        )
+      }
+
+      // Solo permitir eliminar fechas en estado CREATED
+      if (existingDate.status !== 'CREATED') {
+        return NextResponse.json(
+          { error: `Solo se pueden eliminar fechas en estado CREATED (estado actual: ${existingDate.status})` },
+          { status: 400 }
+        )
+      }
+
+      // Eliminar la fecha
+      await prisma.gameDate.delete({
+        where: { id: gameDateId }
+      })
+
+      console.log(`[GAME DATE API] Game date ${gameDateId} deleted successfully by user ${_user.id}`)
+
+      return NextResponse.json({
+        success: true,
+        message: `Fecha ${existingDate.dateNumber} eliminada exitosamente`
+      })
+    } catch (error) {
+      console.error('Error deleting game date:', error)
+      return NextResponse.json(
+        { error: 'Error interno del servidor' },
+        { status: 500 }
+      )
+    }
+  })
+}

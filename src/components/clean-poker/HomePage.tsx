@@ -560,6 +560,9 @@ function HomeAuthenticated({
 
       {/* Content */}
       <main className="pb-20 px-4 space-y-4">
+        {/* Celebrations - Birthdays (first position, dismissible) */}
+        <CelebrationsCard />
+
         {/* Next Date with Calendar */}
         <NextDateWithCalendar nextDate={nextDate} scheduledDate={nextDateScheduled} />
 
@@ -608,9 +611,6 @@ function HomeAuthenticated({
             }))}
           />
         )}
-
-        {/* Celebrations - Birthdays and Victory Droughts */}
-        <CelebrationsCard />
       </main>
 
       {/* Bottom Nav */}
@@ -711,6 +711,9 @@ function HomeWithLiveGame({
 
       {/* Content */}
       <main className="pb-20 px-4 space-y-4">
+        {/* Celebrations - Birthdays (first position, dismissible) */}
+        <CelebrationsCard />
+
         {/* Timer Card */}
         <CPTimerCard />
 
@@ -764,9 +767,6 @@ function HomeWithLiveGame({
             }))}
           />
         )}
-
-        {/* Celebrations - Birthdays and Victory Droughts */}
-        <CelebrationsCard />
       </main>
 
       {/* Bottom Nav */}
