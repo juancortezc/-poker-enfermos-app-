@@ -38,45 +38,67 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      if (!existingDate) {
-        return NextResponse.json(
-          { error: `No se encontró la fecha ${dateNumber} para este torneo` },
-          { status: 400 }
-        )
-      }
-
-      if (existingDate.status !== 'pending') {
-        return NextResponse.json(
-          { error: `La fecha ${dateNumber} ya ha sido activada (estado: ${existingDate.status})` },
-          { status: 400 }
-        )
-      }
-
       // Calcular puntos para el ganador basado en número de participantes
       const totalParticipants = playerIds.length + guestIds.length
       const pointsForWinner = calculateWinnerPoints(totalParticipants)
 
-      // Actualizar la fecha de juego existente
-      const gameDate = await prisma.gameDate.update({
-        where: {
-          id: existingDate.id
-        },
-        data: {
-          playerIds: playerIds,
-          status: 'CREATED', // Configurada y lista para usar
-          playersMin: Math.min(9, totalParticipants),
-          playersMax: Math.max(24, totalParticipants)
-        },
-        include: {
-          tournament: {
-            select: {
-              id: true,
-              name: true,
-              number: true
+      let gameDate
+
+      if (!existingDate) {
+        // Date doesn't exist - recreate it (was deleted)
+        // Parse the scheduled date properly
+        const parsedDate = new Date(scheduledDate + 'T12:00:00.000Z')
+
+        gameDate = await prisma.gameDate.create({
+          data: {
+            tournamentId: parseInt(tournamentId),
+            dateNumber: parseInt(dateNumber),
+            scheduledDate: parsedDate,
+            playerIds: playerIds,
+            status: 'CREATED',
+            playersMin: Math.min(9, totalParticipants),
+            playersMax: Math.max(24, totalParticipants)
+          },
+          include: {
+            tournament: {
+              select: {
+                id: true,
+                name: true,
+                number: true
+              }
             }
           }
+        })
+      } else {
+        if (existingDate.status !== 'pending') {
+          return NextResponse.json(
+            { error: `La fecha ${dateNumber} ya ha sido activada (estado: ${existingDate.status})` },
+            { status: 400 }
+          )
         }
-      })
+
+        // Actualizar la fecha de juego existente
+        gameDate = await prisma.gameDate.update({
+          where: {
+            id: existingDate.id
+          },
+          data: {
+            playerIds: playerIds,
+            status: 'CREATED', // Configurada y lista para usar
+            playersMin: Math.min(9, totalParticipants),
+            playersMax: Math.max(24, totalParticipants)
+          },
+          include: {
+            tournament: {
+              select: {
+                id: true,
+                name: true,
+                number: true
+              }
+            }
+          }
+        })
+      }
 
       return NextResponse.json({
         gameDate: {

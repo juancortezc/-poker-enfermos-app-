@@ -74,6 +74,8 @@ export default function CPActivarTab() {
   // UI states
   const [activeTab, setActiveTab] = useState<'enfermos' | 'invitados'>('enfermos')
   const [blockedDate, setBlockedDate] = useState<BlockedDate | null>(null)
+  const [missingDate, setMissingDate] = useState<number | null>(null)
+  const [missingDateScheduled, setMissingDateScheduled] = useState<string>('')
 
   useEffect(() => {
     const token = getStoredAuthToken()
@@ -133,7 +135,17 @@ export default function CPActivarTab() {
         setRegisteredPlayers(data.registeredPlayers)
         setAdditionalPlayers(data.additionalPlayers || [])
 
-        if (data.availableDates.length > 0) {
+        // Check for missing dates (deleted dates that need to be recreated)
+        if (data.missingDate) {
+          setMissingDate(data.missingDate)
+          // Set default to next Tuesday
+          const today = new Date()
+          const nextTuesday = new Date(today)
+          const daysUntilTuesday = (2 - today.getDay() + 7) % 7 || 7
+          nextTuesday.setDate(today.getDate() + daysUntilTuesday)
+          setMissingDateScheduled(nextTuesday.toISOString().split('T')[0])
+          setSelectedPlayers(data.registeredPlayers.map((p: Player) => p.id))
+        } else if (data.availableDates.length > 0) {
           const firstDate = data.availableDates[0]
           setSelectedDateId(firstDate.id)
           setSelectedDate(new Date(firstDate.scheduledDate))
@@ -198,6 +210,46 @@ export default function CPActivarTab() {
   }
 
   const handleActivate = async () => {
+    // Handle missing date (recreate)
+    if (missingDate && tournament) {
+      if (!missingDateScheduled) {
+        setError('Selecciona una fecha para activar')
+        return
+      }
+
+      try {
+        setActivating(true)
+        setError('')
+
+        const response = await fetch('/api/game-dates', {
+          method: 'POST',
+          headers: buildAuthHeaders({}, { includeJson: true }),
+          body: JSON.stringify({
+            tournamentId: tournament.id,
+            dateNumber: missingDate,
+            scheduledDate: missingDateScheduled,
+            playerIds: [...selectedPlayers, ...selectedGuests]
+          })
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          setActiveGameDate(result.gameDate)
+          setMissingDate(null)
+          router.push(`/game-dates/${result.gameDate.id}/confirm`)
+        } else {
+          const errorData = await response.json()
+          setError(errorData.error || 'Error al crear fecha')
+        }
+      } catch (err) {
+        setError('Error al crear fecha de juego')
+      } finally {
+        setActivating(false)
+      }
+      return
+    }
+
+    // Handle existing pending date
     if (!tournament || !selectedDateId || !selectedDate) {
       setError('Datos incompletos para activar fecha')
       return
@@ -436,6 +488,193 @@ export default function CPActivarTab() {
         <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }}>
           {activeGameDate.playersCount} participantes
         </p>
+      </div>
+    )
+  }
+
+  // Missing date - needs to be recreated
+  if (missingDate && tournament) {
+    return (
+      <div className="space-y-4">
+        {/* Missing Date Header */}
+        <div
+          className="p-4"
+          style={{
+            background: 'rgba(251, 191, 36, 0.1)',
+            border: '1px solid rgba(251, 191, 36, 0.3)',
+            borderRadius: '4px',
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Calendar size={20} style={{ color: '#FBBF24' }} />
+            <p style={{ color: '#FBBF24', fontSize: 'var(--cp-body-size)', fontWeight: 600 }}>
+              Fecha {missingDate} - Necesita ser creada
+            </p>
+          </div>
+          <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }}>
+            Esta fecha fue eliminada y necesita ser recreada para continuar.
+          </p>
+        </div>
+
+        {/* Date Selection Row */}
+        <div className="flex gap-3">
+          {/* Date Input */}
+          <div className="flex-1 relative">
+            <input
+              type="date"
+              value={missingDateScheduled}
+              onChange={(e) => setMissingDateScheduled(e.target.value)}
+              className="w-full px-3 py-2.5"
+              style={{
+                background: 'var(--cp-background)',
+                border: '1px solid var(--cp-surface-border)',
+                color: 'var(--cp-on-surface)',
+                fontSize: 'var(--cp-body-size)',
+                borderRadius: '4px',
+                fontWeight: 600,
+                colorScheme: 'dark',
+              }}
+            />
+          </div>
+
+          {/* Activate Button */}
+          <button
+            onClick={handleActivate}
+            disabled={activating || selectedPlayers.length === 0 || !missingDateScheduled}
+            className="flex items-center justify-center gap-2 px-6 py-2.5"
+            style={{
+              background: activating || selectedPlayers.length === 0 ? 'rgba(229, 57, 53, 0.5)' : '#E53935',
+              color: 'white',
+              borderRadius: '4px',
+              fontWeight: 600,
+              fontSize: 'var(--cp-body-size)',
+              opacity: activating || selectedPlayers.length === 0 ? 0.7 : 1,
+            }}
+          >
+            {activating ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Play size={18} />
+            )}
+            {activating ? 'Creando...' : `CREAR FECHA ${missingDate}`}
+          </button>
+        </div>
+
+        {/* Tabs Row: Enfermos, Invitados */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Enfermos Tab */}
+          <button
+            onClick={() => setActiveTab('enfermos')}
+            className="py-2 px-3 text-center transition-all"
+            style={{
+              background: activeTab === 'enfermos' ? '#E53935' : 'var(--cp-surface)',
+              border: `1px solid ${activeTab === 'enfermos' ? '#E53935' : 'var(--cp-surface-border)'}`,
+              color: activeTab === 'enfermos' ? 'white' : 'var(--cp-on-surface)',
+              borderRadius: '4px',
+            }}
+          >
+            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Enfermos
+            </p>
+            <p style={{ fontSize: '18px', fontWeight: 700 }}>
+              {selectedPlayers.length}
+            </p>
+          </button>
+
+          {/* Invitados Tab */}
+          <button
+            onClick={() => setActiveTab('invitados')}
+            className="py-2 px-3 text-center transition-all"
+            style={{
+              background: activeTab === 'invitados' ? '#EC407A' : 'var(--cp-surface)',
+              border: `1px solid ${activeTab === 'invitados' ? '#EC407A' : 'var(--cp-surface-border)'}`,
+              color: activeTab === 'invitados' ? 'white' : 'var(--cp-on-surface)',
+              borderRadius: '4px',
+            }}
+          >
+            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Invitados
+            </p>
+            <p style={{ fontSize: '18px', fontWeight: 700 }}>
+              {selectedGuests.length}
+            </p>
+          </button>
+        </div>
+
+        {/* Player List */}
+        <div
+          className="p-3"
+          style={{
+            background: 'var(--cp-surface)',
+            border: '1px solid var(--cp-surface-border)',
+            borderRadius: '4px',
+          }}
+        >
+          <div className="grid grid-cols-3 gap-2 max-h-80 overflow-y-auto">
+            {currentPlayers.map((player) => {
+              const isSelected = activeTab === 'enfermos'
+                ? selectedPlayers.includes(player.id)
+                : selectedGuests.includes(player.id)
+
+              return (
+                <button
+                  key={player.id}
+                  onClick={() => togglePlayer(player.id)}
+                  className="py-2 px-2 text-center transition-all"
+                  style={{
+                    background: isSelected
+                      ? activeTab === 'invitados' ? '#EC407A' : '#E53935'
+                      : 'var(--cp-background)',
+                    border: `1px solid ${isSelected
+                      ? activeTab === 'invitados' ? '#EC407A' : '#E53935'
+                      : 'var(--cp-surface-border)'}`,
+                    color: isSelected ? 'white' : 'var(--cp-on-surface)',
+                    borderRadius: '4px',
+                    fontSize: 'var(--cp-caption-size)',
+                    fontWeight: isSelected ? 600 : 400,
+                  }}
+                >
+                  {getDisplayName(player)}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Create Guest Button */}
+          {activeTab === 'invitados' && (
+            <button
+              onClick={handleCreateGuest}
+              className="w-full mt-3 py-2 flex items-center justify-center gap-2"
+              style={{
+                background: 'rgba(236, 64, 122, 0.15)',
+                border: '1px solid rgba(236, 64, 122, 0.3)',
+                color: '#EC407A',
+                borderRadius: '4px',
+                fontSize: 'var(--cp-caption-size)',
+                fontWeight: 600,
+              }}
+            >
+              <UserPlus size={14} />
+              CREAR INVITADO
+            </button>
+          )}
+        </div>
+
+        {/* Error Messages */}
+        {error && (
+          <div
+            className="p-3 text-center"
+            style={{
+              background: 'rgba(229, 57, 53, 0.1)',
+              border: '1px solid rgba(229, 57, 53, 0.3)',
+              borderRadius: '4px',
+            }}
+          >
+            <p style={{ color: '#E53935', fontSize: 'var(--cp-caption-size)' }}>
+              {error}
+            </p>
+          </div>
+        )}
       </div>
     )
   }

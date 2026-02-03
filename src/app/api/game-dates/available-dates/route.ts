@@ -108,6 +108,27 @@ export async function GET(request: NextRequest) {
         id: gd.id
       }))
 
+      // Check for missing dates (deleted dates that need to be recreated)
+      // Get all dates for this tournament to find gaps
+      const allTournamentDates = await prisma.gameDate.findMany({
+        where: { tournamentId: activeTournament.id },
+        select: { dateNumber: true, status: true },
+        orderBy: { dateNumber: 'asc' }
+      })
+
+      const existingDateNumbers = allTournamentDates.map(d => d.dateNumber)
+      const completedDates = allTournamentDates.filter(d => d.status === 'completed')
+      const maxCompletedDate = completedDates.length > 0
+        ? Math.max(...completedDates.map(d => d.dateNumber))
+        : 0
+
+      // Find the next date that should be playable
+      // It's either: a pending date, OR the next date after completed ones that's missing
+      const nextExpectedDate = maxCompletedDate + 1
+      const missingDate = !existingDateNumbers.includes(nextExpectedDate) && nextExpectedDate <= 12
+        ? nextExpectedDate
+        : null
+
       return NextResponse.json({
         tournament: {
           id: activeTournament.id,
@@ -116,7 +137,8 @@ export async function GET(request: NextRequest) {
         },
         availableDates: availableDates,
         registeredPlayers: registeredPlayers,
-        additionalPlayers: availableAdditionalPlayers
+        additionalPlayers: availableAdditionalPlayers,
+        missingDate: missingDate // Date number that needs to be recreated
       })
     } catch (error) {
       console.error('Error getting available game dates:', error)
