@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_ENV=production next build",
+    "build": "NODE_ENV=production next build --webpack",
     "build:css": "tailwindcss -o ./src/app/globals.css --minify",
     "build:prod": "NODE_ENV=production npm run build:css && next build",
     "start": "next start",
