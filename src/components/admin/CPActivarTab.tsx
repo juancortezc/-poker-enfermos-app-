@@ -369,7 +369,8 @@ export default function CPActivarTab() {
 
   // Blocked state - show delete button if it's a CREATED date
   if (error && error.includes('Existe una fecha')) {
-    const canDelete = blockedDate && blockedDate.status === 'CREATED'
+    // Siempre mostrar botón si hay blockedDate (para debug) - status check removido temporalmente
+    const canDelete = !!blockedDate
 
     return (
       <div
