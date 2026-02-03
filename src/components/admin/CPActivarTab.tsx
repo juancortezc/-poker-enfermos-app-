@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
-import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown } from 'lucide-react'
+import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown, Trash2 } from 'lucide-react'
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
@@ -47,6 +47,7 @@ export default function CPActivarTab() {
   const [loading, setLoading] = useState(true)
   const [activating, setActivating] = useState(false)
   const [updatingDate, setUpdatingDate] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [dateError, setDateError] = useState('')
 
@@ -229,6 +230,53 @@ export default function CPActivarTab() {
     router.push('/players/new?type=invitado&returnTo=/admin')
   }
 
+  const handleDeleteDate = async () => {
+    if (!selectedDateId) return
+
+    const selectedDateData = availableDates.find(d => d.id === selectedDateId)
+    if (!selectedDateData) return
+
+    const confirmDelete = window.confirm(
+      `¿Estás seguro de eliminar la Fecha ${selectedDateData.dateNumber}?\n\nEsta acción no se puede deshacer.`
+    )
+    if (!confirmDelete) return
+
+    try {
+      setDeleting(true)
+      setError('')
+
+      const response = await fetch(`/api/game-dates/${selectedDateId}`, {
+        method: 'DELETE',
+        headers: buildAuthHeaders()
+      })
+
+      if (response.ok) {
+        // Remover la fecha eliminada de la lista
+        const updatedDates = availableDates.filter(d => d.id !== selectedDateId)
+        setAvailableDates(updatedDates)
+
+        // Seleccionar la siguiente fecha disponible
+        if (updatedDates.length > 0) {
+          setSelectedDateId(updatedDates[0].id)
+          setSelectedDate(new Date(updatedDates[0].scheduledDate))
+        } else {
+          setSelectedDateId(null)
+          setSelectedDate(undefined)
+        }
+
+        setSelectedPlayers([])
+        setSelectedGuests([])
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Error al eliminar fecha')
+      }
+    } catch (err) {
+      setError('Error al eliminar fecha')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const handleDateChange = async (newDateString: string) => {
     if (!selectedDateId || !tournament) return
 
@@ -379,6 +427,27 @@ export default function CPActivarTab() {
             style={{ color: 'var(--cp-on-surface-muted)' }}
           />
         </div>
+
+        {/* Delete Button */}
+        <button
+          onClick={handleDeleteDate}
+          disabled={deleting || !selectedDateId}
+          className="flex items-center justify-center px-3 py-2.5"
+          style={{
+            background: deleting ? 'rgba(156, 163, 175, 0.5)' : 'rgba(156, 163, 175, 0.2)',
+            border: '1px solid rgba(156, 163, 175, 0.3)',
+            color: 'var(--cp-on-surface-muted)',
+            borderRadius: '4px',
+            opacity: deleting || !selectedDateId ? 0.5 : 1,
+          }}
+          title="Eliminar fecha"
+        >
+          {deleting ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : (
+            <Trash2 size={18} />
+          )}
+        </button>
 
         {/* Activate Button */}
         <button
