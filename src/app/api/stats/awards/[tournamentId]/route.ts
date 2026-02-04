@@ -257,15 +257,18 @@ export async function GET(
 
     // ============================================================
     // 5. ÚLTIMOS - Most last place finishes (only registered players)
+    // position = totalPlayers means first eliminated = last place = fewest points
     // ============================================================
     const sieteYDosByPlayer = new Map<string, { player: AwardPlayer; count: number }>()
 
-    // For each date, find only the last position (7º place)
+    // For each date, find the last position (first eliminated)
     gameDates.forEach(gd => {
       if (gd.eliminations.length === 0) return
 
-      const totalPlayers = gd.eliminations.length
-      const lastPosition = totalPlayers // Último lugar (7º)
+      // Total players is from playerIds, not eliminations count
+      // (eliminations might be fewer if players haven't all been eliminated yet)
+      const totalPlayers = gd.playerIds.length
+      const lastPosition = totalPlayers // Last position = first eliminated
 
       // Find player(s) in last position
       const lastPlaceElims = gd.eliminations.filter(
@@ -343,7 +346,7 @@ export async function GET(
 
     // ============================================================
     // 8. FALTAS - Most absences (only registered players)
-    // FALTA = jugador registrado que NO jugó una fecha (sin eliminación)
+    // FALTA = jugador registrado que NO jugó una fecha (0 puntos/sin eliminación)
     // ============================================================
     const faltasByPlayer = new Map<string, { player: AwardPlayer; count: number }>()
 
@@ -362,20 +365,25 @@ export async function GET(
       }
     })
 
-    // For each registered player, count how many dates they missed
+    // Only count completed dates for faltas calculation
+    const completedGameDates = gameDates.filter(gd => gd.status === 'completed')
+
+    // For each registered player, count how many dates they had 0 points (absent)
     for (const tp of registeredParticipants) {
       const player = tp.player
       const playerId = player.id
 
-      // Get which dates this player participated in (has elimination)
-      const datesPlayed = new Set(
-        playerResults.get(playerId)?.dates.map(d => d.dateNumber) || []
-      )
+      // Count dates where player had 0 points (was absent/didn't play)
+      const playerDates = playerResults.get(playerId)?.dates || []
+      const faltasCount = playerDates.filter(d => d.points === 0).length
 
-      // Count faltas (dates NOT played)
-      const faltasCount = gameDates.length - datesPlayed.size
+      // Also count dates they weren't even in (not in playerIds at all)
+      // These are completed dates where the player wasn't included
+      const datesIncluded = new Set(playerDates.map(d => d.dateNumber))
+      const datesNotIncluded = completedGameDates.filter(gd => !datesIncluded.has(gd.dateNumber))
+      const totalFaltas = faltasCount + datesNotIncluded.length
 
-      if (faltasCount > 0) {
+      if (totalFaltas > 0) {
         faltasByPlayer.set(playerId, {
           player: {
             id: player.id,
@@ -383,7 +391,7 @@ export async function GET(
             lastName: player.lastName,
             photoUrl: player.photoUrl
           },
-          count: faltasCount
+          count: totalFaltas
         })
       }
     }
