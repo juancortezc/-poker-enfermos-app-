@@ -42,8 +42,30 @@ async function getTimerData(gameDateId: number): Promise<TimerStreamData | null>
     }
   })
 
-  if (!gameDate || !gameDate.timerState) {
+  if (!gameDate) {
     return null
+  }
+
+  // Handle completed or non-active game dates
+  if (gameDate.status === 'completed' || !gameDate.timerState) {
+    const blindLevels = gameDate.tournament.blindLevels
+    const lastBlind = blindLevels[blindLevels.length - 1]
+
+    return {
+      serverTime: Date.now(),
+      status: 'completed',
+      currentLevel: lastBlind?.level ?? 1,
+      timeRemaining: 0,
+      totalElapsed: 0,
+      smallBlind: lastBlind?.smallBlind ?? 0,
+      bigBlind: lastBlind?.bigBlind ?? 0,
+      nextSmallBlind: null,
+      nextBigBlind: null,
+      nextLevel: null,
+      gameDateId: gameDate.id,
+      tournamentName: `Torneo ${gameDate.tournament.number}`,
+      dateNumber: gameDate.dateNumber
+    }
   }
 
   const timerState = gameDate.timerState
