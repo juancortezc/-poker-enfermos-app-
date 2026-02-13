@@ -391,7 +391,7 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
             }}
           />
 
-          {/* Botón INGRESAR */}
+          {/* Botón LOGIN */}
           <button
             type="submit"
             disabled={loading || pin.length !== 4}
@@ -419,7 +419,7 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
                 }}
               />
             ) : (
-              'INGRESAR'
+              'LOGIN'
             )}
           </button>
 
