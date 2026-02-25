@@ -101,6 +101,7 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
 
     // 8. Handle winner case (position 1)
     if (savedElimination.isWinner()) {
+      console.log(`[Elimination] Position 1 registered for gameDate ${command.gameDateId}, marking as completed`);
       await this.handleWinner(
         command.eliminatedPlayerId,
         eliminatedPlayer,
@@ -110,6 +111,7 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
       );
       // Mark game date as completed when winner is registered
       await this.gameDateRepository.markAsCompleted(command.gameDateId);
+      console.log(`[Elimination] GameDate ${command.gameDateId} marked as completed`);
     } else {
       // Send elimination notification
       await this.notificationService.notifyPlayerEliminated({
@@ -202,9 +204,14 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
     const eliminationCount = await this.eliminationRepository.countByGameDateId(gameDate.id);
     const expectedBeforeWinner = totalPlayers - 1;
 
+    console.log(`[AutoComplete] GameDate ${gameDate.id}: eliminationCount=${eliminationCount}, expected=${expectedBeforeWinner}, totalPlayers=${totalPlayers}`);
+
     if (eliminationCount !== expectedBeforeWinner) {
+      console.log(`[AutoComplete] Skipping - count mismatch`);
       return null;
     }
+
+    console.log(`[AutoComplete] Proceeding with auto-complete for winner ${winnerId}`);
 
     // Create winner elimination
     const winnerElimination = runnerUpElimination.createWinnerElimination(winnerId, totalPlayers);
@@ -226,7 +233,9 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
     );
 
     // Mark game date as completed
+    console.log(`[AutoComplete] Marking gameDate ${gameDate.id} as completed`);
     await this.gameDateRepository.markAsCompleted(gameDate.id);
+    console.log(`[AutoComplete] GameDate ${gameDate.id} marked as completed successfully`);
 
     return {
       id: savedWinner.id!,

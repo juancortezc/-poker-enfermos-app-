@@ -28,9 +28,11 @@ export class PrismaGameDateRepository implements GameDateRepository {
   }
 
   async markAsCompleted(id: number): Promise<void> {
-    await prisma.gameDate.update({
+    console.log(`[PrismaGameDateRepository] markAsCompleted called for id=${id}`);
+    const result = await prisma.gameDate.update({
       where: { id },
       data: { status: 'completed' },
     });
+    console.log(`[PrismaGameDateRepository] markAsCompleted done: status=${result.status}`);
   }
 }
