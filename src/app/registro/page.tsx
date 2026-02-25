@@ -609,21 +609,10 @@ export default function RegistroPage() {
 
             {/* Game Completed Message */}
             {activePlayers <= 1 && (
-              <div
-                className="p-6 text-center"
-                style={{
-                  background: 'rgba(229, 57, 53, 0.1)',
-                  border: '1px solid rgba(229, 57, 53, 0.3)',
-                  borderRadius: '4px',
-                }}
-              >
-                <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--cp-on-surface)' }}>
-                  Juego Completado
-                </h3>
-                <p style={{ color: '#E53935' }}>
-                  El torneo ha terminado. Felicitaciones al ganador!
-                </p>
-              </div>
+              <GameCompletedCard
+                gameDate={activeGameDate}
+                onDateClosed={fetchAllData}
+              />
             )}
 
             {/* Elimination History - CleanPoker Style */}
@@ -1816,6 +1805,111 @@ function CPPlayersModal({
           </p>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ============================================
+// GAME COMPLETED CARD COMPONENT
+// ============================================
+import { CheckCircle, Loader2 as Loader2Icon } from 'lucide-react'
+
+interface GameCompletedCardProps {
+  gameDate: GameDate
+  onDateClosed: () => void
+}
+
+function GameCompletedCard({ gameDate, onDateClosed }: GameCompletedCardProps) {
+  const [isClosing, setIsClosing] = useState(false)
+  const [closeError, setCloseError] = useState<string | null>(null)
+  const [isClosed, setIsClosed] = useState(gameDate.status === 'completed')
+
+  const handleCloseDate = async () => {
+    setIsClosing(true)
+    setCloseError(null)
+
+    try {
+      const response = await fetch('/api/admin/fix-stuck-date', {
+        method: 'POST',
+        headers: buildAuthHeaders({}, { includeJson: true }),
+        body: JSON.stringify({ gameDateId: gameDate.id })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setIsClosed(true)
+        onDateClosed()
+      } else {
+        setCloseError(data.error || data.hint || 'Error al cerrar la fecha')
+      }
+    } catch (err) {
+      setCloseError('Error de conexión')
+    } finally {
+      setIsClosing(false)
+    }
+  }
+
+  return (
+    <div
+      className="p-6 text-center"
+      style={{
+        background: isClosed ? 'rgba(34, 197, 94, 0.1)' : 'rgba(229, 57, 53, 0.1)',
+        border: `1px solid ${isClosed ? 'rgba(34, 197, 94, 0.3)' : 'rgba(229, 57, 53, 0.3)'}`,
+        borderRadius: '4px',
+      }}
+    >
+      {isClosed ? (
+        <>
+          <CheckCircle size={32} className="mx-auto mb-2" style={{ color: '#22c55e' }} />
+          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--cp-on-surface)' }}>
+            Fecha Completada
+          </h3>
+          <p style={{ color: '#22c55e' }}>
+            La fecha ha sido cerrada correctamente.
+          </p>
+        </>
+      ) : (
+        <>
+          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--cp-on-surface)' }}>
+            Juego Completado
+          </h3>
+          <p className="mb-4" style={{ color: '#E53935' }}>
+            El torneo ha terminado. Felicitaciones al ganador!
+          </p>
+
+          {gameDate.status === 'in_progress' && (
+            <>
+              <button
+                onClick={handleCloseDate}
+                disabled={isClosing}
+                className="px-6 py-3 font-bold transition-all"
+                style={{
+                  background: isClosing ? '#666' : '#22c55e',
+                  color: 'white',
+                  borderRadius: '8px',
+                  opacity: isClosing ? 0.7 : 1,
+                }}
+              >
+                {isClosing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2Icon size={18} className="animate-spin" />
+                    Cerrando...
+                  </span>
+                ) : (
+                  'CERRAR FECHA'
+                )}
+              </button>
+
+              {closeError && (
+                <p className="mt-3 text-sm" style={{ color: '#ef4444' }}>
+                  {closeError}
+                </p>
+              )}
+            </>
+          )}
+        </>
+      )}
     </div>
   )
 }
