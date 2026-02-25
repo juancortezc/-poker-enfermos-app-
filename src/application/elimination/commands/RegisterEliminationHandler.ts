@@ -200,60 +200,68 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
     totalPlayers: number,
     gameDate: { id: number; scheduledDate: Date; tournamentId: number }
   ): Promise<EliminationResult | null> {
-    // Check if we have all eliminations except winner
-    const eliminationCount = await this.eliminationRepository.countByGameDateId(gameDate.id);
-    const expectedBeforeWinner = totalPlayers - 1;
+    try {
+      // Check if we have all eliminations except winner
+      const eliminationCount = await this.eliminationRepository.countByGameDateId(gameDate.id);
+      const expectedBeforeWinner = totalPlayers - 1;
 
-    console.log(`[AutoComplete] GameDate ${gameDate.id}: eliminationCount=${eliminationCount}, expected=${expectedBeforeWinner}, totalPlayers=${totalPlayers}`);
+      console.log(`[AutoComplete] GameDate ${gameDate.id}: eliminationCount=${eliminationCount}, expected=${expectedBeforeWinner}, totalPlayers=${totalPlayers}`);
 
-    if (eliminationCount !== expectedBeforeWinner) {
-      console.log(`[AutoComplete] Skipping - count mismatch`);
+      if (eliminationCount !== expectedBeforeWinner) {
+        console.log(`[AutoComplete] Skipping - count mismatch`);
+        return null;
+      }
+
+      console.log(`[AutoComplete] Proceeding with auto-complete for winner ${winnerId}`);
+
+      // Create winner elimination
+      const winnerElimination = runnerUpElimination.createWinnerElimination(winnerId, totalPlayers);
+      const savedWinner = await this.eliminationRepository.save(winnerElimination);
+      console.log(`[AutoComplete] Winner elimination saved with id=${savedWinner.id}`);
+
+      // Get winner player info
+      const winnerPlayer = await this.playerRepository.findById(winnerId);
+      if (!winnerPlayer) {
+        throw new Error(`Winner player ${winnerId} not found`);
+      }
+
+      // Handle winner side effects
+      await this.handleWinner(
+        winnerId,
+        winnerPlayer,
+        gameDate.scheduledDate,
+        savedWinner.points.value,
+        gameDate.id
+      );
+      console.log(`[AutoComplete] Winner side effects handled`);
+
+      // Mark game date as completed
+      console.log(`[AutoComplete] Marking gameDate ${gameDate.id} as completed`);
+      await this.gameDateRepository.markAsCompleted(gameDate.id);
+      console.log(`[AutoComplete] GameDate ${gameDate.id} marked as completed successfully`);
+
+      return {
+        id: savedWinner.id!,
+        gameDateId: savedWinner.gameDateId,
+        position: savedWinner.position.value,
+        points: savedWinner.points.value,
+        eliminatedPlayer: {
+          id: winnerPlayer.id,
+          firstName: winnerPlayer.firstName,
+          lastName: winnerPlayer.lastName,
+        },
+        eliminatorPlayer: {
+          id: winnerPlayer.id,
+          firstName: winnerPlayer.firstName,
+          lastName: winnerPlayer.lastName,
+        },
+        eliminationTime: savedWinner.eliminationTime.toISOString(),
+        triggeredAutoComplete: false,
+      };
+    } catch (error) {
+      console.error(`[AutoComplete] ERROR in handleAutoComplete for gameDate ${gameDate.id}:`, error);
+      // Don't throw - let the position 2 registration succeed even if auto-complete fails
       return null;
     }
-
-    console.log(`[AutoComplete] Proceeding with auto-complete for winner ${winnerId}`);
-
-    // Create winner elimination
-    const winnerElimination = runnerUpElimination.createWinnerElimination(winnerId, totalPlayers);
-    const savedWinner = await this.eliminationRepository.save(winnerElimination);
-
-    // Get winner player info
-    const winnerPlayer = await this.playerRepository.findById(winnerId);
-    if (!winnerPlayer) {
-      throw new Error(`Winner player ${winnerId} not found`);
-    }
-
-    // Handle winner side effects
-    await this.handleWinner(
-      winnerId,
-      winnerPlayer,
-      gameDate.scheduledDate,
-      savedWinner.points.value,
-      gameDate.id
-    );
-
-    // Mark game date as completed
-    console.log(`[AutoComplete] Marking gameDate ${gameDate.id} as completed`);
-    await this.gameDateRepository.markAsCompleted(gameDate.id);
-    console.log(`[AutoComplete] GameDate ${gameDate.id} marked as completed successfully`);
-
-    return {
-      id: savedWinner.id!,
-      gameDateId: savedWinner.gameDateId,
-      position: savedWinner.position.value,
-      points: savedWinner.points.value,
-      eliminatedPlayer: {
-        id: winnerPlayer.id,
-        firstName: winnerPlayer.firstName,
-        lastName: winnerPlayer.lastName,
-      },
-      eliminatorPlayer: {
-        id: winnerPlayer.id,
-        firstName: winnerPlayer.firstName,
-        lastName: winnerPlayer.lastName,
-      },
-      eliminationTime: savedWinner.eliminationTime.toISOString(),
-      triggeredAutoComplete: false,
-    };
   }
 }
