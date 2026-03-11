@@ -662,6 +662,8 @@ interface HomeWithLiveGameProps {
     finalScore?: number
     positionsChanged: number
     playerPhoto?: string
+    lastPlaces?: number
+    absences?: number
   }>
   leaderPoints: number
   lastPoints: number
@@ -755,11 +757,14 @@ function HomeWithLiveGame({
         {bottom2.length >= 2 && (
           <MalazoCard
             players={bottom2.map((p) => ({
+              position: p.position,
               name: p.playerName,
               photoUrl: p.playerPhoto,
               totalPoints: p.totalPoints,
               finalPoints: p.finalScore ?? p.totalPoints,
               trend: p.positionsChanged,
+              lastPlaces: p.lastPlaces ?? 0,
+              absences: p.absences ?? 0,
             }))}
           />
         )}
