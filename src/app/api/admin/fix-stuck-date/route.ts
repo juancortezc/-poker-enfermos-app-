@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
             },
             orderBy: { position: 'asc' }
           },
-          timerState: true
+          timerStates: true
         }
       })
 
@@ -69,12 +69,12 @@ export async function POST(req: NextRequest) {
       // Check if we have all eliminations (including winner)
       const totalPlayers = gameDate.playerIds.length
       const totalEliminations = gameDate.eliminations.length
-      const hasWinner = gameDate.eliminations.some(e => e.position === 1)
+      const hasWinner = gameDate.eliminations.some((e: { position: number }) => e.position === 1)
 
       // If we don't have a winner but all players except 1 have been eliminated,
       // auto-register the winner and complete the date
       if (!hasWinner && totalEliminations === totalPlayers - 1) {
-        const eliminatedPlayerIds = gameDate.eliminations.map(e => e.eliminatedPlayerId)
+        const eliminatedPlayerIds = gameDate.eliminations.map((e: { eliminatedPlayerId: string }) => e.eliminatedPlayerId)
         const remainingPlayerId = gameDate.playerIds.find(id => !eliminatedPlayerIds.includes(id))
 
         if (remainingPlayerId) {
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
           }
 
           // Find the second place to calculate winner points
-          const secondPlace = gameDate.eliminations.find(e => e.position === 2)
+          const secondPlace = gameDate.eliminations.find((e: { position: number; points: number }) => e.position === 2)
           const winnerPoints = secondPlace ? secondPlace.points + 3 : totalPlayers + 10
 
           // Auto-register winner elimination (position 1)
@@ -110,15 +110,14 @@ export async function POST(req: NextRequest) {
           await prisma.gameDate.update({
             where: { id: gameDateId },
             data: {
-              status: 'completed',
-              endTime: new Date()
+              status: 'completed'
             }
           })
 
           // Stop timer if exists
-          if (gameDate.timerState) {
+          if (gameDate.timerStates) {
             await prisma.timerState.update({
-              where: { id: gameDate.timerState.id },
+              where: { id: gameDate.timerStates.id },
               data: { status: 'inactive' }
             })
           }
@@ -160,21 +159,20 @@ export async function POST(req: NextRequest) {
         await prisma.gameDate.update({
           where: { id: gameDateId },
           data: {
-            status: 'completed',
-            endTime: new Date()
+            status: 'completed'
           }
         })
 
         // Stop timer if exists
-        if (gameDate.timerState) {
+        if (gameDate.timerStates) {
           await prisma.timerState.update({
-            where: { id: gameDate.timerState.id },
+            where: { id: gameDate.timerStates.id },
             data: { status: 'inactive' }
           })
         }
 
         // Find winner and update lastVictoryDate
-        const winner = gameDate.eliminations.find(e => e.position === 1)
+        const winner = gameDate.eliminations.find((e: { position: number }) => e.position === 1)
         if (winner) {
           const scheduledDateStr = gameDate.scheduledDate.toLocaleDateString('es-EC')
           await prisma.player.update({
@@ -206,7 +204,7 @@ export async function POST(req: NextRequest) {
       }
 
       // If we're missing eliminations
-      const eliminatedPlayerIds = gameDate.eliminations.map(e => e.eliminatedPlayerId)
+      const eliminatedPlayerIds = gameDate.eliminations.map((e: { eliminatedPlayerId: string }) => e.eliminatedPlayerId)
       const remainingPlayerIds = gameDate.playerIds.filter(id => !eliminatedPlayerIds.includes(id))
 
       const remainingPlayers = await prisma.player.findMany({
@@ -263,7 +261,7 @@ export async function GET(req: NextRequest) {
       const analysis = inProgressDates.map(gd => {
         const totalPlayers = gd.playerIds.length
         const totalEliminations = gd.eliminations.length
-        const hasWinner = gd.eliminations.some(e => e.position === 1)
+        const hasWinner = gd.eliminations.some((e: { position: number }) => e.position === 1)
         const isReadyToComplete = hasWinner && totalEliminations === totalPlayers
 
         return {
