@@ -11,6 +11,7 @@ export interface GameDateParticipation {
   played: boolean;
   position: number | null; // null if still playing or absent
   points: number;
+  totalPlayers?: number; // total players in this game date (for last place detection)
 }
 
 /**
@@ -100,6 +101,10 @@ export class RankingCalculator {
             tiebreaker = tiebreaker.withSecondPlace();
           } else if (participation.position === 3) {
             tiebreaker = tiebreaker.withThirdPlace();
+          }
+          // Check for last place (first eliminated = highest position number)
+          if (participation.totalPlayers && participation.position === participation.totalPlayers) {
+            tiebreaker = tiebreaker.withLastPlace();
           }
         }
       } else {

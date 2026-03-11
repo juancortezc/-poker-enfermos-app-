@@ -13,6 +13,7 @@ export class TiebreakerStats {
     private readonly _firstPlaces: number,
     private readonly _secondPlaces: number,
     private readonly _thirdPlaces: number,
+    private readonly _lastPlaces: number,
     private readonly _absences: number
   ) {}
 
@@ -20,18 +21,20 @@ export class TiebreakerStats {
     firstPlaces: number,
     secondPlaces: number,
     thirdPlaces: number,
+    lastPlaces: number,
     absences: number
   ): TiebreakerStats {
     return new TiebreakerStats(
       Math.max(0, firstPlaces),
       Math.max(0, secondPlaces),
       Math.max(0, thirdPlaces),
+      Math.max(0, lastPlaces),
       Math.max(0, absences)
     );
   }
 
   static empty(): TiebreakerStats {
-    return new TiebreakerStats(0, 0, 0, 0);
+    return new TiebreakerStats(0, 0, 0, 0, 0);
   }
 
   get firstPlaces(): number {
@@ -44,6 +47,10 @@ export class TiebreakerStats {
 
   get thirdPlaces(): number {
     return this._thirdPlaces;
+  }
+
+  get lastPlaces(): number {
+    return this._lastPlaces;
   }
 
   get absences(): number {
@@ -65,6 +72,7 @@ export class TiebreakerStats {
       this._firstPlaces + 1,
       this._secondPlaces,
       this._thirdPlaces,
+      this._lastPlaces,
       this._absences
     );
   }
@@ -77,6 +85,7 @@ export class TiebreakerStats {
       this._firstPlaces,
       this._secondPlaces + 1,
       this._thirdPlaces,
+      this._lastPlaces,
       this._absences
     );
   }
@@ -89,6 +98,20 @@ export class TiebreakerStats {
       this._firstPlaces,
       this._secondPlaces,
       this._thirdPlaces + 1,
+      this._lastPlaces,
+      this._absences
+    );
+  }
+
+  /**
+   * Creates a new TiebreakerStats with an added last place.
+   */
+  withLastPlace(): TiebreakerStats {
+    return new TiebreakerStats(
+      this._firstPlaces,
+      this._secondPlaces,
+      this._thirdPlaces,
+      this._lastPlaces + 1,
       this._absences
     );
   }
@@ -101,6 +124,7 @@ export class TiebreakerStats {
       this._firstPlaces,
       this._secondPlaces,
       this._thirdPlaces,
+      this._lastPlaces,
       this._absences + 1
     );
   }
@@ -138,6 +162,7 @@ export class TiebreakerStats {
       this._firstPlaces === other._firstPlaces &&
       this._secondPlaces === other._secondPlaces &&
       this._thirdPlaces === other._thirdPlaces &&
+      this._lastPlaces === other._lastPlaces &&
       this._absences === other._absences
     );
   }

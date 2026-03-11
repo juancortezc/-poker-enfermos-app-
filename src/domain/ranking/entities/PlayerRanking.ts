@@ -146,6 +146,10 @@ export class PlayerRanking {
     return this._tiebreaker.thirdPlaces;
   }
 
+  get lastPlaces(): number {
+    return this._tiebreaker.lastPlaces;
+  }
+
   get absences(): number {
     return this._tiebreaker.absences;
   }

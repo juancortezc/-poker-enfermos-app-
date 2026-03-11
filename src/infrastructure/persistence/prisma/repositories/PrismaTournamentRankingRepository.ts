@@ -151,6 +151,8 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
         (e) => e.eliminatedPlayerId === playerId
       );
 
+      const totalPlayers = gameDate.playerIds.length;
+
       if (played) {
         if (elimination) {
           // Player was eliminated at a specific position
@@ -159,6 +161,7 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
             played: true,
             position: elimination.position,
             points: elimination.points,
+            totalPlayers,
           });
         } else {
           // Player participated but not eliminated yet
@@ -179,6 +182,7 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
               played: true,
               position: 1,
               points: winnerPoints,
+              totalPlayers,
             });
           } else {
             // Still playing, no points yet
@@ -187,6 +191,7 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
               played: true,
               position: null,
               points: 0,
+              totalPlayers,
             });
           }
         }
@@ -197,6 +202,7 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
           played: false,
           position: null,
           points: 0,
+          totalPlayers,
         });
       }
     }
