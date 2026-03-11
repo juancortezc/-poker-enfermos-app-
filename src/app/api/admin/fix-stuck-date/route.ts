@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       const hasWinner = gameDate.eliminations.some(e => e.position === 1)
 
       // If we don't have a winner but all players except 1 have been eliminated,
-      // we can't auto-complete - need to register winner first
+      // auto-register the winner and complete the date
       if (!hasWinner && totalEliminations === totalPlayers - 1) {
         const eliminatedPlayerIds = gameDate.eliminations.map(e => e.eliminatedPlayerId)
         const remainingPlayerId = gameDate.playerIds.find(id => !eliminatedPlayerIds.includes(id))
@@ -83,20 +83,74 @@ export async function POST(req: NextRequest) {
             select: { id: true, firstName: true, lastName: true }
           })
 
+          if (!remainingPlayer) {
+            return NextResponse.json({
+              success: false,
+              error: 'Could not find remaining player',
+            }, { status: 400 })
+          }
+
+          // Find the second place to calculate winner points
+          const secondPlace = gameDate.eliminations.find(e => e.position === 2)
+          const winnerPoints = secondPlace ? secondPlace.points + 3 : totalPlayers + 10
+
+          // Auto-register winner elimination (position 1)
+          await prisma.elimination.create({
+            data: {
+              gameDateId: gameDate.id,
+              position: 1,
+              points: winnerPoints,
+              eliminatedPlayerId: remainingPlayerId,
+              eliminatorPlayerId: remainingPlayerId, // Winner eliminates themselves (convention)
+              eliminationTime: new Date(),
+            }
+          })
+
+          // Update game date status
+          await prisma.gameDate.update({
+            where: { id: gameDateId },
+            data: {
+              status: 'completed',
+              endTime: new Date()
+            }
+          })
+
+          // Stop timer if exists
+          if (gameDate.timerState) {
+            await prisma.timerState.update({
+              where: { id: gameDate.timerState.id },
+              data: { status: 'inactive' }
+            })
+          }
+
+          // Update winner's lastVictoryDate
+          const scheduledDateStr = gameDate.scheduledDate.toLocaleDateString('es-EC')
+          await prisma.player.update({
+            where: { id: remainingPlayerId },
+            data: { lastVictoryDate: scheduledDateStr }
+          })
+
           return NextResponse.json({
-            success: false,
-            error: 'Game date is missing the winner elimination',
-            hint: 'Register the winner before completing the game date',
-            remaining: {
-              playersNotEliminated: 1,
-              player: remainingPlayer
+            success: true,
+            message: 'Winner auto-registered and game date completed',
+            gameDate: {
+              id: gameDate.id,
+              dateNumber: gameDate.dateNumber,
+              previousStatus: 'in_progress',
+              newStatus: 'completed',
+              tournament: gameDate.tournament
+            },
+            winner: {
+              playerId: remainingPlayerId,
+              playerName: `${remainingPlayer.firstName} ${remainingPlayer.lastName}`,
+              points: winnerPoints,
+              autoRegistered: true
             },
             stats: {
               totalPlayers,
-              totalEliminations,
-              hasWinner: false
+              totalEliminations: totalEliminations + 1
             }
-          }, { status: 400 })
+          })
         }
       }
 
