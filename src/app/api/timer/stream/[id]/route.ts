@@ -46,8 +46,8 @@ async function getTimerData(gameDateId: number): Promise<TimerStreamData | null>
     return null
   }
 
-  // Handle completed or non-active game dates
-  if (gameDate.status === 'completed' || !gameDate.timerState) {
+  // Handle completed game dates
+  if (gameDate.status === 'completed') {
     const blindLevels = gameDate.tournament.blindLevels
     const lastBlind = blindLevels[blindLevels.length - 1]
 
@@ -62,6 +62,28 @@ async function getTimerData(gameDateId: number): Promise<TimerStreamData | null>
       nextSmallBlind: null,
       nextBigBlind: null,
       nextLevel: null,
+      gameDateId: gameDate.id,
+      tournamentName: `Torneo ${gameDate.tournament.number}`,
+      dateNumber: gameDate.dateNumber
+    }
+  }
+
+  // Handle game dates without timer state (not started yet or inactive)
+  if (!gameDate.timerState) {
+    const blindLevels = gameDate.tournament.blindLevels
+    const firstBlind = blindLevels[0]
+
+    return {
+      serverTime: Date.now(),
+      status: 'inactive',
+      currentLevel: 1,
+      timeRemaining: firstBlind?.duration ? firstBlind.duration * 60 : 0,
+      totalElapsed: 0,
+      smallBlind: firstBlind?.smallBlind ?? 0,
+      bigBlind: firstBlind?.bigBlind ?? 0,
+      nextSmallBlind: blindLevels[1]?.smallBlind ?? null,
+      nextBigBlind: blindLevels[1]?.bigBlind ?? null,
+      nextLevel: blindLevels[1]?.level ?? null,
       gameDateId: gameDate.id,
       tournamentName: `Torneo ${gameDate.tournament.number}`,
       dateNumber: gameDate.dateNumber

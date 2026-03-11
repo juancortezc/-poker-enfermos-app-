@@ -46,7 +46,7 @@ export class PrismaEliminationRepository implements EliminationRepository {
 
     const eliminations = await prisma.elimination.findMany({
       where: { gameDateId },
-      orderBy: { position: 'desc' },
+      orderBy: { position: 'asc' }, // Ascendente: posición 1 (último eliminado) primero
     });
 
     return eliminations.map((e) => EliminationMapper.toDomain(e, totalPlayers));
