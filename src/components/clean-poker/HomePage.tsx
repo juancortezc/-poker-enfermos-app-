@@ -14,7 +14,6 @@ import { PositionCard } from './PositionCard'
 import { PodioCard } from './PodioCard'
 import { MalazoCard } from './MalazoCard'
 import { LiveGameCard } from './LiveGameCard'
-import { CPTimerCard } from './CPTimerCard'
 import { CPPlayerDetailModal } from './CPPlayerDetailModal'
 import { CelebrationsCard } from './CelebrationsCard'
 
@@ -713,9 +712,6 @@ function HomeWithLiveGame({
       <main className="pb-20 px-4 space-y-4">
         {/* Celebrations - Birthdays (first position, dismissible) */}
         <CelebrationsCard />
-
-        {/* Timer Card */}
-        <CPTimerCard />
 
         {/* Live Game Card */}
         <LiveGameCard
