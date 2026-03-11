@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
+import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { CPRankingView } from '@/components/clean-poker/CPRankingView'
 
 import { CPHeader } from '@/components/clean-poker/CPHeader'
@@ -131,6 +132,8 @@ export default function RankingPage() {
     )
   }
 
+  const { hasActiveGameDate } = useActiveGameDate()
+
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     : 'PE'
@@ -145,6 +148,7 @@ export default function RankingPage() {
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
         isComision={isComision}
+        hasActiveGameDate={hasActiveGameDate}
       />
 
       {/* Content */}

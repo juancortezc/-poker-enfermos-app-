@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
+import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import ResumenTable from '@/components/tables/ResumenTable'
 import TotalTable from '@/components/tables/TotalTable'
 import FechasTable from '@/components/tables/FechasTable'
@@ -145,6 +146,8 @@ export default function TablaPage() {
     )
   }
 
+  const { hasActiveGameDate } = useActiveGameDate()
+
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     : 'PE'
@@ -159,6 +162,7 @@ export default function TablaPage() {
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
         isComision={isComision}
+        hasActiveGameDate={hasActiveGameDate}
       />
 
       {/* Content */}

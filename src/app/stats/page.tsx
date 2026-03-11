@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
+import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
@@ -98,6 +99,8 @@ export default function StatsPage() {
     )
   }
 
+  const { hasActiveGameDate } = useActiveGameDate()
+
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     : 'PE'
@@ -112,6 +115,7 @@ export default function StatsPage() {
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
         isComision={isComision}
+        hasActiveGameDate={hasActiveGameDate}
       />
 
       {/* Content */}
