@@ -27,6 +27,7 @@ export interface PlayerRankingDTO {
   firstPlaces: number;
   secondPlaces: number;
   thirdPlaces: number;
+  lastPlaces: number;
   absences: number;
 }
 

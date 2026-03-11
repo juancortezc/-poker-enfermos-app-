@@ -91,6 +91,7 @@ export class GetTournamentRankingHandler implements GetTournamentRankingUseCase 
       firstPlaces: pr.firstPlaces,
       secondPlaces: pr.secondPlaces,
       thirdPlaces: pr.thirdPlaces,
+      lastPlaces: pr.lastPlaces,
       absences: pr.absences,
     };
   }
