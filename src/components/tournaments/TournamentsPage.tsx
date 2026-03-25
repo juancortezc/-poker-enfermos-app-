@@ -7,7 +7,8 @@ import { UserRole, TournamentStatus } from '@prisma/client'
 import { Button } from '@/components/ui/button'
 import ProgressBar, { CircularProgress } from '@/components/ui/ProgressBar'
 import LoadingState, { CardSkeleton } from '@/components/ui/LoadingState'
-import { Plus, Trophy, Calendar, Users, Clock } from 'lucide-react'
+import { Plus, Trophy, Calendar, Users, Clock, CheckCircle } from 'lucide-react'
+import TournamentCompletionModal from './TournamentCompletionModal'
 import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface Tournament {
@@ -43,6 +44,8 @@ export default function TournamentsPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'activos' | 'finalizados'>('activos')
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null)
 
   const canEdit = user?.role === 'Comision'
 
@@ -75,6 +78,18 @@ export default function TournamentsPage() {
 
   const handleTournamentClick = (tournamentId: number) => {
     router.push(`/tournaments/${tournamentId}`)
+  }
+
+  const handleFinalizeTournament = (e: React.MouseEvent, tournament: Tournament) => {
+    e.stopPropagation() // Prevent card click
+    setSelectedTournament(tournament)
+    setShowCompletionModal(true)
+  }
+
+  const handleCompletionSuccess = () => {
+    setShowCompletionModal(false)
+    setSelectedTournament(null)
+    fetchTournaments()
   }
 
   const formatDate = (dateString: string) => {
@@ -236,6 +251,21 @@ export default function TournamentsPage() {
                           <span>{formatDate(tournament.createdAt)}</span>
                         </div>
                       </div>
+
+                      {/* Finalize Tournament Button - Only for Comision and active tournaments */}
+                      {canEdit && tournament.status === 'ACTIVO' && (
+                        <Button
+                          onClick={(e) => handleFinalizeTournament(e, tournament)}
+                          className={`w-full mt-2 ${
+                            completedDates === totalDates
+                              ? 'bg-[#10b981] hover:bg-[#059669] text-white'
+                              : 'bg-transparent border border-[#a9441c]/50 text-[#a9441c] hover:bg-[#a9441c]/10'
+                          }`}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          {completedDates === totalDates ? 'Finalizar Torneo' : 'Finalizar Anticipadamente'}
+                        </Button>
+                      )}
                     </div>
 
                     {/* Circular progress para vista rápida */}
@@ -259,6 +289,19 @@ export default function TournamentsPage() {
         )}
         </div>
       </div>
+
+      {/* Completion Modal */}
+      {selectedTournament && (
+        <TournamentCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => {
+            setShowCompletionModal(false)
+            setSelectedTournament(null)
+          }}
+          tournament={selectedTournament}
+          onComplete={handleCompletionSuccess}
+        />
+      )}
     </div>
   )
 }

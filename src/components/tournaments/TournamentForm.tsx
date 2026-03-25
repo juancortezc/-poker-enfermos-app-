@@ -13,7 +13,8 @@ import { useFormValidation, useFormDraft } from '@/hooks/useFormDraft'
 import { validateTournamentForm, validateTournamentNumber } from '@/lib/tournament-validation'
 import { TOURNAMENT_PRESETS, getPresetById } from '@/lib/tournament-presets'
 import { generateTournamentDates } from '@/lib/date-utils'
-import { ArrowLeft, Save, Loader2, Check, AlertCircle, Target, X, Trash2 } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Check, AlertCircle, Target, X, Trash2, Trophy } from 'lucide-react'
+import TournamentCompletionModal from './TournamentCompletionModal'
 import { toast } from 'react-toastify'
 import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
 import { fetchCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
@@ -86,6 +87,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
 
   const isEditing = !!tournamentId
   const [activeTab, setActiveTab] = useState<'participants' | 'dates' | 'blinds'>('participants')
@@ -522,18 +524,30 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
             </div>
           </div>
 
-          {/* Delete Tournament Button - Only when editing */}
+          {/* Action Buttons - Only when editing */}
           {isEditing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
-              title="Cancelar torneo"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Cancelar Torneo
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCompletionModal(true)}
+                className="text-[#10b981] hover:text-[#059669] hover:bg-[#10b981]/10"
+                title="Finalizar torneo"
+              >
+                <Trophy className="w-4 h-4 mr-2" />
+                Finalizar Torneo
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                title="Cancelar torneo"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Cancelar Torneo
+              </Button>
+            </div>
           )}
         </div>
 
@@ -1061,6 +1075,19 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
         variant="danger"
         isLoading={isDeleting}
       />
+
+      {/* Tournament Completion Modal */}
+      {isEditing && (
+        <TournamentCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => setShowCompletionModal(false)}
+          tournament={{ id: parseInt(tournamentId!), name: `Torneo ${tournamentNumber}`, number: tournamentNumber }}
+          onComplete={() => {
+            setShowCompletionModal(false)
+            router.push('/tournaments')
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import LoadingState from '@/components/ui/LoadingState'
 import TournamentCompletionModal from './TournamentCompletionModal'
 import TournamentCancellationModal from './TournamentCancellationModal'
-import { ArrowLeft, Users, Play, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, Users, Play, X, Loader2, CheckCircle, Trophy } from 'lucide-react'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 interface Tournament {
@@ -211,6 +211,30 @@ export default function TournamentOverview() {
               )}
             </div>
 
+            {/* Progress Bar - Show when tournament has progress */}
+            {activeTournament.stats && (
+              <div className="mb-4">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-poker-muted">Progreso del Torneo</span>
+                  <span className="text-white font-medium">
+                    {activeTournament.stats.completedDates || 0} / {activeTournament.stats.totalDates || 12} fechas
+                  </span>
+                </div>
+                <div className="w-full bg-poker-dark rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all ${
+                      activeTournament.stats.isCompleted
+                        ? 'bg-green-500'
+                        : 'bg-poker-red'
+                    }`}
+                    style={{
+                      width: `${((activeTournament.stats.completedDates || 0) / (activeTournament.stats.totalDates || 12)) * 100}%`
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Tournament Info Cards */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               {/* Participants Card */}
@@ -268,6 +292,37 @@ export default function TournamentOverview() {
                 </div>
               </button>
             </div>
+
+            {/* Finalize Tournament Button - Visible for Comision when all dates are completed */}
+            {canEdit && activeTournament.stats?.isCompleted && (
+              <div className="mb-4">
+                <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg mb-3">
+                  <div className="flex items-center gap-2 text-green-400 text-sm">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Todas las fechas han sido completadas</span>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setShowCompletionModal(true)}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-bold"
+                >
+                  <Trophy className="w-5 h-5 mr-2" />
+                  Finalizar Torneo
+                </Button>
+              </div>
+            )}
+
+            {/* Alternative: Always show finalize button for Comision (even if not all dates completed) */}
+            {canEdit && !activeTournament.stats?.isCompleted && (
+              <Button
+                onClick={() => setShowCompletionModal(true)}
+                variant="outline"
+                className="w-full border-poker-red/50 text-poker-red hover:bg-poker-red/10 mb-4"
+              >
+                <Trophy className="w-4 h-4 mr-2" />
+                Finalizar Torneo Anticipadamente
+              </Button>
+            )}
           </div>
         ) : (
           <div className="mb-8">

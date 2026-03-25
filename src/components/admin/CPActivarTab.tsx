@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
-import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown, Trash2 } from 'lucide-react'
+import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown, Trash2, Trophy } from 'lucide-react'
+import TournamentCompletionModal from '@/components/tournaments/TournamentCompletionModal'
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
@@ -76,6 +77,7 @@ export default function CPActivarTab() {
   const [blockedDate, setBlockedDate] = useState<BlockedDate | null>(null)
   const [missingDate, setMissingDate] = useState<number | null>(null)
   const [missingDateScheduled, setMissingDateScheduled] = useState<string>('')
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
 
   useEffect(() => {
     const token = getStoredAuthToken()
@@ -921,24 +923,52 @@ export default function CPActivarTab() {
         </div>
       )}
 
-      {/* Empty State */}
-      {availableDates.length === 0 && !error && (
+      {/* Empty State - All dates completed, show close tournament button */}
+      {availableDates.length === 0 && !error && tournament && (
         <div
           className="p-8 text-center"
           style={{
-            background: 'rgba(0, 0, 0, 0.2)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            background: 'rgba(16, 185, 129, 0.1)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
             borderRadius: '4px',
           }}
         >
-          <Calendar size={32} className="mx-auto mb-3" style={{ color: 'var(--cp-on-surface-muted)' }} />
-          <p style={{ color: 'var(--cp-on-surface)', fontSize: 'var(--cp-body-size)' }}>
-            No hay fechas disponibles
+          <Trophy size={32} className="mx-auto mb-3" style={{ color: '#10b981' }} />
+          <p style={{ color: '#10b981', fontSize: 'var(--cp-body-size)', fontWeight: 600 }}>
+            Torneo Completado
           </p>
-          <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }}>
-            Todas las fechas del torneo han sido jugadas
+          <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }} className="mb-4">
+            Todas las fechas del {tournament.name} han sido jugadas
           </p>
+          <button
+            onClick={() => setShowCompletionModal(true)}
+            className="flex items-center justify-center gap-2 mx-auto px-6 py-3"
+            style={{
+              background: '#10b981',
+              color: 'white',
+              borderRadius: '4px',
+              fontWeight: 600,
+              fontSize: 'var(--cp-body-size)',
+            }}
+          >
+            <Trophy size={18} />
+            CERRAR TORNEO {tournament.number}
+          </button>
         </div>
+      )}
+
+      {/* Tournament Completion Modal */}
+      {tournament && (
+        <TournamentCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => setShowCompletionModal(false)}
+          tournament={{ id: tournament.id, name: tournament.name, number: tournament.number }}
+          onComplete={() => {
+            setShowCompletionModal(false)
+            // Reload the page to show updated state
+            window.location.reload()
+          }}
+        />
       )}
     </div>
   )
