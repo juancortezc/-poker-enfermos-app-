@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 
 interface RankingEvolutionChartProps {
   data: Array<{
@@ -55,6 +55,9 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
   const yDomainMin = 1;
   const yDomainMax = 24;
 
+  // Y-axis ticks: show key positions (1, 6, 12, 18, 24)
+  const yAxisTicks = [1, 6, 12, 18, 24];
+
   if (!data || data.length === 0) {
     return (
       <div className="bg-poker-card border border-white/10 rounded-lg p-6 h-64">
@@ -70,14 +73,14 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
 
   return (
     <div className="rounded-2xl sm:rounded-3xl border border-[#e0b66c]/15 bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1f1410] p-3 sm:p-6 shadow-[0_18px_40px_rgba(11,12,32,0.35)]">
-      <div className="h-52 sm:h-80">
+      <div className="h-64 sm:h-80 w-full overflow-hidden">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
             margin={{
-              top: 10,
-              right: 10,
-              left: 0,
+              top: 20,
+              right: 15,
+              left: 5,
               bottom: 10,
             }}
           >
@@ -94,21 +97,25 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
             <CartesianGrid strokeDasharray="4 8" stroke="url(#noirJazzGrid)" />
             <XAxis
               dataKey="label"
-              stroke="rgba(255, 255, 255, 0.45)"
-              fontSize={10}
+              stroke="rgba(255, 255, 255, 0.6)"
+              fontSize={9}
               tickLine={false}
-              axisLine={false}
+              axisLine={{ stroke: 'rgba(255, 255, 255, 0.2)' }}
               interval={0}
+              tick={{ fill: 'rgba(255, 255, 255, 0.7)' }}
+              padding={{ left: 10, right: 10 }}
             />
             <YAxis
-              stroke="rgba(255, 255, 255, 0.45)"
-              fontSize={10}
+              stroke="rgba(255, 255, 255, 0.6)"
+              fontSize={9}
               tickLine={false}
-              axisLine={false}
-              width={30}
+              axisLine={{ stroke: 'rgba(255, 255, 255, 0.2)' }}
+              width={28}
               domain={[yDomainMin, yDomainMax]}
-              reversed={true} // Invert Y-axis so position 1 is at top
+              reversed={true}
+              ticks={yAxisTicks}
               tickFormatter={(value) => `#${value}`}
+              tick={{ fill: 'rgba(255, 255, 255, 0.7)' }}
             />
             <Tooltip
               content={<CustomTooltip />}
@@ -118,24 +125,33 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
               type="monotone"
               dataKey="position"
               stroke="url(#noirJazzLine)"
-              strokeWidth={3}
+              strokeWidth={2}
               dot={{
                 fill: '#e0b66c',
                 strokeWidth: 1,
                 stroke: '#a9441c',
-                r: 5
+                r: 4
               }}
               activeDot={{
-                r: 8,
+                r: 6,
                 fill: '#e0b66c',
                 stroke: '#f3e6c5',
                 strokeWidth: 2
               }}
-            />
+            >
+              <LabelList
+                dataKey="position"
+                position="top"
+                offset={8}
+                fontSize={9}
+                fill="#f3e6c5"
+                formatter={(value) => `#${value}`}
+              />
+            </Line>
           </LineChart>
         </ResponsiveContainer>
       </div>
-      
+
       {/* Chart info */}
       <div className="mt-2 sm:mt-4 text-center">
         <p className="text-xs sm:text-sm text-white/60">
