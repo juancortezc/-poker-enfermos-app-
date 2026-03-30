@@ -55,14 +55,12 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
   const { yDomainMin, yDomainMax } = useMemo(() => {
     if (!data || data.length === 0) return { yDomainMin: 1, yDomainMax: 10 };
     const maxPos = Math.max(...data.map(d => d.position));
-    const minPos = Math.min(...data.map(d => d.position));
-    const range = maxPos - minPos;
-    const padding = Math.max(1, Math.ceil(range * 0.15));
+    const padding = Math.max(1, Math.ceil(maxPos * 0.1));
 
-    // yDomainMin: Always start at 1 (top position) - never go below 1
+    // yDomainMin: ALWAYS start at 1 (top position) to show full scale
     // yDomainMax: Add padding below the worst position
     return {
-      yDomainMin: Math.max(1, minPos - padding),
+      yDomainMin: 1,
       yDomainMax: maxPos + padding
     };
   }, [data]);
