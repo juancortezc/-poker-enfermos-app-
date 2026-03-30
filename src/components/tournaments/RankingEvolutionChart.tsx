@@ -50,20 +50,10 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
     }));
   }, [data]);
 
-  // OPTIMIZATION: Memoize Y-axis domain calculations
-  // Domain is [top, bottom] when reversed=true, so position 1 should be at top
-  const { yDomainMin, yDomainMax } = useMemo(() => {
-    if (!data || data.length === 0) return { yDomainMin: 1, yDomainMax: 10 };
-    const maxPos = Math.max(...data.map(d => d.position));
-    const padding = Math.max(1, Math.ceil(maxPos * 0.1));
-
-    // yDomainMin: ALWAYS start at 1 (top position) to show full scale
-    // yDomainMax: Add padding below the worst position
-    return {
-      yDomainMin: 1,
-      yDomainMax: maxPos + padding
-    };
-  }, [data]);
+  // Fixed Y-axis domain: 1 (top/best) to 24 (bottom/worst)
+  // This ensures all player charts are comparable with the same scale
+  const yDomainMin = 1;
+  const yDomainMax = 24;
 
   if (!data || data.length === 0) {
     return (
