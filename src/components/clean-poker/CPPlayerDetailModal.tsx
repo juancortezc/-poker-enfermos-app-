@@ -465,10 +465,10 @@ interface PositionEvolutionChartProps {
 function PositionEvolutionChart({ evolution }: PositionEvolutionChartProps) {
   if (!evolution || evolution.length < 2) return null
 
-  const maxPosition = Math.max(...evolution.map(e => e.position), 15)
+  // Fixed scale: 1 (best) to 24 (worst) for consistency across all players
+  const maxPosition = 24
   const minPosition = 1
-  const chartHeight = 80
-  const chartWidth = evolution.length * 40
+  const chartHeight = 120
 
   // Calculate position change
   const firstPosition = evolution[0].position
@@ -487,11 +487,20 @@ function PositionEvolutionChart({ evolution }: PositionEvolutionChartProps) {
     return '#FFC107'
   }
 
-  // Create SVG path for the line
+  // Y-axis ticks for fixed scale
+  const yAxisTicks = [1, 6, 12, 18, 24]
+
+  // Padding for labels
+  const leftPadding = 8 // Space for Y-axis labels
+  const rightPadding = 2
+  const topPadding = 5
+  const bottomPadding = 5
+
+  // Create SVG path for the line with padding
   const points = evolution.map((e, i) => {
-    const x = (i / (evolution.length - 1)) * 100
+    const x = leftPadding + (i / (evolution.length - 1)) * (100 - leftPadding - rightPadding)
     // Invert Y because lower position number = better = higher on chart
-    const y = ((e.position - minPosition) / (maxPosition - minPosition)) * 100
+    const y = topPadding + ((e.position - minPosition) / (maxPosition - minPosition)) * (100 - topPadding - bottomPadding)
     return `${x},${y}`
   }).join(' ')
 
@@ -538,32 +547,33 @@ function PositionEvolutionChart({ evolution }: PositionEvolutionChartProps) {
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="relative overflow-x-auto">
+      {/* Chart - NO scroll, fixed width */}
+      <div className="relative w-full">
         <svg
-          viewBox={`0 0 100 100`}
+          viewBox="0 0 100 100"
           className="w-full"
-          style={{ height: chartHeight, minWidth: chartWidth }}
+          style={{ height: chartHeight }}
           preserveAspectRatio="none"
         >
-          {/* Grid lines */}
-          {[1, 5, 10, 15].filter(p => p <= maxPosition).map(pos => {
-            const y = ((pos - minPosition) / (maxPosition - minPosition)) * 100
+          {/* Y-axis grid lines and labels */}
+          {yAxisTicks.map(pos => {
+            const y = topPadding + ((pos - minPosition) / (maxPosition - minPosition)) * (100 - topPadding - bottomPadding)
             return (
               <g key={pos}>
                 <line
-                  x1="0"
+                  x1={leftPadding}
                   y1={y}
                   x2="100"
                   y2={y}
                   stroke="rgba(255,255,255,0.1)"
-                  strokeWidth="0.5"
+                  strokeWidth="0.3"
+                  vectorEffect="non-scaling-stroke"
                 />
                 <text
-                  x="-2"
+                  x={leftPadding - 1}
                   y={y}
-                  fill="var(--cp-on-surface-muted)"
-                  fontSize="3"
+                  fill="rgba(255,255,255,0.5)"
+                  fontSize="3.5"
                   textAnchor="end"
                   dominantBaseline="middle"
                 >
@@ -584,31 +594,45 @@ function PositionEvolutionChart({ evolution }: PositionEvolutionChartProps) {
             vectorEffect="non-scaling-stroke"
           />
 
-          {/* Data points */}
+          {/* Data points with position labels */}
           {evolution.map((e, i) => {
-            const x = (i / (evolution.length - 1)) * 100
-            const y = ((e.position - minPosition) / (maxPosition - minPosition)) * 100
+            const x = leftPadding + (i / (evolution.length - 1)) * (100 - leftPadding - rightPadding)
+            const y = topPadding + ((e.position - minPosition) / (maxPosition - minPosition)) * (100 - topPadding - bottomPadding)
             return (
-              <circle
-                key={i}
-                cx={x}
-                cy={y}
-                r="2"
-                fill="var(--cp-primary)"
-                vectorEffect="non-scaling-stroke"
-              />
+              <g key={i}>
+                <circle
+                  cx={x}
+                  cy={y}
+                  r="1.8"
+                  fill="var(--cp-primary)"
+                  stroke="#1a1a1a"
+                  strokeWidth="0.5"
+                  vectorEffect="non-scaling-stroke"
+                />
+                {/* Position label above each point */}
+                <text
+                  x={x}
+                  y={y - 3}
+                  fill="rgba(255,255,255,0.9)"
+                  fontSize="3"
+                  textAnchor="middle"
+                  dominantBaseline="auto"
+                >
+                  #{e.position}
+                </text>
+              </g>
             )
           })}
         </svg>
       </div>
 
-      {/* Date labels */}
-      <div className="flex justify-between mt-2">
+      {/* Date labels - evenly distributed */}
+      <div className="flex justify-between mt-1" style={{ paddingLeft: '8%', paddingRight: '2%' }}>
         {evolution.map((e, i) => (
           <span
             key={i}
             style={{
-              fontSize: '8px',
+              fontSize: '9px',
               color: 'var(--cp-on-surface-muted)',
             }}
           >
