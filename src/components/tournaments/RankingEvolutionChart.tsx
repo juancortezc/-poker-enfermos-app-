@@ -79,16 +79,16 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
   }
 
   return (
-    <div className="rounded-3xl border border-[#e0b66c]/15 bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1f1410] p-6 shadow-[0_18px_40px_rgba(11,12,32,0.35)]">
-      <div className="h-80">
+    <div className="rounded-2xl sm:rounded-3xl border border-[#e0b66c]/15 bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1f1410] p-3 sm:p-6 shadow-[0_18px_40px_rgba(11,12,32,0.35)]">
+      <div className="h-52 sm:h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
             margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 20,
+              top: 10,
+              right: 10,
+              left: 0,
+              bottom: 10,
             }}
           >
             <defs>
@@ -105,15 +105,17 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
             <XAxis
               dataKey="label"
               stroke="rgba(255, 255, 255, 0.45)"
-              fontSize={12}
+              fontSize={10}
               tickLine={false}
               axisLine={false}
+              interval={0}
             />
             <YAxis
               stroke="rgba(255, 255, 255, 0.45)"
-              fontSize={12}
+              fontSize={10}
               tickLine={false}
               axisLine={false}
+              width={30}
               domain={[yDomainMin, yDomainMax]}
               reversed={true} // Invert Y-axis so position 1 is at top
               tickFormatter={(value) => `#${value}`}
@@ -126,15 +128,15 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
               type="monotone"
               dataKey="position"
               stroke="url(#noirJazzLine)"
-              strokeWidth={5}
+              strokeWidth={3}
               dot={{
                 fill: '#e0b66c',
-                strokeWidth: 2,
+                strokeWidth: 1,
                 stroke: '#a9441c',
-                r: 8
+                r: 5
               }}
               activeDot={{
-                r: 12,
+                r: 8,
                 fill: '#e0b66c',
                 stroke: '#f3e6c5',
                 strokeWidth: 2
@@ -145,20 +147,10 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
       </div>
       
       {/* Chart info */}
-      <div className="mt-4 text-center">
-        <p className="text-sm text-white/60">
-          Evolución de {playerName} a través de {data.length} fechas jugadas
+      <div className="mt-2 sm:mt-4 text-center">
+        <p className="text-xs sm:text-sm text-white/60">
+          Evolución de {playerName} en {data.length} fechas
         </p>
-        <div className="flex justify-center items-center gap-4 mt-2 text-xs">
-          <div className="flex items-center gap-1">
-            <div className="h-1 w-6 rounded-full bg-gradient-to-r from-[#d73552] to-[#ff4b2b]" />
-            <span className="text-white/70">Posición en ranking</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="h-2 w-2 rounded-full bg-[#ff4b2b]" />
-            <span className="text-white/70">Fecha jugada</span>
-          </div>
-        </div>
       </div>
     </div>
   );
