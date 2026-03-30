@@ -116,7 +116,7 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
               axisLine={false}
               domain={[yDomainMin, yDomainMax]}
               reversed={true} // Invert Y-axis so position 1 is at top
-              tickFormatter={(value) => `${value}°`}
+              tickFormatter={(value) => `#${value}`}
             />
             <Tooltip
               content={<CustomTooltip />}
