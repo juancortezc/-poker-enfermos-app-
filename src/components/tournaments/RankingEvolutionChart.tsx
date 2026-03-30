@@ -51,12 +51,20 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
   }, [data]);
 
   // OPTIMIZATION: Memoize Y-axis domain calculations
-  const { maxPosition, minPosition, padding } = useMemo(() => {
-    if (!data || data.length === 0) return { maxPosition: 1, minPosition: 1, padding: 0 };
-    const max = Math.max(...data.map(d => d.position));
-    const min = Math.min(...data.map(d => d.position));
-    const pad = Math.max(1, Math.ceil((max - min) * 0.1));
-    return { maxPosition: max, minPosition: min, padding: pad };
+  // Domain is [top, bottom] when reversed=true, so position 1 should be at top
+  const { yDomainMin, yDomainMax } = useMemo(() => {
+    if (!data || data.length === 0) return { yDomainMin: 1, yDomainMax: 10 };
+    const maxPos = Math.max(...data.map(d => d.position));
+    const minPos = Math.min(...data.map(d => d.position));
+    const range = maxPos - minPos;
+    const padding = Math.max(1, Math.ceil(range * 0.15));
+
+    // yDomainMin: Always start at 1 (top position) - never go below 1
+    // yDomainMax: Add padding below the worst position
+    return {
+      yDomainMin: Math.max(1, minPos - padding),
+      yDomainMax: maxPos + padding
+    };
   }, [data]);
 
   if (!data || data.length === 0) {
@@ -108,7 +116,7 @@ export default function RankingEvolutionChart({ data, playerName }: RankingEvolu
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              domain={[minPosition - padding, maxPosition + padding]}
+              domain={[yDomainMin, yDomainMax]}
               reversed={true} // Invert Y-axis so position 1 is at top
               tickFormatter={(value) => `${value}°`}
             />
