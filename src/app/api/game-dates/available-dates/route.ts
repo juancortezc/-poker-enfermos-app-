@@ -124,8 +124,9 @@ export async function GET(request: NextRequest) {
 
       // Find the next date that should be playable
       // It's either: a pending date, OR the next date after completed ones that's missing
+      const totalDates = activeTournament.totalDates ?? 12
       const nextExpectedDate = maxCompletedDate + 1
-      const missingDate = !existingDateNumbers.includes(nextExpectedDate) && nextExpectedDate <= 12
+      const missingDate = !existingDateNumbers.includes(nextExpectedDate) && nextExpectedDate <= totalDates
         ? nextExpectedDate
         : null
 
@@ -133,7 +134,9 @@ export async function GET(request: NextRequest) {
         tournament: {
           id: activeTournament.id,
           name: activeTournament.name,
-          number: activeTournament.number
+          number: activeTournament.number,
+          totalDates: activeTournament.totalDates ?? 12,
+          datesToEliminate: activeTournament.datesToEliminate ?? 2
         },
         availableDates: availableDates,
         registeredPlayers: registeredPlayers,

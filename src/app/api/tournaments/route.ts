@@ -64,9 +64,11 @@ export async function POST(req: NextRequest) {
       const data = await req.json()
       const {
         number,
-        gameDates, // Array de 12 fechas
+        gameDates, // Array de fechas (cantidad configurable)
         participantIds, // Array de IDs de jugadores
-        blindLevels // Array de niveles de blinds
+        blindLevels, // Array de niveles de blinds
+        totalDates = 12, // Cantidad total de fechas (10-15, default 12)
+        datesToEliminate = 2 // Fechas a eliminar del ranking (2-3, default 2)
       } = data
 
       // Validaciones
@@ -77,11 +79,27 @@ export async function POST(req: NextRequest) {
         )
       }
 
+      // Validar totalDates (10-15)
+      if (totalDates < 10 || totalDates > 15) {
+        return NextResponse.json(
+          { error: 'La cantidad de fechas debe estar entre 10 y 15' },
+          { status: 400 }
+        )
+      }
+
+      // Validar datesToEliminate (2-3)
+      if (datesToEliminate < 2 || datesToEliminate > 3) {
+        return NextResponse.json(
+          { error: 'Las fechas a eliminar deben ser 2 o 3' },
+          { status: 400 }
+        )
+      }
+
       // Verificar que el número no esté en uso
       const existingTournament = await prisma.tournament.findUnique({
         where: { number }
       })
-      
+
       if (existingTournament) {
         return NextResponse.json(
           { error: `Ya existe un torneo con el número ${number}` },
@@ -102,9 +120,10 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      if (!gameDates || gameDates.length !== 12) {
+      // Validar que gameDates coincida con totalDates
+      if (!gameDates || gameDates.length !== totalDates) {
         return NextResponse.json(
-          { error: 'Debe programar exactamente 12 fechas' },
+          { error: `Debe programar exactamente ${totalDates} fechas` },
           { status: 400 }
         )
       }
@@ -123,6 +142,8 @@ export async function POST(req: NextRequest) {
           number,
           status: 'ACTIVO', // Los nuevos torneos se crean como activos
           participantIds,
+          totalDates,
+          datesToEliminate,
           gameDates: {
             create: gameDates.map((date: { scheduledDate: string }, index: number) => ({
               dateNumber: index + 1,

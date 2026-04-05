@@ -75,19 +75,31 @@ export const validateTournamentNumber = async (
   return null
 }
 
-export const validateGameDates = (gameDates: Array<{
-  dateNumber: number
-  scheduledDate: string
-}>): ValidationError[] => {
+export const validateGameDates = (
+  gameDates: Array<{
+    dateNumber: number
+    scheduledDate: string
+  }>,
+  totalDates: number = 12
+): ValidationError[] => {
   const errors: ValidationError[] = []
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  // Debe tener exactamente 12 fechas
-  if (gameDates.length !== 12) {
+  // Validar totalDates está en rango permitido (10-15)
+  if (totalDates < 10 || totalDates > 15) {
+    errors.push({
+      field: 'totalDates',
+      message: 'La cantidad de fechas debe estar entre 10 y 15',
+      type: 'error'
+    })
+  }
+
+  // Debe tener exactamente totalDates fechas
+  if (gameDates.length !== totalDates) {
     errors.push({
       field: 'gameDates',
-      message: 'Debe programar exactamente 12 fechas',
+      message: `Debe programar exactamente ${totalDates} fechas`,
       type: 'error'
     })
   }
@@ -222,6 +234,33 @@ export const validateParticipants = (participantIds: string[]): ValidationError[
     errors.push({
       field: 'participants',
       message: 'Máximo 24 participantes por torneo',
+      type: 'error'
+    })
+  }
+
+  return errors
+}
+
+export const validateTournamentConfig = (
+  totalDates: number,
+  datesToEliminate: number
+): ValidationError[] => {
+  const errors: ValidationError[] = []
+
+  // Validar totalDates (10-15)
+  if (totalDates < 10 || totalDates > 15) {
+    errors.push({
+      field: 'totalDates',
+      message: 'La cantidad de fechas debe estar entre 10 y 15',
+      type: 'error'
+    })
+  }
+
+  // Validar datesToEliminate (2-3)
+  if (datesToEliminate < 2 || datesToEliminate > 3) {
+    errors.push({
+      field: 'datesToEliminate',
+      message: 'Las fechas a eliminar deben ser 2 o 3',
       type: 'error'
     })
   }

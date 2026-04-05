@@ -74,11 +74,13 @@ export default function CPCrearTorneoTab() {
 
   // Config state
   const [blindLevels, setBlindLevels] = useState<BlindLevel[]>(DEFAULT_BLIND_LEVELS)
+  const [totalDates, setTotalDates] = useState<number>(12)
+  const [datesToEliminate, setDatesToEliminate] = useState<number>(2)
 
   // Generate initial dates
-  const generateInitialDates = useCallback(() => {
+  const generateInitialDates = useCallback((count: number = 12) => {
     const today = new Date()
-    return generateTournamentDates(today, 12)
+    return generateTournamentDates(today, count)
   }, [])
 
   // Load initial data
@@ -113,8 +115,9 @@ export default function CPCrearTorneoTab() {
 
         // Try to load saved draft
         const draft = await fetchCalendarDraft()
-        if (draft?.gameDates?.length === 12) {
+        if (draft && draft.gameDates && draft.gameDates.length >= 10 && draft.gameDates.length <= 15) {
           setGameDates(draft.gameDates)
+          setTotalDates(draft.gameDates.length)
           if (draft.tournamentNumber) {
             setTournamentNumber(draft.tournamentNumber)
           }
@@ -123,7 +126,7 @@ export default function CPCrearTorneoTab() {
             setCalendarApproved(true)
           }
         } else {
-          setGameDates(generateInitialDates())
+          setGameDates(generateInitialDates(12))
         }
       } catch (err) {
         console.error('Error initializing:', err)
@@ -145,14 +148,14 @@ export default function CPCrearTorneoTab() {
 
     if (index === 0) {
       // Regenerate all dates from first date
-      const newDates = generateTournamentDates(testDate, 12)
+      const newDates = generateTournamentDates(testDate, totalDates)
       setGameDates(newDates)
     } else {
       // Update this date and regenerate following dates
       const newDates = [...gameDates]
       newDates[index].scheduledDate = scheduledDate
 
-      const remainingCount = 12 - (index + 1)
+      const remainingCount = totalDates - (index + 1)
       if (remainingCount > 0) {
         const regenerated = generateTournamentDates(testDate, remainingCount + 1)
         for (let i = 0; i < remainingCount; i++) {
@@ -164,7 +167,22 @@ export default function CPCrearTorneoTab() {
 
     // Reset approval when calendar changes
     setCalendarApproved(false)
-  }, [gameDates])
+  }, [gameDates, totalDates])
+
+  // Handle total dates change
+  const handleTotalDatesChange = useCallback((newTotal: number) => {
+    if (newTotal < 10 || newTotal > 15) return
+    setTotalDates(newTotal)
+    // Regenerate dates with new count
+    const firstDate = gameDates[0]?.scheduledDate
+    if (firstDate) {
+      const startDate = new Date(firstDate + 'T12:00:00.000Z')
+      setGameDates(generateTournamentDates(startDate, newTotal))
+    } else {
+      setGameDates(generateInitialDates(newTotal))
+    }
+    setCalendarApproved(false)
+  }, [gameDates, generateInitialDates])
 
   // Save calendar draft
   const saveCalendar = useCallback(async () => {
@@ -187,8 +205,8 @@ export default function CPCrearTorneoTab() {
   // Approve calendar
   const approveCalendar = useCallback(async () => {
     const validDates = gameDates.filter(d => d.scheduledDate)
-    if (validDates.length !== 12) {
-      toast.error('Define las 12 fechas antes de aprobar')
+    if (validDates.length !== totalDates) {
+      toast.error(`Define las ${totalDates} fechas antes de aprobar`)
       return
     }
 
@@ -244,7 +262,9 @@ export default function CPCrearTorneoTab() {
             scheduledDate: d.scheduledDate
           })),
           participantIds: selectedParticipants,
-          blindLevels
+          blindLevels,
+          totalDates,
+          datesToEliminate
         })
       })
 
@@ -260,7 +280,9 @@ export default function CPCrearTorneoTab() {
 
       // Reset form
       setCalendarApproved(false)
-      setGameDates(generateInitialDates())
+      setTotalDates(12)
+      setDatesToEliminate(2)
+      setGameDates(generateInitialDates(12))
       setCurrentStep('calendario')
 
       // Fetch new tournament number
@@ -279,7 +301,7 @@ export default function CPCrearTorneoTab() {
     } finally {
       setCreating(false)
     }
-  }, [calendarApproved, selectedParticipants, tournamentNumber, gameDates, blindLevels, generateInitialDates])
+  }, [calendarApproved, selectedParticipants, tournamentNumber, gameDates, blindLevels, totalDates, datesToEliminate, generateInitialDates])
 
   // Check if can proceed to next step
   const canProceed = (step: Step): boolean => {
@@ -423,13 +445,17 @@ export default function CPCrearTorneoTab() {
         <CalendarStep
           gameDates={gameDates}
           validDatesCount={validDatesCount}
+          totalDates={totalDates}
+          datesToEliminate={datesToEliminate}
           calendarApproved={calendarApproved}
           saving={saving}
           updateGameDate={updateGameDate}
           saveCalendar={saveCalendar}
           approveCalendar={approveCalendar}
+          onTotalDatesChange={handleTotalDatesChange}
+          onDatesToEliminateChange={setDatesToEliminate}
           resetCalendar={() => {
-            setGameDates(generateInitialDates())
+            setGameDates(generateInitialDates(totalDates))
             setCalendarApproved(false)
           }}
         />
@@ -462,29 +488,97 @@ export default function CPCrearTorneoTab() {
 interface CalendarStepProps {
   gameDates: GeneratedDate[]
   validDatesCount: number
+  totalDates: number
+  datesToEliminate: number
   calendarApproved: boolean
   saving: boolean
   updateGameDate: (index: number, date: string) => void
   saveCalendar: () => void
   approveCalendar: () => void
+  onTotalDatesChange: (total: number) => void
+  onDatesToEliminateChange: (count: number) => void
   resetCalendar: () => void
 }
 
 function CalendarStep({
   gameDates,
   validDatesCount,
+  totalDates,
+  datesToEliminate,
   calendarApproved,
   saving,
   updateGameDate,
   saveCalendar,
   approveCalendar,
+  onTotalDatesChange,
+  onDatesToEliminateChange,
   resetCalendar
 }: CalendarStepProps) {
   return (
     <div className="space-y-3">
+      {/* Tournament Config */}
+      <div
+        className="grid grid-cols-2 gap-3 p-3"
+        style={{
+          background: 'var(--cp-surface)',
+          border: '1px solid var(--cp-surface-border)',
+          borderRadius: '4px',
+        }}
+      >
+        <div>
+          <label
+            style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-on-surface-muted)' }}
+            className="block mb-1"
+          >
+            Total de Fechas
+          </label>
+          <select
+            value={totalDates}
+            onChange={(e) => onTotalDatesChange(parseInt(e.target.value))}
+            disabled={calendarApproved}
+            className="w-full p-2 text-center font-bold"
+            style={{
+              background: 'var(--cp-background)',
+              border: '1px solid var(--cp-surface-border)',
+              borderRadius: '4px',
+              color: 'var(--cp-on-surface)',
+              cursor: calendarApproved ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {[10, 11, 12, 13, 14, 15].map(n => (
+              <option key={n} value={n}>{n} fechas</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-on-surface-muted)' }}
+            className="block mb-1"
+          >
+            Fechas a Eliminar
+          </label>
+          <select
+            value={datesToEliminate}
+            onChange={(e) => onDatesToEliminateChange(parseInt(e.target.value))}
+            disabled={calendarApproved}
+            className="w-full p-2 text-center font-bold"
+            style={{
+              background: 'var(--cp-background)',
+              border: '1px solid var(--cp-surface-border)',
+              borderRadius: '4px',
+              color: 'var(--cp-on-surface)',
+              cursor: calendarApproved ? 'not-allowed' : 'pointer',
+            }}
+          >
+            <option value={2}>Elimina 2</option>
+            <option value={3}>Elimina 3</option>
+          </select>
+        </div>
+      </div>
+
       {/* Info */}
       <p style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-on-surface-muted)' }}>
-        Selecciona la primera fecha y el sistema genera las 12 fechas del torneo (cada 15 dias en martes).
+        Selecciona la primera fecha y el sistema genera las {totalDates} fechas del torneo (cada 15 dias en martes).
       </p>
 
       {/* Dates Grid */}
@@ -566,7 +660,7 @@ function CalendarStep({
         </button>
         <button
           onClick={saveCalendar}
-          disabled={saving || validDatesCount !== 12}
+          disabled={saving || validDatesCount !== totalDates}
           className="flex-1 py-2 font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           style={{
             background: 'var(--cp-surface)',
@@ -581,7 +675,7 @@ function CalendarStep({
         {!calendarApproved && (
           <button
             onClick={approveCalendar}
-            disabled={saving || validDatesCount !== 12}
+            disabled={saving || validDatesCount !== totalDates}
             className="flex-1 py-2 font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             style={{
               background: '#E53935',
@@ -596,8 +690,8 @@ function CalendarStep({
       </div>
 
       {/* Status */}
-      <p className="text-center" style={{ fontSize: 'var(--cp-caption-size)', color: validDatesCount === 12 ? '#22c55e' : 'var(--cp-on-surface-muted)' }}>
-        {validDatesCount}/12 fechas definidas
+      <p className="text-center" style={{ fontSize: 'var(--cp-caption-size)', color: validDatesCount === totalDates ? '#22c55e' : 'var(--cp-on-surface-muted)' }}>
+        {validDatesCount}/{totalDates} fechas definidas | Mejores {totalDates - datesToEliminate} de {totalDates}
       </p>
     </div>
   )

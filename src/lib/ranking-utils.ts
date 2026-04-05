@@ -31,6 +31,7 @@ export interface TournamentRankingData {
     name: string;
     number: number;
     totalDates: number;
+    datesToEliminate: number;
     completedDates: number;
   };
   rankings: PlayerRanking[];
@@ -196,30 +197,34 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       });
     });
 
-    // SISTEMA ELIMINA 2: Calcular puntuación final usando las 10 mejores fechas de 12
-    // Regla: De las 12 fechas del torneo, solo las 10 mejores cuentan para el campeonato
-    // Se eliminan las 2 fechas con peores resultados (incluyendo ausencias = 0 puntos)
+    // SISTEMA ELIMINA N: Calcular puntuación final eliminando las N peores fechas
+    // Configuración dinámica: totalDates (10-15) y datesToEliminate (2-3)
+    const totalDates = tournament.totalDates ?? 12;
+    const datesToEliminate = tournament.datesToEliminate ?? 2;
+    const eliminationThreshold = Math.ceil(totalDates / 2); // Aplicar a partir de la mitad de fechas
+
     Array.from(playerRankings.values()).forEach(ranking => {
       const dateNumbers = Object.keys(ranking.pointsByDate).map(Number).sort((a, b) => a - b);
       const completedDatesCount = dateNumbers.length;
-      
-      // Solo aplicar eliminaciones a partir de 6 fechas jugadas (permite mostrar desde fecha 6)
-      if (completedDatesCount >= 6) {
+
+      // Solo aplicar eliminaciones a partir del threshold (mitad de fechas)
+      if (completedDatesCount >= eliminationThreshold) {
         // Obtener todas las puntuaciones (incluyendo 0 para fechas ausentes)
         const allScores = dateNumbers.map(dateNumber => ranking.pointsByDate[dateNumber]);
-        
+
         // Ordenar puntuaciones de menor a mayor para identificar las peores
         const sortedScores = [...allScores].sort((a, b) => a - b);
-        
-        // Identificar las 2 peores fechas para eliminación
-        ranking.elimina1 = sortedScores[0]; // Peor puntuación (incluye 0 por ausencias)
-        ranking.elimina2 = sortedScores[1]; // Segunda peor puntuación
-        
-        // PUNTUACIÓN FINAL = Total - 2 peores fechas (equivale a sumar solo las mejores)
-        // Ejemplo: Total 100 pts, elimina 5+8 = Final 87 pts (suma de mejores fechas)
-        ranking.finalScore = ranking.totalPoints - (ranking.elimina1 + ranking.elimina2);
+
+        // Identificar las N peores fechas para eliminación
+        const eliminatedScores = sortedScores.slice(0, datesToEliminate);
+        ranking.elimina1 = eliminatedScores[0]; // Peor puntuación
+        ranking.elimina2 = eliminatedScores[1]; // Segunda peor (si existe)
+
+        // PUNTUACIÓN FINAL = Total - N peores fechas
+        const eliminatedSum = eliminatedScores.reduce((sum, s) => sum + s, 0);
+        ranking.finalScore = ranking.totalPoints - eliminatedSum;
       } else {
-        // Antes de la fecha 6: usar puntuación total sin eliminaciones
+        // Antes del threshold: usar puntuación total sin eliminaciones
         ranking.elimina1 = undefined;
         ranking.elimina2 = undefined;
         ranking.finalScore = ranking.totalPoints;
@@ -339,17 +344,17 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
           });
         });
 
-        // Aplicar ELIMINA 2 si aplica (>= 6 fechas anteriores)
-        if (previousGameDates.length >= 6) {
+        // Aplicar ELIMINA N si aplica (>= threshold fechas anteriores)
+        if (previousGameDates.length >= eliminationThreshold) {
           tempRankings.forEach((tempRanking, playerId) => {
             const ranking = playerRankings.get(playerId)!;
             const prevDateNumbers = previousGameDates.map(gd => gd.dateNumber);
             const prevScores = prevDateNumbers.map(dn => ranking.pointsByDate[dn] || 0);
             const sortedPrevScores = [...prevScores].sort((a, b) => a - b);
 
-            const elimina1 = sortedPrevScores[0];
-            const elimina2 = sortedPrevScores[1];
-            tempRanking.finalScore = tempRanking.totalPoints - (elimina1 + elimina2);
+            const eliminatedPrevScores = sortedPrevScores.slice(0, datesToEliminate);
+            const eliminatedPrevSum = eliminatedPrevScores.reduce((sum, s) => sum + s, 0);
+            tempRanking.finalScore = tempRanking.totalPoints - eliminatedPrevSum;
           });
         } else {
           tempRankings.forEach(tempRanking => {
@@ -412,7 +417,8 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         id: tournament.id,
         name: tournament.name,
         number: tournament.number,
-        totalDates: 12, // Siempre 12 fechas por torneo
+        totalDates: tournament.totalDates ?? 12,
+        datesToEliminate: tournament.datesToEliminate ?? 2,
         completedDates: tournament.gameDates.length
       },
       rankings: sortedRankings,

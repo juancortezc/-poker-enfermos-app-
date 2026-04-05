@@ -1,15 +1,12 @@
-import { RANKING_CONFIG } from '@/lib/constants/scoring';
-
 /**
- * Value Object that encapsulates the ELIMINA 2 scoring calculation.
+ * Value Object that encapsulates the ELIMINA N scoring calculation.
  *
- * ELIMINA 2 System:
- * - A tournament has 12 game dates
- * - Only the best 10 dates count for the championship
- * - The 2 worst results are eliminated (including absences = 0 points)
- * - This system rewards consistency while allowing for 2 bad days
+ * ELIMINA N System:
+ * - A tournament has configurable number of game dates (10-15, default 12)
+ * - The N worst results are eliminated (2-3, default 2)
+ * - This system rewards consistency while allowing for N bad days
  *
- * The elimination is only applied after 6+ dates are completed.
+ * The elimination is only applied after >= ceil(totalDates/2) dates are completed.
  */
 export class Elimina2Score {
   private constructor(
@@ -17,35 +14,47 @@ export class Elimina2Score {
     private readonly _finalScore: number,
     private readonly _elimina1: number | null,
     private readonly _elimina2: number | null,
+    private readonly _eliminatedScores: number[],
     private readonly _isApplied: boolean
   ) {}
 
   /**
-   * Calculates the ELIMINA 2 score from a list of points per date.
+   * Calculates the ELIMINA N score from a list of points per date.
    *
    * @param pointsByDate - Map of dateNumber -> points (0 for absences)
+   * @param datesToEliminate - Number of worst dates to eliminate (default 2)
+   * @param totalDates - Total dates in tournament for threshold calculation (default 12)
    */
-  static calculate(pointsByDate: Map<number, number>): Elimina2Score {
+  static calculate(
+    pointsByDate: Map<number, number>,
+    datesToEliminate: number = 2,
+    totalDates: number = 12
+  ): Elimina2Score {
     const scores = Array.from(pointsByDate.values());
     const totalPoints = scores.reduce((sum, pts) => sum + pts, 0);
     const completedDates = scores.length;
 
-    // Only apply ELIMINA 2 when 6+ dates are completed
-    const shouldApply = completedDates >= 6;
+    // Apply elimination when >= ceil(totalDates/2) dates are completed
+    const threshold = Math.ceil(totalDates / 2);
+    const shouldApply = completedDates >= threshold;
 
     if (!shouldApply) {
-      return new Elimina2Score(totalPoints, totalPoints, null, null, false);
+      return new Elimina2Score(totalPoints, totalPoints, null, null, [], false);
     }
 
-    // Sort scores ascending to find the 2 worst
+    // Sort scores ascending to find the N worst
     const sortedScores = [...scores].sort((a, b) => a - b);
-    const elimina1 = sortedScores[0]; // Worst score
-    const elimina2 = sortedScores[1]; // Second worst score
+    const eliminatedScores = sortedScores.slice(0, datesToEliminate);
+    const eliminatedSum = eliminatedScores.reduce((sum, s) => sum + s, 0);
 
-    // Final score = total - 2 worst dates
-    const finalScore = totalPoints - elimina1 - elimina2;
+    // For backwards compatibility, keep elimina1 and elimina2
+    const elimina1 = eliminatedScores[0] ?? null;
+    const elimina2 = eliminatedScores[1] ?? null;
 
-    return new Elimina2Score(totalPoints, finalScore, elimina1, elimina2, true);
+    // Final score = total - N worst dates
+    const finalScore = totalPoints - eliminatedSum;
+
+    return new Elimina2Score(totalPoints, finalScore, elimina1, elimina2, eliminatedScores, true);
   }
 
   /**
@@ -55,10 +64,12 @@ export class Elimina2Score {
     totalPoints: number,
     finalScore: number,
     elimina1: number | null,
-    elimina2: number | null
+    elimina2: number | null,
+    eliminatedScores?: number[]
   ): Elimina2Score {
-    const isApplied = elimina1 !== null && elimina2 !== null;
-    return new Elimina2Score(totalPoints, finalScore, elimina1, elimina2, isApplied);
+    const isApplied = elimina1 !== null;
+    const scores = eliminatedScores ?? (elimina1 !== null && elimina2 !== null ? [elimina1, elimina2] : []);
+    return new Elimina2Score(totalPoints, finalScore, elimina1, elimina2, scores, isApplied);
   }
 
   /**
@@ -97,11 +108,18 @@ export class Elimina2Score {
   }
 
   /**
-   * Points eliminated (sum of 2 worst dates).
+   * Points eliminated (sum of N worst dates).
    */
   get eliminatedPoints(): number {
     if (!this._isApplied) return 0;
-    return (this._elimina1 ?? 0) + (this._elimina2 ?? 0);
+    return this._eliminatedScores.reduce((sum, s) => sum + s, 0);
+  }
+
+  /**
+   * All eliminated scores (for N > 2 scenarios).
+   */
+  get eliminatedScores(): number[] {
+    return [...this._eliminatedScores];
   }
 
   /**
@@ -131,7 +149,9 @@ export class Elimina2Score {
       this._totalPoints === other._totalPoints &&
       this._finalScore === other._finalScore &&
       this._elimina1 === other._elimina1 &&
-      this._elimina2 === other._elimina2
+      this._elimina2 === other._elimina2 &&
+      this._eliminatedScores.length === other._eliminatedScores.length &&
+      this._eliminatedScores.every((s, i) => s === other._eliminatedScores[i])
     );
   }
 }

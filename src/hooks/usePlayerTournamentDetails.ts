@@ -228,7 +228,9 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
         const rankingEvolution = calculateRankingEvolution(
           playerRanking.pointsByDate,
           rankingData.rankings,
-          playerId
+          playerId,
+          rankingData.tournament?.totalDates ?? 12,
+          rankingData.tournament?.datesToEliminate ?? 2
         );
 
         let bestResultLabel = 'Sin datos';
@@ -322,11 +324,13 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
   return { details, loading: combinedLoading, error: combinedError, refetch };
 }
 
-// Helper function to calculate ranking evolution with ELIMINA 2 system
+// Helper function to calculate ranking evolution with ELIMINA N system
 function calculateRankingEvolution(
   playerPointsByDate: { [dateNumber: number]: number },
   allRankings: Array<{ playerId: string; pointsByDate: { [key: number]: number }; [key: string]: unknown }>,
-  targetPlayerId: string
+  targetPlayerId: string,
+  totalDates: number = 12,
+  datesToEliminate: number = 2
 ): Array<{ dateNumber: number; position: number; points: number }> {
   const evolution: Array<{ dateNumber: number; position: number; points: number }> = [];
 
@@ -340,18 +344,21 @@ function calculateRankingEvolution(
 
   const sortedDates = Array.from(allPlayedDates).sort((a, b) => a - b);
 
-  // Function to calculate final score with ELIMINA 2 system
+  // Threshold for applying elimination (half of total dates)
+  const eliminationThreshold = Math.ceil(totalDates / 2);
+
+  // Function to calculate final score with ELIMINA N system
   const calculateFinalScore = (pointsByDate: { [key: number]: number }, upToDateNumber: number): number => {
     const datesUpTo = sortedDates.filter(d => d <= upToDateNumber);
     const scores = datesUpTo.map(d => pointsByDate[d] || 0);
     const totalPoints = scores.reduce((sum, pts) => sum + pts, 0);
 
-    // Apply ELIMINA 2 only if >= 6 dates
-    if (datesUpTo.length >= 6) {
+    // Apply ELIMINA N only if >= threshold dates
+    if (datesUpTo.length >= eliminationThreshold) {
       const sortedScores = [...scores].sort((a, b) => a - b);
-      const elimina1 = sortedScores[0];
-      const elimina2 = sortedScores[1];
-      return totalPoints - (elimina1 + elimina2);
+      const eliminatedScores = sortedScores.slice(0, datesToEliminate);
+      const eliminatedSum = eliminatedScores.reduce((sum, s) => sum + s, 0);
+      return totalPoints - eliminatedSum;
     }
 
     return totalPoints;

@@ -61,6 +61,8 @@ model Tournament {
   number                 Int                     @unique
   status                 TournamentStatus        @default(ACTIVO)
   participantIds         String[]                @map("participant_ids")
+  totalDates             Int                     @default(12) @map("total_dates")
+  datesToEliminate       Int                     @default(2) @map("dates_to_eliminate")
   createdAt              DateTime                @default(now()) @map("created_at")
   updatedAt              DateTime                @updatedAt @map("updated_at")
   blindLevels            BlindLevel[]
