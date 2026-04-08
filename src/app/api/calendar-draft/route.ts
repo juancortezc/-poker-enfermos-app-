@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
         approved?: boolean
       }
 
-      if (!Array.isArray(gameDates) || gameDates.length !== 12) {
-        return NextResponse.json({ error: 'Se requieren 12 fechas para el calendario.' }, { status: 400 })
+      if (!Array.isArray(gameDates) || gameDates.length < 10 || gameDates.length > 15) {
+        return NextResponse.json({ error: 'Se requieren entre 10 y 15 fechas para el calendario.' }, { status: 400 })
       }
 
       const hasInvalidDate = gameDates.some((entry, index) => {
