@@ -106,9 +106,11 @@ export async function recalculateAllStats(tournamentId: number) {
       .map(p => p.playerId)
 
     // Obtener todas las eliminaciones del torneo
+    // Excluir posición 1 (ganador) ya que el ganador no elimina a nadie
     const eliminations = await prisma.elimination.findMany({
       where: {
-        gameDate: { tournamentId }
+        gameDate: { tournamentId },
+        position: { not: 1 } // El ganador no cuenta como eliminación
       },
       include: {
         gameDate: {

@@ -42,12 +42,14 @@ export async function GET(
     }
 
     // Get all eliminations by this player in the tournament
+    // Exclude position 1 (winner) since the winner doesn't eliminate anyone
     const eliminations = await prisma.elimination.findMany({
       where: {
         eliminatorPlayerId: playerId,
         gameDate: {
           tournamentId: tournamentIdNum
-        }
+        },
+        position: { not: 1 } // Winner doesn't count as an elimination
       },
       include: {
         eliminatedPlayer: {

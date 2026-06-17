@@ -43,11 +43,14 @@ export async function GET(
     const totalParticipants = gameDate.playerIds.length
 
     // 1. Varón de la Noche (most eliminations)
+    // Exclude position 1 (winner) since the winner doesn't eliminate anyone
     const eliminationCounts = new Map<string, number>()
-    gameDate.eliminations.forEach((elim) => {
-      const count = eliminationCounts.get(elim.eliminatorPlayerId) || 0
-      eliminationCounts.set(elim.eliminatorPlayerId, count + 1)
-    })
+    gameDate.eliminations
+      .filter((elim) => elim.position !== 1) // Winner doesn't count as an elimination
+      .forEach((elim) => {
+        const count = eliminationCounts.get(elim.eliminatorPlayerId) || 0
+        eliminationCounts.set(elim.eliminatorPlayerId, count + 1)
+      })
 
     const maxEliminations = Math.max(...Array.from(eliminationCounts.values()), 0)
     const varonPlayerIds = Array.from(eliminationCounts.entries())

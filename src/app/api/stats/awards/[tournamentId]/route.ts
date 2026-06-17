@@ -161,7 +161,9 @@ export async function GET(
     }
 
     // Get all eliminations for Varón/Gay calculation
+    // Exclude position 1 (winner) since the winner doesn't eliminate anyone
     const allEliminations = gameDates.flatMap(gd => gd.eliminations)
+      .filter(elim => elim.position !== 1)
 
     // ============================================================
     // 1. VARÓN - Most eliminations (only registered players)
