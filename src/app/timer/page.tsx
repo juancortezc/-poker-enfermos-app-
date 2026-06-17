@@ -56,6 +56,7 @@ export default function TimerPage() {
   const isPaused = timer.status === 'paused'
   const isInactive = timer.status === 'inactive' || timer.status === 'completed'
   const isUnlimited = timer.currentBlind?.duration === 0
+  const isBreak = timer.currentBlind?.smallBlind === 0 && timer.currentBlind?.bigBlind === 0
   const progressPct =
     timer.totalLevelDuration > 0
       ? Math.min(100, (timer.elapsedInLevel / timer.totalLevelDuration) * 100)
@@ -92,8 +93,8 @@ export default function TimerPage() {
           Fecha {gameDate.dateNumber}
         </p>
         <p style={{ fontSize: '15px', color: 'var(--cp-on-surface-medium)', marginTop: '4px' }}>
-          Nivel {timer.currentLevel}
-          {timer.nextBlind ? ` de ${timer.nextBlind.level}` : ''}
+          {isBreak ? 'Descanso' : `Nivel ${timer.currentLevel}`}
+          {!isBreak && timer.nextBlind ? ` de ${timer.nextBlind.level}` : ''}
         </p>
       </div>
 
@@ -130,23 +131,43 @@ export default function TimerPage() {
           {isUnlimited ? 'SIN LÍMITE' : timer.formattedTime}
         </div>
 
-        {/* Current blinds */}
+        {/* Current blinds / break label */}
         {timer.currentBlind && (
-          <div
-            style={{
-              fontSize: 'clamp(28px, 8vw, 48px)',
-              fontWeight: 700,
-              color: '#ffffff',
-              letterSpacing: '0.04em',
-            }}
-          >
-            {timer.currentBlind.smallBlind.toLocaleString()} /{' '}
-            {timer.currentBlind.bigBlind.toLocaleString()}
-          </div>
+          isBreak ? (
+            <div
+              style={{
+                fontSize: 'clamp(32px, 9vw, 56px)',
+                fontWeight: 700,
+                color: '#ca8a04',
+                letterSpacing: '0.12em',
+              }}
+            >
+              DESCANSO
+            </div>
+          ) : (
+            <div
+              style={{
+                fontSize: 'clamp(28px, 8vw, 48px)',
+                fontWeight: 700,
+                color: '#ffffff',
+                letterSpacing: '0.04em',
+              }}
+            >
+              {timer.currentBlind.smallBlind.toLocaleString()} /{' '}
+              {timer.currentBlind.bigBlind.toLocaleString()}
+            </div>
+          )
         )}
 
         {/* Next blinds */}
-        {timer.nextBlind && (
+        {timer.nextBlind && !isBreak && (
+          <p style={{ fontSize: '16px', color: 'var(--cp-on-surface-variant)' }}>
+            {timer.nextBlind.smallBlind === 0
+              ? 'Siguiente: Descanso'
+              : `Siguiente: ${timer.nextBlind.smallBlind.toLocaleString()} / ${timer.nextBlind.bigBlind.toLocaleString()}`}
+          </p>
+        )}
+        {timer.nextBlind && isBreak && (
           <p style={{ fontSize: '16px', color: 'var(--cp-on-surface-variant)' }}>
             Siguiente: {timer.nextBlind.smallBlind.toLocaleString()} /{' '}
             {timer.nextBlind.bigBlind.toLocaleString()}
