@@ -1,5 +1,6 @@
 /**
  * Update blind levels for the active tournament (T30) to the new structure.
+ * Break is now manual — no 0/0 level. 18 total levels.
  * Run with: npx tsx scripts/update-t30-blinds.ts
  */
 import { PrismaClient } from '@prisma/client'
@@ -13,19 +14,18 @@ const NEW_BLIND_LEVELS = [
   { level: 4,  smallBlind: 200,   bigBlind: 400,   duration: 12 },
   { level: 5,  smallBlind: 300,   bigBlind: 600,   duration: 12 },
   { level: 6,  smallBlind: 400,   bigBlind: 800,   duration: 12 },
-  { level: 7,  smallBlind: 0,     bigBlind: 0,     duration: 20 }, // DESCANSO
-  { level: 8,  smallBlind: 500,   bigBlind: 1000,  duration: 16 },
-  { level: 9,  smallBlind: 600,   bigBlind: 1200,  duration: 16 },
-  { level: 10, smallBlind: 800,   bigBlind: 1600,  duration: 16 },
-  { level: 11, smallBlind: 1000,  bigBlind: 2000,  duration: 16 },
-  { level: 12, smallBlind: 1500,  bigBlind: 3000,  duration: 16 },
-  { level: 13, smallBlind: 2000,  bigBlind: 4000,  duration: 16 },
-  { level: 14, smallBlind: 3000,  bigBlind: 6000,  duration: 16 },
-  { level: 15, smallBlind: 4000,  bigBlind: 8000,  duration: 16 },
-  { level: 16, smallBlind: 5000,  bigBlind: 10000, duration: 10 },
-  { level: 17, smallBlind: 6000,  bigBlind: 12000, duration: 10 },
-  { level: 18, smallBlind: 8000,  bigBlind: 16000, duration: 10 },
-  { level: 19, smallBlind: 10000, bigBlind: 20000, duration: 0  },
+  { level: 7,  smallBlind: 500,   bigBlind: 1000,  duration: 16 },
+  { level: 8,  smallBlind: 600,   bigBlind: 1200,  duration: 16 },
+  { level: 9,  smallBlind: 800,   bigBlind: 1600,  duration: 16 },
+  { level: 10, smallBlind: 1000,  bigBlind: 2000,  duration: 16 },
+  { level: 11, smallBlind: 1500,  bigBlind: 3000,  duration: 16 },
+  { level: 12, smallBlind: 2000,  bigBlind: 4000,  duration: 16 },
+  { level: 13, smallBlind: 3000,  bigBlind: 6000,  duration: 16 },
+  { level: 14, smallBlind: 4000,  bigBlind: 8000,  duration: 16 },
+  { level: 15, smallBlind: 5000,  bigBlind: 10000, duration: 10 },
+  { level: 16, smallBlind: 6000,  bigBlind: 12000, duration: 10 },
+  { level: 17, smallBlind: 8000,  bigBlind: 16000, duration: 10 },
+  { level: 18, smallBlind: 10000, bigBlind: 20000, duration: 0  },
 ]
 
 async function main() {
@@ -43,10 +43,7 @@ async function main() {
   console.log(`Niveles actuales: ${activeTournament.blindLevels.length}`)
 
   await prisma.$transaction(async (tx) => {
-    // Delete existing blind levels
     await tx.blindLevel.deleteMany({ where: { tournamentId: activeTournament.id } })
-
-    // Insert new blind levels
     await tx.blindLevel.createMany({
       data: NEW_BLIND_LEVELS.map(bl => ({
         tournamentId: activeTournament.id,
@@ -58,8 +55,10 @@ async function main() {
     })
   })
 
-  console.log(`✅ Blinds actualizados: ${NEW_BLIND_LEVELS.length} niveles`)
-  console.log('   Nivel 7 = DESCANSO automático (20 min, 0/0)')
+  console.log(`✅ Blinds actualizados: ${NEW_BLIND_LEVELS.length} niveles (sin nivel 0/0)`)
+  NEW_BLIND_LEVELS.forEach(b => {
+    console.log(`   Nivel ${b.level}: ${b.smallBlind}/${b.bigBlind} — ${b.duration === 0 ? 'ÚLTIMO' : `${b.duration} min`}`)
+  })
 }
 
 main()

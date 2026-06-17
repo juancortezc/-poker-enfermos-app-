@@ -25,7 +25,6 @@ export function CPTimerCard() {
 
   const isPaused = timer.status === 'paused'
   const isUnlimited = timer.currentBlind?.duration === 0
-  const isBreak = timer.currentBlind?.smallBlind === 0 && timer.currentBlind?.bigBlind === 0
   const accentColor = isPaused ? 'var(--cp-warning)' : 'var(--cp-primary)'
 
   return (
@@ -71,15 +70,9 @@ export function CPTimerCard() {
               )}
             </div>
             <p style={{ fontSize: 'var(--cp-body-size)', color: 'var(--cp-on-surface-variant)' }}>
-              {isBreak ? 'Descanso' : `Nivel ${timer.currentLevel}`}
-              {!isBreak && timer.currentBlind && `: ${timer.currentBlind.smallBlind}/${timer.currentBlind.bigBlind}`}
-              {!isBreak && timer.nextBlind && (
-                <span style={{ color: 'var(--cp-on-surface-muted)' }}>
-                  {' → '}
-                  {timer.nextBlind.smallBlind === 0 ? 'Descanso' : `${timer.nextBlind.smallBlind}/${timer.nextBlind.bigBlind}`}
-                </span>
-              )}
-              {isBreak && timer.nextBlind && (
+              {`Nivel ${timer.currentLevel}`}
+              {timer.currentBlind && `: ${timer.currentBlind.smallBlind}/${timer.currentBlind.bigBlind}`}
+              {timer.nextBlind && (
                 <span style={{ color: 'var(--cp-on-surface-muted)' }}>
                   {' → '}{timer.nextBlind.smallBlind}/{timer.nextBlind.bigBlind}
                 </span>

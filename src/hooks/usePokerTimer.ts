@@ -84,8 +84,6 @@ const fetcher = (url: string) =>
 export function usePokerTimer(gameDateId: number | null): PokerTimerState {
   const [displayTime, setDisplayTime] = useState(0)
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const lastAutoAdvancedFromRef = useRef<number | null>(null)
-  const isAdvancingRef = useRef(false)
 
   const { data, error, isLoading, mutate } = useSWR<TimerApiResponse>(
     gameDateId ? `/api/timer/game-date/${gameDateId}` : null,
@@ -138,48 +136,8 @@ export function usePokerTimer(gameDateId: number | null): PokerTimerState {
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [mutate])
 
-  // Auto-advance: only Comision, only when timer hits 0 and there's a next level
-  useEffect(() => {
-    if (!data) return
-    const { canControl, timerState, nextBlind } = data
-    if (!canControl) return
-    if (timerState.status !== 'active') return
-    if (!nextBlind) return
-    if (displayTime > 0) return
-    if (isAdvancingRef.current) return
-    if (lastAutoAdvancedFromRef.current === timerState.currentLevel) return
-
-    const fromLevel = timerState.currentLevel
-    const toLevel = nextBlind.level
-    lastAutoAdvancedFromRef.current = fromLevel
-    isAdvancingRef.current = true
-
-    fetch(`/api/timer/game-date/${gameDateId}/level-up`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ toLevel, fromLevel }),
-    })
-      .then(r => r.json())
-      .then(() => mutate())
-      .catch(() => {
-        // Reset guard so it can retry on next tick
-        lastAutoAdvancedFromRef.current = null
-      })
-      .finally(() => {
-        isAdvancingRef.current = false
-      })
-  }, [displayTime, data, gameDateId, mutate])
-
-  // Reset auto-advance guard when level changes (new level from server)
-  const currentLevel = data?.timerState?.currentLevel
-  useEffect(() => {
-    if (currentLevel !== undefined && lastAutoAdvancedFromRef.current !== null) {
-      if (currentLevel !== lastAutoAdvancedFromRef.current) {
-        lastAutoAdvancedFromRef.current = null
-      }
-    }
-  }, [currentLevel])
+  // Auto-advance is handled by the /timer page (decision flow with optional break).
+  // The hook only syncs state — level advancement is an explicit admin action.
 
   const refresh = useCallback(() => { mutate() }, [mutate])
 
