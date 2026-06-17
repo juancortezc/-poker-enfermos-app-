@@ -43,7 +43,7 @@ export class RankingCalculator {
   ): TournamentRanking {
     // Build PlayerRanking for each player
     const playerRankings = playerInputs.map((input) =>
-      this.buildPlayerRanking(input)
+      this.buildPlayerRanking(input, tournament.datesToEliminate, tournament.totalDates)
     );
 
     // Create the tournament ranking (sorts and assigns positions)
@@ -82,7 +82,7 @@ export class RankingCalculator {
     return this.calculate(adjustedTournament, filteredInputs, null);
   }
 
-  private buildPlayerRanking(input: PlayerRankingInput): PlayerRanking {
+  private buildPlayerRanking(input: PlayerRankingInput, datesToEliminate: number = 2, totalDates: number = 12): PlayerRanking {
     const pointsByDate = new Map<number, number>();
     let datesPlayed = 0;
     let tiebreaker = TiebreakerStats.empty();
@@ -113,6 +113,6 @@ export class RankingCalculator {
       }
     }
 
-    return PlayerRanking.create(input.player, pointsByDate, datesPlayed, tiebreaker);
+    return PlayerRanking.create(input.player, pointsByDate, datesPlayed, tiebreaker, datesToEliminate, totalDates);
   }
 }

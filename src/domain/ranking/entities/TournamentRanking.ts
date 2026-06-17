@@ -9,6 +9,7 @@ export interface RankedTournamentInfo {
   name: string;
   number: number;
   totalDates: number;
+  datesToEliminate: number;
   completedDates: number;
 }
 
@@ -82,6 +83,10 @@ export class TournamentRanking {
 
   get totalDates(): number {
     return this._tournament.totalDates;
+  }
+
+  get datesToEliminate(): number {
+    return this._tournament.datesToEliminate;
   }
 
   get completedDates(): number {

@@ -39,9 +39,11 @@ export class PlayerRanking {
     player: RankedPlayerInfo,
     pointsByDate: Map<number, number>,
     datesPlayed: number,
-    tiebreaker: TiebreakerStats
+    tiebreaker: TiebreakerStats,
+    datesToEliminate: number = 2,
+    totalDates: number = 12
   ): PlayerRanking {
-    const score = Elimina2Score.calculate(pointsByDate);
+    const score = Elimina2Score.calculate(pointsByDate, datesToEliminate, totalDates);
 
     return new PlayerRanking(
       0, // Position assigned later
@@ -164,6 +166,14 @@ export class PlayerRanking {
 
   get elimina2(): number | undefined {
     return this._score.elimina2 ?? undefined;
+  }
+
+  get elimina3(): number | undefined {
+    return this._score.elimina3 ?? undefined;
+  }
+
+  get eliminasActive(): boolean {
+    return this._score.isApplied;
   }
 
   // Mutators (return new instance or modify in place for ranking calculation)

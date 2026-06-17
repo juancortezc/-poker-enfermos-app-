@@ -19,9 +19,11 @@ export interface PlayerRankingDTO {
   pointsByDate: Record<number, number>;
   trend: 'up' | 'down' | 'same';
   positionsChanged: number;
-  // ELIMINA 2
+  // ELIMINA N
   elimina1?: number;
   elimina2?: number;
+  elimina3?: number;
+  eliminasActive: boolean;
   finalScore?: number;
   // Tiebreaker stats
   firstPlaces: number;
@@ -40,6 +42,7 @@ export interface TournamentRankingDTO {
     name: string;
     number: number;
     totalDates: number;
+    datesToEliminate: number;
     completedDates: number;
   };
   rankings: PlayerRankingDTO[];

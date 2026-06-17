@@ -93,7 +93,8 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
       id: tournament.id,
       name: tournament.name,
       number: tournament.number,
-      totalDates: 12, // Always 12 dates per tournament
+      totalDates: tournament.totalDates ?? 12,
+      datesToEliminate: tournament.datesToEliminate ?? 2,
       completedDates: tournament.gameDates.length,
     };
 

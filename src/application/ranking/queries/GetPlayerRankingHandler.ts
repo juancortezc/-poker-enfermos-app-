@@ -74,10 +74,13 @@ export class GetPlayerRankingHandler implements GetPlayerRankingUseCase {
       positionsChanged: pr.trend.positionsChanged,
       elimina1: pr.elimina1,
       elimina2: pr.elimina2,
+      elimina3: pr.elimina3,
+      eliminasActive: pr.eliminasActive,
       finalScore: pr.score.isApplied ? pr.finalScore : undefined,
       firstPlaces: pr.firstPlaces,
       secondPlaces: pr.secondPlaces,
       thirdPlaces: pr.thirdPlaces,
+      lastPlaces: pr.lastPlaces,
       absences: pr.absences,
     };
   }

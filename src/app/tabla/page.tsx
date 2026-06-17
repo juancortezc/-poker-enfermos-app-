@@ -25,6 +25,7 @@ const TABS = [
 export default function TablaPage() {
   const { user, loading: authLoading } = useAuth()
   const [activeTab, setActiveTab] = useState<TabType>('resumen')
+  const { hasActiveGameDate } = useActiveGameDate()
 
   const {
     tournament: activeTournament,
@@ -145,8 +146,6 @@ export default function TablaPage() {
       </CPAppShell>
     )
   }
-
-  const { hasActiveGameDate } = useActiveGameDate()
 
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
