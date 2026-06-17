@@ -107,6 +107,12 @@ export class Elimina2Score {
     return [...this._eliminatedScores];
   }
 
+  /** Always = totalPoints − sum(worst N), regardless of threshold. Used for FIN display. */
+  get projectedScore(): number {
+    const sum = this._eliminatedScores.reduce((s, v) => s + v, 0);
+    return this._totalPoints - sum;
+  }
+
   get rankingScore(): number {
     return this._finalScore;
   }

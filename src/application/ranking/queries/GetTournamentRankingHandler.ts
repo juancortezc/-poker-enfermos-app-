@@ -91,6 +91,7 @@ export class GetTournamentRankingHandler implements GetTournamentRankingUseCase 
       elimina3: pr.elimina3,
       eliminasActive: pr.eliminasActive,
       finalScore: pr.score.isApplied ? pr.finalScore : undefined,
+      projectedScore: pr.elimina1 !== undefined ? pr.projectedScore : undefined,
       firstPlaces: pr.firstPlaces,
       secondPlaces: pr.secondPlaces,
       thirdPlaces: pr.thirdPlaces,

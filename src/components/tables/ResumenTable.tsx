@@ -162,8 +162,11 @@ export default function ResumenTable({ tournamentId, currentUserId }: ResumenTab
                     {player.elimina3 !== undefined ? player.elimina3 : '-'}
                   </td>
                 )}
-                <td className="excel-cell excel-cell-total text-center font-bold score-emphasis" style={{color: '#1a365d'}}>
-                  {player.finalScore !== undefined ? player.finalScore : '-'}
+                <td
+                  className={`excel-cell text-center font-bold score-emphasis ${active ? 'excel-cell-total' : ''}`}
+                  style={active ? {color: '#1a365d'} : {color: '#7c3aed'}}
+                >
+                  {player.projectedScore !== undefined ? player.projectedScore : '-'}
                 </td>
               </tr>
             );

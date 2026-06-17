@@ -172,6 +172,10 @@ export class PlayerRanking {
     return this._score.elimina3 ?? undefined;
   }
 
+  get projectedScore(): number {
+    return this._score.projectedScore;
+  }
+
   get eliminasActive(): boolean {
     return this._score.isApplied;
   }

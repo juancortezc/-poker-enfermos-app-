@@ -25,6 +25,7 @@ export interface PlayerRankingDTO {
   elimina3?: number;
   eliminasActive: boolean;
   finalScore?: number;
+  projectedScore?: number;
   // Tiebreaker stats
   firstPlaces: number;
   secondPlaces: number;
