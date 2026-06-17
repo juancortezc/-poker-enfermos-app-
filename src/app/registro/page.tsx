@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Pause, Play, Smartphone, SmartphoneNfc, RotateCcw, FastForward } from 'lucide-react'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { buildAuthHeaders } from '@/lib/client-auth'
-import { useTimerSSEById } from '@/hooks/useTimerSSE'
+import { usePokerTimer } from '@/hooks/usePokerTimer'
 import { useWakeLock } from '@/hooks/useWakeLock'
 import { formatTime } from '@/lib/timer-utils'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
@@ -27,6 +27,7 @@ interface Elimination {
   points: number
   eliminatedPlayer: Player
   eliminatorPlayer?: Player | null
+  eliminationTime?: string | null
 }
 
 interface GameDate {
@@ -63,35 +64,19 @@ export default function RegistroPage() {
     ? activeGameDate.id
     : null
 
-  const {
-    data: timerData,
-    formattedTime: formattedTimeRemaining,
-    isActive: timerIsActive,
-    isPaused: timerIsPaused,
-  } = useTimerSSEById(timerGameDateId)
+  const timer = usePokerTimer(timerGameDateId)
 
-  // Extraer datos del timer para compatibilidad
-  const timerState = timerData ? {
-    currentLevel: timerData.currentLevel,
-    timeRemaining: timerData.timeRemaining,
-    status: timerData.status
+  const timerIsActive = timer.status === 'active'
+  const timerIsPaused = timer.status === 'paused'
+  const formattedTimeRemaining = timer.formattedTime
+  const timerState = timerGameDateId ? {
+    currentLevel: timer.currentLevel,
+    timeRemaining: timer.displayTimeRemaining,
+    status: timer.status
   } : null
-
-  const currentBlindLevel = timerData ? {
-    smallBlind: timerData.smallBlind,
-    bigBlind: timerData.bigBlind,
-    duration: 0 // No necesitamos esto para display
-  } : null
-
-  const nextBlindLevel = timerData?.nextLevel ? {
-    level: timerData.nextLevel,
-    smallBlind: timerData.nextSmallBlind!,
-    bigBlind: timerData.nextBigBlind!,
-    duration: 0
-  } : null
-
-  // Ya no necesitamos refreshTimer porque SSE se actualiza automáticamente
-  const refreshTimer = () => {}
+  const currentBlindLevel = timer.currentBlind ?? null
+  const nextBlindLevel = timer.nextBlind ?? null
+  const refreshTimer = () => timer.refresh()
 
   // Control de timer (pausar/reiniciar)
   const handlePauseTimer = async () => {
@@ -189,7 +174,7 @@ export default function RegistroPage() {
       const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/level-up`, {
         method: 'POST',
         headers: buildAuthHeaders({}, { includeJson: true }),
-        body: JSON.stringify({ toLevel: nextLevel })
+        body: JSON.stringify({ toLevel: nextLevel, fromLevel: timerState?.currentLevel })
       })
       if (response.ok) {
         await Promise.all([fetchAllData(), refreshTimer()])
@@ -622,6 +607,7 @@ export default function RegistroPage() {
               tournamentId={activeGameDate.tournament.id}
               gameDateId={activeGameDate.id}
               onEliminationUpdated={fetchAllData}
+              gameDateStartTime={timer.gameDateStartTime}
             />
           </div>
         </div>
@@ -964,6 +950,23 @@ interface CPEliminationHistoryProps {
   tournamentId: number
   gameDateId: number
   onEliminationUpdated: () => void
+  gameDateStartTime?: string | null
+}
+
+function formatElapsedTime(eliminationTime: string | null | undefined, startTime: string | null | undefined): string | null {
+  if (!eliminationTime || !startTime) return null
+  const elapsed = new Date(eliminationTime).getTime() - new Date(startTime).getTime()
+  if (elapsed < 0) return null
+  const totalMin = Math.floor(elapsed / 60000)
+  const h = Math.floor(totalMin / 60)
+  const m = totalMin % 60
+  return h > 0 ? `${h}h ${m}m` : `${m}m`
+}
+
+function formatClockTime(isoString: string | null | undefined): string | null {
+  if (!isoString) return null
+  const d = new Date(isoString)
+  return d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
 }
 
 function CPEliminationHistory({
@@ -971,7 +974,8 @@ function CPEliminationHistory({
   players,
   tournamentId,
   gameDateId,
-  onEliminationUpdated
+  onEliminationUpdated,
+  gameDateStartTime,
 }: CPEliminationHistoryProps) {
   const { mutate } = useSWRConfig()
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -1193,13 +1197,13 @@ function CPEliminationHistory({
               ) : (
                 // Modo visualización
                 <>
-                  <div className="flex items-center space-x-2 flex-1">
-                    <div className="w-6 text-center">
+                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                    <div className="w-6 text-center shrink-0">
                       <span className="font-bold text-sm" style={{ color: 'var(--cp-on-surface)' }}>
                         {elimination.position}
                       </span>
                     </div>
-                    <div className="flex-1 text-sm" style={{ color: 'var(--cp-on-surface)' }}>
+                    <div className="flex-1 min-w-0 text-sm" style={{ color: 'var(--cp-on-surface)' }}>
                       <span className="truncate block">
                         {getPlayerName(elimination, 'eliminated')}
                         {elimination.position !== 1 && (
@@ -1212,8 +1216,17 @@ function CPEliminationHistory({
                           <span style={{ color: 'var(--cp-on-surface-muted)' }}> - Ganador</span>
                         )}
                       </span>
+                      {/* Tiempo jugado */}
+                      {elimination.eliminationTime && (
+                        <span className="block" style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)', marginTop: '1px' }}>
+                          {formatClockTime(elimination.eliminationTime)}
+                          {formatElapsedTime(elimination.eliminationTime, gameDateStartTime) && (
+                            <> · Jugó {formatElapsedTime(elimination.eliminationTime, gameDateStartTime)}</>
+                          )}
+                        </span>
+                      )}
                     </div>
-                    <div className="w-8 text-center">
+                    <div className="w-8 text-center shrink-0">
                       <span className="font-semibold text-sm" style={{ color: 'var(--cp-on-surface)' }}>
                         {elimination.points}
                       </span>

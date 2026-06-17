@@ -13,8 +13,8 @@ export async function POST(
   return withComisionAuth(request, async (req, user) => {
     try {
       const gameDateId = parseInt((await params).id)
-      const { toLevel } = await req.json()
-      
+      const { toLevel, fromLevel } = await req.json()
+
       if (isNaN(gameDateId)) {
         return NextResponse.json(
           { error: 'ID de fecha inválido' },
@@ -76,6 +76,15 @@ export async function POST(
           { error: `Nivel ${toLevel} no encontrado en el torneo` },
           { status: 400 }
         )
+      }
+
+      // Idempotency: if caller sent fromLevel and current level already moved, report success
+      if (fromLevel !== undefined && timerState.currentLevel !== fromLevel) {
+        return NextResponse.json({
+          success: true,
+          alreadyAdvanced: true,
+          message: `Nivel ya fue avanzado (actual: ${timerState.currentLevel}, esperado: ${fromLevel})`
+        })
       }
 
       if (toLevel <= timerState.currentLevel) {

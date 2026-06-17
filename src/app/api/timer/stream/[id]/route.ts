@@ -38,7 +38,7 @@ async function getTimerData(gameDateId: number): Promise<TimerStreamData | null>
           }
         }
       },
-      timerState: true
+      timerStates: true
     }
   })
 
@@ -69,7 +69,7 @@ async function getTimerData(gameDateId: number): Promise<TimerStreamData | null>
   }
 
   // Handle game dates without timer state (not started yet or inactive)
-  if (!gameDate.timerState) {
+  if (!gameDate.timerStates) {
     const blindLevels = gameDate.tournament.blindLevels
     const firstBlind = blindLevels[0]
 
@@ -90,7 +90,7 @@ async function getTimerData(gameDateId: number): Promise<TimerStreamData | null>
     }
   }
 
-  const timerState = gameDate.timerState
+  const timerState = gameDate.timerStates
   const computed = computeTimerState(timerState)
   const blindLevels = gameDate.tournament.blindLevels
 
@@ -126,14 +126,14 @@ async function autoAdvanceLevel(gameDateId: number, toLevel: number): Promise<bo
             }
           }
         },
-        timerState: true
+        timerStates: true
       }
     })
 
-    if (!gameDate || !gameDate.timerState) return false
+    if (!gameDate || !gameDate.timerStates) return false
     if (gameDate.status !== 'in_progress') return false
 
-    const timerState = gameDate.timerState
+    const timerState = gameDate.timerStates
     if (timerState.status !== 'active') return false
 
     const targetBlindLevel = gameDate.tournament.blindLevels.find(bl => bl.level === toLevel)
@@ -156,7 +156,7 @@ async function autoAdvanceLevel(gameDateId: number, toLevel: number): Promise<bo
       data: {
         timerStateId: timerState.id,
         actionType: 'level_up',
-        performedBy: null, // Sistema automático
+        performedBy: 'sistema',
         fromLevel: timerState.currentLevel,
         toLevel: toLevel,
         metadata: {
