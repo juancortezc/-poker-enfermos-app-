@@ -13,10 +13,12 @@ export interface PlayerRanking {
   pointsByDate: { [dateNumber: number]: number }; // Puntos por cada fecha
   trend: 'up' | 'down' | 'same'; // Tendencia respecto a ranking anterior
   positionsChanged: number; // Número de posiciones que cambió (positivo = subió, negativo = bajó)
-  // Sistema ELIMINA 2: peores fechas y puntuación final
+  // Sistema ELIMINA N: peores fechas y puntuación final
   elimina1?: number; // Peor fecha (menor puntuación)
   elimina2?: number; // Segunda peor fecha
-  finalScore?: number; // Puntuación final (mejores 10 fechas)
+  elimina3?: number; // Tercera peor fecha (si datesToEliminate >= 3)
+  eliminasActive: boolean; // true = se aplican al ranking (umbral alcanzado), false = solo informativo
+  finalScore?: number; // Puntuación final (total - N peores fechas)
   // Estadísticas para criterios de desempate
   firstPlaces: number;  // Cantidad de fechas ganadas (1er lugar)
   secondPlaces: number; // Cantidad de segundos lugares
@@ -115,6 +117,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         pointsByDate: {},
         trend: 'same',
         positionsChanged: 0,
+        eliminasActive: false,
         // Inicializar estadísticas de desempate
         firstPlaces: 0,
         secondPlaces: 0,
@@ -207,26 +210,27 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       const dateNumbers = Object.keys(ranking.pointsByDate).map(Number).sort((a, b) => a - b);
       const completedDatesCount = dateNumbers.length;
 
-      // Solo aplicar eliminaciones a partir del threshold (mitad de fechas)
-      if (completedDatesCount >= eliminationThreshold) {
-        // Obtener todas las puntuaciones (incluyendo 0 para fechas ausentes)
+      // Siempre calcular las N peores fechas para mostrar en tabla
+      if (completedDatesCount > 0) {
         const allScores = dateNumbers.map(dateNumber => ranking.pointsByDate[dateNumber]);
-
-        // Ordenar puntuaciones de menor a mayor para identificar las peores
         const sortedScores = [...allScores].sort((a, b) => a - b);
-
-        // Identificar las N peores fechas para eliminación
         const eliminatedScores = sortedScores.slice(0, datesToEliminate);
-        ranking.elimina1 = eliminatedScores[0]; // Peor puntuación
-        ranking.elimina2 = eliminatedScores[1]; // Segunda peor (si existe)
+        ranking.elimina1 = eliminatedScores[0];
+        ranking.elimina2 = eliminatedScores[1];
+        ranking.elimina3 = eliminatedScores[2];
+      }
 
-        // PUNTUACIÓN FINAL = Total - N peores fechas
+      // Aplicar al ranking (finalScore) solo a partir del threshold
+      if (completedDatesCount >= eliminationThreshold) {
+        ranking.eliminasActive = true;
+        const allScores = dateNumbers.map(dateNumber => ranking.pointsByDate[dateNumber]);
+        const sortedScores = [...allScores].sort((a, b) => a - b);
+        const eliminatedScores = sortedScores.slice(0, datesToEliminate);
         const eliminatedSum = eliminatedScores.reduce((sum, s) => sum + s, 0);
         ranking.finalScore = ranking.totalPoints - eliminatedSum;
       } else {
-        // Antes del threshold: usar puntuación total sin eliminaciones
-        ranking.elimina1 = undefined;
-        ranking.elimina2 = undefined;
+        // Antes del threshold: puntaje final = total (eliminas solo informativas)
+        ranking.eliminasActive = false;
         ranking.finalScore = ranking.totalPoints;
       }
     });
