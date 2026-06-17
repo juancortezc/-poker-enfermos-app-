@@ -22,9 +22,9 @@ export async function POST(
         )
       }
 
-      if (!toLevel || toLevel < 1 || toLevel > 18) {
+      if (!toLevel || toLevel < 1) {
         return NextResponse.json(
-          { error: 'Nivel inválido. Debe ser entre 1 y 18' },
+          { error: 'Nivel inválido' },
           { status: 400 }
         )
       }
@@ -101,7 +101,7 @@ export async function POST(
         where: { id: timerState.id },
         data: {
           ...updatePayload,
-          status: timerState.status // Mantener el estado actual (activo o pausado)
+          status: 'active' // Advancing a level always starts the new blind running
         }
       })
 
