@@ -18,6 +18,8 @@ export default function RankingPage() {
     isNotFound
   } = useActiveTournament({ refreshInterval: 300000 }) // 5 minutes
 
+  const { hasActiveGameDate } = useActiveGameDate()
+
   // Loading state
   if (authLoading || tournamentLoading) {
     return (
@@ -131,8 +133,6 @@ export default function RankingPage() {
       </CPAppShell>
     )
   }
-
-  const { hasActiveGameDate } = useActiveGameDate()
 
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
