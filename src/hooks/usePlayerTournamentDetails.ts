@@ -53,13 +53,17 @@ interface PlayerTournamentDetails {
 }
 
 interface EliminationRecord {
-  eliminatedPlayerId: string;
-  position: number;
-  points: number;
+  eliminatedPlayer: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  };
   eliminatorPlayer?: {
     firstName: string;
     lastName: string;
   } | null;
+  position: number;
+  points: number;
 }
 
 export function usePlayerTournamentDetails(playerId: string, tournamentId: number) {
@@ -178,7 +182,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
             if (date.status === 'completed' && date.id) {
               const eliminations = eliminationMap.get(date.id) || [];
 
-              const playerElimination = eliminations.find(e => e.eliminatedPlayerId === playerId);
+              const playerElimination = eliminations.find(e => e.eliminatedPlayer.id === playerId);
 
               if (playerElimination) {
                 return {
