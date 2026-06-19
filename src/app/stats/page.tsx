@@ -143,7 +143,7 @@ export default function StatsPage() {
         {activeTab === 'torneos' && <CPTorneosTab />}
         {activeTab === 'campeones' && <CPCampeonesTab />}
         {activeTab === 'podios' && <CPPodiosTab />}
-        {activeTab === 'sin-ganar' && <SinGanarTab />}
+        {activeTab === 'sin-ganar' && <SinGanarTab tournamentId={activeTournament?.id} />}
       </main>
 
       {/* Bottom Nav */}
