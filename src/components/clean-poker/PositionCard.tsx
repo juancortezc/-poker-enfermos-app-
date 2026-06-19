@@ -33,58 +33,48 @@ export function PositionCard({
 
   return (
     <div
-      className="px-4 py-2.5 relative"
+      className="px-3 py-2 relative"
       style={{
         borderRadius: '5px',
         background: 'linear-gradient(135deg, #0e0510 0%, #1c0a1a 45%, #0a0308 100%)',
-        boxShadow: '0 6px 20px rgba(0,0,0,0.6), 0 0 24px rgba(180,20,60,0.10)',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.55), 0 0 32px rgba(180,15,55,0.18)',
         border: '1px solid rgba(220,40,80,0.18)',
       }}
     >
-      {/* Top row */}
-      <div className="flex items-center gap-3 mb-2">
-        {/* Position */}
-        <div className="shrink-0">
-          <span className="font-extrabold" style={{ fontSize: '26px', color: '#fff', lineHeight: 1 }}>
-            #{position}
-          </span>
-          <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.30)', letterSpacing: '0.05em', marginTop: '1px' }}>
-            MI POSICIÓN
-          </p>
+      {/* Top row: position + inline stats */}
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className="font-extrabold shrink-0" style={{ fontSize: '22px', color: '#fff', lineHeight: 1 }}>
+          #{position}
+        </span>
+        <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em', flexShrink: 0 }}>POS</span>
+
+        <div style={{ width: '1px', height: '14px', background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
+
+        <div className="flex items-baseline gap-1 shrink-0">
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff', lineHeight: 1 }}>{finalPoints}</span>
+          <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>fin</span>
+        </div>
+        <div className="flex items-baseline gap-1 shrink-0">
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', lineHeight: 1 }}>{totalPoints}</span>
+          <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.30)' }}>tot</span>
+        </div>
+        <div className="flex items-baseline gap-0.5 shrink-0">
+          <span style={{ fontSize: '13px', fontWeight: 700, color: trendColor, lineHeight: 1 }}>{trendSymbol}{Math.abs(trend)}</span>
         </div>
 
-        {/* Stats: final · total · cambio */}
-        <div className="flex-1 flex items-center justify-around">
-          <div className="text-center">
-            <p style={{ fontSize: '14px', fontWeight: 700, color: '#fff', lineHeight: 1 }}>{finalPoints}</p>
-            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>final</p>
-          </div>
-          <div className="text-center">
-            <p style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.55)', lineHeight: 1 }}>{totalPoints}</p>
-            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>total</p>
-          </div>
-          <div className="text-center">
-            <p style={{ fontSize: '14px', fontWeight: 700, color: trendColor, lineHeight: 1 }}>
-              {trendSymbol}{Math.abs(trend)}
-            </p>
-            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>cambio</p>
-          </div>
-        </div>
-
-        {/* Detalle */}
         {onDetailClick && (
-          <button onClick={onDetailClick} className="shrink-0 hover:opacity-80">
-            <span style={{ color: '#E53935', fontSize: '11px' }}>Detalle →</span>
+          <button onClick={onDetailClick} className="ml-auto shrink-0 hover:opacity-80">
+            <span style={{ color: '#E53935', fontSize: '10px' }}>Detalle →</span>
           </button>
         )}
       </div>
 
       {/* Bars */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '8px' }}>
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '6px' }}>
 
         {/* Tú */}
-        <div className="flex items-center gap-1.5 mb-1">
-          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', width: '34px', textAlign: 'right', flexShrink: 0 }}>
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.40)', width: '40px', textAlign: 'right', flexShrink: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {shortName}
           </span>
           <div className="flex-1 relative" style={{ height: '5px', borderRadius: '3px', background: 'rgba(255,255,255,0.08)' }}>
@@ -110,7 +100,7 @@ export function PositionCard({
         {/* Líder */}
         {!isLeader && (
           <div className="flex items-center gap-1.5">
-            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', width: '34px', textAlign: 'right', flexShrink: 0 }}>
+            <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.40)', width: '40px', textAlign: 'right', flexShrink: 0 }}>
               Líder
             </span>
             <div className="flex-1 relative" style={{ height: '5px', borderRadius: '3px', background: 'rgba(255,255,255,0.08)' }}>

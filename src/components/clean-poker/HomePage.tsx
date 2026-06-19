@@ -16,6 +16,7 @@ import { MalazoCard } from './MalazoCard'
 import { LiveGameCard } from './LiveGameCard'
 import { CPPlayerDetailModal } from './CPPlayerDetailModal'
 import { CelebrationsCard } from './CelebrationsCard'
+import { DestacadosCard } from './DestacadosCard'
 
 // Logo URL
 const LOGO_URL = 'https://storage.googleapis.com/poker-enfermos/logo.png'
@@ -184,6 +185,7 @@ export function HomePage() {
       nextDateScheduled={nextGameDateFromTournament?.scheduledDate ?? null}
       hasActiveDate={!!activeGameDate}
       tournamentId={activeTournament?.id || 0}
+      rankings={rankings}
     />
   )
 }
@@ -525,6 +527,7 @@ interface HomeAuthenticatedProps {
   nextDateScheduled?: string | null
   hasActiveDate: boolean
   tournamentId: number
+  rankings: Array<{ playerId: string; playerName: string; playerPhoto?: string; positionsChanged: number }>
 }
 
 function HomeAuthenticated({
@@ -539,7 +542,8 @@ function HomeAuthenticated({
   nextDate,
   nextDateScheduled,
   hasActiveDate,
-  tournamentId
+  tournamentId,
+  rankings,
 }: HomeAuthenticatedProps) {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const userInitials = user.firstName && user.lastName
@@ -611,6 +615,9 @@ function HomeAuthenticated({
             }))}
           />
         )}
+
+        {/* Destacados */}
+        <DestacadosCard rankings={rankings} />
       </main>
 
       {/* Bottom Nav */}

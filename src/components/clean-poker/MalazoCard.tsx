@@ -49,7 +49,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
       style={{
         borderRadius: '5px',
         background: 'linear-gradient(135deg, rgba(80, 8, 38, 0.97) 0%, rgba(180, 30, 90, 0.88) 60%, rgba(220, 50, 120, 0.82) 100%)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 28px rgba(200, 30, 90, 0.18)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.50), 0 0 40px rgba(200, 20, 80, 0.24)',
         border: '1px solid rgba(236, 64, 122, 0.22)',
       }}
     >

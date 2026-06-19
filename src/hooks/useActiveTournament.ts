@@ -26,6 +26,7 @@ interface ActiveTournamentResponse {
     completedDates: number
     totalDates: number
     nextDate?: GameDate
+    lastCompletedDate?: { id: number; dateNumber: number } | null
     startDate?: string
     endDate?: string
     isCompleted: boolean

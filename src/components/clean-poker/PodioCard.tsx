@@ -51,21 +51,21 @@ export function PodioCard({ players }: PodioCardProps) {
     }
     if (position === 1) return {
       ...base,
-      background: 'linear-gradient(165deg, #1a1200 0%, #2e2000 50%, #1a1000 100%)',
-      border: '1px solid rgba(255, 210, 0, 0.40)',
-      boxShadow: '0 14px 32px rgba(0,0,0,0.75), 0 0 28px rgba(255,185,0,0.22), inset 0 1px 0 rgba(255,220,0,0.20)',
+      background: 'linear-gradient(165deg, #1e1600 0%, #342200 50%, #1e1400 100%)',
+      border: '1px solid rgba(255, 210, 0, 0.55)',
+      boxShadow: '0 16px 44px rgba(0,0,0,0.75), 0 0 48px rgba(255,185,0,0.38), inset 0 1px 0 rgba(255,220,0,0.24)',
     }
     if (position === 2) return {
       ...base,
-      background: 'linear-gradient(165deg, #0e0e16 0%, #1a1a28 50%, #0e0e16 100%)',
-      border: '1px solid rgba(200, 200, 220, 0.32)',
-      boxShadow: '0 10px 26px rgba(0,0,0,0.70), 0 0 18px rgba(180,180,210,0.14), inset 0 1px 0 rgba(220,220,255,0.12)',
+      background: 'linear-gradient(165deg, #0e0e18 0%, #181826 50%, #0e0e18 100%)',
+      border: '1px solid rgba(200, 210, 240, 0.42)',
+      boxShadow: '0 12px 32px rgba(0,0,0,0.70), 0 0 32px rgba(180,190,230,0.26), inset 0 1px 0 rgba(220,225,255,0.16)',
     }
     return {
       ...base,
-      background: 'linear-gradient(165deg, #160a00 0%, #261400 50%, #160a00 100%)',
-      border: '1px solid rgba(205, 127, 50, 0.34)',
-      boxShadow: '0 10px 26px rgba(0,0,0,0.70), 0 0 18px rgba(180,100,30,0.16), inset 0 1px 0 rgba(205,140,50,0.14)',
+      background: 'linear-gradient(165deg, #1a0e00 0%, #2c1800 50%, #1a0e00 100%)',
+      border: '1px solid rgba(205, 130, 50, 0.48)',
+      boxShadow: '0 12px 32px rgba(0,0,0,0.70), 0 0 32px rgba(185,105,30,0.28), inset 0 1px 0 rgba(210,145,55,0.18)',
     }
   }
 
@@ -102,9 +102,9 @@ export function PodioCard({ players }: PodioCardProps) {
       className="p-4 pt-5"
       style={{
         borderRadius: '5px',
-        background: 'linear-gradient(145deg, #0b0909 0%, #100d0a 50%, #0b0909 100%)',
-        boxShadow: '0 8px 36px rgba(0,0,0,0.65), 0 0 1px rgba(255,210,0,0.06)',
-        border: '1px solid rgba(255,210,0,0.07)',
+        background: 'linear-gradient(160deg, #090d1e 0%, #121b38 50%, #0c1228 100%)',
+        boxShadow: '0 8px 40px rgba(0,0,0,0.70), 0 0 50px rgba(40,60,180,0.08)',
+        border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
       {/* Header with title and link */}

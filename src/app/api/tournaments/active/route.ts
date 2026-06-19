@@ -75,8 +75,10 @@ export async function GET() {
       }
 
       // Calcular estadísticas adicionales
-      const completedDates = activeTournament.gameDates.filter(d => d.status === 'completed').length
+      const completedGameDates = activeTournament.gameDates.filter(d => d.status === 'completed')
+      const completedDates = completedGameDates.length
       const nextDate = activeTournament.gameDates.find(d => d.status === 'pending' || d.status === 'CREATED')
+      const lastCompletedDate = completedGameDates.at(-1) ?? null
       const startDate = activeTournament.gameDates[0]?.scheduledDate
       const endDate = activeTournament.gameDates[activeTournament.gameDates.length - 1]?.scheduledDate
 
@@ -86,6 +88,7 @@ export async function GET() {
           completedDates,
           totalDates: activeTournament.gameDates.length,
           nextDate,
+          lastCompletedDate: lastCompletedDate ? { id: lastCompletedDate.id, dateNumber: lastCompletedDate.dateNumber } : null,
           startDate,
           endDate,
           isCompleted: completedDates === activeTournament.gameDates.length

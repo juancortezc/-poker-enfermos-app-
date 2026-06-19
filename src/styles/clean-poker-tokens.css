@@ -5,13 +5,13 @@
 
 :root {
   /* === BACKGROUND === */
-  --cp-background: #080006;
-  --cp-background-subtle: #0d020a;
+  --cp-background: #120008;
+  --cp-background-subtle: #1a060e;
 
   /* === SURFACE (Cards with glassmorphism) === */
-  --cp-surface: rgba(35, 5, 18, 0.80);
-  --cp-surface-solid: #180510;
-  --cp-surface-border: rgba(220, 40, 80, 0.14);
+  --cp-surface: rgba(55, 8, 28, 0.84);
+  --cp-surface-solid: #280c18;
+  --cp-surface-border: rgba(200, 30, 70, 0.20);
   --cp-surface-blur: 16px;
 
   /* === TEXT === */
