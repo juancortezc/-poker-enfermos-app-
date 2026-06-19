@@ -55,16 +55,17 @@ export function PodioCard({ players }: PodioCardProps) {
     players.find(p => p.position === 3),
   ].filter(Boolean) as PodioPlayer[]
 
-  // Get avatar size based on position (minimal border)
+  // Get avatar size based on position
   const getAvatarSize = (position: number) => {
-    if (position === 1) return { size: 80, border: 2 }
-    return { size: 64, border: 1.5 }
+    if (position === 1) return { size: 120, border: 2 }
+    return { size: 96, border: 1.5 }
   }
 
   return (
     <div
-      className="p-4 pt-5 rounded-2xl"
+      className="p-4 pt-5"
       style={{
+        borderRadius: '5px',
         background: 'linear-gradient(90deg, rgba(26, 26, 26, 0.95) 0%, rgba(64, 64, 64, 0.85) 100%)',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3)',
         border: '1px solid rgba(255, 255, 255, 0.06)',
@@ -99,30 +100,31 @@ export function PodioCard({ players }: PodioCardProps) {
           return (
             <div
               key={player.position}
-              className="flex-1 rounded-xl flex flex-col items-center relative"
+              className="flex-1 flex flex-col items-center relative"
               style={{
+                borderRadius: '5px',
                 background: 'rgba(0, 0, 0, 0.3)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
                 maxWidth: isWinner ? '130px' : '105px',
-                minHeight: isWinner ? '190px' : '160px',
+                minHeight: isWinner ? '215px' : '185px',
                 marginTop: isWinner ? '0' : '30px',
                 paddingTop: `${avatarConfig.size / 2 + 8}px`,
-                paddingBottom: '12px',
+                paddingBottom: '10px',
                 paddingLeft: '8px',
                 paddingRight: '8px',
               }}
             >
               {/* Avatar - positioned to overflow top by 50% */}
               <div
-                className="absolute rounded-full overflow-hidden flex items-center justify-center"
+                className="absolute overflow-hidden flex items-center justify-center"
                 style={{
                   width: avatarConfig.size,
                   height: avatarConfig.size,
                   top: `-${avatarConfig.size / 2}px`,
                   left: '50%',
                   transform: 'translateX(-50%)',
+                  borderRadius: '5px',
                   background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
-                  border: `${avatarConfig.border}px solid ${getMedalColor(player.position)}`,
                   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
                 }}
               >
@@ -149,17 +151,17 @@ export function PodioCard({ players }: PodioCardProps) {
 
               {/* Name */}
               <p
-                className="text-center font-medium truncate w-full mb-3"
+                className="text-center font-medium truncate w-full mb-2"
                 style={{
                   fontSize: 'var(--cp-caption-size)',
                   color: 'var(--cp-on-surface)',
                 }}
               >
-                {player.name.split(' ')[0]}
+                {(() => { const p = player.name.split(' ').filter(Boolean); return p.length > 1 ? `${p[0]} ${p[p.length-1][0]}.` : p[0] })()}
               </p>
 
               {/* Stats: Final, Total (darker), Cambio */}
-              <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 {/* Final */}
                 <div className="text-center">
                   <p
@@ -231,13 +233,13 @@ export function PodioCard({ players }: PodioCardProps) {
 
               {/* Medal Divider */}
               <div
-                className="w-full h-0.5 mb-2"
+                className="w-full h-0.5 mb-1"
                 style={{ backgroundColor: getMedalColor(player.position) }}
               />
 
               {/* Position Number */}
               <p
-                className="font-bold mb-2"
+                className="font-bold mb-1"
                 style={{
                   fontSize: isWinner ? 'var(--cp-title-size)' : 'var(--cp-body-size)',
                   color: getMedalColor(player.position),

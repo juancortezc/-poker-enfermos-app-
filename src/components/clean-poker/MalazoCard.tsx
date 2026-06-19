@@ -45,9 +45,10 @@ export function MalazoCard({ players }: MalazoCardProps) {
 
   return (
     <div
-      className="p-4 pt-5 rounded-2xl"
+      className="p-4 pt-5"
       style={{
-        background: 'linear-gradient(90deg, rgba(26, 26, 26, 0.95) 0%, rgba(236, 64, 122, 0.3) 100%)',
+        borderRadius: '5px',
+        background: 'linear-gradient(90deg, rgba(90, 10, 45, 0.95) 0%, rgba(210, 60, 110, 0.8) 100%)',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3)',
         border: '1px solid rgba(255, 255, 255, 0.06)',
       }}
@@ -77,13 +78,14 @@ export function MalazoCard({ players }: MalazoCardProps) {
         {players.slice(0, 2).map((player) => (
           <div
             key={player.position}
-            className="flex-1 rounded-xl flex flex-col items-center relative"
+            className="flex-1 flex flex-col items-center relative"
             style={{
+              borderRadius: '5px',
               background: 'rgba(0, 0, 0, 0.3)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
               maxWidth: '160px',
-              minHeight: '180px',
-              paddingTop: '48px', // space for avatar overflow
+              minHeight: '200px',
+              paddingTop: '62px', // space for avatar overflow (108/2 + 8)
               paddingBottom: '12px',
               paddingLeft: '12px',
               paddingRight: '12px',
@@ -91,15 +93,15 @@ export function MalazoCard({ players }: MalazoCardProps) {
           >
             {/* Avatar - positioned to overflow top by 50% */}
             <div
-              className="absolute rounded-full overflow-hidden flex items-center justify-center"
+              className="absolute overflow-hidden flex items-center justify-center"
               style={{
-                width: 72,
-                height: 72,
-                top: '-36px',
+                width: 108,
+                height: 108,
+                top: '-54px',
                 left: '50%',
                 transform: 'translateX(-50%)',
+                borderRadius: '5px',
                 background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
-                border: `1.5px solid ${PINK_COLOR}`,
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
               }}
             >
@@ -107,8 +109,8 @@ export function MalazoCard({ players }: MalazoCardProps) {
                 <Image
                   src={player.photoUrl}
                   alt={player.name}
-                  width={72}
-                  height={72}
+                  width={108}
+                  height={108}
                   className="object-cover w-full h-full"
                 />
               ) : (
@@ -126,17 +128,17 @@ export function MalazoCard({ players }: MalazoCardProps) {
 
             {/* Name */}
             <p
-              className="text-center font-medium truncate w-full mb-3"
+              className="text-center font-medium truncate w-full mb-2"
               style={{
                 fontSize: 'var(--cp-caption-size)',
                 color: 'var(--cp-on-surface)',
               }}
             >
-              {player.name.split(' ')[0]}
+              {(() => { const p = player.name.split(' ').filter(Boolean); return p.length > 1 ? `${p[0]} ${p[p.length-1][0]}.` : p[0] })()}
             </p>
 
             {/* Stats: Final, Total (darker), Cambio */}
-            <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="flex items-center justify-center gap-3 mb-2">
               {/* Final */}
               <div className="text-center">
                 <p
@@ -208,13 +210,13 @@ export function MalazoCard({ players }: MalazoCardProps) {
 
             {/* Pink Divider */}
             <div
-              className="w-full h-0.5 mb-2"
+              className="w-full h-0.5 mb-1"
               style={{ backgroundColor: PINK_COLOR }}
             />
 
             {/* Position Number */}
             <p
-              className="font-bold mb-2"
+              className="font-bold mb-1"
               style={{
                 fontSize: 'var(--cp-body-size)',
                 color: PINK_COLOR,
