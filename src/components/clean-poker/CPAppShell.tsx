@@ -17,14 +17,14 @@ export function CPAppShell({ children }: CPAppShellProps) {
     <div
       className="min-h-screen"
       style={{
-        backgroundColor: '#100008',
+        backgroundColor: '#1e0c14',
         backgroundImage: `
           url('/textures/noise.png'),
-          radial-gradient(ellipse 90% 45% at 50% 20%, rgba(160, 8, 45, 0.22) 0%, transparent 65%),
-          radial-gradient(ellipse 70% 35% at 15% 55%, rgba(120, 5, 30, 0.14) 0%, transparent 60%),
-          radial-gradient(ellipse 55% 30% at 85% 65%, rgba(140, 6, 38, 0.12) 0%, transparent 55%),
-          radial-gradient(ellipse 80% 40% at 50% 85%, rgba(100, 4, 25, 0.16) 0%, transparent 60%),
-          linear-gradient(170deg, #120008 0%, #1a0610 30%, #220a16 60%, #2e0e1e 100%)
+          radial-gradient(ellipse 90% 45% at 50% 20%, rgba(200, 20, 60, 0.28) 0%, transparent 65%),
+          radial-gradient(ellipse 70% 35% at 15% 55%, rgba(160, 15, 45, 0.18) 0%, transparent 60%),
+          radial-gradient(ellipse 55% 30% at 85% 65%, rgba(180, 18, 52, 0.16) 0%, transparent 55%),
+          radial-gradient(ellipse 80% 40% at 50% 85%, rgba(140, 12, 38, 0.20) 0%, transparent 60%),
+          linear-gradient(170deg, #1e0c14 0%, #260e1a 30%, #2e1020 60%, #38142a 100%)
         `,
         backgroundSize: '180px 180px, 100% 100%, 70% 80%, 60% 60%, 80% 50%, 100% 100%',
         backgroundRepeat: 'repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat',

@@ -5,13 +5,13 @@
 
 :root {
   /* === BACKGROUND === */
-  --cp-background: #120008;
-  --cp-background-subtle: #1a060e;
+  --cp-background: #1e0c14;
+  --cp-background-subtle: #260e1a;
 
   /* === SURFACE (Cards with glassmorphism) === */
-  --cp-surface: rgba(55, 8, 28, 0.84);
-  --cp-surface-solid: #280c18;
-  --cp-surface-border: rgba(200, 30, 70, 0.20);
+  --cp-surface: rgba(70, 18, 40, 0.88);
+  --cp-surface-solid: #3a1224;
+  --cp-surface-border: rgba(200, 30, 70, 0.22);
   --cp-surface-blur: 16px;
 
   /* === TEXT === */
@@ -45,10 +45,10 @@
   --cp-live-glow: rgba(229, 57, 53, 0.5);
 
   /* === SHAPE === */
-  --cp-radius-sm: 8px;
-  --cp-radius-md: 12px;
-  --cp-radius-lg: 16px;
-  --cp-radius-xl: 20px;
+  --cp-radius-sm: 5px;
+  --cp-radius-md: 5px;
+  --cp-radius-lg: 5px;
+  --cp-radius-xl: 5px;
   --cp-radius-full: 9999px;
 
   /* === SPACING === */

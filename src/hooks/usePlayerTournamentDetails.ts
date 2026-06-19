@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import { useTournamentRanking } from './useTournamentRanking';
 import { useGameDates } from './useGameDates';
@@ -29,8 +29,11 @@ interface PlayerTournamentDetails {
     pointsByDate: { [dateNumber: number]: number };
     elimina1?: number;
     elimina2?: number;
+    elimina3?: number;
+    eliminasActive?: boolean;
     finalScore?: number;
   };
+  datesToEliminate: number;
   datePerformance: Array<{
     dateNumber: number;
     status: 'completed' | 'in_progress' | 'pending' | 'CREATED';
@@ -77,7 +80,9 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     errorMessage: rankingErrorMessage,
     refresh: refreshRanking
   } = useTournamentRanking(tournamentId, {
-    refreshInterval: 0 // No auto-refresh in modal
+    refreshInterval: 0,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
   });
 
   const {
@@ -87,7 +92,9 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     errorMessage: datesErrorMessage,
     refresh: refreshDates
   } = useGameDates(tournamentId, {
-    refreshInterval: 0 // No auto-refresh in modal
+    refreshInterval: 0,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
   });
 
   const {
@@ -96,8 +103,20 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     isLoading: playerLoading,
     mutate: refreshPlayer
   } = useSWR<PlayerPublicData>(
-    playerId ? swrKeys.playerDetails(playerId) : null
+    playerId ? swrKeys.playerDetails(playerId) : null,
+    { revalidateOnFocus: false, revalidateOnReconnect: false }
   );
+
+  // Stable refs — avoid re-running the effect when SWR cache refreshes from parent
+  const rankingDataRef = useRef(rankingData);
+  rankingDataRef.current = rankingData;
+  const gameDatesRef = useRef(gameDates);
+  gameDatesRef.current = gameDates;
+  const playerRef = useRef(player);
+  playerRef.current = player;
+
+  const allReady = !rankingLoading && !datesLoading && !playerLoading
+    && !!rankingData && !!gameDates && !!player;
 
   useEffect(() => {
     if (!playerId || !tournamentId) {
@@ -106,13 +125,13 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
       return;
     }
 
-    if (rankingLoading || datesLoading || playerLoading) {
-      return;
-    }
+    if (!allReady) return;
 
-    if (!rankingData || !player || !gameDates) {
-      return;
-    }
+    const rankingData = rankingDataRef.current;
+    const gameDates = gameDatesRef.current;
+    const player = playerRef.current;
+
+    if (!rankingData || !gameDates || !player) return;
 
     let cancelled = false;
 
@@ -270,8 +289,11 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
               pointsByDate: playerRanking.pointsByDate,
               elimina1: playerRanking.elimina1,
               elimina2: playerRanking.elimina2,
+              elimina3: playerRanking.elimina3,
+              eliminasActive: playerRanking.eliminasActive,
               finalScore: playerRanking.finalScore
             },
+            datesToEliminate: rankingData.tournament?.datesToEliminate ?? 2,
             datePerformance: datePerformance.sort((a, b) => a.dateNumber - b.dateNumber),
             rankingEvolution,
             bestResult: bestResultLabel
@@ -295,16 +317,8 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     return () => {
       cancelled = true;
     };
-  }, [
-    playerId,
-    tournamentId,
-    rankingData,
-    rankingLoading,
-    gameDates,
-    datesLoading,
-    player,
-    playerLoading
-  ]);
+  // Only re-run when player/tournament changes or when data becomes ready for the first time
+  }, [playerId, tournamentId, allReady]);
 
   const combinedLoading = loading || rankingLoading || datesLoading || playerLoading;
   const combinedError = error
