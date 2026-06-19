@@ -48,9 +48,9 @@ export function MalazoCard({ players }: MalazoCardProps) {
       className="p-4 pt-5"
       style={{
         borderRadius: '5px',
-        background: 'linear-gradient(90deg, rgba(90, 10, 45, 0.95) 0%, rgba(210, 60, 110, 0.8) 100%)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3)',
-        border: '1px solid rgba(255, 255, 255, 0.06)',
+        background: 'linear-gradient(135deg, rgba(80, 8, 38, 0.97) 0%, rgba(180, 30, 90, 0.88) 60%, rgba(220, 50, 120, 0.82) 100%)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 28px rgba(200, 30, 90, 0.18)',
+        border: '1px solid rgba(236, 64, 122, 0.22)',
       }}
     >
       {/* Header with title and link */}
@@ -81,8 +81,8 @@ export function MalazoCard({ players }: MalazoCardProps) {
             className="flex-1 flex flex-col items-center relative"
             style={{
               borderRadius: '5px',
-              background: 'rgba(0, 0, 0, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'rgba(0, 0, 0, 0.25)',
+              border: '1px solid rgba(236, 64, 122, 0.18)',
               maxWidth: '160px',
               minHeight: '200px',
               paddingTop: '62px', // space for avatar overflow (108/2 + 8)

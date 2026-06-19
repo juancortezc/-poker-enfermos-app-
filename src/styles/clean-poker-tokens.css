@@ -5,13 +5,13 @@
 
 :root {
   /* === BACKGROUND === */
-  --cp-background: #000000;
-  --cp-background-subtle: #0a0a0a;
+  --cp-background: #080006;
+  --cp-background-subtle: #0d020a;
 
   /* === SURFACE (Cards with glassmorphism) === */
-  --cp-surface: rgba(38, 38, 38, 0.75);
-  --cp-surface-solid: #1a1a1a;
-  --cp-surface-border: rgba(255, 255, 255, 0.06);
+  --cp-surface: rgba(35, 5, 18, 0.80);
+  --cp-surface-solid: #180510;
+  --cp-surface-border: rgba(220, 40, 80, 0.14);
   --cp-surface-blur: 16px;
 
   /* === TEXT === */
@@ -36,9 +36,13 @@
   --cp-silver: #C0C0C0;
   --cp-bronze: #CD7F32;
 
+  /* === ACCENTS === */
+  --cp-chip: #E8830A;        /* poker chip orange */
+  --cp-magenta: #C2185B;     /* red → magenta accent */
+
   /* === LIVE === */
   --cp-live: #E53935;
-  --cp-live-glow: rgba(229, 57, 53, 0.4);
+  --cp-live-glow: rgba(229, 57, 53, 0.5);
 
   /* === SHAPE === */
   --cp-radius-sm: 8px;

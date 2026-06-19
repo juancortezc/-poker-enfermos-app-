@@ -33,10 +33,46 @@ export function PodioCard({ players }: PodioCardProps) {
   }
 
   const getMedalColor = (position: number) => {
-    if (position === 1) return '#FFD700' // Oro
-    if (position === 2) return '#C0C0C0' // Plata
-    if (position === 3) return '#CD7F32' // Bronce
+    if (position === 1) return '#FFD700'
+    if (position === 2) return '#C8C8D8'
+    if (position === 3) return '#CD7F32'
     return 'var(--cp-on-surface-variant)'
+  }
+
+  const getMedalCardStyle = (position: number, isWinner: boolean) => {
+    const base = {
+      borderRadius: '5px',
+      maxWidth: isWinner ? '130px' : '105px',
+      minHeight: isWinner ? '215px' : '185px',
+      marginTop: isWinner ? '0' : '30px',
+      paddingBottom: '10px',
+      paddingLeft: '8px',
+      paddingRight: '8px',
+    }
+    if (position === 1) return {
+      ...base,
+      background: 'linear-gradient(165deg, #1a1200 0%, #2e2000 50%, #1a1000 100%)',
+      border: '1px solid rgba(255, 210, 0, 0.40)',
+      boxShadow: '0 14px 32px rgba(0,0,0,0.75), 0 0 28px rgba(255,185,0,0.22), inset 0 1px 0 rgba(255,220,0,0.20)',
+    }
+    if (position === 2) return {
+      ...base,
+      background: 'linear-gradient(165deg, #0e0e16 0%, #1a1a28 50%, #0e0e16 100%)',
+      border: '1px solid rgba(200, 200, 220, 0.32)',
+      boxShadow: '0 10px 26px rgba(0,0,0,0.70), 0 0 18px rgba(180,180,210,0.14), inset 0 1px 0 rgba(220,220,255,0.12)',
+    }
+    return {
+      ...base,
+      background: 'linear-gradient(165deg, #160a00 0%, #261400 50%, #160a00 100%)',
+      border: '1px solid rgba(205, 127, 50, 0.34)',
+      boxShadow: '0 10px 26px rgba(0,0,0,0.70), 0 0 18px rgba(180,100,30,0.16), inset 0 1px 0 rgba(205,140,50,0.14)',
+    }
+  }
+
+  const getMedalAvatarShadow = (position: number) => {
+    if (position === 1) return '0 6px 20px rgba(0,0,0,0.7), 0 0 16px rgba(255,185,0,0.30)'
+    if (position === 2) return '0 6px 16px rgba(0,0,0,0.65), 0 0 12px rgba(180,180,220,0.18)'
+    return '0 6px 16px rgba(0,0,0,0.65), 0 0 12px rgba(180,100,30,0.20)'
   }
 
   const getInitials = (name: string) => {
@@ -66,9 +102,9 @@ export function PodioCard({ players }: PodioCardProps) {
       className="p-4 pt-5"
       style={{
         borderRadius: '5px',
-        background: 'linear-gradient(90deg, rgba(26, 26, 26, 0.95) 0%, rgba(64, 64, 64, 0.85) 100%)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3)',
-        border: '1px solid rgba(255, 255, 255, 0.06)',
+        background: 'linear-gradient(145deg, #0b0909 0%, #100d0a 50%, #0b0909 100%)',
+        boxShadow: '0 8px 36px rgba(0,0,0,0.65), 0 0 1px rgba(255,210,0,0.06)',
+        border: '1px solid rgba(255,210,0,0.07)',
       }}
     >
       {/* Header with title and link */}
@@ -102,16 +138,8 @@ export function PodioCard({ players }: PodioCardProps) {
               key={player.position}
               className="flex-1 flex flex-col items-center relative"
               style={{
-                borderRadius: '5px',
-                background: 'rgba(0, 0, 0, 0.3)',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                maxWidth: isWinner ? '130px' : '105px',
-                minHeight: isWinner ? '215px' : '185px',
-                marginTop: isWinner ? '0' : '30px',
+                ...getMedalCardStyle(player.position, isWinner),
                 paddingTop: `${avatarConfig.size / 2 + 8}px`,
-                paddingBottom: '10px',
-                paddingLeft: '8px',
-                paddingRight: '8px',
               }}
             >
               {/* Avatar - positioned to overflow top by 50% */}
@@ -125,7 +153,7 @@ export function PodioCard({ players }: PodioCardProps) {
                   transform: 'translateX(-50%)',
                   borderRadius: '5px',
                   background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+                  boxShadow: getMedalAvatarShadow(player.position),
                 }}
               >
                 {player.photoUrl ? (

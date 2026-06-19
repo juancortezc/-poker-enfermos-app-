@@ -4,9 +4,10 @@ interface PositionCardProps {
   position: number
   totalPoints: number
   finalPoints: number
-  trend: number // +6, -2, 0
+  trend: number
   leaderPoints: number
   lastPoints: number
+  playerName?: string
   onDetailClick?: () => void
 }
 
@@ -16,158 +17,115 @@ export function PositionCard({
   finalPoints,
   trend,
   leaderPoints,
-  lastPoints,
+  playerName,
   onDetailClick,
 }: PositionCardProps) {
-  const pointsToLeader = leaderPoints - finalPoints
-  const pointsFromLast = finalPoints - lastPoints
+  const isLeader = position === 1
+  const gap = leaderPoints - finalPoints
+  const pct = leaderPoints > 0 ? Math.round((finalPoints / leaderPoints) * 100) : 100
 
-  const getTrendColor = () => {
-    if (trend > 0) return '#4CAF50' // Verde - sube
-    if (trend < 0) return '#E53935' // Rojo - baja
-    return '#FFC107' // Amarillo - se mantiene
-  }
+  const shortName = playerName
+    ? (() => { const p = playerName.split(' ').filter(Boolean); return p.length > 1 ? `${p[0]} ${p[p.length-1][0]}.` : p[0] })()
+    : 'Tú'
 
-  const getTrendSymbol = () => {
-    if (trend > 0) return '▲'
-    if (trend < 0) return '▼'
-    return '●'
-  }
+  const trendColor = trend > 0 ? '#4CAF50' : trend < 0 ? '#E53935' : '#FFC107'
+  const trendSymbol = trend > 0 ? '▲' : trend < 0 ? '▼' : '●'
 
   return (
     <div
-      className="p-4 pt-5 rounded-2xl relative"
+      className="px-4 py-2.5 relative"
       style={{
-        background: 'linear-gradient(90deg, rgba(26, 26, 26, 0.95) 0%, rgba(64, 64, 64, 0.85) 100%)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3)',
-        border: '1px solid rgba(255, 255, 255, 0.06)',
+        borderRadius: '5px',
+        background: 'linear-gradient(135deg, #0e0510 0%, #1c0a1a 45%, #0a0308 100%)',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.6), 0 0 24px rgba(180,20,60,0.10)',
+        border: '1px solid rgba(220,40,80,0.18)',
       }}
     >
-      {/* Detail Link - Top Right */}
-      {onDetailClick && (
-        <button
-          onClick={onDetailClick}
-          className="absolute top-3 right-3 flex items-center gap-1 transition-opacity hover:opacity-80"
-        >
-          <span style={{ color: '#E53935', fontSize: '12px' }}>Detalle</span>
-          <span style={{ color: '#E53935', fontSize: '12px' }}>→</span>
-        </button>
-      )}
-
-      {/* Main Row: Position centered + KPIs distributed */}
-      <div className="flex items-center">
-        {/* Position - centered vertically with "Mi Posición" label */}
-        <div className="flex flex-col items-center justify-center shrink-0 mr-4">
-          <span
-            className="font-extrabold"
-            style={{
-              fontSize: 'var(--cp-display-size)',
-              fontWeight: 'var(--cp-display-weight)',
-              color: 'var(--cp-on-surface)',
-              lineHeight: 1,
-            }}
-          >
+      {/* Top row */}
+      <div className="flex items-center gap-3 mb-2">
+        {/* Position */}
+        <div className="shrink-0">
+          <span className="font-extrabold" style={{ fontSize: '26px', color: '#fff', lineHeight: 1 }}>
             #{position}
           </span>
-          <span
-            style={{
-              fontSize: 'var(--cp-caption-size)',
-              color: 'var(--cp-on-surface-variant)',
-              marginTop: '4px',
-            }}
-          >
-            Mi Posición
-          </span>
+          <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.30)', letterSpacing: '0.05em', marginTop: '1px' }}>
+            MI POSICIÓN
+          </p>
         </div>
 
-        {/* KPIs - distributed horizontally: Final, Total (darker), Cambio */}
+        {/* Stats: final · total · cambio */}
         <div className="flex-1 flex items-center justify-around">
-          {/* Final */}
           <div className="text-center">
-            <p
-              className="font-bold"
-              style={{
-                fontSize: 'var(--cp-title-size)',
-                color: 'var(--cp-on-surface)',
-              }}
-            >
-              {finalPoints}
-            </p>
-            <p
-              style={{
-                fontSize: 'var(--cp-caption-size)',
-                color: 'var(--cp-on-surface-variant)',
-              }}
-            >
-              final
-            </p>
+            <p style={{ fontSize: '14px', fontWeight: 700, color: '#fff', lineHeight: 1 }}>{finalPoints}</p>
+            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>final</p>
           </div>
-
-          {/* Total (darker color to differentiate) */}
           <div className="text-center">
-            <p
-              className="font-bold"
-              style={{
-                fontSize: 'var(--cp-title-size)',
-                color: 'var(--cp-on-surface-medium)',
-              }}
-            >
-              {totalPoints}
-            </p>
-            <p
-              style={{
-                fontSize: 'var(--cp-caption-size)',
-                color: 'var(--cp-on-surface-variant)',
-              }}
-            >
-              total
-            </p>
+            <p style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.55)', lineHeight: 1 }}>{totalPoints}</p>
+            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>total</p>
           </div>
-
-          {/* Trend/Cambio */}
           <div className="text-center">
-            <div className="flex items-center justify-center gap-1">
-              <span style={{ fontSize: '12px', color: getTrendColor() }}>{getTrendSymbol()}</span>
-              <span
-                className="font-bold"
-                style={{
-                  fontSize: 'var(--cp-title-size)',
-                  color: 'var(--cp-on-surface)'
-                }}
-              >
-                {Math.abs(trend)}
-              </span>
-            </div>
-            <p
-              style={{
-                fontSize: 'var(--cp-caption-size)',
-                color: 'var(--cp-on-surface-variant)',
-              }}
-            >
-              cambio
+            <p style={{ fontSize: '14px', fontWeight: 700, color: trendColor, lineHeight: 1 }}>
+              {trendSymbol}{Math.abs(trend)}
             </p>
+            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>cambio</p>
           </div>
         </div>
+
+        {/* Detalle */}
+        {onDetailClick && (
+          <button onClick={onDetailClick} className="shrink-0 hover:opacity-80">
+            <span style={{ color: '#E53935', fontSize: '11px' }}>Detalle →</span>
+          </button>
+        )}
       </div>
 
-      {/* Helper Text + Detail Link */}
-      <div
-        className="mt-3 pt-3 relative"
-        style={{
-          borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-        }}
-      >
-        <p
-          className="text-center"
-          style={{
-            fontSize: 'var(--cp-caption-size)',
-            color: 'var(--cp-on-surface-muted)',
-          }}
-        >
-          Te faltan <span style={{ color: '#e0b66c', fontWeight: 600 }}>{pointsToLeader}</span> pts para liderar
-          {' · '}
-          Estás a <span style={{ color: '#e0b66c', fontWeight: 600 }}>{pointsFromLast}</span> del malazo
-        </p>
+      {/* Bars */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '8px' }}>
+
+        {/* Tú */}
+        <div className="flex items-center gap-1.5 mb-1">
+          <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', width: '34px', textAlign: 'right', flexShrink: 0 }}>
+            {shortName}
+          </span>
+          <div className="flex-1 relative" style={{ height: '5px', borderRadius: '3px', background: 'rgba(255,255,255,0.08)' }}>
+            <div style={{
+              position: 'absolute', left: 0, top: 0, bottom: 0,
+              width: `${pct}%`, borderRadius: '3px',
+              background: isLeader
+                ? 'linear-gradient(90deg, #F57F17, #FFD700)'
+                : 'linear-gradient(90deg, #006064, #00E5FF)',
+              boxShadow: isLeader
+                ? '0 0 6px rgba(255,210,0,0.5)'
+                : '0 0 6px rgba(0,229,255,0.4)',
+            }} />
+          </div>
+          <div className="flex items-center gap-1" style={{ width: '48px', flexShrink: 0, justifyContent: 'flex-end' }}>
+            <span style={{ fontSize: '10px', color: '#fff', fontWeight: 700 }}>{finalPoints}</span>
+            {!isLeader && (
+              <span style={{ fontSize: '9px', color: '#E53935', fontWeight: 600 }}>−{gap}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Líder */}
+        {!isLeader && (
+          <div className="flex items-center gap-1.5">
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', width: '34px', textAlign: 'right', flexShrink: 0 }}>
+              Líder
+            </span>
+            <div className="flex-1 relative" style={{ height: '5px', borderRadius: '3px', background: 'rgba(255,255,255,0.08)' }}>
+              <div style={{
+                position: 'absolute', left: 0, top: 0, bottom: 0,
+                width: '100%', borderRadius: '3px',
+                background: 'linear-gradient(90deg, #F57F17, #FFD700)',
+                boxShadow: '0 0 6px rgba(255,210,0,0.45)',
+              }} />
+            </div>
+            <span style={{ fontSize: '10px', color: '#FFD700', fontWeight: 700, width: '48px', textAlign: 'right', flexShrink: 0 }}>
+              {leaderPoints}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -574,6 +574,7 @@ function HomeAuthenticated({
             trend={myRanking.positionsChanged}
             leaderPoints={leaderPoints}
             lastPoints={lastPoints}
+            playerName={myRanking.playerName}
             onDetailClick={() => setShowDetailModal(true)}
           />
         )}
@@ -732,6 +733,7 @@ function HomeWithLiveGame({
             trend={myRanking.positionsChanged}
             leaderPoints={leaderPoints}
             lastPoints={lastPoints}
+            playerName={myRanking.playerName}
             onDetailClick={() => setShowDetailModal(true)}
           />
         )}
