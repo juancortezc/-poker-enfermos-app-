@@ -10,5 +10,11 @@
   "regions": ["iad1"],
   "env": {
     "SKIP_ENV_VALIDATION": "1"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/birthdays",
+      "schedule": "0 12 * * *"
+    }
+  ]
 }

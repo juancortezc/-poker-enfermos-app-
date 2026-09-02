@@ -111,7 +111,7 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
   {
     eventType: 'timer_resumed',
     defaultSettings: {
-      isEnabled: false,
+      isEnabled: true,
       timing: 'immediate',
       targetRoles: ['Comision', 'Enfermo']
     },
@@ -123,7 +123,7 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
   {
     eventType: 'proposal_created',
     defaultSettings: {
-      isEnabled: true,
+      isEnabled: false,
       timing: 'immediate',
       targetRoles: ['Comision', 'Enfermo', 'Invitado']
     },
@@ -180,6 +180,16 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
       targetRoles: ['Comision', 'Enfermo']
     },
     description: 'When a game date starts',
+    category: 'dates'
+  },
+  {
+    eventType: 'player_birthday',
+    defaultSettings: {
+      isEnabled: true,
+      timing: 'immediate',
+      targetRoles: ['Comision', 'Enfermo', 'Invitado']
+    },
+    description: "On a player's birthday, sent at 7am Ecuador time",
     category: 'dates'
   }
 ]

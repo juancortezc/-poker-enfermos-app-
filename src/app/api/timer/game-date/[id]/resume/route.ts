@@ -3,6 +3,7 @@ import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveResumeUpdate } from '@/lib/timer-state'
 import { getEcuadorDate } from '@/lib/date-utils'
+import { sendNotificationIfEnabled } from '@/lib/notification-config'
 
 export async function POST(
   request: NextRequest,
@@ -86,6 +87,14 @@ export async function POST(
         timerState: updatedTimer,
         message: 'Timer reanudado exitosamente'
       }
+
+      sendNotificationIfEnabled(
+        'timer_resumed',
+        'Timer reanudado',
+        `Nivel ${timerState.currentLevel} continúa`,
+        { gameDateId },
+        user.id
+      ).catch(err => console.error('Failed to send timer resumed notification:', err))
 
       return NextResponse.json(responseBody)
 
