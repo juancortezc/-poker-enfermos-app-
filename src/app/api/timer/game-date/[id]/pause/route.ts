@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { derivePauseUpdate } from '@/lib/timer-state'
-import { emitTimerEvent } from '@/lib/server-socket'
 
 export async function POST(
   request: NextRequest,
@@ -51,10 +50,11 @@ export async function POST(
       }
 
       if (timerState.status === 'paused') {
-        return NextResponse.json(
-          { error: 'El timer ya está pausado' },
-          { status: 400 }
-        )
+        return NextResponse.json({
+          success: true,
+          timerState,
+          message: 'Timer ya estaba pausado'
+        })
       }
 
       // Pausar el timer
@@ -85,8 +85,6 @@ export async function POST(
         timerState: updatedTimer,
         message: 'Timer pausado exitosamente'
       }
-
-      await emitTimerEvent(gameDateId, 'timer-paused')
 
       return NextResponse.json(responseBody)
 

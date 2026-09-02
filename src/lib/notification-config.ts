@@ -81,7 +81,7 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
   {
     eventType: 'blind_level_changed',
     defaultSettings: {
-      isEnabled: false,
+      isEnabled: true,
       timing: 'immediate',
       targetRoles: ['Comision', 'Enfermo']
     },
@@ -91,7 +91,7 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
   {
     eventType: 'blind_level_warning',
     defaultSettings: {
-      isEnabled: false,
+      isEnabled: true,
       timing: 'immediate',
       targetRoles: ['Comision', 'Enfermo']
     },
@@ -299,8 +299,8 @@ export async function sendNotificationIfEnabled(
     const result = await broadcastPushNotification({
       title,
       body,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/badge-72x72.png',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
       url: '/',
       tag: eventType,
       data: {

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveLevelChangeUpdate } from '@/lib/timer-state'
-import { emitTimerEvent } from '@/lib/server-socket'
 import { getEcuadorDate } from '@/lib/date-utils'
 
 /**
@@ -86,6 +85,7 @@ export async function POST(
           status: 'active', // Reiniciar como activo
           // NO resetear totalElapsed - preservar historial
           levelStartTime: getEcuadorDate(), // Nuevo tiempo de inicio del nivel (hora de Ecuador)
+          warnedLevel: null, // Permitir que el aviso de 1 minuto vuelva a dispararse en este nivel
         }
       })
 
@@ -115,8 +115,6 @@ export async function POST(
         blindLevel: currentBlindLevel,
         message: `Timer del nivel ${timerState.currentLevel} reiniciado exitosamente`
       }
-
-      await emitTimerEvent(gameDateId, 'timer-started')
 
       return NextResponse.json(responseBody)
 

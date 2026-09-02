@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { computeTimerState } from '@/lib/timer-state'
+import { maybeSendBlindWarning } from '@/lib/timer-notifications'
 
 export async function GET(
   request: NextRequest,
@@ -62,6 +63,10 @@ export async function GET(
       const nextBlind = blindLevels.find(bl => bl.level === timerState.currentLevel + 1) || null
 
       const computed = computeTimerState(timerState)
+
+      maybeSendBlindWarning(timerState, computed, blindLevels).catch((err) =>
+        console.error('[TIMER WARNING NOTIFICATION ERROR]', err)
+      )
 
       return NextResponse.json({
         success: true,

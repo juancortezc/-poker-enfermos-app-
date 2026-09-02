@@ -5,7 +5,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from '@/contexts/AuthContext'
 import { PlayerSearchProvider } from '@/contexts/PlayerSearchContext'
 import { AppLayout } from '@/components/AppLayout'
-import { SocketProvider } from '@/contexts/SocketContext'
 import { ToastContainer } from 'react-toastify'
 import { SWRProvider } from '@/lib/swr-config'
 import { OfflineIndicator } from '@/components/OfflineIndicator'
@@ -73,13 +72,11 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased noir-bg`}>
         <SWRProvider>
           <AuthProvider>
-            <SocketProvider>
-              <PlayerSearchProvider>
-                <AppLayout>
-                  {children}
-                </AppLayout>
-              </PlayerSearchProvider>
-            </SocketProvider>
+            <PlayerSearchProvider>
+              <AppLayout>
+                {children}
+              </AppLayout>
+            </PlayerSearchProvider>
           </AuthProvider>
         </SWRProvider>
         <NotificationInitializer />

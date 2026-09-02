@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveResumeUpdate } from '@/lib/timer-state'
-import { emitTimerEvent } from '@/lib/server-socket'
 import { getEcuadorDate } from '@/lib/date-utils'
 
 export async function POST(
@@ -52,10 +51,11 @@ export async function POST(
       }
 
       if (timerState.status === 'active') {
-        return NextResponse.json(
-          { error: 'El timer ya está activo' },
-          { status: 400 }
-        )
+        return NextResponse.json({
+          success: true,
+          timerState,
+          message: 'Timer ya estaba activo'
+        })
       }
 
       // Reanudar el timer
@@ -86,8 +86,6 @@ export async function POST(
         timerState: updatedTimer,
         message: 'Timer reanudado exitosamente'
       }
-
-      await emitTimerEvent(gameDateId, 'timer-resumed')
 
       return NextResponse.json(responseBody)
 

@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveLevelChangeUpdate } from '@/lib/timer-state'
-import { emitTimerEvent } from '@/lib/server-socket'
 import { getEcuadorDate } from '@/lib/date-utils'
-import { broadcastPushNotification } from '@/lib/push-service'
+import { sendNotificationIfEnabled } from '@/lib/notification-config'
 
 export async function POST(
   request: NextRequest,
@@ -130,24 +129,18 @@ export async function POST(
         message: `Avanzado al nivel ${toLevel} exitosamente`
       }
 
-      await emitTimerEvent(gameDateId, 'timer-level-changed')
-
-      // Send broadcast push notification for blind change
-      await broadcastPushNotification(
+      // Send push notification for blind change (respects NotificationSettings + logs history)
+      sendNotificationIfEnabled(
+        'blind_level_changed',
+        'Cambio de Blind',
+        `Nivel ${toLevel}: ${targetBlindLevel.smallBlind.toLocaleString()}/${targetBlindLevel.bigBlind.toLocaleString()}`,
         {
-          title: 'Cambio de Blind',
-          body: `Nivel ${toLevel}: ${targetBlindLevel.smallBlind}/${targetBlindLevel.bigBlind}`,
-          tag: `blind-change-${gameDateId}-${toLevel}`,
-          url: '/home',
-          data: {
-            type: 'blind_change',
-            gameDateId,
-            level: toLevel,
-            smallBlind: targetBlindLevel.smallBlind,
-            bigBlind: targetBlindLevel.bigBlind
-          }
+          gameDateId,
+          level: toLevel,
+          smallBlind: targetBlindLevel.smallBlind,
+          bigBlind: targetBlindLevel.bigBlind
         },
-        { targetRoles: ['Comision', 'Enfermo'] }
+        user.id
       ).catch(err => console.error('Failed to send blind change notification:', err))
 
       return NextResponse.json(responseBody)

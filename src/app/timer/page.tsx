@@ -34,6 +34,9 @@ export default function TimerPage() {
   // Warning at 1 min
   const [showWarning, setShowWarning] = useState(false)
 
+  // Error feedback for failed control actions
+  const [actionError, setActionError] = useState<string | null>(null)
+
   const isComision = user?.role === 'Comision'
 
   // Keep screen awake
@@ -121,12 +124,20 @@ export default function TimerPage() {
     async (action: 'pause' | 'resume' | 'reset') => {
       if (!gameDate?.id || actionLoading) return
       setActionLoading(action)
+      setActionError(null)
       try {
-        await fetch(`/api/timer/game-date/${gameDate.id}/${action === 'reset' ? 'reset' : action}`, {
+        const response = await fetch(`/api/timer/game-date/${gameDate.id}/${action === 'reset' ? 'reset' : action}`, {
           method: 'POST',
           credentials: 'include',
         })
+        if (!response.ok) {
+          const body = await response.json().catch(() => null)
+          setActionError(body?.error || 'No se pudo completar la acción')
+          return
+        }
         timer.refresh()
+      } catch {
+        setActionError('Error de conexión, intenta de nuevo')
       } finally {
         setActionLoading(null)
       }
@@ -137,8 +148,9 @@ export default function TimerPage() {
   const sendLevelUp = useCallback(async () => {
     if (!gameDate?.id || !timer.nextBlind) return
     setActionLoading('levelup')
+    setActionError(null)
     try {
-      await fetch(`/api/timer/game-date/${gameDate.id}/level-up`, {
+      const response = await fetch(`/api/timer/game-date/${gameDate.id}/level-up`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -147,8 +159,15 @@ export default function TimerPage() {
           fromLevel: timer.currentLevel,
         }),
       })
+      if (!response.ok) {
+        const body = await response.json().catch(() => null)
+        setActionError(body?.error || 'No se pudo avanzar de nivel')
+        return
+      }
       setBreakPhase('none')
       timer.refresh()
+    } catch {
+      setActionError('Error de conexión, intenta de nuevo')
     } finally {
       setActionLoading(null)
     }
@@ -214,6 +233,7 @@ export default function TimerPage() {
         className="min-h-screen flex flex-col items-center justify-center gap-8 px-6 select-none"
         style={{ background: 'var(--cp-background)' }}
       >
+        <ActionErrorBanner error={actionError} onDismiss={() => setActionError(null)} />
         <p style={{ fontSize: '13px', color: 'var(--cp-on-surface-variant)', letterSpacing: '0.08em' }}>
           Fecha {gameDate.dateNumber}
           {timer.nextBlind
@@ -272,6 +292,7 @@ export default function TimerPage() {
         className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 select-none"
         style={{ background: 'var(--cp-background)' }}
       >
+        <ActionErrorBanner error={actionError} onDismiss={() => setActionError(null)} />
         <p style={{ fontSize: '13px', color: 'var(--cp-on-surface-variant)', letterSpacing: '0.08em' }}>
           Fecha {gameDate.dateNumber}
         </p>
@@ -319,6 +340,8 @@ export default function TimerPage() {
           </span>
         </div>
       )}
+
+      <ActionErrorBanner error={actionError} onDismiss={() => setActionError(null)} />
 
       {/* Header */}
       <div className="text-center w-full">
@@ -434,6 +457,21 @@ export default function TimerPage() {
         )}
       </div>
     </div>
+  )
+}
+
+function ActionErrorBanner({ error, onDismiss }: { error: string | null; onDismiss: () => void }) {
+  if (!error) return null
+  return (
+    <button
+      onClick={onDismiss}
+      className="fixed top-4 left-4 right-4 rounded-2xl px-4 py-3 z-50 text-center"
+      style={{ background: 'rgba(229,57,53,0.18)', border: '1px solid #E53935' }}
+    >
+      <span style={{ fontSize: '14px', color: '#E53935', fontWeight: 600 }}>
+        ⚠️  {error}
+      </span>
+    </button>
   )
 }
 

@@ -150,6 +150,7 @@ model TimerState {
   pausedDuration Int           @default(0) @map("paused_duration")
   levelStartTime DateTime?     @map("level_start_time")
   blindLevels    Json?         @map("blind_levels")
+  warnedLevel    Int?          @map("warned_level")
   lastUpdated    DateTime      @default(now()) @map("last_updated")
   timerActions   TimerAction[]
   gameDate       GameDate      @relation(fields: [gameDateId], references: [id], onDelete: Cascade)
