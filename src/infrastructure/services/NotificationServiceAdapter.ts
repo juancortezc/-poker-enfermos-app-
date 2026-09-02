@@ -14,12 +14,12 @@ export class NotificationServiceAdapter implements NotificationService {
     eliminatorName?: string;
   }): Promise<void> {
     const body = params.eliminatorName
-      ? `${params.playerName} eliminado en posición ${params.position}° por ${params.eliminatorName}`
-      : `${params.playerName} eliminado en posición ${params.position}°`;
+      ? `${params.playerName}, eliminado en posición ${params.position}° por ${params.eliminatorName}`
+      : `${params.playerName}, eliminado en posición ${params.position}°`;
 
     await sendNotificationIfEnabled(
       'player_eliminated',
-      '💀 Jugador Eliminado',
+      '💀 Eliminado',
       body,
       {
         playerId: params.playerId,
@@ -40,8 +40,8 @@ export class NotificationServiceAdapter implements NotificationService {
   }): Promise<void> {
     await sendNotificationIfEnabled(
       'winner_declared',
-      '🏆 ¡Tenemos Ganador!',
-      `${params.playerName} ha ganado la fecha con ${params.points} puntos`,
+      '🏆 ¡Tenemos Campeón!',
+      `${params.playerName} es el Campeón de la Fecha!`,
       {
         playerId: params.playerId,
         playerName: params.playerName,

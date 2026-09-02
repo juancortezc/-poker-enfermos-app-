@@ -38,12 +38,12 @@ export async function maybeSendBlindWarning(
 
   const nextBlind = blindLevels.find((bl) => bl.level === timerState.currentLevel + 1)
   const body = nextBlind
-    ? `Sube a ${nextBlind.smallBlind.toLocaleString()}/${nextBlind.bigBlind.toLocaleString()}`
+    ? `${nextBlind.smallBlind.toLocaleString()}/${nextBlind.bigBlind.toLocaleString()}`
     : 'Termina el nivel actual'
 
   await sendNotificationIfEnabled(
     'blind_level_warning',
-    'Falta 1 minuto ⏱️',
+    '⏱️ ¡Sube en 1 minuto!',
     body,
     { gameDateId: timerState.gameDateId, level: timerState.currentLevel }
   )

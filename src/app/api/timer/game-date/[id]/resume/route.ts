@@ -90,8 +90,8 @@ export async function POST(
 
       sendNotificationIfEnabled(
         'timer_resumed',
-        'Timer reanudado',
-        `Nivel ${timerState.currentLevel} continúa`,
+        '▶️ ¡Continuamos!',
+        `Nivel ${timerState.currentLevel}`,
         { gameDateId },
         user.id
       ).catch(err => console.error('Failed to send timer resumed notification:', err))

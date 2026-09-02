@@ -132,8 +132,8 @@ export async function POST(
       // Send push notification for blind change (respects NotificationSettings + logs history)
       sendNotificationIfEnabled(
         'blind_level_changed',
-        'Cambio de Blind',
-        `Nivel ${toLevel}: ${targetBlindLevel.smallBlind.toLocaleString()}/${targetBlindLevel.bigBlind.toLocaleString()}`,
+        '📈 ¡Sube!',
+        `${targetBlindLevel.smallBlind.toLocaleString()}/${targetBlindLevel.bigBlind.toLocaleString()}`,
         {
           gameDateId,
           level: toLevel,

@@ -37,7 +37,7 @@ export const NOTIFICATION_EVENTS: NotificationEvent[] = [
   {
     eventType: 'tournament_completed',
     defaultSettings: {
-      isEnabled: true,
+      isEnabled: false,
       timing: 'immediate',
       targetRoles: ['Comision', 'Enfermo', 'Invitado']
     },

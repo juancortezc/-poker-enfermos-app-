@@ -71,10 +71,11 @@ export async function GET(request: NextRequest) {
         continue
       }
 
+      const lastInitial = player.lastName.trim().charAt(0).toUpperCase()
       const result = await sendNotificationIfEnabled(
         'player_birthday',
         '🎂 Cumpleaños',
-        `Hoy es el cumpleaños de ${player.firstName} ${player.lastName}. ¡Felicítalo!`,
+        `¡Feliz Cumpleaños ${player.firstName} ${lastInitial}.!`,
         { playerId: player.id }
       )
       results.push({ playerId: player.id, ...result })
