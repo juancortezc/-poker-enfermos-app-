@@ -120,6 +120,9 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
         position: command.position,
         points: savedElimination.points.value,
         gameDateId: command.gameDateId,
+        eliminatorName: eliminatorPlayer
+          ? `${eliminatorPlayer.firstName} ${eliminatorPlayer.lastName}`
+          : undefined,
       });
     }
 

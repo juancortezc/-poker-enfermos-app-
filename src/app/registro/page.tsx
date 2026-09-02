@@ -625,7 +625,6 @@ export default function RegistroPage() {
 // ============================================
 import { useMemo } from 'react'
 import { Plus, ChevronDown } from 'lucide-react'
-import { useNotifications } from '@/hooks/useNotifications'
 import { useSWRConfig } from 'swr'
 import { swrKeys } from '@/lib/swr-config'
 
@@ -649,7 +648,6 @@ function CPEliminationForm({
   nextPosition,
   onEliminationCreated
 }: CPEliminationFormProps) {
-  const { notifyPlayerEliminated, notifyWinner } = useNotifications()
   const { mutate } = useSWRConfig()
   const [eliminatedPlayerId, setEliminatedPlayerId] = useState('')
   const [eliminatorPlayerId, setEliminatorPlayerId] = useState('')
@@ -707,25 +705,6 @@ function CPEliminationForm({
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Error al registrar eliminación')
-      }
-
-      // Obtener información del jugador eliminado para notificaciones
-      const eliminatedPlayer = players.find(p => p.id === eliminatedPlayerId)
-      const eliminatorPlayer = nextPosition === 2
-        ? autoWinner
-        : eliminatorPlayerId
-          ? players.find(p => p.id === eliminatorPlayerId)
-          : null
-
-      // Enviar notificaciones según el tipo de eliminación
-      if (nextPosition === 1) {
-        if (eliminatedPlayer) {
-          notifyWinner(`${eliminatedPlayer.firstName} ${eliminatedPlayer.lastName}`, points)
-        }
-      } else if (nextPosition === 2 && eliminatorPlayer) {
-        notifyWinner(`${eliminatorPlayer.firstName} ${eliminatorPlayer.lastName}`, calculatePointsForPosition(1, players.length))
-      } else if (eliminatedPlayer) {
-        notifyPlayerEliminated(`${eliminatedPlayer.firstName} ${eliminatedPlayer.lastName}`, nextPosition)
       }
 
       // Limpiar formulario

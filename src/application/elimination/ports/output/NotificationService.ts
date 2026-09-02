@@ -14,6 +14,7 @@ export interface NotificationService {
     position: number;
     points: number;
     gameDateId: number;
+    eliminatorName?: string;
   }): Promise<void>;
 
   /**

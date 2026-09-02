@@ -11,17 +11,23 @@ export class NotificationServiceAdapter implements NotificationService {
     position: number;
     points: number;
     gameDateId: number;
+    eliminatorName?: string;
   }): Promise<void> {
+    const body = params.eliminatorName
+      ? `${params.playerName} eliminado en posición ${params.position}° por ${params.eliminatorName}`
+      : `${params.playerName} eliminado en posición ${params.position}°`;
+
     await sendNotificationIfEnabled(
       'player_eliminated',
       '💀 Jugador Eliminado',
-      `${params.playerName} eliminado en posición ${params.position}°`,
+      body,
       {
         playerId: params.playerId,
         playerName: params.playerName,
         position: params.position,
         points: params.points,
         gameDateId: params.gameDateId,
+        eliminatorName: params.eliminatorName,
       }
     );
   }
