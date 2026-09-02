@@ -1,6 +1,7 @@
 import { prisma } from './prisma';
 import { calculatePointsForPosition } from './tournament-utils';
 import { getPlayerPhotoUrl } from './player-utils';
+import { getPointPenaltiesByPlayer } from './player-adjustments';
 
 export interface PlayerRanking {
   position: number;
@@ -18,7 +19,8 @@ export interface PlayerRanking {
   elimina2?: number; // Segunda peor fecha
   elimina3?: number; // Tercera peor fecha (si datesToEliminate >= 3)
   eliminasActive: boolean; // true = se aplican al ranking (umbral alcanzado), false = solo informativo
-  finalScore?: number; // Puntuación final (total - N peores fechas)
+  finalScore?: number; // Puntuación final (total - N peores fechas - multas de puntos)
+  pointPenalty?: number; // Multas de puntos ya descontadas del finalScore
   // Estadísticas para criterios de desempate
   firstPlaces: number;  // Cantidad de fechas ganadas (1er lugar)
   secondPlaces: number; // Cantidad de segundos lugares
@@ -101,6 +103,9 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       role: tp.player.role
     }));
 
+    // Multas de puntos (Multas/Ajustes) registradas para este torneo
+    const pointPenalties = await getPointPenaltiesByPlayer(tournamentId);
+
     // Calcular puntos por jugador por fecha
     const playerRankings = new Map<string, PlayerRanking>();
 
@@ -118,6 +123,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         trend: 'same',
         positionsChanged: 0,
         eliminasActive: false,
+        pointPenalty: pointPenalties.get(player.id) ?? 0,
         // Inicializar estadísticas de desempate
         firstPlaces: 0,
         secondPlaces: 0,
@@ -227,11 +233,11 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         const sortedScores = [...allScores].sort((a, b) => a - b);
         const eliminatedScores = sortedScores.slice(0, datesToEliminate);
         const eliminatedSum = eliminatedScores.reduce((sum, s) => sum + s, 0);
-        ranking.finalScore = ranking.totalPoints - eliminatedSum;
+        ranking.finalScore = ranking.totalPoints - eliminatedSum - (ranking.pointPenalty ?? 0);
       } else {
-        // Antes del threshold: puntaje final = total (eliminas solo informativas)
+        // Antes del threshold: puntaje final = total (eliminas solo informativas), menos multas de puntos
         ranking.eliminasActive = false;
-        ranking.finalScore = ranking.totalPoints;
+        ranking.finalScore = ranking.totalPoints - (ranking.pointPenalty ?? 0);
       }
     });
 

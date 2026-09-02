@@ -51,6 +51,8 @@ model Player {
   thirdPlaceWins         TournamentWinners[]     @relation("ThirdPlace")
   sentNotifications      NotificationHistory[]
   calendarDrafts         CalendarDraft[]
+  playerAdjustments      PlayerAdjustment[]      @relation("PlayerAdjustments")
+  createdAdjustments     PlayerAdjustment[]      @relation("AdjustmentCreator")
 
   @@map("players")
 }
@@ -70,6 +72,7 @@ model Tournament {
   parentChildStats       ParentChildStats[]
   tournamentParticipants TournamentParticipant[]
   tournamentRankings     TournamentRanking[]
+  adjustments            PlayerAdjustment[]
 
   @@map("tournaments")
 }
@@ -230,6 +233,24 @@ model TournamentWinners {
   thirdPlace       Player   @relation("ThirdPlace", fields: [thirdPlaceId], references: [id])
 
   @@map("tournament_winners")
+}
+
+model PlayerAdjustment {
+  id            Int        @id @default(autoincrement())
+  tournamentId  Int        @map("tournament_id")
+  playerId      String     @map("player_id")
+  reason        String
+  pointsPenalty Int        @default(0) @map("points_penalty")
+  chipsAmount   Int?       @map("chips_amount")
+  moneyAmount   Float?     @map("money_amount")
+  paid          Boolean    @default(false)
+  createdById   String?    @map("created_by_id")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  player        Player     @relation("PlayerAdjustments", fields: [playerId], references: [id])
+  createdBy     Player?    @relation("AdjustmentCreator", fields: [createdById], references: [id])
+
+  @@map("player_adjustments")
 }
 
 model Proposal {

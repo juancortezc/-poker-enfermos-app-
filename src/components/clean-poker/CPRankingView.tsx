@@ -27,6 +27,21 @@ function trendLabel(player: PlayerRanking) {
   return `${sym}${Math.abs(player.positionsChanged)}`
 }
 
+function PenaltyBadge({ points }: { points: number }) {
+  return (
+    <span
+      style={{
+        fontSize: '8px', fontWeight: 800, color: '#fff',
+        background: '#E53935', borderRadius: '3px',
+        padding: '1px 4px', whiteSpace: 'nowrap',
+      }}
+      title="Multa de puntos"
+    >
+      -{points} multa
+    </span>
+  )
+}
+
 // ── HERO CARD ── #1 full-width
 function HeroCard({ player, onClick }: { player: PlayerRanking; onClick: () => void }) {
   const pts = player.finalScore ?? player.totalPoints
@@ -72,6 +87,7 @@ function HeroCard({ player, onClick }: { player: PlayerRanking; onClick: () => v
           <div>
             <p style={{ fontSize: '22px', fontWeight: 900, color: '#FFD700', lineHeight: 1 }}>{pts}</p>
             <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.40)' }}>pts finales</p>
+            {!!player.pointPenalty && <PenaltyBadge points={player.pointPenalty} />}
           </div>
           <div>
             <p style={{ fontSize: '16px', fontWeight: 700, color: 'rgba(255,255,255,0.45)', lineHeight: 1 }}>{player.totalPoints}</p>
@@ -152,6 +168,11 @@ function PodiumCard({ player, onClick }: { player: PlayerRanking; onClick: () =>
           <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.28)' }}>total</p>
         </div>
       </div>
+      {!!player.pointPenalty && (
+        <div className="mt-1">
+          <PenaltyBadge points={player.pointPenalty} />
+        </div>
+      )}
 
       <p style={{ fontSize: '10px', color: trendColor(player.trend), fontWeight: 700, marginTop: '4px' }}>
         {trendLabel(player)}
@@ -228,6 +249,11 @@ function PlayerRow({ player, rank, isMalazo = false, onClick }: {
       <div className="text-right shrink-0">
         <p style={{ fontSize: '15px', fontWeight: 800, color: isMalazo ? pink : '#fff' }}>{pts}</p>
         <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)' }}>{player.totalPoints} tot</p>
+        {!!player.pointPenalty && (
+          <div className="mt-0.5">
+            <PenaltyBadge points={player.pointPenalty} />
+          </div>
+        )}
       </div>
     </button>
   )

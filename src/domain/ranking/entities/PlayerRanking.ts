@@ -41,9 +41,10 @@ export class PlayerRanking {
     datesPlayed: number,
     tiebreaker: TiebreakerStats,
     datesToEliminate: number = 2,
-    totalDates: number = 12
+    totalDates: number = 12,
+    pointPenalty: number = 0
   ): PlayerRanking {
-    const score = Elimina2Score.calculate(pointsByDate, datesToEliminate, totalDates);
+    const score = Elimina2Score.calculate(pointsByDate, datesToEliminate, totalDates, pointPenalty);
 
     return new PlayerRanking(
       0, // Position assigned later
@@ -178,6 +179,10 @@ export class PlayerRanking {
 
   get eliminasActive(): boolean {
     return this._score.isApplied;
+  }
+
+  get pointPenalty(): number {
+    return this._score.pointPenalty;
   }
 
   // Mutators (return new instance or modify in place for ranking calculation)

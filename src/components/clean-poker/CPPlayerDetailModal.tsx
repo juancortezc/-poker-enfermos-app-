@@ -25,6 +25,15 @@ interface CPPlayerDetailModalProps {
   tournamentId: number
 }
 
+interface Multa {
+  id: number
+  reason: string
+  pointsPenalty: number
+  chipsAmount: number | null
+  moneyAmount: number | null
+  paid: boolean
+}
+
 export function CPPlayerDetailModal({ isOpen, onClose, playerId, tournamentId }: CPPlayerDetailModalProps) {
   const { details, loading, error } = usePlayerTournamentDetails(
     isOpen ? playerId : '',
@@ -38,6 +47,12 @@ export function CPPlayerDetailModal({ isOpen, onClose, playerId, tournamentId }:
   )
 
   const playerChampionships = championStats?.data?.all?.find(c => c.player?.id === playerId)
+
+  const { data: multas } = useSWR<Multa[]>(
+    isOpen && playerId && tournamentId ? `/api/multas?tournamentId=${tournamentId}&playerId=${playerId}` : null,
+    (url: string) => fetch(url).then(res => res.json() as Promise<Multa[]>),
+    { revalidateOnFocus: false }
+  )
 
   const completedDates = details?.datePerformance?.filter(d => d.status === 'completed') ?? []
   const participatedDates = completedDates.filter(d => !d.isAbsent).length
@@ -274,6 +289,34 @@ export function CPPlayerDetailModal({ isOpen, onClose, playerId, tournamentId }:
                 })}
               </div>
             </section>
+
+            {/* ── MULTAS ── */}
+            {multas && multas.length > 0 && (
+              <section>
+                <SectionLabel>Multas</SectionLabel>
+                <div className="space-y-1.5">
+                  {multas.map((multa) => (
+                    <div
+                      key={multa.id}
+                      className="flex items-center justify-between px-3 py-2"
+                      style={{ borderRadius: '5px', background: 'rgba(229,57,53,0.10)', border: '1px solid rgba(229,57,53,0.22)' }}
+                    >
+                      <div className="min-w-0">
+                        <p style={{ fontSize: '11px', color: '#fff', fontWeight: 600 }}>{multa.reason}</p>
+                        <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.40)' }}>
+                          {multa.pointsPenalty > 0 && `-${multa.pointsPenalty} pts`}
+                          {!!multa.chipsAmount && `${multa.pointsPenalty > 0 ? ' · ' : ''}${multa.chipsAmount} fichas`}
+                          {!!multa.moneyAmount && `${multa.pointsPenalty > 0 || multa.chipsAmount ? ' · ' : ''}$${multa.moneyAmount}`}
+                        </p>
+                      </div>
+                      <span style={{ fontSize: '9px', fontWeight: 700, color: multa.paid ? '#16a34a' : '#E53935', flexShrink: 0 }}>
+                        {multa.paid ? 'PAGADA' : 'PENDIENTE'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </div>

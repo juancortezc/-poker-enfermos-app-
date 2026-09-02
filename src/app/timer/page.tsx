@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { usePokerTimer } from '@/hooks/usePokerTimer'
+import { TIMER_ENABLED } from '@/lib/feature-flags'
 
 type BreakPhase = 'none' | 'decision' | 'active'
 
@@ -179,6 +180,19 @@ export default function TimerPage() {
     : timer.isCritical
     ? 'var(--cp-primary)'
     : '#ffffff'
+
+  if (!TIMER_ENABLED) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center px-6 text-center"
+        style={{ background: 'var(--cp-background)' }}
+      >
+        <p style={{ color: 'var(--cp-on-surface-variant)', fontSize: '18px' }}>
+          Timer en mantenimiento
+        </p>
+      </div>
+    )
+  }
 
   if (!gameDate || isInactive) {
     return (

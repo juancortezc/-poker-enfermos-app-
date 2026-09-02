@@ -26,6 +26,8 @@ export interface PlayerRankingDTO {
   eliminasActive: boolean;
   finalScore?: number;
   projectedScore?: number;
+  /** Manual point penalty (Multas) already deducted from finalScore. */
+  pointPenalty: number;
   // Tiebreaker stats
   firstPlaces: number;
   secondPlaces: number;

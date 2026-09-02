@@ -20,6 +20,8 @@ export interface GameDateParticipation {
 export interface PlayerRankingInput {
   player: RankedPlayerInfo;
   participations: GameDateParticipation[];
+  /** Manual point penalty (e.g. Multas) subtracted from finalScore, regardless of ELIMINA threshold. */
+  pointPenalty?: number;
 }
 
 /**
@@ -113,6 +115,6 @@ export class RankingCalculator {
       }
     }
 
-    return PlayerRanking.create(input.player, pointsByDate, datesPlayed, tiebreaker, datesToEliminate, totalDates);
+    return PlayerRanking.create(input.player, pointsByDate, datesPlayed, tiebreaker, datesToEliminate, totalDates, input.pointPenalty ?? 0);
   }
 }

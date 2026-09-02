@@ -9,6 +9,7 @@ import { buildAuthHeaders } from '@/lib/client-auth'
 import { usePokerTimer } from '@/hooks/usePokerTimer'
 import { useWakeLock } from '@/hooks/useWakeLock'
 import { formatTime } from '@/lib/timer-utils'
+import { TIMER_ENABLED } from '@/lib/feature-flags'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
 import CPHeader from '@/components/clean-poker/CPHeader'
 import CPBottomNav from '@/components/clean-poker/CPBottomNav'
@@ -441,7 +442,7 @@ export default function RegistroPage() {
               >
                 Iniciar Fecha
               </button>
-            ) : (
+            ) : TIMER_ENABLED ? (
               <>
                 {/* Timer Controls - Compact Row */}
                 <div
@@ -565,7 +566,7 @@ export default function RegistroPage() {
                   )}
                 </div>
               </>
-            )}
+            ) : null}
 
             {/* Stats Cards - CleanPoker Style */}
             <CPStatsCards

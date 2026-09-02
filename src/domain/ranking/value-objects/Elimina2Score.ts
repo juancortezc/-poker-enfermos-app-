@@ -17,7 +17,8 @@ export class Elimina2Score {
     private readonly _elimina2: number | null,
     private readonly _elimina3: number | null,
     private readonly _eliminatedScores: number[],
-    private readonly _isApplied: boolean
+    private readonly _isApplied: boolean,
+    private readonly _pointPenalty: number = 0
   ) {}
 
   /**
@@ -26,18 +27,20 @@ export class Elimina2Score {
    * @param pointsByDate - Map of dateNumber -> points (0 for absences)
    * @param datesToEliminate - Number of worst dates to eliminate (default 2)
    * @param totalDates - Total dates in tournament for threshold calculation (default 12)
+   * @param pointPenalty - Manual point penalty (e.g. Multas) subtracted from finalScore, regardless of threshold
    */
   static calculate(
     pointsByDate: Map<number, number>,
     datesToEliminate: number = 2,
-    totalDates: number = 12
+    totalDates: number = 12,
+    pointPenalty: number = 0
   ): Elimina2Score {
     const scores = Array.from(pointsByDate.values());
     const totalPoints = scores.reduce((sum, pts) => sum + pts, 0);
     const completedDates = scores.length;
 
     if (completedDates === 0) {
-      return new Elimina2Score(0, 0, null, null, null, [], false);
+      return new Elimina2Score(0, -pointPenalty, null, null, null, [], false, pointPenalty);
     }
 
     // Always compute the N worst scores for display purposes
@@ -53,10 +56,10 @@ export class Elimina2Score {
     const threshold = Math.ceil(totalDates / 2);
     const isApplied = completedDates >= threshold;
 
-    // finalScore only deducts eliminated scores after threshold
-    const finalScore = isApplied ? totalPoints - eliminatedSum : totalPoints;
+    // finalScore deducts eliminated scores after threshold, and always deducts the point penalty
+    const finalScore = (isApplied ? totalPoints - eliminatedSum : totalPoints) - pointPenalty;
 
-    return new Elimina2Score(totalPoints, finalScore, elimina1, elimina2, elimina3, eliminatedScores, isApplied);
+    return new Elimina2Score(totalPoints, finalScore, elimina1, elimina2, elimina3, eliminatedScores, isApplied, pointPenalty);
   }
 
   /**
@@ -98,6 +101,10 @@ export class Elimina2Score {
     return this._isApplied;
   }
 
+  get pointPenalty(): number {
+    return this._pointPenalty;
+  }
+
   get eliminatedPoints(): number {
     if (!this._isApplied) return 0;
     return this._eliminatedScores.reduce((sum, s) => sum + s, 0);
@@ -107,10 +114,10 @@ export class Elimina2Score {
     return [...this._eliminatedScores];
   }
 
-  /** Always = totalPoints − sum(worst N), regardless of threshold. Used for FIN display. */
+  /** Always = totalPoints − sum(worst N) − pointPenalty, regardless of threshold. Used for FIN display. */
   get projectedScore(): number {
     const sum = this._eliminatedScores.reduce((s, v) => s + v, 0);
-    return this._totalPoints - sum;
+    return this._totalPoints - sum - this._pointPenalty;
   }
 
   get rankingScore(): number {

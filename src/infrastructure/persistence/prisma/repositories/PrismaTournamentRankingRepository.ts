@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { calculatePointsForPosition } from '@/lib/tournament-utils';
+import { getPointPenaltiesByPlayer } from '@/lib/player-adjustments';
 import type {
   TournamentRankingRepository,
   TournamentRankingData,
@@ -24,7 +25,8 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
     const tournament = await this.fetchTournamentWithData(tournamentId);
     if (!tournament) return null;
 
-    return this.transformToRankingData(tournament);
+    const pointPenalties = await getPointPenaltiesByPlayer(tournamentId);
+    return this.transformToRankingData(tournament, pointPenalties);
   }
 
   async getTournamentRankingDataUpToDate(
@@ -34,7 +36,8 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
     const tournament = await this.fetchTournamentWithData(tournamentId, maxDateNumber);
     if (!tournament) return null;
 
-    return this.transformToRankingData(tournament, maxDateNumber);
+    const pointPenalties = await getPointPenaltiesByPlayer(tournamentId);
+    return this.transformToRankingData(tournament, pointPenalties, maxDateNumber);
   }
 
   private async fetchTournamentWithData(
@@ -86,6 +89,7 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
 
   private transformToRankingData(
     tournament: NonNullable<Awaited<ReturnType<typeof this.fetchTournamentWithData>>>,
+    pointPenalties: Map<string, number>,
     maxDateNumber?: number
   ): TournamentRankingData {
     // Build tournament info
@@ -117,6 +121,7 @@ export class PrismaTournamentRankingRepository implements TournamentRankingRepos
       return {
         player: player as RankedPlayerInfo,
         participations,
+        pointPenalty: pointPenalties.get(player.id) ?? 0,
       };
     });
 

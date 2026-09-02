@@ -11,14 +11,16 @@ import CalendarioTab from '@/components/info/CalendarioTab'
 import ReglamentoTab from '@/components/info/ReglamentoTab'
 import EnfermosTab from '@/components/info/EnfermosTab'
 import PodcastTab from '@/components/info/PodcastTab'
+import MultasTab from '@/components/info/MultasTab'
 
-type TabType = 'calendario' | 'reglamento' | 'enfermos' | 'podcast'
+type TabType = 'calendario' | 'reglamento' | 'enfermos' | 'podcast' | 'multas'
 
 const TABS = [
   { id: 'calendario' as const, label: 'Calendario' },
   { id: 'reglamento' as const, label: 'Reglamento' },
   { id: 'enfermos' as const, label: 'Enfermos' },
   { id: 'podcast' as const, label: 'Podcast' },
+  { id: 'multas' as const, label: 'Multas' },
 ]
 
 export default function InfoPage() {
@@ -144,6 +146,7 @@ export default function InfoPage() {
         {activeTab === 'reglamento' && <ReglamentoTab />}
         {activeTab === 'enfermos' && <EnfermosTab />}
         {activeTab === 'podcast' && <PodcastTab />}
+        {activeTab === 'multas' && <MultasTab />}
       </main>
 
       {/* Bottom Nav */}

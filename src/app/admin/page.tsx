@@ -13,8 +13,9 @@ import CPCrearTorneoTab from '@/components/admin/CPCrearTorneoTab'
 import CPJugadoresTab from '@/components/admin/CPJugadoresTab'
 import CPPremiacionTab from '@/components/admin/CPPremiacionTab'
 import CPBlindsTab from '@/components/admin/CPBlindsTab'
+import CPMultasTab from '@/components/admin/CPMultasTab'
 
-type TabType = 'activar' | 'torneo' | 'blinds' | 'jugadores' | 'premiacion'
+type TabType = 'activar' | 'torneo' | 'blinds' | 'jugadores' | 'premiacion' | 'multas'
 
 const TABS = [
   { id: 'activar' as const, label: 'Activar' },
@@ -22,6 +23,7 @@ const TABS = [
   { id: 'blinds' as const, label: 'Blinds' },
   { id: 'jugadores' as const, label: 'Enfermos' },
   { id: 'premiacion' as const, label: 'Premios' },
+  { id: 'multas' as const, label: 'Multas' },
 ]
 
 export default function AdminNewPage() {
@@ -165,6 +167,7 @@ export default function AdminNewPage() {
           {activeTab === 'blinds' && <CPBlindsTab tournamentId={activeTournament?.id} />}
           {activeTab === 'jugadores' && <CPJugadoresTab />}
           {activeTab === 'premiacion' && <CPPremiacionTab tournamentId={activeTournament?.id} />}
+          {activeTab === 'multas' && <CPMultasTab tournamentId={activeTournament?.id} />}
         </div>
 
         {/* Bottom Navigation */}
