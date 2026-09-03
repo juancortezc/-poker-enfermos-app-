@@ -26,7 +26,7 @@ interface ActiveTournamentResponse {
     completedDates: number
     totalDates: number
     nextDate?: GameDate
-    lastCompletedDate?: { id: number; dateNumber: number } | null
+    lastCompletedDate?: { id: number; dateNumber: number; scheduledDate: string | null } | null
     startDate?: string
     endDate?: string
     isCompleted: boolean
@@ -127,7 +127,14 @@ export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
     } : null,
 
     // Next scheduled date
-    nextDate: swrResponse.data?.stats.nextDate || null
+    nextDate: swrResponse.data?.stats.nextDate || null,
+
+    // Last completed date (for the "Última Fecha" recap view)
+    lastCompletedDate: swrResponse.data?.stats.lastCompletedDate || null,
+
+    // Season start/end dates (for the calendar page)
+    seasonStartDate: swrResponse.data?.stats.startDate || null,
+    seasonEndDate: swrResponse.data?.stats.endDate || null
   }
 }
 

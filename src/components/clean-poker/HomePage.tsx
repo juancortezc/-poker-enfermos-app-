@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
+import { useTournamentInsights } from '@/hooks/useTournamentInsights'
 import useSWR from 'swr'
 import Image from 'next/image'
 
@@ -14,9 +16,12 @@ import { PositionCard } from './PositionCard'
 import { PodioCard } from './PodioCard'
 import { MalazoCard } from './MalazoCard'
 import { LiveGameCard } from './LiveGameCard'
-import { CPPlayerDetailModal } from './CPPlayerDetailModal'
 import { CelebrationsCard } from './CelebrationsCard'
-import { DestacadosCard } from './DestacadosCard'
+import { HomeViewToggle, type HomeView } from './HomeViewToggle'
+import { HomeUltimaFecha } from './HomeUltimaFecha'
+import { HomeTorneo } from './HomeTorneo'
+import { isWithinRecapWindow, openAddToCalendar } from '@/lib/home-view'
+import type { PlayerRanking, TournamentInsightsData } from '@/lib/ranking-utils'
 
 // Logo URL
 const LOGO_URL = 'https://storage.googleapis.com/poker-enfermos/logo.png'
@@ -59,7 +64,8 @@ export function HomePage() {
     tournament: activeTournament,
     isLoading: tournamentLoading,
     progress,
-    nextDate: nextGameDateFromTournament
+    nextDate: nextGameDateFromTournament,
+    lastCompletedDate
   } = useActiveTournament({ refreshInterval: 300000 }) // 5 minutes
 
   const {
@@ -69,6 +75,8 @@ export function HomePage() {
   } = useTournamentRanking(activeTournament?.id || null, {
     refreshInterval: 300000 // 5 minutes
   })
+
+  const { insights } = useTournamentInsights(activeTournament?.id || null)
 
   // Fetch active game date
   const { data: activeGameDate } = useSWR<ActiveGameDate | null>(
@@ -142,14 +150,6 @@ export function HomePage() {
       }
     : null
 
-  // Format next date with date number
-  const formatNextDate = (dateNumber: number | undefined, dateStr: string | null) => {
-    if (!dateStr) return 'Por definir'
-    const date = new Date(dateStr)
-    const formattedDate = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })
-    return dateNumber ? `Fecha ${dateNumber}: ${formattedDate}` : formattedDate
-  }
-
   // Estado C: Fecha en vivo
   if (isGameLive && activeGameDate) {
     return (
@@ -174,18 +174,14 @@ export function HomePage() {
   return (
     <HomeAuthenticated
       user={user}
-      myRanking={myRanking}
-      top3={top3}
-      bottom2={bottom2}
-      leaderPoints={leaderPoints}
-      lastPoints={lastPoints}
       isCommission={isCommission}
       tournamentNumber={activeTournament?.number ?? 29}
-      nextDate={formatNextDate(nextGameDateFromTournament?.dateNumber, nextGameDateFromTournament?.scheduledDate ?? null)}
-      nextDateScheduled={nextGameDateFromTournament?.scheduledDate ?? null}
-      hasActiveDate={!!activeGameDate}
       tournamentId={activeTournament?.id || 0}
       rankings={rankings}
+      lastCompletedDate={lastCompletedDate}
+      nextDate={nextGameDateFromTournament ?? null}
+      insights={insights}
+      hasActiveDate={!!activeGameDate}
     />
   )
 }
@@ -216,80 +212,6 @@ function HomeLoading() {
         </div>
       </div>
     </CPAppShell>
-  )
-}
-
-// ============================================
-// NEXT DATE WITH CALENDAR BUTTON
-// ============================================
-interface NextDateWithCalendarProps {
-  nextDate: string // Format: "8: 20 de enero" or "Por definir"
-  scheduledDate?: string | null // ISO date string for calendar
-}
-
-function NextDateWithCalendar({ nextDate, scheduledDate }: NextDateWithCalendarProps) {
-  const handleAddToCalendar = () => {
-    if (!scheduledDate) return
-
-    const eventDate = new Date(scheduledDate)
-    const endDate = new Date(eventDate)
-    endDate.setHours(endDate.getHours() + 4) // 4 hour event
-
-    // Format dates for calendar URL
-    const formatDateForCal = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
-    }
-
-    const title = encodeURIComponent(`Poker Enfermos - Fecha ${nextDate.split(':')[0]}`)
-    const startStr = formatDateForCal(eventDate)
-    const endStr = formatDateForCal(endDate)
-
-    // Use Google Calendar URL which works on both iOS and Android
-    // iOS will offer to open in native calendar app
-    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}`
-
-    window.open(calendarUrl, '_blank')
-  }
-
-  const canAddToCalendar = nextDate !== 'Por definir' && scheduledDate
-
-  return (
-    <div className="flex items-center justify-center gap-2">
-      <p
-        style={{
-          fontSize: 'var(--cp-body-size)',
-          color: 'var(--cp-on-surface-variant)',
-        }}
-      >
-        {nextDate}
-      </p>
-      {canAddToCalendar && (
-        <button
-          onClick={handleAddToCalendar}
-          className="p-1.5 rounded-full transition-all hover:bg-white/10 active:scale-95"
-          aria-label="Agregar al calendario"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: 'var(--cp-primary)' }}
-          >
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-            <line x1="12" y1="14" x2="12" y2="18" />
-            <line x1="10" y1="16" x2="14" y2="16" />
-          </svg>
-        </button>
-      )}
-    </div>
   )
 }
 
@@ -481,7 +403,7 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
 }
 
 // ============================================
-// ESTADO B: LOGUEADO (Sin fecha activa)
+// ESTADO B: LOGUEADO (Sin fecha activa) — Última Fecha / Torneo
 // ============================================
 interface HomeAuthenticatedProps {
   user: {
@@ -490,65 +412,34 @@ interface HomeAuthenticatedProps {
     lastName?: string
     photoUrl?: string
   }
-  myRanking?: {
-    position: number
-    playerName: string
-    totalPoints: number
-    finalScore?: number
-    positionsChanged: number
-  }
-  top3: Array<{
-    position: number
-    playerName: string
-    playerId: string
-    totalPoints: number
-    finalScore?: number
-    positionsChanged: number
-    playerPhoto?: string
-    victories?: number
-    podiums?: number
-  }>
-  bottom2: Array<{
-    position: number
-    playerName: string
-    playerId: string
-    totalPoints: number
-    finalScore?: number
-    positionsChanged: number
-    playerPhoto?: string
-    lastPlaces?: number
-    absences?: number
-  }>
-  leaderPoints: number
-  lastPoints: number
   isCommission: boolean
   tournamentNumber: number
-  nextDate: string
-  nextDateScheduled?: string | null
-  hasActiveDate: boolean
   tournamentId: number
-  rankings: Array<{ playerId: string; playerName: string; playerPhoto?: string; positionsChanged: number }>
+  rankings: PlayerRanking[]
+  lastCompletedDate: { id: number; dateNumber: number; scheduledDate: string | null } | null
+  nextDate: { dateNumber: number; scheduledDate: string | null } | null
+  insights?: TournamentInsightsData
+  hasActiveDate: boolean
 }
 
 function HomeAuthenticated({
   user,
-  myRanking,
-  top3,
-  bottom2,
-  leaderPoints,
-  lastPoints,
   isCommission,
   tournamentNumber,
-  nextDate,
-  nextDateScheduled,
-  hasActiveDate,
   tournamentId,
   rankings,
+  lastCompletedDate,
+  nextDate,
+  insights,
+  hasActiveDate,
 }: HomeAuthenticatedProps) {
-  const [showDetailModal, setShowDetailModal] = useState(false)
+  const router = useRouter()
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     : 'PE'
+
+  const defaultView: HomeView = lastCompletedDate && isWithinRecapWindow(lastCompletedDate.scheduledDate) ? 'ultimaFecha' : 'torneo'
+  const [view, setView] = useState<HomeView>(defaultView)
 
   return (
     <CPAppShell>
@@ -566,70 +457,37 @@ function HomeAuthenticated({
         {/* Celebrations - Birthdays (first position, dismissible) */}
         <CelebrationsCard />
 
-        {/* Next Date with Calendar */}
-        <NextDateWithCalendar nextDate={nextDate} scheduledDate={nextDateScheduled} />
+        <HomeViewToggle value={view} onChange={setView} ultimaFechaDisabled={!lastCompletedDate} />
 
-        {/* Mi Posición */}
-        {myRanking && (
-          <PositionCard
-            position={myRanking.position}
-            totalPoints={myRanking.totalPoints}
-            finalPoints={myRanking.finalScore ?? myRanking.totalPoints}
-            trend={myRanking.positionsChanged}
-            leaderPoints={leaderPoints}
-            lastPoints={lastPoints}
-            playerName={myRanking.playerName}
-            onDetailClick={() => setShowDetailModal(true)}
-          />
-        )}
-
-        {/* Podio */}
-        {top3.length > 0 && (
-          <PodioCard
+        {view === 'ultimaFecha' && lastCompletedDate ? (
+          <HomeUltimaFecha
+            user={user}
             tournamentNumber={tournamentNumber}
-            players={top3.map((p, idx) => ({
-              position: idx + 1,
-              name: p.playerName,
-              photoUrl: p.playerPhoto,
-              totalPoints: p.totalPoints,
-              finalPoints: p.finalScore ?? p.totalPoints,
-              trend: p.positionsChanged,
-              victories: p.firstPlaces ?? 0,
-              podiums: (p.firstPlaces ?? 0) + (p.secondPlaces ?? 0) + (p.thirdPlaces ?? 0),
-            }))}
+            rankings={rankings}
+            lastCompletedDate={lastCompletedDate}
+            streaks={insights?.streaks}
+            onOpenProfile={() => router.push(`/players/${user.id}`)}
+            onSeeAllResults={() => router.push('/fecha')}
+            onSeeFullTable={() => router.push('/ranking')}
+          />
+        ) : (
+          <HomeTorneo
+            user={user}
+            tournamentId={tournamentId}
+            tournamentNumber={tournamentNumber}
+            rankings={rankings}
+            nextDate={nextDate}
+            streaks={insights?.streaks}
+            seasonHighlights={insights?.seasonHighlights}
+            onOpenProfile={() => router.push(`/players/${user.id}`)}
+            onSeeCalendar={() => openAddToCalendar(nextDate?.dateNumber, nextDate?.scheduledDate)}
+            onSeeFullTable={() => router.push('/ranking')}
           />
         )}
-
-        {/* 7/2 - Malazos */}
-        {bottom2.length >= 2 && (
-          <MalazoCard
-            players={bottom2.map((p) => ({
-              position: p.position,
-              name: p.playerName,
-              photoUrl: p.playerPhoto,
-              totalPoints: p.totalPoints,
-              finalPoints: p.finalScore ?? p.totalPoints,
-              trend: p.positionsChanged,
-              lastPlaces: p.lastPlaces ?? 0,
-              absences: p.absences ?? 0,
-            }))}
-          />
-        )}
-
-        {/* Destacados */}
-        <DestacadosCard rankings={rankings} />
       </main>
 
       {/* Bottom Nav */}
       <CPBottomNav />
-
-      {/* Player Detail Modal */}
-      <CPPlayerDetailModal
-        isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
-        playerId={user.id}
-        tournamentId={tournamentId}
-      />
     </CPAppShell>
   )
 }
@@ -661,6 +519,9 @@ interface HomeWithLiveGameProps {
     playerPhoto?: string
     victories?: number
     podiums?: number
+    firstPlaces?: number
+    secondPlaces?: number
+    thirdPlaces?: number
   }>
   bottom2: Array<{
     position: number
@@ -699,10 +560,9 @@ function HomeWithLiveGame({
   tournamentNumber,
   activeGameDate,
   playersRemaining,
-  lastElimination,
-  tournamentId
+  lastElimination
 }: HomeWithLiveGameProps) {
-  const [showDetailModal, setShowDetailModal] = useState(false)
+  const router = useRouter()
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     : 'PE'
@@ -741,7 +601,7 @@ function HomeWithLiveGame({
             leaderPoints={leaderPoints}
             lastPoints={lastPoints}
             playerName={myRanking.playerName}
-            onDetailClick={() => setShowDetailModal(true)}
+            onDetailClick={() => router.push(`/players/${user.id}`)}
           />
         )}
 
@@ -781,14 +641,6 @@ function HomeWithLiveGame({
 
       {/* Bottom Nav */}
       <CPBottomNav />
-
-      {/* Player Detail Modal */}
-      <CPPlayerDetailModal
-        isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
-        playerId={user.id}
-        tournamentId={tournamentId}
-      />
     </CPAppShell>
   )
 }

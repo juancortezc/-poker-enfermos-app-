@@ -30,6 +30,8 @@ export default function StatsPage() {
     isLoading: tournamentLoading,
   } = useActiveTournament({ refreshInterval: 300000 })
 
+  const { hasActiveGameDate } = useActiveGameDate()
+
   // Loading state
   if (authLoading || tournamentLoading) {
     return (
@@ -98,8 +100,6 @@ export default function StatsPage() {
       </CPAppShell>
     )
   }
-
-  const { hasActiveGameDate } = useActiveGameDate()
 
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()

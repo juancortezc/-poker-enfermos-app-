@@ -96,6 +96,7 @@ export { fetcher }
 export const swrKeys = {
   // Tournament related
   tournamentRanking: (tournamentId: number) => `/api/tournaments/${tournamentId}/ranking`,
+  tournamentInsights: (tournamentId: number) => `/api/tournaments/${tournamentId}/insights`,
   activeTournament: () => '/api/tournaments/active',
   previousTournament: () => '/api/tournaments/previous',
   tournament: (tournamentId: number) => `/api/tournaments/${tournamentId}`,

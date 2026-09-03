@@ -88,7 +88,7 @@ export async function GET() {
           completedDates,
           totalDates: activeTournament.gameDates.length,
           nextDate,
-          lastCompletedDate: lastCompletedDate ? { id: lastCompletedDate.id, dateNumber: lastCompletedDate.dateNumber } : null,
+          lastCompletedDate: lastCompletedDate ? { id: lastCompletedDate.id, dateNumber: lastCompletedDate.dateNumber, scheduledDate: lastCompletedDate.scheduledDate } : null,
           startDate,
           endDate,
           isCompleted: completedDates === activeTournament.gameDates.length

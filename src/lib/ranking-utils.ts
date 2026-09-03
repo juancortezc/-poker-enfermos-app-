@@ -481,3 +481,236 @@ export async function getTournamentRegisteredPlayers(tournamentId: number) {
     role: tp.player.role
   }));
 }
+
+// ============================================================================
+// INSIGHTS DE TEMPORADA (rachas multi-fecha, récords) — bloque aditivo.
+// No modifica calculateTournamentRanking; reutiliza el mismo criterio
+// simplificado (orden solo por puntaje, sin desempates secundarios) que ya
+// usa el cálculo de `trend` de arriba para estimar posiciones históricas.
+// ============================================================================
+
+const STREAK_WINDOW_DATES = 3;
+
+interface InsightGameDate {
+  dateNumber: number;
+  status: string;
+  playerIds: string[];
+  eliminations: { eliminatedPlayerId: string; points: number; position: number }[];
+}
+
+/**
+ * Puntaje acumulado (con ELIMINA N si aplica) de cada jugador usando solo
+ * las primeras `count` fechas de `gameDates` (ordenadas por dateNumber asc).
+ */
+function scoresAtPrefix(
+  gameDates: InsightGameDate[],
+  count: number,
+  registeredPlayerIds: string[],
+  datesToEliminate: number,
+  eliminationThreshold: number
+): Map<string, number> {
+  const prefix = gameDates.slice(0, count);
+  const totals = new Map<string, number>();
+  const pointsByDate = new Map<string, Map<number, number>>();
+  registeredPlayerIds.forEach(id => {
+    totals.set(id, 0);
+    pointsByDate.set(id, new Map());
+  });
+
+  prefix.forEach(gameDate => {
+    const totalPlayersInDate = gameDate.playerIds.length;
+    gameDate.playerIds.forEach(playerId => {
+      if (!totals.has(playerId)) return;
+      const elimination = gameDate.eliminations.find(e => e.eliminatedPlayerId === playerId);
+      let points = 0;
+      if (elimination) {
+        points = elimination.points;
+      } else {
+        const eliminatedCount = gameDate.eliminations.length;
+        const activePlayersCount = totalPlayersInDate - eliminatedCount;
+        if (activePlayersCount === 1 || gameDate.status === 'completed') {
+          const secondPlace = gameDate.eliminations.find(e => e.position === 2);
+          points = secondPlace ? secondPlace.points + 3 : calculatePointsForPosition(1, totalPlayersInDate);
+        }
+      }
+      totals.set(playerId, (totals.get(playerId) ?? 0) + points);
+      pointsByDate.get(playerId)!.set(gameDate.dateNumber, points);
+    });
+  });
+
+  const scores = new Map<string, number>();
+  if (prefix.length >= eliminationThreshold) {
+    registeredPlayerIds.forEach(id => {
+      const dates = Array.from(pointsByDate.get(id)!.values());
+      const sorted = [...dates].sort((a, b) => a - b);
+      const eliminated = sorted.slice(0, datesToEliminate);
+      const eliminatedSum = eliminated.reduce((sum, v) => sum + v, 0);
+      scores.set(id, (totals.get(id) ?? 0) - eliminatedSum);
+    });
+  } else {
+    registeredPlayerIds.forEach(id => scores.set(id, totals.get(id) ?? 0));
+  }
+  return scores;
+}
+
+function positionsFromScores(scores: Map<string, number>): Map<string, number> {
+  const sorted = Array.from(scores.entries()).sort((a, b) => b[1] - a[1]);
+  const positions = new Map<string, number>();
+  sorted.forEach(([playerId], index) => positions.set(playerId, index + 1));
+  return positions;
+}
+
+export interface PlayerPositionDelta {
+  playerId: string;
+  playerName: string;
+  playerPhoto?: string;
+  positionsChanged: number;
+}
+
+export interface TournamentInsightsData {
+  streaks: {
+    hot: PlayerPositionDelta[];
+    cold: PlayerPositionDelta[];
+  };
+  seasonHighlights: {
+    biggestJump: (PlayerPositionDelta & { dateNumber: number }) | null;
+    longestTop3Streak: { playerId: string; playerName: string; playerPhoto?: string; streakLength: number } | null;
+  };
+}
+
+/**
+ * Calcula rachas de posición (últimas N fechas) y récords de temporada
+ * (mayor salto en una fecha, racha actual de fechas seguidas en el Top 3).
+ * Usado por la home nueva ("Los que vienen calientes" / "Los Malazos 7/2" /
+ * "La temporada en números").
+ */
+export async function calculateTournamentInsights(tournamentId: number): Promise<TournamentInsightsData | null> {
+  try {
+    const currentRankingData = await calculateTournamentRanking(tournamentId);
+    if (!currentRankingData || currentRankingData.tournament.completedDates < 2) {
+      return null;
+    }
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      include: {
+        tournamentParticipants: {
+          include: {
+            player: {
+              select: { id: true, firstName: true, lastName: true, role: true, photoUrl: true }
+            }
+          }
+        },
+        gameDates: {
+          where: { status: { in: ['completed', 'in_progress'] } },
+          include: {
+            eliminations: {
+              select: { eliminatedPlayerId: true, points: true, position: true }
+            }
+          },
+          orderBy: { dateNumber: 'asc' }
+        }
+      }
+    });
+    if (!tournament) return null;
+
+    const registeredPlayers = tournament.tournamentParticipants.map(tp => ({
+      id: tp.player.id,
+      name: `${tp.player.firstName} ${tp.player.lastName}`,
+      photo: getPlayerPhotoUrl(tp.player.photoUrl, tp.player.role) || undefined
+    }));
+    const registeredPlayerIds = registeredPlayers.map(p => p.id);
+    const playerById = new Map(registeredPlayers.map(p => [p.id, p]));
+
+    const totalDates = tournament.totalDates ?? 12;
+    const datesToEliminate = tournament.datesToEliminate ?? 2;
+    const eliminationThreshold = Math.ceil(totalDates / 2);
+    const gameDates: InsightGameDate[] = tournament.gameDates;
+    const n = gameDates.length;
+
+    // Posición actual "oficial" (con todos los criterios de desempate) desde calculateTournamentRanking
+    const currentPositionById = new Map(currentRankingData.rankings.map(r => [r.playerId, r.position]));
+
+    // Posiciones en cada prefijo de fechas (criterio simplificado, con caché)
+    const positionsAtPrefixCache = new Map<number, Map<string, number>>();
+    const positionsAtPrefix = (count: number): Map<string, number> => {
+      if (count <= 0) return new Map();
+      const cached = positionsAtPrefixCache.get(count);
+      if (cached) return cached;
+      const scores = scoresAtPrefix(gameDates, count, registeredPlayerIds, datesToEliminate, eliminationThreshold);
+      const positions = positionsFromScores(scores);
+      positionsAtPrefixCache.set(count, positions);
+      return positions;
+    };
+
+    // --- Rachas (ventana de STREAK_WINDOW_DATES fechas) ---
+    const windowStart = Math.max(0, n - STREAK_WINDOW_DATES);
+    const positionsBeforeWindow = positionsAtPrefix(windowStart);
+    const deltas: PlayerPositionDelta[] = registeredPlayerIds
+      .map((playerId): PlayerPositionDelta | null => {
+        const before = positionsBeforeWindow.get(playerId);
+        const now = currentPositionById.get(playerId);
+        if (before === undefined || now === undefined) return null;
+        const player = playerById.get(playerId)!;
+        return {
+          playerId,
+          playerName: player.name,
+          playerPhoto: player.photo,
+          positionsChanged: before - now
+        };
+      })
+      .filter((d): d is PlayerPositionDelta => d !== null && d.positionsChanged !== 0);
+
+    const hot = [...deltas].sort((a, b) => b.positionsChanged - a.positionsChanged).slice(0, 3);
+    const cold = [...deltas].sort((a, b) => a.positionsChanged - b.positionsChanged).slice(0, 2);
+
+    // --- Mayor salto de la temporada (una sola fecha) ---
+    let biggestJump: TournamentInsightsData['seasonHighlights']['biggestJump'] = null;
+    for (let k = 2; k <= n; k++) {
+      const before = positionsAtPrefix(k - 1);
+      const after = positionsAtPrefix(k);
+      registeredPlayerIds.forEach(playerId => {
+        const b = before.get(playerId);
+        const a = after.get(playerId);
+        if (b === undefined || a === undefined) return;
+        const change = b - a;
+        if (!biggestJump || change > biggestJump.positionsChanged) {
+          const player = playerById.get(playerId)!;
+          biggestJump = {
+            playerId,
+            playerName: player.name,
+            playerPhoto: player.photo,
+            positionsChanged: change,
+            dateNumber: gameDates[k - 1].dateNumber
+          };
+        }
+      });
+    }
+
+    // --- Racha actual de fechas seguidas en el Top 3 ---
+    let longestTop3Streak: TournamentInsightsData['seasonHighlights']['longestTop3Streak'] = null;
+    registeredPlayerIds.forEach(playerId => {
+      let streak = 0;
+      for (let k = n; k >= 1; k--) {
+        const pos = positionsAtPrefix(k).get(playerId);
+        if (pos !== undefined && pos <= 3) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      if (streak >= 2 && (!longestTop3Streak || streak > longestTop3Streak.streakLength)) {
+        const player = playerById.get(playerId)!;
+        longestTop3Streak = { playerId, playerName: player.name, playerPhoto: player.photo, streakLength: streak };
+      }
+    });
+
+    return {
+      streaks: { hot, cold },
+      seasonHighlights: { biggestJump, longestTop3Streak }
+    };
+  } catch (error) {
+    console.error('Error calculating tournament insights:', error);
+    return null;
+  }
+}

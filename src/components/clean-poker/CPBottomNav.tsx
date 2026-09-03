@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, ChevronLeft, Table2, TrendingUp, Info } from 'lucide-react'
+import { Home, ChevronLeft, Calendar, Mic, TrendingUp, MoreHorizontal } from 'lucide-react'
 
 interface NavItem {
   id: string
@@ -19,22 +19,28 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Home className="w-5 h-5" />,
   },
   {
-    id: 'tabla',
-    label: 'Tabla',
-    href: '/tabla',
-    icon: <Table2 className="w-5 h-5" />,
+    id: 'podcast',
+    label: 'Podcast',
+    href: '/podcast',
+    icon: <Mic className="w-5 h-5" />,
   },
   {
     id: 'stats',
-    label: 'Stats',
+    label: 'Estadísticas',
     href: '/stats',
     icon: <TrendingUp className="w-5 h-5" />,
   },
   {
-    id: 'info',
-    label: 'Info',
-    href: '/info',
-    icon: <Info className="w-5 h-5" />,
+    id: 'fecha',
+    label: 'Fecha',
+    href: '/fecha',
+    icon: <Calendar className="w-5 h-5" />,
+  },
+  {
+    id: 'mas',
+    label: 'Más',
+    href: '/mas',
+    icon: <MoreHorizontal className="w-5 h-5" />,
   },
 ]
 
@@ -70,12 +76,12 @@ export function CPBottomNav() {
           background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.95) 100%)',
         }}
       >
-      <div className="flex items-center justify-around py-2 px-4">
+      <div className="flex items-center py-2 px-1">
         {/* Back button - only show when not on home */}
         {!isHomePage && (
           <button
             onClick={handleBack}
-            className="flex flex-col items-center gap-1 py-2 px-6 rounded-xl transition-all cursor-pointer"
+            className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all cursor-pointer flex-1 min-w-0"
             style={{
               background: 'transparent',
               color: 'var(--cp-on-surface-variant)',
@@ -83,8 +89,8 @@ export function CPBottomNav() {
           >
             <ChevronLeft className="w-5 h-5" />
             <span
-              className="font-medium"
-              style={{ fontSize: 'var(--cp-caption-size)' }}
+              className="font-medium truncate"
+              style={{ fontSize: '10px' }}
             >
               Atrás
             </span>
@@ -97,7 +103,7 @@ export function CPBottomNav() {
             <Link
               key={item.id}
               href={item.href}
-              className="flex flex-col items-center gap-1 py-2 px-6 rounded-xl transition-all"
+              className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all flex-1 min-w-0"
               style={{
                 background: active ? 'var(--cp-surface)' : 'transparent',
                 color: active ? 'var(--cp-on-surface)' : 'var(--cp-on-surface-variant)',
@@ -105,8 +111,8 @@ export function CPBottomNav() {
             >
               {item.icon}
               <span
-                className="font-medium"
-                style={{ fontSize: 'var(--cp-caption-size)' }}
+                className="font-medium truncate"
+                style={{ fontSize: '10px' }}
               >
                 {item.label}
               </span>

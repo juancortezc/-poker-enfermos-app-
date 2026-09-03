@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { RotateCw } from 'lucide-react'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
-import { CPPlayerDetailModal } from './CPPlayerDetailModal'
 import type { PlayerRanking } from '@/lib/ranking-utils'
 
 interface CPRankingViewProps {
@@ -261,7 +260,8 @@ function PlayerRow({ player, rank, isMalazo = false, onClick }: {
 
 // ── MAIN ──
 export function CPRankingView({ tournamentId }: CPRankingViewProps) {
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+  const router = useRouter()
+  const goToPlayer = (playerId: string) => router.push(`/players/${playerId}`)
 
   const { ranking: rankingData, isLoading, isError, errorMessage, refresh } = useTournamentRanking(tournamentId, {
     refreshInterval: 30000,
@@ -316,14 +316,14 @@ export function CPRankingView({ tournamentId }: CPRankingViewProps) {
 
       {/* #1 Hero card */}
       {leader && (
-        <HeroCard player={leader} onClick={() => setSelectedPlayerId(leader.playerId)} />
+        <HeroCard player={leader} onClick={() => goToPlayer(leader.playerId)} />
       )}
 
       {/* #2 and #3 side by side */}
       {(second || third) && (
         <div className="flex gap-2 items-start" style={{ marginTop: '40px' }}>
-          {second && <PodiumCard player={second} onClick={() => setSelectedPlayerId(second.playerId)} />}
-          {third && <PodiumCard player={third} onClick={() => setSelectedPlayerId(third.playerId)} />}
+          {second && <PodiumCard player={second} onClick={() => goToPlayer(second.playerId)} />}
+          {third && <PodiumCard player={third} onClick={() => goToPlayer(third.playerId)} />}
         </div>
       )}
 
@@ -335,7 +335,7 @@ export function CPRankingView({ tournamentId }: CPRankingViewProps) {
               key={player.playerId}
               player={player}
               rank={player.position}
-              onClick={() => setSelectedPlayerId(player.playerId)}
+              onClick={() => goToPlayer(player.playerId)}
             />
           ))}
         </div>
@@ -353,19 +353,11 @@ export function CPRankingView({ tournamentId }: CPRankingViewProps) {
               player={player}
               rank={player.position}
               isMalazo
-              onClick={() => setSelectedPlayerId(player.playerId)}
+              onClick={() => goToPlayer(player.playerId)}
             />
           ))}
         </div>
       )}
-
-      {/* Player Detail Modal */}
-      <CPPlayerDetailModal
-        isOpen={!!selectedPlayerId}
-        onClose={() => setSelectedPlayerId(null)}
-        playerId={selectedPlayerId || ''}
-        tournamentId={tournamentId}
-      />
     </div>
   )
 }
