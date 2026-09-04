@@ -16,21 +16,20 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
       {cold.length > 0 && (
         <div
           style={{
-            background: 'rgba(236,64,122,0.20)',
-            border: '1px solid rgba(236,64,122,0.55)',
+            background: 'linear-gradient(160deg,#EC407A,#AD1457)',
             borderRadius: 16,
             padding: 14
           }}
         >
-          <div style={{ fontSize: 10, fontWeight: 800, color: '#FF6FA5', letterSpacing: '0.04em', marginBottom: 10 }}>LOS MALAZOS 7/2</div>
+          <div style={{ fontSize: 10, fontWeight: 800, color: '#fff', letterSpacing: '0.04em', marginBottom: 10 }}>LOS MALAZOS 7/2</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 8 }}>
             {cold.map(player => (
               <div
                 key={player.playerId}
                 style={{
                   textAlign: 'center',
-                  background: 'rgba(236,64,122,0.12)',
-                  border: '1px solid rgba(236,64,122,0.30)',
+                  background: 'rgba(0,0,0,0.18)',
+                  border: '1px solid rgba(255,255,255,0.14)',
                   borderRadius: 14,
                   padding: '12px 6px',
                   display: 'flex',
@@ -40,11 +39,11 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
                   <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={48} fontSize={14} />
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {player.playerName}
                 </div>
-                <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#FF6FA5' }}>
-                  {player.points} <span style={{ fontSize: 9, fontWeight: 700 }}>PTS</span>
+                <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#fff' }}>
+                  {player.points} <span style={{ fontSize: 9, fontWeight: 700, opacity: 0.85 }}>PTS</span>
                 </div>
               </div>
             ))}
@@ -55,8 +54,8 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
       {hot.length > 0 && (
         <div
           style={{
-            background: 'rgba(76,175,80,0.18)',
-            border: '1px solid rgba(76,175,80,0.50)',
+            background: 'rgba(76,175,80,0.14)',
+            border: '1.5px solid rgba(76,175,80,0.65)',
             borderRadius: 16,
             padding: 14
           }}
@@ -69,8 +68,8 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 key={player.playerId}
                 style={{
                   textAlign: 'center',
-                  background: 'rgba(76,175,80,0.10)',
-                  border: '1px solid rgba(76,175,80,0.28)',
+                  background: 'rgba(0,0,0,0.16)',
+                  border: '1px solid rgba(76,175,80,0.30)',
                   borderRadius: 14,
                   padding: '12px 6px',
                   display: 'flex',
@@ -83,7 +82,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {player.playerName}
                 </div>
-                <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#4CAF50' }}>
+                <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#7CD07F' }}>
                   +{player.positionsChanged}
                 </div>
               </div>

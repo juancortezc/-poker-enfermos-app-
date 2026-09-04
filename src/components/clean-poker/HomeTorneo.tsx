@@ -1,6 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
+import { CalendarPlus } from 'lucide-react'
 import type { PlayerRanking, PlayerPositionDelta, TournamentInsightsData } from '@/lib/ranking-utils'
 import { PodioTorneoCard } from './PodioTorneoCard'
 import { StreaksCards } from './StreaksCards'
@@ -25,7 +26,8 @@ interface HomeTorneoProps {
   streaks?: { hot: PlayerPositionDelta[]; cold: PlayerPositionDelta[] }
   seasonHighlights?: TournamentInsightsData['seasonHighlights']
   onOpenProfile: () => void
-  onSeeCalendar: () => void
+  onOpenCalendarPage: () => void
+  onAddToPersonalCalendar: () => void
   onSeeFullTable: () => void
 }
 
@@ -42,7 +44,7 @@ function ClockIcon() {
 
 function TrophyIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D8A84E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8C158" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" y1="19" x2="12" y2="23" />
@@ -88,7 +90,8 @@ export function HomeTorneo({
   streaks,
   seasonHighlights,
   onOpenProfile,
-  onSeeCalendar,
+  onOpenCalendarPage,
+  onAddToPersonalCalendar,
   onSeeFullTable
 }: HomeTorneoProps) {
   const { data: droughtData } = useSWR<DaysWithoutVictoryResponse>(
@@ -164,11 +167,11 @@ export function HomeTorneo({
     seasonHighlights?.biggestJump && {
       key: 'biggestjump',
       icon: <TrophyIcon />,
-      iconBg: 'rgba(216,168,78,0.24)',
+      iconBg: 'rgba(232,193,88,0.24)',
       text: (
         <>
           La racha más grande de la temporada:{' '}
-          <span style={{ color: '#D8A84E' }}>+{seasonHighlights.biggestJump.positionsChanged} posiciones</span> (
+          <span style={{ color: '#E8C158' }}>+{seasonHighlights.biggestJump.positionsChanged} posiciones</span> (
           {seasonHighlights.biggestJump.playerName.split(' ')[0]}, Fecha {seasonHighlights.biggestJump.dateNumber})
         </>
       )
@@ -193,7 +196,7 @@ export function HomeTorneo({
         }}
       >
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#D8A84E' }}>Próxima fecha</div>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#E8C158' }}>Próxima fecha</div>
           <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', marginTop: 2, letterSpacing: '-0.01em' }}>
             {formattedDate ?? 'Por definir'}
           </div>
@@ -202,26 +205,48 @@ export function HomeTorneo({
             {nextDate?.dateNumber ? ` · Fecha ${nextDate.dateNumber}` : ''}
           </div>
         </div>
-        <button
-          onClick={onSeeCalendar}
-          style={{
-            flexShrink: 0,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-            background: '#E53935',
-            color: '#fff',
-            padding: '7px 12px',
-            borderRadius: 100,
-            fontSize: 10,
-            fontWeight: 800,
-            letterSpacing: '0.02em',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-        >
-          CALENDARIO
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <button
+            onClick={onAddToPersonalCalendar}
+            title="Guarda esta fecha en tu calendario"
+            aria-label="Guarda esta fecha en tu calendario"
+            style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 30,
+              height: 30,
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              borderRadius: '50%',
+              color: '#A89A8C',
+              cursor: 'pointer'
+            }}
+          >
+            <CalendarPlus size={14} />
+          </button>
+          <button
+            onClick={onOpenCalendarPage}
+            style={{
+              flexShrink: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              background: '#E53935',
+              color: '#fff',
+              padding: '7px 12px',
+              borderRadius: 100,
+              fontSize: 10,
+              fontWeight: 800,
+              letterSpacing: '0.02em',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            CALENDARIO T{tournamentNumber}
+          </button>
+        </div>
       </div>
 
       {/* PERSONAL STATS */}

@@ -481,7 +481,8 @@ function HomeAuthenticated({
             streaks={insights?.streaks}
             seasonHighlights={insights?.seasonHighlights}
             onOpenProfile={() => router.push(`/players/${user.id}`)}
-            onSeeCalendar={() => openAddToCalendar(nextDate?.dateNumber, nextDate?.scheduledDate)}
+            onOpenCalendarPage={() => router.push('/calendario')}
+            onAddToPersonalCalendar={() => openAddToCalendar(nextDate?.dateNumber, nextDate?.scheduledDate)}
             onSeeFullTable={() => router.push('/ranking')}
           />
         )}

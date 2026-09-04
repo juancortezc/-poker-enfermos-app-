@@ -214,12 +214,12 @@ export function HomeUltimaFecha({
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>
                     {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName[0]}.
                   </div>
-                  <div style={{ fontSize: 10, fontWeight: e.position === 1 ? 800 : 600, color: e.position === 1 ? '#D8A84E' : '#A89A8C', letterSpacing: e.position === 1 ? '0.04em' : undefined }}>
+                  <div style={{ fontSize: 10, fontWeight: e.position === 1 ? 800 : 600, color: e.position === 1 ? '#E8C158' : '#A89A8C', letterSpacing: e.position === 1 ? '0.04em' : undefined }}>
                     {e.position === 1 ? 'CAMPEÓN' : `${e.position}° puesto`}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: e.position === 1 ? '#D8A84E' : '#F5EFE6' }}>{e.points}</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: e.position === 1 ? '#E8C158' : '#F5EFE6' }}>{e.points}</div>
                   <div style={{ fontSize: 8, fontWeight: 700, color: '#7A6E62' }}>PTS</div>
                 </div>
               </div>

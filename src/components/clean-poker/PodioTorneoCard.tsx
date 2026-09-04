@@ -2,16 +2,25 @@
 
 import type { PlayerRanking } from '@/lib/ranking-utils'
 import { HomeAvatar } from './HomeAvatar'
-import { HomeCard } from './HomeCard'
 import { LinkCta } from './LinkCta'
 
 const MEDALS = [
-  { bg: 'rgba(216,168,78,0.20)', border: 'rgba(216,168,78,0.55)', color: '#F0C875' },
+  { bg: 'rgba(232,193,88,0.20)', border: 'rgba(232,193,88,0.55)', color: '#F5D274' },
   { bg: 'rgba(180,185,200,0.16)', border: 'rgba(180,185,200,0.45)', color: '#D6D8E2' },
   { bg: 'rgba(201,138,78,0.20)', border: 'rgba(201,138,78,0.52)', color: '#E0A268' }
 ]
 
 const TIGHT_RACE_THRESHOLD = 3
+
+function TrophyIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8C158" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+    </svg>
+  )
+}
 
 interface PodioTorneoCardProps {
   tournamentNumber: number
@@ -29,9 +38,18 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
   const isTightRace = showNightContext && spread !== null && spread <= TIGHT_RACE_THRESHOLD
 
   return (
-    <HomeCard style={{ padding: 16 }}>
+    <div
+      style={{
+        background: 'linear-gradient(160deg, rgba(232,193,88,0.16), rgba(232,193,88,0.05))',
+        border: '1.5px solid rgba(232,193,88,0.45)',
+        borderRadius: 18,
+        padding: 16,
+        boxShadow: '0 4px 20px rgba(232,193,88,0.10)'
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>
+        <TrophyIcon />
+        <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.05em' }}>
           PODIO TORNEO {tournamentNumber}
         </div>
       </div>
@@ -100,27 +118,18 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
       </div>
 
       {isTightRace && (
-        <div
-          style={{
-            marginTop: 12,
-            background: 'rgba(229,57,53,0.20)',
-            border: '1px solid rgba(229,57,53,0.55)',
-            borderRadius: 12,
-            padding: '10px 12px',
-            textAlign: 'center'
-          }}
-        >
-          <div style={{ fontSize: 10, fontWeight: 800, color: '#FF8783', letterSpacing: '0.02em' }}>
+        <div style={{ marginTop: 12, textAlign: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.02em' }}>
             TRES JUGADORES SEPARADOS POR {spread} {spread === 1 ? 'PUNTO' : 'PUNTOS'}
           </div>
-          <div style={{ fontSize: 9, fontWeight: 600, color: '#FF8783', marginTop: 2 }}>¡Esto se puso feo!</div>
+          <div style={{ fontSize: 9, fontWeight: 700, color: '#E53935', marginTop: 2 }}>¡Esto se puso feo!</div>
         </div>
       )}
 
       <div style={{ marginTop: 10, textAlign: 'center' }}>
         <LinkCta onClick={onSeeAll}>VER TABLA COMPLETA →</LinkCta>
       </div>
-    </HomeCard>
+    </div>
   )
 }
 
