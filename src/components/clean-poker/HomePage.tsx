@@ -468,6 +468,7 @@ function HomeAuthenticated({
             streaks={insights?.streaks}
             onOpenProfile={() => router.push(`/players/${user.id}`)}
             onSeeAllResults={() => router.push('/fecha')}
+            onSeeResultsTab={() => router.push('/fecha?tab=resultados')}
             onSeeFullTable={() => router.push('/ranking')}
           />
         ) : (

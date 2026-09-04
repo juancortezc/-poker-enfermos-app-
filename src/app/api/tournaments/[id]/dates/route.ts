@@ -43,7 +43,8 @@ export async function GET(
                   id: true,
                   firstName: true,
                   lastName: true,
-                  photoUrl: true
+                  photoUrl: true,
+                  role: true
                 }
               },
               eliminatorPlayer: {

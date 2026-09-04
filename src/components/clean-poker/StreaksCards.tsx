@@ -6,10 +6,9 @@ import { HomeAvatar } from './HomeAvatar'
 interface StreaksCardsProps {
   hot: PlayerPositionDelta[]
   cold: PlayerPositionDelta[]
-  onSeeAllHot?: () => void
 }
 
-export function StreaksCards({ hot, cold, onSeeAllHot }: StreaksCardsProps) {
+export function StreaksCards({ hot, cold }: StreaksCardsProps) {
   if (hot.length === 0 && cold.length === 0) return null
 
   return (
@@ -17,22 +16,36 @@ export function StreaksCards({ hot, cold, onSeeAllHot }: StreaksCardsProps) {
       {cold.length > 0 && (
         <div
           style={{
-            background: 'rgba(229,57,53,0.08)',
-            border: '1px solid rgba(229,57,53,0.24)',
+            background: 'rgba(236,64,122,0.20)',
+            border: '1px solid rgba(236,64,122,0.55)',
             borderRadius: 16,
             padding: 14
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: '#FF8783', letterSpacing: '0.04em' }}>LOS MALAZOS 7/2</div>
-            <span style={{ fontSize: 13 }}>😅</span>
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: '#FF6FA5', letterSpacing: '0.04em', marginBottom: 10 }}>LOS MALAZOS 7/2</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 8 }}>
             {cold.map(player => (
-              <div key={player.playerId} style={{ flex: '0 0 40%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={48} fontSize={14} />
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#F5EFE6' }}>{player.playerName}</div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#E53935' }}>{player.positionsChanged}</div>
+              <div
+                key={player.playerId}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(236,64,122,0.12)',
+                  border: '1px solid rgba(236,64,122,0.30)',
+                  borderRadius: 14,
+                  padding: '12px 6px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
+                  <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={48} fontSize={14} />
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {player.playerName}
+                </div>
+                <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#FF6FA5' }}>
+                  {player.points} <span style={{ fontSize: 9, fontWeight: 700 }}>PTS</span>
+                </div>
               </div>
             ))}
           </div>
@@ -42,32 +55,39 @@ export function StreaksCards({ hot, cold, onSeeAllHot }: StreaksCardsProps) {
       {hot.length > 0 && (
         <div
           style={{
-            background: 'rgba(76,175,80,0.08)',
-            border: '1px solid rgba(76,175,80,0.24)',
+            background: 'rgba(76,175,80,0.18)',
+            border: '1px solid rgba(76,175,80,0.50)',
             borderRadius: 16,
             padding: 14
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: '#7CD07F', letterSpacing: '0.04em' }}>LOS QUE VIENEN CALIENTES</div>
-            <span style={{ fontSize: 13 }}>🔥</span>
-          </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ fontSize: 10, fontWeight: 800, color: '#7CD07F', letterSpacing: '0.04em' }}>LOS QUE VIENEN CALIENTES</div>
+          <div style={{ fontSize: 9, color: '#B7E0B8', marginTop: 2, marginBottom: 10 }}>Más posiciones ganadas en las últimas 3 fechas</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
             {hot.map(player => (
-              <div key={player.playerId} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={46} fontSize={13} />
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#F5EFE6' }}>{player.playerName}</div>
-                <div style={{ fontSize: 11, fontWeight: 800, color: '#4CAF50' }}>+{player.positionsChanged}</div>
+              <div
+                key={player.playerId}
+                style={{
+                  textAlign: 'center',
+                  background: 'rgba(76,175,80,0.10)',
+                  border: '1px solid rgba(76,175,80,0.28)',
+                  borderRadius: 14,
+                  padding: '12px 6px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
+                  <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={46} fontSize={13} />
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {player.playerName}
+                </div>
+                <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#4CAF50' }}>
+                  +{player.positionsChanged}
+                </div>
               </div>
             ))}
-          </div>
-          <div style={{ marginTop: 10, textAlign: 'center' }}>
-            <button
-              onClick={onSeeAllHot}
-              style={{ fontSize: 10, fontWeight: 700, color: '#7CD07F', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              VER TODOS →
-            </button>
           </div>
         </div>
       )}

@@ -6,9 +6,9 @@ import { HomeCard } from './HomeCard'
 import { LinkCta } from './LinkCta'
 
 const MEDALS = [
-  { bg: 'rgba(216,168,78,0.10)', border: 'rgba(216,168,78,0.30)', color: '#D8A84E' },
-  { bg: 'rgba(180,185,200,0.08)', border: 'rgba(180,185,200,0.24)', color: '#B9B9C4' },
-  { bg: 'rgba(201,138,78,0.10)', border: 'rgba(201,138,78,0.28)', color: '#C98A4E' }
+  { bg: 'rgba(216,168,78,0.20)', border: 'rgba(216,168,78,0.55)', color: '#F0C875' },
+  { bg: 'rgba(180,185,200,0.16)', border: 'rgba(180,185,200,0.45)', color: '#D6D8E2' },
+  { bg: 'rgba(201,138,78,0.20)', border: 'rgba(201,138,78,0.52)', color: '#E0A268' }
 ]
 
 const TIGHT_RACE_THRESHOLD = 3
@@ -31,7 +31,6 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
   return (
     <HomeCard style={{ padding: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-        <span style={{ fontSize: 14 }}>🏆</span>
         <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>
           PODIO TORNEO {tournamentNumber}
         </div>
@@ -49,7 +48,9 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
                 background: medal.bg,
                 border: `1px solid ${medal.border}`,
                 borderRadius: 14,
-                padding: '12px 6px'
+                padding: '12px 6px',
+                display: 'flex',
+                flexDirection: 'column'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto 6px', position: 'relative', width: 56 }}>
@@ -80,15 +81,19 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
                   {index + 1}
                 </div>
               </div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6' }}>{player.playerName}</div>
-              <div style={{ fontSize: 16, fontWeight: 900, color: medal.color, marginTop: 2 }}>
-                {scoreOf(player)} <span style={{ fontSize: 9, fontWeight: 700 }}>PTS</span>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {player.playerName}
               </div>
-              {delta !== 0 && (
-                <div style={{ fontSize: 9, fontWeight: 700, color: delta > 0 ? '#7CD07F' : '#E53935', marginTop: 1 }}>
-                  {delta > 0 ? `+${delta}` : delta}
+              <div style={{ marginTop: 'auto', paddingTop: 4 }}>
+                <div style={{ fontSize: 16, fontWeight: 900, color: medal.color }}>
+                  {scoreOf(player)} <span style={{ fontSize: 9, fontWeight: 700 }}>PTS</span>
                 </div>
-              )}
+                {showNightContext && (
+                  <div style={{ fontSize: 9, fontWeight: 700, color: delta > 0 ? '#7CD07F' : delta < 0 ? '#E53935' : '#A89A8C', marginTop: 1 }}>
+                    {delta > 0 ? `+${delta}` : delta === 0 ? '+0' : delta}
+                  </div>
+                )}
+              </div>
             </div>
           )
         })}
@@ -98,8 +103,8 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
         <div
           style={{
             marginTop: 12,
-            background: 'rgba(229,57,53,0.10)',
-            border: '1px solid rgba(229,57,53,0.28)',
+            background: 'rgba(229,57,53,0.20)',
+            border: '1px solid rgba(229,57,53,0.55)',
             borderRadius: 12,
             padding: '10px 12px',
             textAlign: 'center'

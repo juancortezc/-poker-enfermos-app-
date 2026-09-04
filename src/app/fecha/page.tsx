@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import { Trophy, Users, UserX, ChevronRight } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -18,9 +18,12 @@ interface EliminationDTO {
   id: number
   position: number
   points: number
-  eliminatedPlayer: { id: string; firstName: string; lastName: string; photoUrl?: string | null }
+  eliminatedPlayer: { id: string; firstName: string; lastName: string; photoUrl?: string | null; role?: string }
   eliminatorPlayer: { id: string; firstName: string; lastName: string } | null
 }
+
+const isGuest = (player: { role?: string }) => player.role === 'Invitado'
+const pointsLabel = (e: EliminationDTO) => (isGuest(e.eliminatedPlayer) ? '—' : `${e.points} pts`)
 interface DatesGameDate {
   id: number
   dateNumber: number
@@ -38,6 +41,7 @@ const TABS: { id: TabId; label: string }[] = [
 
 export default function FechaPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, loading: authLoading } = useAuth()
   const { tournament: activeTournament, isLoading: tournamentLoading } = useActiveTournament({ refreshInterval: 300000 })
   const { hasActiveGameDate } = useActiveGameDate()
@@ -53,6 +57,13 @@ export default function FechaPage() {
 
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [tab, setTab] = useState<TabId>('resumen')
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam === 'resultados' || tabParam === 'eliminaciones' || tabParam === 'resumen') {
+      setTab(tabParam)
+    }
+  }, [searchParams])
 
   const selectedDate = sortedDates.find((d) => d.id === selectedId) ?? lastCompleted ?? sortedDates[0] ?? null
 
@@ -191,7 +202,9 @@ export default function FechaPage() {
                       <div style={{ fontSize: 18, fontWeight: 900, color: '#2A1F14', marginTop: 2 }}>
                         {winner.eliminatedPlayer.firstName} {winner.eliminatedPlayer.lastName}
                       </div>
-                      <div style={{ fontSize: 12, color: '#8A7860', marginTop: 2 }}>{winner.points} puntos</div>
+                      <div style={{ fontSize: 12, color: '#8A7860', marginTop: 2 }}>
+                        {isGuest(winner.eliminatedPlayer) ? 'invitado' : `${winner.points} puntos`}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -208,7 +221,7 @@ export default function FechaPage() {
                             <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>
                               {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName}
                             </div>
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{e.points} pts</div>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{pointsLabel(e)}</div>
                           </div>
                         </HomeCard>
                       ))}
@@ -265,7 +278,7 @@ export default function FechaPage() {
                       <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>
                         {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName}
                       </div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{e.points} pts</div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{pointsLabel(e)}</div>
                     </div>
                   </HomeCard>
                 ))}

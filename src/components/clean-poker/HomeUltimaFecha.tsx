@@ -27,6 +27,7 @@ interface HomeUltimaFechaProps {
   streaks?: { hot: PlayerPositionDelta[]; cold: PlayerPositionDelta[] }
   onOpenProfile: () => void
   onSeeAllResults: () => void
+  onSeeResultsTab: () => void
   onSeeFullTable: () => void
 }
 
@@ -40,6 +41,7 @@ export function HomeUltimaFecha({
   streaks,
   onOpenProfile,
   onSeeAllResults,
+  onSeeResultsTab,
   onSeeFullTable
 }: HomeUltimaFechaProps) {
   const { data: eliminations } = useSWR<EliminationDTO[]>(
@@ -102,6 +104,14 @@ export function HomeUltimaFecha({
       detail: `${varonDeLaNoche.count} eliminaciones`,
       playerId: varonDeLaNoche.playerId
     },
+    elMalazoElim && {
+      key: 'malazo',
+      label: 'EL MALAZO',
+      color: '#E53935',
+      name: `${elMalazoElim.eliminatedPlayer.firstName} ${elMalazoElim.eliminatedPlayer.lastName}`,
+      detail: 'primero eliminado',
+      playerId: elMalazoElim.eliminatedPlayer.id
+    },
     nocheParaOlvidar && {
       key: 'olvidar',
       label: 'NOCHE PARA OLVIDAR',
@@ -111,20 +121,12 @@ export function HomeUltimaFecha({
       playerId: nocheParaOlvidar.playerId
     },
     elQueMasSubio && {
-      key: 'subio',
-      label: 'EL QUE MÁS SUBIÓ',
+      key: 'contento',
+      label: 'EL MÁS CONTENTO',
       color: '#4CAF50',
       name: elQueMasSubio.playerName,
       detail: `+${elQueMasSubio.positionsChanged} posiciones`,
       playerId: elQueMasSubio.playerId
-    },
-    elMalazoElim && {
-      key: 'malazo',
-      label: 'EL MALAZO',
-      color: '#E53935',
-      name: `${elMalazoElim.eliminatedPlayer.firstName} ${elMalazoElim.eliminatedPlayer.lastName}`,
-      detail: 'primero eliminado',
-      playerId: elMalazoElim.eliminatedPlayer.id
     }
   ].filter((c): c is NonNullable<typeof c> => Boolean(c))
 
@@ -144,11 +146,11 @@ export function HomeUltimaFecha({
                   className="object-cover object-top"
                   unoptimized
                 />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #2A292B 0%, rgba(42,41,43,0.55) 40%, transparent 100%)' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 55%, rgba(20,17,14,0.7) 100%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(42,41,43,0.45) 0%, transparent 16%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 68%, rgba(20,17,14,0.45) 100%)' }} />
               </div>
             )}
-            <div style={{ padding: '18px 16px', position: 'relative', zIndex: 1, maxWidth: winnerPhoto ? '68%' : '100%' }}>
+            <div style={{ padding: '18px 16px', position: 'relative', zIndex: 1, maxWidth: winnerPhoto ? '52%' : '100%' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#7A6E62', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
                 Fecha {lastCompletedDate.dateNumber}
               </div>
@@ -193,8 +195,7 @@ export function HomeUltimaFecha({
       {/* PODIUM DE LA FECHA */}
       {podium.length > 0 && (
         <HomeCard style={{ padding: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-            <span style={{ fontSize: 15 }}>🏆</span>
+          <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
               Podio Fecha {lastCompletedDate.dateNumber}
             </div>
@@ -225,7 +226,7 @@ export function HomeUltimaFecha({
             ))}
           </div>
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
-            <LinkCta onClick={onSeeAllResults}>VER TODOS LOS RESULTADOS →</LinkCta>
+            <LinkCta onClick={onSeeResultsTab}>VER TODOS LOS RESULTADOS →</LinkCta>
           </div>
         </HomeCard>
       )}
@@ -234,17 +235,24 @@ export function HomeUltimaFecha({
       {myRanking && myNightElim && (
         <div style={{ display: 'flex', gap: 10 }}>
           <div style={{ flex: 1, background: 'linear-gradient(160deg,#E53935,#B32623)', borderRadius: 16, padding: 14, color: '#fff' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.85 }}>{myNightElim.eliminatedPlayer.firstName}, terminaste</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 2 }}>
-              <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.02em' }}>#{myNightElim.position}</div>
-              {myRanking.positionsChanged !== 0 && (
-                <div style={{ fontSize: 11, fontWeight: 800, opacity: 0.9 }}>
-                  {myRanking.positionsChanged > 0 ? '↑' : '↓'}{Math.abs(myRanking.positionsChanged)}
-                </div>
-              )}
-            </div>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.75, marginTop: 2 }}>Tu posición</div>
-            <div style={{ fontSize: 11, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} puntos</div>
+            {myNightElim.position === 1 ? (
+              <>
+                <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.85 }}>{myNightElim.eliminatedPlayer.firstName}</div>
+                <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', marginTop: 2 }}>¡Ganaste!</div>
+                <div style={{ fontSize: 11, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} pts</div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', opacity: 0.85 }}>Te eliminaron en posición:</div>
+                <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.02em', marginTop: 2 }}>#{myNightElim.position}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} pts</div>
+                {myNightElim.eliminatorPlayer && (
+                  <div style={{ fontSize: 10, fontWeight: 600, opacity: 0.85, marginTop: 2 }}>
+                    Te eliminó: {myNightElim.eliminatorPlayer.firstName} {myNightElim.eliminatorPlayer.lastName}
+                  </div>
+                )}
+              </>
+            )}
           </div>
           <HomeCard style={{ flex: 1, padding: 14 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#A89A8C' }}>En el campeonato estás</div>
@@ -263,19 +271,22 @@ export function HomeUltimaFecha({
       {/* LO QUE DEJO LA NOCHE */}
       {insightCards.length > 0 && (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, padding: '0 2px' }}>
+          <div style={{ marginBottom: 10, padding: '0 2px' }}>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>LO QUE DEJÓ LA NOCHE</div>
-            <span style={{ fontSize: 14 }}>😅</span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${insightCards.length}, minmax(0,1fr))`, gap: 8 }}>
             {insightCards.map(card => (
-              <HomeCard key={card.key} style={{ padding: 8, textAlign: 'center' }}>
+              <HomeCard key={card.key} style={{ padding: 8, textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   <HomeAvatar playerId={card.playerId} name={card.name} photoUrl={photoByPlayerId.get(card.playerId)} size={64} fontSize={20} />
                 </div>
-                <div style={{ fontSize: 9, fontWeight: 800, color: card.color, marginTop: 6 }}>{card.label}</div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#F5EFE6', marginTop: 3 }}>{card.name}</div>
-                <div style={{ fontSize: 8, color: '#7A6E62', marginTop: 2, lineHeight: 1.3 }}>{card.detail}</div>
+                <div style={{ fontSize: 9, fontWeight: 800, color: card.color, marginTop: 6, minHeight: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1.3 }}>
+                  {card.label}
+                </div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: '#F5EFE6', marginTop: 3, minHeight: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {card.name}
+                </div>
+                <div style={{ fontSize: 8, color: '#A89A8C', marginTop: 'auto', paddingTop: 2, lineHeight: 1.3 }}>{card.detail}</div>
               </HomeCard>
             ))}
           </div>
@@ -284,7 +295,7 @@ export function HomeUltimaFecha({
 
       <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} showNightContext onSeeAll={onSeeFullTable} />
 
-      {streaks && <StreaksCards hot={streaks.hot} cold={streaks.cold} onSeeAllHot={onSeeFullTable} />}
+      {streaks && <StreaksCards hot={streaks.hot} cold={streaks.cold} />}
     </>
   )
 }

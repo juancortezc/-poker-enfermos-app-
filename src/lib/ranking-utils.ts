@@ -565,6 +565,7 @@ export interface PlayerPositionDelta {
   playerName: string;
   playerPhoto?: string;
   positionsChanged: number;
+  points: number;
 }
 
 export interface TournamentInsightsData {
@@ -630,6 +631,7 @@ export async function calculateTournamentInsights(tournamentId: number): Promise
 
     // Posición actual "oficial" (con todos los criterios de desempate) desde calculateTournamentRanking
     const currentPositionById = new Map(currentRankingData.rankings.map(r => [r.playerId, r.position]));
+    const currentPointsById = new Map(currentRankingData.rankings.map(r => [r.playerId, r.finalScore ?? r.totalPoints]));
 
     // Posiciones en cada prefijo de fechas (criterio simplificado, con caché)
     const positionsAtPrefixCache = new Map<number, Map<string, number>>();
@@ -656,7 +658,8 @@ export async function calculateTournamentInsights(tournamentId: number): Promise
           playerId,
           playerName: player.name,
           playerPhoto: player.photo,
-          positionsChanged: before - now
+          positionsChanged: before - now,
+          points: currentPointsById.get(playerId) ?? 0
         };
       })
       .filter((d): d is PlayerPositionDelta => d !== null && d.positionsChanged !== 0);
@@ -681,6 +684,7 @@ export async function calculateTournamentInsights(tournamentId: number): Promise
             playerName: player.name,
             playerPhoto: player.photo,
             positionsChanged: change,
+            points: currentPointsById.get(playerId) ?? 0,
             dateNumber: gameDates[k - 1].dateNumber
           };
         }
