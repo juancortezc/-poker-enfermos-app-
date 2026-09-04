@@ -9,6 +9,7 @@ import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
 import { usePlayerTournamentDetails } from '@/hooks/usePlayerTournamentDetails'
+import { averageNightlyPosition, averagePointsPerDate } from '@/lib/ranking-utils'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
@@ -111,48 +112,28 @@ export default function PlayerProfilePage() {
 
   const playerChampionships = championStats?.data?.all?.find((c) => c.player?.id === playerId)
   const myRankingEntry = rankingData?.rankings.find((r) => r.playerId === playerId)
+  const avgPosition = rankingData ? averageNightlyPosition(rankingData.rankings, playerId) : null
+  const avgPoints = myRankingEntry ? averagePointsPerDate(myRankingEntry) : null
 
   const achievements = useMemo(() => {
     if (!details) return null
     const played = details.datePerformance.filter((d) => d.status === 'completed' && !d.isAbsent)
 
+    const victories = played.filter((d) => d.eliminationPosition === undefined).length
+
     const podiums = played.filter(
       (d) => d.eliminationPosition === undefined || (d.eliminationPosition !== undefined && d.eliminationPosition <= 3)
     ).length
 
-    let bestScore = 0
-    let bestScoreDate = 0
-    for (const d of played) {
-      if (d.points > bestScore) {
-        bestScore = d.points
-        bestScoreDate = d.dateNumber
-      }
-    }
-
     const MESA_FINAL_MIN = 12
-    const isMesaFinal = (d: (typeof played)[0]) =>
-      d.eliminationPosition === undefined || (d.eliminationPosition !== undefined && d.eliminationPosition >= MESA_FINAL_MIN)
+    const mesaFinalCount = played.filter(
+      (d) => d.eliminationPosition === undefined || (d.eliminationPosition !== undefined && d.eliminationPosition >= MESA_FINAL_MIN)
+    ).length
 
-    const sortedCompleted = [...details.datePerformance].filter((d) => d.status === 'completed').sort((a, b) => a.dateNumber - b.dateNumber)
-    let maxMesaStreak = 0
-    let curMesaStreak = 0
-    for (const d of sortedCompleted) {
-      if (!d.isAbsent && isMesaFinal(d)) {
-        curMesaStreak++
-        maxMesaStreak = Math.max(maxMesaStreak, curMesaStreak)
-      } else {
-        curMesaStreak = 0
-      }
-    }
+    // Último lugar: ganó exactamente 1 punto esa fecha
+    const lastPlaceCount = played.filter((d) => d.points === 1).length
 
-    const sortedEvo = [...details.rankingEvolution].sort((a, b) => a.dateNumber - b.dateNumber)
-    let bestRise = 0
-    for (let i = 1; i < sortedEvo.length; i++) {
-      const rise = sortedEvo[i - 1].position - sortedEvo[i].position
-      if (rise > bestRise) bestRise = rise
-    }
-
-    return { podiums, bestScore, bestScoreDate, mesaFinalStreak: maxMesaStreak, bestRise }
+    return { victories, podiums, mesaFinalCount, lastPlaceCount }
   }, [details])
 
   const rival = useMemo(() => {
@@ -279,44 +260,56 @@ export default function PlayerProfilePage() {
           </div>
         </div>
 
+        {/* RIVAL DIRECTO */}
+        {rival && (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+              {isOwnProfile ? 'TU RIVAL DIRECTO' : 'RIVAL CERCANO'}
+            </div>
+            <HomeCard>
+              <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <HomeAvatar playerId={rival.playerId} name={rival.playerName} photoUrl={rival.playerPhoto} size={44} fontSize={15} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{rival.playerName}</div>
+                  <div style={{ fontSize: 10, color: '#7A6E62' }}>#{rival.position} en el torneo</div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>
+                    {Math.abs((currentStats.finalScore ?? currentStats.totalPoints) - (rival.finalScore ?? rival.totalPoints))} pts
+                  </div>
+                  <div style={{ fontSize: 9, color: '#7A6E62' }}>de diferencia</div>
+                </div>
+              </div>
+            </HomeCard>
+          </div>
+        )}
+
         {/* LOGROS */}
         {achievements && (
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>LOGROS</div>
-            <div className="grid grid-cols-2 gap-2">
-              <HomeCard>
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontSize: 20 }}>🏆</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#F5EFE6', marginTop: 4 }}>{achievements.podiums}</div>
-                  <div style={{ fontSize: 9, color: '#8A7E70', marginTop: 1 }}>{achievements.podiums === 1 ? 'podio' : 'podios'}</div>
-                </div>
-              </HomeCard>
-              <HomeCard>
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontSize: 20 }}>🔥</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#F5EFE6', marginTop: 4 }}>{achievements.mesaFinalStreak}</div>
-                  <div style={{ fontSize: 9, color: '#8A7E70', marginTop: 1 }}>racha mesas finales</div>
-                </div>
-              </HomeCard>
-              <HomeCard>
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontSize: 20 }}>⚡</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#F5EFE6', marginTop: 4 }}>
-                    {achievements.bestRise > 0 ? `+${achievements.bestRise}` : '—'}
+            <HomeCard>
+              <div className="grid grid-cols-4" style={{ padding: '10px 4px' }}>
+                {[
+                  { val: achievements.victories, label: achievements.victories === 1 ? 'victoria' : 'victorias' },
+                  { val: achievements.podiums, label: achievements.podiums === 1 ? 'podio' : 'podios' },
+                  { val: achievements.mesaFinalCount, label: achievements.mesaFinalCount === 1 ? 'mesa final' : 'mesas finales' },
+                  { val: achievements.lastPlaceCount, label: achievements.lastPlaceCount === 1 ? 'último' : 'últimos' }
+                ].map((kpi, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      textAlign: 'center',
+                      padding: '0 4px',
+                      borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.08)' : undefined
+                    }}
+                  >
+                    <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{kpi.val}</div>
+                    <div style={{ fontSize: 8, color: '#8A7E70', marginTop: 1, lineHeight: 1.3 }}>{kpi.label}</div>
                   </div>
-                  <div style={{ fontSize: 9, color: '#8A7E70', marginTop: 1 }}>mejor subida</div>
-                </div>
-              </HomeCard>
-              <HomeCard>
-                <div style={{ padding: 12 }}>
-                  <div style={{ fontSize: 20 }}>🎯</div>
-                  <div style={{ fontSize: 18, fontWeight: 900, color: '#F5EFE6', marginTop: 4 }}>{achievements.bestScore}</div>
-                  <div style={{ fontSize: 9, color: '#8A7E70', marginTop: 1 }}>
-                    {achievements.bestScoreDate > 0 ? `pts · F${achievements.bestScoreDate}` : 'pts'}
-                  </div>
-                </div>
-              </HomeCard>
-            </div>
+                ))}
+              </div>
+            </HomeCard>
           </div>
         )}
 
@@ -343,13 +336,8 @@ export default function PlayerProfilePage() {
             <div style={{ padding: '4px 14px' }}>
               <StatRow label="Mejor resultado" value={details.bestResult} />
               <StatRow label="Fechas jugadas" value={`${totalCompletedDates - absences}/${totalCompletedDates}`} />
-              <StatRow label="Ausencias" value={absences} />
-              <div style={{ padding: '9px 0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, color: '#B5A996' }}>Puntuación final</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{currentStats.finalScore ?? currentStats.totalPoints}</span>
-                </div>
-              </div>
+              <StatRow label="Posición promedio" value={avgPosition !== null ? `#${Math.round(avgPosition)}` : '—'} />
+              <StatRow label="Puntos promedio" value={avgPoints !== null ? `${Math.round(avgPoints)} pts` : '—'} />
             </div>
           </HomeCard>
         </div>
@@ -399,30 +387,6 @@ export default function PlayerProfilePage() {
                 )
               })}
             </div>
-          </div>
-        )}
-
-        {/* RIVAL DIRECTO */}
-        {rival && (
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
-              {isOwnProfile ? 'TU RIVAL DIRECTO' : 'RIVAL CERCANO'}
-            </div>
-            <HomeCard>
-              <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <HomeAvatar playerId={rival.playerId} name={rival.playerName} photoUrl={rival.playerPhoto} size={44} fontSize={15} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{rival.playerName}</div>
-                  <div style={{ fontSize: 10, color: '#7A6E62' }}>#{rival.position} en el torneo</div>
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>
-                    {Math.abs((currentStats.finalScore ?? currentStats.totalPoints) - (rival.finalScore ?? rival.totalPoints))} pts
-                  </div>
-                  <div style={{ fontSize: 9, color: '#7A6E62' }}>de diferencia</div>
-                </div>
-              </div>
-            </HomeCard>
           </div>
         )}
 

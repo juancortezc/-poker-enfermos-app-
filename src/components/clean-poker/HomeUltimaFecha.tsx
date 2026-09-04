@@ -254,7 +254,7 @@ export function HomeUltimaFecha({
               </>
             )}
           </div>
-          <HomeCard style={{ flex: 1, padding: 14 }}>
+          <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#A89A8C' }}>En el campeonato estás</div>
             <div style={{ fontSize: 30, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.02em', marginTop: 2 }}>#{myRanking.position}</div>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', marginTop: 2 }}>{scoreOf(myRanking)} puntos</div>
@@ -263,7 +263,7 @@ export function HomeUltimaFecha({
                 {gapToLeader === 0 ? 'eres el líder' : `a ${gapToLeader} ${gapToLeader === 1 ? 'punto' : 'puntos'} del líder`}
               </div>
             )}
-            <LinkCta onClick={onOpenProfile} style={{ marginTop: 8 }}>VER MI PERFIL →</LinkCta>
+            <LinkCta onClick={onOpenProfile} style={{ marginTop: 'auto', paddingTop: 8 }}>VER MI TORNEO →</LinkCta>
           </HomeCard>
         </div>
       )}

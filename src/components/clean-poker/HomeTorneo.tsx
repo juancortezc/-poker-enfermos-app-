@@ -3,6 +3,7 @@
 import useSWR from 'swr'
 import { CalendarPlus } from 'lucide-react'
 import type { PlayerRanking, PlayerPositionDelta, TournamentInsightsData } from '@/lib/ranking-utils'
+import { playedDateNumbers, nightlyPosition, averagePointsPerDate } from '@/lib/ranking-utils'
 import { PodioTorneoCard } from './PodioTorneoCard'
 import { StreaksCards } from './StreaksCards'
 import { HomeCard } from './HomeCard'
@@ -63,24 +64,6 @@ function daysUntil(dateStr: string | null): number | null {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
 }
 
-/** Fechas (números) en las que al menos un jugador registró puntos. */
-function playedDateNumbers(rankings: PlayerRanking[]): number[] {
-  const set = new Set<number>()
-  rankings.forEach(r => Object.keys(r.pointsByDate).forEach(d => set.add(Number(d))))
-  return Array.from(set).sort((a, b) => a - b)
-}
-
-/** Puesto del jugador esa noche puntual (según puntos de esa fecha), o null si no jugó. */
-function nightlyPosition(rankings: PlayerRanking[], dateNumber: number, playerId: string): number | null {
-  const entries = rankings
-    .map(r => ({ playerId: r.playerId, points: r.pointsByDate[dateNumber] }))
-    .filter((e): e is { playerId: string; points: number } => typeof e.points === 'number' && e.points > 0)
-  if (entries.length === 0) return null
-  entries.sort((a, b) => b.points - a.points)
-  const idx = entries.findIndex(e => e.playerId === playerId)
-  return idx === -1 ? null : idx + 1
-}
-
 export function HomeTorneo({
   user,
   tournamentId,
@@ -116,9 +99,7 @@ export function HomeTorneo({
 
   // Forma reciente: rendimiento noche a noche (independiente del puntaje acumulado de temporada)
   const playedDates = playedDateNumbers(rankings)
-  const eliminatedDatesCount = myRanking?.eliminasActive ? (myRanking.elimina3 !== undefined ? 3 : 2) : 0
-  const countedDates = myRanking ? Math.max(1, myRanking.datesPlayed - eliminatedDatesCount) : 1
-  const avgPointsPerDate = myRanking ? scoreOf(myRanking) / countedDates : null
+  const avgPointsPerDate = myRanking ? averagePointsPerDate(myRanking) : null
 
   const myPlayedDates = myRanking
     ? playedDates.filter(d => (myRanking.pointsByDate[d] ?? 0) > 0)
@@ -268,11 +249,11 @@ export function HomeTorneo({
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
                 <span style={{ opacity: 0.75 }}>Puesto promedio</span>
-                <span style={{ fontWeight: 800 }}>{avgNightlyPosition !== null ? `#${avgNightlyPosition.toFixed(1)}` : '—'}</span>
+                <span style={{ fontWeight: 800 }}>{avgNightlyPosition !== null ? `#${Math.round(avgNightlyPosition)}` : '—'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
                 <span style={{ opacity: 0.75 }}>Prom. por fecha*</span>
-                <span style={{ fontWeight: 800 }}>{avgPointsPerDate !== null ? `${avgPointsPerDate.toFixed(1)} pts` : '—'}</span>
+                <span style={{ fontWeight: 800 }}>{avgPointsPerDate !== null ? `${Math.round(avgPointsPerDate)} pts` : '—'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
                 <span style={{ opacity: 0.75 }}>Últimas 3 fechas</span>
@@ -281,7 +262,7 @@ export function HomeTorneo({
             </div>
             <div style={{ fontSize: 8, opacity: 0.5, marginTop: 6 }}>*sin contar fechas eliminadas</div>
           </div>
-          <HomeCard style={{ flex: 1, padding: 14 }}>
+          <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#A89A8C' }}>Tus puntos</div>
             <div style={{ fontSize: 26, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.02em', marginTop: 2 }}>
               {scoreOf(myRanking)} <span style={{ fontSize: 13, fontWeight: 700 }}>pts</span>
@@ -301,7 +282,7 @@ export function HomeTorneo({
                 </div>
               )}
             </div>
-            <LinkCta onClick={onOpenProfile} style={{ marginTop: 8 }}>VER MI PERFIL →</LinkCta>
+            <LinkCta onClick={onOpenProfile} style={{ marginTop: 'auto', paddingTop: 8 }}>VER MI TORNEO →</LinkCta>
           </HomeCard>
         </div>
       )}

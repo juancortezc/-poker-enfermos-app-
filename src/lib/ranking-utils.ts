@@ -718,3 +718,42 @@ export async function calculateTournamentInsights(tournamentId: number): Promise
     return null;
   }
 }
+
+/**
+ * Fechas (números) en las que al menos un jugador registró puntos.
+ * Usado para calcular métricas de "forma reciente" en el cliente,
+ * a partir de PlayerRanking[] ya cargado (sin llamadas adicionales).
+ */
+export function playedDateNumbers(rankings: PlayerRanking[]): number[] {
+  const set = new Set<number>();
+  rankings.forEach(r => Object.keys(r.pointsByDate).forEach(d => set.add(Number(d))));
+  return Array.from(set).sort((a, b) => a - b);
+}
+
+/** Puesto del jugador esa noche puntual (según puntos de esa fecha), o null si no jugó. */
+export function nightlyPosition(rankings: PlayerRanking[], dateNumber: number, playerId: string): number | null {
+  const entries = rankings
+    .map(r => ({ playerId: r.playerId, points: r.pointsByDate[dateNumber] }))
+    .filter((e): e is { playerId: string; points: number } => typeof e.points === 'number' && e.points > 0);
+  if (entries.length === 0) return null;
+  entries.sort((a, b) => b.points - a.points);
+  const idx = entries.findIndex(e => e.playerId === playerId);
+  return idx === -1 ? null : idx + 1;
+}
+
+/** Promedio del puesto nocturno del jugador en las fechas que jugó (excluye ausencias). */
+export function averageNightlyPosition(rankings: PlayerRanking[], playerId: string): number | null {
+  const player = rankings.find(r => r.playerId === playerId);
+  if (!player) return null;
+  const myPlayedDates = playedDateNumbers(rankings).filter(d => (player.pointsByDate[d] ?? 0) > 0);
+  if (myPlayedDates.length === 0) return null;
+  const sum = myPlayedDates.reduce((acc, d) => acc + (nightlyPosition(rankings, d, playerId) ?? 0), 0);
+  return sum / myPlayedDates.length;
+}
+
+/** Promedio de puntos por fecha, sin contar las fechas eliminadas por el sistema ELIMINA N. */
+export function averagePointsPerDate(player: PlayerRanking): number {
+  const eliminatedDatesCount = player.eliminasActive ? (player.elimina3 !== undefined ? 3 : 2) : 0;
+  const countedDates = Math.max(1, player.datesPlayed - eliminatedDatesCount);
+  return (player.finalScore ?? player.totalPoints) / countedDates;
+}
