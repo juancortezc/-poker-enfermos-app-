@@ -27,10 +27,11 @@ interface PodioTorneoCardProps {
   top3: PlayerRanking[]
   /** Muestra el delta de posición desde la última fecha y el aviso de carrera apretada (solo vista "Última Fecha"). */
   showNightContext?: boolean
-  onSeeAll?: () => void
+  onSeeTabla?: () => void
+  onSeePosiciones?: () => void
 }
 
-export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = false, onSeeAll }: PodioTorneoCardProps) {
+export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = false, onSeeTabla, onSeePosiciones }: PodioTorneoCardProps) {
   if (top3.length === 0) return null
 
   const scoreOf = (r: PlayerRanking) => r.finalScore ?? r.totalPoints
@@ -104,7 +105,7 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
               </div>
               <div style={{ marginTop: 'auto', paddingTop: 4 }}>
                 <div style={{ fontSize: 16, fontWeight: 900, color: medal.color }}>
-                  {scoreOf(player)} <span style={{ fontSize: 9, fontWeight: 700 }}>PTS</span>
+                  {scoreOf(player)} <span style={{ fontSize: 9, fontWeight: 700, color: 'inherit' }}>PTS</span>
                 </div>
                 {showNightContext && (
                   <div style={{ fontSize: 9, fontWeight: 700, color: delta > 0 ? '#7CD07F' : delta < 0 ? '#E53935' : '#A89A8C', marginTop: 1 }}>
@@ -126,8 +127,9 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
         </div>
       )}
 
-      <div style={{ marginTop: 10, textAlign: 'center' }}>
-        <LinkCta onClick={onSeeAll}>VER TABLA COMPLETA →</LinkCta>
+      <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center', gap: 20 }}>
+        <LinkCta onClick={onSeeTabla}>VER TABLA →</LinkCta>
+        <LinkCta onClick={onSeePosiciones}>VER POSICIONES →</LinkCta>
       </div>
     </div>
   )

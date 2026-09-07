@@ -469,7 +469,8 @@ function HomeAuthenticated({
             onOpenProfile={() => router.push(`/players/${user.id}`)}
             onSeeAllResults={() => router.push('/fecha')}
             onSeeResultsTab={() => router.push('/fecha?tab=resultados')}
-            onSeeFullTable={() => router.push('/ranking')}
+            onSeeTabla={() => router.push('/tabla')}
+            onSeePosiciones={() => router.push('/ranking')}
           />
         ) : (
           <HomeTorneo
@@ -483,7 +484,8 @@ function HomeAuthenticated({
             onOpenProfile={() => router.push(`/players/${user.id}`)}
             onOpenCalendarPage={() => router.push('/calendario')}
             onAddToPersonalCalendar={() => openAddToCalendar(nextDate?.dateNumber, nextDate?.scheduledDate)}
-            onSeeFullTable={() => router.push('/ranking')}
+            onSeeTabla={() => router.push('/tabla')}
+            onSeePosiciones={() => router.push('/ranking')}
           />
         )}
       </main>

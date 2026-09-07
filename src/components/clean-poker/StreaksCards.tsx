@@ -43,7 +43,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                   {player.playerName}
                 </div>
                 <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#fff' }}>
-                  {player.points} <span style={{ fontSize: 9, fontWeight: 700, opacity: 0.85 }}>PTS</span>
+                  {player.points} <span style={{ fontSize: 9, fontWeight: 700, opacity: 0.85, color: 'inherit' }}>PTS</span>
                 </div>
               </div>
             ))}

@@ -8,7 +8,7 @@ import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
-import { Table2, BookOpen, User, Settings, ChevronRight, Calendar, Shield } from 'lucide-react'
+import { Table2, BookOpen, User, Settings, ChevronRight, Calendar, Shield, Trophy } from 'lucide-react'
 
 // Placeholder consciente: menú mínimo mientras se termina de diseñar esta
 // sección. Reúne lo que antes vivía directo en la barra de navegación.
@@ -36,6 +36,7 @@ export default function MasPage() {
   const isComision = user?.role === 'Comision'
 
   const items = [
+    { href: '/ranking', label: 'Clasificación', icon: Trophy },
     { href: '/calendario', label: 'Calendario', icon: Calendar },
     { href: '/tabla', label: 'Tabla', icon: Table2 },
     { href: '/info', label: 'Reglamento e info', icon: BookOpen },

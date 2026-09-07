@@ -2,12 +2,30 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { RotateCw } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
+import { playedDateNumbers, nightlyPosition } from '@/lib/ranking-utils'
 import type { PlayerRanking } from '@/lib/ranking-utils'
+import { downloadCsv } from '@/lib/csv'
 
 interface CPRankingViewProps {
   tournamentId: number
+  tournamentNumber: number
+  currentUserId?: string | null
+}
+
+const GRID = '#000'
+const RED = '#E53935'
+const GOLD = '#E8C158'
+const SILVER = '#B9B9C4'
+const BRONZE = '#C98A4E'
+const MESA_FINAL_THRESHOLD = 9
+
+function medalBadgeStyle(position: number) {
+  if (position === 1) return { background: GOLD, color: '#1A1512' }
+  if (position === 2) return { background: SILVER, color: '#1A1512' }
+  if (position === 3) return { background: BRONZE, color: '#1A1512' }
+  return { background: '#2A292B', color: '#F5EFE6' }
 }
 
 function shortName(full: string) {
@@ -15,251 +33,22 @@ function shortName(full: string) {
   return p.length > 1 ? `${p[0]} ${p[p.length - 1][0]}.` : p[0]
 }
 
-function trendColor(t: string) {
-  if (t === 'up') return '#4CAF50'
-  if (t === 'down') return '#E53935'
-  return '#888'
-}
-function trendLabel(player: PlayerRanking) {
-  if (player.positionsChanged === 0) return '●'
-  const sym = player.trend === 'up' ? '▲' : '▼'
-  return `${sym}${Math.abs(player.positionsChanged)}`
-}
-
-function PenaltyBadge({ points }: { points: number }) {
+function CircleAvatar({ photoUrl, name, size = 26 }: { photoUrl?: string; name: string; size?: number }) {
+  const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
   return (
-    <span
-      style={{
-        fontSize: '8px', fontWeight: 800, color: '#fff',
-        background: '#E53935', borderRadius: '3px',
-        padding: '1px 4px', whiteSpace: 'nowrap',
-      }}
-      title="Multa de puntos"
-    >
-      -{points} multa
-    </span>
-  )
-}
-
-// ── HERO CARD ── #1 full-width
-function HeroCard({ player, onClick }: { player: PlayerRanking; onClick: () => void }) {
-  const pts = player.finalScore ?? player.totalPoints
-  return (
-    <button
-      onClick={onClick}
-      className="w-full relative overflow-hidden text-left"
-      style={{
-        borderRadius: '10px',
-        minHeight: '150px',
-        backgroundColor: '#1e1600',
-        backgroundImage: `url('/textures/noise.png'), linear-gradient(135deg, #1e1600 0%, #342200 55%, #1c1400 100%)`,
-        backgroundSize: '160px 160px, 100% 100%',
-        backgroundRepeat: 'repeat, no-repeat',
-        backgroundBlendMode: 'soft-light, normal',
-        border: '1px solid rgba(255,210,0,0.52)',
-        boxShadow: '0 16px 44px rgba(0,0,0,0.75), 0 0 50px rgba(255,185,0,0.35)',
-      }}
-    >
-      {/* Photo right */}
-      {player.playerPhoto && (
-        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '130px', pointerEvents: 'none' }}>
-          <Image src={player.playerPhoto} alt={player.playerName} fill className="object-cover object-top" unoptimized />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #1e1600 0%, rgba(30,22,0,0.5) 45%, transparent 100%)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 55%, rgba(20,14,0,0.75) 100%)' }} />
+    <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#333' }}>
+      {photoUrl ? (
+        <Image src={photoUrl} alt={name} width={size} height={size} className="object-cover w-full h-full" unoptimized />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center" style={{ fontSize: size * 0.35, fontWeight: 800, color: '#fff' }}>
+          {initials}
         </div>
       )}
-
-      {/* Content left */}
-      <div style={{ padding: '14px 16px', position: 'relative', zIndex: 1, maxWidth: player.playerPhoto ? '62%' : '100%' }}>
-        <span style={{ fontSize: '9px', fontWeight: 800, color: '#FFD700', letterSpacing: '0.18em' }}>LÍDER · T30</span>
-
-        <div className="flex items-baseline gap-2 mt-1">
-          <span style={{ fontSize: '36px', fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>
-            #1
-          </span>
-          <span style={{ fontSize: '16px', fontWeight: 700, color: 'rgba(255,255,255,0.90)' }}>
-            {shortName(player.playerName)}
-          </span>
-        </div>
-
-        <div className="flex items-end gap-4 mt-3">
-          <div>
-            <p style={{ fontSize: '22px', fontWeight: 900, color: '#FFD700', lineHeight: 1 }}>{pts}</p>
-            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.40)' }}>pts finales</p>
-            {!!player.pointPenalty && <PenaltyBadge points={player.pointPenalty} />}
-          </div>
-          <div>
-            <p style={{ fontSize: '16px', fontWeight: 700, color: 'rgba(255,255,255,0.45)', lineHeight: 1 }}>{player.totalPoints}</p>
-            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.30)' }}>total</p>
-          </div>
-          <div>
-            <p style={{ fontSize: '14px', fontWeight: 700, color: trendColor(player.trend), lineHeight: 1 }}>
-              {trendLabel(player)}
-            </p>
-            <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.30)' }}>cambio</p>
-          </div>
-        </div>
-      </div>
-    </button>
+    </div>
   )
 }
 
-// ── PODIUM CARD ── #2 / #3 side by side
-function PodiumCard({ player, onClick }: { player: PlayerRanking; onClick: () => void }) {
-  const pos = player.position as 2 | 3
-  const pts = player.finalScore ?? player.totalPoints
-  const avatarSize = 88
-
-  const cardStyle = pos === 2
-    ? { bg: 'linear-gradient(165deg, #0e0e18 0%, #181826 50%, #0e0e18 100%)', border: 'rgba(200,210,240,0.42)', glow: 'rgba(180,190,230,0.22)' }
-    : { bg: 'linear-gradient(165deg, #1a0e00 0%, #2c1800 50%, #1a0e00 100%)', border: 'rgba(205,130,50,0.48)', glow: 'rgba(185,105,30,0.22)' }
-
-  const medalColor = pos === 2 ? '#C8C8D8' : '#CD7F32'
-
-  return (
-    <button
-      onClick={onClick}
-      className="flex-1 flex flex-col items-center relative pt-12 pb-3 px-2"
-      style={{
-        borderRadius: '5px',
-        background: cardStyle.bg,
-        border: `1px solid ${cardStyle.border}`,
-        boxShadow: `0 10px 30px rgba(0,0,0,0.70), 0 0 30px ${cardStyle.glow}, inset 0 1px 0 ${cardStyle.border}`,
-        marginTop: '40px',
-        minHeight: '160px',
-      }}
-    >
-      {/* Avatar overflow */}
-      <div
-        className="absolute overflow-hidden"
-        style={{
-          width: avatarSize, height: avatarSize,
-          top: `-${avatarSize / 2}px`,
-          left: '50%', transform: 'translateX(-50%)',
-          borderRadius: '5px',
-          background: player.playerPhoto ? 'transparent' : 'var(--cp-surface-solid)',
-          boxShadow: `0 6px 18px rgba(0,0,0,0.65), 0 0 16px ${cardStyle.glow}`,
-        }}
-      >
-        {player.playerPhoto ? (
-          <Image src={player.playerPhoto} alt={player.playerName} width={avatarSize} height={avatarSize} className="object-cover w-full h-full" unoptimized />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span style={{ fontSize: '20px', fontWeight: 900, color: medalColor }}>{pos}</span>
-          </div>
-        )}
-      </div>
-
-      <p style={{ fontSize: '18px', fontWeight: 900, color: medalColor, marginBottom: '2px' }}>#{pos}</p>
-      <p className="truncate w-full text-center" style={{ fontSize: '11px', fontWeight: 600, color: '#fff', marginBottom: '6px' }}>
-        {shortName(player.playerName)}
-      </p>
-
-      <div style={{ width: '100%', height: '1px', background: medalColor, opacity: 0.4, marginBottom: '6px' }} />
-
-      <div className="flex items-baseline gap-2 justify-center">
-        <div className="text-center">
-          <p style={{ fontSize: '16px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{pts}</p>
-          <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.38)' }}>final</p>
-        </div>
-        <div className="text-center">
-          <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', lineHeight: 1 }}>{player.totalPoints}</p>
-          <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.28)' }}>total</p>
-        </div>
-      </div>
-      {!!player.pointPenalty && (
-        <div className="mt-1">
-          <PenaltyBadge points={player.pointPenalty} />
-        </div>
-      )}
-
-      <p style={{ fontSize: '10px', color: trendColor(player.trend), fontWeight: 700, marginTop: '4px' }}>
-        {trendLabel(player)}
-      </p>
-    </button>
-  )
-}
-
-// ── PLAYER ROW ── positions 4+
-function PlayerRow({ player, rank, isMalazo = false, onClick }: {
-  player: PlayerRanking; rank: number; isMalazo?: boolean; onClick: () => void
-}) {
-  const pts = player.finalScore ?? player.totalPoints
-  const pink = '#EC407A'
-
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3 transition-all hover:brightness-125"
-      style={{
-        padding: '9px 12px',
-        borderRadius: '5px',
-        background: isMalazo
-          ? 'linear-gradient(135deg, rgba(80,8,38,0.80) 0%, rgba(140,20,70,0.70) 100%)'
-          : 'linear-gradient(135deg, rgba(40,8,20,0.80) 0%, rgba(55,12,28,0.70) 100%)',
-        border: `1px solid ${isMalazo ? 'rgba(236,64,122,0.24)' : 'rgba(200,30,70,0.16)'}`,
-        boxShadow: isMalazo
-          ? '0 4px 14px rgba(0,0,0,0.45), 0 0 16px rgba(200,30,90,0.10)'
-          : '0 3px 10px rgba(0,0,0,0.40)',
-      }}
-    >
-      {/* Position number */}
-      <span
-        style={{
-          fontSize: '12px', fontWeight: 800,
-          color: isMalazo ? pink : 'rgba(255,255,255,0.32)',
-          width: '20px', textAlign: 'center', flexShrink: 0,
-        }}
-      >
-        {rank}
-      </span>
-
-      {/* Photo */}
-      <div
-        style={{
-          width: 40, height: 40, flexShrink: 0, overflow: 'hidden',
-          borderRadius: '5px',
-          background: 'rgba(255,255,255,0.08)',
-          border: `1px solid ${isMalazo ? 'rgba(236,64,122,0.30)' : 'rgba(255,255,255,0.10)'}`,
-        }}
-      >
-        {player.playerPhoto ? (
-          <Image src={player.playerPhoto} alt={player.playerName} width={40} height={40} className="object-cover w-full h-full" unoptimized />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.40)', fontWeight: 700 }}>
-              {player.playerName.split(' ').map(w => w[0]).slice(0, 2).join('')}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Name */}
-      <div className="flex-1 min-w-0 text-left">
-        <p style={{ fontSize: '13px', fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {shortName(player.playerName)}
-        </p>
-        <p style={{ fontSize: '9px', color: trendColor(player.trend), fontWeight: 600 }}>
-          {trendLabel(player)}
-        </p>
-      </div>
-
-      {/* Points */}
-      <div className="text-right shrink-0">
-        <p style={{ fontSize: '15px', fontWeight: 800, color: isMalazo ? pink : '#fff' }}>{pts}</p>
-        <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)' }}>{player.totalPoints} tot</p>
-        {!!player.pointPenalty && (
-          <div className="mt-0.5">
-            <PenaltyBadge points={player.pointPenalty} />
-          </div>
-        )}
-      </div>
-    </button>
-  )
-}
-
-// ── MAIN ──
-export function CPRankingView({ tournamentId }: CPRankingViewProps) {
+export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }: CPRankingViewProps) {
   const router = useRouter()
   const goToPlayer = (playerId: string) => router.push(`/players/${playerId}`)
 
@@ -271,22 +60,19 @@ export function CPRankingView({ tournamentId }: CPRankingViewProps) {
   if (isLoading) {
     return (
       <div className="space-y-3 pt-2">
-        <div className="h-36 animate-pulse" style={{ borderRadius: '5px', background: 'rgba(255,185,0,0.08)' }} />
-        <div className="flex gap-2">
-          {[0, 1].map(i => <div key={i} className="flex-1 h-44 animate-pulse" style={{ borderRadius: '5px', background: 'rgba(255,255,255,0.05)' }} />)}
-        </div>
-        {[0,1,2,3].map(i => <div key={i} className="h-14 animate-pulse" style={{ borderRadius: '5px', background: 'rgba(255,255,255,0.04)' }} />)}
+        <div className="h-32 animate-pulse rounded-2xl" style={{ background: 'rgba(255,255,255,0.05)' }} />
+        <div className="h-64 animate-pulse rounded-2xl" style={{ background: 'rgba(255,255,255,0.04)' }} />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="p-6 text-center" style={{ borderRadius: '5px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p style={{ fontSize: '14px', color: '#fff' }}>Error al cargar el ranking</p>
-        <p className="mt-1" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>{errorMessage}</p>
-        <button onClick={() => refresh()} className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 rounded-full" style={{ border: '1px solid #E53935', color: '#E53935', fontSize: '12px' }}>
-          <RotateCw className="w-4 h-4" /> Reintentar
+      <div className="p-6 text-center rounded-2xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <p style={{ fontSize: 14, color: '#F5EFE6' }}>Error al cargar la tabla</p>
+        <p className="mt-1" style={{ fontSize: 11, color: '#7A6E62' }}>{errorMessage}</p>
+        <button onClick={() => refresh()} className="mt-4 px-4 py-2 rounded-full" style={{ border: `1px solid ${RED}`, color: RED, fontSize: 12 }}>
+          Reintentar
         </button>
       </div>
     )
@@ -294,70 +80,244 @@ export function CPRankingView({ tournamentId }: CPRankingViewProps) {
 
   if (!rankingData || rankingData.rankings.length === 0) {
     return (
-      <div className="p-6 text-center" style={{ borderRadius: '5px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)' }}>No hay datos de ranking disponibles.</p>
+      <div className="p-6 text-center rounded-2xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <p style={{ fontSize: 14, color: '#7A6E62' }}>No hay datos de tabla disponibles.</p>
       </div>
     )
   }
 
-  const { rankings, tournament } = rankingData
-  const leader = rankings[0]
-  const second = rankings.find(p => p.position === 2)
-  const third = rankings.find(p => p.position === 3)
-  const middle = rankings.slice(3, -2)
-  const bottom2 = rankings.length > 4 ? rankings.slice(-2) : []
+  const { rankings } = rankingData
+  const completedDates = playedDateNumbers(rankings)
+  const lastDate = completedDates[completedDates.length - 1]
+
+  const deltaFor = (player: PlayerRanking) => (lastDate ? player.pointsByDate[lastDate] ?? 0 : 0)
+
+  const mesasFinalesFor = (player: PlayerRanking) =>
+    completedDates.filter(d => (player.pointsByDate[d] ?? 0) > 0 && (nightlyPosition(rankings, d, player.playerId) ?? 999) <= MESA_FINAL_THRESHOLD).length
+
+  const leader = rankings.find(r => r.position === 1)
+  const second = rankings.find(r => r.position === 2)
+  const third = rankings.find(r => r.position === 3)
+
+  const thStyle: React.CSSProperties = {
+    background: RED,
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: '0.03em',
+    textAlign: 'center',
+    padding: '8px 5px',
+    border: `1px solid ${GRID}`,
+    whiteSpace: 'nowrap'
+  }
+
+  const thNeutralStyle: React.CSSProperties = {
+    ...thStyle,
+    background: '#2A292B'
+  }
+
+  const tdStyle: React.CSSProperties = {
+    color: '#000',
+    fontSize: 12,
+    textAlign: 'center',
+    padding: '7px 5px',
+    border: `1px solid ${GRID}`,
+    background: '#fff'
+  }
+
+  const handleDownloadCsv = () => {
+    const headers = ['#', 'Jugador', 'Pts', ...completedDates.map(d => `F${d}`), 'Prom']
+    const rows = rankings.map(player => {
+      const pts = player.finalScore ?? player.totalPoints
+      const prom = completedDates.length > 0 ? Math.round((player.totalPoints / completedDates.length) * 10) / 10 : 0
+      return [player.position, player.playerName, pts, ...completedDates.map(d => player.pointsByDate[d] ?? 0), prom]
+    })
+    downloadCsv(headers, rows, `tabla-torneo-${tournamentNumber}.csv`)
+  }
 
   return (
-    <div className="space-y-2 pt-2">
-      {/* Dates count - subtle */}
-      <p className="text-center" style={{ fontSize: '9px', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.08em', marginBottom: '4px' }}>
-        {tournament.completedDates}/{tournament.totalDates} FECHAS JUGADAS
-      </p>
+    <div className="space-y-4 pt-2">
+      {/* LIDER */}
+      {leader && (() => {
+        const delta = deltaFor(leader)
+        const mesasFinales = mesasFinalesFor(leader)
+        const podios = leader.firstPlaces + leader.secondPlaces + leader.thirdPlaces
+        return (
+          <button
+            onClick={() => goToPlayer(leader.playerId)}
+            className="w-full text-left relative overflow-hidden"
+            style={{
+              borderRadius: 18,
+              background: 'linear-gradient(135deg, #1e1600 0%, #241a02 60%, #1c1400 100%)',
+              border: `1.5px solid ${GOLD}`,
+              boxShadow: `0 8px 28px rgba(0,0,0,0.5), 0 0 30px rgba(232,193,88,0.10)`,
+              padding: 14,
+              minHeight: 118
+            }}
+          >
+            {leader.playerPhoto && (
+              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '38%' }}>
+                <Image src={leader.playerPhoto} alt={leader.playerName} fill className="object-cover object-top" unoptimized />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #1e1600 0%, transparent 55%)' }} />
+              </div>
+            )}
+            <div style={{ position: 'relative', zIndex: 1, maxWidth: leader.playerPhoto ? '62%' : '100%' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: 13 }}>👑</span>
+                <span style={{ fontSize: 9, fontWeight: 800, color: GOLD, letterSpacing: '0.1em' }}>LÍDER DEL TORNEO</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
+                <span style={{ fontSize: 26, fontWeight: 900, color: '#fff' }}>#1</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#F5EFE6' }}>{shortName(leader.playerName)}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+                <span style={{ fontSize: 20, fontWeight: 900, color: GOLD }}>{leader.finalScore ?? leader.totalPoints}</span>
+                <span style={{ fontSize: 9, color: '#A89A8C' }}>PUNTOS</span>
+                {delta !== 0 && (
+                  <span style={{ fontSize: 10, fontWeight: 800, color: delta > 0 ? '#7CD07F' : RED, marginLeft: 4 }}>
+                    {delta > 0 ? `+${delta} ▲` : `${delta} ▼`} <span style={{ fontWeight: 500, color: '#7A6E62' }}>vs fecha anterior</span>
+                  </span>
+                )}
+              </div>
+              {leader.playerAlias && (
+                <div style={{ fontSize: 11, color: '#C9B27A', fontStyle: 'italic', marginTop: 6 }}>&ldquo;{leader.playerAlias}&rdquo;</div>
+              )}
+            </div>
+            <div style={{ position: 'absolute', top: 14, right: 14, textAlign: 'right' }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: '#fff' }}>{mesasFinales}</div>
+              <div style={{ fontSize: 7, color: '#A89A8C', letterSpacing: '0.04em' }}>MESAS FINALES</div>
+              <div style={{ fontSize: 13, fontWeight: 900, color: '#fff', marginTop: 4 }}>{podios}</div>
+              <div style={{ fontSize: 7, color: '#A89A8C', letterSpacing: '0.04em' }}>PODIOS</div>
+              <div style={{ fontSize: 13, fontWeight: 900, color: '#fff', marginTop: 4 }}>{leader.firstPlaces}</div>
+              <div style={{ fontSize: 7, color: '#A89A8C', letterSpacing: '0.04em' }}>VICTORIAS</div>
+            </div>
+          </button>
+        )
+      })()}
 
-      {/* #1 Hero card */}
-      {leader && (
-        <HeroCard player={leader} onClick={() => goToPlayer(leader.playerId)} />
-      )}
-
-      {/* #2 and #3 side by side */}
+      {/* #2 / #3 */}
       {(second || third) && (
-        <div className="flex gap-2 items-start" style={{ marginTop: '40px' }}>
-          {second && <PodiumCard player={second} onClick={() => goToPlayer(second.playerId)} />}
-          {third && <PodiumCard player={third} onClick={() => goToPlayer(third.playerId)} />}
+        <div style={{ display: 'flex', gap: 10 }}>
+          {[second, third].filter((p): p is PlayerRanking => !!p).map(player => {
+            const delta = deltaFor(player)
+            const medal = player.position === 2 ? SILVER : BRONZE
+            return (
+              <button
+                key={player.playerId}
+                onClick={() => goToPlayer(player.playerId)}
+                className="flex-1 text-left"
+                style={{
+                  borderRadius: 16,
+                  background: '#2A292B',
+                  border: `1px solid ${medal}55`,
+                  padding: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10
+                }}
+              >
+                <CircleAvatar photoUrl={player.playerPhoto} name={player.playerName} size={40} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: medal }}>#{player.position}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {shortName(player.playerName)}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 900, color: '#F5EFE6' }}>{player.finalScore ?? player.totalPoints}</span>
+                    <span style={{ fontSize: 8, color: '#7A6E62' }}>PTS</span>
+                    {delta !== 0 && (
+                      <span style={{ fontSize: 9, fontWeight: 700, color: delta > 0 ? '#7CD07F' : RED }}>
+                        {delta > 0 ? `+${delta} ▲` : `${delta} ▼`}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            )
+          })}
         </div>
       )}
 
-      {/* Middle players */}
-      {middle.length > 0 && (
-        <div className="space-y-1.5 pt-2">
-          {middle.map(player => (
-            <PlayerRow
-              key={player.playerId}
-              player={player}
-              rank={player.position}
-              onClick={() => goToPlayer(player.playerId)}
-            />
-          ))}
-        </div>
-      )}
+      {/* CSV */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          onClick={handleDownloadCsv}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 11,
+            fontWeight: 700,
+            color: '#F5EFE6',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.14)',
+            borderRadius: 100,
+            padding: '7px 12px',
+            cursor: 'pointer'
+          }}
+        >
+          <Download size={13} /> Descargar CSV
+        </button>
+      </div>
 
-      {/* 7/2 */}
-      {bottom2.length > 0 && (
-        <div className="space-y-1.5 pt-2">
-          <p className="text-center" style={{ fontSize: '9px', fontWeight: 700, color: '#EC407A', letterSpacing: '0.14em' }}>
-            7 / 2
-          </p>
-          {bottom2.map(player => (
-            <PlayerRow
-              key={player.playerId}
-              player={player}
-              rank={player.position}
-              isMalazo
-              onClick={() => goToPlayer(player.playerId)}
-            />
-          ))}
+      {/* TABLA */}
+      <div style={{ borderRadius: 14, overflow: 'hidden', border: `1px solid ${GRID}` }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 500 }}>
+            <thead>
+              <tr>
+                <th style={{ ...thNeutralStyle, width: 36 }}>#</th>
+                <th style={{ ...thNeutralStyle, textAlign: 'left', width: 110 }}>JUGADOR</th>
+                <th style={{ ...thStyle, width: 46 }}>PTS</th>
+                {completedDates.map(d => (
+                  <th key={d} style={{ ...thNeutralStyle, width: 36 }}>F{d}</th>
+                ))}
+                <th style={{ ...thNeutralStyle, width: 46 }}>PROM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rankings.map((player, index) => {
+                const isCurrentUser = currentUserId && player.playerId === currentUserId
+                const isMalazo = player.position > rankings.length - 2
+                const rowBg = isCurrentUser ? 'rgba(229,57,53,0.85)' : isMalazo ? '#FDEBEE' : index % 2 === 1 ? '#F7F7F7' : '#fff'
+                const textColor = isCurrentUser ? '#fff' : '#000'
+                const badge = medalBadgeStyle(player.position)
+                const pts = player.finalScore ?? player.totalPoints
+                const prom = completedDates.length > 0 ? Math.round((player.totalPoints / completedDates.length) * 10) / 10 : 0
+
+                return (
+                  <tr key={player.playerId} onClick={() => goToPlayer(player.playerId)} style={{ cursor: 'pointer' }}>
+                    <td style={{ ...tdStyle, background: rowBg }}>
+                      {isMalazo ? (
+                        <span style={{ fontSize: 15 }}>💀</span>
+                      ) : (
+                        <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontWeight: 800, fontSize: 11, ...badge }}>
+                          {player.position}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ ...tdStyle, background: rowBg, textAlign: 'left' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: textColor }}>
+                        <CircleAvatar photoUrl={player.playerPhoto} name={player.playerName} />
+                        <span style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>
+                          {player.playerName}
+                          {player.position === 1 && ' 👑'}
+                          {isCurrentUser && ' (Tú)'}
+                        </span>
+                      </div>
+                    </td>
+                    <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? '#fff' : '#000', fontWeight: 900 }}>{pts}</td>
+                    {completedDates.map(d => (
+                      <td key={d} style={{ ...tdStyle, background: rowBg, color: textColor }}>{player.pointsByDate[d] ?? 0}</td>
+                    ))}
+                    <td style={{ ...tdStyle, background: rowBg, color: textColor }}>{prom.toFixed(1)}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
     </div>
   )
 }

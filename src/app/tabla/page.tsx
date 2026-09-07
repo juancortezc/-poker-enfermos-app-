@@ -1,30 +1,16 @@
 'use client'
 
-import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
-import ResumenTable from '@/components/tables/ResumenTable'
 import TotalTable from '@/components/tables/TotalTable'
-import FechasTable from '@/components/tables/FechasTable'
-import ResultadosTable from '@/components/tables/ResultadosTable'
 
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 
-type TabType = 'resumen' | 'total' | 'fechas' | 'resultados'
-
-const TABS = [
-  { id: 'resumen' as const, label: 'Resumen' },
-  { id: 'total' as const, label: 'Por Fecha' },
-  { id: 'fechas' as const, label: 'Eliminados' },
-  { id: 'resultados' as const, label: 'Resultados' },
-]
-
 export default function TablaPage() {
   const { user, loading: authLoading } = useAuth()
-  const [activeTab, setActiveTab] = useState<TabType>('resumen')
   const { hasActiveGameDate } = useActiveGameDate()
 
   const {
@@ -165,65 +151,8 @@ export default function TablaPage() {
       />
 
       {/* Content */}
-      <main className="pb-20 px-4 space-y-4">
-        {/* Tab Navigation */}
-        <div className="flex justify-center gap-6">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="pb-2 transition-all duration-200 cursor-pointer"
-              style={{
-                fontSize: 'var(--cp-body-size)',
-                fontWeight: activeTab === tab.id ? 700 : 400,
-                color: activeTab === tab.id ? 'var(--cp-on-surface)' : 'var(--cp-on-surface-muted)',
-                borderBottom: activeTab === tab.id ? '2px solid #E53935' : '2px solid transparent',
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Table Container - white background for tables, transparent for CleanPoker tabs */}
-        {(activeTab === 'resumen' || activeTab === 'total') && (
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{
-              background: 'rgba(255, 255, 255, 0.98)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            {activeTab === 'resumen' && (
-              <ResumenTable
-                tournamentId={activeTournament.id}
-                userPin={user?.pin}
-              />
-            )}
-
-            {activeTab === 'total' && (
-              <TotalTable
-                tournamentId={activeTournament.id}
-                userPin={user?.pin}
-                currentUserId={user?.id}
-              />
-            )}
-          </div>
-        )}
-
-        {activeTab === 'fechas' && (
-          <FechasTable
-            tournamentId={activeTournament.id}
-            userPin={user?.pin}
-          />
-        )}
-
-        {activeTab === 'resultados' && (
-          <ResultadosTable
-            tournamentId={activeTournament.id}
-            userPin={user?.pin}
-          />
-        )}
+      <main className="pb-20 px-4 pt-4 space-y-4">
+        <TotalTable tournamentId={activeTournament.id} userPin={user?.pin} currentUserId={user?.id} />
       </main>
 
       {/* Bottom Nav */}

@@ -153,7 +153,7 @@ export default function RankingPage() {
 
       {/* Content */}
       <main className="pb-20 px-4">
-        <CPRankingView tournamentId={activeTournament.id} />
+        <CPRankingView tournamentId={activeTournament.id} tournamentNumber={tournamentNumber} currentUserId={user.id} />
       </main>
 
       {/* Bottom Nav */}

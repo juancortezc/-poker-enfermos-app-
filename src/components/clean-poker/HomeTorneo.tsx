@@ -29,7 +29,8 @@ interface HomeTorneoProps {
   onOpenProfile: () => void
   onOpenCalendarPage: () => void
   onAddToPersonalCalendar: () => void
-  onSeeFullTable: () => void
+  onSeeTabla: () => void
+  onSeePosiciones: () => void
 }
 
 const scoreOf = (r: PlayerRanking) => r.finalScore ?? r.totalPoints
@@ -75,7 +76,8 @@ export function HomeTorneo({
   onOpenProfile,
   onOpenCalendarPage,
   onAddToPersonalCalendar,
-  onSeeFullTable
+  onSeeTabla,
+  onSeePosiciones
 }: HomeTorneoProps) {
   const { data: droughtData } = useSWR<DaysWithoutVictoryResponse>(
     tournamentId ? `/api/stats/days-without-victory/${tournamentId}` : null,
@@ -240,24 +242,24 @@ export function HomeTorneo({
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.18)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                <span style={{ opacity: 0.75 }}>Última fecha</span>
-                <span style={{ fontWeight: 800 }}>
+                <span style={{ opacity: 0.75, color: 'inherit' }}>Última fecha</span>
+                <span style={{ fontWeight: 800, color: 'inherit' }}>
                   {myRanking.positionsChanged === 0
                     ? 'sin cambios'
                     : `${myRanking.positionsChanged > 0 ? '+' : ''}${myRanking.positionsChanged} pos`}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                <span style={{ opacity: 0.75 }}>Puesto promedio</span>
-                <span style={{ fontWeight: 800 }}>{avgNightlyPosition !== null ? `#${Math.round(avgNightlyPosition)}` : '—'}</span>
+                <span style={{ opacity: 0.75, color: 'inherit' }}>Puesto promedio</span>
+                <span style={{ fontWeight: 800, color: 'inherit' }}>{avgNightlyPosition !== null ? `#${Math.round(avgNightlyPosition)}` : '—'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                <span style={{ opacity: 0.75 }}>Prom. por fecha*</span>
-                <span style={{ fontWeight: 800 }}>{avgPointsPerDate !== null ? `${Math.round(avgPointsPerDate)} pts` : '—'}</span>
+                <span style={{ opacity: 0.75, color: 'inherit' }}>Prom. por fecha*</span>
+                <span style={{ fontWeight: 800, color: 'inherit' }}>{avgPointsPerDate !== null ? `${Math.round(avgPointsPerDate)} pts` : '—'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                <span style={{ opacity: 0.75 }}>Últimas 3 fechas</span>
-                <span style={{ fontWeight: 800 }}>{last3 ? `${last3.mine}/${last3.max} pts` : '—'}</span>
+                <span style={{ opacity: 0.75, color: 'inherit' }}>Últimas 3 fechas</span>
+                <span style={{ fontWeight: 800, color: 'inherit' }}>{last3 ? `${last3.mine}/${last3.max} pts` : '—'}</span>
               </div>
             </div>
             <div style={{ fontSize: 8, opacity: 0.5, marginTop: 6 }}>*sin contar fechas eliminadas</div>
@@ -265,7 +267,7 @@ export function HomeTorneo({
           <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#A89A8C' }}>Tus puntos</div>
             <div style={{ fontSize: 26, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.02em', marginTop: 2 }}>
-              {scoreOf(myRanking)} <span style={{ fontSize: 13, fontWeight: 700 }}>pts</span>
+              {scoreOf(myRanking)} <span style={{ fontSize: 13, fontWeight: 700, color: 'inherit' }}>pts</span>
             </div>
             {eliminaSum > 0 && (
               <div style={{ fontSize: 10, fontWeight: 600, color: '#A89A8C', marginTop: 2 }}>Eliminas {eliminaSum} pts</div>
@@ -287,7 +289,7 @@ export function HomeTorneo({
         </div>
       )}
 
-      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} onSeeAll={onSeeFullTable} />
+      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} onSeeTabla={onSeeTabla} onSeePosiciones={onSeePosiciones} />
 
       {streaks && <StreaksCards hot={streaks.hot} cold={streaks.cold} />}
 

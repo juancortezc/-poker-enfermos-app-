@@ -28,7 +28,8 @@ interface HomeUltimaFechaProps {
   onOpenProfile: () => void
   onSeeAllResults: () => void
   onSeeResultsTab: () => void
-  onSeeFullTable: () => void
+  onSeeTabla: () => void
+  onSeePosiciones: () => void
 }
 
 const scoreOf = (r: PlayerRanking) => r.finalScore ?? r.totalPoints
@@ -42,7 +43,8 @@ export function HomeUltimaFecha({
   onOpenProfile,
   onSeeAllResults,
   onSeeResultsTab,
-  onSeeFullTable
+  onSeeTabla,
+  onSeePosiciones
 }: HomeUltimaFechaProps) {
   const { data: eliminations } = useSWR<EliminationDTO[]>(
     `/api/eliminations/game-date/${lastCompletedDate.id}`,
@@ -293,7 +295,7 @@ export function HomeUltimaFecha({
         </div>
       )}
 
-      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} showNightContext onSeeAll={onSeeFullTable} />
+      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} showNightContext onSeeTabla={onSeeTabla} onSeePosiciones={onSeePosiciones} />
 
       {streaks && <StreaksCards hot={streaks.hot} cold={streaks.cold} />}
     </>
