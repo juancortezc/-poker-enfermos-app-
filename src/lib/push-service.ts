@@ -7,8 +7,11 @@ let vapidConfigured = false
 function ensureVapidConfiguration() {
   if (vapidConfigured) return
 
-  const publicKey = process.env.VAPID_PUBLIC_KEY
-  const privateKey = process.env.VAPID_PRIVATE_KEY
+  // .trim(): las variables de entorno pueden llegar con saltos de línea o espacios
+  // al pegarlas en el dashboard, y web-push rechaza la clave con
+  // "Vapid public key must be a URL safe Base 64".
+  const publicKey = process.env.VAPID_PUBLIC_KEY?.trim()
+  const privateKey = process.env.VAPID_PRIVATE_KEY?.trim()
 
   if (!publicKey || !privateKey) {
     console.warn('⚠️  VAPID keys not configured. Push notifications will not work.')
@@ -296,5 +299,5 @@ export async function broadcastPushNotification(
  * Get VAPID public key for client-side subscription
  */
 export function getVapidPublicKey(): string | null {
-  return process.env.VAPID_PUBLIC_KEY || null
+  return process.env.VAPID_PUBLIC_KEY?.trim() || null
 }
