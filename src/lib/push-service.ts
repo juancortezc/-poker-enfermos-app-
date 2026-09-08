@@ -57,6 +57,83 @@ export interface PushResult {
   error?: string
 }
 
+interface DeliverableSubscription {
+  id: string
+  endpoint: string
+  p256dh: string
+  auth: string
+}
+
+/**
+ * 404/410: el endpoint ya no existe — el navegador se desuscribió o caducó.
+ * 403: la suscripción se creó con OTRO par de claves VAPID, así que el push
+ * service nunca va a aceptar nuestros envíos para ella. Queda huérfana y hay
+ * que registrarla de nuevo desde el dispositivo.
+ */
+function deadSubscriptionStatus(error: unknown): number | null {
+  const statusCode = (error as { statusCode?: number })?.statusCode
+  if (statusCode === 403 || statusCode === 404 || statusCode === 410) return statusCode
+  if (error instanceof Error) {
+    if (/\b(404|410)\b/.test(error.message)) return 410
+    if (error.message.includes('invalid') || error.message.includes('expired')) return 410
+  }
+  return null
+}
+
+/**
+ * Envía a un conjunto de suscripciones y desactiva las que quedaron muertas.
+ *
+ * Un 403 aislado significa suscripción huérfana, pero si TODAS fallan con 403
+ * lo más probable es que las claves VAPID del servidor estén mal: en ese caso
+ * no se desactiva nada, porque las suscripciones siguen siendo válidas y
+ * borrarlas obligaría a todos a volver a activarlas a mano.
+ */
+async function deliverToSubscriptions(
+  subscriptions: DeliverableSubscription[],
+  notificationData: unknown
+): Promise<number> {
+  const payload = JSON.stringify(notificationData)
+
+  const results = await Promise.all(
+    subscriptions.map(async (subscription) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: subscription.endpoint,
+            keys: { p256dh: subscription.p256dh, auth: subscription.auth }
+          },
+          payload
+        )
+        return { success: true, subscriptionId: subscription.id, deadStatus: null as number | null }
+      } catch (error) {
+        console.error(`Failed to send notification to subscription ${subscription.id}:`, error)
+        return { success: false, subscriptionId: subscription.id, deadStatus: deadSubscriptionStatus(error) }
+      }
+    })
+  )
+
+  const successCount = results.filter((r) => r.success).length
+  const serverKeysLookBroken = successCount === 0 && results.every((r) => r.deadStatus === 403)
+
+  const toDeactivate = results
+    .filter((r) => r.deadStatus !== null && !(r.deadStatus === 403 && serverKeysLookBroken))
+    .map((r) => r.subscriptionId)
+
+  if (toDeactivate.length > 0) {
+    await prisma.pushSubscription.updateMany({
+      where: { id: { in: toDeactivate } },
+      data: { isActive: false }
+    })
+    console.log(`Desactivadas ${toDeactivate.length} suscripciones push muertas`)
+  }
+
+  if (serverKeysLookBroken) {
+    console.error('Todas las suscripciones respondieron 403: revisar VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY del servidor')
+  }
+
+  return successCount
+}
+
 /**
  * Send push notification to a specific player
  */
@@ -98,43 +175,7 @@ export async function sendPushNotification(
       tag: payload.tag
     }
 
-    const results = await Promise.allSettled(
-      subscriptions.map(async (subscription) => {
-        try {
-          await webpush.sendNotification(
-            {
-              endpoint: subscription.endpoint,
-              keys: {
-                p256dh: subscription.p256dh,
-                auth: subscription.auth
-              }
-            },
-            JSON.stringify(notificationData)
-          )
-          return { success: true, subscriptionId: subscription.id }
-        } catch (error) {
-          console.error(`Failed to send notification to subscription ${subscription.id}:`, error)
-
-          // If subscription is invalid, deactivate it
-          if (error instanceof Error && (
-            error.message.includes('410') ||
-            error.message.includes('invalid') ||
-            error.message.includes('expired')
-          )) {
-            await prisma.pushSubscription.update({
-              where: { id: subscription.id },
-              data: { isActive: false }
-            })
-          }
-
-          return { success: false, subscriptionId: subscription.id, error }
-        }
-      })
-    )
-
-    const successCount = results.filter(result =>
-      result.status === 'fulfilled' && result.value.success
-    ).length
+    const successCount = await deliverToSubscriptions(subscriptions, notificationData)
 
     return {
       success: successCount > 0,
@@ -240,43 +281,7 @@ export async function broadcastPushNotification(
       tag: payload.tag
     }
 
-    const results = await Promise.allSettled(
-      subscriptions.map(async (subscription) => {
-        try {
-          await webpush.sendNotification(
-            {
-              endpoint: subscription.endpoint,
-              keys: {
-                p256dh: subscription.p256dh,
-                auth: subscription.auth
-              }
-            },
-            JSON.stringify(notificationData)
-          )
-          return { success: true, subscriptionId: subscription.id }
-        } catch (error) {
-          console.error(`Failed to send notification to subscription ${subscription.id}:`, error)
-
-          // If subscription is invalid, deactivate it
-          if (error instanceof Error && (
-            error.message.includes('410') ||
-            error.message.includes('invalid') ||
-            error.message.includes('expired')
-          )) {
-            await prisma.pushSubscription.update({
-              where: { id: subscription.id },
-              data: { isActive: false }
-            })
-          }
-
-          return { success: false, subscriptionId: subscription.id, error }
-        }
-      })
-    )
-
-    const successCount = results.filter(result =>
-      result.status === 'fulfilled' && result.value.success
-    ).length
+    const successCount = await deliverToSubscriptions(subscriptions, notificationData)
 
     return {
       success: successCount > 0,

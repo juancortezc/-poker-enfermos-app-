@@ -17,6 +17,7 @@ import { PodioCard } from './PodioCard'
 import { MalazoCard } from './MalazoCard'
 import { LiveGameCard } from './LiveGameCard'
 import { CelebrationsCard } from './CelebrationsCard'
+import { PushActivationBanner } from './PushActivationBanner'
 import { HomeViewToggle, type HomeView } from './HomeViewToggle'
 import { HomeUltimaFecha } from './HomeUltimaFecha'
 import { HomeTorneo } from './HomeTorneo'
@@ -457,6 +458,9 @@ function HomeAuthenticated({
         {/* Celebrations - Birthdays (first position, dismissible) */}
         <CelebrationsCard />
 
+        {/* Push opt-in - solo aparece si el usuario no tiene suscripción activa */}
+        <PushActivationBanner />
+
         <HomeViewToggle value={view} onChange={setView} ultimaFechaDisabled={!lastCompletedDate} />
 
         {view === 'ultimaFecha' && lastCompletedDate ? (
@@ -586,6 +590,9 @@ function HomeWithLiveGame({
       <main className="pb-20 px-4 space-y-4">
         {/* Celebrations - Birthdays (first position, dismissible) */}
         <CelebrationsCard />
+
+        {/* Push opt-in - solo aparece si el usuario no tiene suscripción activa */}
+        <PushActivationBanner />
 
         {/* Live Game Card */}
         <LiveGameCard
