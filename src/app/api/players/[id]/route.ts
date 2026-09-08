@@ -92,13 +92,6 @@ export async function PUT(
       )
     }
 
-    if (lastName !== undefined && !lastName.trim()) {
-      return NextResponse.json(
-        { error: 'El apellido es obligatorio' },
-        { status: 400 }
-      )
-    }
-
     // Verificar que el jugador existe
     const existingPlayer = await prisma.player.findUnique({
       where: { id }
@@ -108,6 +101,21 @@ export async function PUT(
       return NextResponse.json(
         { error: 'Jugador no encontrado' },
         { status: 404 }
+      )
+    }
+
+    // El apellido es opcional para invitados: se registran con un nombre de
+    // referencia incompleto ("Sobrino Diego", "Carlos jr")
+    const finalRole = role !== undefined ? role : existingPlayer.role
+
+    if (
+      lastName !== undefined &&
+      !lastName.trim() &&
+      finalRole !== UserRole.Invitado
+    ) {
+      return NextResponse.json(
+        { error: 'El apellido es obligatorio' },
+        { status: 400 }
       )
     }
 
@@ -127,8 +135,8 @@ export async function PUT(
     // Preparar datos de actualización
     const updateData: Record<string, unknown> = {}
 
-    if (firstName !== undefined) updateData.firstName = firstName
-    if (lastName !== undefined) updateData.lastName = lastName
+    if (firstName !== undefined) updateData.firstName = firstName.trim()
+    if (lastName !== undefined) updateData.lastName = lastName.trim()
     if (aliases !== undefined) {
       const sanitizedAliases = Array.isArray(aliases)
         ? aliases

@@ -102,12 +102,44 @@ export async function POST(req: NextRequest) {
       joinYear
     } = data
 
-    // Validaciones básicas
-    if (!firstName || !lastName || !role) {
+    const isInvitado = role === UserRole.Invitado
+
+    // Validaciones básicas.
+    // Los invitados suelen registrarse con un nombre de referencia incompleto
+    // ("Sobrino Diego", "Carlos jr"), por eso el apellido es opcional para ellos.
+    if (!firstName || !role) {
       return NextResponse.json(
-        { error: 'Nombre, apellido y rol son obligatorios' },
+        { error: 'Nombre y rol son obligatorios' },
         { status: 400 }
       )
+    }
+
+    if (!isInvitado && !lastName) {
+      return NextResponse.json(
+        { error: 'El apellido es obligatorio' },
+        { status: 400 }
+      )
+    }
+
+    const finalLastName = typeof lastName === 'string' ? lastName.trim() : ''
+
+    // Evitar invitados duplicados: el formulario se reintenta con frecuencia
+    if (isInvitado) {
+      const duplicate = await prisma.player.findFirst({
+        where: {
+          role: UserRole.Invitado,
+          firstName: { equals: firstName.trim(), mode: 'insensitive' },
+          lastName: { equals: finalLastName, mode: 'insensitive' }
+        },
+        select: { id: true }
+      })
+
+      if (duplicate) {
+        return NextResponse.json(
+          { error: 'Ya existe un invitado con ese nombre' },
+          { status: 409 }
+        )
+      }
     }
 
     // Validar y hashear PIN si se proporciona
@@ -125,7 +157,7 @@ export async function POST(req: NextRequest) {
 
     // Para invitados, asignar foto genérica si no se proporciona
     let finalPhotoUrl = photoUrl
-    if (role === UserRole.Invitado && !photoUrl) {
+    if (isInvitado && !photoUrl) {
       finalPhotoUrl = 'https://storage.googleapis.com/poker-enfermos/pato.png'
     }
 
@@ -137,8 +169,8 @@ export async function POST(req: NextRequest) {
 
     const newPlayer = await prisma.player.create({
       data: {
-        firstName,
-        lastName,
+        firstName: firstName.trim(),
+        lastName: finalLastName,
         joinDate: (joinYear || new Date().getFullYear()).toString(),
         joinYear: joinYear || new Date().getFullYear(),
         role,
@@ -147,7 +179,7 @@ export async function POST(req: NextRequest) {
         birthDate,
         phone,
         email,
-        inviterId: role === UserRole.Invitado ? inviterId : null,
+        inviterId: isInvitado ? inviterId : null,
         photoUrl: finalPhotoUrl,
         adminKey: adminKey,
         isActive: true

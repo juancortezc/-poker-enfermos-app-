@@ -122,8 +122,14 @@ export default function CPPlayerForm({
     setError('')
 
     try {
-      if (!formData.firstName.trim() || !formData.lastName.trim()) {
-        throw new Error('Nombre y apellido son obligatorios')
+      if (!formData.firstName.trim()) {
+        throw new Error('El nombre es obligatorio')
+      }
+
+      // Los invitados se registran con un nombre de referencia incompleto
+      // ("Sobrino Diego", "Carlos jr"), por eso el apellido es opcional
+      if (formData.role !== UserRole.Invitado && !formData.lastName.trim()) {
+        throw new Error('El apellido es obligatorio')
       }
 
       if (formData.pin && formData.pin !== '****' && !/^\d{4}$/.test(formData.pin)) {
@@ -276,8 +282,8 @@ export default function CPPlayerForm({
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => updateFormData('lastName', e.target.value)}
-                placeholder="Apellido *"
-                required
+                placeholder={formData.role === UserRole.Invitado ? 'Apellido' : 'Apellido *'}
+                required={formData.role !== UserRole.Invitado}
                 className="px-3 py-2.5"
                 style={{ ...inputBaseStyle, borderRadius: '4px' }}
               />

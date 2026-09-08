@@ -142,10 +142,6 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
         throw new Error('Nombre es obligatorio')
       }
       
-      if (!formData.lastName.trim()) {
-        throw new Error('Apellido es obligatorio')
-      }
-
       if (!formData.inviterId) {
         throw new Error('Debe seleccionar el Enfermo que lo invita')
       }
@@ -257,16 +253,19 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
                 />
               </div>
               <div>
-                <Label htmlFor="lastName" className="text-poker-text">Apellido *</Label>
+                <Label htmlFor="lastName" className="text-poker-text">Apellido</Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) => updateFormData('lastName', e.target.value)}
                   className="bg-poker-dark/50 border-white/10 text-white focus:border-poker-red"
-                  required
                 />
               </div>
             </div>
+            <p className="text-xs text-poker-muted">
+              Si no conoces el apellido, deja el campo vacío y usa el nombre de
+              referencia con el que se lo identifica (ej. &quot;Sobrino Diego&quot;, &quot;Carlos jr&quot;).
+            </p>
 
             {/* Enfermo que invita */}
             <div>

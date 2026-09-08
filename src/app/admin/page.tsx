@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
+import { Play, Trophy, Coins, Users, Gift, Gavel } from 'lucide-react'
 import CPBottomNav from '@/components/clean-poker/CPBottomNav'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
 import CPHeader from '@/components/clean-poker/CPHeader'
@@ -18,12 +19,12 @@ import CPMultasTab from '@/components/admin/CPMultasTab'
 type TabType = 'activar' | 'torneo' | 'blinds' | 'jugadores' | 'premiacion' | 'multas'
 
 const TABS = [
-  { id: 'activar' as const, label: 'Activar' },
-  { id: 'torneo' as const, label: 'Torneo' },
-  { id: 'blinds' as const, label: 'Blinds' },
-  { id: 'jugadores' as const, label: 'Enfermos' },
-  { id: 'premiacion' as const, label: 'Premios' },
-  { id: 'multas' as const, label: 'Multas' },
+  { id: 'activar' as const, label: 'Activar', icon: Play },
+  { id: 'torneo' as const, label: 'Torneo', icon: Trophy },
+  { id: 'blinds' as const, label: 'Blinds', icon: Coins },
+  { id: 'jugadores' as const, label: 'Enfermos', icon: Users },
+  { id: 'premiacion' as const, label: 'Premios', icon: Gift },
+  { id: 'multas' as const, label: 'Multas', icon: Gavel },
 ]
 
 export default function AdminNewPage() {
@@ -140,23 +141,37 @@ export default function AdminNewPage() {
             Configuracion
           </p>
 
-          {/* CleanTabs - Text with red underline */}
-          <div className="flex justify-center gap-6">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className="pb-2 transition-all duration-200 cursor-pointer"
-                style={{
-                  fontSize: 'var(--cp-body-size)',
-                  fontWeight: activeTab === tab.id ? 700 : 400,
-                  color: activeTab === tab.id ? 'var(--cp-on-surface)' : 'var(--cp-on-surface-muted)',
-                  borderBottom: activeTab === tab.id ? '2px solid #E53935' : '2px solid transparent',
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Icon tabs */}
+          <div className="flex gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            {TABS.map((tab) => {
+              const Icon = tab.icon
+              const active = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="flex flex-col items-center gap-1 shrink-0 transition-all duration-200 cursor-pointer"
+                  style={{
+                    minWidth: 64,
+                    padding: '10px 8px',
+                    borderRadius: 14,
+                    background: active ? '#E53935' : 'var(--cp-surface)',
+                    border: `1px solid ${active ? '#E53935' : 'var(--cp-surface-border)'}`,
+                  }}
+                >
+                  <Icon size={18} color={active ? '#fff' : 'var(--cp-on-surface-muted)'} />
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: active ? 700 : 500,
+                      color: active ? '#fff' : 'var(--cp-on-surface-muted)',
+                    }}
+                  >
+                    {tab.label}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 

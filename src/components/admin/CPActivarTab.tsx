@@ -1,13 +1,32 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
-import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown, Trash2, Trophy } from 'lucide-react'
+import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown, Trash2, Trophy, Check, ChevronRight } from 'lucide-react'
 import TournamentCompletionModal from '@/components/tournaments/TournamentCompletionModal'
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+
+const RED = '#E53935'
+const PINK = '#EC407A'
+
+function RosterAvatar({ photoUrl, name, size = 32 }: { photoUrl?: string; name: string; size?: number }) {
+  const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#3A322B' }}>
+      {photoUrl ? (
+        <Image src={photoUrl} alt={name} width={size} height={size} className="object-cover w-full h-full" unoptimized />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center" style={{ fontSize: size * 0.35, fontWeight: 800, color: '#fff' }}>
+          {initials}
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface Player {
   id: string
@@ -402,6 +421,13 @@ export default function CPActivarTab() {
     ? [...registeredPlayers, ...additionalPlayers]
     : guests
 
+  const totalEnfermos = registeredPlayers.length + additionalPlayers.length
+  const totalInvitados = guests.length
+
+  const lastConfirmDate = selectedDate
+    ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() - 1)
+    : null
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -562,104 +588,137 @@ export default function CPActivarTab() {
           </button>
         </div>
 
-        {/* Tabs Row: Enfermos, Invitados */}
+        {/* Stat Tabs: Enfermos, Invitados */}
         <div className="grid grid-cols-2 gap-2">
-          {/* Enfermos Tab */}
           <button
             onClick={() => setActiveTab('enfermos')}
-            className="py-2 px-3 text-center transition-all"
+            className="text-left transition-all"
             style={{
-              background: activeTab === 'enfermos' ? '#E53935' : 'var(--cp-surface)',
-              border: `1px solid ${activeTab === 'enfermos' ? '#E53935' : 'var(--cp-surface-border)'}`,
-              color: activeTab === 'enfermos' ? 'white' : 'var(--cp-on-surface)',
-              borderRadius: '4px',
+              padding: '12px 14px',
+              borderRadius: 14,
+              background: activeTab === 'enfermos' ? 'rgba(229,57,53,0.16)' : 'var(--cp-surface)',
+              border: `1px solid ${activeTab === 'enfermos' ? RED : 'var(--cp-surface-border)'}`,
             }}
           >
-            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="flex items-start justify-between">
+              <Users size={16} color={RED} />
+              <ChevronRight size={14} style={{ color: 'var(--cp-on-surface-muted)' }} />
+            </div>
+            <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 6 }}>
               Enfermos
             </p>
-            <p style={{ fontSize: '18px', fontWeight: 700 }}>
-              {selectedPlayers.length}
+            <p style={{ fontSize: 20, fontWeight: 900, color: 'var(--cp-on-surface)' }}>
+              {selectedPlayers.length}<span style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-on-surface-muted)' }}>/{totalEnfermos}</span>
             </p>
           </button>
 
-          {/* Invitados Tab */}
           <button
             onClick={() => setActiveTab('invitados')}
-            className="py-2 px-3 text-center transition-all"
+            className="text-left transition-all"
             style={{
-              background: activeTab === 'invitados' ? '#EC407A' : 'var(--cp-surface)',
-              border: `1px solid ${activeTab === 'invitados' ? '#EC407A' : 'var(--cp-surface-border)'}`,
-              color: activeTab === 'invitados' ? 'white' : 'var(--cp-on-surface)',
-              borderRadius: '4px',
+              padding: '12px 14px',
+              borderRadius: 14,
+              background: activeTab === 'invitados' ? 'rgba(236,64,122,0.16)' : 'var(--cp-surface)',
+              border: `1px solid ${activeTab === 'invitados' ? PINK : 'var(--cp-surface-border)'}`,
             }}
           >
-            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="flex items-start justify-between">
+              <UserPlus size={16} color={PINK} />
+              <ChevronRight size={14} style={{ color: 'var(--cp-on-surface-muted)' }} />
+            </div>
+            <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 6 }}>
               Invitados
             </p>
-            <p style={{ fontSize: '18px', fontWeight: 700 }}>
-              {selectedGuests.length}
+            <p style={{ fontSize: 20, fontWeight: 900, color: 'var(--cp-on-surface)' }}>
+              {selectedGuests.length}<span style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-on-surface-muted)' }}>/{totalInvitados}</span>
             </p>
           </button>
         </div>
 
-        {/* Player List */}
-        <div
-          className="p-3"
-          style={{
-            background: 'var(--cp-surface)',
-            border: '1px solid var(--cp-surface-border)',
-            borderRadius: '4px',
-          }}
-        >
-          <div className="grid grid-cols-3 gap-2 max-h-80 overflow-y-auto">
-            {currentPlayers.map((player) => {
-              const isSelected = activeTab === 'enfermos'
-                ? selectedPlayers.includes(player.id)
-                : selectedGuests.includes(player.id)
+        {/* Jugadores del Torneo */}
+        <div>
+          <div
+            className="p-3"
+            style={{
+              background: 'var(--cp-surface)',
+              border: '1px solid var(--cp-surface-border)',
+              borderRadius: 14,
+            }}
+          >
+            <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
+              {currentPlayers.map((player) => {
+                const isSelected = activeTab === 'enfermos'
+                  ? selectedPlayers.includes(player.id)
+                  : selectedGuests.includes(player.id)
+                const accent = activeTab === 'invitados' ? PINK : RED
 
-              return (
-                <button
-                  key={player.id}
-                  onClick={() => togglePlayer(player.id)}
-                  className="py-2 px-2 text-center transition-all"
-                  style={{
-                    background: isSelected
-                      ? activeTab === 'invitados' ? '#EC407A' : '#E53935'
-                      : 'var(--cp-background)',
-                    border: `1px solid ${isSelected
-                      ? activeTab === 'invitados' ? '#EC407A' : '#E53935'
-                      : 'var(--cp-surface-border)'}`,
-                    color: isSelected ? 'white' : 'var(--cp-on-surface)',
-                    borderRadius: '4px',
-                    fontSize: 'var(--cp-caption-size)',
-                    fontWeight: isSelected ? 600 : 400,
-                  }}
-                >
-                  {getDisplayName(player)}
-                </button>
-              )
-            })}
+                return (
+                  <button
+                    key={player.id}
+                    onClick={() => togglePlayer(player.id)}
+                    className="flex items-center gap-1.5 transition-all"
+                    style={{
+                      padding: '6px 8px',
+                      borderRadius: 12,
+                      background: isSelected ? accent : 'var(--cp-background)',
+                      border: `1px solid ${isSelected ? accent : 'var(--cp-surface-border)'}`,
+                    }}
+                  >
+                    <RosterAvatar photoUrl={player.photoUrl} name={getDisplayName(player)} size={26} />
+                    <span
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: isSelected ? '#fff' : 'var(--cp-on-surface)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        textAlign: 'left'
+                      }}
+                    >
+                      {getDisplayName(player)}
+                    </span>
+                    <div
+                      style={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: isSelected ? '#22c55e' : 'transparent',
+                        border: isSelected ? 'none' : '1.5px solid rgba(255,255,255,0.25)'
+                      }}
+                    >
+                      {isSelected && <Check size={10} color="#fff" strokeWidth={3} />}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Create Guest Button */}
+            {activeTab === 'invitados' && (
+              <button
+                onClick={handleCreateGuest}
+                className="w-full mt-3 py-2 flex items-center justify-center gap-2"
+                style={{
+                  background: 'rgba(236, 64, 122, 0.15)',
+                  border: '1px solid rgba(236, 64, 122, 0.3)',
+                  color: PINK,
+                  borderRadius: 100,
+                  fontSize: 'var(--cp-caption-size)',
+                  fontWeight: 600,
+                }}
+              >
+                <UserPlus size={14} />
+                CREAR INVITADO
+              </button>
+            )}
           </div>
-
-          {/* Create Guest Button */}
-          {activeTab === 'invitados' && (
-            <button
-              onClick={handleCreateGuest}
-              className="w-full mt-3 py-2 flex items-center justify-center gap-2"
-              style={{
-                background: 'rgba(236, 64, 122, 0.15)',
-                border: '1px solid rgba(236, 64, 122, 0.3)',
-                color: '#EC407A',
-                borderRadius: '4px',
-                fontSize: 'var(--cp-caption-size)',
-                fontWeight: 600,
-              }}
-            >
-              <UserPlus size={14} />
-              CREAR INVITADO
-            </button>
-          )}
         </div>
 
         {/* Error Messages */}
@@ -683,212 +742,260 @@ export default function CPActivarTab() {
 
   return (
     <div className="space-y-4">
-      {/* Date Selection Row */}
-      <div className="flex gap-3">
-        {/* Date Selector */}
-        <div className="flex-1 relative">
-          <select
-            value={selectedDateId || ''}
-            onChange={(e) => handleDateSelection(Number(e.target.value))}
-            className="w-full px-3 py-2.5 pr-10 appearance-none"
+      {/* Fecha */}
+      <div>
+        <div className="flex gap-2">
+          {/* Date Selector */}
+          <div
+            className="flex-1 relative flex items-center gap-2"
             style={{
-              background: 'var(--cp-background)',
+              padding: '10px 12px',
+              borderRadius: 14,
+              background: 'var(--cp-surface)',
               border: '1px solid var(--cp-surface-border)',
-              color: 'var(--cp-on-surface)',
-              fontSize: 'var(--cp-body-size)',
-              borderRadius: '4px',
-              fontWeight: 600,
             }}
           >
-            {availableDates.map((date) => (
-              <option key={date.id} value={date.id}>
-                Fecha {date.dateNumber}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            size={16}
-            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: 'var(--cp-on-surface-muted)' }}
-          />
+            <Calendar size={16} style={{ color: 'var(--cp-on-surface-muted)', flexShrink: 0 }} />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)' }}>
+                {availableDates.find(d => d.id === selectedDateId)
+                  ? `Fecha ${availableDates.find(d => d.id === selectedDateId)!.dateNumber}`
+                  : 'Selecciona fecha'}
+              </p>
+              {selectedDate && (
+                <p style={{ fontSize: 10, color: 'var(--cp-on-surface-muted)' }}>
+                  {selectedDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()}
+                </p>
+              )}
+            </div>
+            <ChevronDown size={14} style={{ color: 'var(--cp-on-surface-muted)', flexShrink: 0 }} />
+            <select
+              value={selectedDateId || ''}
+              onChange={(e) => handleDateSelection(Number(e.target.value))}
+              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+            >
+              {availableDates.map((date) => (
+                <option key={date.id} value={date.id}>
+                  Fecha {date.dateNumber}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Delete Button */}
+          <button
+            onClick={() => handleDeleteDate()}
+            disabled={deleting || !selectedDateId}
+            className="flex items-center justify-center"
+            style={{
+              width: 44,
+              background: deleting ? 'rgba(156, 163, 175, 0.5)' : 'rgba(156, 163, 175, 0.2)',
+              border: '1px solid rgba(156, 163, 175, 0.3)',
+              color: 'var(--cp-on-surface-muted)',
+              borderRadius: 14,
+              opacity: deleting || !selectedDateId ? 0.5 : 1,
+            }}
+            title="Eliminar fecha"
+          >
+            {deleting ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Trash2 size={18} />
+            )}
+          </button>
         </div>
 
-        {/* Delete Button */}
-        <button
-          onClick={handleDeleteDate}
-          disabled={deleting || !selectedDateId}
-          className="flex items-center justify-center px-3 py-2.5"
-          style={{
-            background: deleting ? 'rgba(156, 163, 175, 0.5)' : 'rgba(156, 163, 175, 0.2)',
-            border: '1px solid rgba(156, 163, 175, 0.3)',
-            color: 'var(--cp-on-surface-muted)',
-            borderRadius: '4px',
-            opacity: deleting || !selectedDateId ? 0.5 : 1,
-          }}
-          title="Eliminar fecha"
-        >
-          {deleting ? (
-            <Loader2 size={18} className="animate-spin" />
-          ) : (
-            <Trash2 size={18} />
-          )}
-        </button>
+        {/* Stat Row: Enfermos, Invitados, Fecha */}
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          <button
+            onClick={() => setActiveTab('enfermos')}
+            className="text-left transition-all"
+            style={{
+              padding: '10px 10px',
+              borderRadius: 14,
+              background: activeTab === 'enfermos' ? 'rgba(229,57,53,0.16)' : 'var(--cp-surface)',
+              border: `1px solid ${activeTab === 'enfermos' ? RED : 'var(--cp-surface-border)'}`,
+            }}
+          >
+            <Users size={14} color={RED} />
+            <p style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 4 }}>
+              Enfermos
+            </p>
+            <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--cp-on-surface)' }}>
+              {selectedPlayers.length}<span style={{ fontSize: 10, fontWeight: 600, color: 'var(--cp-on-surface-muted)' }}>/{totalEnfermos}</span>
+            </p>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('invitados')}
+            className="text-left transition-all"
+            style={{
+              padding: '10px 10px',
+              borderRadius: 14,
+              background: activeTab === 'invitados' ? 'rgba(236,64,122,0.16)' : 'var(--cp-surface)',
+              border: `1px solid ${activeTab === 'invitados' ? PINK : 'var(--cp-surface-border)'}`,
+            }}
+          >
+            <UserPlus size={14} color={PINK} />
+            <p style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 4 }}>
+              Invitados
+            </p>
+            <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--cp-on-surface)' }}>
+              {selectedGuests.length}<span style={{ fontSize: 10, fontWeight: 600, color: 'var(--cp-on-surface-muted)' }}>/{totalInvitados}</span>
+            </p>
+          </button>
+
+          {/* Date Display */}
+          <div
+            className="relative"
+            style={{
+              padding: '10px 10px',
+              borderRadius: 14,
+              background: 'var(--cp-surface)',
+              border: '1px solid var(--cp-surface-border)',
+            }}
+          >
+            <Calendar size={14} style={{ color: 'var(--cp-on-surface-muted)' }} />
+            {lastConfirmDate ? (
+              <>
+                <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--cp-on-surface)', marginTop: 4 }}>
+                  {lastConfirmDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }).toUpperCase()}
+                </p>
+                <p style={{ fontSize: 8, color: 'var(--cp-on-surface-muted)', lineHeight: 1.2 }}>
+                  Último día para confirmar
+                </p>
+              </>
+            ) : (
+              <p style={{ fontSize: 8, color: 'var(--cp-on-surface-muted)', marginTop: 4 }}>Sin fecha</p>
+            )}
+            <input
+              type="date"
+              value={selectedDate ? formatDateForInput(selectedDate) : ''}
+              onChange={(e) => handleDateChange(e.target.value)}
+              disabled={updatingDate || !selectedDateId}
+              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              style={{ colorScheme: 'dark' }}
+            />
+            {updatingDate && (
+              <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', borderRadius: 14 }}>
+                <Loader2 size={16} className="animate-spin" style={{ color: RED }} />
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Activate Button */}
         <button
           onClick={handleActivate}
           disabled={activating || selectedPlayers.length === 0}
-          className="flex items-center justify-center gap-2 px-6 py-2.5"
+          className="w-full flex items-center gap-3 mt-2"
           style={{
-            background: activating || selectedPlayers.length === 0 ? 'rgba(229, 57, 53, 0.5)' : '#E53935',
+            padding: '12px 16px',
+            background: activating || selectedPlayers.length === 0 ? 'rgba(229, 57, 53, 0.5)' : RED,
             color: 'white',
-            borderRadius: '4px',
-            fontWeight: 600,
-            fontSize: 'var(--cp-body-size)',
+            borderRadius: 14,
             opacity: activating || selectedPlayers.length === 0 ? 0.7 : 1,
           }}
         >
           {activating ? (
-            <Loader2 size={18} className="animate-spin" />
+            <Loader2 size={20} className="animate-spin" />
           ) : (
-            <Play size={18} />
+            <Play size={20} fill="white" />
           )}
-          {activating ? 'Activando...' : 'ACTIVAR'}
+          <p style={{ fontSize: 14, fontWeight: 800, flex: 1, textAlign: 'left' }}>
+            {activating ? 'ACTIVANDO...' : 'ACTIVAR FECHA'}
+          </p>
+          <div className="text-right">
+            <p style={{ fontSize: 18, fontWeight: 900, lineHeight: 1 }}>{selectedPlayers.length + selectedGuests.length}</p>
+            <p style={{ fontSize: 8, opacity: 0.85, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Participantes</p>
+          </div>
         </button>
       </div>
 
-      {/* Tabs Row: Enfermos, Invitados, Date */}
-      <div className="grid grid-cols-3 gap-2">
-        {/* Enfermos Tab */}
-        <button
-          onClick={() => setActiveTab('enfermos')}
-          className="py-2 px-3 text-center transition-all"
-          style={{
-            background: activeTab === 'enfermos' ? '#E53935' : 'var(--cp-surface)',
-            border: `1px solid ${activeTab === 'enfermos' ? '#E53935' : 'var(--cp-surface-border)'}`,
-            color: activeTab === 'enfermos' ? 'white' : 'var(--cp-on-surface)',
-            borderRadius: '4px',
-          }}
-        >
-          <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Enfermos
-          </p>
-          <p style={{ fontSize: '18px', fontWeight: 700 }}>
-            {selectedPlayers.length}
-          </p>
-        </button>
-
-        {/* Invitados Tab */}
-        <button
-          onClick={() => setActiveTab('invitados')}
-          className="py-2 px-3 text-center transition-all"
-          style={{
-            background: activeTab === 'invitados' ? '#EC407A' : 'var(--cp-surface)',
-            border: `1px solid ${activeTab === 'invitados' ? '#EC407A' : 'var(--cp-surface-border)'}`,
-            color: activeTab === 'invitados' ? 'white' : 'var(--cp-on-surface)',
-            borderRadius: '4px',
-          }}
-        >
-          <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Invitados
-          </p>
-          <p style={{ fontSize: '18px', fontWeight: 700 }}>
-            {selectedGuests.length}
-          </p>
-        </button>
-
-        {/* Date Display */}
+      {/* Jugadores del Torneo */}
+      <div>
         <div
-          className="py-2 px-3 text-center relative"
+          className="p-3"
           style={{
             background: 'var(--cp-surface)',
             border: '1px solid var(--cp-surface-border)',
-            borderRadius: '4px',
+            borderRadius: 14,
           }}
         >
-          {selectedDate && (
-            <>
-              <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)' }}>
-                {selectedDate.toLocaleDateString('es-ES', { month: 'short' })}
-              </p>
-              <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--cp-on-surface)' }}>
-                {selectedDate.getDate()}
-              </p>
-            </>
-          )}
-          <input
-            type="date"
-            value={selectedDate ? formatDateForInput(selectedDate) : ''}
-            onChange={(e) => handleDateChange(e.target.value)}
-            disabled={updatingDate || !selectedDateId}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-            style={{ colorScheme: 'dark' }}
-          />
-          {updatingDate && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', borderRadius: '4px' }}>
-              <Loader2 size={16} className="animate-spin" style={{ color: '#E53935' }} />
-            </div>
+          <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
+            {currentPlayers.map((player) => {
+              const isSelected = activeTab === 'enfermos'
+                ? selectedPlayers.includes(player.id)
+                : selectedGuests.includes(player.id)
+              const accent = activeTab === 'invitados' ? PINK : RED
+
+              return (
+                <button
+                  key={player.id}
+                  onClick={() => togglePlayer(player.id)}
+                  className="flex items-center gap-1.5 transition-all"
+                  style={{
+                    padding: '6px 8px',
+                    borderRadius: 12,
+                    background: isSelected ? accent : 'var(--cp-background)',
+                    border: `1px solid ${isSelected ? accent : 'var(--cp-surface-border)'}`,
+                  }}
+                >
+                  <RosterAvatar photoUrl={player.photoUrl} name={getDisplayName(player)} size={26} />
+                  <span
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: isSelected ? '#fff' : 'var(--cp-on-surface)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {getDisplayName(player)}
+                  </span>
+                  <div
+                    style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: isSelected ? '#22c55e' : 'transparent',
+                      border: isSelected ? 'none' : '1.5px solid rgba(255,255,255,0.25)'
+                    }}
+                  >
+                    {isSelected && <Check size={10} color="#fff" strokeWidth={3} />}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Create Guest Button */}
+          {activeTab === 'invitados' && (
+            <button
+              onClick={handleCreateGuest}
+              className="w-full mt-3 py-2 flex items-center justify-center gap-2"
+              style={{
+                background: 'rgba(236, 64, 122, 0.15)',
+                border: '1px solid rgba(236, 64, 122, 0.3)',
+                color: PINK,
+                borderRadius: 100,
+                fontSize: 'var(--cp-caption-size)',
+                fontWeight: 600,
+              }}
+            >
+              <UserPlus size={14} />
+              CREAR INVITADO
+            </button>
           )}
         </div>
-      </div>
-
-      {/* Player List */}
-      <div
-        className="p-3"
-        style={{
-          background: 'var(--cp-surface)',
-          border: '1px solid var(--cp-surface-border)',
-          borderRadius: '4px',
-        }}
-      >
-        <div className="grid grid-cols-3 gap-2 max-h-80 overflow-y-auto">
-          {currentPlayers.map((player) => {
-            const isSelected = activeTab === 'enfermos'
-              ? selectedPlayers.includes(player.id)
-              : selectedGuests.includes(player.id)
-
-            return (
-              <button
-                key={player.id}
-                onClick={() => togglePlayer(player.id)}
-                className="py-2 px-2 text-center transition-all"
-                style={{
-                  background: isSelected
-                    ? activeTab === 'invitados' ? '#EC407A' : '#E53935'
-                    : 'var(--cp-background)',
-                  border: `1px solid ${isSelected
-                    ? activeTab === 'invitados' ? '#EC407A' : '#E53935'
-                    : 'var(--cp-surface-border)'}`,
-                  color: isSelected ? 'white' : 'var(--cp-on-surface)',
-                  borderRadius: '4px',
-                  fontSize: 'var(--cp-caption-size)',
-                  fontWeight: isSelected ? 600 : 400,
-                }}
-              >
-                {getDisplayName(player)}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Create Guest Button */}
-        {activeTab === 'invitados' && (
-          <button
-            onClick={handleCreateGuest}
-            className="w-full mt-3 py-2 flex items-center justify-center gap-2"
-            style={{
-              background: 'rgba(236, 64, 122, 0.15)',
-              border: '1px solid rgba(236, 64, 122, 0.3)',
-              color: '#EC407A',
-              borderRadius: '4px',
-              fontSize: 'var(--cp-caption-size)',
-              fontWeight: 600,
-            }}
-          >
-            <UserPlus size={14} />
-            CREAR INVITADO
-          </button>
-        )}
       </div>
 
       {/* Error Messages */}

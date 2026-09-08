@@ -31,3 +31,20 @@ export function getPlayerPhotoUrl(
 export function isGuest(role: string | null | undefined): boolean {
   return role === 'Invitado'
 }
+
+/**
+ * Builds the display name of a player.
+ *
+ * Guests (Invitados) are frequently registered with an incomplete reference name
+ * ("Sobrino Diego", "Carlos jr") and no last name, so the parts are joined
+ * defensively to avoid trailing whitespace.
+ */
+export function getPlayerFullName(
+  firstName: string | null | undefined,
+  lastName: string | null | undefined
+): string {
+  return [firstName, lastName]
+    .map(part => (typeof part === 'string' ? part.trim() : ''))
+    .filter(Boolean)
+    .join(' ')
+}

@@ -9,18 +9,14 @@ import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import CalendarioTab from '@/components/info/CalendarioTab'
 import ReglamentoTab from '@/components/info/ReglamentoTab'
-import EnfermosTab from '@/components/info/EnfermosTab'
 import PodcastTab from '@/components/info/PodcastTab'
-import MultasTab from '@/components/info/MultasTab'
 
-type TabType = 'calendario' | 'reglamento' | 'enfermos' | 'podcast' | 'multas'
+type TabType = 'calendario' | 'reglamento' | 'podcast'
 
 const TABS = [
   { id: 'calendario' as const, label: 'Calendario' },
   { id: 'reglamento' as const, label: 'Reglamento' },
-  { id: 'enfermos' as const, label: 'Enfermos' },
   { id: 'podcast' as const, label: 'Podcast' },
-  { id: 'multas' as const, label: 'Multas' },
 ]
 
 export default function InfoPage() {
@@ -144,9 +140,7 @@ export default function InfoPage() {
         {/* Tab Content */}
         {activeTab === 'calendario' && <CalendarioTab />}
         {activeTab === 'reglamento' && <ReglamentoTab />}
-        {activeTab === 'enfermos' && <EnfermosTab />}
         {activeTab === 'podcast' && <PodcastTab />}
-        {activeTab === 'multas' && <MultasTab />}
       </main>
 
       {/* Bottom Nav */}

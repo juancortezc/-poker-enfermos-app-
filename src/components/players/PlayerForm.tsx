@@ -131,8 +131,14 @@ export default function PlayerForm({
 
     try {
       // Validaciones básicas
-      if (!formData.firstName.trim() || !formData.lastName.trim()) {
-        throw new Error('Nombre y apellido son obligatorios')
+      if (!formData.firstName.trim()) {
+        throw new Error('El nombre es obligatorio')
+      }
+
+      // Los invitados se registran con un nombre de referencia incompleto
+      // ("Sobrino Diego", "Carlos jr"), por eso el apellido es opcional
+      if (formData.role !== UserRole.Invitado && !formData.lastName.trim()) {
+        throw new Error('El apellido es obligatorio')
       }
 
       if (formData.pin && formData.pin !== '****' && !/^\d{4}$/.test(formData.pin)) {
@@ -243,13 +249,15 @@ export default function PlayerForm({
                 />
               </div>
               <div>
-                <Label htmlFor="lastName" className="text-poker-text">Apellido *</Label>
+                <Label htmlFor="lastName" className="text-poker-text">
+                  Apellido {formData.role === UserRole.Invitado ? '' : '*'}
+                </Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
                   onChange={(e) => updateFormData('lastName', e.target.value)}
                   className="bg-poker-dark/50 border-white/10 text-poker-text"
-                  required
+                  required={formData.role !== UserRole.Invitado}
                 />
               </div>
             </div>
