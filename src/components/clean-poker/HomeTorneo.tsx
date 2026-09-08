@@ -24,7 +24,7 @@ interface HomeTorneoProps {
   tournamentNumber: number
   rankings: PlayerRanking[]
   nextDate: NextDateInfo | null
-  streaks?: { hot: PlayerPositionDelta[]; cold: PlayerPositionDelta[] }
+  streaks?: { hot: PlayerPositionDelta[] }
   seasonHighlights?: TournamentInsightsData['seasonHighlights']
   onOpenProfile: () => void
   onOpenCalendarPage: () => void
@@ -89,6 +89,11 @@ export function HomeTorneo({
   const myRanking = rankings.find(r => r.playerId === user.id)
   const leaderScore = rankings.length ? scoreOf(rankings[0]) : 0
   const gapToLeader = myRanking ? leaderScore - scoreOf(myRanking) : null
+
+  // 7/2: los últimos 2 lugares de la tabla actual (no un dato de tendencia)
+  const bottom2 = rankings.length >= 2
+    ? [...rankings].sort((a, b) => b.position - a.position).slice(0, 2).reverse()
+    : []
 
   const sortedByPosition = [...rankings].sort((a, b) => a.position - b.position)
   const penultimate = sortedByPosition.length >= 2 ? sortedByPosition[sortedByPosition.length - 2] : null
@@ -291,7 +296,7 @@ export function HomeTorneo({
 
       <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} onSeeTabla={onSeeTabla} onSeePosiciones={onSeePosiciones} />
 
-      {streaks && <StreaksCards hot={streaks.hot} cold={streaks.cold} />}
+      {(streaks || bottom2.length > 0) && <StreaksCards hot={streaks?.hot ?? []} cold={bottom2} />}
 
       {highlightCards.length > 0 && (
         <div>

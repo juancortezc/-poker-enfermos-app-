@@ -424,10 +424,6 @@ export default function CPActivarTab() {
   const totalEnfermos = registeredPlayers.length + additionalPlayers.length
   const totalInvitados = guests.length
 
-  const lastConfirmDate = selectedDate
-    ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() - 1)
-    : null
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -782,6 +778,29 @@ export default function CPActivarTab() {
             </select>
           </div>
 
+          {/* Edit scheduled date */}
+          <div
+            className="relative flex items-center justify-center"
+            style={{
+              width: 44,
+              background: 'rgba(156, 163, 175, 0.2)',
+              border: '1px solid rgba(156, 163, 175, 0.3)',
+              color: 'var(--cp-on-surface-muted)',
+              borderRadius: 14,
+            }}
+            title="Cambiar fecha programada"
+          >
+            {updatingDate ? <Loader2 size={18} className="animate-spin" /> : <Calendar size={18} />}
+            <input
+              type="date"
+              value={selectedDate ? formatDateForInput(selectedDate) : ''}
+              onChange={(e) => handleDateChange(e.target.value)}
+              disabled={updatingDate || !selectedDateId}
+              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              style={{ colorScheme: 'dark' }}
+            />
+          </div>
+
           {/* Delete Button */}
           <button
             onClick={() => handleDeleteDate()}
@@ -805,7 +824,7 @@ export default function CPActivarTab() {
           </button>
         </div>
 
-        {/* Stat Row: Enfermos, Invitados, Fecha */}
+        {/* Stat Row: Enfermos, Invitados, Activar */}
         <div className="grid grid-cols-3 gap-2 mt-2">
           <button
             onClick={() => setActiveTab('enfermos')}
@@ -845,71 +864,31 @@ export default function CPActivarTab() {
             </p>
           </button>
 
-          {/* Date Display */}
-          <div
-            className="relative"
+          {/* Activate */}
+          <button
+            onClick={handleActivate}
+            disabled={activating || selectedPlayers.length === 0}
+            className="text-left transition-all"
             style={{
               padding: '10px 10px',
               borderRadius: 14,
-              background: 'var(--cp-surface)',
-              border: '1px solid var(--cp-surface-border)',
+              background: activating || selectedPlayers.length === 0 ? 'rgba(229, 57, 53, 0.5)' : RED,
+              opacity: activating || selectedPlayers.length === 0 ? 0.7 : 1,
             }}
           >
-            <Calendar size={14} style={{ color: 'var(--cp-on-surface-muted)' }} />
-            {lastConfirmDate ? (
-              <>
-                <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--cp-on-surface)', marginTop: 4 }}>
-                  {lastConfirmDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }).toUpperCase()}
-                </p>
-                <p style={{ fontSize: 8, color: 'var(--cp-on-surface-muted)', lineHeight: 1.2 }}>
-                  Último día para confirmar
-                </p>
-              </>
+            {activating ? (
+              <Loader2 size={14} className="animate-spin" color="#fff" />
             ) : (
-              <p style={{ fontSize: 8, color: 'var(--cp-on-surface-muted)', marginTop: 4 }}>Sin fecha</p>
+              <Play size={14} fill="#fff" color="#fff" />
             )}
-            <input
-              type="date"
-              value={selectedDate ? formatDateForInput(selectedDate) : ''}
-              onChange={(e) => handleDateChange(e.target.value)}
-              disabled={updatingDate || !selectedDateId}
-              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-              style={{ colorScheme: 'dark' }}
-            />
-            {updatingDate && (
-              <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', borderRadius: 14 }}>
-                <Loader2 size={16} className="animate-spin" style={{ color: RED }} />
-              </div>
-            )}
-          </div>
+            <p style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.85)', marginTop: 4 }}>
+              {activating ? 'Activando...' : 'Activar'}
+            </p>
+            <p style={{ fontSize: 16, fontWeight: 900, color: '#fff' }}>
+              {selectedPlayers.length + selectedGuests.length}
+            </p>
+          </button>
         </div>
-
-        {/* Activate Button */}
-        <button
-          onClick={handleActivate}
-          disabled={activating || selectedPlayers.length === 0}
-          className="w-full flex items-center gap-3 mt-2"
-          style={{
-            padding: '12px 16px',
-            background: activating || selectedPlayers.length === 0 ? 'rgba(229, 57, 53, 0.5)' : RED,
-            color: 'white',
-            borderRadius: 14,
-            opacity: activating || selectedPlayers.length === 0 ? 0.7 : 1,
-          }}
-        >
-          {activating ? (
-            <Loader2 size={20} className="animate-spin" />
-          ) : (
-            <Play size={20} fill="white" />
-          )}
-          <p style={{ fontSize: 14, fontWeight: 800, flex: 1, textAlign: 'left' }}>
-            {activating ? 'ACTIVANDO...' : 'ACTIVAR FECHA'}
-          </p>
-          <div className="text-right">
-            <p style={{ fontSize: 18, fontWeight: 900, lineHeight: 1 }}>{selectedPlayers.length + selectedGuests.length}</p>
-            <p style={{ fontSize: 8, opacity: 0.85, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Participantes</p>
-          </div>
-        </button>
       </div>
 
       {/* Jugadores del Torneo */}

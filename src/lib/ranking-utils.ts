@@ -571,7 +571,6 @@ export interface PlayerPositionDelta {
 export interface TournamentInsightsData {
   streaks: {
     hot: PlayerPositionDelta[];
-    cold: PlayerPositionDelta[];
   };
   seasonHighlights: {
     biggestJump: (PlayerPositionDelta & { dateNumber: number }) | null;
@@ -665,7 +664,6 @@ export async function calculateTournamentInsights(tournamentId: number): Promise
       .filter((d): d is PlayerPositionDelta => d !== null && d.positionsChanged !== 0);
 
     const hot = [...deltas].sort((a, b) => b.positionsChanged - a.positionsChanged).slice(0, 3);
-    const cold = [...deltas].sort((a, b) => a.positionsChanged - b.positionsChanged).slice(0, 2);
 
     // --- Mayor salto de la temporada (una sola fecha) ---
     let biggestJump: TournamentInsightsData['seasonHighlights']['biggestJump'] = null;
@@ -710,7 +708,7 @@ export async function calculateTournamentInsights(tournamentId: number): Promise
     });
 
     return {
-      streaks: { hot, cold },
+      streaks: { hot },
       seasonHighlights: { biggestJump, longestTop3Streak }
     };
   } catch (error) {

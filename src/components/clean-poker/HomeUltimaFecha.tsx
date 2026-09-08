@@ -24,7 +24,7 @@ interface HomeUltimaFechaProps {
   tournamentNumber: number
   rankings: PlayerRanking[]
   lastCompletedDate: { id: number; dateNumber: number }
-  streaks?: { hot: PlayerPositionDelta[]; cold: PlayerPositionDelta[] }
+  streaks?: { hot: PlayerPositionDelta[] }
   onOpenProfile: () => void
   onSeeAllResults: () => void
   onSeeResultsTab: () => void
@@ -96,6 +96,11 @@ export function HomeUltimaFecha({
   const myRanking = rankings.find(r => r.playerId === user.id)
   const leaderScore = rankings.length ? scoreOf(rankings[0]) : 0
   const gapToLeader = myRanking ? leaderScore - scoreOf(myRanking) : null
+
+  // 7/2: los últimos 2 lugares de la tabla actual (no un dato de tendencia)
+  const bottom2 = rankings.length >= 2
+    ? [...rankings].sort((a, b) => b.position - a.position).slice(0, 2).reverse()
+    : []
 
   const insightCards = [
     varonDeLaNoche && {
@@ -297,7 +302,7 @@ export function HomeUltimaFecha({
 
       <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} showNightContext onSeeTabla={onSeeTabla} onSeePosiciones={onSeePosiciones} />
 
-      {streaks && <StreaksCards hot={streaks.hot} cold={streaks.cold} />}
+      {(streaks || bottom2.length > 0) && <StreaksCards hot={streaks?.hot ?? []} cold={bottom2} />}
     </>
   )
 }

@@ -1,12 +1,15 @@
 'use client'
 
-import type { PlayerPositionDelta } from '@/lib/ranking-utils'
+import type { PlayerPositionDelta, PlayerRanking } from '@/lib/ranking-utils'
 import { HomeAvatar } from './HomeAvatar'
 
 interface StreaksCardsProps {
   hot: PlayerPositionDelta[]
-  cold: PlayerPositionDelta[]
+  /** Los últimos 2 lugares de la tabla actual (7/2) — no un dato de tendencia. */
+  cold: PlayerRanking[]
 }
+
+const scoreOf = (r: PlayerRanking) => r.finalScore ?? r.totalPoints
 
 export function StreaksCards({ hot, cold }: StreaksCardsProps) {
   if (hot.length === 0 && cold.length === 0) return null
@@ -43,7 +46,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                   {player.playerName}
                 </div>
                 <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#fff' }}>
-                  {player.points} <span style={{ fontSize: 9, fontWeight: 700, opacity: 0.85, color: 'inherit' }}>PTS</span>
+                  {scoreOf(player)} <span style={{ fontSize: 9, fontWeight: 700, opacity: 0.85, color: 'inherit' }}>PTS</span>
                 </div>
               </div>
             ))}
