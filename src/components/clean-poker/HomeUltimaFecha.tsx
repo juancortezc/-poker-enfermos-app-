@@ -177,7 +177,7 @@ export function HomeUltimaFecha({
                   cursor: 'pointer'
                 }}
               >
-                VER RESUMEN
+                VER RESULTADOS
               </button>
             </div>
             {!winnerPhoto && (

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, ChevronLeft, Calendar, Mic, TrendingUp, MoreHorizontal } from 'lucide-react'
+import { Home, ChevronLeft, Mic, TrendingUp, MoreHorizontal } from 'lucide-react'
 
 interface NavItem {
   id: string
@@ -29,12 +29,6 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Estadísticas',
     href: '/stats',
     icon: <TrendingUp className="w-5 h-5" />,
-  },
-  {
-    id: 'fecha',
-    label: 'Fecha',
-    href: '/fecha',
-    icon: <Calendar className="w-5 h-5" />,
   },
   {
     id: 'mas',

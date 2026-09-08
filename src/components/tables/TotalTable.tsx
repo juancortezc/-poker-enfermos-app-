@@ -88,7 +88,8 @@ export default function TotalTable({ tournamentId, currentUserId }: TotalTablePr
   }
 
   const has3 = (rankingData.tournament.datesToEliminate ?? 2) >= 3;
-  const nameFormat = completedDates.length > 8 ? 'short' : completedDates.length > 5 ? 'medium' : 'full';
+  const nameFormat = 'medium';
+  const lastDate = completedDates[completedDates.length - 1];
 
   const thStyle: React.CSSProperties = {
     background: NEUTRAL_HEADER,
@@ -126,10 +127,8 @@ export default function TotalTable({ tournamentId, currentUserId }: TotalTablePr
           <thead>
             <tr>
               <th style={{ ...thStyle, width: 36 }}>#</th>
-              <th style={{ ...thStyle, textAlign: 'left', width: 90 }}>JUGADOR</th>
-              {completedDates.map(dateNumber => (
-                <th key={dateNumber} style={{ ...thStyle, width: 40 }}>F{dateNumber}</th>
-              ))}
+              <th style={{ ...thStyle, textAlign: 'left', width: 110 }}>JUGADOR</th>
+              {lastDate !== undefined && <th style={{ ...thStyle, width: 44 }}>F{lastDate}</th>}
               <th style={{ ...thStyle, width: 50 }}>FINAL</th>
               <th style={{ ...thStyle, width: 40 }}>E1</th>
               <th style={{ ...thStyle, width: 40 }}>E2</th>
@@ -140,7 +139,8 @@ export default function TotalTable({ tournamentId, currentUserId }: TotalTablePr
           <tbody>
             {rankingData.rankings.map((player, index) => {
               const isCurrentUser = currentUserId && player.playerId === currentUserId;
-              const rowBg = isCurrentUser ? '#FEF3C7' : index % 2 === 1 ? '#F7F7F7' : '#fff';
+              const isMalazo = player.position > rankingData.rankings.length - 2;
+              const rowBg = isCurrentUser ? '#FEF3C7' : isMalazo ? '#FCE4EC' : index % 2 === 1 ? '#F7F7F7' : '#fff';
               const badge = medalBadgeStyle(player.position);
               return (
                 <tr key={player.playerId}>
@@ -153,9 +153,9 @@ export default function TotalTable({ tournamentId, currentUserId }: TotalTablePr
                     {formatPlayerName(player.playerName, nameFormat)}
                     {isCurrentUser && <span style={{ color: '#B45309', marginLeft: 4, fontSize: 10 }}>◀ TÚ</span>}
                   </td>
-                  {completedDates.map(dateNumber => (
-                    <td key={dateNumber} style={{ ...tdStyle, background: rowBg }}>{player.pointsByDate[dateNumber] || 0}</td>
-                  ))}
+                  {lastDate !== undefined && (
+                    <td style={{ ...tdStyle, background: rowBg }}>{player.pointsByDate[lastDate] || 0}</td>
+                  )}
                   <td style={{ ...tdStyle, background: rowBg, fontWeight: 700, color: '#8A6A1E' }}>
                     {player.finalScore !== undefined ? player.finalScore : '-'}
                   </td>

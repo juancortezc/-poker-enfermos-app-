@@ -119,15 +119,16 @@ export default function PlayerProfilePage() {
     if (!details) return null
     const played = details.datePerformance.filter((d) => d.status === 'completed' && !d.isAbsent)
 
-    const victories = played.filter((d) => d.eliminationPosition === undefined).length
+    // eliminationPosition: 1 = ganador, y sube mientras peor el resultado (más alto = eliminado más temprano).
+    const isWinner = (d: (typeof played)[0]) => d.eliminationPosition === undefined || d.eliminationPosition === 1
 
-    const podiums = played.filter(
-      (d) => d.eliminationPosition === undefined || (d.eliminationPosition !== undefined && d.eliminationPosition <= 3)
-    ).length
+    const victories = played.filter(isWinner).length
 
-    const MESA_FINAL_MIN = 12
+    const podiums = played.filter((d) => isWinner(d) || (d.eliminationPosition !== undefined && d.eliminationPosition <= 3)).length
+
+    const MESA_FINAL_MAX = 9
     const mesaFinalCount = played.filter(
-      (d) => d.eliminationPosition === undefined || (d.eliminationPosition !== undefined && d.eliminationPosition >= MESA_FINAL_MIN)
+      (d) => isWinner(d) || (d.eliminationPosition !== undefined && d.eliminationPosition <= MESA_FINAL_MAX)
     ).length
 
     // Último lugar: ganó exactamente 1 punto esa fecha
@@ -136,13 +137,25 @@ export default function PlayerProfilePage() {
     return { victories, podiums, mesaFinalCount, lastPlaceCount }
   }, [details])
 
-  const rival = useMemo(() => {
-    if (!rankingData || !details) return null
+  const rivals = useMemo(() => {
+    if (!rankingData || !details) return { above: null, below: null }
     const myPos = details.currentStats.position
-    const above = rankingData.rankings.find((r) => r.position === myPos - 1)
-    const below = rankingData.rankings.find((r) => r.position === myPos + 1)
-    return above ?? below ?? null
+    const above = rankingData.rankings.find((r) => r.position === myPos - 1) ?? null
+    const below = rankingData.rankings.find((r) => r.position === myPos + 1) ?? null
+    return { above, below }
   }, [rankingData, details])
+
+  const eliminatedDates = useMemo(() => {
+    if (!details || !details.currentStats.eliminasActive) return []
+    const n = details.datesToEliminate
+    if (n <= 0) return []
+    // Mismo criterio que calculateTournamentRanking: ordenar por puntos ascendente
+    // (sort estable → en empate gana la fecha más antigua, igual que el servidor).
+    const played = [...details.datePerformance]
+      .filter((d) => d.status === 'completed')
+      .sort((a, b) => a.dateNumber - b.dateNumber)
+    return [...played].sort((a, b) => a.points - b.points).slice(0, n)
+  }, [details])
 
   const lastThreeDates = useMemo(() => {
     if (!dates) return []
@@ -261,26 +274,40 @@ export default function PlayerProfilePage() {
         </div>
 
         {/* RIVAL DIRECTO */}
-        {rival && (
+        {(rivals.above || rivals.below) && (
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'TU RIVAL DIRECTO' : 'RIVAL CERCANO'}
             </div>
-            <HomeCard>
-              <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <HomeAvatar playerId={rival.playerId} name={rival.playerName} photoUrl={rival.playerPhoto} size={44} fontSize={15} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{rival.playerName}</div>
-                  <div style={{ fontSize: 10, color: '#7A6E62' }}>#{rival.position} en el torneo</div>
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>
-                    {Math.abs((currentStats.finalScore ?? currentStats.totalPoints) - (rival.finalScore ?? rival.totalPoints))} pts
-                  </div>
-                  <div style={{ fontSize: 9, color: '#7A6E62' }}>de diferencia</div>
-                </div>
-              </div>
-            </HomeCard>
+            <div className="space-y-2">
+              {[
+                { player: rivals.above, tag: 'ARRIBA' },
+                { player: rivals.below, tag: 'ABAJO' }
+              ]
+                .filter((r): r is { player: NonNullable<typeof rivals.above>; tag: string } => !!r.player)
+                .map(({ player, tag }) => (
+                  <HomeCard key={player.playerId}>
+                    <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={44} fontSize={15} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: 8, fontWeight: 800, color: '#7A6E62', letterSpacing: '0.06em', background: 'rgba(255,255,255,0.06)', padding: '2px 5px', borderRadius: 4 }}>
+                            {tag}
+                          </span>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{player.playerName}</div>
+                        </div>
+                        <div style={{ fontSize: 10, color: '#7A6E62', marginTop: 2 }}>#{player.position} en el torneo</div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>
+                          {Math.abs((currentStats.finalScore ?? currentStats.totalPoints) - (player.finalScore ?? player.totalPoints))} pts
+                        </div>
+                        <div style={{ fontSize: 9, color: '#7A6E62' }}>de diferencia</div>
+                      </div>
+                    </div>
+                  </HomeCard>
+                ))}
+            </div>
           </div>
         )}
 
@@ -386,6 +413,39 @@ export default function PlayerProfilePage() {
                   </HomeCard>
                 )
               })}
+            </div>
+          </div>
+        )}
+
+        {/* FECHAS QUE ELIMINA */}
+        {eliminatedDates.length > 0 && (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+              {isOwnProfile ? 'FECHAS QUE ELIMINAS' : 'FECHAS QUE ELIMINA'}
+            </div>
+            <div className="space-y-2">
+              {eliminatedDates.map((d) => (
+                <HomeCard key={d.dateNumber}>
+                  <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ textAlign: 'center', flexShrink: 0, width: 34 }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: '#7A6E62' }}>FECHA</div>
+                      <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{d.dateNumber}</div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0, fontSize: 11, color: '#B5A996' }}>
+                      {d.isAbsent ? 'Ausencia' : d.eliminationPosition ? `Posición #${d.eliminationPosition}` : 'Ganador'}
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#E53935', flexShrink: 0 }}>-{d.points} pts</div>
+                  </div>
+                </HomeCard>
+              ))}
+              <HomeCard>
+                <div style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6' }}>Total eliminado</span>
+                  <span style={{ fontSize: 15, fontWeight: 900, color: '#E53935' }}>
+                    -{eliminatedDates.reduce((sum, d) => sum + d.points, 0)} pts
+                  </span>
+                </div>
+              </HomeCard>
             </div>
           </div>
         )}

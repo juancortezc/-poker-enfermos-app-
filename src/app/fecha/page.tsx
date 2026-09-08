@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
-import { Trophy, Users, UserX, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
@@ -32,10 +32,9 @@ interface DatesGameDate {
   eliminations: EliminationDTO[]
 }
 
-type TabId = 'resumen' | 'resultados' | 'eliminaciones'
+type TabId = 'posiciones' | 'eliminaciones'
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'resumen', label: 'Resumen' },
-  { id: 'resultados', label: 'Resultados' },
+  { id: 'posiciones', label: 'Posiciones' },
   { id: 'eliminaciones', label: 'Eliminaciones' }
 ]
 
@@ -56,11 +55,11 @@ export default function FechaPage() {
   const lastCompleted = useMemo(() => [...sortedDates].reverse().find((d) => d.status === 'completed'), [sortedDates])
 
   const [selectedId, setSelectedId] = useState<number | null>(null)
-  const [tab, setTab] = useState<TabId>('resumen')
+  const [tab, setTab] = useState<TabId>('posiciones')
 
   useEffect(() => {
     const tabParam = searchParams.get('tab')
-    if (tabParam === 'resultados' || tabParam === 'eliminaciones' || tabParam === 'resumen') {
+    if (tabParam === 'posiciones' || tabParam === 'eliminaciones') {
       setTab(tabParam)
     }
   }, [searchParams])
@@ -88,12 +87,8 @@ export default function FechaPage() {
 
   const eliminations = selectedDate?.eliminations ?? []
   const isCompleted = selectedDate?.status === 'completed'
-  const winner = eliminations.find((e) => e.position === 1)
-  const podium = [...eliminations].sort((a, b) => a.position - b.position).slice(0, 3)
   const results = [...eliminations].sort((a, b) => a.position - b.position)
   const eliminationEvents = [...eliminations].filter((e) => e.position !== 1).sort((a, b) => b.position - a.position)
-  const myElim = eliminations.find((e) => e.eliminatedPlayer.id === user.id)
-  const totalPlayers = eliminations.length
 
   return (
     <CPAppShell>
@@ -189,84 +184,7 @@ export default function FechaPage() {
               ))}
             </div>
 
-            {tab === 'resumen' && (
-              <div className="space-y-4">
-                {winner && (
-                  <div style={{ background: '#F3E6D0', borderRadius: 18, padding: 18, display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <HomeAvatar playerId={winner.eliminatedPlayer.id} name={winner.eliminatedPlayer.firstName} photoUrl={winner.eliminatedPlayer.photoUrl} size={64} fontSize={22} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <Trophy size={13} color="#B5442C" />
-                        <span style={{ fontSize: 10, fontWeight: 800, color: '#B5442C', letterSpacing: '0.06em' }}>GANADOR</span>
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: '#2A1F14', marginTop: 2 }}>
-                        {winner.eliminatedPlayer.firstName} {winner.eliminatedPlayer.lastName}
-                      </div>
-                      <div style={{ fontSize: 12, color: '#8A7860', marginTop: 2 }}>
-                        {isGuest(winner.eliminatedPlayer) ? 'invitado' : `${winner.points} puntos`}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {podium.length > 1 && (
-                  <div>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>PODIO</div>
-                    <div className="space-y-2">
-                      {podium.map((e) => (
-                        <HomeCard key={e.id}>
-                          <div style={{ padding: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 900, color: '#D8A84E' }}>#{e.position}</div>
-                            <HomeAvatar playerId={e.eliminatedPlayer.id} name={e.eliminatedPlayer.firstName} photoUrl={e.eliminatedPlayer.photoUrl} size={36} fontSize={13} />
-                            <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>
-                              {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName}
-                            </div>
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{pointsLabel(e)}</div>
-                          </div>
-                        </HomeCard>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {myElim && (
-                  <HomeCard>
-                    <div style={{ padding: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ fontSize: 10, fontWeight: 800, color: '#7A6E62', letterSpacing: '0.06em' }}>TU RESULTADO</div>
-                        <div style={{ fontSize: 15, fontWeight: 900, color: '#F5EFE6', marginTop: 2 }}>
-                          {myElim.position === 1 ? '¡Ganaste!' : `#${myElim.position}`}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: 15, fontWeight: 800, color: '#F5EFE6' }}>{myElim.points} pts</div>
-                    </div>
-                  </HomeCard>
-                )}
-
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <HomeCard>
-                    <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Users size={16} color="#7A6E62" />
-                      <div>
-                        <div style={{ fontSize: 15, fontWeight: 900, color: '#F5EFE6' }}>{totalPlayers}</div>
-                        <div style={{ fontSize: 9, color: '#7A6E62' }}>jugadores</div>
-                      </div>
-                    </div>
-                  </HomeCard>
-                  <HomeCard>
-                    <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <UserX size={16} color="#7A6E62" />
-                      <div>
-                        <div style={{ fontSize: 15, fontWeight: 900, color: '#F5EFE6' }}>{eliminations.filter((e) => e.points === 0).length}</div>
-                        <div style={{ fontSize: 9, color: '#7A6E62' }}>ausencias</div>
-                      </div>
-                    </div>
-                  </HomeCard>
-                </div>
-              </div>
-            )}
-
-            {tab === 'resultados' && (
+            {tab === 'posiciones' && (
               <div className="space-y-1.5">
                 {results.map((e) => (
                   <HomeCard key={e.id}>

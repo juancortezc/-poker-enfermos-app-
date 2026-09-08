@@ -1,10 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Download } from 'lucide-react'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
-import { playedDateNumbers, nightlyPosition } from '@/lib/ranking-utils'
+import { playedDateNumbers, nightlyPosition, averagePointsPerDate } from '@/lib/ranking-utils'
 import type { PlayerRanking } from '@/lib/ranking-utils'
 import { downloadCsv } from '@/lib/csv'
 
@@ -20,6 +21,8 @@ const GOLD = '#E8C158'
 const SILVER = '#B9B9C4'
 const BRONZE = '#C98A4E'
 const MESA_FINAL_THRESHOLD = 9
+
+type TableView = 'compacta' | 'completa'
 
 function medalBadgeStyle(position: number) {
   if (position === 1) return { background: GOLD, color: '#1A1512' }
@@ -51,6 +54,7 @@ function CircleAvatar({ photoUrl, name, size = 26 }: { photoUrl?: string; name: 
 export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }: CPRankingViewProps) {
   const router = useRouter()
   const goToPlayer = (playerId: string) => router.push(`/players/${playerId}`)
+  const [view, setView] = useState<TableView>('compacta')
 
   const { ranking: rankingData, isLoading, isError, errorMessage, refresh } = useTournamentRanking(tournamentId, {
     refreshInterval: 30000,
@@ -86,14 +90,22 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
     )
   }
 
-  const { rankings } = rankingData
+  const { rankings, tournament } = rankingData
   const completedDates = playedDateNumbers(rankings)
-  const lastDate = completedDates[completedDates.length - 1]
 
-  const deltaFor = (player: PlayerRanking) => (lastDate ? player.pointsByDate[lastDate] ?? 0 : 0)
+  const deltaFor = (player: PlayerRanking) => player.positionsChanged
 
   const mesasFinalesFor = (player: PlayerRanking) =>
     completedDates.filter(d => (player.pointsByDate[d] ?? 0) > 0 && (nightlyPosition(rankings, d, player.playerId) ?? 999) <= MESA_FINAL_THRESHOLD).length
+
+  // Mismo criterio que calculateTournamentRanking: ordenar por puntos ascendente
+  // (sort estable → en empate gana la fecha más antigua, igual que el servidor).
+  const eliminatedDatesFor = (player: PlayerRanking): Set<number> => {
+    if (!player.eliminasActive || tournament.datesToEliminate <= 0) return new Set()
+    const dateNumbers = Object.keys(player.pointsByDate).map(Number).sort((a, b) => a - b)
+    const sorted = [...dateNumbers].sort((a, b) => (player.pointsByDate[a] ?? 0) - (player.pointsByDate[b] ?? 0))
+    return new Set(sorted.slice(0, tournament.datesToEliminate))
+  }
 
   const leader = rankings.find(r => r.position === 1)
   const second = rankings.find(r => r.position === 2)
@@ -126,10 +138,10 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
   }
 
   const handleDownloadCsv = () => {
-    const headers = ['#', 'Jugador', 'Pts', ...completedDates.map(d => `F${d}`), 'Prom']
+    const headers = ['#', 'Jugador', 'Final', ...completedDates.map(d => `F${d}`), 'Prom']
     const rows = rankings.map(player => {
       const pts = player.finalScore ?? player.totalPoints
-      const prom = completedDates.length > 0 ? Math.round((player.totalPoints / completedDates.length) * 10) / 10 : 0
+      const prom = Math.round(averagePointsPerDate(player))
       return [player.position, player.playerName, pts, ...completedDates.map(d => player.pointsByDate[d] ?? 0), prom]
     })
     downloadCsv(headers, rows, `tabla-torneo-${tournamentNumber}.csv`)
@@ -175,7 +187,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                 <span style={{ fontSize: 9, color: '#A89A8C' }}>PUNTOS</span>
                 {delta !== 0 && (
                   <span style={{ fontSize: 10, fontWeight: 800, color: delta > 0 ? '#7CD07F' : RED, marginLeft: 4 }}>
-                    {delta > 0 ? `+${delta} ▲` : `${delta} ▼`} <span style={{ fontWeight: 500, color: '#7A6E62' }}>vs fecha anterior</span>
+                    {delta > 0 ? `+${delta} ▲` : `${delta} ▼`} <span style={{ fontWeight: 500, color: '#7A6E62' }}>posiciones vs fecha anterior</span>
                   </span>
                 )}
               </div>
@@ -238,8 +250,29 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
         </div>
       )}
 
-      {/* CSV */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      {/* SELECTOR + CSV */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {(['compacta', 'completa'] as const).map(v => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: view === v ? '#fff' : '#B5A996',
+                background: view === v ? RED : 'rgba(255,255,255,0.06)',
+                border: 'none',
+                borderRadius: 100,
+                padding: '7px 12px',
+                cursor: 'pointer',
+                textTransform: 'capitalize'
+              }}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
         <button
           onClick={handleDownloadCsv}
           style={{
@@ -253,26 +286,27 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
             border: '1px solid rgba(255,255,255,0.14)',
             borderRadius: 100,
             padding: '7px 12px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            flexShrink: 0
           }}
         >
-          <Download size={13} /> Descargar CSV
+          <Download size={13} /> CSV
         </button>
       </div>
 
       {/* TABLA */}
       <div style={{ borderRadius: 14, overflow: 'hidden', border: `1px solid ${GRID}` }}>
         <div style={{ overflowX: 'auto' }}>
-          <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 500 }}>
+          <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: view === 'completa' ? 500 : undefined }}>
             <thead>
               <tr>
                 <th style={{ ...thNeutralStyle, width: 36 }}>#</th>
                 <th style={{ ...thNeutralStyle, textAlign: 'left', width: 110 }}>JUGADOR</th>
-                <th style={{ ...thStyle, width: 46 }}>PTS</th>
-                {completedDates.map(d => (
+                <th style={{ ...thStyle, width: 46 }}>FINAL</th>
+                {view === 'completa' && completedDates.map(d => (
                   <th key={d} style={{ ...thNeutralStyle, width: 36 }}>F{d}</th>
                 ))}
-                <th style={{ ...thNeutralStyle, width: 46 }}>PROM</th>
+                {view === 'completa' && <th style={{ ...thNeutralStyle, width: 46 }}>PROM</th>}
               </tr>
             </thead>
             <tbody>
@@ -283,7 +317,8 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                 const textColor = isCurrentUser ? '#fff' : '#000'
                 const badge = medalBadgeStyle(player.position)
                 const pts = player.finalScore ?? player.totalPoints
-                const prom = completedDates.length > 0 ? Math.round((player.totalPoints / completedDates.length) * 10) / 10 : 0
+                const prom = Math.round(averagePointsPerDate(player))
+                const eliminatedDates = view === 'completa' ? eliminatedDatesFor(player) : null
 
                 return (
                   <tr key={player.playerId} onClick={() => goToPlayer(player.playerId)} style={{ cursor: 'pointer' }}>
@@ -301,16 +336,28 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                         <CircleAvatar photoUrl={player.playerPhoto} name={player.playerName} />
                         <span style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>
                           {player.playerName}
-                          {player.position === 1 && ' 👑'}
                           {isCurrentUser && ' (Tú)'}
                         </span>
                       </div>
                     </td>
                     <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? '#fff' : '#000', fontWeight: 900 }}>{pts}</td>
-                    {completedDates.map(d => (
-                      <td key={d} style={{ ...tdStyle, background: rowBg, color: textColor }}>{player.pointsByDate[d] ?? 0}</td>
-                    ))}
-                    <td style={{ ...tdStyle, background: rowBg, color: textColor }}>{prom.toFixed(1)}</td>
+                    {view === 'completa' && completedDates.map(d => {
+                      const isEliminated = eliminatedDates?.has(d)
+                      return (
+                        <td
+                          key={d}
+                          style={{
+                            ...tdStyle,
+                            background: rowBg,
+                            color: isEliminated ? (isCurrentUser ? 'rgba(255,255,255,0.55)' : '#B0B0B0') : textColor,
+                            textDecoration: isEliminated ? 'line-through' : undefined
+                          }}
+                        >
+                          {player.pointsByDate[d] ?? 0}
+                        </td>
+                      )
+                    })}
+                    {view === 'completa' && <td style={{ ...tdStyle, background: rowBg, color: textColor }}>{prom}</td>}
                   </tr>
                 )
               })}
@@ -318,6 +365,11 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
           </table>
         </div>
       </div>
+      {view === 'completa' && (
+        <p style={{ fontSize: 9, color: '#7A6E62', textAlign: 'center' }}>
+          Las fechas <span style={{ textDecoration: 'line-through' }}>tachadas</span> son las que cada jugador elimina de su puntaje.
+        </p>
+      )}
     </div>
   )
 }
