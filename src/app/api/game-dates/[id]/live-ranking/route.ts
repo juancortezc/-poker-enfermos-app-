@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { computeTimerState } from '@/lib/timer-state'
+import { syncTimerLevel } from '@/lib/timer-advance'
 import { calculateLiveRanking } from '@/lib/live-ranking'
 
 export const dynamic = 'force-dynamic'
@@ -38,7 +39,10 @@ export async function GET(
         .then((gd) => gd?.tournament.blindLevels ?? [])
     ])
 
-    const computed = timerState ? computeTimerState(timerState) : null
+    // El home también hace subir el nivel: si es la única pantalla abierta
+    // durante la fecha, el timer igual avanza.
+    const synced = timerState ? await syncTimerLevel(timerState, blindLevels) : null
+    const computed = synced ? computeTimerState(synced) : null
     const current = blindLevels.find((bl) => bl.level === (computed?.currentLevel || 1)) ?? blindLevels[0] ?? null
 
     return NextResponse.json({

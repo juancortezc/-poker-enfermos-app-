@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { computeTimerState } from '@/lib/timer-state'
+import { syncTimerLevel } from '@/lib/timer-advance'
 import { maybeSendBlindWarning } from '@/lib/timer-notifications'
 
 export async function GET(
@@ -59,12 +60,18 @@ export async function GET(
       }
 
       const blindLevels = gameDate.tournament.blindLevels
-      const currentBlind = blindLevels.find(bl => bl.level === timerState.currentLevel) || null
-      const nextBlind = blindLevels.find(bl => bl.level === timerState.currentLevel + 1) || null
 
-      const computed = computeTimerState(timerState)
+      // El nivel sube solo: no hay cron, se adelanta al leer el estado.
+      // Se conservan los timerActions del fetch original para la respuesta.
+      const synced = await syncTimerLevel(timerState, blindLevels)
+      const effective = { ...timerState, ...synced }
 
-      maybeSendBlindWarning(timerState, computed, blindLevels).catch((err) =>
+      const currentBlind = blindLevels.find(bl => bl.level === effective.currentLevel) || null
+      const nextBlind = blindLevels.find(bl => bl.level === effective.currentLevel + 1) || null
+
+      const computed = computeTimerState(effective)
+
+      maybeSendBlindWarning(effective, computed, blindLevels).catch((err) =>
         console.error('[TIMER WARNING NOTIFICATION ERROR]', err)
       )
 
@@ -72,7 +79,7 @@ export async function GET(
         success: true,
         serverTime: Date.now(), // Para sincronización de reloj cliente-servidor
         timerState: {
-          ...timerState,
+          ...effective,
           timeRemaining: computed.timeRemaining,
           totalElapsed: computed.totalElapsed,
           status: computed.status,
