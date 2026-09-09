@@ -21,6 +21,44 @@ export function parseToUTCNoon(dateString: string): Date {
   return createUTCNoonDate(year, month - 1, day) // month is 0-indexed
 }
 
+export const ECUADOR_TZ = 'America/Guayaquil'
+
+/**
+ * El día calendario de HOY en Ecuador, sin depender de la zona del proceso.
+ *
+ * Importa porque en Vercel el servidor corre en UTC: a partir de las 19:00 de
+ * Ecuador, `new Date().getDate()` ya devuelve el día siguiente — justo la
+ * franja en la que se juega. Ecuador no tiene horario de verano, pero se usa
+ * Intl con la zona en vez de restar 5 horas a mano para no repetir el error
+ * de tratar un instante como si fuera hora local.
+ */
+export function getEcuadorToday(): { year: number; month: number; day: number } {
+  // 'en-CA' formatea como YYYY-MM-DD.
+  const [year, month, day] = new Intl.DateTimeFormat('en-CA', {
+    timeZone: ECUADOR_TZ,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+    .format(new Date())
+    .split('-')
+    .map(Number)
+
+  return { year, month, day }
+}
+
+/** "YYYY-MM-DD" de hoy en Ecuador. */
+export function getEcuadorTodayString(): string {
+  const { year, month, day } = getEcuadorToday()
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}
+
+/** Hoy en Ecuador, como Date a mediodía UTC (comparable con scheduledDate). */
+export function getEcuadorTodayAsUTCNoon(): Date {
+  const { year, month, day } = getEcuadorToday()
+  return createUTCNoonDate(year, month - 1, day)
+}
+
 /**
  * Formats a date to YYYY-MM-DD string
  * Uses UTC values to prevent timezone shifts
@@ -63,8 +101,11 @@ export function isUTCTuesday(date: Date): boolean {
  * Gets the next Tuesday from a given date
  * @param fromDate - Starting date (defaults to today)
  */
-export function getNextTuesday(fromDate: Date = new Date()): Date {
-  const date = new Date(fromDate)
+export function getNextTuesday(fromDate?: Date): Date {
+  // Sin argumento se parte de hoy en Ecuador: un lunes a las 20:00 en Ecuador
+  // ya es martes en UTC, y calcular sobre eso saltaba el martes de mañana y
+  // devolvía el de la semana siguiente.
+  const date = fromDate ? new Date(fromDate) : getEcuadorTodayAsUTCNoon()
   const dayOfWeek = date.getUTCDay()
   
   let daysToAdd = 2 - dayOfWeek // 2 = Tuesday
@@ -140,12 +181,7 @@ export function isSameDate(date1: Date, date2: Date): boolean {
  * Checks if a date is in the past (comparing only date, not time)
  */
 export function isDateInPast(date: Date): boolean {
-  const today = createUTCNoonDate(
-    new Date().getUTCFullYear(),
-    new Date().getUTCMonth(),
-    new Date().getUTCDate()
-  )
-  return date < today
+  return date < getEcuadorTodayAsUTCNoon()
 }
 
 /**

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getEcuadorToday } from '@/lib/date-utils'
 import { UserRole } from '@prisma/client'
 import { withComisionAuth } from '@/lib/api-auth'
 import { validateAndHashPin } from '@/lib/pin-utils'
@@ -171,8 +172,8 @@ export async function POST(req: NextRequest) {
       data: {
         firstName: firstName.trim(),
         lastName: finalLastName,
-        joinDate: (joinYear || new Date().getFullYear()).toString(),
-        joinYear: joinYear || new Date().getFullYear(),
+        joinDate: (joinYear || getEcuadorToday().year).toString(),
+        joinYear: joinYear || getEcuadorToday().year,
         role,
         aliases,
         pin: hashedPin,

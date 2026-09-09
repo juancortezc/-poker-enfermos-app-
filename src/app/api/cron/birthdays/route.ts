@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendNotificationIfEnabled } from '@/lib/notification-config'
+import { getEcuadorToday } from '@/lib/date-utils'
 
 /**
  * GET /api/cron/birthdays
@@ -18,9 +19,10 @@ export async function GET(request: NextRequest) {
 
   try {
     const now = new Date()
-    // Cron always fires at 12:00 UTC, which is 7:00am Ecuador — same calendar day either way.
-    const todayMonth = now.getUTCMonth() + 1
-    const todayDay = now.getUTCDate()
+    // Día de Ecuador explícito. Con el cron a las 12:00 UTC (7:00am Ecuador) el
+    // día coincide igual, pero atarlo a la zona evita que mover el horario del
+    // cron a la tarde rompa silenciosamente el cálculo.
+    const { month: todayMonth, day: todayDay } = getEcuadorToday()
 
     const players = await prisma.player.findMany({
       where: {

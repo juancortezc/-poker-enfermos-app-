@@ -138,7 +138,8 @@ export const validateGameDates = (
     }
 
     // Verificar que sea martes (día 2)
-    if (scheduledDate.getDay() !== 2) {
+    // getUTCDay: scheduledDate se guarda a mediodía UTC (parseToUTCNoon).
+    if (scheduledDate.getUTCDay() !== 2) {
       errors.push({
         field: `gameDate-${index}`,
         message: `La fecha ${date.dateNumber} debería ser un martes`,

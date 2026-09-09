@@ -29,6 +29,15 @@ interface CelebrationsData {
 
 const DISMISSED_KEY = 'celebrations_dismissed'
 
+/**
+ * "YYYY-MM-DD" de hoy en Ecuador. toISOString() daría el día UTC, que a partir
+ * de las 19:00 de Ecuador ya es el siguiente: los cumpleaños descartados se
+ * volvían a mostrar a media tarde.
+ */
+function ecuadorToday(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Guayaquil' }).format(new Date())
+}
+
 interface DismissedState {
   birthdayIds: string[]
   droughtIds: string[]
@@ -45,7 +54,7 @@ function getDismissedState(): DismissedState {
     if (stored) {
       const parsed = JSON.parse(stored) as DismissedState
       // Reset if it's a new day (birthdays change daily)
-      const today = new Date().toISOString().split('T')[0]
+      const today = ecuadorToday()
       if (parsed.lastUpdated !== today) {
         // New day - clear birthday dismissals but keep drought dismissals
         return {
@@ -63,7 +72,7 @@ function getDismissedState(): DismissedState {
   return {
     birthdayIds: [],
     droughtIds: [],
-    lastUpdated: new Date().toISOString().split('T')[0]
+    lastUpdated: ecuadorToday()
   }
 }
 
@@ -100,7 +109,7 @@ export function CelebrationsCard() {
     setDismissed(prev => ({
       ...prev,
       birthdayIds: [...prev.birthdayIds, ...data.birthdays.map(p => p.id)],
-      lastUpdated: new Date().toISOString().split('T')[0]
+      lastUpdated: ecuadorToday()
     }))
   }
 
@@ -109,7 +118,7 @@ export function CelebrationsCard() {
     setDismissed(prev => ({
       ...prev,
       droughtIds: [...prev.droughtIds, ...data.droughts.map(p => p.id)],
-      lastUpdated: new Date().toISOString().split('T')[0]
+      lastUpdated: ecuadorToday()
     }))
   }
 

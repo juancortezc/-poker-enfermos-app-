@@ -160,11 +160,17 @@ export default function CPActivarTab() {
         if (data.missingDate) {
           setMissingDate(data.missingDate)
           // Set default to next Tuesday
+          // El día se arma en local y se serializa en local: con toISOString()
+          // a partir de las 19:00 de Ecuador salía el día siguiente y el
+          // formulario proponía un miércoles.
           const today = new Date()
           const nextTuesday = new Date(today)
           const daysUntilTuesday = (2 - today.getDay() + 7) % 7 || 7
           nextTuesday.setDate(today.getDate() + daysUntilTuesday)
-          setMissingDateScheduled(nextTuesday.toISOString().split('T')[0])
+          const yyyy = nextTuesday.getFullYear()
+          const mm = String(nextTuesday.getMonth() + 1).padStart(2, '0')
+          const dd = String(nextTuesday.getDate()).padStart(2, '0')
+          setMissingDateScheduled(`${yyyy}-${mm}-${dd}`)
           setSelectedPlayers(data.registeredPlayers.map((p: Player) => p.id))
         } else if (data.availableDates.length > 0) {
           const firstDate = data.availableDates[0]

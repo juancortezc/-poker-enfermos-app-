@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { createUTCNoonDate, getEcuadorToday } from '@/lib/date-utils'
 
 interface BirthdayPlayer {
   id: string
@@ -23,9 +24,11 @@ interface DroughtPlayer {
 
 export async function GET() {
   try {
-    const today = new Date()
-    const todayMonth = today.getMonth() + 1 // 1-12
-    const todayDay = today.getDate()
+    // Hora de Ecuador, no la del servidor: en Vercel el proceso corre en UTC y
+    // a partir de las 19:00 de Ecuador ya sería el día siguiente, así que el
+    // cumpleaños de hoy desaparecía justo en el horario de juego.
+    const { year: todayYear, month: todayMonth, day: todayDay } = getEcuadorToday()
+    const today = createUTCNoonDate(todayYear, todayMonth - 1, todayDay)
 
     // Get all active players with birthDate or lastVictoryDate
     const players = await prisma.player.findMany({
@@ -71,12 +74,12 @@ export async function GET() {
       const isToday = birthMonth === todayMonth && birthDay === todayDay
 
       // Calculate days until birthday
-      const thisYearBirthday = new Date(today.getFullYear(), birthMonth - 1, birthDay)
+      const thisYearBirthday = createUTCNoonDate(todayYear, birthMonth - 1, birthDay)
       let nextBirthday = thisYearBirthday
 
       if (thisYearBirthday < today && !isToday) {
         // Birthday already passed this year, get next year's
-        nextBirthday = new Date(today.getFullYear() + 1, birthMonth - 1, birthDay)
+        nextBirthday = createUTCNoonDate(todayYear + 1, birthMonth - 1, birthDay)
       }
 
       const daysUntil = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
@@ -106,7 +109,6 @@ export async function GET() {
     const droughts: DroughtPlayer[] = []
 
     for (const player of players) {
-      let daysSinceVictory: number
 
       if (!player.lastVictoryDate) {
         // Never won - calculate from join date or a default
@@ -118,7 +120,7 @@ export async function GET() {
       const victoryDate = new Date(player.lastVictoryDate)
       if (isNaN(victoryDate.getTime())) continue
 
-      daysSinceVictory = Math.floor((today.getTime() - victoryDate.getTime()) / (1000 * 60 * 60 * 24))
+      const daysSinceVictory = Math.floor((today.getTime() - victoryDate.getTime()) / (1000 * 60 * 60 * 24))
 
       // Only include if >= 1000 days
       if (daysSinceVictory >= 1000) {
