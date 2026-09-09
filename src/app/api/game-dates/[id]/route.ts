@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withComisionAuth } from '@/lib/api-auth'
-import { parseToUTCNoon, validateTuesdayDate, getEcuadorDate } from '@/lib/date-utils'
+import { parseToUTCNoon, validateTuesdayDate} from '@/lib/date-utils'
 
 // GET - Obtener detalles de una fecha específica
 export async function GET(
@@ -113,12 +113,12 @@ export async function PUT(
 
         // Usar transacción para asegurar consistencia
         const result = await prisma.$transaction(async (tx) => {
-          // 1. Actualizar GameDate status y startTime (usar hora de Ecuador)
+          // 1. Actualizar GameDate status y startTime
           const updatedGameDate = await tx.gameDate.update({
             where: { id: gameDateId },
             data: {
               status: 'in_progress',
-              startTime: getEcuadorDate()
+              startTime: new Date()
             },
             include: {
               tournament: {
@@ -131,8 +131,8 @@ export async function PUT(
             }
           })
 
-          // 2. Crear TimerState inicial (usar hora de Ecuador)
-          const ecuadorNow = getEcuadorDate()
+          // 2. Crear TimerState inicial
+          const ecuadorNow = new Date()
           const timerState = await tx.timerState.create({
             data: {
               gameDateId: gameDateId,

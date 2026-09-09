@@ -149,23 +149,18 @@ export function isDateInPast(date: Date): boolean {
 }
 
 /**
- * Gets the current date/time in Ecuador timezone (America/Guayaquil, UTC-5)
- * Ecuador does not observe daylight saving time
+ * NO USAR para guardar marcas de tiempo.
+ *
+ * Existía un getEcuadorDate() que le sumaba un offset a `new Date()` para
+ * "convertirlo" a hora de Ecuador. Un Date de JS es un instante absoluto: el
+ * offset solo aplica al mostrarlo. Al desplazarlo se guardaba un instante que
+ * no era el real — en el servidor daba +10 horas, y el timer de blinds
+ * arrancaba con levelStartTime en el futuro.
+ *
+ * Para guardar: new Date(). Para mostrar en hora de Ecuador:
+ * formatEcuadorDateTime() / formatEcuadorDate(), que usan timeZone.
  */
-export function getEcuadorDate(): Date {
-  // Get current UTC time
-  const now = new Date()
 
-  // Ecuador is UTC-5 (no DST)
-  const ecuadorOffset = -5 * 60 // minutes
-  const localOffset = now.getTimezoneOffset() // minutes
-
-  // Calculate the difference and adjust
-  const offsetDiff = localOffset - ecuadorOffset
-  const ecuadorTime = new Date(now.getTime() + offsetDiff * 60 * 1000)
-
-  return ecuadorTime
-}
 
 /**
  * Formats a date to Ecuador timezone for display

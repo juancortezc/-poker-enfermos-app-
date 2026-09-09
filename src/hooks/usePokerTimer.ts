@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import useSWR from 'swr'
+import { buildAuthHeaders } from '@/lib/client-auth'
 
 interface BlindLevel {
   level: number
@@ -71,12 +72,16 @@ function computeDisplay(
   // Adjust for server-client clock difference (serverTime came with the snapshot)
   const clockOffset = serverTime - now // typically ±200ms
   const adjustedNow = now + clockOffset
-  const elapsedSinceLevelStart = Math.floor((adjustedNow - levelStart) / 1000)
+  // Nunca negativo: un levelStartTime en el futuro (por datos corruptos) haría
+  // que restar un elapsed negativo inflara el tiempo restante.
+  const elapsedSinceLevelStart = Math.max(0, Math.floor((adjustedNow - levelStart) / 1000))
   return Math.max(0, storedTimeRemaining - elapsedSinceLevelStart)
 }
 
 const fetcher = (url: string) =>
-  fetch(url, { credentials: 'include' }).then(r => {
+  // La API valida el header Authorization (validateApiAccess), no cookies:
+  // sin buildAuthHeaders todas las respuestas eran 401 y el timer quedaba en 00:00.
+  fetch(url, { headers: buildAuthHeaders(), credentials: 'include' }).then(r => {
     if (!r.ok) throw new Error(`HTTP ${r.status}`)
     return r.json() as Promise<TimerApiResponse>
   })

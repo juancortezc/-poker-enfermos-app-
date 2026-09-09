@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveResumeUpdate } from '@/lib/timer-state'
-import { getEcuadorDate } from '@/lib/date-utils'
 import { sendNotificationIfEnabled } from '@/lib/notification-config'
 
 export async function POST(
@@ -76,7 +75,7 @@ export async function POST(
           fromLevel: timerState.currentLevel,
           toLevel: timerState.currentLevel,
           metadata: {
-            resumedAt: getEcuadorDate().toISOString(),
+            resumedAt: new Date().toISOString(),
             timeRemaining: updatePayload.timeRemaining
           }
         }

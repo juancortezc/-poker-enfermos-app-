@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { withComisionAuth } from '@/lib/api-auth'
 import { prisma } from '@/lib/prisma'
 import { deriveLevelChangeUpdate } from '@/lib/timer-state'
-import { getEcuadorDate } from '@/lib/date-utils'
 import { sendNotificationIfEnabled } from '@/lib/notification-config'
 
 export async function POST(
@@ -113,7 +112,7 @@ export async function POST(
           fromLevel: timerState.currentLevel,
           toLevel: toLevel,
           metadata: {
-            levelUpAt: getEcuadorDate().toISOString(),
+            levelUpAt: new Date().toISOString(),
             newDuration: targetBlindLevel.duration,
             newSmallBlind: targetBlindLevel.smallBlind,
             newBigBlind: targetBlindLevel.bigBlind,
