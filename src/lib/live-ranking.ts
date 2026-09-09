@@ -21,6 +21,7 @@ export interface LiveRankingRow {
   playerId: string
   playerName: string
   playerAlias?: string
+  playerPhoto?: string
   /** Posición proyectada, ya con el ELIMINA aplicado. */
   position: number
   /** Posición que tenía antes de que empezara esta fecha. */
@@ -205,6 +206,7 @@ export function projectLiveRanking(
         playerId: entry.ranking.playerId,
         playerName: entry.ranking.playerName,
         playerAlias: entry.ranking.playerAlias,
+        playerPhoto: entry.ranking.playerPhoto,
         position,
         basePosition,
         positionsChanged: basePosition - position,
