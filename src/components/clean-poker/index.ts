@@ -12,6 +12,7 @@ export { MalazoCard } from './MalazoCard'
 export { TournamentCard } from './TournamentCard'
 export { NextDateCard } from './NextDateCard'
 export { LiveGameCard } from './LiveGameCard'
+export { LiveDateBoard } from './LiveDateBoard'
 export { LeaderCard } from './LeaderCard'
 export { CPTimerCard } from './CPTimerCard'
 

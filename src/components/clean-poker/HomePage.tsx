@@ -12,10 +12,7 @@ import Image from 'next/image'
 import { CPHeader } from './CPHeader'
 import { CPBottomNav } from './CPBottomNav'
 import { CPAppShell } from './CPAppShell'
-import { PositionCard } from './PositionCard'
-import { PodioCard } from './PodioCard'
-import { MalazoCard } from './MalazoCard'
-import { LiveGameCard } from './LiveGameCard'
+import { LiveDateBoard } from './LiveDateBoard'
 import { CelebrationsCard } from './CelebrationsCard'
 import { PushActivationBanner } from './PushActivationBanner'
 import { HomeViewToggle, type HomeView } from './HomeViewToggle'
@@ -41,23 +38,6 @@ interface ActiveGameDate {
   }
 }
 
-interface Elimination {
-  id: number
-  eliminatedPlayerId: string
-  eliminatorPlayerId: string
-  position: number
-  points: number
-  eliminatedPlayer: {
-    firstName: string
-    lastName: string
-  }
-  eliminatorPlayer: {
-    firstName: string
-    lastName: string
-  }
-}
-
-
 export function HomePage() {
   const { user, loading: authLoading } = useAuth()
 
@@ -71,8 +51,7 @@ export function HomePage() {
 
   const {
     ranking: rankingData,
-    isLoading: rankingLoading,
-    getTopPlayers
+    isLoading: rankingLoading
   } = useTournamentRanking(activeTournament?.id || null, {
     refreshInterval: 300000 // 5 minutes
   })
@@ -85,19 +64,6 @@ export function HomePage() {
     {
       refreshInterval: 30000, // 30 seconds for game status
       revalidateOnFocus: true // Refresh when user comes back to tab
-    }
-  )
-
-
-  // Fetch eliminations for live game (only refreshes during live games)
-  const { data: eliminations } = useSWR<Elimination[]>(
-    activeGameDate?.status === 'in_progress'
-      ? `/api/eliminations/game-date/${activeGameDate.id}`
-      : null,
-    {
-      refreshInterval: 5000, // 5 seconds during live games for faster updates
-      revalidateOnFocus: true, // Refresh when user comes back to the tab
-      dedupingInterval: 2000 // Allow more frequent requests during live games
     }
   )
 
@@ -125,48 +91,18 @@ export function HomePage() {
     )
   }
 
-  // Get current user's ranking
-  const myRanking = rankingData?.rankings?.find(r => r.playerId === user.id)
-  const top3 = getTopPlayers(3)
   const rankings = rankingData?.rankings || []
-  const leaderPoints = rankings[0]?.finalScore ?? rankings[0]?.totalPoints ?? 0
-  const lastPoints = rankings[rankings.length - 1]?.finalScore ?? rankings[rankings.length - 1]?.totalPoints ?? 0
   const isCommission = user.role === 'Comision'
   const isGameLive = activeGameDate?.status === 'in_progress'
-
-  // Get bottom 2 players (7/2 - malazos)
-  const bottom2 = rankings.length >= 2 ? rankings.slice(-2) : []
-
-  // Calculate live game stats
-  const playersRemaining = activeGameDate
-    ? activeGameDate.playersCount - (eliminations?.length || 0)
-    : 0
-
-  const lastElimination = eliminations?.[0]
-    ? {
-        eliminatedPlayer: `${eliminations[0].eliminatedPlayer.firstName} ${eliminations[0].eliminatedPlayer.lastName}`,
-        eliminatedPosition: eliminations[0].position,
-        eliminatorPlayer: `${eliminations[0].eliminatorPlayer.firstName} ${eliminations[0].eliminatorPlayer.lastName}`,
-        pointsAwarded: eliminations[0].points
-      }
-    : null
 
   // Estado C: Fecha en vivo
   if (isGameLive && activeGameDate) {
     return (
       <HomeWithLiveGame
         user={user}
-        myRanking={myRanking}
-        top3={top3}
-        bottom2={bottom2}
-        leaderPoints={leaderPoints}
-        lastPoints={lastPoints}
         isCommission={isCommission}
         tournamentNumber={activeTournament?.number ?? 29}
         activeGameDate={activeGameDate}
-        playersRemaining={playersRemaining}
-        lastElimination={lastElimination}
-        tournamentId={activeTournament?.id || 0}
       />
     )
   }
@@ -510,67 +446,17 @@ interface HomeWithLiveGameProps {
     lastName?: string
     photoUrl?: string
   }
-  myRanking?: {
-    position: number
-    playerName: string
-    totalPoints: number
-    finalScore?: number
-    positionsChanged: number
-  }
-  top3: Array<{
-    position: number
-    playerName: string
-    playerId: string
-    totalPoints: number
-    finalScore?: number
-    positionsChanged: number
-    playerPhoto?: string
-    victories?: number
-    podiums?: number
-    firstPlaces?: number
-    secondPlaces?: number
-    thirdPlaces?: number
-  }>
-  bottom2: Array<{
-    position: number
-    playerName: string
-    playerId: string
-    totalPoints: number
-    finalScore?: number
-    positionsChanged: number
-    playerPhoto?: string
-    lastPlaces?: number
-    absences?: number
-  }>
-  leaderPoints: number
-  lastPoints: number
   isCommission: boolean
   tournamentNumber: number
   activeGameDate: ActiveGameDate
-  playersRemaining: number
-  lastElimination: {
-    eliminatedPlayer: string
-    eliminatedPosition: number
-    eliminatorPlayer: string
-    pointsAwarded: number
-  } | null
-  tournamentId: number
 }
 
 function HomeWithLiveGame({
   user,
-  myRanking,
-  top3,
-  bottom2,
-  leaderPoints,
-  lastPoints,
   isCommission,
   tournamentNumber,
-  activeGameDate,
-  playersRemaining,
-  lastElimination
+  activeGameDate
 }: HomeWithLiveGameProps) {
-  const router = useRouter()
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     : 'PE'
@@ -586,68 +472,13 @@ function HomeWithLiveGame({
         hasActiveGameDate={true}
       />
 
-      {/* Content */}
-      <main className="pb-20 px-4 space-y-4">
-        {/* Celebrations - Birthdays (first position, dismissible) */}
-        <CelebrationsCard />
-
-        {/* Push opt-in - solo aparece si el usuario no tiene suscripción activa */}
-        <PushActivationBanner />
-
-        {/* Live Game Card */}
-        <LiveGameCard
-          dateNumber={activeGameDate.dateNumber}
-          playersRemaining={playersRemaining}
-          playersTotal={activeGameDate.playersCount}
-          lastElimination={lastElimination}
-        />
-
-        {/* Mi Posición */}
-        {myRanking && (
-          <PositionCard
-            position={myRanking.position}
-            totalPoints={myRanking.totalPoints}
-            finalPoints={myRanking.finalScore ?? myRanking.totalPoints}
-            trend={myRanking.positionsChanged}
-            leaderPoints={leaderPoints}
-            lastPoints={lastPoints}
-            playerName={myRanking.playerName}
-            onDetailClick={() => router.push(`/players/${user.id}`)}
-          />
-        )}
-
-        {/* Podio */}
-        {top3.length > 0 && (
-          <PodioCard
-            tournamentNumber={tournamentNumber}
-            players={top3.map((p, idx) => ({
-              position: idx + 1,
-              name: p.playerName,
-              photoUrl: p.playerPhoto,
-              totalPoints: p.totalPoints,
-              finalPoints: p.finalScore ?? p.totalPoints,
-              trend: p.positionsChanged,
-              victories: p.firstPlaces ?? 0,
-              podiums: (p.firstPlaces ?? 0) + (p.secondPlaces ?? 0) + (p.thirdPlaces ?? 0),
-            }))}
-          />
-        )}
-
-        {/* 7/2 - Malazos */}
-        {bottom2.length >= 2 && (
-          <MalazoCard
-            players={bottom2.map((p) => ({
-              position: p.position,
-              name: p.playerName,
-              photoUrl: p.playerPhoto,
-              totalPoints: p.totalPoints,
-              finalPoints: p.finalScore ?? p.totalPoints,
-              trend: p.positionsChanged,
-              lastPlaces: p.lastPlaces ?? 0,
-              absences: p.absences ?? 0,
-            }))}
-          />
-        )}
+      {/*
+        Durante la fecha en vivo el home es solo el tablero: KPIs, último
+        eliminado y la tabla proyectada. Las tarjetas del torneo vuelven
+        cuando la fecha termina.
+      */}
+      <main className="pb-20 px-3 pt-2">
+        <LiveDateBoard gameDateId={activeGameDate.id} userId={user.id} />
       </main>
 
       {/* Bottom Nav */}
