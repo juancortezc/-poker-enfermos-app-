@@ -1,8 +1,6 @@
 'use client'
 
 import useSWR from 'swr'
-import { BarChart3, Coins, Info, Spade, Users } from 'lucide-react'
-import { HomeAvatar } from './HomeAvatar'
 import type { LiveRankingData, LiveRankingRow } from '@/lib/live-ranking'
 
 interface BlindInfo {
@@ -20,62 +18,46 @@ function shortName(full: string) {
 }
 
 const MEDALS: Record<number, string> = { 1: '#F0B429', 2: '#C0C0C0', 3: '#CD7F32' }
+const MUTED = 'rgba(255,255,255,0.45)'
+const PANEL = '1px solid rgba(255,255,255,0.08)'
 
-function Kpi({
-  icon,
-  label,
-  value,
-  hint,
-  tint,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  hint: string
-  tint: string
-}) {
+/**
+ * Toda la pantalla tiene que entrar sin scroll con 19 jugadores en la tabla,
+ * así que las alturas de arriba están recortadas al mínimo: sin iconos en los
+ * KPIs y sin fotos en las filas.
+ */
+function Kpi({ label, value, hint, tint }: { label: string; value: string; hint: string; tint: string }) {
   return (
     <div
-      className="flex-1 min-w-0 px-3 py-3"
-      style={{
-        background: `linear-gradient(160deg, ${tint}, rgba(255,255,255,0.02))`,
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 14,
-      }}
+      className="flex-1 min-w-0 px-2.5 py-1.5"
+      style={{ background: tint, border: PANEL, borderRadius: 10 }}
     >
-      <div
-        className="flex items-center justify-center mb-2"
-        style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }}
-      >
-        {icon}
-      </div>
-      <p
-        className="uppercase truncate"
-        style={{ fontSize: 10, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.55)' }}
-      >
+      <p className="uppercase truncate" style={{ fontSize: 9, letterSpacing: '0.1em', color: MUTED }}>
         {label}
       </p>
-      <p className="leading-none mt-1" style={{ fontSize: 26, fontWeight: 800, color: '#fff' }}>
-        {value}
-      </p>
-      <p className="mt-1 leading-none truncate" style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>
-        {hint}
-      </p>
+      <div className="flex items-baseline gap-1.5 min-w-0">
+        <span className="leading-none" style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>
+          {value}
+        </span>
+        <span className="truncate leading-none" style={{ fontSize: 10, color: MUTED }}>
+          {hint}
+        </span>
+      </div>
     </div>
   )
 }
 
 function Var({ change }: { change: number }) {
   if (change === 0) {
-    return <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>—</span>
+    return <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)' }}>—</span>
   }
   const up = change > 0
   return (
     <span
-      className="inline-flex items-center gap-1"
-      style={{ color: up ? '#22c55e' : '#ef4444', fontSize: 12, fontWeight: 700 }}
+      className="inline-flex items-center gap-0.5"
+      style={{ color: up ? '#22c55e' : '#ef4444', fontSize: 11, fontWeight: 700 }}
     >
-      <span style={{ fontSize: 9 }}>{up ? '▲' : '▼'}</span>
+      <span style={{ fontSize: 8 }}>{up ? '▲' : '▼'}</span>
       {Math.abs(change)}
     </span>
   )
@@ -83,51 +65,46 @@ function Var({ change }: { change: number }) {
 
 function Row({ row, isMe, striped }: { row: LiveRankingRow; isMe: boolean; striped: boolean }) {
   // Los puntos proyectados (sigue en mesa) van en ámbar y sin negrita; los ya
-  // definidos en blanco y en negrita. Es la única forma de distinguirlos.
+  // definidos en blanco y en negrita.
   const projected = row.state === 'playing'
   const medal = MEDALS[row.position]
 
   return (
     <div
-      className="flex items-center gap-2 px-3"
+      className="flex items-center gap-2 px-2"
       style={{
-        height: 40,
-        background: isMe ? 'rgba(229,57,53,0.16)' : striped ? 'rgba(255,255,255,0.02)' : 'transparent',
+        height: 24,
+        background: isMe ? 'rgba(229,57,53,0.18)' : striped ? 'rgba(255,255,255,0.02)' : 'transparent',
         borderLeft: isMe ? '3px solid #E53935' : '3px solid transparent',
       }}
     >
-      {/* Posición: medalla para el podio */}
-      <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 26 }}>
+      <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 20 }}>
         {medal ? (
           <span
             className="flex items-center justify-center"
             style={{
-              width: 22,
-              height: 22,
+              width: 17,
+              height: 17,
               borderRadius: '50%',
               background: medal,
               color: '#1a1a1a',
-              fontSize: 12,
+              fontSize: 10,
               fontWeight: 800,
             }}
           >
             {row.position}
           </span>
         ) : (
-          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{row.position}</span>
+          <span style={{ fontSize: 11, color: MUTED }}>{row.position}</span>
         )}
-      </div>
-
-      <div className="rounded-full overflow-hidden flex-shrink-0">
-        <HomeAvatar playerId={row.playerId} name={row.playerName} photoUrl={row.playerPhoto} size={28} />
       </div>
 
       <span
         className="flex-1 truncate"
         style={{
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: isMe ? 700 : 500,
-          color: row.state === 'absent' ? 'rgba(255,255,255,0.45)' : '#fff',
+          color: row.state === 'absent' ? 'rgba(255,255,255,0.4)' : '#fff',
         }}
       >
         {shortName(row.playerName)}
@@ -136,8 +113,8 @@ function Row({ row, isMe, striped }: { row: LiveRankingRow; isMe: boolean; strip
       <span
         className="text-right tabular-nums flex-shrink-0"
         style={{
-          width: 40,
-          fontSize: 15,
+          width: 34,
+          fontSize: 13,
           fontWeight: projected ? 500 : 800,
           color: projected ? '#F0B429' : '#fff',
         }}
@@ -145,7 +122,7 @@ function Row({ row, isMe, striped }: { row: LiveRankingRow; isMe: boolean; strip
         {row.score}
       </span>
 
-      <span className="text-right flex-shrink-0" style={{ width: 34 }}>
+      <span className="text-right flex-shrink-0" style={{ width: 28 }}>
         <Var change={row.positionsChanged} />
       </span>
     </div>
@@ -160,7 +137,7 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
 
   if (isLoading) {
     return (
-      <div className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
+      <div className="py-10 text-center" style={{ color: MUTED, fontSize: 13 }}>
         Cargando la mesa...
       </div>
     )
@@ -168,7 +145,7 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
 
   if (error || !data) {
     return (
-      <div className="py-10 text-center" style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
+      <div className="py-10 text-center" style={{ color: MUTED, fontSize: 13 }}>
         No se pudo cargar el estado de la fecha.
       </div>
     )
@@ -177,28 +154,25 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
   const { gameDate, projection, lastElimination, rows, currentBlind } = data
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* KPIs */}
-      <div className="flex gap-2.5">
+      <div className="flex gap-2">
         <Kpi
-          icon={<Users className="w-4 h-4" style={{ color: '#f87171' }} />}
           label="Jugadores"
           value={String(gameDate.totalPlayers)}
           hint={`Fecha ${gameDate.dateNumber}`}
           tint="rgba(229,57,53,0.14)"
         />
         <Kpi
-          icon={<Spade className="w-4 h-4" style={{ color: '#4ade80' }} />}
           label="En juego"
           value={String(gameDate.playersRemaining)}
           hint={`${gameDate.eliminationsCount} fuera`}
           tint="rgba(34,197,94,0.14)"
         />
         <Kpi
-          icon={<Coins className="w-4 h-4" style={{ color: '#c084fc' }} />}
           label="Blind"
           value={currentBlind ? String(currentBlind.level) : '—'}
-          hint={currentBlind ? `${currentBlind.smallBlind} / ${currentBlind.bigBlind}` : 'sin timer'}
+          hint={currentBlind ? `${currentBlind.smallBlind}/${currentBlind.bigBlind}` : 'sin timer'}
           tint="rgba(168,85,247,0.14)"
         />
       </div>
@@ -206,63 +180,43 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
       {/* Último eliminado */}
       {lastElimination && (
         <div
-          className="flex items-center gap-3 px-4 py-3"
+          className="flex items-center gap-2 px-3 py-1.5"
           style={{
-            background: 'linear-gradient(160deg, rgba(229,57,53,0.12), rgba(255,255,255,0.02))',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 14,
+            background: 'rgba(229,57,53,0.12)',
+            border: PANEL,
+            borderRadius: 10,
           }}
         >
           <div className="flex-1 min-w-0">
-            <p
-              className="uppercase"
-              style={{ fontSize: 10, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.5)' }}
-            >
+            <p className="uppercase" style={{ fontSize: 9, letterSpacing: '0.1em', color: MUTED }}>
               Último eliminado · {lastElimination.position}º
             </p>
-            <p className="truncate mt-0.5" style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>
-              {shortName(lastElimination.playerName)}
-            </p>
-            <p className="truncate" style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
-              por {shortName(lastElimination.eliminatorName)}
+            <p className="truncate" style={{ fontSize: 13, color: '#fff' }}>
+              <span style={{ fontWeight: 700 }}>{shortName(lastElimination.playerName)}</span>
+              <span style={{ color: MUTED }}> por {shortName(lastElimination.eliminatorName)}</span>
             </p>
           </div>
-          <div className="text-right flex-shrink-0">
-            <p className="leading-none" style={{ fontSize: 26, fontWeight: 800, color: '#F0B429' }}>
-              +{lastElimination.points}
-            </p>
-            <p className="mt-1" style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>
-              puntos
-            </p>
-          </div>
+          <span className="flex-shrink-0" style={{ fontSize: 20, fontWeight: 800, color: '#F0B429' }}>
+            +{lastElimination.points}
+          </span>
         </div>
       )}
 
       {/* Tabla del torneo */}
-      <div
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 14,
-          overflow: 'hidden',
-        }}
-      >
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <BarChart3 className="w-4 h-4 flex-shrink-0" style={{ color: '#E53935' }} />
-            <h2 className="truncate" style={{ fontSize: 16, fontWeight: 800, color: '#fff', letterSpacing: '0.01em' }}>
-              TABLA DEL TORNEO
-            </h2>
-          </div>
-          <p className="flex items-center gap-1.5 flex-shrink-0" style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
-            <span style={{ color: '#F0B429', fontSize: 9 }}>●</span>
-            Si sale ahora: +{projection.nextPoints} pts
+      <div style={{ background: 'rgba(255,255,255,0.03)', border: PANEL, borderRadius: 10, overflow: 'hidden' }}>
+        <div className="flex items-center justify-between px-3 py-1.5">
+          <h2 className="truncate" style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>
+            TABLA DEL TORNEO
+          </h2>
+          <p className="flex items-center gap-1 flex-shrink-0" style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>
+            <span style={{ color: '#F0B429', fontSize: 8 }}>●</span>
+            Si sale ahora: +{projection.nextPoints}
           </p>
         </div>
 
         {/* Encabezado de columnas */}
         <div
-          className="flex items-center gap-2 px-3 py-2"
+          className="flex items-center gap-2 px-2 py-1"
           style={{
             background: 'rgba(255,255,255,0.04)',
             borderTop: '1px solid rgba(255,255,255,0.06)',
@@ -272,26 +226,22 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
         >
           <span
             className="uppercase flex-shrink-0 text-center"
-            style={{ width: 26, fontSize: 10, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.45)' }}
+            style={{ width: 20, fontSize: 9, letterSpacing: '0.08em', color: MUTED }}
           >
             #
           </span>
-          <span className="flex-shrink-0" style={{ width: 28 }} />
-          <span
-            className="uppercase flex-1"
-            style={{ fontSize: 10, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.45)' }}
-          >
+          <span className="uppercase flex-1" style={{ fontSize: 9, letterSpacing: '0.08em', color: MUTED }}>
             Jugador
           </span>
           <span
             className="uppercase text-right flex-shrink-0"
-            style={{ width: 40, fontSize: 10, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.45)' }}
+            style={{ width: 34, fontSize: 9, letterSpacing: '0.08em', color: MUTED }}
           >
             Pts
           </span>
           <span
             className="uppercase text-right flex-shrink-0"
-            style={{ width: 34, fontSize: 10, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.45)' }}
+            style={{ width: 28, fontSize: 9, letterSpacing: '0.08em', color: MUTED }}
           >
             Var
           </span>
@@ -301,17 +251,14 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
           <Row key={row.playerId} row={row} isMe={row.playerId === userId} striped={index % 2 === 1} />
         ))}
 
-        <div
-          className="flex items-start gap-2 px-4 py-3"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+        <p
+          className="px-3 py-1.5"
+          style={{ fontSize: 9, color: MUTED, borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <Info className="w-3.5 h-3.5 flex-shrink-0 mt-px" style={{ color: 'rgba(255,255,255,0.35)' }} />
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
-            Puntaje del torneo con ELIMINA {projection.datesToEliminate}
-            {projection.eliminasActive ? '' : ' (todavía informativo)'} · en{' '}
-            <span style={{ color: '#F0B429' }}>ámbar</span> los puntos proyectados si sale ahora
-          </p>
-        </div>
+          Puntaje final con ELIMINA {projection.datesToEliminate}
+          {projection.eliminasActive ? '' : ' (informativo)'} · en{' '}
+          <span style={{ color: '#F0B429' }}>ámbar</span> lo proyectado si sale ahora
+        </p>
       </div>
     </div>
   )
