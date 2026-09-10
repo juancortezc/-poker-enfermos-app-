@@ -749,15 +749,20 @@ export function averageNightlyPosition(rankings: PlayerRanking[], playerId: stri
   return sum / myPlayedDates.length;
 }
 
-/** Promedio de puntos por fecha, sin contar las fechas eliminadas por el sistema ELIMINA N. */
+/**
+ * Promedio de puntos en las fechas que el jugador realmente jugó.
+ *
+ * Es rendimiento por noche, no puntaje de torneo: NO se aplica el ELIMINA ni
+ * se descuentan multas. Así queda comparable con la posición promedio, que
+ * también se calcula solo sobre las fechas jugadas.
+ *
+ * Se filtra por puntos > 0 porque una ausencia queda registrada como 0 en
+ * pointsByDate, mientras que una fecha jugada siempre da al menos 1 punto
+ * (el último puesto). Eso también deja fuera la fecha en curso para quien
+ * todavía está en mesa, que aún no tiene puntos.
+ */
 export function averagePointsPerDate(player: PlayerRanking): number {
-  const eliminatedDatesCount = player.eliminasActive ? (player.elimina3 !== undefined ? 3 : 2) : 0;
-  // El denominador tiene que ser el número de fechas que aportan al finalScore,
-  // no las que el jugador jugó: el ELIMINA descarta las N peores de TODAS las
-  // registradas, y esas casi siempre son ausencias (0 puntos) que nunca
-  // estuvieron en datesPlayed. Restarlas de datesPlayed las descontaba dos
-  // veces e inflaba el promedio.
-  const recordedDates = Object.keys(player.pointsByDate).length;
-  const countedDates = Math.max(1, recordedDates - eliminatedDatesCount);
-  return (player.finalScore ?? player.totalPoints) / countedDates;
+  const scores = Object.values(player.pointsByDate).filter(points => points > 0);
+  if (scores.length === 0) return 0;
+  return scores.reduce((sum, points) => sum + points, 0) / scores.length;
 }
