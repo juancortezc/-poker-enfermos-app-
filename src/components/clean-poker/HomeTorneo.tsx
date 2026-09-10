@@ -267,7 +267,7 @@ export function HomeTorneo({
                 <span style={{ fontWeight: 800, color: 'inherit' }}>{last3 ? `${last3.mine}/${last3.max} pts` : '—'}</span>
               </div>
             </div>
-            <div style={{ fontSize: 8, opacity: 0.5, marginTop: 6 }}>*sin contar fechas eliminadas</div>
+            <div style={{ fontSize: 8, opacity: 0.5, marginTop: 6 }}>*solo fechas jugadas, sin ausencias</div>
           </div>
           <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#A89A8C' }}>Tus puntos</div>
