@@ -34,7 +34,7 @@ interface HomeTorneoProps {
 
 function ClockIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E53935" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cp-primary-light)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
     </svg>
@@ -43,7 +43,7 @@ function ClockIcon() {
 
 function TrophyIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8C158" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--cp-gold)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" y1="19" x2="12" y2="23" />
@@ -127,32 +127,29 @@ export function HomeTorneo({
     droughtLeader && {
       key: 'drought',
       icon: <ClockIcon />,
-      iconBg: 'rgba(229,57,53,0.24)',
       text: (
         <>
-          {droughtLeader.firstName} lleva <span style={{ color: '#E53935' }}>{droughtLeader.daysWithoutVictory} días</span> sin ganar una fecha
+          {droughtLeader.firstName} lleva <span style={{ color: 'var(--cp-primary-light)', fontWeight: 700 }}>{droughtLeader.daysWithoutVictory} días</span> sin ganar una fecha
         </>
       )
     },
     seasonHighlights?.longestTop3Streak && {
       key: 'top3streak',
       icon: <span style={{ fontSize: 15 }}>🔥</span>,
-      iconBg: 'rgba(76,175,80,0.24)',
       text: (
         <>
           {seasonHighlights.longestTop3Streak.playerName.split(' ')[0]} lleva{' '}
-          <span style={{ color: '#6ECB71' }}>{seasonHighlights.longestTop3Streak.streakLength} fechas seguidas</span> en el Top 3
+          <span style={{ color: 'var(--cp-positive)', fontWeight: 700 }}>{seasonHighlights.longestTop3Streak.streakLength} fechas seguidas</span> en el Top 3
         </>
       )
     },
     seasonHighlights?.biggestJump && {
       key: 'biggestjump',
       icon: <TrophyIcon />,
-      iconBg: 'rgba(232,193,88,0.24)',
       text: (
         <>
           La racha más grande de la temporada:{' '}
-          <span style={{ color: '#E8C158' }}>+{seasonHighlights.biggestJump.positionsChanged} posiciones</span> (
+          <span style={{ color: 'var(--cp-gold)', fontWeight: 700 }}>+{seasonHighlights.biggestJump.positionsChanged} posiciones</span> (
           {seasonHighlights.biggestJump.playerName.split(' ')[0]}, Fecha {seasonHighlights.biggestJump.dateNumber})
         </>
       )
@@ -162,178 +159,197 @@ export function HomeTorneo({
   const podio = sortedByPosition.slice(0, 3)
   const [abierto, setAbierto] = useState<string | null>(null)
 
-  // Anillo de cuenta regresiva: 14 dias es el ciclo entre fechas del club.
   const CICLO = 14
   const avance = days !== null ? Math.max(0, Math.min(1, 1 - days / CICLO)) : 0
-  const R = 26
+  const R = 30
   const CIRC = 2 * Math.PI * R
 
   const tinta = 'var(--cp-on-surface)'
   const suave = 'var(--cp-on-surface-muted)'
   const tenue = 'var(--cp-on-surface-variant)'
-  const linea = '1px solid var(--cp-surface-border)'
 
-  const overline: React.CSSProperties = {
+  const overline = (color?: string): React.CSSProperties => ({
     fontFamily: 'var(--cp-font-display)',
-    fontSize: 11, fontWeight: 800, letterSpacing: '0.18em',
-    textTransform: 'uppercase', color: tenue
+    fontSize: 10.5, fontWeight: 800, letterSpacing: '0.16em',
+    textTransform: 'uppercase', color: color ?? tenue
+  })
+
+  /**
+   * Bento: bloques de distinto tamano y peso en una grilla de dos columnas.
+   *
+   * La version anterior era papel de punta a punta — "una sabana blanca sin
+   * divisiones". El punto medio no es un gris entre negro y blanco: es papel de
+   * fondo con BLOQUES QUE ANCLAN. El negro y el rosa vuelven, pero como piezas
+   * dentro de la pantalla, no como el suelo de todo.
+   */
+  const tile = (v: 'papel' | 'negro' | 'rosa' | 'verde' | 'oro', span = 2): React.CSSProperties => {
+    const base: React.CSSProperties = {
+      gridColumn: `span ${span}`,
+      borderRadius: 20,
+      padding: 16,
+      position: 'relative',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: 0
+    }
+    switch (v) {
+      case 'negro': return { ...base,
+        background: 'linear-gradient(150deg, #241D19 0%, #17120F 100%)',
+        color: '#FFF', boxShadow: '0 14px 30px rgba(23,18,15,0.28)' }
+      case 'rosa': return { ...base,
+        background: 'linear-gradient(150deg, #D81B60 0%, #AD1457 100%)',
+        color: '#FFF', boxShadow: '0 12px 26px rgba(173,20,87,0.30)' }
+      case 'verde': return { ...base,
+        background: 'linear-gradient(150deg, #15803D 0%, #0F5C2C 100%)',
+        color: '#FFF', boxShadow: '0 12px 26px rgba(15,92,44,0.28)' }
+      case 'oro': return { ...base,
+        background: 'linear-gradient(150deg, #FCF4DE 0%, #F3E6C2 100%)',
+        border: '1px solid rgba(138,101,8,0.30)', color: tinta,
+        boxShadow: '0 10px 24px rgba(23,18,15,0.07)' }
+      default: return { ...base,
+        background: '#FFF', border: '1px solid var(--cp-surface-border)',
+        color: tinta, boxShadow: '0 6px 18px rgba(23,18,15,0.05)' }
+    }
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 30 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
 
-      {/* ── TU POSICIÓN ──────────────────────────────────────────────
-          Sin tarjeta, directo sobre el papel. El salto de 11px a 96px es
-          la jerarquía que faltaba: antes todo medía lo mismo. */}
+      {/* ── TU POSICIÓN — el ancla negra ──────────────────────────── */}
       {myRanking && (
-        <section className="cp-rise" style={{ animationDelay: '0ms' }}>
-          <div style={overline}>{myRanking.playerName.split(' ')[0]}, estás</div>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, marginTop: 2 }}>
+        <section className="cp-rise" style={{ ...tile('negro'), animationDelay: '0ms' }}>
+          <span
+            aria-hidden
+            className="cp-score"
+            style={{ position: 'absolute', right: -14, top: -26, fontSize: 150, color: 'rgba(255,255,255,0.05)', lineHeight: 1, pointerEvents: 'none' }}
+          >
+            {myRanking.position}
+          </span>
+          <div style={overline('rgba(255,255,255,0.55)')}>{myRanking.playerName.split(' ')[0]}, estás</div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginTop: 4, position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-              <span className="cp-score" style={{ fontSize: 40, color: 'var(--cp-primary)', lineHeight: 1.15 }}>#</span>
-              <Score value={myRanking.position} size={96} color={tinta} style={{ lineHeight: 0.88 }} />
+              <span className="cp-score" style={{ fontSize: 34, color: '#FF5A56', lineHeight: 1.2 }}>#</span>
+              <Score value={myRanking.position} size={82} color="#FFF" style={{ lineHeight: 0.9 }} />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, paddingTop: 8, flex: 1, minWidth: 0 }}>
-              <div style={{ ...overline, fontSize: 10, color: suave }}>en el campeonato</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 10 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                <Score value={scoreOf(myRanking)} size={26} color={tinta} />
-                <span style={{ ...overline, fontSize: 10 }}>{SCORE_LABELS.points}</span>
+                <Score value={scoreOf(myRanking)} size={26} color="#FFF" />
+                <span style={overline('rgba(255,255,255,0.5)')}>{SCORE_LABELS.points}</span>
               </div>
-              <div style={{ fontSize: 12, color: suave }}>
-                {SCORE_LABELS.accumulatedLong} <span style={{ color: 'var(--cp-negative)', fontWeight: 700 }}>{myRanking.totalPoints}</span>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+                {SCORE_LABELS.accumulatedLong} <span style={{ color: '#FF9E5E', fontWeight: 700 }}>{myRanking.totalPoints}</span>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 0, marginTop: 16, borderTop: linea, paddingTop: 12 }}>
+          <div style={{ display: 'flex', marginTop: 14, paddingTop: 11, borderTop: '1px solid rgba(255,255,255,0.14)', position: 'relative' }}>
             {[
               { v: myRanking.positionsChanged, l: 'última fecha', signo: true },
               { v: avgNightlyPosition !== null ? Math.round(avgNightlyPosition) : null, l: 'puesto prom.', prefijo: '#' },
               { v: avgPointsPerDate !== null ? Math.round(avgPointsPerDate) : null, l: 'prom./fecha' },
               { v: last3 ? last3.mine : null, l: 'últimas 3' }
             ].map((m, k) => (
-              <div key={m.l} style={{ flex: 1, minWidth: 0, paddingLeft: k === 0 ? 0 : 12, borderLeft: k === 0 ? 'none' : linea }}>
+              <div key={m.l} style={{ flex: 1, minWidth: 0, paddingLeft: k === 0 ? 0 : 10, borderLeft: k === 0 ? 'none' : '1px solid rgba(255,255,255,0.14)' }}>
                 <div className="cp-score" style={{
-                  fontSize: 19,
-                  color: m.signo && typeof m.v === 'number' && m.v < 0 ? 'var(--cp-negative)'
-                       : m.signo && typeof m.v === 'number' && m.v > 0 ? 'var(--cp-positive)' : tinta
+                  fontSize: 18,
+                  color: m.signo && typeof m.v === 'number' && m.v < 0 ? '#FF9E5E'
+                       : m.signo && typeof m.v === 'number' && m.v > 0 ? '#6ECB71' : '#FFF'
                 }}>
                   {m.v === null ? '—' : `${m.prefijo ?? ''}${m.signo && m.v > 0 ? '+' : ''}${m.v}`}
                 </div>
-                <div style={{ fontSize: 11, color: tenue, marginTop: 1 }}>{m.l}</div>
+                <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.5)', marginTop: 1 }}>{m.l}</div>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* ── PRÓXIMA FECHA ────────────────────────────────────────────
-          Un anillo, no otro rectángulo. La cuenta regresiva se ve, no se lee. */}
+      {/* ── EL ANILLO — bloque chico y cuadrado ───────────────────── */}
       {formattedDate && (
-        <section className="cp-rise" style={{ animationDelay: '70ms', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
-            <svg width="64" height="64" viewBox="0 0 64 64" style={{ transform: 'rotate(-90deg)' }}>
-              <circle cx="32" cy="32" r={R} fill="none" stroke="var(--cp-surface-3)" strokeWidth="5" />
-              <circle
-                cx="32" cy="32" r={R} fill="none"
-                stroke="var(--cp-primary)" strokeWidth="5" strokeLinecap="round"
-                strokeDasharray={CIRC}
-                strokeDashoffset={CIRC * (1 - avance)}
-                style={{ transition: 'stroke-dashoffset 900ms cubic-bezier(0.22,1,0.36,1)' }}
-              />
+        <section className="cp-rise" style={{ ...tile('papel', 1), animationDelay: '60ms', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <div style={{ position: 'relative', width: 72, height: 72 }}>
+            <svg width="72" height="72" viewBox="0 0 72 72" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="36" cy="36" r={R} fill="none" stroke="var(--cp-surface-3)" strokeWidth="6" />
+              <circle cx="36" cy="36" r={R} fill="none" stroke="var(--cp-primary)" strokeWidth="6" strokeLinecap="round"
+                strokeDasharray={CIRC} strokeDashoffset={CIRC * (1 - avance)}
+                style={{ transition: 'stroke-dashoffset 900ms cubic-bezier(0.22,1,0.36,1)' }} />
             </svg>
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <span className="cp-score" style={{ fontSize: 22, color: tinta, lineHeight: 1 }}>{days ?? '—'}</span>
+              <span className="cp-score" style={{ fontSize: 26, color: tinta, lineHeight: 1 }}>{days ?? '—'}</span>
               <span style={{ fontSize: 9, color: tenue, letterSpacing: '0.1em' }}>DÍAS</span>
             </div>
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={overline}>próxima fecha</div>
-            <div className="cp-display" style={{ fontSize: 22, fontWeight: 800, color: tinta, marginTop: 1 }}>{formattedDate}</div>
-            <div style={{ fontSize: 12, color: suave, marginTop: 1 }}>Fecha {nextDate?.dateNumber ?? '—'} · Torneo {tournamentNumber}</div>
+          <div style={{ ...overline(), textAlign: 'center' }}>para la fecha</div>
+        </section>
+      )}
+
+      {/* ── LA FECHA — bloque chico al lado ───────────────────────── */}
+      {formattedDate && (
+        <section className="cp-rise" style={{ ...tile('papel', 1), animationDelay: '110ms', justifyContent: 'space-between', gap: 8 }}>
+          <div>
+            <div style={overline()}>próxima</div>
+            <div className="cp-display" style={{ fontSize: 20, fontWeight: 800, color: tinta, marginTop: 3, lineHeight: 1.1 }}>{formattedDate}</div>
+            <div style={{ fontSize: 11.5, color: suave, marginTop: 3 }}>Fecha {nextDate?.dateNumber ?? '—'}</div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-            <button
-              onClick={onAddToPersonalCalendar}
-              aria-label="Agregar a mi calendario"
-              style={{ width: 38, height: 38, borderRadius: '50%', border: linea, background: 'var(--cp-surface-1)', color: suave, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-            >
-              <CalendarPlus size={17} />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button onClick={onAddToPersonalCalendar} aria-label="Agregar a mi calendario"
+              style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid var(--cp-surface-border)', background: 'var(--cp-surface-2)', color: suave, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+              <CalendarPlus size={16} />
             </button>
-            <LinkCta onClick={onOpenCalendarPage} style={{ fontSize: 11, color: tenue, justifyContent: 'center' }}>T{tournamentNumber}</LinkCta>
+            <LinkCta onClick={onOpenCalendarPage} style={{ fontSize: 11, color: 'var(--cp-primary-light)' }}>T{tournamentNumber}</LinkCta>
           </div>
         </section>
       )}
 
-      {/* ── EL PODIO ─────────────────────────────────────────────────
-          Con la forma de un podio: escalonado y en círculos. Tocar a alguien
-          abre sus números acá mismo — no es un botón para irse a otro lado. */}
+      {/* ── EL PODIO — bloque ancho, en oro ───────────────────────── */}
       {podio.length === 3 && (
-        <section className="cp-rise" style={{ animationDelay: '140ms' }}>
+        <section className="cp-rise" style={{ ...tile('oro'), animationDelay: '160ms' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-            <span style={overline}>el podio</span>
-            <LinkCta onClick={onSeeTabla} style={{ color: 'var(--cp-primary-light)', fontSize: 12 }}>TABLA COMPLETA →</LinkCta>
+            <span style={overline('#8A6508')}>el podio</span>
+            <LinkCta onClick={onSeeTabla} style={{ color: '#C62828', fontSize: 11.5 }}>TABLA →</LinkCta>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginTop: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 12, marginTop: 12 }}>
             {[podio[1], podio[0], podio[2]].map((p) => {
               const idx = podio.indexOf(p)
-              const metal = ['var(--cp-gold)', 'var(--cp-silver)', 'var(--cp-bronze)'][idx]
+              const metal = ['#8A6508', '#6E6A67', '#8B5E2F'][idx]
               const primero = idx === 0
-              const tam = primero ? 84 : 62
+              const tam = primero ? 76 : 56
               const activo = abierto === p.playerId
               return (
-                <button
-                  key={p.playerId}
-                  onClick={() => setAbierto(activo ? null : p.playerId)}
-                  aria-expanded={activo}
-                  style={{
-                    background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center',
-                    gap: 7, marginBottom: primero ? 14 : 0, flex: primero ? '0 0 auto' : '1 1 0', minWidth: 0
-                  }}
-                >
-                  <div style={{
-                    position: 'relative', borderRadius: '50%', padding: 3,
-                    border: `2px solid ${metal}`,
-                    boxShadow: activo ? `0 0 0 4px var(--cp-surface-2)` : 'none',
-                    transition: 'box-shadow 200ms ease, transform 200ms ease',
-                    transform: activo ? 'translateY(-3px)' : 'none'
-                  }}>
-                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={tam} fontSize={primero ? 22 : 16} round />
-                    <span className="cp-score" style={{
-                      position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)',
-                      background: metal, color: '#FFF', fontSize: 12, minWidth: 20, height: 20,
-                      borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>{idx + 1}</span>
+                <button key={p.playerId} onClick={() => setAbierto(activo ? null : p.playerId)} aria-expanded={activo}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: primero ? 12 : 0, minWidth: 0 }}>
+                  <div style={{ position: 'relative', borderRadius: '50%', padding: 3, border: `2px solid ${metal}`,
+                    background: activo ? 'rgba(255,255,255,0.9)' : 'transparent',
+                    transition: 'transform 200ms ease', transform: activo ? 'translateY(-3px)' : 'none' }}>
+                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={tam} fontSize={primero ? 20 : 15} round />
+                    <span className="cp-score" style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 11, minWidth: 19, height: 19, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{idx + 1}</span>
                   </div>
-                  <div style={{ fontSize: primero ? 13 : 12, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>
-                    {p.playerName.split(' ')[0]}
-                  </div>
-                  <div className="cp-score" style={{ fontSize: primero ? 20 : 16, color: metal }}>{scoreOf(p)}</div>
+                  <div style={{ fontSize: primero ? 12.5 : 11.5, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>{p.playerName.split(' ')[0]}</div>
+                  <div className="cp-score" style={{ fontSize: primero ? 19 : 15, color: metal }}>{scoreOf(p)}</div>
                 </button>
               )
             })}
           </div>
 
-          {/* El panel se abre acá abajo, sin sacarte de la pantalla. */}
           {abierto && (() => {
             const p = podio.find(x => x.playerId === abierto)
             if (!p) return null
             const podios = p.firstPlaces + p.secondPlaces + p.thirdPlaces
             return (
-              <div className="cp-rise" style={{ marginTop: 14, paddingTop: 12, borderTop: linea, display: 'flex', gap: 0 }}>
+              <div className="cp-rise" style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(138,101,8,0.22)', display: 'flex' }}>
                 {[
                   { v: p.firstPlaces, l: 'victorias' },
                   { v: podios, l: 'podios' },
-                  { v: p.totalPoints, l: SCORE_LABELS.accumulatedLong.toLowerCase() },
+                  { v: p.totalPoints, l: 'acum.' },
                   { v: scoreOf(p) - (myRanking ? scoreOf(myRanking) : 0), l: 'vs vos', signo: true }
                 ].map((m, k) => (
-                  <div key={m.l} style={{ flex: 1, minWidth: 0, paddingLeft: k === 0 ? 0 : 10, borderLeft: k === 0 ? 'none' : linea }}>
-                    <div className="cp-score" style={{ fontSize: 17, color: m.signo ? (m.v > 0 ? 'var(--cp-negative)' : 'var(--cp-positive)') : tinta }}>
+                  <div key={m.l} style={{ flex: 1, minWidth: 0, paddingLeft: k === 0 ? 0 : 8, borderLeft: k === 0 ? 'none' : '1px solid rgba(138,101,8,0.22)' }}>
+                    <div className="cp-score" style={{ fontSize: 16, color: m.signo ? (m.v > 0 ? '#C2410C' : '#15803D') : tinta }}>
                       {m.signo && m.v > 0 ? '+' : ''}{m.v}
                     </div>
-                    <div style={{ fontSize: 11, color: tenue, marginTop: 1 }}>{m.l}</div>
+                    <div style={{ fontSize: 10.5, color: '#7A6E69', marginTop: 1 }}>{m.l}</div>
                   </div>
                 ))}
               </div>
@@ -342,86 +358,69 @@ export function HomeTorneo({
         </section>
       )}
 
-      {/* ── TU CARRERA ───────────────────────────────────────────────── */}
+      {/* ── LOS MALAZOS — el bloque ROSA. No negociable. ──────────── */}
+      {bottom2.length > 0 && (
+        <section className="cp-rise" style={{ ...tile('rosa', 1), animationDelay: '220ms', gap: 10 }}>
+          <span style={overline('rgba(255,255,255,0.75)')}>malazos 7/2</span>
+          {bottom2.map(p => (
+            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
+                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={32} fontSize={12} round />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.playerName.split(' ')[0]}</div>
+                <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>{scoreOf(p)}</div>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* ── LOS CALIENTES — bloque verde, al lado del rosa ────────── */}
+      {(streaks?.hot?.length ?? 0) > 0 && (
+        <section className="cp-rise" style={{ ...tile('verde', 1), animationDelay: '260ms', gap: 10 }}>
+          <span style={overline('rgba(255,255,255,0.75)')}>calientes</span>
+          {(streaks?.hot ?? []).slice(0, 2).map(p => (
+            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
+                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={32} fontSize={12} round />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.playerName.split(' ')[0]}</div>
+                <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>+{p.positionsChanged}</div>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* ── TU CARRERA — bloque ancho con las barras ──────────────── */}
       {myRanking && (
-        <section className="cp-rise" style={{ animationDelay: '210ms', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <span style={overline}>tu carrera</span>
-          <Meter
-            value={leaderScore > 0 ? scoreOf(myRanking) / leaderScore : 0}
-            color="var(--cp-primary)"
-            track="var(--cp-surface-3)"
+        <section className="cp-rise" style={{ ...tile('papel'), animationDelay: '300ms', gap: 13 }}>
+          <span style={overline()}>tu carrera</span>
+          <Meter value={leaderScore > 0 ? scoreOf(myRanking) / leaderScore : 0}
+            color="var(--cp-primary)" track="var(--cp-surface-3)"
             left={<span style={{ color: suave, whiteSpace: 'nowrap' }}>Hacia el líder</span>}
-            right={<span className="cp-score" style={{ fontSize: 15, color: tinta }}>−{gapToLeader ?? 0}</span>}
-          />
+            right={<span className="cp-score" style={{ fontSize: 15, color: tinta }}>−{gapToLeader ?? 0}</span>} />
           {gapToMalazos !== null && (
-            <Meter
-              value={Math.max(0, Math.min(1, gapToMalazos / Math.max(leaderScore, 1)))}
-              color="var(--cp-malazo)"
-              track="var(--cp-surface-3)"
+            <Meter value={Math.max(0, Math.min(1, gapToMalazos / Math.max(leaderScore, 1)))}
+              color="var(--cp-malazo)" track="var(--cp-surface-3)"
               left={<span style={{ color: suave, whiteSpace: 'nowrap' }}>Colchón sobre el 7/2</span>}
-              right={<span className="cp-score" style={{ fontSize: 15, color: 'var(--cp-malazo-text)' }}>{gapToMalazos}</span>}
-            />
+              right={<span className="cp-score" style={{ fontSize: 15, color: 'var(--cp-malazo-text)' }}>{gapToMalazos}</span>} />
           )}
           <LinkCta onClick={onOpenProfile} style={{ color: 'var(--cp-primary-light)', alignSelf: 'flex-start' }}>VER MI TORNEO →</LinkCta>
         </section>
       )}
 
-      {/* ── LOS MALAZOS ──────────────────────────────────────────────
-          Rosa, el color del club para todo lo del 7/2. Chico y al margen:
-          importa, pero no manda la pantalla. */}
-      {bottom2.length > 0 && (
-        <section className="cp-rise" style={{ animationDelay: '280ms' }}>
-          <span style={{ ...overline, color: 'var(--cp-malazo-text)' }}>los malazos 7/2</span>
-          <div style={{ display: 'flex', gap: 18, marginTop: 10 }}>
-            {bottom2.map(p => (
-              <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
-                <div style={{ borderRadius: '50%', padding: 2, border: '2px solid var(--cp-malazo)', flexShrink: 0 }}>
-                  <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={36} fontSize={13} round />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: tinta, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {p.playerName.split(' ')[0]}
-                  </div>
-                  <div className="cp-score" style={{ fontSize: 14, color: 'var(--cp-malazo-text)' }}>{scoreOf(p)}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── LOS QUE VIENEN CALIENTES ─────────────────────────────── */}
-      {(streaks?.hot?.length ?? 0) > 0 && (
-        <section className="cp-rise" style={{ animationDelay: '315ms' }}>
-          <span style={{ ...overline, color: 'var(--cp-positive)' }}>los que vienen calientes</span>
-          <div style={{ display: 'flex', gap: 18, marginTop: 10, flexWrap: 'wrap' }}>
-            {(streaks?.hot ?? []).slice(0, 3).map(p => (
-              <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
-                <div style={{ borderRadius: '50%', padding: 2, border: '2px solid var(--cp-positive)', flexShrink: 0 }}>
-                  <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={36} fontSize={13} round />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: tinta, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {p.playerName.split(' ')[0]}
-                  </div>
-                  <div className="cp-score" style={{ fontSize: 14, color: 'var(--cp-positive)' }}>+{p.positionsChanged}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── DE LA TEMPORADA ──────────────────────────────────────────
-          Sin tarjeta cada una: una lista con filete, que respira. */}
+      {/* ── DE LA TEMPORADA ──────────────────────────────────────── */}
       {highlightCards.length > 0 && (
-        <section className="cp-rise" style={{ animationDelay: '350ms' }}>
-          <span style={overline}>de la temporada</span>
-          <div style={{ marginTop: 8 }}>
-            {highlightCards.map(card => (
-              <div key={card.key} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 0', borderBottom: linea }}>
+        <section className="cp-rise" style={{ ...tile('papel'), animationDelay: '340ms', padding: '14px 16px' }}>
+          <span style={overline()}>de la temporada</span>
+          <div style={{ marginTop: 4 }}>
+            {highlightCards.map((card, k) => (
+              <div key={card.key} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderTop: k === 0 ? 'none' : '1px solid var(--cp-surface-border)' }}>
                 <span style={{ flexShrink: 0, display: 'flex' }}>{card.icon}</span>
-                <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: suave, lineHeight: 1.45 }}>{card.text}</span>
+                <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, color: suave, lineHeight: 1.4 }}>{card.text}</span>
               </div>
             ))}
           </div>
