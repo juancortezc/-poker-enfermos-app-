@@ -17,12 +17,15 @@
      Asi habia 340 usos de color que no pintaban nada. Antes de borrar un token
      de aqui, buscar la clase en src/. */
 
-  /* Superficies — la escala de cinco pisos */
-  --color-poker-dark: #1D1615;        /* L*  8 — fondo (104 usos) */
-  --color-poker-card: #2B2120;        /* L* 14 — tarjeta */
-  --color-poker-raised: #382E2C;      /* L* 20 — elevada, hover, lider */
-  --color-poker-line: #483E3C;        /* L* 27 — bordes e inputs */
-  --color-poker-edge: #584E4C;        /* L* 34 — bordes vivos */
+  /* Superficies — la escala de cinco pisos.
+     Apuntan a las variables, NO a un hex: asi una clase como `bg-poker-card`
+     se adapta sola cuando el subarbol esta en `.cp-light`. Era la unica forma
+     de mover el suelo sin reescribir las ~700 clases poker-* del codigo. */
+  --color-poker-dark: var(--cp-surface-0);
+  --color-poker-card: var(--cp-surface-1);
+  --color-poker-raised: var(--cp-surface-2);
+  --color-poker-line: var(--cp-surface-border);
+  --color-poker-edge: var(--cp-outline);
   --color-poker-dark-950: #14100F;
   --color-poker-dark-900: #1D1615;
   --color-poker-dark-800: #2B2120;
@@ -62,10 +65,10 @@
   --color-poker-silver: #C9C6C2;
   --color-poker-bronze: #C08A54;
 
-  /* Texto */
-  --color-poker-text: #F5EFE6;
-  --color-poker-muted: #C9BFBA;
-  --color-poker-faint: #9A8F8B;
+  /* Texto — tambien por variable, por el mismo motivo */
+  --color-poker-text: var(--cp-on-surface);
+  --color-poker-muted: var(--cp-on-surface-muted);
+  --color-poker-faint: var(--cp-on-surface-variant);
 
   /* Tokens semanticos */
   --color-primary: #E53935;
@@ -74,12 +77,12 @@
   --color-secondary-foreground: #FFFFFF;
   --color-accent: #5BC8C0;
   --color-accent-foreground: #1D1615;
-  --color-background: #1D1615;
-  --color-surface: #2B2120;
-  --color-surface-elevated: #382E2C;
-  --color-text-primary: #F5EFE6;
-  --color-text-secondary: #C9BFBA;
-  --color-text-muted: #9A8F8B;
+  --color-background: var(--cp-surface-0);
+  --color-surface: var(--cp-surface-1);
+  --color-surface-elevated: var(--cp-surface-2);
+  --color-text-primary: var(--cp-on-surface);
+  --color-text-secondary: var(--cp-on-surface-muted);
+  --color-text-muted: var(--cp-on-surface-variant);
 
   /* Tipografia */
   --font-family-sans: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
