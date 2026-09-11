@@ -89,7 +89,7 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
                     borderRadius: 5,
                     background: medal.color,
                     color: '#1A1512',
-                    fontSize: 9,
+                    fontSize: 12,
                     fontWeight: 900,
                     display: 'flex',
                     alignItems: 'center',
@@ -99,15 +99,15 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
                   {index + 1}
                 </div>
               </div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {player.playerName}
               </div>
               <div style={{ marginTop: 'auto', paddingTop: 4 }}>
                 <div style={{ fontSize: 16, fontWeight: 900, color: medal.color }}>
-                  {scoreOf(player)} <span style={{ fontSize: 9, fontWeight: 700, color: 'inherit' }}>{SCORE_LABELS.pointsShort}</span>
+                  {scoreOf(player)} <span style={{ fontSize: 12, fontWeight: 700, color: 'inherit' }}>{SCORE_LABELS.pointsShort}</span>
                 </div>
                 {showNightContext && (
-                  <div style={{ fontSize: 9, fontWeight: 700, color: delta > 0 ? '#7CD07F' : delta < 0 ? '#E53935' : '#A89A8C', marginTop: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? '#7CD07F' : delta < 0 ? '#E53935' : '#A89A8C', marginTop: 1 }}>
                     {delta > 0 ? `+${delta}` : delta === 0 ? '+0' : delta}
                   </div>
                 )}
@@ -119,10 +119,10 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
 
       {isTightRace && (
         <div style={{ marginTop: 12, textAlign: 'center' }}>
-          <div style={{ fontSize: 10, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.02em' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.02em' }}>
             TRES JUGADORES SEPARADOS POR {spread} {spread === 1 ? 'PUNTO' : 'PUNTOS'}
           </div>
-          <div style={{ fontSize: 9, fontWeight: 700, color: '#E53935', marginTop: 2 }}>¡Esto se puso feo!</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#E53935', marginTop: 2 }}>¡Esto se puso feo!</div>
         </div>
       )}
 

@@ -605,7 +605,7 @@ function CalendarStep({
                 borderRadius: '4px',
               }}
             >
-              <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>
+              <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>
                 F{gameDate.dateNumber}
               </p>
               {isValid ? (
@@ -613,7 +613,7 @@ function CalendarStep({
                   <p className="text-xl font-bold" style={{ color: 'var(--cp-on-surface)' }}>
                     {dateObj!.getDate()}
                   </p>
-                  <p style={{ fontSize: '11px', color: '#E53935', fontWeight: 600 }}>
+                  <p style={{ fontSize: '13px', color: '#E53935', fontWeight: 600 }}>
                     {dateObj!.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase()}
                   </p>
                 </>
@@ -838,10 +838,10 @@ function ConfigStep({
         {showBlinds && (
           <div className="p-3 pt-0 space-y-2">
             <div className="grid grid-cols-4 gap-2 text-center mb-2">
-              <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>Nivel</p>
-              <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>SB</p>
-              <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>BB</p>
-              <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>Min</p>
+              <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>Nivel</p>
+              <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>SB</p>
+              <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>BB</p>
+              <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>Min</p>
             </div>
             {blindLevels.map((blind, index) => (
               <div key={index} className="grid grid-cols-4 gap-2">

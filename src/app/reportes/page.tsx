@@ -10,6 +10,7 @@ import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
 import { buildAuthHeaders } from '@/lib/client-auth'
 
@@ -77,16 +78,7 @@ export default function ReportesPage() {
   const isLoading = authLoading || tournamentLoading || !user
 
   if (isLoading || user.role !== 'Comision') {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div
-            className="w-10 h-10 border-2 rounded-full animate-spin"
-            style={{ borderColor: 'var(--cp-surface-border)', borderTopColor: 'var(--cp-primary)' }}
-          />
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[120, 200, 200]} />
   }
 
   const userInitials = user.firstName && user.lastName ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 'PE'
@@ -108,13 +100,13 @@ export default function ReportesPage() {
           <FileSpreadsheet size={20} color="#E53935" />
           <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>Reportes</div>
         </div>
-        <p style={{ fontSize: 12, color: '#7A6E62', marginTop: -8 }}>
+        <p style={{ fontSize: 12, color: '#A89A8C', marginTop: -8 }}>
           Descarga el reporte completo de un torneo en Excel: resultados por fecha, matriz de eliminaciones,
           premiación final y días sin ganar.
         </p>
 
         <div>
-          <p style={{ fontSize: 11, fontWeight: 700, color: '#7A6E62', marginBottom: 8 }}>Torneo</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#A89A8C', marginBottom: 8 }}>Torneo</p>
           <div
             className="relative flex items-center gap-2"
             style={{
@@ -127,7 +119,7 @@ export default function ReportesPage() {
             <div style={{ flex: 1, fontSize: 14, fontWeight: 800, color: '#F5EFE6' }}>
               {selectedTournament ? `Torneo ${selectedTournament.number} — ${selectedTournament.name}` : 'Selecciona un torneo'}
             </div>
-            <ChevronDown size={16} style={{ color: '#7A6E62', flexShrink: 0 }} />
+            <ChevronDown size={16} style={{ color: '#A89A8C', flexShrink: 0 }} />
             <select
               value={selectedId ?? ''}
               onChange={(e) => setSelectedId(Number(e.target.value))}
@@ -170,7 +162,7 @@ export default function ReportesPage() {
 
         <HomeCard>
           <div style={{ padding: 14 }}>
-            <p style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em', marginBottom: 8 }}>
+            <p style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em', marginBottom: 8 }}>
               QUÉ INCLUYE EL REPORTE
             </p>
             <ul style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -180,7 +172,7 @@ export default function ReportesPage() {
                 'Premiación final: Varón del Torneo, Podio Final, 7/2 Final, Padres e Hijos.',
                 'Días sin ganar: última victoria de cada jugador, con la fecha de referencia usada para el cálculo.'
               ].map((text) => (
-                <li key={text} style={{ fontSize: 11, color: '#B5A996', lineHeight: 1.4 }}>
+                <li key={text} style={{ fontSize: 13, color: '#B5A996', lineHeight: 1.4 }}>
                   · {text}
                 </li>
               ))}

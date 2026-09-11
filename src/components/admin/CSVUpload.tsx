@@ -158,7 +158,7 @@ export function CSVUpload({ onFileUpload, isValidating }: CSVUploadProps) {
           <li><span className="font-semibold text-white">PUNTOS</span> — Puntos asignados a la posición.</li>
         </ol>
         <div className="mt-5 bg-black/40 border border-white/10 rounded-lg p-4 text-xs sm:text-sm text-white/80">
-          <p className="uppercase text-poker-muted tracking-wide text-[10px] sm:text-[11px]">Ejemplo de fila</p>
+          <p className="uppercase text-poker-muted tracking-wide text-[12px] sm:text-[13px]">Ejemplo de fila</p>
           <code className="block mt-2 whitespace-pre-wrap break-words font-mono">28,7,2025-07-08,11,Jose Patricio Moreno,Freddy Lopez,12</code>
         </div>
       </Card>

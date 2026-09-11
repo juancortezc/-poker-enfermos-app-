@@ -66,7 +66,7 @@ export default function DaysWithoutVictoryTable({
 
         <div className="overflow-hidden">
           <table className="w-full table-fixed text-[13px] sm:text-sm">
-            <thead className="bg-white/5 text-[10px] uppercase tracking-[0.3em] text-gray-300">
+            <thead className="bg-white/5 text-[12px] uppercase tracking-[0.3em] text-gray-300">
               <tr>
                 <th className="w-12 px-2 py-3 text-center">#</th>
                 <th className="px-2 py-3 text-left">Jugador</th>
@@ -116,7 +116,7 @@ export default function DaysWithoutVictoryTable({
                   </td>
                   <td className="px-2 py-3 text-center">
                     {player.hasNeverWon ? (
-                      <div className="flex flex-col items-center text-[11px] text-gray-400">
+                      <div className="flex flex-col items-center text-[13px] text-gray-400">
                         <span className="font-semibold text-gray-500">N/A</span>
                         <span className="mt-1 italic">Nunca</span>
                       </div>
@@ -125,7 +125,7 @@ export default function DaysWithoutVictoryTable({
                         <span className={`text-sm font-black ${getDaysColorClass(player.daysWithoutVictory)}`}>
                           {player.daysWithoutVictory}
                         </span>
-                        <span className="mt-1 text-[11px] font-mono text-gray-500">
+                        <span className="mt-1 text-[13px] font-mono text-gray-500">
                           {formatVictoryDate(player.lastVictoryDate)}
                         </span>
                       </div>

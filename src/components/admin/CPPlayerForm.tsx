@@ -355,7 +355,7 @@ export default function CPPlayerForm({
               PIN de Acceso
             </p>
             <p
-              style={{ fontSize: '11px', color: 'var(--cp-on-surface-muted)', marginTop: '-4px' }}
+              style={{ fontSize: '13px', color: 'var(--cp-on-surface-muted)', marginTop: '-4px' }}
             >
               {player ? 'Deja en blanco para mantener el actual' : '4 digitos para ingresar a la app'}
             </p>

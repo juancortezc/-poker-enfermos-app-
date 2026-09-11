@@ -23,7 +23,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
             padding: 14
           }}
         >
-          <div style={{ fontSize: 10, fontWeight: 800, color: '#fff', letterSpacing: '0.04em', marginBottom: 10 }}>LOS MALAZOS 7/2</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', letterSpacing: '0.04em', marginBottom: 10 }}>LOS MALAZOS 7/2</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 8 }}>
             {cold.map(player => (
               <div
@@ -41,11 +41,11 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
                   <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={48} fontSize={14} />
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {player.playerName}
                 </div>
                 <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#fff' }}>
-                  {scoreOf(player)} <span style={{ fontSize: 9, fontWeight: 700, opacity: 0.85, color: 'inherit' }}>{SCORE_LABELS.pointsShort}</span>
+                  {scoreOf(player)} <span style={{ fontSize: 12, fontWeight: 700, opacity: 0.85, color: 'inherit' }}>{SCORE_LABELS.pointsShort}</span>
                 </div>
               </div>
             ))}
@@ -62,8 +62,8 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
             padding: 14
           }}
         >
-          <div style={{ fontSize: 10, fontWeight: 800, color: '#7CD07F', letterSpacing: '0.04em' }}>LOS QUE VIENEN CALIENTES</div>
-          <div style={{ fontSize: 9, color: '#B7E0B8', marginTop: 2, marginBottom: 10 }}>Más posiciones ganadas en las últimas 3 fechas</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#7CD07F', letterSpacing: '0.04em' }}>LOS QUE VIENEN CALIENTES</div>
+          <div style={{ fontSize: 12, color: '#B7E0B8', marginTop: 2, marginBottom: 10 }}>Más posiciones ganadas en las últimas 3 fechas</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
             {hot.map(player => (
               <div
@@ -81,7 +81,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}>
                   <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={46} fontSize={13} />
                 </div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {player.playerName}
                 </div>
                 <div style={{ marginTop: 'auto', paddingTop: 4, fontSize: 14, fontWeight: 900, color: '#7CD07F' }}>

@@ -436,7 +436,7 @@ function CPAwardCard({
           <p style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-on-surface)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {title}
           </p>
-          <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>
+          <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>
             {description}
           </p>
         </div>
@@ -444,7 +444,7 @@ function CPAwardCard({
         <span
           className="px-2 py-0.5"
           style={{
-            fontSize: '11px',
+            fontSize: '13px',
             fontWeight: 600,
             color: accentColor,
             background: `${accentColor}15`,
@@ -484,7 +484,7 @@ function CPAwardCard({
               ) : (
                 <span
                   style={{
-                    fontSize: '10px',
+                    fontSize: '12px',
                     color: 'var(--cp-on-surface-variant)',
                     fontWeight: 600,
                   }}
@@ -521,7 +521,7 @@ function CPAwardCard({
                 {valueLabel && (
                   <span
                     style={{
-                      fontSize: '9px',
+                      fontSize: '12px',
                       color: 'var(--cp-on-surface-muted)',
                       textTransform: 'uppercase',
                     }}
@@ -582,7 +582,7 @@ function CPParentChildCard({ relation }: CPParentChildCardProps) {
     <div className="flex flex-col items-center gap-1">
       <span
         style={{
-          fontSize: '9px',
+          fontSize: '12px',
           color: 'var(--cp-on-surface-muted)',
           textTransform: 'uppercase',
           letterSpacing: '0.1em',
@@ -608,7 +608,7 @@ function CPParentChildCard({ relation }: CPParentChildCardProps) {
         ) : (
           <span
             style={{
-              fontSize: '11px',
+              fontSize: '13px',
               color: 'var(--cp-on-surface-variant)',
               fontWeight: 600,
             }}
@@ -662,7 +662,7 @@ function CPParentChildCard({ relation }: CPParentChildCardProps) {
           <span
             className="px-2 py-0.5 mt-1"
             style={{
-              fontSize: '9px',
+              fontSize: '12px',
               color: '#E53935',
               background: 'rgba(229, 57, 53, 0.15)',
               borderRadius: '4px',

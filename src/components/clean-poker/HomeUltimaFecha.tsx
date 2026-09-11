@@ -51,7 +51,7 @@ export function HomeUltimaFecha({
   if (!eliminations || eliminations.length === 0 || rankings.length === 0) {
     return (
       <HomeCard style={{ padding: 24, textAlign: 'center' }}>
-        <div style={{ fontSize: 12, color: '#7A6E62' }}>Cargando la última fecha...</div>
+        <div style={{ fontSize: 12, color: '#A89A8C' }}>Cargando la última fecha...</div>
       </HomeCard>
     )
   }
@@ -155,7 +155,7 @@ export function HomeUltimaFecha({
               </div>
             )}
             <div style={{ padding: '18px 16px', position: 'relative', zIndex: 1, maxWidth: winnerPhoto ? '52%' : '100%' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#7A6E62', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
                 Fecha {lastCompletedDate.dateNumber}
               </div>
               <div style={{ fontSize: 26, fontWeight: 900, color: '#F5EFE6', lineHeight: 1.05, letterSpacing: '-0.01em' }}>
@@ -172,7 +172,7 @@ export function HomeUltimaFecha({
                   color: '#fff',
                   padding: '9px 16px',
                   borderRadius: 100,
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: 800,
                   letterSpacing: '0.03em',
                   border: 'none',
@@ -200,7 +200,7 @@ export function HomeUltimaFecha({
       {podium.length > 0 && (
         <HomeCard style={{ padding: 16 }}>
           <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
               Podio Fecha {lastCompletedDate.dateNumber}
             </div>
           </div>
@@ -218,13 +218,13 @@ export function HomeUltimaFecha({
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>
                     {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName[0]}.
                   </div>
-                  <div style={{ fontSize: 10, fontWeight: e.position === 1 ? 800 : 600, color: e.position === 1 ? '#E8C158' : '#A89A8C', letterSpacing: e.position === 1 ? '0.04em' : undefined }}>
+                  <div style={{ fontSize: 12, fontWeight: e.position === 1 ? 800 : 600, color: e.position === 1 ? '#E8C158' : '#A89A8C', letterSpacing: e.position === 1 ? '0.04em' : undefined }}>
                     {e.position === 1 ? 'CAMPEÓN' : `${e.position}° puesto`}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: 16, fontWeight: 900, color: e.position === 1 ? '#E8C158' : '#F5EFE6' }}>{e.points}</div>
-                  <div style={{ fontSize: 8, fontWeight: 700, color: '#7A6E62' }}>PTS</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C' }}>PTS</div>
                 </div>
               </div>
             ))}
@@ -241,17 +241,17 @@ export function HomeUltimaFecha({
           <div style={{ flex: 1, background: 'linear-gradient(160deg,#E53935,#B32623)', borderRadius: 16, padding: 14, color: '#fff' }}>
             {myNightElim.position === 1 ? (
               <>
-                <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.85 }}>{myNightElim.eliminatedPlayer.firstName}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.85 }}>{myNightElim.eliminatedPlayer.firstName}</div>
                 <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', marginTop: 2 }}>¡Ganaste!</div>
-                <div style={{ fontSize: 11, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} pts</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} pts</div>
               </>
             ) : (
               <>
-                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', opacity: 0.85 }}>Te eliminaron en posición:</div>
+                <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', opacity: 0.85 }}>Te eliminaron en posición:</div>
                 <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.02em', marginTop: 2 }}>#{myNightElim.position}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} pts</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} pts</div>
                 {myNightElim.eliminatorPlayer && (
-                  <div style={{ fontSize: 10, fontWeight: 600, opacity: 0.85, marginTop: 2 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.85, marginTop: 2 }}>
                     Te eliminó: {myNightElim.eliminatorPlayer.firstName} {myNightElim.eliminatorPlayer.lastName}
                   </div>
                 )}
@@ -259,11 +259,11 @@ export function HomeUltimaFecha({
             )}
           </div>
           <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#A89A8C' }}>En el campeonato estás</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C' }}>En el campeonato estás</div>
             <div style={{ fontSize: 30, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.02em', marginTop: 2 }}>#{myRanking.position}</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#F5EFE6', marginTop: 2 }}>{scoreOf(myRanking)} puntos</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6', marginTop: 2 }}>{scoreOf(myRanking)} puntos</div>
             {gapToLeader !== null && (
-              <div style={{ fontSize: 9, color: '#7A6E62', marginTop: 6 }}>
+              <div style={{ fontSize: 12, color: '#A89A8C', marginTop: 6 }}>
                 {gapToLeader === 0 ? 'eres el líder' : `a ${gapToLeader} ${gapToLeader === 1 ? 'punto' : 'puntos'} del líder`}
               </div>
             )}
@@ -276,7 +276,7 @@ export function HomeUltimaFecha({
       {insightCards.length > 0 && (
         <div>
           <div style={{ marginBottom: 10, padding: '0 2px' }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>LO QUE DEJÓ LA NOCHE</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>LO QUE DEJÓ LA NOCHE</div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${insightCards.length}, minmax(0,1fr))`, gap: 8 }}>
             {insightCards.map(card => (
@@ -284,13 +284,13 @@ export function HomeUltimaFecha({
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   <HomeAvatar playerId={card.playerId} name={card.name} photoUrl={photoByPlayerId.get(card.playerId)} size={64} fontSize={20} />
                 </div>
-                <div style={{ fontSize: 9, fontWeight: 800, color: card.color, marginTop: 6, minHeight: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1.3 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: card.color, marginTop: 6, minHeight: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1.3 }}>
                   {card.label}
                 </div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#F5EFE6', marginTop: 3, minHeight: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6', marginTop: 3, minHeight: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {card.name}
                 </div>
-                <div style={{ fontSize: 8, color: '#A89A8C', marginTop: 'auto', paddingTop: 2, lineHeight: 1.3 }}>{card.detail}</div>
+                <div style={{ fontSize: 12, color: '#A89A8C', marginTop: 'auto', paddingTop: 2, lineHeight: 1.3 }}>{card.detail}</div>
               </HomeCard>
             ))}
           </div>

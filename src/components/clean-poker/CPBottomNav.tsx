@@ -84,7 +84,7 @@ export function CPBottomNav() {
             <ChevronLeft className="w-5 h-5" />
             <span
               className="font-medium truncate"
-              style={{ fontSize: '10px' }}
+              style={{ fontSize: '12px' }}
             >
               Atrás
             </span>
@@ -106,7 +106,7 @@ export function CPBottomNav() {
               {item.icon}
               <span
                 className="font-medium truncate"
-                style={{ fontSize: '10px' }}
+                style={{ fontSize: '12px' }}
               >
                 {item.label}
               </span>

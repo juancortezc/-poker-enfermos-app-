@@ -239,11 +239,11 @@ export default function CPBlindsTab({ tournamentId }: CPBlindsTabProps) {
             borderBottom: '1px solid var(--cp-surface-border)'
           }}
         >
-          <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>Nivel</p>
-          <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>SB</p>
-          <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>BB</p>
-          <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>Min</p>
-          <p style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}></p>
+          <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>Nivel</p>
+          <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>SB</p>
+          <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>BB</p>
+          <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>Min</p>
+          <p style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}></p>
         </div>
 
         {/* Table Body */}

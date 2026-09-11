@@ -128,8 +128,8 @@ function GameDateBadge({ match }: { match: MatchingGameDate }) {
       border: '1px solid rgba(0,229,255,0.45)',
       boxShadow: '0 0 12px rgba(0,229,255,0.20)',
     }}>
-      <span style={{ fontSize: '11px' }}>🎮</span>
-      <span style={{ fontSize: '9px', fontWeight: 800, color: '#00E5FF', letterSpacing: '0.10em' }}>
+      <span style={{ fontSize: '13px' }}>🎮</span>
+      <span style={{ fontSize: '12px', fontWeight: 800, color: '#00E5FF', letterSpacing: '0.10em' }}>
         COINCIDE CON F{match.dateNumber}
       </span>
     </div>
@@ -168,13 +168,13 @@ function StatsStrip({ players }: { players: PlayerWithVictoryData[] }) {
           const pct = Math.round((count / total) * 100)
           return (
             <div key={tier.key} style={{ ...cardBase, border: `1px solid ${tier.border}` }}>
-              <p style={{ fontSize: '8px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
                 {tier.label}
               </p>
               <p style={{ fontSize: '24px', fontWeight: 900, color: '#fff', lineHeight: 1, textAlign: 'right' }}>
                 {count}
               </p>
-              <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.32)', textAlign: 'right' }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.32)', textAlign: 'right' }}>
                 {pct}% del total
               </p>
             </div>
@@ -183,27 +183,27 @@ function StatsStrip({ players }: { players: PlayerWithVictoryData[] }) {
 
         {/* Average card */}
         <div style={{ ...cardBase, border: '1px solid rgba(0,229,255,0.22)' }}>
-          <p style={{ fontSize: '8px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
+          <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
             PROMEDIO
           </p>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', gap: '2px' }}>
             <span style={{ fontSize: '24px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{avg}</span>
-            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.38)', fontWeight: 600 }}>d</span>
+            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.38)', fontWeight: 600 }}>d</span>
           </div>
-          <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.32)', textAlign: 'right' }}>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.32)', textAlign: 'right' }}>
             días sin ganar
           </p>
         </div>
 
         {/* Historical record card — placeholder, data not yet in DB */}
         <div style={{ ...cardBase, border: '1px solid rgba(255,255,255,0.08)', opacity: 0.55 }}>
-          <p style={{ fontSize: '8px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
+          <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
             RÉCORD HISTÓRICO
           </p>
           <p style={{ fontSize: '24px', fontWeight: 900, color: 'rgba(255,255,255,0.30)', lineHeight: 1, textAlign: 'right', marginTop: 'auto' }}>
             —
           </p>
-          <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.22)', textAlign: 'right' }}>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.22)', textAlign: 'right' }}>
             días sin ganar
           </p>
         </div>
@@ -233,7 +233,7 @@ function Club1000Hero({ player, milestoneDate, matchingGameDate }: {
     }}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p style={{ fontSize: '8px', fontWeight: 800, color: tier.color, letterSpacing: '0.22em', marginBottom: '4px' }}>
+          <p style={{ fontSize: '12px', fontWeight: 800, color: tier.color, letterSpacing: '0.22em', marginBottom: '4px' }}>
             {isPast ? '💀 MIEMBRO DEL CLUB 1000' : '⚠️ MÁS CERCA DEL HITO'}
           </p>
           <div className="flex items-baseline gap-2">
@@ -251,7 +251,7 @@ function Club1000Hero({ player, milestoneDate, matchingGameDate }: {
 
           {/* Milestone date */}
           {milestoneDate && (
-            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>
               📅 {isPast ? 'Cumplió el' : 'Se cumple el'}{' '}
               <span style={{ fontWeight: 700, color: tier.color }}>{formatDateEs(milestoneDate)}</span>
             </p>
@@ -261,12 +261,12 @@ function Club1000Hero({ player, milestoneDate, matchingGameDate }: {
           {matchingGameDate && <GameDateBadge match={matchingGameDate} />}
 
           {!player.hasNeverWon && player.lastVictoryDate && (
-            <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.28)', marginTop: '5px' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.28)', marginTop: '5px' }}>
               Última victoria: {player.lastVictoryDate}
             </p>
           )}
           {player.hasNeverWon && (
-            <p style={{ fontSize: '9px', fontWeight: 800, color: tier.color, marginTop: '5px', letterSpacing: '0.08em' }}>
+            <p style={{ fontSize: '12px', fontWeight: 800, color: tier.color, marginTop: '5px', letterSpacing: '0.08em' }}>
               NUNCA HA GANADO
             </p>
           )}
@@ -287,17 +287,17 @@ function Club1000Hero({ player, milestoneDate, matchingGameDate }: {
               </div>
             )}
           </div>
-          <p style={{ fontSize: '11px', fontWeight: 700, color: '#fff', marginTop: '5px' }}>{player.firstName}</p>
-          <p style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>{player.lastName}</p>
+          <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', marginTop: '5px' }}>{player.firstName}</p>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)' }}>{player.lastName}</p>
         </div>
       </div>
 
       <div className="mt-3">
         <XPBar days={days} color={tier.color} glow={tier.glow} height={8} />
         <div className="flex justify-between mt-1.5">
-          <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.18)' }}>0</span>
-          <span style={{ fontSize: '8px', fontWeight: 800, color: tier.color }}>{pct}%</span>
-          <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.18)' }}>1000</span>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.18)' }}>0</span>
+          <span style={{ fontSize: '12px', fontWeight: 800, color: tier.color }}>{pct}%</span>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.18)' }}>1000</span>
         </div>
       </div>
     </div>
@@ -316,9 +316,9 @@ function TierHeader({ tier, count }: { tier: typeof TIERS[0]; count: number }) {
         display: 'flex', alignItems: 'center', gap: '6px',
       }}>
         <span style={{ fontSize: '13px' }}>{tier.emoji}</span>
-        <span style={{ fontSize: '9px', fontWeight: 800, color: tier.color, letterSpacing: '0.18em' }}>{tier.label}</span>
+        <span style={{ fontSize: '12px', fontWeight: 800, color: tier.color, letterSpacing: '0.18em' }}>{tier.label}</span>
         <span style={{
-          fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.30)',
+          fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.30)',
           borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '6px',
         }}>×{count}</span>
       </div>
@@ -347,7 +347,7 @@ function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
     }}>
       <div className="flex items-center gap-2.5">
         {/* Rank */}
-        <span style={{ width: '18px', textAlign: 'center', flexShrink: 0, fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.22)' }}>
+        <span style={{ width: '18px', textAlign: 'center', flexShrink: 0, fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.22)' }}>
           {rank}
         </span>
 
@@ -367,7 +367,7 @@ function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span style={{ fontSize: '11px', fontWeight: 800, color: tier.color }}>
+              <span style={{ fontSize: '13px', fontWeight: 800, color: tier.color }}>
                 {player.firstName[0]}{player.lastName[0]}
               </span>
             </div>
@@ -383,7 +383,7 @@ function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
             </p>
             <div className="flex items-baseline gap-0.5 shrink-0">
               <span style={{ fontSize: '16px', fontWeight: 900, color: tier.color, lineHeight: 1 }}>{days}</span>
-              <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.28)' }}>d</span>
+              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.28)' }}>d</span>
             </div>
           </div>
 
@@ -395,9 +395,9 @@ function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
           <div className="mt-1 flex items-center justify-between gap-1">
             <div>
               {player.hasNeverWon ? (
-                <span style={{ fontSize: '8px', fontWeight: 800, color: tier.color, letterSpacing: '0.08em' }}>NUNCA HA GANADO</span>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: tier.color, letterSpacing: '0.08em' }}>NUNCA HA GANADO</span>
               ) : player.lastVictoryDate ? (
-                <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.22)' }}>Ú.V: {player.lastVictoryDate}</span>
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.22)' }}>Ú.V: {player.lastVictoryDate}</span>
               ) : null}
             </div>
 
@@ -406,7 +406,7 @@ function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
               <div className="flex items-center gap-1 shrink-0">
                 {matchingGameDate && (
                   <span style={{
-                    fontSize: '7px', fontWeight: 800, color: '#00E5FF',
+                    fontSize: '12px', fontWeight: 800, color: '#00E5FF',
                     padding: '1px 5px', borderRadius: '3px',
                     background: 'rgba(0,229,255,0.14)', border: '1px solid rgba(0,229,255,0.38)',
                     letterSpacing: '0.06em',
@@ -414,7 +414,7 @@ function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
                     🎮 F{matchingGameDate.dateNumber}
                   </span>
                 )}
-                <span style={{ fontSize: '8px', color: isPast ? tier.color : 'rgba(255,255,255,0.35)', fontWeight: isPast ? 700 : 400 }}>
+                <span style={{ fontSize: '12px', color: isPast ? tier.color : 'rgba(255,255,255,0.35)', fontWeight: isPast ? 700 : 400 }}>
                   {isPast ? '✓ ' : '→ '}{formatDateEs(milestoneDate)}
                 </span>
               </div>

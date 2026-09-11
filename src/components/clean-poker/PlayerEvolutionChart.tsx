@@ -18,18 +18,18 @@ export function PlayerEvolutionChart({ evolution }: { evolution: EvolutionPoint[
       <ResponsiveContainer>
         <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
-          <XAxis dataKey="label" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="label" tick={{ fontSize: 12, fill: 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
           <YAxis
             reversed
             domain={[1, maxPos]}
             allowDecimals={false}
-            tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }}
+            tick={{ fontSize: 12, fill: 'rgba(255,255,255,0.4)' }}
             axisLine={false}
             tickLine={false}
             width={28}
           />
           <Tooltip
-            contentStyle={{ background: '#17140F', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }}
+            contentStyle={{ background: '#17140F', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 13 }}
             labelStyle={{ color: '#F5EFE6' }}
             itemStyle={{ color: '#E53935' }}
             formatter={(value: number) => [`#${value}`, 'Posición']}

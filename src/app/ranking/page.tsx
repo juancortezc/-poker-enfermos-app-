@@ -8,6 +8,7 @@ import { CPRankingView } from '@/components/clean-poker/CPRankingView'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 
 export default function RankingPage() {
   const { user, loading: authLoading } = useAuth()
@@ -22,29 +23,7 @@ export default function RankingPage() {
 
   // Loading state
   if (authLoading || tournamentLoading) {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div
-              className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
-              style={{
-                borderColor: 'var(--cp-surface-border)',
-                borderTopColor: 'var(--cp-primary)'
-              }}
-            />
-            <p
-              style={{
-                fontSize: 'var(--cp-body-size)',
-                color: 'var(--cp-on-surface-variant)'
-              }}
-            >
-              Cargando ranking...
-            </p>
-          </div>
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[140, 80, 44, 420]} />
   }
 
   // Not authenticated

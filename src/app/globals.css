@@ -725,3 +725,32 @@
     min-height: 40px;
   }
 }
+
+/* ============================================
+   ESQUELETOS DE CARGA
+   ============================================ */
+.cp-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: cp-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes cp-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Quien pide menos movimiento ve un bloque quieto, no un destello */
+@media (prefers-reduced-motion: reduce) {
+  .cp-skeleton,
+  .animate-pulse,
+  .animate-spin {
+    animation: none;
+  }
+  .cp-skeleton { background: rgba(255, 255, 255, 0.06); }
+}

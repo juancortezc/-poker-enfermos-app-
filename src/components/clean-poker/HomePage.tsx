@@ -12,6 +12,7 @@ import Image from 'next/image'
 import { CPHeader } from './CPHeader'
 import { CPBottomNav } from './CPBottomNav'
 import { CPAppShell } from './CPAppShell'
+import { CPPageSkeleton } from './CPPageSkeleton'
 import { LiveDateBoard } from './LiveDateBoard'
 import { CelebrationsCard } from './CelebrationsCard'
 import { PushActivationBanner } from './PushActivationBanner'
@@ -127,29 +128,7 @@ export function HomePage() {
 // LOADING STATE
 // ============================================
 function HomeLoading() {
-  return (
-    <CPAppShell>
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div
-            className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
-            style={{
-              borderColor: 'var(--cp-surface-border)',
-              borderTopColor: 'var(--cp-primary)'
-            }}
-          />
-          <p
-            style={{
-              fontSize: 'var(--cp-body-size)',
-              color: 'var(--cp-on-surface-variant)'
-            }}
-          >
-            Cargando...
-          </p>
-        </div>
-      </div>
-    </CPAppShell>
-  )
+  return <CPPageSkeleton blocks={[44, 120, 150, 220, 180]} />
 }
 
 // ============================================

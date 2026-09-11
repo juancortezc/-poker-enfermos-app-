@@ -11,6 +11,7 @@ import { useWakeLock } from '@/hooks/useWakeLock'
 import { formatTime } from '@/lib/timer-utils'
 import { TIMER_ENABLED } from '@/lib/feature-flags'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import CPHeader from '@/components/clean-poker/CPHeader'
 import CPBottomNav from '@/components/clean-poker/CPBottomNav'
 
@@ -300,25 +301,7 @@ export default function RegistroPage() {
 
   // Estados de carga y error
   if (loading) {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="relative w-12 h-12 mx-auto mb-3">
-              <div
-                className="absolute inset-0 rounded-full border-4"
-                style={{ borderColor: 'var(--cp-surface-border)' }}
-              />
-              <div
-                className="absolute inset-0 rounded-full border-4 border-t-transparent animate-spin"
-                style={{ borderColor: '#E53935', borderTopColor: 'transparent' }}
-              />
-            </div>
-            <p style={{ color: 'var(--cp-on-surface-muted)' }}>Cargando...</p>
-          </div>
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[120, 180, 300]} />
   }
 
   if (error || !activeGameDate) {
@@ -1198,7 +1181,7 @@ function CPEliminationHistory({
                       </span>
                       {/* Tiempo jugado */}
                       {elimination.eliminationTime && (
-                        <span className="block" style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)', marginTop: '1px' }}>
+                        <span className="block" style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)', marginTop: '1px' }}>
                           {formatClockTime(elimination.eliminationTime)}
                           {formatElapsedTime(elimination.eliminationTime, gameDateStartTime) && (
                             <> · Jugó {formatElapsedTime(elimination.eliminationTime, gameDateStartTime)}</>

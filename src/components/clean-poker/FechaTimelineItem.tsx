@@ -88,9 +88,9 @@ export function FechaTimelineItem({
         }}
       >
         <div style={{ textAlign: 'center', flexShrink: 0, width: 40 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: CREAM_MUTED }}>FECHA</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: CREAM_MUTED }}>FECHA</div>
           <div style={{ fontSize: 18, fontWeight: 900, color: CREAM_TEXT, lineHeight: 1.1 }}>{dateNumber}</div>
-          <div style={{ fontSize: 9, fontWeight: 700, color: '#E53935' }}>{day} {month}</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#E53935' }}>{day} {month}</div>
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -98,7 +98,7 @@ export function FechaTimelineItem({
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <HomeAvatar playerId={winner.eliminatedPlayer.id} name={winner.eliminatedPlayer.firstName} photoUrl={winner.eliminatedPlayer.photoUrl} size={40} fontSize={13} />
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 9, fontWeight: 800, color: '#4CAF50', letterSpacing: '0.04em' }}>GANADOR</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#4CAF50', letterSpacing: '0.04em' }}>GANADOR</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: CREAM_TEXT }}>
                   {winner.eliminatedPlayer.firstName} {winner.eliminatedPlayer.lastName[0]}.
                 </div>
@@ -108,19 +108,19 @@ export function FechaTimelineItem({
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Cake size={16} color="#D8A84E" />
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 9, fontWeight: 800, color: '#D8A84E', letterSpacing: '0.04em' }}>FECHA ESPECIAL</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#D8A84E', letterSpacing: '0.04em' }}>FECHA ESPECIAL</div>
                 <div style={{ fontSize: 12, fontWeight: 700, color: CREAM_TEXT }}>Cumpleaños de {birthdayPlayerName}</div>
               </div>
             </div>
           ) : isNext ? (
             <div>
-              <div style={{ fontSize: 10, fontWeight: 800, color: '#E53935', letterSpacing: '0.04em' }}>PRÓXIMA FECHA</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#E53935', letterSpacing: '0.04em' }}>PRÓXIMA FECHA</div>
               <div style={{ fontSize: 12, fontWeight: 700, color: CREAM_TEXT }}>Faltan {daysUntil} {daysUntil === 1 ? 'día' : 'días'}</div>
-              <div style={{ fontSize: 10, color: CREAM_MUTED, marginTop: 1 }}>{time}</div>
+              <div style={{ fontSize: 12, color: CREAM_MUTED, marginTop: 1 }}>{time}</div>
             </div>
           ) : (
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: CREAM_MUTED, letterSpacing: '0.04em' }}>PROGRAMADA</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: CREAM_MUTED, letterSpacing: '0.04em' }}>PROGRAMADA</div>
               <div style={{ fontSize: 12, fontWeight: 700, color: CREAM_TEXT }}>{time}</div>
             </div>
           )}
@@ -128,7 +128,7 @@ export function FechaTimelineItem({
 
         {isCompleted && (
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={{ fontSize: 9, color: CREAM_MUTED, fontWeight: 700 }}>
+            <div style={{ fontSize: 12, color: CREAM_MUTED, fontWeight: 700 }}>
               {myElim?.position === 1 ? '¡GANASTE!' : 'TÚ QUEDASTE'}
             </div>
             {myElim && myElim.position !== 1 && (

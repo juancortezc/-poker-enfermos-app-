@@ -116,7 +116,7 @@ export default function PlayerEliminationsTab({ tournamentId }: PlayerEliminatio
               </div>
               {/* Badge with elimination count */}
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-poker-red/20 flex-shrink-0">
-                <span className="text-[10px] font-bold text-poker-red">{playerStat.eliminationCount}</span>
+                <span className="text-[12px] font-bold text-poker-red">{playerStat.eliminationCount}</span>
               </div>
             </button>
           ))}

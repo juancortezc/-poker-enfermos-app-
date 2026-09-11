@@ -85,17 +85,17 @@ export default function MultasTab() {
               </p>
               <div className="flex items-center gap-4 mt-2">
                 {multa.pointsPenalty > 0 && (
-                  <span className="flex items-center gap-1" style={{ fontSize: '11px', color: '#E53935', fontWeight: 600 }}>
+                  <span className="flex items-center gap-1" style={{ fontSize: '13px', color: '#E53935', fontWeight: 600 }}>
                     <Hash size={12} /> -{multa.pointsPenalty} pts
                   </span>
                 )}
                 {!!multa.chipsAmount && (
-                  <span className="flex items-center gap-1" style={{ fontSize: '11px', color: 'var(--cp-on-surface-muted)' }}>
+                  <span className="flex items-center gap-1" style={{ fontSize: '13px', color: 'var(--cp-on-surface-muted)' }}>
                     <Coins size={12} /> {multa.chipsAmount} fichas
                   </span>
                 )}
                 {!!multa.moneyAmount && (
-                  <span className="flex items-center gap-1" style={{ fontSize: '11px', color: 'var(--cp-on-surface-muted)' }}>
+                  <span className="flex items-center gap-1" style={{ fontSize: '13px', color: 'var(--cp-on-surface-muted)' }}>
                     <DollarSign size={12} /> {multa.moneyAmount}
                   </span>
                 )}

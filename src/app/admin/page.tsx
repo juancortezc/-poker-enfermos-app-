@@ -7,6 +7,7 @@ import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { Play, Trophy, Coins, Users, Gift, Gavel } from 'lucide-react'
 import CPBottomNav from '@/components/clean-poker/CPBottomNav'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import CPHeader from '@/components/clean-poker/CPHeader'
 import LoginForm from '@/components/LoginForm'
 import CPActivarTab from '@/components/admin/CPActivarTab'
@@ -46,25 +47,7 @@ export default function AdminNewPage() {
 
   // Loading state
   if (loading || tournamentLoading) {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="relative w-12 h-12 mx-auto mb-3">
-              <div
-                className="absolute inset-0 rounded-full border-4"
-                style={{ borderColor: 'var(--cp-surface-border)' }}
-              />
-              <div
-                className="absolute inset-0 rounded-full border-4 border-t-transparent animate-spin"
-                style={{ borderColor: '#E53935', borderTopColor: 'transparent' }}
-              />
-            </div>
-            <p style={{ color: 'var(--cp-on-surface-muted)' }}>Cargando...</p>
-          </div>
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[120, 200, 200]} />
   }
 
   // Not authenticated
@@ -162,7 +145,7 @@ export default function AdminNewPage() {
                   <Icon size={18} color={active ? '#fff' : 'var(--cp-on-surface-muted)'} />
                   <span
                     style={{
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: active ? 700 : 500,
                       color: active ? '#fff' : 'var(--cp-on-surface-muted)',
                     }}

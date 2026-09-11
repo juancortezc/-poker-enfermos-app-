@@ -230,7 +230,7 @@ export default function CPCampeonesTab() {
                     <p
                       className="truncate"
                       style={{
-                        fontSize: '10px',
+                        fontSize: '12px',
                         color: '#f97316',
                       }}
                     >
@@ -323,7 +323,7 @@ function ChampionCard({ champion, position, color, size }: ChampionCardProps) {
         {getAlias() && (
           <p
             className="truncate w-full text-center"
-            style={{ fontSize: '9px', color: '#f97316' }}
+            style={{ fontSize: '12px', color: '#f97316' }}
           >
             ({getAlias()})
           </p>

@@ -328,7 +328,7 @@ export default function CalendarDraftBuilder() {
                 <span>Próximo torneo: <span className="font-semibold text-white">#{tournamentNumber ?? '—'}</span></span>
               </div>
               {nextNumber && tournamentNumber !== nextNumber && (
-                <span className="text-yellow-300 text-[11px] sm:text-xs">Sugerido: #{nextNumber}</span>
+                <span className="text-yellow-300 text-[13px] sm:text-xs">Sugerido: #{nextNumber}</span>
               )}
             </div>
             <p className="mt-2 text-white/70">
@@ -350,7 +350,7 @@ export default function CalendarDraftBuilder() {
                 className="rounded-xl border border-poker-red/40 bg-poker-card p-2.5 text-xs transition-all duration-200 hover:border-poker-red/60 hover:shadow-lg hover:shadow-poker-red/10 sm:p-3"
               >
                 <div className="space-y-2 text-center">
-                  <div className="flex items-center justify-center space-x-2 text-[11px] text-poker-muted">
+                  <div className="flex items-center justify-center space-x-2 text-[13px] text-poker-muted">
                     <span className="font-medium uppercase tracking-wide">Fecha {gameDate.dateNumber}</span>
                     {index === 0 && <span className="h-1.5 w-1.5 rounded-full bg-poker-red" />}
                   </div>
@@ -393,7 +393,7 @@ export default function CalendarDraftBuilder() {
                       onChange={(value) => updateGameDate(index, value)}
                       placeholder={index === 0 ? 'Seleccionar fecha' : 'Auto'}
                       required={index === 0}
-                      className="w-full text-[11px] opacity-80 transition-opacity hover:opacity-100 sm:text-sm"
+                      className="w-full text-[13px] opacity-80 transition-opacity hover:opacity-100 sm:text-sm"
                     />
                   </div>
                 </div>

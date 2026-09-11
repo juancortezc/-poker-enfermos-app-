@@ -277,7 +277,7 @@ export default function DatosTab() {
           Cambiar PIN
         </p>
         <p
-          style={{ fontSize: '11px', color: 'var(--cp-on-surface-muted)', marginTop: '-4px' }}
+          style={{ fontSize: '13px', color: 'var(--cp-on-surface-muted)', marginTop: '-4px' }}
         >
           Deja en blanco para mantener el PIN actual
         </p>

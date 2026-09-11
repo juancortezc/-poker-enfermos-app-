@@ -9,6 +9,7 @@ import { Search, Phone, Mail, Cake, Users } from 'lucide-react'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
 import { HomeAvatar } from '@/components/clean-poker/HomeAvatar'
 
@@ -73,16 +74,7 @@ export default function ContactosPage() {
   const isLoading = authLoading || tournamentLoading || !user
 
   if (isLoading) {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div
-            className="w-10 h-10 border-2 rounded-full animate-spin"
-            style={{ borderColor: 'var(--cp-surface-border)', borderTopColor: 'var(--cp-primary)' }}
-          />
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[52, 300, 200]} />
   }
 
   const userInitials = user.firstName && user.lastName ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 'PE'
@@ -104,12 +96,12 @@ export default function ContactosPage() {
           <Users size={20} color="#E53935" />
           <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>Contactos</div>
           {totalContacts !== null && (
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#7A6E62' }}>{totalContacts}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#A89A8C' }}>{totalContacts}</span>
           )}
         </div>
 
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#7A6E62' }} />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#A89A8C' }} />
           <input
             type="text"
             value={search}
@@ -152,12 +144,12 @@ export default function ContactosPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 14, fontWeight: 800, color: '#F5EFE6' }}>
                           {player.firstName} {player.lastName}
-                          {isCurrentUser && <span style={{ color: '#7A6E62', fontWeight: 600 }}> (Tú)</span>}
+                          {isCurrentUser && <span style={{ color: '#A89A8C', fontWeight: 600 }}> (Tú)</span>}
                         </span>
                         {player.role === 'Comision' && (
                           <span
                             style={{
-                              fontSize: 9,
+                              fontSize: 12,
                               fontWeight: 800,
                               color: '#E53935',
                               background: 'rgba(229,57,53,0.16)',
@@ -178,26 +170,26 @@ export default function ContactosPage() {
                       <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {player.phone && (
                           <a href={`tel:${player.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Phone size={11} style={{ color: '#7A6E62', flexShrink: 0 }} />
-                            <span style={{ fontSize: 11, color: '#B5A996' }}>{player.phone}</span>
+                            <Phone size={11} style={{ color: '#A89A8C', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: '#B5A996' }}>{player.phone}</span>
                           </a>
                         )}
                         {player.email && (
                           <a href={`mailto:${player.email}`} style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                            <Mail size={11} style={{ color: '#7A6E62', flexShrink: 0 }} />
-                            <span style={{ fontSize: 11, color: '#B5A996', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Mail size={11} style={{ color: '#A89A8C', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: '#B5A996', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {player.email}
                             </span>
                           </a>
                         )}
                         {birthday && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Cake size={11} style={{ color: '#7A6E62', flexShrink: 0 }} />
-                            <span style={{ fontSize: 11, color: '#B5A996' }}>{birthday}</span>
+                            <Cake size={11} style={{ color: '#A89A8C', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: '#B5A996' }}>{birthday}</span>
                           </div>
                         )}
                         {!player.phone && !player.email && !birthday && (
-                          <span style={{ fontSize: 11, color: '#7A6E62' }}>Sin datos de contacto</span>
+                          <span style={{ fontSize: 13, color: '#A89A8C' }}>Sin datos de contacto</span>
                         )}
                       </div>
                     </div>

@@ -181,11 +181,11 @@ export default function CPPodiosTab() {
           className="grid grid-cols-[1fr_40px_40px_40px_50px] gap-2 px-4 py-2"
           style={{ borderBottom: '1px solid var(--cp-surface-border)' }}
         >
-          <span style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>JUGADOR</span>
-          <span className="text-center" style={{ fontSize: '10px', color: '#fbbf24' }}>1ro</span>
-          <span className="text-center" style={{ fontSize: '10px', color: '#94a3b8' }}>2do</span>
-          <span className="text-center" style={{ fontSize: '10px', color: '#f97316' }}>3ro</span>
-          <span className="text-center" style={{ fontSize: '10px', color: 'var(--cp-on-surface-muted)' }}>TOT</span>
+          <span style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>JUGADOR</span>
+          <span className="text-center" style={{ fontSize: '12px', color: '#fbbf24' }}>1ro</span>
+          <span className="text-center" style={{ fontSize: '12px', color: '#94a3b8' }}>2do</span>
+          <span className="text-center" style={{ fontSize: '12px', color: '#f97316' }}>3ro</span>
+          <span className="text-center" style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>TOT</span>
         </div>
 
         {/* Rest of Players */}
@@ -200,7 +200,7 @@ export default function CPPodiosTab() {
                 <span
                   className="w-5 text-center font-medium"
                   style={{
-                    fontSize: '11px',
+                    fontSize: '13px',
                     color: 'var(--cp-on-surface-muted)',
                   }}
                 >
@@ -241,7 +241,7 @@ export default function CPPodiosTab() {
                   {getPlayerAlias(stat.player) && (
                     <p
                       className="truncate"
-                      style={{ fontSize: '9px', color: '#f97316' }}
+                      style={{ fontSize: '12px', color: '#f97316' }}
                     >
                       ({getPlayerAlias(stat.player)})
                     </p>

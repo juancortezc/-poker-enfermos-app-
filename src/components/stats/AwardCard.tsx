@@ -88,7 +88,7 @@ export default function AwardCard({
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.24em] text-white/60">{description}</p>
+          <p className="text-[12px] uppercase tracking-[0.24em] text-white/60">{description}</p>
           <h3 className="mt-1 text-xl font-semibold text-white tracking-tight">{title}</h3>
         </div>
         <div className={`flex h-12 w-12 items-center justify-center rounded-full ${colors.bg}`}>
@@ -137,7 +137,7 @@ export default function AwardCard({
                 <div className={`flex flex-col items-end text-right px-3 py-1 rounded-lg ${colors.bg}`}>
                   <span className={`text-lg font-bold ${colors.text}`}>{item.value}</span>
                   {valueLabel && (
-                    <span className="text-[10px] uppercase tracking-wider text-white/50">{valueLabel}</span>
+                    <span className="text-[12px] uppercase tracking-wider text-white/50">{valueLabel}</span>
                   )}
                 </div>
               )}

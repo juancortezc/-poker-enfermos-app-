@@ -191,12 +191,12 @@ export function ProposalCard({
                 {proposal.title}
               </h3>
               {!proposal.isActive && (
-                <span className="rounded-full bg-slate-700/60 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200">
+                <span className="rounded-full bg-slate-700/60 px-3 py-0.5 text-[13px] font-semibold uppercase tracking-[0.18em] text-slate-200">
                   Inactiva
                 </span>
               )}
               {proposal.votingClosed && (
-                <span className="rounded-full bg-amber-700/60 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200 flex items-center gap-1">
+                <span className="rounded-full bg-amber-700/60 px-3 py-0.5 text-[13px] font-semibold uppercase tracking-[0.18em] text-amber-200 flex items-center gap-1">
                   <Lock className="w-3 h-3" />
                   Cerrada
                 </span>
@@ -210,7 +210,7 @@ export function ProposalCard({
                   <span className="text-white/80">
                     {proposal.createdBy.firstName} {proposal.createdBy.lastName}
                   </span>
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.18em] ${getRoleBadgeColor(proposal.createdBy.role)}`}>
+                  <span className={`rounded-full px-2 py-0.5 text-[13px] font-semibold uppercase tracking-[0.18em] ${getRoleBadgeColor(proposal.createdBy.role)}`}>
                     {proposal.createdBy.role}
                   </span>
                   <span className="text-white/30">•</span>
@@ -286,7 +286,7 @@ export function ProposalCard({
                   onClick={() => window.open(proposal.imageUrl!, '_blank')}
                 />
               </div>
-              <p className="mt-2 text-center text-[11px] uppercase tracking-[0.2em] text-white/45">
+              <p className="mt-2 text-center text-[13px] uppercase tracking-[0.2em] text-white/45">
                 Click para ver en tamaño completo
               </p>
             </div>

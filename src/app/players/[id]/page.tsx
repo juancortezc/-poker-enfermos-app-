@@ -13,6 +13,7 @@ import { averageNightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } f
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
 import { HomeAvatar } from '@/components/clean-poker/HomeAvatar'
 import { PlayerEvolutionChart } from '@/components/clean-poker/PlayerEvolutionChart'
@@ -62,20 +63,20 @@ const NEGATIVE = '#C2410C'
 function TrendBadge({ positionsChanged }: { positionsChanged: number }) {
   if (positionsChanged > 0) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: '#2E7D32', fontSize: 11, fontWeight: 800 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: '#2E7D32', fontSize: 13, fontWeight: 800 }}>
         <TrendingUp size={12} /> +{positionsChanged}
       </div>
     )
   }
   if (positionsChanged < 0) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: '#C62828', fontSize: 11, fontWeight: 800 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: '#C62828', fontSize: 13, fontWeight: 800 }}>
         <TrendingDown size={12} /> {positionsChanged}
       </div>
     )
   }
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: CREAM_MUTED, fontSize: 11, fontWeight: 700 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: CREAM_MUTED, fontSize: 13, fontWeight: 700 }}>
       <Minus size={12} />
     </div>
   )
@@ -170,16 +171,7 @@ export default function PlayerProfilePage() {
   const isLoading = authLoading || tournamentLoading || !user || detailsLoading || !details
 
   if (isLoading) {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div
-            className="w-10 h-10 border-2 rounded-full animate-spin"
-            style={{ borderColor: 'var(--cp-surface-border)', borderTopColor: 'var(--cp-primary)' }}
-          />
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[150, 90, 200, 200]} />
   }
 
   const isOwnProfile = user.id === playerId
@@ -204,7 +196,7 @@ export default function PlayerProfilePage() {
       <main className="pb-24 px-4 pt-4 space-y-4">
         <button
           onClick={() => router.back()}
-          style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 11, fontWeight: 700, color: '#A89A8C', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 13, fontWeight: 700, color: '#A89A8C', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           <ChevronLeft size={14} /> VOLVER
         </button>
@@ -246,14 +238,14 @@ export default function PlayerProfilePage() {
               {(playerChampionships?.championshipsCount ?? 0) > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
                   <Trophy size={12} color="#8A6A2E" />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#8A6A2E' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#8A6A2E' }}>
                     {playerChampionships!.championshipsCount}x campeón
                   </span>
                 </div>
               )}
             </div>
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: 9, fontWeight: 800, color: CREAM_MUTED, letterSpacing: '0.06em' }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: CREAM_MUTED, letterSpacing: '0.06em' }}>
                 {isOwnProfile ? 'TU POSICIÓN' : 'POSICIÓN'}
               </div>
               <div style={{ fontSize: 26, fontWeight: 900, color: CREAM_TEXT, lineHeight: 1 }}>#{currentStats.position}</div>
@@ -270,7 +262,7 @@ export default function PlayerProfilePage() {
               <div key={label} style={{ flex: 1, textAlign: 'center' }}>
                 <div
                   style={{
-                    fontSize: 9,
+                    fontSize: 12,
                     color: lead ? CREAM_TEXT : CREAM_MUTED,
                     fontWeight: lead ? 800 : 400,
                     letterSpacing: '0.1em',
@@ -296,7 +288,7 @@ export default function PlayerProfilePage() {
         {/* RIVAL DIRECTO */}
         {(rivals.above || rivals.below) && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'TU RIVAL DIRECTO' : 'RIVAL CERCANO'}
             </div>
             <div className="space-y-2">
@@ -311,18 +303,18 @@ export default function PlayerProfilePage() {
                       <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={44} fontSize={15} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 8, fontWeight: 800, color: '#7A6E62', letterSpacing: '0.06em', background: 'rgba(255,255,255,0.06)', padding: '2px 5px', borderRadius: 4 }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: '#A89A8C', letterSpacing: '0.06em', background: 'rgba(255,255,255,0.06)', padding: '2px 5px', borderRadius: 4 }}>
                             {tag}
                           </span>
                           <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{player.playerName}</div>
                         </div>
-                        <div style={{ fontSize: 10, color: '#7A6E62', marginTop: 2 }}>#{player.position} en el torneo</div>
+                        <div style={{ fontSize: 12, color: '#A89A8C', marginTop: 2 }}>#{player.position} en el torneo</div>
                       </div>
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>
                           {Math.abs((currentStats.finalScore ?? currentStats.totalPoints) - (player.finalScore ?? player.totalPoints))} pts
                         </div>
-                        <div style={{ fontSize: 9, color: '#7A6E62' }}>de diferencia</div>
+                        <div style={{ fontSize: 12, color: '#A89A8C' }}>de diferencia</div>
                       </div>
                     </div>
                   </HomeCard>
@@ -334,7 +326,7 @@ export default function PlayerProfilePage() {
         {/* LOGROS */}
         {achievements && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>LOGROS</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>LOGROS</div>
             <HomeCard>
               <div className="grid grid-cols-4" style={{ padding: '10px 4px' }}>
                 {[
@@ -352,7 +344,7 @@ export default function PlayerProfilePage() {
                     }}
                   >
                     <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{kpi.val}</div>
-                    <div style={{ fontSize: 8, color: '#8A7E70', marginTop: 1, lineHeight: 1.3 }}>{kpi.label}</div>
+                    <div style={{ fontSize: 12, color: '#8A7E70', marginTop: 1, lineHeight: 1.3 }}>{kpi.label}</div>
                   </div>
                 ))}
               </div>
@@ -363,7 +355,7 @@ export default function PlayerProfilePage() {
         {/* EVOLUCION */}
         {details.rankingEvolution.length > 1 && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'MI EVOLUCIÓN EN EL TORNEO' : 'EVOLUCIÓN EN EL TORNEO'}
             </div>
             <HomeCard>
@@ -376,7 +368,7 @@ export default function PlayerProfilePage() {
 
         {/* RESUMEN */}
         <div>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
             RESUMEN DE {isOwnProfile ? 'TU' : 'SU'} TORNEO
           </div>
           <HomeCard>
@@ -392,7 +384,7 @@ export default function PlayerProfilePage() {
         {/* ULTIMAS FECHAS */}
         {lastThreeDates.length > 0 && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'TUS ÚLTIMAS FECHAS' : 'ÚLTIMAS FECHAS'}
             </div>
             <div className="space-y-2">
@@ -404,14 +396,14 @@ export default function PlayerProfilePage() {
                   <HomeCard key={d.id}>
                     <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ textAlign: 'center', flexShrink: 0, width: 34 }}>
-                        <div style={{ fontSize: 9, fontWeight: 700, color: '#7A6E62' }}>FECHA</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C' }}>FECHA</div>
                         <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{d.dateNumber}</div>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {winner && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <HomeAvatar playerId={winner.eliminatedPlayer.id} name={winner.eliminatedPlayer.firstName} photoUrl={winner.eliminatedPlayer.photoUrl} size={26} fontSize={10} />
-                            <div style={{ fontSize: 11, color: '#B5A996' }}>
+                            <div style={{ fontSize: 13, color: '#B5A996' }}>
                               Ganó <span style={{ color: '#F5EFE6', fontWeight: 700 }}>{winner.eliminatedPlayer.firstName}</span>
                             </div>
                           </div>
@@ -420,13 +412,13 @@ export default function PlayerProfilePage() {
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         {participated ? (
                           <>
-                            <div style={{ fontSize: 9, color: '#7A6E62', fontWeight: 700 }}>
+                            <div style={{ fontSize: 12, color: '#A89A8C', fontWeight: 700 }}>
                               {!myElim ? '¡GANÓ!' : `#${myElim.position}`}
                             </div>
                             <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{myElim?.points ?? winner?.points ?? ''} pts</div>
                           </>
                         ) : (
-                          <div style={{ fontSize: 10, color: '#7A6E62' }}>No participó</div>
+                          <div style={{ fontSize: 12, color: '#A89A8C' }}>No participó</div>
                         )}
                       </div>
                     </div>
@@ -440,7 +432,7 @@ export default function PlayerProfilePage() {
         {/* FECHAS QUE ELIMINA */}
         {eliminatedDates.length > 0 && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'FECHAS QUE ELIMINAS' : 'FECHAS QUE ELIMINA'}
             </div>
             <div className="space-y-2">
@@ -448,10 +440,10 @@ export default function PlayerProfilePage() {
                 <HomeCard key={d.dateNumber}>
                   <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ textAlign: 'center', flexShrink: 0, width: 34 }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: '#7A6E62' }}>FECHA</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C' }}>FECHA</div>
                       <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{d.dateNumber}</div>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0, fontSize: 11, color: '#B5A996' }}>
+                    <div style={{ flex: 1, minWidth: 0, fontSize: 13, color: '#B5A996' }}>
                       {d.isAbsent ? 'Ausencia' : d.eliminationPosition ? `Posición #${d.eliminationPosition}` : 'Ganador'}
                     </div>
                     <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-negative)', flexShrink: 0 }}>−{d.points} pts</div>
@@ -473,7 +465,7 @@ export default function PlayerProfilePage() {
         {/* MULTAS */}
         {multas && multas.length > 0 && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>MULTAS</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>MULTAS</div>
             <div className="space-y-1.5">
               {multas.map((multa) => (
                 <div
@@ -482,13 +474,13 @@ export default function PlayerProfilePage() {
                 >
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 12, color: '#F5EFE6', fontWeight: 700 }}>{multa.reason}</div>
-                    <div style={{ fontSize: 10, color: '#B5A996' }}>
+                    <div style={{ fontSize: 12, color: '#B5A996' }}>
                       {multa.pointsPenalty > 0 && `-${multa.pointsPenalty} pts`}
                       {!!multa.chipsAmount && `${multa.pointsPenalty > 0 ? ' · ' : ''}${multa.chipsAmount} fichas`}
                       {!!multa.moneyAmount && `${multa.pointsPenalty > 0 || multa.chipsAmount ? ' · ' : ''}$${multa.moneyAmount}`}
                     </div>
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: multa.paid ? '#4CAF50' : '#E53935', flexShrink: 0 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: multa.paid ? '#4CAF50' : '#E53935', flexShrink: 0 }}>
                     {multa.paid ? 'PAGADA' : 'PENDIENTE'}
                   </span>
                 </div>

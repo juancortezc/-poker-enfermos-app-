@@ -152,7 +152,7 @@ export function PwaInstallPrompt() {
                 <div className="mt-2 space-y-1.5 text-xs text-white/80">
                   {instructions.map((step, index) => (
                     <div key={step} className="flex items-start gap-2">
-                      <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white">{index + 1}</span>
+                      <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-[13px] font-semibold text-white">{index + 1}</span>
                       <span>{step}</span>
                     </div>
                   ))}

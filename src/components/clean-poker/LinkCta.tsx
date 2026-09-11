@@ -3,7 +3,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 
 const BASE_STYLE: CSSProperties = {
-  fontSize: 11,
+  fontSize: 13,
   fontWeight: 700,
   letterSpacing: '0.04em',
   display: 'inline-flex',

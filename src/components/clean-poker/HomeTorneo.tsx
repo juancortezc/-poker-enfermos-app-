@@ -180,11 +180,11 @@ export function HomeTorneo({
         }}
       >
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#E8C158' }}>Próxima fecha</div>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#E8C158' }}>Próxima fecha</div>
           <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', marginTop: 2, letterSpacing: '-0.01em' }}>
             {formattedDate ?? 'Por definir'}
           </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#A89A8C', marginTop: 2 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#A89A8C', marginTop: 2 }}>
             {days !== null ? `Faltan ${days} ${days === 1 ? 'día' : 'días'}` : 'Sin fecha programada'}
             {nextDate?.dateNumber ? ` · Fecha ${nextDate.dateNumber}` : ''}
           </div>
@@ -221,7 +221,7 @@ export function HomeTorneo({
               color: '#fff',
               padding: '7px 12px',
               borderRadius: 100,
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 800,
               letterSpacing: '0.02em',
               border: 'none',
@@ -237,12 +237,12 @@ export function HomeTorneo({
       {myRanking && (
         <div style={{ display: 'flex', gap: 10 }}>
           <div style={{ flex: 1, background: 'linear-gradient(160deg,#E53935,#B32623)', borderRadius: 16, padding: 14, color: '#fff' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.85 }}>{myRanking.playerName.split(' ')[0]}, estás</div>
+            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.85 }}>{myRanking.playerName.split(' ')[0]}, estás</div>
             <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.02em', marginTop: 2 }}>#{myRanking.position}</div>
-            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.75, marginTop: 2, marginBottom: 8 }}>En el campeonato</div>
+            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.75, marginTop: 2, marginBottom: 8 }}>En el campeonato</div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.18)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, whiteSpace: 'nowrap' }}>
                 <span style={{ opacity: 0.75, color: 'inherit' }}>Última fecha</span>
                 <span style={{ fontWeight: 800, color: 'inherit' }}>
                   {myRanking.positionsChanged === 0
@@ -250,39 +250,39 @@ export function HomeTorneo({
                     : `${myRanking.positionsChanged > 0 ? '+' : ''}${myRanking.positionsChanged} pos`}
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                <span style={{ opacity: 0.75, color: 'inherit' }}>Puesto promedio</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, whiteSpace: 'nowrap' }}>
+                <span style={{ opacity: 0.75, color: 'inherit' }}>Puesto prom.</span>
                 <span style={{ fontWeight: 800, color: 'inherit' }}>{avgNightlyPosition !== null ? `#${Math.round(avgNightlyPosition)}` : '—'}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                <span style={{ opacity: 0.75, color: 'inherit' }}>Prom. por fecha*</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, whiteSpace: 'nowrap' }}>
+                <span style={{ opacity: 0.75, color: 'inherit' }}>Prom./fecha*</span>
                 <span style={{ fontWeight: 800, color: 'inherit' }}>{avgPointsPerDate !== null ? `${Math.round(avgPointsPerDate)} pts` : '—'}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10 }}>
-                <span style={{ opacity: 0.75, color: 'inherit' }}>Últimas 3 fechas</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, whiteSpace: 'nowrap' }}>
+                <span style={{ opacity: 0.75, color: 'inherit' }}>Últimas 3</span>
                 <span style={{ fontWeight: 800, color: 'inherit' }}>{last3 ? `${last3.mine}/${last3.max} pts` : '—'}</span>
               </div>
             </div>
-            <div style={{ fontSize: 8, opacity: 0.5, marginTop: 6 }}>*solo fechas jugadas, sin ausencias</div>
+            <div style={{ fontSize: 12, opacity: 0.5, marginTop: 6 }}>*solo fechas jugadas, sin ausencias</div>
           </div>
           <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#A89A8C' }}>Tus puntos</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C' }}>Tus puntos</div>
             <div style={{ fontSize: 26, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.02em', marginTop: 2 }}>
               {scoreOf(myRanking)} <span style={{ fontSize: 13, fontWeight: 700, color: 'inherit' }}>pts</span>
             </div>
             {eliminaSum > 0 && (
-              <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 2 }}>Descartas {eliminaSum} pts</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 2 }}>Descartas {eliminaSum} pts</div>
             )}
-            <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 1 }}>
               {SCORE_LABELS.accumulatedLong}: {myRanking.totalPoints} pts
             </div>
 
             <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontSize: 9, color: '#A89A8C' }}>
+              <div style={{ fontSize: 12, color: '#A89A8C' }}>
                 Te separan del líder: <span style={{ fontWeight: 800, color: '#F5EFE6' }}>{gapToLeader ?? 0} {gapToLeader === 1 ? 'pt' : 'pts'}</span>
               </div>
               {gapToMalazos !== null && (
-                <div style={{ fontSize: 9, color: '#7A6E62', marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: '#A89A8C', marginTop: 2 }}>
                   {gapToMalazos} {gapToMalazos === 1 ? 'pt' : 'pts'} de la zona 7/2
                 </div>
               )}
@@ -299,7 +299,7 @@ export function HomeTorneo({
       {highlightCards.length > 0 && (
         <div>
           <div style={{ marginBottom: 10, padding: '0 2px' }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>LA TEMPORADA EN NÚMEROS</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>LA TEMPORADA EN NÚMEROS</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {highlightCards.map(card => (
@@ -307,7 +307,7 @@ export function HomeTorneo({
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   {card.icon}
                 </div>
-                <div style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: 700, color: '#F5EFE6' }}>{card.text}</div>
+                <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{card.text}</div>
               </HomeCard>
             ))}
           </div>

@@ -606,7 +606,7 @@ export default function CPActivarTab() {
               <Users size={16} color={RED} />
               <ChevronRight size={14} style={{ color: 'var(--cp-on-surface-muted)' }} />
             </div>
-            <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 6 }}>
+            <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 6 }}>
               Enfermos
             </p>
             <p style={{ fontSize: 20, fontWeight: 900, color: 'var(--cp-on-surface)' }}>
@@ -628,7 +628,7 @@ export default function CPActivarTab() {
               <UserPlus size={16} color={PINK} />
               <ChevronRight size={14} style={{ color: 'var(--cp-on-surface-muted)' }} />
             </div>
-            <p style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 6 }}>
+            <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 6 }}>
               Invitados
             </p>
             <p style={{ fontSize: 20, fontWeight: 900, color: 'var(--cp-on-surface)' }}>
@@ -671,7 +671,7 @@ export default function CPActivarTab() {
                       style={{
                         flex: 1,
                         minWidth: 0,
-                        fontSize: 11,
+                        fontSize: 13,
                         fontWeight: 600,
                         color: isSelected ? '#fff' : 'var(--cp-on-surface)',
                         whiteSpace: 'nowrap',
@@ -765,7 +765,7 @@ export default function CPActivarTab() {
                   : 'Selecciona fecha'}
               </p>
               {selectedDate && (
-                <p style={{ fontSize: 10, color: 'var(--cp-on-surface-muted)' }}>
+                <p style={{ fontSize: 12, color: 'var(--cp-on-surface-muted)' }}>
                   {selectedDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()}
                 </p>
               )}
@@ -843,11 +843,11 @@ export default function CPActivarTab() {
             }}
           >
             <Users size={14} color={RED} />
-            <p style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 4 }}>
+            <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 4 }}>
               Enfermos
             </p>
             <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--cp-on-surface)' }}>
-              {selectedPlayers.length}<span style={{ fontSize: 10, fontWeight: 600, color: 'var(--cp-on-surface-muted)' }}>/{totalEnfermos}</span>
+              {selectedPlayers.length}<span style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-on-surface-muted)' }}>/{totalEnfermos}</span>
             </p>
           </button>
 
@@ -862,11 +862,11 @@ export default function CPActivarTab() {
             }}
           >
             <UserPlus size={14} color={PINK} />
-            <p style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 4 }}>
+            <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--cp-on-surface-muted)', marginTop: 4 }}>
               Invitados
             </p>
             <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--cp-on-surface)' }}>
-              {selectedGuests.length}<span style={{ fontSize: 10, fontWeight: 600, color: 'var(--cp-on-surface-muted)' }}>/{totalInvitados}</span>
+              {selectedGuests.length}<span style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-on-surface-muted)' }}>/{totalInvitados}</span>
             </p>
           </button>
 
@@ -887,7 +887,7 @@ export default function CPActivarTab() {
             ) : (
               <Play size={14} fill="#fff" color="#fff" />
             )}
-            <p style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.85)', marginTop: 4 }}>
+            <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.85)', marginTop: 4 }}>
               {activating ? 'Activando...' : 'Activar'}
             </p>
             <p style={{ fontSize: 16, fontWeight: 900, color: '#fff' }}>
@@ -931,7 +931,7 @@ export default function CPActivarTab() {
                     style={{
                       flex: 1,
                       minWidth: 0,
-                      fontSize: 11,
+                      fontSize: 13,
                       fontWeight: 600,
                       color: isSelected ? '#fff' : 'var(--cp-on-surface)',
                       whiteSpace: 'nowrap',

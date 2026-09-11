@@ -306,7 +306,7 @@ export default function CPJugadoresTab() {
                 ) : (
                   <span
                     style={{
-                      fontSize: '11px',
+                      fontSize: '13px',
                       color: 'var(--cp-on-surface-variant)',
                       fontWeight: 600,
                     }}

@@ -7,6 +7,7 @@ import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import CalendarioTab from '@/components/info/CalendarioTab'
 import ReglamentoTab from '@/components/info/ReglamentoTab'
 import PodcastTab from '@/components/info/PodcastTab'
@@ -32,29 +33,7 @@ export default function InfoPage() {
 
   // Loading state
   if (authLoading || tournamentLoading) {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div
-            className="w-10 h-10 border-2 rounded-full animate-spin mx-auto mb-3"
-            style={{
-              borderColor: 'var(--cp-surface-border)',
-              borderTopColor: 'var(--cp-primary)'
-            }}
-          />
-          <p
-            style={{
-              fontSize: 'var(--cp-body-size)',
-              color: 'var(--cp-on-surface-variant)'
-            }}
-          >
-            Cargando informacion...
-          </p>
-        </div>
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[44, 200, 200]} />
   }
 
   // Not authenticated

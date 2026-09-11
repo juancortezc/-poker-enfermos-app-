@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import CPBottomNav from '@/components/clean-poker/CPBottomNav'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import LoginForm from '@/components/LoginForm'
 import DatosTab from '@/components/perfil/DatosTab'
 import NotificacionesTab from '@/components/perfil/NotificacionesTab'
@@ -28,25 +29,7 @@ export default function PerfilPage() {
 
   // Loading state
   if (loading) {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="relative w-12 h-12 mx-auto mb-3">
-              <div
-                className="absolute inset-0 rounded-full border-4"
-                style={{ borderColor: 'var(--cp-surface-border)' }}
-              />
-              <div
-                className="absolute inset-0 rounded-full border-4 border-t-transparent animate-spin"
-                style={{ borderColor: '#E53935', borderTopColor: 'transparent' }}
-              />
-            </div>
-            <p style={{ color: 'var(--cp-on-surface-muted)' }}>Cargando...</p>
-          </div>
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[44, 200, 200]} />
   }
 
   // Not authenticated

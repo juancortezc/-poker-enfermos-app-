@@ -152,7 +152,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
                 </p>
                 <p
                   style={{
-                    fontSize: '9px',
+                    fontSize: '12px',
                     color: 'var(--cp-on-surface-muted)',
                   }}
                 >
@@ -173,7 +173,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
                 </p>
                 <p
                   style={{
-                    fontSize: '9px',
+                    fontSize: '12px',
                     color: 'var(--cp-on-surface-muted)',
                   }}
                 >
@@ -184,7 +184,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
               {/* Cambio */}
               <div className="text-center">
                 <div className="flex items-center justify-center gap-0.5">
-                  <span style={{ fontSize: '8px', color: getTrendColor(player.trend) }}>
+                  <span style={{ fontSize: '12px', color: getTrendColor(player.trend) }}>
                     {getTrendSymbol(player.trend)}
                   </span>
                   <span
@@ -199,7 +199,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
                 </div>
                 <p
                   style={{
-                    fontSize: '9px',
+                    fontSize: '12px',
                     color: 'var(--cp-on-surface-muted)',
                   }}
                 >
@@ -239,7 +239,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
                 </p>
                 <p
                   style={{
-                    fontSize: '8px',
+                    fontSize: '12px',
                     color: 'var(--cp-on-surface-muted)',
                   }}
                 >
@@ -258,7 +258,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
                 </p>
                 <p
                   style={{
-                    fontSize: '8px',
+                    fontSize: '12px',
                     color: 'var(--cp-on-surface-muted)',
                   }}
                 >

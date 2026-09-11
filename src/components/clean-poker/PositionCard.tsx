@@ -46,17 +46,17 @@ export function PositionCard({
         <span className="font-extrabold shrink-0" style={{ fontSize: '22px', color: '#fff', lineHeight: 1 }}>
           #{position}
         </span>
-        <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em', flexShrink: 0 }}>POS</span>
+        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em', flexShrink: 0 }}>POS</span>
 
         <div style={{ width: '1px', height: '14px', background: 'rgba(255,255,255,0.12)', flexShrink: 0 }} />
 
         <div className="flex items-baseline gap-1 shrink-0">
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff', lineHeight: 1 }}>{finalPoints}</span>
-          <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.35)' }}>fin</span>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)' }}>fin</span>
         </div>
         <div className="flex items-baseline gap-1 shrink-0">
           <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.45)', lineHeight: 1 }}>{totalPoints}</span>
-          <span style={{ fontSize: '8px', color: 'rgba(255,255,255,0.30)' }}>tot</span>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.30)' }}>tot</span>
         </div>
         <div className="flex items-baseline gap-0.5 shrink-0">
           <span style={{ fontSize: '13px', fontWeight: 700, color: trendColor, lineHeight: 1 }}>{trendSymbol}{Math.abs(trend)}</span>
@@ -64,7 +64,7 @@ export function PositionCard({
 
         {onDetailClick && (
           <button onClick={onDetailClick} className="ml-auto shrink-0 hover:opacity-80">
-            <span style={{ color: '#E53935', fontSize: '10px' }}>Detalle →</span>
+            <span style={{ color: '#E53935', fontSize: '12px' }}>Detalle →</span>
           </button>
         )}
       </div>
@@ -74,7 +74,7 @@ export function PositionCard({
 
         {/* Tú */}
         <div className="flex items-center gap-1.5 mb-0.5">
-          <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.40)', width: '40px', textAlign: 'right', flexShrink: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.40)', width: '40px', textAlign: 'right', flexShrink: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {shortName}
           </span>
           <div className="flex-1 relative" style={{ height: '5px', borderRadius: '3px', background: 'rgba(255,255,255,0.08)' }}>
@@ -90,9 +90,9 @@ export function PositionCard({
             }} />
           </div>
           <div className="flex items-center gap-1" style={{ width: '48px', flexShrink: 0, justifyContent: 'flex-end' }}>
-            <span style={{ fontSize: '10px', color: '#fff', fontWeight: 700 }}>{finalPoints}</span>
+            <span style={{ fontSize: '12px', color: '#fff', fontWeight: 700 }}>{finalPoints}</span>
             {!isLeader && (
-              <span style={{ fontSize: '9px', color: '#E53935', fontWeight: 600 }}>−{gap}</span>
+              <span style={{ fontSize: '12px', color: '#E53935', fontWeight: 600 }}>−{gap}</span>
             )}
           </div>
         </div>
@@ -100,7 +100,7 @@ export function PositionCard({
         {/* Líder */}
         {!isLeader && (
           <div className="flex items-center gap-1.5">
-            <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.40)', width: '40px', textAlign: 'right', flexShrink: 0 }}>
+            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.40)', width: '40px', textAlign: 'right', flexShrink: 0 }}>
               Líder
             </span>
             <div className="flex-1 relative" style={{ height: '5px', borderRadius: '3px', background: 'rgba(255,255,255,0.08)' }}>
@@ -111,7 +111,7 @@ export function PositionCard({
                 boxShadow: '0 0 6px rgba(255,210,0,0.45)',
               }} />
             </div>
-            <span style={{ fontSize: '10px', color: '#FFD700', fontWeight: 700, width: '48px', textAlign: 'right', flexShrink: 0 }}>
+            <span style={{ fontSize: '12px', color: '#FFD700', fontWeight: 700, width: '48px', textAlign: 'right', flexShrink: 0 }}>
               {leaderPoints}
             </span>
           </div>

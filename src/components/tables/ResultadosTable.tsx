@@ -62,7 +62,7 @@ function CPAwardCard({ title, description, accentColor, players, valueLabel }: C
         <p
           className="uppercase tracking-wider"
           style={{
-            fontSize: '10px',
+            fontSize: '12px',
             color: 'var(--cp-on-surface-muted)',
           }}
         >
@@ -155,7 +155,7 @@ function CPAwardCard({ title, description, accentColor, players, valueLabel }: C
                     <span
                       className="uppercase tracking-wider"
                       style={{
-                        fontSize: '9px',
+                        fontSize: '12px',
                         color: 'var(--cp-on-surface-muted)',
                       }}
                     >

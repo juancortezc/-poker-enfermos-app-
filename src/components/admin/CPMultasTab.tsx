@@ -159,17 +159,17 @@ export default function CPMultasTab({ tournamentId }: CPMultasTabProps) {
                 </p>
                 <div className="flex items-center gap-3 mt-1">
                   {multa.pointsPenalty > 0 && (
-                    <span className="flex items-center gap-1" style={{ fontSize: '11px', color: '#E53935' }}>
+                    <span className="flex items-center gap-1" style={{ fontSize: '13px', color: '#E53935' }}>
                       <Hash size={11} /> -{multa.pointsPenalty} pts
                     </span>
                   )}
                   {!!multa.chipsAmount && (
-                    <span className="flex items-center gap-1" style={{ fontSize: '11px', color: 'var(--cp-on-surface-muted)' }}>
+                    <span className="flex items-center gap-1" style={{ fontSize: '13px', color: 'var(--cp-on-surface-muted)' }}>
                       <Coins size={11} /> {multa.chipsAmount}
                     </span>
                   )}
                   {!!multa.moneyAmount && (
-                    <span className="flex items-center gap-1" style={{ fontSize: '11px', color: 'var(--cp-on-surface-muted)' }}>
+                    <span className="flex items-center gap-1" style={{ fontSize: '13px', color: 'var(--cp-on-surface-muted)' }}>
                       <DollarSign size={11} /> {multa.moneyAmount}
                     </span>
                   )}

@@ -103,7 +103,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
     return (
       <div className="p-6 text-center rounded-2xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p style={{ fontSize: 14, color: '#F5EFE6' }}>Error al cargar la tabla</p>
-        <p className="mt-1" style={{ fontSize: 11, color: '#7A6E62' }}>{errorMessage}</p>
+        <p className="mt-1" style={{ fontSize: 13, color: '#A89A8C' }}>{errorMessage}</p>
         <button onClick={() => refresh()} className="mt-4 px-4 py-2 rounded-full" style={{ border: `1px solid ${RED}`, color: RED, fontSize: 12 }}>
           Reintentar
         </button>
@@ -114,7 +114,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
   if (!rankingData || rankingData.rankings.length === 0) {
     return (
       <div className="p-6 text-center rounded-2xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p style={{ fontSize: 14, color: '#7A6E62' }}>No hay datos de tabla disponibles.</p>
+        <p style={{ fontSize: 14, color: '#A89A8C' }}>No hay datos de tabla disponibles.</p>
       </div>
     )
   }
@@ -142,7 +142,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
   const thStyle: React.CSSProperties = {
     background: HEADER_BG,
     color: '#F5EFE6',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 800,
     letterSpacing: '0.03em',
     textAlign: 'center',
@@ -172,8 +172,8 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
     }
     if (view === 'elimina') {
       return hasPenalties
-        ? `${SCORE_LABELS.accumulated} menos las fechas descartadas y las multas de puntos = ${SCORE_LABELS.points}.`
-        : `${SCORE_LABELS.accumulated} menos las fechas descartadas = ${SCORE_LABELS.points}.`
+        ? `${SCORE_LABELS.points} = ${SCORE_LABELS.accumulated} menos las fechas descartadas y las multas de puntos.`
+        : `${SCORE_LABELS.points} = ${SCORE_LABELS.accumulated} menos las fechas descartadas.`
     }
     return eliminasActive
       ? `${SCORE_LABELS.points} es lo que manda: tus mejores ${bestOf} fechas de ${totalDates}.`
@@ -232,12 +232,13 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
               <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '38%' }}>
                 <Image src={leader.playerPhoto} alt={leader.playerName} fill className="object-cover object-top" unoptimized />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #1e1600 0%, transparent 55%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, #1c1400 0%, transparent 34%)' }} />
               </div>
             )}
             <div style={{ position: 'relative', zIndex: 1, maxWidth: leader.playerPhoto ? '62%' : '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ fontSize: 13 }}>👑</span>
-                <span style={{ fontSize: 9, fontWeight: 800, color: GOLD, letterSpacing: '0.1em' }}>LÍDER DEL TORNEO</span>
+                <span style={{ fontSize: 12, fontWeight: 800, color: GOLD, letterSpacing: '0.1em' }}>LÍDER DEL TORNEO</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
                 <span style={{ fontSize: 26, fontWeight: 900, color: '#fff' }}>#1</span>
@@ -245,24 +246,38 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
                 <span style={{ fontSize: 20, fontWeight: 900, color: GOLD }}>{scoreOf(leader)}</span>
-                <span style={{ fontSize: 9, color: '#A89A8C' }}>{SCORE_LABELS.points}</span>
+                <span style={{ fontSize: 12, color: '#A89A8C' }}>{SCORE_LABELS.points}</span>
                 {delta !== 0 && (
-                  <span style={{ fontSize: 10, fontWeight: 800, color: delta > 0 ? '#7CD07F' : RED, marginLeft: 4 }}>
-                    {delta > 0 ? `+${delta} ▲` : `${delta} ▼`} <span style={{ fontWeight: 500, color: '#7A6E62' }}>posiciones vs fecha anterior</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: delta > 0 ? '#7CD07F' : RED, marginLeft: 4 }}>
+                    {delta > 0 ? `+${delta} ▲` : `${delta} ▼`} <span style={{ fontWeight: 500, color: '#A89A8C' }}>posiciones vs fecha anterior</span>
                   </span>
                 )}
               </div>
               {leader.playerAlias && (
-                <div style={{ fontSize: 11, color: '#C9B27A', fontStyle: 'italic', marginTop: 6 }}>&ldquo;{leader.playerAlias}&rdquo;</div>
+                <div style={{ fontSize: 13, color: '#C9B27A', fontStyle: 'italic', marginTop: 6 }}>&ldquo;{leader.playerAlias}&rdquo;</div>
               )}
             </div>
-            <div style={{ position: 'absolute', top: 14, right: 14, textAlign: 'right' }}>
-              <div style={{ fontSize: 13, fontWeight: 900, color: '#fff' }}>{mesasFinales}</div>
-              <div style={{ fontSize: 7, color: '#A89A8C', letterSpacing: '0.04em' }}>MESAS FINALES</div>
-              <div style={{ fontSize: 13, fontWeight: 900, color: '#fff', marginTop: 4 }}>{podios}</div>
-              <div style={{ fontSize: 7, color: '#A89A8C', letterSpacing: '0.04em' }}>PODIOS</div>
-              <div style={{ fontSize: 13, fontWeight: 900, color: '#fff', marginTop: 4 }}>{leader.firstPlaces}</div>
-              <div style={{ fontSize: 7, color: '#A89A8C', letterSpacing: '0.04em' }}>VICTORIAS</div>
+            <div
+              style={{
+                position: 'relative',
+                zIndex: 1,
+                display: 'flex',
+                gap: 8,
+                marginTop: 12,
+                paddingTop: 10,
+                borderTop: '1px solid rgba(232,193,88,0.28)'
+              }}
+            >
+              {[
+                { v: mesasFinales, l: 'MESAS FINALES' },
+                { v: podios, l: 'PODIOS' },
+                { v: leader.firstPlaces, l: 'VICTORIAS' }
+              ].map(({ v, l }) => (
+                <div key={l} style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#fff', lineHeight: 1.1 }}>{v}</div>
+                  <div style={{ fontSize: 12, color: '#A89A8C', letterSpacing: '0.03em' }}>{l}</div>
+                </div>
+              ))}
             </div>
           </button>
         )
@@ -297,9 +312,9 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                     <span style={{ fontSize: 13, fontWeight: 900, color: '#F5EFE6' }}>{scoreOf(player)}</span>
-                    <span style={{ fontSize: 8, color: '#7A6E62' }}>{SCORE_LABELS.pointsShort}</span>
+                    <span style={{ fontSize: 12, color: '#A89A8C' }}>{SCORE_LABELS.pointsShort}</span>
                     {delta !== 0 && (
-                      <span style={{ fontSize: 9, fontWeight: 700, color: delta > 0 ? '#7CD07F' : RED }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? '#7CD07F' : RED }}>
                         {delta > 0 ? `+${delta} ▲` : `${delta} ▼`}
                       </span>
                     )}
@@ -341,7 +356,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: 700,
             color: '#F5EFE6',
             background: 'rgba(255,255,255,0.06)',
@@ -364,12 +379,12 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
         <div style={{ overflowX: 'auto' }}>
           <table
             className="w-full"
-            style={{ borderCollapse: 'collapse', minWidth: view === 'fechas' ? 520 : view === 'elimina' ? 420 : undefined }}
+            style={{ borderCollapse: 'collapse', minWidth: view === 'fechas' ? 460 : undefined }}
           >
             <thead>
               <tr>
                 <th style={{ ...thStyle, width: 36 }}>#</th>
-                <th style={{ ...thStyle, textAlign: 'left', width: 110 }}>JUGADOR</th>
+                <th style={{ ...thStyle, textAlign: 'left', width: view === 'resumen' ? 110 : 84 }}>JUGADOR</th>
                 <th style={{ ...thPointsStyle, width: 52 }}>{SCORE_LABELS.points}</th>
 
                 {view === 'fechas' && completedDates.map(d => (
@@ -377,11 +392,11 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                 ))}
                 {view === 'fechas' && <th style={{ ...thStyle, width: 46 }}>PROM</th>}
 
+                {view === 'elimina' && <th style={{ ...thStyle, width: 54 }}>{SCORE_LABELS.accumulated}</th>}
                 {view === 'elimina' && <th style={{ ...thStyle, width: 40 }}>E1</th>}
                 {view === 'elimina' && <th style={{ ...thStyle, width: 40 }}>E2</th>}
                 {view === 'elimina' && showElimina3 && <th style={{ ...thStyle, width: 40 }}>E3</th>}
                 {view === 'elimina' && hasPenalties && <th style={{ ...thStyle, width: 46 }}>MULTA</th>}
-                {view === 'elimina' && <th style={{ ...thStyle, width: 54 }}>{SCORE_LABELS.accumulated}</th>}
               </tr>
             </thead>
             <tbody>
@@ -405,7 +420,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                       {isMalazo ? (
                         <span style={{ fontSize: 15 }}>💀</span>
                       ) : (
-                        <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontWeight: 800, fontSize: 11, ...badge }}>
+                        <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontWeight: 800, fontSize: 13, ...badge }}>
                           {player.position}
                         </div>
                       )}
@@ -413,9 +428,9 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
 
                     <td style={{ ...tdStyle, background: rowBg, textAlign: 'left' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: textColor }}>
-                        <CircleAvatar photoUrl={player.playerPhoto} name={player.playerName} />
+                        <CircleAvatar photoUrl={player.playerPhoto} name={player.playerName} size={view === 'resumen' ? 26 : 22} />
                         <span style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>
-                          {player.playerName}
+                          {view === 'resumen' ? player.playerName : shortName(player.playerName)}
                           {isCurrentUser && ' (Tú)'}
                         </span>
                       </div>
@@ -445,6 +460,11 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                     {view === 'fechas' && <td style={{ ...tdStyle, background: rowBg, color: textColor }}>{prom}</td>}
 
                     {view === 'elimina' && (
+                      <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.8)' : ORANGE, fontWeight: 500 }}>
+                        {player.totalPoints}
+                      </td>
+                    )}
+                    {view === 'elimina' && (
                       <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.85)' : eliminaColor }}>
                         {player.elimina1 !== undefined ? `−${player.elimina1}` : '—'}
                       </td>
@@ -462,11 +482,6 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                     {view === 'elimina' && hasPenalties && (
                       <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.85)' : ORANGE }}>
                         {(player.pointPenalty ?? 0) > 0 ? `−${player.pointPenalty}` : '—'}
-                      </td>
-                    )}
-                    {view === 'elimina' && (
-                      <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.8)' : ORANGE, fontWeight: 500 }}>
-                        {player.totalPoints}
                       </td>
                     )}
                   </tr>

@@ -8,6 +8,7 @@ import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
+import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { FechaTimelineItem } from '@/components/clean-poker/FechaTimelineItem'
 import { downloadSeasonIcs } from '@/lib/ics'
 import { isBirthdayNearDate } from '@/lib/birthday-utils'
@@ -52,16 +53,7 @@ export default function FechaPage() {
   const { data: players } = useSWR<PlayerLite[]>('/api/players', { revalidateOnFocus: false })
 
   if (authLoading || tournamentLoading || !user) {
-    return (
-      <CPAppShell>
-        <div className="min-h-screen flex items-center justify-center">
-          <div
-            className="w-10 h-10 border-2 rounded-full animate-spin"
-            style={{ borderColor: 'var(--cp-surface-border)', borderTopColor: 'var(--cp-primary)' }}
-          />
-        </div>
-      </CPAppShell>
-    )
+    return <CPPageSkeleton blocks={[120, 88, 88, 88, 88]} />
   }
 
   const userInitials = user.firstName && user.lastName
@@ -131,7 +123,7 @@ export default function FechaPage() {
                 display: 'inline-block',
                 background: '#E53935',
                 color: '#fff',
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: 800,
                 letterSpacing: '0.04em',
                 padding: '4px 10px',
@@ -163,23 +155,23 @@ export default function FechaPage() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
             <Trophy size={14} color="#D8A84E" />
-            <div style={{ fontSize: 10, fontWeight: 800, color: '#D8A84E', letterSpacing: '0.08em' }}>TEMPORADA</div>
+            <div style={{ fontSize: 12, fontWeight: 800, color: '#D8A84E', letterSpacing: '0.08em' }}>TEMPORADA</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
             <div>
               <div style={{ fontSize: 20, fontWeight: 900, color: '#F5EFE6' }}>{completedCount}</div>
-              <div style={{ fontSize: 9, color: '#7A6E62' }}>JUGADAS</div>
+              <div style={{ fontSize: 12, color: '#A89A8C' }}>JUGADAS</div>
             </div>
             <div>
               <div style={{ fontSize: 20, fontWeight: 900, color: '#F5EFE6' }}>{remaining}</div>
-              <div style={{ fontSize: 9, color: '#7A6E62' }}>POR JUGAR</div>
+              <div style={{ fontSize: 12, color: '#A89A8C' }}>POR JUGAR</div>
             </div>
           </div>
           <div style={{ marginTop: 10, height: 6, borderRadius: 100, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${progressPct}%`, background: '#E53935', borderRadius: 100 }} />
           </div>
           {seasonEndDate && (
-            <div style={{ marginTop: 10, fontSize: 10, color: '#A89A8C' }}>
+            <div style={{ marginTop: 10, fontSize: 12, color: '#A89A8C' }}>
               Final: {new Date(seasonEndDate).toLocaleDateString('es-EC', { day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
           )}
@@ -188,7 +180,7 @@ export default function FechaPage() {
         {/* LINEA DE TIEMPO */}
         {sortedDates.length > 0 && (
           <div>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 10 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 10 }}>
               LÍNEA DE TIEMPO DEL TORNEO
             </div>
             {sortedDates.map((d, index) => (
@@ -222,14 +214,14 @@ export default function FechaPage() {
           <CalendarPlus size={20} color="#E53935" />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6' }}>Agrega las fechas a tu calendario</div>
-            <div style={{ fontSize: 10, color: '#7A6E62' }}>No te pierdas ninguna fecha del torneo.</div>
+            <div style={{ fontSize: 12, color: '#A89A8C' }}>No te pierdas ninguna fecha del torneo.</div>
           </div>
           <button
             onClick={handleDownloadIcs}
             style={{
               background: '#E53935',
               color: '#fff',
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: 800,
               padding: '9px 14px',
               borderRadius: 100,

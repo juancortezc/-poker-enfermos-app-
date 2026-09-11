@@ -33,14 +33,14 @@ function Kpi({ label, value, hint, tint }: { label: string; value: string; hint:
       className="flex-1 min-w-0 px-2.5 py-1.5"
       style={{ background: tint, border: PANEL, borderRadius: 10 }}
     >
-      <p className="uppercase truncate" style={{ fontSize: 9, letterSpacing: '0.1em', color: MUTED }}>
+      <p className="uppercase truncate" style={{ fontSize: 12, letterSpacing: '0.1em', color: MUTED }}>
         {label}
       </p>
       <div className="flex items-baseline gap-1.5 min-w-0">
         <span className="leading-none" style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>
           {value}
         </span>
-        <span className="truncate leading-none" style={{ fontSize: 10, color: MUTED }}>
+        <span className="truncate leading-none" style={{ fontSize: 12, color: MUTED }}>
           {hint}
         </span>
       </div>
@@ -50,15 +50,15 @@ function Kpi({ label, value, hint, tint }: { label: string; value: string; hint:
 
 function Var({ change }: { change: number }) {
   if (change === 0) {
-    return <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)' }}>—</span>
+    return <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.28)' }}>—</span>
   }
   const up = change > 0
   return (
     <span
       className="inline-flex items-center gap-0.5"
-      style={{ color: up ? '#22c55e' : '#ef4444', fontSize: 11, fontWeight: 700 }}
+      style={{ color: up ? '#22c55e' : '#ef4444', fontSize: 13, fontWeight: 700 }}
     >
-      <span style={{ fontSize: 8 }}>{up ? '▲' : '▼'}</span>
+      <span style={{ fontSize: 12 }}>{up ? '▲' : '▼'}</span>
       {Math.abs(change)}
     </span>
   )
@@ -89,14 +89,14 @@ function Row({ row, isMe, striped }: { row: LiveRankingRow; isMe: boolean; strip
               borderRadius: '50%',
               background: medal,
               color: '#1a1a1a',
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 800,
             }}
           >
             {row.position}
           </span>
         ) : (
-          <span style={{ fontSize: 11, color: MUTED }}>{row.position}</span>
+          <span style={{ fontSize: 13, color: MUTED }}>{row.position}</span>
         )}
       </div>
 
@@ -189,7 +189,7 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
           }}
         >
           <div className="flex-1 min-w-0">
-            <p className="uppercase" style={{ fontSize: 9, letterSpacing: '0.1em', color: MUTED }}>
+            <p className="uppercase" style={{ fontSize: 12, letterSpacing: '0.1em', color: MUTED }}>
               Último eliminado · {lastElimination.position}º
             </p>
             <p className="truncate" style={{ fontSize: 13, color: '#fff' }}>
@@ -209,8 +209,8 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
           <h2 className="truncate" style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>
             TABLA DEL TORNEO
           </h2>
-          <p className="flex items-center gap-1 flex-shrink-0" style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>
-            <span style={{ color: '#F0B429', fontSize: 8 }}>●</span>
+          <p className="flex items-center gap-1 flex-shrink-0" style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+            <span style={{ color: '#F0B429', fontSize: 12 }}>●</span>
             Si sale ahora: +{projection.nextPoints}
           </p>
         </div>
@@ -227,22 +227,22 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
         >
           <span
             className="uppercase flex-shrink-0 text-center"
-            style={{ width: 20, fontSize: 9, letterSpacing: '0.08em', color: MUTED }}
+            style={{ width: 20, fontSize: 12, letterSpacing: '0.08em', color: MUTED }}
           >
             #
           </span>
-          <span className="uppercase flex-1" style={{ fontSize: 9, letterSpacing: '0.08em', color: MUTED }}>
+          <span className="uppercase flex-1" style={{ fontSize: 12, letterSpacing: '0.08em', color: MUTED }}>
             Jugador
           </span>
           <span
             className="uppercase text-right flex-shrink-0"
-            style={{ width: 34, fontSize: 9, letterSpacing: '0.08em', color: MUTED }}
+            style={{ width: 34, fontSize: 12, letterSpacing: '0.08em', color: MUTED }}
           >
             {SCORE_LABELS.pointsShort}
           </span>
           <span
             className="uppercase text-right flex-shrink-0"
-            style={{ width: 28, fontSize: 9, letterSpacing: '0.08em', color: MUTED }}
+            style={{ width: 28, fontSize: 12, letterSpacing: '0.08em', color: MUTED }}
           >
             Var
           </span>
@@ -254,7 +254,7 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
 
         <p
           className="px-3 py-1.5"
-          style={{ fontSize: 9, color: MUTED, borderTop: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ fontSize: 12, color: MUTED, borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
           {SCORE_LABELS.points} descarta tus {projection.datesToEliminate} peores fechas
           {projection.eliminasActive ? '' : ' (todavía informativo)'} · en{' '}
