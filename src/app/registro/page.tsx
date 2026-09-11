@@ -455,7 +455,7 @@ export default function RegistroPage() {
                     <p
                       className="font-bold font-mono"
                       style={{
-                        color: timerStatus === 'paused' ? '#ca8a04' : '#E53935',
+                        color: timerStatus === 'paused' ? '#C9A144' : '#E53935',
                         fontSize: 'var(--cp-title-size)',
                       }}
                     >
@@ -472,7 +472,7 @@ export default function RegistroPage() {
                           onClick={handlePauseTimer}
                           disabled={isControlling}
                           className="w-9 h-9 flex items-center justify-center rounded transition-colors disabled:opacity-50"
-                          style={{ background: '#ca8a04', color: 'white' }}
+                          style={{ background: '#C9A144', color: 'white' }}
                           title="Pausar"
                         >
                           <Pause className="w-4 h-4" />
@@ -482,7 +482,7 @@ export default function RegistroPage() {
                           onClick={handleResumeTimer}
                           disabled={isControlling}
                           className="w-9 h-9 flex items-center justify-center rounded transition-colors disabled:opacity-50"
-                          style={{ background: '#16a34a', color: 'white' }}
+                          style={{ background: '#4FA854', color: 'white' }}
                           title="Reanudar"
                         >
                           <Play className="w-4 h-4" />
@@ -532,7 +532,7 @@ export default function RegistroPage() {
                           }}
                           className="w-9 h-9 flex items-center justify-center rounded transition-colors"
                           style={{
-                            background: wakeLockActive ? '#16a34a' : 'var(--cp-surface-solid)',
+                            background: wakeLockActive ? '#4FA854' : 'var(--cp-surface-solid)',
                             border: wakeLockActive ? 'none' : '1px solid var(--cp-surface-border)',
                             color: wakeLockActive ? 'white' : 'var(--cp-on-surface)',
                           }}
@@ -734,7 +734,7 @@ function CPEliminationForm({
           <h3 className="font-semibold" style={{ color: 'var(--cp-on-surface)' }}>
             POS {nextPosition}
           </h3>
-          <div className="font-bold text-lg" style={{ color: '#E53935' }}>
+          <div className="font-bold text-lg" style={{ color: '#FF6B6B' }}>
             PTS {points}
           </div>
         </div>
@@ -749,7 +749,7 @@ function CPEliminationForm({
               borderRadius: '4px',
             }}
           >
-            <p className="text-sm" style={{ color: '#ef4444' }}>{formError}</p>
+            <p className="text-sm" style={{ color: '#FF6B6B' }}>{formError}</p>
           </div>
         )}
 
@@ -1058,7 +1058,7 @@ function CPEliminationHistory({
               borderRadius: '4px',
             }}
           >
-            <p className="text-sm" style={{ color: '#ef4444' }}>{updateError}</p>
+            <p className="text-sm" style={{ color: '#FF6B6B' }}>{updateError}</p>
           </div>
         )}
 
@@ -1143,7 +1143,7 @@ function CPEliminationHistory({
                       onClick={() => handleSaveEdit(elimination.id)}
                       disabled={isUpdating || !editForm.eliminatedPlayerId}
                       className="p-1 transition-colors disabled:opacity-50"
-                      style={{ color: '#E53935' }}
+                      style={{ color: '#FF6B6B' }}
                     >
                       <Check className="w-4 h-4" />
                     </button>
@@ -1258,7 +1258,7 @@ function CPStatsCards({
           <div className="text-sm mb-1" style={{ color: 'var(--cp-on-surface-muted)' }}>
             Jugando
           </div>
-          <div className="text-2xl font-bold" style={{ color: '#E53935' }}>
+          <div className="text-2xl font-bold" style={{ color: '#FF6B6B' }}>
             {activePlayers}
           </div>
         </div>
@@ -1545,7 +1545,7 @@ function CPPlayersModal({
                 borderRadius: '4px',
               }}
             >
-              <p className="text-sm" style={{ color: '#ef4444' }}>{error}</p>
+              <p className="text-sm" style={{ color: '#FF6B6B' }}>{error}</p>
             </div>
           )}
 
@@ -1561,11 +1561,11 @@ function CPPlayersModal({
             >
               <div className="flex items-center gap-2 mb-3">
                 {actionType === 'add' ? (
-                  <UserPlus size={20} style={{ color: '#16a34a' }} />
+                  <UserPlus size={20} style={{ color: '#4FA854' }} />
                 ) : (
-                  <AlertTriangle size={20} style={{ color: '#f97316' }} />
+                  <AlertTriangle size={20} style={{ color: '#E8863C' }} />
                 )}
-                <span className="font-semibold" style={{ color: actionType === 'add' ? '#16a34a' : '#f97316' }}>
+                <span className="font-semibold" style={{ color: actionType === 'add' ? '#4FA854' : '#E8863C' }}>
                   {confirmationStep === 1
                     ? (actionType === 'add' ? 'Confirmar agregar' : 'Confirmar quitar')
                     : 'Confirmación final'}
@@ -1591,7 +1591,7 @@ function CPPlayersModal({
                       onClick={handleFirstConfirm}
                       className="flex-1 px-4 py-2 text-sm font-semibold transition-colors"
                       style={{
-                        background: actionType === 'add' ? '#16a34a' : '#f97316',
+                        background: actionType === 'add' ? '#4FA854' : '#E8863C',
                         color: 'white',
                         borderRadius: '4px',
                       }}
@@ -1618,7 +1618,7 @@ function CPPlayersModal({
                       disabled={isProcessing}
                       className="flex-1 px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50"
                       style={{
-                        background: actionType === 'add' ? '#16a34a' : '#E53935',
+                        background: actionType === 'add' ? '#4FA854' : '#E53935',
                         color: 'white',
                         borderRadius: '4px',
                       }}
@@ -1663,7 +1663,7 @@ function CPPlayersModal({
                     }}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full" style={{ background: '#16a34a' }} />
+                      <span className="w-2 h-2 rounded-full" style={{ background: '#4FA854' }} />
                       <span className="text-sm" style={{ color: 'var(--cp-on-surface)' }}>
                         {getPlayerName(player)}
                       </span>
@@ -1761,7 +1761,7 @@ function CPPlayersModal({
                         onClick={() => handleSelectForAdd(player.id)}
                         disabled={isProcessing}
                         className="p-1.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                        style={{ color: '#16a34a', borderRadius: '4px' }}
+                        style={{ color: '#4FA854', borderRadius: '4px' }}
                         title="Agregar a la fecha"
                       >
                         <UserPlus size={14} />
@@ -1837,11 +1837,11 @@ function GameCompletedCard({ gameDate, onDateClosed }: GameCompletedCardProps) {
     >
       {isClosed ? (
         <>
-          <CheckCircle size={32} className="mx-auto mb-2" style={{ color: '#22c55e' }} />
+          <CheckCircle size={32} className="mx-auto mb-2" style={{ color: '#6ECB71' }} />
           <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--cp-on-surface)' }}>
             Fecha Completada
           </h3>
-          <p style={{ color: '#22c55e' }}>
+          <p style={{ color: '#6ECB71' }}>
             La fecha ha sido cerrada correctamente.
           </p>
         </>
@@ -1850,7 +1850,7 @@ function GameCompletedCard({ gameDate, onDateClosed }: GameCompletedCardProps) {
           <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--cp-on-surface)' }}>
             Juego Completado
           </h3>
-          <p className="mb-4" style={{ color: '#E53935' }}>
+          <p className="mb-4" style={{ color: '#FF6B6B' }}>
             El torneo ha terminado. Felicitaciones al ganador!
           </p>
 
@@ -1861,7 +1861,7 @@ function GameCompletedCard({ gameDate, onDateClosed }: GameCompletedCardProps) {
                 disabled={isClosing}
                 className="px-6 py-3 font-bold transition-all"
                 style={{
-                  background: isClosing ? '#666' : '#22c55e',
+                  background: isClosing ? '#666' : '#6ECB71',
                   color: 'white',
                   borderRadius: '8px',
                   opacity: isClosing ? 0.7 : 1,
@@ -1878,7 +1878,7 @@ function GameCompletedCard({ gameDate, onDateClosed }: GameCompletedCardProps) {
               </button>
 
               {closeError && (
-                <p className="mt-3 text-sm" style={{ color: '#ef4444' }}>
+                <p className="mt-3 text-sm" style={{ color: '#FF6B6B' }}>
                   {closeError}
                 </p>
               )}

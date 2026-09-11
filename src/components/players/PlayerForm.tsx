@@ -229,7 +229,7 @@ export default function PlayerForm({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-poker-muted hover:text-poker-red"
+            className="text-poker-muted hover:text-poker-red-light"
           >
             <X className="w-4 h-4" />
           </Button>

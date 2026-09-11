@@ -34,7 +34,7 @@ const iconMap = {
 const accentColors = {
   red: {
     bg: 'bg-poker-red/20',
-    text: 'text-poker-red',
+    text: 'text-poker-red-light',
     border: 'border-poker-red/40',
     gradient: 'from-poker-red/10 via-poker-dark to-poker-dark'
   },

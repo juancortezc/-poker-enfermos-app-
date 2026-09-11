@@ -103,7 +103,7 @@ function FechaPageInner() {
       <main className="pb-24 px-4 pt-4 space-y-4">
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 24, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>FECHA</div>
-          <div style={{ fontSize: 12, color: '#A89A8C', marginTop: 2 }}>Torneo {tournamentNumber}</div>
+          <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 2 }}>Torneo {tournamentNumber}</div>
         </div>
 
         {/* Selector de fecha */}
@@ -127,7 +127,7 @@ function FechaPageInner() {
                     cursor: 'pointer'
                   }}
                 >
-                  <div style={{ fontSize: 12, fontWeight: 700, color: isSelected ? '#fff' : '#A89A8C' }}>F</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: isSelected ? '#fff' : '#9A8F8B' }}>F</div>
                   <div style={{ fontSize: 14, fontWeight: 900, color: isSelected ? '#fff' : isDone ? '#F5EFE6' : '#5A5048' }}>
                     {d.dateNumber}
                   </div>
@@ -140,7 +140,7 @@ function FechaPageInner() {
         {!selectedDate && (
           <HomeCard>
             <div style={{ padding: 20, textAlign: 'center' }}>
-              <p style={{ fontSize: 12, color: '#B5A996' }}>Todavía no hay fechas registradas.</p>
+              <p style={{ fontSize: 12, color: '#9A8F8B' }}>Todavía no hay fechas registradas.</p>
             </div>
           </HomeCard>
         )}
@@ -149,7 +149,7 @@ function FechaPageInner() {
           <HomeCard>
             <div style={{ padding: 20, textAlign: 'center' }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>Fecha {selectedDate.dateNumber} todavía no se ha jugado</p>
-              <p style={{ fontSize: 13, color: '#A89A8C', marginTop: 4 }}>
+              <p style={{ fontSize: 13, color: '#9A8F8B', marginTop: 4 }}>
                 {new Date(selectedDate.scheduledDate).toLocaleDateString('es-EC', { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
               <div style={{ marginTop: 12 }}>
@@ -174,7 +174,7 @@ function FechaPageInner() {
                     fontSize: 13,
                     fontWeight: 700,
                     background: tab === t.id ? '#E53935' : 'rgba(255,255,255,0.06)',
-                    color: tab === t.id ? '#fff' : '#B5A996',
+                    color: tab === t.id ? '#fff' : '#9A8F8B',
                     border: 'none',
                     cursor: 'pointer'
                   }}
@@ -189,7 +189,7 @@ function FechaPageInner() {
                 {results.map((e) => (
                   <HomeCard key={e.id}>
                     <div style={{ padding: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 900, color: e.position <= 3 ? '#D8A84E' : '#A89A8C' }}>
+                      <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 900, color: e.position <= 3 ? '#D8A84E' : '#9A8F8B' }}>
                         #{e.position}
                       </div>
                       <HomeAvatar playerId={e.eliminatedPlayer.id} name={e.eliminatedPlayer.firstName} photoUrl={e.eliminatedPlayer.photoUrl} size={32} fontSize={12} />
@@ -206,19 +206,19 @@ function FechaPageInner() {
             {tab === 'eliminaciones' && (
               <div className="space-y-1.5">
                 {eliminationEvents.length === 0 && (
-                  <p style={{ fontSize: 12, color: '#A89A8C', textAlign: 'center', padding: 16 }}>No hay eliminaciones registradas.</p>
+                  <p style={{ fontSize: 12, color: '#9A8F8B', textAlign: 'center', padding: 16 }}>No hay eliminaciones registradas.</p>
                 )}
                 {eliminationEvents.map((e) => (
                   <HomeCard key={e.id}>
                     <div style={{ padding: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 800, color: '#A89A8C' }}>#{e.position}</div>
+                      <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 800, color: '#9A8F8B' }}>#{e.position}</div>
                       <HomeAvatar playerId={e.eliminatedPlayer.id} name={e.eliminatedPlayer.firstName} photoUrl={e.eliminatedPlayer.photoUrl} size={30} fontSize={11} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6' }}>
                           {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName}
                         </div>
                         {e.eliminatorPlayer && (
-                          <div style={{ fontSize: 12, color: '#A89A8C' }}>
+                          <div style={{ fontSize: 12, color: '#9A8F8B' }}>
                             eliminado por {e.eliminatorPlayer.firstName} {e.eliminatorPlayer.lastName}
                           </div>
                         )}
@@ -243,7 +243,7 @@ function FechaPageInner() {
             borderRadius: 100,
             background: 'rgba(255,255,255,0.06)',
             border: '1px solid rgba(255,255,255,0.12)',
-            color: '#B5A996',
+            color: '#9A8F8B',
             fontSize: 13,
             fontWeight: 700,
             cursor: 'pointer'

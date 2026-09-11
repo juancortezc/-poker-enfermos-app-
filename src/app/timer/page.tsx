@@ -245,7 +245,7 @@ export default function TimerPage() {
           style={{
             fontSize: 'clamp(36px, 10vw, 60px)',
             fontWeight: 700,
-            color: '#ca8a04',
+            color: '#C9A144',
             letterSpacing: '0.14em',
           }}
         >
@@ -274,7 +274,7 @@ export default function TimerPage() {
             label="✓ Terminar Descanso"
             onClick={sendLevelUp}
             loading={actionLoading === 'levelup'}
-            color="var(--cp-positive, #22c55e)"
+            color="var(--cp-positive, #6ECB71)"
           />
         )}
       </div>
@@ -310,13 +310,13 @@ export default function TimerPage() {
             label="☕  Iniciar Descanso"
             onClick={() => handleBreakChoice('break')}
             loading={false}
-            color="#ca8a04"
+            color="#C9A144"
           />
           <ControlBtn
             label={`▶  Continuar — ${nextLabel}`}
             onClick={() => handleBreakChoice('continue')}
             loading={actionLoading === 'levelup'}
-            color="var(--cp-positive, #22c55e)"
+            color="var(--cp-positive, #6ECB71)"
           />
         </div>
       </div>
@@ -333,9 +333,9 @@ export default function TimerPage() {
       {showWarning && (
         <div
           className="fixed top-4 left-4 right-4 rounded-2xl px-4 py-3 z-50 text-center"
-          style={{ background: 'rgba(202,138,4,0.18)', border: '1px solid #ca8a04' }}
+          style={{ background: 'rgba(202,138,4,0.18)', border: '1px solid #C9A144' }}
         >
-          <span style={{ fontSize: '14px', color: '#ca8a04', fontWeight: 600 }}>
+          <span style={{ fontSize: '14px', color: '#C9A144', fontWeight: 600 }}>
             ⚠️  1 minuto — Se acerca el descanso
           </span>
         </div>
@@ -436,7 +436,7 @@ export default function TimerPage() {
                 label="Pausa"
                 onClick={() => sendAction('pause')}
                 loading={actionLoading === 'pause'}
-                color="#ca8a04"
+                color="#C9A144"
               />
             )}
             {isPaused && (
@@ -444,7 +444,7 @@ export default function TimerPage() {
                 label="Continuar"
                 onClick={() => sendAction('resume')}
                 loading={actionLoading === 'resume'}
-                color="var(--cp-positive, #22c55e)"
+                color="var(--cp-positive, #6ECB71)"
               />
             )}
             <ControlBtn
@@ -468,7 +468,7 @@ function ActionErrorBanner({ error, onDismiss }: { error: string | null; onDismi
       className="fixed top-4 left-4 right-4 rounded-2xl px-4 py-3 z-50 text-center"
       style={{ background: 'rgba(229,57,53,0.18)', border: '1px solid #E53935' }}
     >
-      <span style={{ fontSize: '14px', color: '#E53935', fontWeight: 600 }}>
+      <span style={{ fontSize: '14px', color: '#FF6B6B', fontWeight: 600 }}>
         ⚠️  {error}
       </span>
     </button>

@@ -15,7 +15,7 @@ export function HomeViewToggle({ value, onChange, ultimaFechaDisabled = false }:
     padding: '8px 0',
     borderRadius: 9,
     background: active ? '#E53935' : 'transparent',
-    color: active ? '#fff' : '#A89A8C',
+    color: active ? '#fff' : '#9A8F8B',
     fontSize: 13,
     fontWeight: 700,
     letterSpacing: '0.02em',

@@ -59,7 +59,7 @@ export default function DaysWithoutVictoryTable({
       <Card className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-gray-850 to-gray-950">
         <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-3">
           <h3 className="flex items-center gap-2 text-base font-semibold text-white">
-            <CalendarX className="h-5 w-5 text-poker-red" />
+            <CalendarX className="h-5 w-5 text-poker-red-light" />
             Días sin Ganar
           </h3>
         </div>

@@ -104,11 +104,11 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
   const getStrokeColor = () => {
     switch (color) {
       case 'green':
-        return '#10b981'
+        return '#6ECB71'
       case 'red':
-        return '#ef4444'
+        return '#E53935'
       case 'yellow':
-        return '#f59e0b'
+        return '#E8C158'
       case 'cyan':
         return '#06b6d4'
       case 'purple':
@@ -183,7 +183,7 @@ export const StepProgress: React.FC<StepProgressProps> = ({ steps, className = '
                   : step.completed
                   ? 'bg-green-500/20 border-green-500 text-green-400'
                   : step.active
-                  ? 'bg-poker-red/20 border-poker-red text-poker-red'
+                  ? 'bg-poker-red/20 border-poker-red text-poker-red-light'
                   : 'bg-poker-dark/50 border-white/20 text-poker-muted'
               }`}
             >
@@ -209,7 +209,7 @@ export const StepProgress: React.FC<StepProgressProps> = ({ steps, className = '
             </div>
             <span
               className={`text-xs mt-1 transition-colors duration-200 ${
-                step.active ? 'text-poker-red' : step.completed ? 'text-green-400' : 'text-poker-muted'
+                step.active ? 'text-poker-red-light' : step.completed ? 'text-green-400' : 'text-poker-muted'
               }`}
             >
               {step.label}

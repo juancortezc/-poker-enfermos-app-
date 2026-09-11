@@ -116,7 +116,7 @@ export default function PlayerEliminationsTab({ tournamentId }: PlayerEliminatio
               </div>
               {/* Badge with elimination count */}
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-poker-red/20 flex-shrink-0">
-                <span className="text-[12px] font-bold text-poker-red">{playerStat.eliminationCount}</span>
+                <span className="text-[12px] font-bold text-poker-red-light">{playerStat.eliminationCount}</span>
               </div>
             </button>
           ))}
@@ -138,7 +138,7 @@ export default function PlayerEliminationsTab({ tournamentId }: PlayerEliminatio
               <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-poker-red/10 via-white/5 to-white/5 p-5">
                 <div className="flex items-center gap-4">
                   {eliminationsData.eliminator.photoUrl ? (
-                    <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-poker-red/40">
+                    <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-poker-line">
                       <Image
                         src={eliminationsData.eliminator.photoUrl}
                         alt={`${eliminationsData.eliminator.firstName} ${eliminationsData.eliminator.lastName}`}
@@ -217,7 +217,7 @@ export default function PlayerEliminationsTab({ tournamentId }: PlayerEliminatio
                           </div>
                         </div>
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-poker-red/20">
-                          <span className="text-sm font-bold text-poker-red">{victim.count}</span>
+                          <span className="text-sm font-bold text-poker-red-light">{victim.count}</span>
                         </div>
                       </div>
 
@@ -230,7 +230,7 @@ export default function PlayerEliminationsTab({ tournamentId }: PlayerEliminatio
                           >
                             <div className="flex items-center gap-3">
                               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-poker-red/20">
-                                <Calendar className="h-4 w-4 text-poker-red" />
+                                <Calendar className="h-4 w-4 text-poker-red-light" />
                               </div>
                               <p className="text-sm font-medium text-white">
                                 Fecha #{elim.dateNumber}
@@ -238,7 +238,7 @@ export default function PlayerEliminationsTab({ tournamentId }: PlayerEliminatio
                             </div>
                             <div className="text-right">
                               <p className="text-xs text-white/50">Posición</p>
-                              <p className="text-sm font-bold text-poker-red">#{elim.position}</p>
+                              <p className="text-sm font-bold text-poker-red-light">#{elim.position}</p>
                             </div>
                           </div>
                         ))}
@@ -260,7 +260,7 @@ export default function PlayerEliminationsTab({ tournamentId }: PlayerEliminatio
         <Card className="admin-card p-8 text-center">
           <div className="flex flex-col items-center space-y-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-poker-red/20">
-              <Target className="w-8 h-8 text-poker-red" />
+              <Target className="w-8 h-8 text-poker-red-light" />
             </div>
             <h3 className="text-xl font-semibold text-white">Selecciona un jugador</h3>
             <p className="text-gray-400 text-sm">

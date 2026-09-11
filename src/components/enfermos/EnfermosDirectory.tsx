@@ -99,7 +99,7 @@ export default function EnfermosDirectory() {
           </p>
           <p className="truncate text-xs text-white/50">{player.lastName}</p>
         </div>
-        <span className="text-xs text-white/40 transition-colors group-hover:text-poker-red">Ver</span>
+        <span className="text-xs text-white/40 transition-colors group-hover:text-poker-red-light">Ver</span>
       </button>
     )
   }

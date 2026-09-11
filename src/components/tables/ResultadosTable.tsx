@@ -263,7 +263,7 @@ export default function ResultadosTable({ tournamentId }: ResultadosTableProps) 
             }}
           >
             {availableDates.map(date => (
-              <option key={date.id} value={date.id} style={{ background: '#1a1a1a' }}>
+              <option key={date.id} value={date.id} style={{ background: '#2B2120' }}>
                 Fecha {date.dateNumber}{date.status === 'in_progress' ? ' (En curso)' : ''}
               </option>
             ))}
@@ -286,7 +286,7 @@ export default function ResultadosTable({ tournamentId }: ResultadosTableProps) 
           <CPAwardCard
             title="Podio"
             description="Top 3 de la fecha"
-            accentColor="#F59E0B"
+            accentColor="#E8C158"
             players={awards.podio.map(p => ({ player: p }))}
           />
 
@@ -303,7 +303,7 @@ export default function ResultadosTable({ tournamentId }: ResultadosTableProps) 
           <CPAwardCard
             title="Mesa Final"
             description="Posiciones 1 a 9"
-            accentColor="#10B981"
+            accentColor="#6ECB71"
             players={awards.mesaFinal.map(p => ({ player: p }))}
           />
 

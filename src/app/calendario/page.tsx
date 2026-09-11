@@ -104,7 +104,7 @@ export default function FechaPage() {
       <main className="pb-24 px-4 pt-4 space-y-4">
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 24, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>CALENDARIO</div>
-          <div style={{ fontSize: 12, color: '#A89A8C', marginTop: 2 }}>Todas las fechas del Torneo {tournamentNumber}</div>
+          <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 2 }}>Todas las fechas del Torneo {tournamentNumber}</div>
         </div>
 
         {/* PRÓXIMA FECHA HERO */}
@@ -160,18 +160,18 @@ export default function FechaPage() {
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
             <div>
               <div style={{ fontSize: 20, fontWeight: 900, color: '#F5EFE6' }}>{completedCount}</div>
-              <div style={{ fontSize: 12, color: '#A89A8C' }}>JUGADAS</div>
+              <div style={{ fontSize: 12, color: '#9A8F8B' }}>JUGADAS</div>
             </div>
             <div>
               <div style={{ fontSize: 20, fontWeight: 900, color: '#F5EFE6' }}>{remaining}</div>
-              <div style={{ fontSize: 12, color: '#A89A8C' }}>POR JUGAR</div>
+              <div style={{ fontSize: 12, color: '#9A8F8B' }}>POR JUGAR</div>
             </div>
           </div>
           <div style={{ marginTop: 10, height: 6, borderRadius: 100, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${progressPct}%`, background: '#E53935', borderRadius: 100 }} />
           </div>
           {seasonEndDate && (
-            <div style={{ marginTop: 10, fontSize: 12, color: '#A89A8C' }}>
+            <div style={{ marginTop: 10, fontSize: 12, color: '#9A8F8B' }}>
               Final: {new Date(seasonEndDate).toLocaleDateString('es-EC', { day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
           )}
@@ -202,7 +202,7 @@ export default function FechaPage() {
         {/* AGREGAR AL CALENDARIO */}
         <div
           style={{
-            background: '#2A292B',
+            background: '#382E2C',
             border: '1px solid rgba(255,255,255,0.09)',
             borderRadius: 16,
             padding: 14,
@@ -214,7 +214,7 @@ export default function FechaPage() {
           <CalendarPlus size={20} color="#E53935" />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6' }}>Agrega las fechas a tu calendario</div>
-            <div style={{ fontSize: 12, color: '#A89A8C' }}>No te pierdas ninguna fecha del torneo.</div>
+            <div style={{ fontSize: 12, color: '#9A8F8B' }}>No te pierdas ninguna fecha del torneo.</div>
           </div>
           <button
             onClick={handleDownloadIcs}

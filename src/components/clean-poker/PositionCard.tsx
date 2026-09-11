@@ -28,7 +28,7 @@ export function PositionCard({
     ? (() => { const p = playerName.split(' ').filter(Boolean); return p.length > 1 ? `${p[0]} ${p[p.length-1][0]}.` : p[0] })()
     : 'Tú'
 
-  const trendColor = trend > 0 ? '#4CAF50' : trend < 0 ? '#E53935' : '#FFC107'
+  const trendColor = trend > 0 ? '#6ECB71' : trend < 0 ? '#E53935' : '#E8C158'
   const trendSymbol = trend > 0 ? '▲' : trend < 0 ? '▼' : '●'
 
   return (
@@ -82,7 +82,7 @@ export function PositionCard({
               position: 'absolute', left: 0, top: 0, bottom: 0,
               width: `${pct}%`, borderRadius: '3px',
               background: isLeader
-                ? 'linear-gradient(90deg, #F57F17, #FFD700)'
+                ? 'linear-gradient(90deg, #F57F17, #E8C158)'
                 : 'linear-gradient(90deg, #006064, #00E5FF)',
               boxShadow: isLeader
                 ? '0 0 6px rgba(255,210,0,0.5)'
@@ -107,11 +107,11 @@ export function PositionCard({
               <div style={{
                 position: 'absolute', left: 0, top: 0, bottom: 0,
                 width: '100%', borderRadius: '3px',
-                background: 'linear-gradient(90deg, #F57F17, #FFD700)',
+                background: 'linear-gradient(90deg, #F57F17, #E8C158)',
                 boxShadow: '0 0 6px rgba(255,210,0,0.45)',
               }} />
             </div>
-            <span style={{ fontSize: '12px', color: '#FFD700', fontWeight: 700, width: '48px', textAlign: 'right', flexShrink: 0 }}>
+            <span style={{ fontSize: '12px', color: '#E8C158', fontWeight: 700, width: '48px', textAlign: 'right', flexShrink: 0 }}>
               {leaderPoints}
             </span>
           </div>

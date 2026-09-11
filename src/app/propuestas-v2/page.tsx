@@ -123,8 +123,8 @@ export default function PropuestasV2Page() {
   if (!user) {
     return (
       <div className="pb-24">
-        <Card className="border border-white/12 bg-gradient-to-br from-[#191a2c] via-[#171828] to-[#10111b] p-7 text-center text-white/65 shadow-[0_18px_40px_rgba(12,13,30,0.35)]">
-          <Lightbulb className="mx-auto mb-3 h-10 w-10 text-poker-red" />
+        <Card className="border border-white/12 bg-gradient-to-br from-[#2B2120] via-[#2B2120] to-[#1D1615] p-7 text-center text-white/65 shadow-[0_18px_40px_rgba(12,13,30,0.35)]">
+          <Lightbulb className="mx-auto mb-3 h-10 w-10 text-poker-red-light" />
           <h3 className="mb-1 text-base font-semibold text-white">Acceso Requerido</h3>
           <p className="text-sm text-white/55">
             Necesitas iniciar sesión para gestionar tus propuestas.
@@ -138,10 +138,10 @@ export default function PropuestasV2Page() {
     <div className="pb-24 space-y-7">
       {/* Header */}
       <section>
-        <Card className="bg-gradient-to-br from-[#2A292B] via-[#201F22] to-[#1e0c14] border border-[#E53935]/15 p-5 shadow-[0_18px_40px_rgba(11,12,32,0.35)]">
+        <Card className="bg-gradient-to-br from-[#382E2C] via-[#2B2120] to-[#1D1615] border border-[#E53935]/15 p-5 shadow-[0_18px_40px_rgba(11,12,32,0.35)]">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-poker-red/25 ring-1 ring-poker-red/40 text-poker-red">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-poker-red/25 ring-1 ring-poker-red/40 text-poker-red-light">
                 <FileText className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -158,7 +158,7 @@ export default function PropuestasV2Page() {
                 setShowCreateForm(!showCreateForm)
                 setEditingProposal(null)
               }}
-            className="relative min-w-[220px] rounded-full bg-gradient-to-r from-poker-red via-[#d73552] to-[#ff4b2b] text-white font-semibold shadow-[0_14px_30px_rgba(215,53,82,0.45)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(215,53,82,0.55)]"
+            className="relative min-w-[220px] rounded-full bg-gradient-to-r from-poker-red via-[#D8342F] to-[#C62828] text-white font-semibold shadow-[0_14px_30px_rgba(215,53,82,0.45)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(215,53,82,0.55)]"
               disabled={isLoading}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -178,7 +178,7 @@ export default function PropuestasV2Page() {
 
       {/* Loading proposal for editing */}
       {isFetchingProposal && (
-        <Card className="border border-white/12 bg-gradient-to-br from-[#181a2c] via-[#151726] to-[#10111b] p-6 text-center text-white/65 shadow-[0_16px_36px_rgba(12,13,30,0.35)]">
+        <Card className="border border-white/12 bg-gradient-to-br from-[#2B2120] via-[#2B2120] to-[#1D1615] p-6 text-center text-white/65 shadow-[0_16px_36px_rgba(12,13,30,0.35)]">
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-poker-red"></div>
           Cargando propuesta seleccionada...
         </Card>
@@ -204,7 +204,7 @@ export default function PropuestasV2Page() {
 
       {/* Error State */}
       {error && (
-        <Card className="border border-rose-500/30 bg-gradient-to-br from-rose-500/15 via-[#191a2c] to-[#10111b] p-7 text-center text-rose-200 shadow-[0_18px_40px_rgba(230,70,120,0.25)]">
+        <Card className="border border-rose-500/30 bg-gradient-to-br from-rose-500/15 via-[#2B2120] to-[#1D1615] p-7 text-center text-rose-200 shadow-[0_18px_40px_rgba(230,70,120,0.25)]">
           <FileText className="mx-auto mb-4 h-10 w-10 text-rose-200" />
           <p className="text-sm">{error}</p>
           <Button
@@ -219,8 +219,8 @@ export default function PropuestasV2Page() {
 
       {/* Empty State */}
       {!isLoading && !error && proposals.length === 0 && (
-        <Card className="border border-white/12 bg-gradient-to-br from-[#191a2c] via-[#171828] to-[#10111b] p-7 text-center text-white/65 shadow-[0_18px_40px_rgba(12,13,30,0.35)]">
-          <FileText className="mx-auto mb-3 h-10 w-10 text-poker-red" />
+        <Card className="border border-white/12 bg-gradient-to-br from-[#2B2120] via-[#2B2120] to-[#1D1615] p-7 text-center text-white/65 shadow-[0_18px_40px_rgba(12,13,30,0.35)]">
+          <FileText className="mx-auto mb-3 h-10 w-10 text-poker-red-light" />
           <h3 className="mb-1 text-base font-semibold text-white">Sin propuestas</h3>
           <p className="text-sm text-white/55 mb-4">
             Aún no has creado ninguna propuesta para el Torneo 29.
@@ -228,7 +228,7 @@ export default function PropuestasV2Page() {
           <Button
             variant="ghost"
             onClick={() => setShowCreateForm(true)}
-            className="rounded-full bg-gradient-to-r from-poker-red via-[#d73552] to-[#ff4b2b] px-5 py-2 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(215,53,82,0.45)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(215,53,82,0.55)]"
+            className="rounded-full bg-gradient-to-r from-poker-red via-[#D8342F] to-[#C62828] px-5 py-2 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(215,53,82,0.45)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(215,53,82,0.55)]"
           >
             <Plus className="mr-2 h-4 w-4" />
             Crear mi primera propuesta
@@ -260,9 +260,9 @@ export default function PropuestasV2Page() {
       )}
 
       {/* Info Footer */}
-      <Card className="border border-white/12 bg-gradient-to-br from-[#181a2c] via-[#151726] to-[#10111b] p-5 shadow-[0_16px_36px_rgba(12,13,30,0.35)]">
+      <Card className="border border-white/12 bg-gradient-to-br from-[#2B2120] via-[#2B2120] to-[#1D1615] p-5 shadow-[0_16px_36px_rgba(12,13,30,0.35)]">
         <div className="flex items-start gap-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-poker-red/25 text-poker-red">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-poker-red/25 text-poker-red-light">
             <Lightbulb className="h-4 w-4 text-white" />
           </div>
           <div>

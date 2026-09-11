@@ -100,26 +100,26 @@ export default function ReportesPage() {
           <FileSpreadsheet size={20} color="#E53935" />
           <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>Reportes</div>
         </div>
-        <p style={{ fontSize: 12, color: '#A89A8C', marginTop: -8 }}>
+        <p style={{ fontSize: 12, color: '#9A8F8B', marginTop: -8 }}>
           Descarga el reporte completo de un torneo en Excel: resultados por fecha, matriz de eliminaciones,
           premiación final y días sin ganar.
         </p>
 
         <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#A89A8C', marginBottom: 8 }}>Torneo</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#9A8F8B', marginBottom: 8 }}>Torneo</p>
           <div
             className="relative flex items-center gap-2"
             style={{
               padding: '10px 12px',
               borderRadius: 14,
-              background: '#2A292B',
+              background: '#382E2C',
               border: '1px solid rgba(255,255,255,0.09)'
             }}
           >
             <div style={{ flex: 1, fontSize: 14, fontWeight: 800, color: '#F5EFE6' }}>
               {selectedTournament ? `Torneo ${selectedTournament.number} — ${selectedTournament.name}` : 'Selecciona un torneo'}
             </div>
-            <ChevronDown size={16} style={{ color: '#A89A8C', flexShrink: 0 }} />
+            <ChevronDown size={16} style={{ color: '#9A8F8B', flexShrink: 0 }} />
             <select
               value={selectedId ?? ''}
               onChange={(e) => setSelectedId(Number(e.target.value))}
@@ -172,7 +172,7 @@ export default function ReportesPage() {
                 'Premiación final: Varón del Torneo, Podio Final, 7/2 Final, Padres e Hijos.',
                 'Días sin ganar: última victoria de cada jugador, con la fecha de referencia usada para el cálculo.'
               ].map((text) => (
-                <li key={text} style={{ fontSize: 13, color: '#B5A996', lineHeight: 1.4 }}>
+                <li key={text} style={{ fontSize: 13, color: '#9A8F8B', lineHeight: 1.4 }}>
                   · {text}
                 </li>
               ))}

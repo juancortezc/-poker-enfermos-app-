@@ -292,7 +292,7 @@ export default function CPJugadoresTab() {
                 className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center shrink-0"
                 style={{
                   background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
-                  border: `2px solid ${player.role === 'Comision' ? '#E53935' : player.role === 'Invitado' ? '#EC407A' : 'rgba(255, 255, 255, 0.1)'}`,
+                  border: `2px solid ${player.role === 'Comision' ? '#E53935' : player.role === 'Invitado' ? '#E8863C' : 'rgba(255, 255, 255, 0.1)'}`,
                 }}
               >
                 {player.photoUrl ? (
@@ -338,7 +338,7 @@ export default function CPJugadoresTab() {
               {player.role === 'Comision' && (
                 <span
                   className="px-2 py-0.5 rounded-full text-xs font-medium shrink-0"
-                  style={{ background: 'rgba(229, 57, 53, 0.2)', color: '#E53935' }}
+                  style={{ background: 'rgba(229, 57, 53, 0.2)', color: '#FF6B6B' }}
                 >
                   C
                 </span>

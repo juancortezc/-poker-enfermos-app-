@@ -68,7 +68,7 @@ export default function GameDateSummary({ gameDate, onEdit }: GameDateSummaryPro
             
             <div className="text-center">
               <div className="bg-poker-dark/50 rounded-lg p-3">
-                <Trophy className="w-6 h-6 text-poker-red mx-auto mb-2" />
+                <Trophy className="w-6 h-6 text-poker-red-light mx-auto mb-2" />
                 <p className="text-xs text-poker-muted">Pts. Ganador</p>
                 <p className="text-sm font-semibold text-white">
                   {pointsForWinner}

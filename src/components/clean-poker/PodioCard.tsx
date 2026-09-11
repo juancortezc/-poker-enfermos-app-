@@ -21,9 +21,9 @@ interface PodioCardProps {
 
 export function PodioCard({ players }: PodioCardProps) {
   const getTrendColor = (trend: number) => {
-    if (trend > 0) return '#4CAF50' // Verde
+    if (trend > 0) return '#6ECB71' // Verde
     if (trend < 0) return '#E53935' // Rojo
-    return '#FFC107' // Amarillo
+    return '#E8C158' // Amarillo
   }
 
   const getTrendSymbol = (trend: number) => {
@@ -33,9 +33,9 @@ export function PodioCard({ players }: PodioCardProps) {
   }
 
   const getMedalColor = (position: number) => {
-    if (position === 1) return '#FFD700'
-    if (position === 2) return '#C8C8D8'
-    if (position === 3) return '#CD7F32'
+    if (position === 1) return '#E8C158'
+    if (position === 2) return '#C9C6C2'
+    if (position === 3) return '#C08A54'
     return 'var(--cp-on-surface-variant)'
   }
 
@@ -122,8 +122,8 @@ export function PodioCard({ players }: PodioCardProps) {
           href="/ranking"
           className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity hover:opacity-80"
         >
-          <span style={{ color: '#E53935', fontSize: '12px' }}>Todos</span>
-          <span style={{ color: '#E53935', fontSize: '12px' }}>→</span>
+          <span style={{ color: '#FF6B6B', fontSize: '12px' }}>Todos</span>
+          <span style={{ color: '#FF6B6B', fontSize: '12px' }}>→</span>
         </Link>
       </div>
 
@@ -283,7 +283,7 @@ export function PodioCard({ players }: PodioCardProps) {
                     className="font-bold"
                     style={{
                       fontSize: 'var(--cp-label-size)',
-                      color: player.victories > 0 ? '#FFD700' : 'var(--cp-on-surface-muted)',
+                      color: player.victories > 0 ? '#E8C158' : 'var(--cp-on-surface-muted)',
                     }}
                   >
                     {player.victories}

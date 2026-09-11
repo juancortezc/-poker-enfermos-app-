@@ -293,7 +293,7 @@ export default function CPMultaForm({ multa, tournamentId, players, isOpen, onCl
               className="rounded-xl p-4 text-center"
               style={{ background: 'rgba(229, 57, 53, 0.1)', border: '1px solid rgba(229, 57, 53, 0.3)' }}
             >
-              <p style={{ color: '#E53935', fontSize: 'var(--cp-caption-size)' }}>{error}</p>
+              <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-caption-size)' }}>{error}</p>
             </div>
           )}
         </form>
@@ -309,7 +309,7 @@ export default function CPMultaForm({ multa, tournamentId, players, isOpen, onCl
               onClick={handleDelete}
               disabled={loading}
               className="py-3 px-4 font-medium transition-all"
-              style={{ background: 'rgba(229, 57, 53, 0.1)', color: '#E53935', borderRadius: '8px' }}
+              style={{ background: 'rgba(229, 57, 53, 0.1)', color: '#FF6B6B', borderRadius: '8px' }}
             >
               Eliminar
             </button>

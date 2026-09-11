@@ -324,7 +324,7 @@ export default function CalendarDraftBuilder() {
           <div className="rounded-xl border border-white/5 bg-poker-dark/40 p-2.5 text-xs text-white/70 sm:text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2 text-white/60">
               <div className="inline-flex items-center gap-2">
-                <CalendarDays className="h-3.5 w-3.5 text-poker-red" />
+                <CalendarDays className="h-3.5 w-3.5 text-poker-red-light" />
                 <span>Próximo torneo: <span className="font-semibold text-white">#{tournamentNumber ?? '—'}</span></span>
               </div>
               {nextNumber && tournamentNumber !== nextNumber && (
@@ -347,7 +347,7 @@ export default function CalendarDraftBuilder() {
             {gameDates.map((gameDate, index) => (
               <div
                 key={gameDate.dateNumber}
-                className="rounded-xl border border-poker-red/40 bg-poker-card p-2.5 text-xs transition-all duration-200 hover:border-poker-red/60 hover:shadow-lg hover:shadow-poker-red/10 sm:p-3"
+                className="rounded-xl border border-poker-line bg-poker-card p-2.5 text-xs transition-all duration-200 hover:border-poker-red/60 hover:shadow-lg hover:shadow-poker-red/10 sm:p-3"
               >
                 <div className="space-y-2 text-center">
                   <div className="flex items-center justify-center space-x-2 text-[13px] text-poker-muted">

@@ -315,7 +315,7 @@ export default function CPPlayerForm({
             {/* Invitador (solo para invitados) */}
             {formData.role === UserRole.Invitado && (
               <div className="flex items-center gap-2">
-                <User className="w-4 h-4 flex-shrink-0" style={{ color: '#EC407A' }} />
+                <User className="w-4 h-4 flex-shrink-0" style={{ color: '#E8863C' }} />
                 <div className="relative flex-1">
                   <select
                     value={formData.inviterId}
@@ -411,7 +411,7 @@ export default function CPPlayerForm({
                       className="p-2 shrink-0 transition-colors hover:bg-red-500/20"
                       style={{
                         background: 'rgba(229, 57, 53, 0.1)',
-                        color: '#E53935',
+                        color: '#FF6B6B',
                         borderRadius: '4px',
                       }}
                     >
@@ -425,7 +425,7 @@ export default function CPPlayerForm({
                 onClick={addAlias}
                 className="flex items-center gap-2 py-1.5 px-2 transition-colors hover:bg-white/5"
                 style={{
-                  color: '#E53935',
+                  color: '#FF6B6B',
                   fontSize: 'var(--cp-caption-size)',
                   borderRadius: '4px',
                 }}
@@ -512,7 +512,7 @@ export default function CPPlayerForm({
                 border: '1px solid rgba(229, 57, 53, 0.3)',
               }}
             >
-              <p style={{ color: '#E53935', fontSize: 'var(--cp-caption-size)' }}>{error}</p>
+              <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-caption-size)' }}>{error}</p>
             </div>
           )}
 

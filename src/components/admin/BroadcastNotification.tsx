@@ -223,7 +223,7 @@ export function BroadcastNotification() {
   return (
     <div className="space-y-6">
       {/* Information Notice */}
-      <div className="p-4 rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-500/15 via-[#191a2c] to-[#10111b]">
+      <div className="p-4 rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-500/15 via-[#2B2120] to-[#1D1615]">
         <div className="flex items-center gap-2 mb-2">
           <Bell className="w-4 h-4 text-blue-400" />
           <span className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-200">Información</span>
@@ -377,13 +377,13 @@ export function BroadcastNotification() {
       {title && body && (
         <div className="p-4 rounded-xl border border-white/12 bg-gradient-to-r from-white/8 to-white/3">
           <div className="flex items-center gap-2 mb-3">
-            <MessageSquare className="w-4 h-4 text-poker-red" />
+            <MessageSquare className="w-4 h-4 text-poker-red-light" />
             <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/80">Vista Previa</span>
           </div>
           <div className="space-y-2">
             <p className="text-sm font-semibold text-white">{title}</p>
             <p className="text-sm text-white/70 leading-relaxed">{body}</p>
-            <p className="text-xs text-poker-red/80 mt-3">{getAudienceInfo()}</p>
+            <p className="text-xs text-poker-red-light/80 mt-3">{getAudienceInfo()}</p>
           </div>
         </div>
       )}
@@ -419,7 +419,7 @@ export function BroadcastNotification() {
 
       {/* Result/Error Display */}
       {result && (
-        <div className="p-4 bg-gradient-to-r from-emerald-500/15 via-[#191a2c] to-[#10111b] border border-emerald-500/20 rounded-xl">
+        <div className="p-4 bg-gradient-to-r from-emerald-500/15 via-[#2B2120] to-[#1D1615] border border-emerald-500/20 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="w-4 h-4 text-emerald-400" />
             <span className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-200">Éxito</span>
@@ -429,7 +429,7 @@ export function BroadcastNotification() {
       )}
 
       {error && (
-        <div className="p-4 bg-gradient-to-r from-rose-500/15 via-[#191a2c] to-[#10111b] border border-rose-500/20 rounded-xl">
+        <div className="p-4 bg-gradient-to-r from-rose-500/15 via-[#2B2120] to-[#1D1615] border border-rose-500/20 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle className="w-4 h-4 text-rose-400" />
             <span className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-200">Error</span>

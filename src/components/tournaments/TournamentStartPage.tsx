@@ -70,7 +70,7 @@ export default function TournamentStartPage() {
     return (
       <div className="min-h-screen bg-poker-dark text-white flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-poker-red" />
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-poker-red-light" />
           <p className="text-poker-muted">Cargando información...</p>
         </div>
       </div>

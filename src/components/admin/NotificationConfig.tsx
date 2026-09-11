@@ -271,13 +271,13 @@ export function NotificationConfig() {
 
       {/* Results/Errors */}
       {result && (
-        <div className="p-4 bg-gradient-to-r from-emerald-500/15 via-[#191a2c] to-[#10111b] border border-emerald-500/20 rounded-xl">
+        <div className="p-4 bg-gradient-to-r from-emerald-500/15 via-[#2B2120] to-[#1D1615] border border-emerald-500/20 rounded-xl">
           <p className="text-sm text-emerald-200">{result}</p>
         </div>
       )}
 
       {error && (
-        <div className="p-4 bg-gradient-to-r from-rose-500/15 via-[#191a2c] to-[#10111b] border border-rose-500/20 rounded-xl">
+        <div className="p-4 bg-gradient-to-r from-rose-500/15 via-[#2B2120] to-[#1D1615] border border-rose-500/20 rounded-xl">
           <p className="text-sm text-rose-200">{error}</p>
         </div>
       )}

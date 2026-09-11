@@ -18,7 +18,7 @@ function shortName(full: string) {
   return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0]
 }
 
-const MEDALS: Record<number, string> = { 1: '#F0B429', 2: '#C0C0C0', 3: '#CD7F32' }
+const MEDALS: Record<number, string> = { 1: '#F0B429', 2: '#C0C0C0', 3: '#C08A54' }
 const MUTED = 'rgba(255,255,255,0.45)'
 const PANEL = '1px solid rgba(255,255,255,0.08)'
 
@@ -56,7 +56,7 @@ function Var({ change }: { change: number }) {
   return (
     <span
       className="inline-flex items-center gap-0.5"
-      style={{ color: up ? '#22c55e' : '#ef4444', fontSize: 13, fontWeight: 700 }}
+      style={{ color: up ? '#6ECB71' : '#E53935', fontSize: 13, fontWeight: 700 }}
     >
       <span style={{ fontSize: 12 }}>{up ? '▲' : '▼'}</span>
       {Math.abs(change)}
@@ -88,7 +88,7 @@ function Row({ row, isMe, striped }: { row: LiveRankingRow; isMe: boolean; strip
               height: 17,
               borderRadius: '50%',
               background: medal,
-              color: '#1a1a1a',
+              color: '#2B2120',
               fontSize: 12,
               fontWeight: 800,
             }}

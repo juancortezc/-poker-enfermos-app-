@@ -62,9 +62,9 @@ export default function MasPage() {
                 className="flex items-center gap-3 px-3 py-3"
                 style={{ borderBottom: index < items.length - 1 ? '1px solid rgba(255,255,255,0.08)' : undefined }}
               >
-                <Icon size={18} style={{ color: '#A89A8C' }} />
+                <Icon size={18} style={{ color: '#9A8F8B' }} />
                 <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#F5EFE6' }}>{item.label}</span>
-                <ChevronRight size={16} style={{ color: '#A89A8C' }} />
+                <ChevronRight size={16} style={{ color: '#9A8F8B' }} />
               </Link>
             )
           })}

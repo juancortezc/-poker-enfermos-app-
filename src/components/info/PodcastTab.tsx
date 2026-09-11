@@ -58,7 +58,7 @@ export default function PodcastTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        <p style={{ color: '#E53935', fontSize: 'var(--cp-body-size)' }}>
+        <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-body-size)' }}>
           Error: {error}
         </p>
         <button

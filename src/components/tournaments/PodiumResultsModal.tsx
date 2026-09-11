@@ -238,7 +238,7 @@ export default function PodiumResultsModal({ isOpen, onClose, playerId }: Podium
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="dashboard-card p-4">
                       <h3 className="text-lg font-semibold text-white mb-2">Mejor Posición</h3>
-                      <p className="text-2xl font-bold text-poker-red">{data.summary.bestPosition}</p>
+                      <p className="text-2xl font-bold text-poker-red-light">{data.summary.bestPosition}</p>
                     </div>
 
                     <div className="dashboard-card p-4">

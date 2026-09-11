@@ -124,7 +124,7 @@ export default function EliminationsTab({ tournamentId }: EliminationsTabProps) 
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-poker-red/20">
-                  <Calendar className="h-5 w-5 text-poker-red" />
+                  <Calendar className="h-5 w-5 text-poker-red-light" />
                 </div>
                 <div className="text-left">
                   <h3 className="text-sm font-semibold text-white">
@@ -173,7 +173,7 @@ export default function EliminationsTab({ tournamentId }: EliminationsTabProps) 
                         className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-3 hover:bg-white/10 transition-colors"
                       >
                         {/* Position */}
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-poker-red/20 text-xs font-bold text-poker-red">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-poker-red/20 text-xs font-bold text-poker-red-light">
                           #{elimination.position}
                         </div>
 
@@ -234,7 +234,7 @@ export default function EliminationsTab({ tournamentId }: EliminationsTabProps) 
                         {/* Points */}
                         <div className="text-right">
                           <p className="text-xs text-white/50">Puntos</p>
-                          <p className="text-sm font-bold text-poker-red">{elimination.points}</p>
+                          <p className="text-sm font-bold text-poker-red-light">{elimination.points}</p>
                         </div>
                       </div>
                     ))}

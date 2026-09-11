@@ -55,13 +55,13 @@ export function CSVPreview({
           <h2 className="text-xl font-semibold text-white mb-4">Resumen del Archivo</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-poker-red">
+              <div className="text-2xl font-bold text-poker-red-light">
                 {previewData.totalRecords}
               </div>
               <div className="text-poker-text">Eliminaciones</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-poker-red">
+              <div className="text-2xl font-bold text-poker-red-light">
                 {previewData.playerCount}
               </div>
               <div className="text-poker-text">Jugadores</div>
@@ -203,10 +203,10 @@ export function CSVPreview({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-600">
-                <th className="text-left py-2 px-3 text-poker-red">Pos</th>
-                <th className="text-left py-2 px-3 text-poker-red">Eliminado</th>
-                <th className="text-left py-2 px-3 text-poker-red">Eliminador</th>
-                <th className="text-left py-2 px-3 text-poker-red">Puntos</th>
+                <th className="text-left py-2 px-3 text-poker-red-light">Pos</th>
+                <th className="text-left py-2 px-3 text-poker-red-light">Eliminado</th>
+                <th className="text-left py-2 px-3 text-poker-red-light">Eliminador</th>
+                <th className="text-left py-2 px-3 text-poker-red-light">Puntos</th>
               </tr>
             </thead>
             <tbody>
@@ -217,7 +217,7 @@ export function CSVPreview({
                   <td className="py-2 px-3 text-poker-text">
                     {elim.eliminador || '-'}
                   </td>
-                  <td className="py-2 px-3 text-poker-red font-medium">{elim.puntos}</td>
+                  <td className="py-2 px-3 text-poker-red-light font-medium">{elim.puntos}</td>
                 </tr>
               ))}
             </tbody>

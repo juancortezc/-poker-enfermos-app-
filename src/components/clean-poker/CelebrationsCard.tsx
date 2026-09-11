@@ -147,10 +147,10 @@ export function CelebrationsCard() {
           </button>
 
           <div className="flex items-center gap-2 mb-3">
-            <Cake className="w-5 h-5" style={{ color: '#FFC107' }} />
+            <Cake className="w-5 h-5" style={{ color: '#E8C158' }} />
             <span
               className="font-semibold"
-              style={{ fontSize: 'var(--cp-body-size)', color: '#FFC107' }}
+              style={{ fontSize: 'var(--cp-body-size)', color: '#E8C158' }}
             >
               Cumpleanos
             </span>
@@ -164,7 +164,7 @@ export function CelebrationsCard() {
                   className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
                   style={{
                     background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
-                    border: '2px solid #FFC107',
+                    border: '2px solid #E8C158',
                   }}
                 >
                   {player.photoUrl ? (
@@ -191,7 +191,7 @@ export function CelebrationsCard() {
                   <p
                     style={{
                       fontSize: 'var(--cp-caption-size)',
-                      color: player.isToday ? '#FFC107' : 'var(--cp-on-surface-muted)',
+                      color: player.isToday ? '#E8C158' : 'var(--cp-on-surface-muted)',
                       fontWeight: player.isToday ? 600 : 400
                     }}
                   >
@@ -209,7 +209,7 @@ export function CelebrationsCard() {
                     className="px-2 py-1 rounded-full text-xs font-bold"
                     style={{
                       background: 'rgba(255, 193, 7, 0.2)',
-                      color: '#FFC107'
+                      color: '#E8C158'
                     }}
                   >
                     Felicidades!

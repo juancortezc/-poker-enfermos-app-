@@ -399,7 +399,7 @@ export default function GameDateConfigPage() {
     return (
       <div className="min-h-screen bg-poker-dark flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-poker-red" />
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-poker-red-light" />
           <p className="text-poker-muted">Cargando...</p>
         </div>
       </div>
@@ -528,7 +528,7 @@ export default function GameDateConfigPage() {
               {/* Loading indicator */}
               {updatingDate && (
                 <div className="absolute inset-0 flex items-center justify-center bg-poker-card/80 rounded-lg">
-                  <Loader2 className="w-4 h-4 animate-spin text-poker-red" />
+                  <Loader2 className="w-4 h-4 animate-spin text-poker-red-light" />
                 </div>
               )}
             </div>

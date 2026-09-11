@@ -98,7 +98,7 @@ export default function AplicacionTab() {
               className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
               style={{ background: 'rgba(34, 197, 94, 0.2)' }}
             >
-              <CheckCircle className="w-8 h-8" style={{ color: '#22c55e' }} />
+              <CheckCircle className="w-8 h-8" style={{ color: '#6ECB71' }} />
             </div>
             <h2
               className="text-lg font-bold mb-2"
@@ -116,7 +116,7 @@ export default function AplicacionTab() {
               className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
               style={{ background: 'rgba(229, 57, 53, 0.2)' }}
             >
-              <Download className="w-8 h-8" style={{ color: '#E53935' }} />
+              <Download className="w-8 h-8" style={{ color: '#FF6B6B' }} />
             </div>
             <h2
               className="text-lg font-bold mb-2"
@@ -141,7 +141,7 @@ export default function AplicacionTab() {
           }}
         >
           <div className="flex items-center gap-3 mb-4">
-            <Apple className="w-5 h-5" style={{ color: '#E53935' }} />
+            <Apple className="w-5 h-5" style={{ color: '#FF6B6B' }} />
             <h3 className="font-semibold" style={{ color: 'var(--cp-on-surface)' }}>
               Instrucciones para iOS
             </h3>
@@ -157,7 +157,7 @@ export default function AplicacionTab() {
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: 'rgba(229, 57, 53, 0.2)' }}
                 >
-                  <span style={{ color: '#E53935', fontWeight: 'bold', fontSize: '14px' }}>
+                  <span style={{ color: '#FF6B6B', fontWeight: 'bold', fontSize: '14px' }}>
                     {instruction.step}
                   </span>
                 </div>
@@ -187,7 +187,7 @@ export default function AplicacionTab() {
               border: '1px solid rgba(249, 115, 22, 0.3)',
             }}
           >
-            <p style={{ color: '#f97316', fontSize: 'var(--cp-caption-size)' }}>
+            <p style={{ color: '#E8863C', fontSize: 'var(--cp-caption-size)' }}>
               Nota: Debes usar Safari para instalar la app en iOS
             </p>
           </div>
@@ -204,7 +204,7 @@ export default function AplicacionTab() {
           }}
         >
           <div className="flex items-center gap-3 mb-4">
-            <Chrome className="w-5 h-5" style={{ color: '#E53935' }} />
+            <Chrome className="w-5 h-5" style={{ color: '#FF6B6B' }} />
             <h3 className="font-semibold" style={{ color: 'var(--cp-on-surface)' }}>
               {deferredPrompt ? 'Listo para instalar' : 'Instrucciones para Android'}
             </h3>
@@ -221,7 +221,7 @@ export default function AplicacionTab() {
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: 'rgba(229, 57, 53, 0.2)' }}
                 >
-                  <span style={{ color: '#E53935', fontWeight: 'bold', fontSize: '14px' }}>1</span>
+                  <span style={{ color: '#FF6B6B', fontWeight: 'bold', fontSize: '14px' }}>1</span>
                 </div>
                 <div>
                   <p
@@ -240,7 +240,7 @@ export default function AplicacionTab() {
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: 'rgba(229, 57, 53, 0.2)' }}
                 >
-                  <span style={{ color: '#E53935', fontWeight: 'bold', fontSize: '14px' }}>2</span>
+                  <span style={{ color: '#FF6B6B', fontWeight: 'bold', fontSize: '14px' }}>2</span>
                 </div>
                 <div>
                   <p
@@ -313,7 +313,7 @@ export default function AplicacionTab() {
             'Experiencia de pantalla completa',
           ].map((benefit, index) => (
             <div key={index} className="flex items-center gap-3">
-              <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#22c55e' }} />
+              <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#6ECB71' }} />
               <p style={{ color: 'var(--cp-on-surface-variant)', fontSize: 'var(--cp-caption-size)' }}>
                 {benefit}
               </p>

@@ -1,66 +1,128 @@
 /* ============================================
-   CLEAN POKER - Design System Tokens
-   Material Design 3 Dark Theme + Glassmorphism
+   POKER ENFERMOS - Tokens de color
+   ============================================
+
+   Una sola escala de superficies, un solo matiz.
+
+   Antes convivian cuatro negros que no se ponian de acuerdo — ciruela
+   (#1e0c14), gris neutro (#2A292B), gris puro (#171717) y restos navy de
+   PokerNew (#10111b) — y los ocho tonos cabian en 14 puntos de L*, con el
+   texto en 95. Dos grupos y un abismo en medio: cada elemento era un hueco
+   con letras encima. Eso es lo que se leia como sombrio.
+
+   Ahora hay cinco pisos repartidos en 26 puntos, todos con el matiz del rojo
+   del club (hue 34) y croma bajo constante. Seis puntos de separacion entre
+   pisos es lo que hace que una tarjeta se vea apoyada sobre algo en vez de
+   recortada en algo.
    ============================================ */
 
 :root {
-  /* === BACKGROUND === */
-  --cp-background: #1e0c14;
-  --cp-background-subtle: #260e1a;
+  /* === SUPERFICIES ===
+     L* medido en CIELAB. No intercalar valores sueltos entre estos pisos:
+     la escala funciona porque los saltos son parejos. */
+  --cp-surface-0: #1D1615;   /* L*  8 — fondo de la app */
+  --cp-surface-1: #2B2120;   /* L* 14 — tarjeta, fila de tabla */
+  --cp-surface-2: #382E2C;   /* L* 20 — elevada, hover, lider */
+  --cp-surface-3: #483E3C;   /* L* 27 — inputs, chips, separadores */
+  --cp-surface-4: #584E4C;   /* L* 34 — bordes vivos, encabezados */
 
-  /* === SURFACE (Cards with glassmorphism) === */
-  --cp-surface: rgba(70, 18, 40, 0.88);
-  --cp-surface-solid: #3a1224;
-  --cp-surface-border: rgba(200, 30, 70, 0.22);
+  /* Alias por compatibilidad: hay ~300 usos de estos nombres en el codigo. */
+  --cp-background: var(--cp-surface-0);
+  --cp-background-subtle: var(--cp-surface-1);
+  --cp-surface: var(--cp-surface-1);
+  --cp-surface-solid: var(--cp-surface-1);
+  --cp-surface-container: var(--cp-surface-2);
+  --cp-surface-elevated: var(--cp-surface-2);
   --cp-surface-blur: 16px;
 
-  /* === TEXT === */
-  --cp-on-surface: #ffffff;
-  --cp-on-surface-medium: #b3b3b3;
-  --cp-on-surface-variant: #808080;
-  --cp-on-surface-muted: #e8e3e3;
+  /* Los bordes son neutros, no rojos.
+     Antes valia rgba(200,30,70,.22) y estaba en 143 lugares: el rojo hacia de
+     marca, boton, LIVE, encabezado Y contorno de todo. Cuando un color esta
+     en todo, deja de significar algo. */
+  --cp-surface-border: var(--cp-surface-3);
+  --cp-outline: var(--cp-surface-4);
+  --cp-outline-variant: var(--cp-surface-3);
 
-  /* === PRIMARY (Red) === */
+  /* === PAPEL ===
+     El tercer color del club existia solo como tipografia. Reservado a lo que
+     se celebra — podio, campeon, fecha en curso, premios — para que el cambio
+     de fondo signifique algo. Si el papel se usa en todas partes deja de ser
+     un premio y vuelve a ser decoracion. */
+  --cp-paper: #FBF7F2;
+  --cp-paper-2: #F1EAE4;
+  --cp-paper-border: rgba(29, 22, 21, 0.12);
+  --cp-ink: #1D1615;         /* 16.7:1 sobre papel */
+  --cp-ink-2: #574C49;       /*  7.8:1 sobre papel */
+
+  /* === TEXTO SOBRE OSCURO ===
+     Crema, no blanco puro: sobre un fondo calido el blanco puro vibra. */
+  --cp-on-surface: #F5EFE6;         /* 13.7:1 sobre surface-1 */
+  --cp-on-surface-muted: #C9BFBA;   /*  8.7:1 — secundario */
+  --cp-on-surface-medium: #C9BFBA;
+  --cp-on-surface-variant: #9A8F8B; /*  5.0:1 — terciario, piso de AA */
+
+  /* === ROJO — marca, accion y estado ===
+     El rojo del club NO llega a 4.5:1 como texto sobre ninguna superficie
+     (3.7:1 sobre surface-1). Por eso hay dos tokens y no uno: `primary` para
+     fondos, bordes y estados; `primary-light` para cuando el rojo es letra. */
   --cp-primary: #E53935;
-  --cp-primary-variant: #C62828;   /* fondo de botones: con texto blanco da 5.6:1 */
-  --cp-primary-light: #FF6B6B;     /* rojo COMO TEXTO sobre superficies oscuras: 5.2:1 */
+  --cp-primary-variant: #C62828;    /* fondo de boton: con texto blanco, 5.6:1 */
+  --cp-primary-light: #FF6B6B;      /* rojo COMO TEXTO sobre oscuro: 5.6:1 */
+  --cp-primary-on-light: #C62828;   /* rojo COMO TEXTO sobre papel: 5.3:1 */
   --cp-on-primary: #ffffff;
 
-  /* === ESCALA TIPOGRÁFICA ===
-     Piso duro de 12px: por debajo no se lee en un teléfono, y el público son
-     socios adultos leyendo de noche. 12px queda reservado a los overlines en
-     mayúscula con letter-spacing; cualquier texto explicativo va de 13 para
-     arriba. */
-  --cp-text-micro: 12px;    /* overlines en mayúscula */
-  --cp-text-caption: 13px;  /* secundario y explicativo */
-  --cp-text-body: 15px;     /* lectura por defecto */
-  --cp-text-strong: 16px;
-  --cp-text-title: 18px;
+  /* === INFORMATIVO — el color frio ===
+     Quinto color, y el unico que no es de la paleta historica. Reservado a lo
+     neutro que esta en curso o solo informa: fechas futuras, calendario,
+     perfiles, propuestas, avisos.
+     Existe por dos razones. Una: sin el, todo lo neutro se pinta con ausencia
+     de color y ahi es donde la app se apaga. Dos: un color frio entre tanto
+     calido hace que el rojo vuelva a sentirse calido — y deja al rojo libre
+     para premiar, que es lo que hace que ganar se vea. */
+  --cp-info: #5BC8C0;               /* 7.8:1 sobre surface-1 */
+  --cp-info-on-light: #0F766E;      /* 5.1:1 sobre papel */
+  --cp-info-soft: rgba(91, 200, 192, 0.12);
 
   /* === FEEDBACK ===
      Los colores del club son negro, rojo y blanco: se reservan para lo que
      suma. Lo negativo — puntos que se pierden, fechas descartadas, el
-     acumulado que no cuenta — va en naranja, nunca en rojo.
-     `on-light` es para las tablas de fondo blanco; el otro para las tarjetas
-     oscuras. */
-  --cp-positive: #4CAF50;
-  --cp-negative: #E8863C;
-  --cp-negative-on-light: #C2410C;
-  --cp-neutral: #666666;
-  --cp-warning: #ca8a04;
+     acumulado que no cuenta, las faltas — va en naranja, nunca en rojo. */
+  --cp-positive: #6ECB71;           /* 7.8:1 sobre surface-1 */
+  --cp-positive-on-light: #15803D;
+  --cp-success: var(--cp-positive);
+  --cp-negative: #E8863C;           /* 5.9:1 sobre surface-1 */
+  --cp-negative-on-light: #C2410C;  /* 4.9:1 sobre papel */
+  --cp-neutral: var(--cp-on-surface-variant);
+  --cp-warning: #E8C158;
 
-  /* === PODIUM === */
-  --cp-gold: #FFD700;
-  --cp-silver: #C0C0C0;
-  --cp-bronze: #CD7F32;
+  /* === PODIO ===
+     Dos juegos: el oro brillante no se lee sobre papel (3.1:1), asi que las
+     medallas sobre fondo claro usan las variantes `-on-light`. */
+  --cp-gold: #E8C158;
+  --cp-silver: #C9C6C2;
+  --cp-bronze: #C08A54;
+  --cp-gold-on-light: #8A6508;      /* 5.0:1 sobre papel */
+  --cp-silver-on-light: #6E6A67;    /* 5.0:1 sobre papel */
+  --cp-bronze-on-light: #8B5E2F;    /* 5.3:1 sobre papel */
 
-  /* === ACCENTS === */
-  --cp-chip: #E8830A;        /* poker chip orange */
-  --cp-magenta: #C2185B;     /* red → magenta accent */
+  /* === ACENTOS === */
+  --cp-chip: #E8863C;        /* ficha de poker; misma familia que lo negativo */
+  --cp-magenta: #C2185B;
 
   /* === LIVE === */
   --cp-live: #E53935;
   --cp-live-glow: rgba(229, 57, 53, 0.5);
+
+  /* === ESCALA TIPOGRAFICA ===
+     Piso duro de 12px: por debajo no se lee en un telefono, y el publico son
+     socios adultos leyendo de noche. 12px queda reservado a los overlines en
+     mayuscula con letter-spacing; cualquier texto explicativo va de 13 para
+     arriba. */
+  --cp-text-micro: 12px;
+  --cp-text-caption: 13px;
+  --cp-text-body: 15px;
+  --cp-text-strong: 16px;
+  --cp-text-title: 18px;
 
   /* === SHAPE === */
   --cp-radius-sm: 5px;
@@ -77,7 +139,7 @@
   --cp-space-5: 20px;
   --cp-space-6: 24px;
 
-  /* === ELEVATION === */
+  /* === ELEVACION === */
   --cp-elevation-1:
     0 1px 2px rgba(0, 0, 0, 0.3),
     0 2px 6px rgba(0, 0, 0, 0.2);
@@ -85,26 +147,19 @@
     0 2px 4px rgba(0, 0, 0, 0.3),
     0 4px 12px rgba(0, 0, 0, 0.25);
 
-  /* === TYPOGRAPHY === */
+  /* === TIPOGRAFIA === */
   --cp-font: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* Display - Position numbers (#10) */
   --cp-display-size: 40px;
   --cp-display-weight: 800;
-
-  /* Title - Names */
   --cp-title-size: 18px;
   --cp-title-weight: 600;
-
-  /* Body - Content */
+  --cp-title-medium: 16px;
   --cp-body-size: 14px;
   --cp-body-weight: 500;
-
-  /* Label - Small text, stats */
   --cp-label-size: 12px;
   --cp-label-weight: 500;
-
-  /* Caption - Helper text */
+  --cp-label-large: 14px;
   --cp-caption-size: 11px;
   --cp-caption-weight: 400;
 
@@ -114,7 +169,7 @@
   --cp-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* === BASE STYLES === */
+/* === BASE === */
 .cp-app {
   font-family: var(--cp-font);
   background: var(--cp-background);
@@ -123,17 +178,49 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* === GLASS CARD === */
+/* === TARJETA === */
 .cp-card {
   background: var(--cp-surface);
-  backdrop-filter: blur(var(--cp-surface-blur));
-  -webkit-backdrop-filter: blur(var(--cp-surface-blur));
   border: 1px solid var(--cp-surface-border);
   border-radius: var(--cp-radius-lg);
   box-shadow: var(--cp-elevation-1);
 }
 
-/* === ANIMATIONS === */
+/* La tarjeta que hay que mirar sube un piso, no se pinta de otro color. */
+.cp-card-raised {
+  background: var(--cp-surface-2);
+  border: 1px solid var(--cp-outline);
+  border-radius: var(--cp-radius-lg);
+  box-shadow: var(--cp-elevation-2);
+}
+
+/* === PAPEL ===
+   Bloque claro para lo que se celebra. Reasigna los tokens de texto y de
+   feedback a sus variantes `-on-light`, asi que cualquier componente que
+   ya use var(--cp-on-surface) o var(--cp-negative) queda legible adentro
+   sin tocarlo. */
+.cp-paper {
+  background: var(--cp-paper);
+  border: 1px solid var(--cp-paper-border);
+  border-radius: var(--cp-radius-lg);
+  box-shadow: var(--cp-elevation-2);
+
+  --cp-on-surface: var(--cp-ink);
+  --cp-on-surface-muted: var(--cp-ink-2);
+  --cp-on-surface-medium: var(--cp-ink-2);
+  --cp-on-surface-variant: var(--cp-ink-2);
+  --cp-surface-border: var(--cp-paper-border);
+  --cp-negative: var(--cp-negative-on-light);
+  --cp-positive: var(--cp-positive-on-light);
+  --cp-primary-light: var(--cp-primary-on-light);
+  --cp-info: var(--cp-info-on-light);
+  --cp-gold: var(--cp-gold-on-light);
+  --cp-silver: var(--cp-silver-on-light);
+  --cp-bronze: var(--cp-bronze-on-light);
+  color: var(--cp-on-surface);
+}
+
+/* === ANIMACIONES === */
 @keyframes cp-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }

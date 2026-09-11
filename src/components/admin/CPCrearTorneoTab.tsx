@@ -375,7 +375,7 @@ export default function CPCrearTorneoTab() {
               disabled={calendarApproved}
             />
             {tournamentNumber !== nextTournamentNumber && (
-              <span style={{ fontSize: 'var(--cp-caption-size)', color: '#FFC107' }}>
+              <span style={{ fontSize: 'var(--cp-caption-size)', color: '#E8C158' }}>
                 (sugerido: {nextTournamentNumber})
               </span>
             )}
@@ -388,7 +388,7 @@ export default function CPCrearTorneoTab() {
               background: 'rgba(34, 197, 94, 0.15)',
               border: '1px solid rgba(34, 197, 94, 0.3)',
               borderRadius: '4px',
-              color: '#22c55e',
+              color: '#6ECB71',
               fontSize: 'var(--cp-caption-size)',
             }}
           >
@@ -424,7 +424,7 @@ export default function CPCrearTorneoTab() {
               {step.icon}
               <span className="hidden sm:inline">{step.label}</span>
               {isCompleted && !isActive && (
-                <Check size={12} style={{ color: '#22c55e' }} />
+                <Check size={12} style={{ color: '#6ECB71' }} />
               )}
             </button>
           )
@@ -441,8 +441,8 @@ export default function CPCrearTorneoTab() {
             borderRadius: '4px',
           }}
         >
-          <AlertCircle size={16} style={{ color: '#ef4444' }} />
-          <p style={{ color: '#ef4444', fontSize: 'var(--cp-body-size)' }}>{error}</p>
+          <AlertCircle size={16} style={{ color: '#FF6B6B' }} />
+          <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-body-size)' }}>{error}</p>
         </div>
       )}
 
@@ -613,7 +613,7 @@ function CalendarStep({
                   <p className="text-xl font-bold" style={{ color: 'var(--cp-on-surface)' }}>
                     {dateObj!.getDate()}
                   </p>
-                  <p style={{ fontSize: '13px', color: '#E53935', fontWeight: 600 }}>
+                  <p style={{ fontSize: '13px', color: '#FF6B6B', fontWeight: 600 }}>
                     {dateObj!.toLocaleDateString('es-ES', { month: 'short' }).toUpperCase()}
                   </p>
                 </>
@@ -696,7 +696,7 @@ function CalendarStep({
       </div>
 
       {/* Status */}
-      <p className="text-center" style={{ fontSize: 'var(--cp-caption-size)', color: validDatesCount === totalDates ? '#22c55e' : 'var(--cp-on-surface-muted)' }}>
+      <p className="text-center" style={{ fontSize: 'var(--cp-caption-size)', color: validDatesCount === totalDates ? '#6ECB71' : 'var(--cp-on-surface-muted)' }}>
         {validDatesCount}/{totalDates} fechas definidas | Mejores {totalDates - datesToEliminate} de {totalDates}
       </p>
     </div>
@@ -724,7 +724,7 @@ function ParticipantsStep({
       {/* Header */}
       <div className="flex items-center justify-between">
         <p style={{ fontSize: 'var(--cp-body-size)', color: 'var(--cp-on-surface)' }}>
-          Participantes: <span style={{ color: '#E53935' }}>{selectedIds.length}</span>/{players.length}
+          Participantes: <span style={{ color: '#FF6B6B' }}>{selectedIds.length}</span>/{players.length}
         </p>
         <div className="flex gap-2">
           <button

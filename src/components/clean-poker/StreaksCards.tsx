@@ -18,7 +18,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
       {cold.length > 0 && (
         <div
           style={{
-            background: 'linear-gradient(160deg,#EC407A,#AD1457)',
+            background: 'linear-gradient(160deg,#E8863C,#AD1457)',
             borderRadius: 16,
             padding: 14
           }}

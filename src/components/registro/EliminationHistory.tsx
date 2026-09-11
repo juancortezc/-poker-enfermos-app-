@@ -182,7 +182,7 @@ export function EliminationHistory({
                     <button
                       onClick={() => handleSaveEdit(elimination.id)}
                       disabled={isUpdating || !editForm.eliminatedPlayerId}
-                      className="p-1 text-white hover:text-poker-red transition-colors disabled:opacity-50"
+                      className="p-1 text-white hover:text-poker-red-light transition-colors disabled:opacity-50"
                     >
                       <Check className="w-4 h-4" />
                     </button>

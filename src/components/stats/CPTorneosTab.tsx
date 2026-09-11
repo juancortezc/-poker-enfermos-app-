@@ -206,11 +206,11 @@ export default function CPTorneosTab() {
               color: 'var(--cp-on-surface)',
             }}
           >
-            <option value="all" style={{ background: '#1a1a1a' }}>
+            <option value="all" style={{ background: '#2B2120' }}>
               Torneo
             </option>
             {tournaments.map(t => (
-              <option key={t.tournamentNumber} value={t.tournamentNumber} style={{ background: '#1a1a1a' }}>
+              <option key={t.tournamentNumber} value={t.tournamentNumber} style={{ background: '#2B2120' }}>
                 T{t.tournamentNumber}
               </option>
             ))}
@@ -233,11 +233,11 @@ export default function CPTorneosTab() {
               color: 'var(--cp-on-surface)',
             }}
           >
-            <option value="all" style={{ background: '#1a1a1a' }}>
+            <option value="all" style={{ background: '#2B2120' }}>
               Campeon
             </option>
             {uniqueChampions.map(c => (
-              <option key={`${c.firstName}-${c.lastName}`} value={`${c.firstName} ${c.lastName}`} style={{ background: '#1a1a1a' }}>
+              <option key={`${c.firstName}-${c.lastName}`} value={`${c.firstName} ${c.lastName}`} style={{ background: '#2B2120' }}>
                 {c.firstName} {c.lastName.charAt(0)}.
               </option>
             ))}
@@ -260,11 +260,11 @@ export default function CPTorneosTab() {
               color: 'var(--cp-on-surface)',
             }}
           >
-            <option value="all" style={{ background: '#1a1a1a' }}>
+            <option value="all" style={{ background: '#2B2120' }}>
               Jugador
             </option>
             {uniquePlayers.map(p => (
-              <option key={`player-${p.firstName}-${p.lastName}`} value={`${p.firstName} ${p.lastName}`} style={{ background: '#1a1a1a' }}>
+              <option key={`player-${p.firstName}-${p.lastName}`} value={`${p.firstName} ${p.lastName}`} style={{ background: '#2B2120' }}>
                 {p.firstName} {p.lastName.charAt(0)}.
               </option>
             ))}
@@ -322,7 +322,7 @@ export default function CPTorneosTab() {
                 ) : (
                   <div
                     className="w-full h-full flex items-center justify-center text-3xl"
-                    style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }}
+                    style={{ background: 'linear-gradient(135deg, #E8C158, #E8C158)' }}
                   >
                     🏆
                   </div>
@@ -333,7 +333,7 @@ export default function CPTorneosTab() {
               <div className="flex-1">
                 <span
                   className="text-xs uppercase tracking-wider"
-                  style={{ color: '#fbbf24' }}
+                  style={{ color: '#E8C158' }}
                 >
                   Campeon
                 </span>
@@ -347,7 +347,7 @@ export default function CPTorneosTab() {
                   {formatPlayerName(tournament.champion)}
                 </h3>
                 {getPlayerAlias(tournament.champion) && (
-                  <p style={{ fontSize: 'var(--cp-caption-size)', color: '#f97316' }}>
+                  <p style={{ fontSize: 'var(--cp-caption-size)', color: '#E8863C' }}>
                     ({getPlayerAlias(tournament.champion)})
                   </p>
                 )}
@@ -370,7 +370,7 @@ export default function CPTorneosTab() {
             {/* Third Place */}
             <PositionCard
               badge="3"
-              badgeColor="#f97316"
+              badgeColor="#E8863C"
               player={tournament.thirdPlace}
             />
 

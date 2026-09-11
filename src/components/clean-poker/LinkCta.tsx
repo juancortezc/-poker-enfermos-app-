@@ -9,7 +9,7 @@ const BASE_STYLE: CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   gap: 4,
-  color: '#E53935',
+  color: '#FF6B6B',
   background: 'none',
   border: 'none',
   cursor: 'pointer',

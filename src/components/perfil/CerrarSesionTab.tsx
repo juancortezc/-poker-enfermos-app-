@@ -41,7 +41,7 @@ export default function CerrarSesionTab() {
         <div
           className="relative w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #E53935, #f97316)',
+            background: 'linear-gradient(135deg, #E53935, #E8863C)',
           }}
         >
           {user?.photoUrl ? (
@@ -86,9 +86,9 @@ export default function CerrarSesionTab() {
           }}
         >
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 flex-shrink-0" style={{ color: '#f97316' }} />
+            <AlertTriangle className="w-5 h-5 flex-shrink-0" style={{ color: '#E8863C' }} />
             <div>
-              <h3 className="font-semibold" style={{ color: '#f97316' }}>
+              <h3 className="font-semibold" style={{ color: '#E8863C' }}>
                 ¿Estás seguro?
               </h3>
               <p
@@ -143,7 +143,7 @@ export default function CerrarSesionTab() {
           style={{
             background: 'var(--cp-surface)',
             border: '1px solid var(--cp-surface-border)',
-            color: '#E53935',
+            color: '#FF6B6B',
           }}
         >
           <LogOut className="w-5 h-5" />

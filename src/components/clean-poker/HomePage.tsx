@@ -267,7 +267,7 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
           </button>
 
           {error && (
-            <p className="text-center mt-3" style={{ color: '#E53935', fontSize: '13px' }}>
+            <p className="text-center mt-3" style={{ color: '#FF6B6B', fontSize: '13px' }}>
               {error}
             </p>
           )}

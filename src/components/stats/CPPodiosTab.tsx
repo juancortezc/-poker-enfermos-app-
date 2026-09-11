@@ -81,7 +81,7 @@ export default function CPPodiosTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        <p style={{ color: '#E53935', fontSize: 'var(--cp-body-size)' }}>
+        <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-body-size)' }}>
           Error: {error}
         </p>
         <button
@@ -124,9 +124,9 @@ export default function CPPodiosTab() {
 
   const getPositionColor = (index: number) => {
     switch (index) {
-      case 0: return '#fbbf24'
+      case 0: return '#E8C158'
       case 1: return '#94a3b8'
-      case 2: return '#f97316'
+      case 2: return '#E8863C'
       default: return 'var(--cp-on-surface-muted)'
     }
   }
@@ -182,9 +182,9 @@ export default function CPPodiosTab() {
           style={{ borderBottom: '1px solid var(--cp-surface-border)' }}
         >
           <span style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>JUGADOR</span>
-          <span className="text-center" style={{ fontSize: '12px', color: '#fbbf24' }}>1ro</span>
+          <span className="text-center" style={{ fontSize: '12px', color: '#E8C158' }}>1ro</span>
           <span className="text-center" style={{ fontSize: '12px', color: '#94a3b8' }}>2do</span>
-          <span className="text-center" style={{ fontSize: '12px', color: '#f97316' }}>3ro</span>
+          <span className="text-center" style={{ fontSize: '12px', color: '#E8863C' }}>3ro</span>
           <span className="text-center" style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>TOT</span>
         </div>
 
@@ -219,7 +219,7 @@ export default function CPPodiosTab() {
                     <div
                       className="flex h-full w-full items-center justify-center text-xs font-semibold"
                       style={{
-                        background: 'linear-gradient(135deg, #E53935, #f97316)',
+                        background: 'linear-gradient(135deg, #E53935, #E8863C)',
                         color: 'white',
                       }}
                     >
@@ -241,7 +241,7 @@ export default function CPPodiosTab() {
                   {getPlayerAlias(stat.player) && (
                     <p
                       className="truncate"
-                      style={{ fontSize: '12px', color: '#f97316' }}
+                      style={{ fontSize: '12px', color: '#E8863C' }}
                     >
                       ({getPlayerAlias(stat.player)})
                     </p>
@@ -252,7 +252,7 @@ export default function CPPodiosTab() {
               {/* Stats */}
               <span
                 className="text-center font-medium"
-                style={{ fontSize: 'var(--cp-caption-size)', color: '#fbbf24' }}
+                style={{ fontSize: 'var(--cp-caption-size)', color: '#E8C158' }}
               >
                 {stat.firstPlaces}
               </span>
@@ -264,7 +264,7 @@ export default function CPPodiosTab() {
               </span>
               <span
                 className="text-center font-medium"
-                style={{ fontSize: 'var(--cp-caption-size)', color: '#f97316' }}
+                style={{ fontSize: 'var(--cp-caption-size)', color: '#E8863C' }}
               >
                 {stat.thirdPlaces}
               </span>
@@ -347,7 +347,7 @@ function PodiumCard({ stat, position, color, size }: PodiumCardProps) {
         {getAlias() && (
           <p
             className="truncate w-full text-center"
-            style={{ fontSize: isLarge ? '11px' : '10px', color: '#f97316' }}
+            style={{ fontSize: isLarge ? '11px' : '10px', color: '#E8863C' }}
           >
             ({getAlias()})
           </p>
@@ -355,9 +355,9 @@ function PodiumCard({ stat, position, color, size }: PodiumCardProps) {
 
         {/* Mini Stats */}
         <div className="flex gap-3 mt-2">
-          <span style={{ fontSize: isLarge ? '13px' : '12px', color: '#fbbf24' }}>{stat.firstPlaces}</span>
+          <span style={{ fontSize: isLarge ? '13px' : '12px', color: '#E8C158' }}>{stat.firstPlaces}</span>
           <span style={{ fontSize: isLarge ? '13px' : '12px', color: '#94a3b8' }}>{stat.secondPlaces}</span>
-          <span style={{ fontSize: isLarge ? '13px' : '12px', color: '#f97316' }}>{stat.thirdPlaces}</span>
+          <span style={{ fontSize: isLarge ? '13px' : '12px', color: '#E8863C' }}>{stat.thirdPlaces}</span>
         </div>
       </div>
 

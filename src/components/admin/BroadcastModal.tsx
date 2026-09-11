@@ -49,14 +49,14 @@ export function BroadcastModal({ isOpen, onClose }: BroadcastModalProps) {
       {/* Modal */}
       <div className="relative w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="relative border border-white/12 rounded-2xl shadow-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1b2b]/95 via-[#141625]/95 to-[#10111b]/95 backdrop-blur-md" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#382E2C]/95 via-[#2B2120]/95 to-[#1D1615]/95 backdrop-blur-md" />
 
           <div className="relative">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/12 bg-gradient-to-r from-white/8 to-transparent">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-gradient-to-r from-poker-red/20 to-poker-red/10 border border-poker-red/20">
-                  <Radio className="w-5 h-5 text-poker-red" />
+                  <Radio className="w-5 h-5 text-poker-red-light" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold tracking-tight text-white">Broadcast de Notificaciones</h2>

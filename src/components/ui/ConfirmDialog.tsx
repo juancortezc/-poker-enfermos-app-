@@ -32,19 +32,19 @@ export function ConfirmDialog({
     danger: {
       icon: 'text-rose-400',
       border: 'border-rose-500/30',
-      bg: 'from-rose-500/15 via-[#2A292B] to-[#1e0c14]',
+      bg: 'from-rose-500/15 via-[#382E2C] to-[#1D1615]',
       button: 'bg-gradient-to-r from-rose-500 via-rose-600 to-rose-700'
     },
     warning: {
       icon: 'text-[#FF6B6B]',
       border: 'border-[#E53935]/30',
-      bg: 'from-[#E53935]/10 via-[#2A292B] to-[#1e0c14]',
-      button: 'bg-gradient-to-r from-[#E53935] via-[#D32F2F] to-[#C2410C]'
+      bg: 'from-[#E53935]/10 via-[#382E2C] to-[#1D1615]',
+      button: 'bg-gradient-to-r from-[#E53935] via-[#D8342F] to-[#C2410C]'
     },
     info: {
       icon: 'text-blue-400',
       border: 'border-blue-500/30',
-      bg: 'from-blue-500/10 via-[#2A292B] to-[#1e0c14]',
+      bg: 'from-blue-500/10 via-[#382E2C] to-[#1D1615]',
       button: 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700'
     }
   }

@@ -25,9 +25,9 @@ interface CPRankingViewProps {
 const GRID = '#000'
 const RED = '#E53935'
 const GOLD = '#E8C158'
-const SILVER = '#B9B9C4'
-const BRONZE = '#C98A4E'
-const HEADER_BG = '#2A292B'
+const SILVER = '#C9C6C2'
+const BRONZE = '#C08A54'
+const HEADER_BG = '#382E2C'
 /**
  * Paleta del club: negro, rojo y blanco para lo que suma; naranja para lo que
  * resta. PUNTOS es la única columna marcada en rojo — es la que manda. ACUM. y
@@ -37,8 +37,17 @@ const HEADER_BG = '#2A292B'
 const POINTS_TINT = '#FFF5F4'
 /** Rojo profundo: el mismo del club, con contraste suficiente para texto blanco. */
 const RED_DEEP = '#C62828'
-const ORANGE = '#C2410C'
-const INACTIVE_TEXT = '#9A9A9A'
+const ORANGE = '#C2410C'        // lo negativo sobre fondo claro
+const ORANGE_ON_DARK = '#E8863C' // lo negativo sobre tarjeta oscura
+const GREEN_ON_DARK = '#6ECB71'
+// Papel: la tarjeta del lider es el momento de celebracion, y el blanco es el
+// tercer color del club. Estas variantes son las unicas que pasan AA sobre el.
+const PAPER_INK = '#1D1615'
+const PAPER_INK_2 = '#574C49'
+const PAPER_GOLD = '#7F5D07'
+const PAPER_GREEN = '#136B34'
+const PAPER_ORANGE = '#A8360A'
+const INACTIVE_TEXT = '#9A8F8B'
 const MESA_FINAL_THRESHOLD = 9
 
 /**
@@ -57,7 +66,7 @@ function medalBadgeStyle(position: number) {
   if (position === 1) return { background: GOLD, color: '#1A1512' }
   if (position === 2) return { background: SILVER, color: '#1A1512' }
   if (position === 3) return { background: BRONZE, color: '#1A1512' }
-  return { background: '#2A292B', color: '#F5EFE6' }
+  return { background: '#382E2C', color: '#F5EFE6' }
 }
 
 function shortName(full: string) {
@@ -103,7 +112,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
     return (
       <div className="p-6 text-center rounded-2xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p style={{ fontSize: 14, color: '#F5EFE6' }}>Error al cargar la tabla</p>
-        <p className="mt-1" style={{ fontSize: 13, color: '#A89A8C' }}>{errorMessage}</p>
+        <p className="mt-1" style={{ fontSize: 13, color: '#9A8F8B' }}>{errorMessage}</p>
         <button onClick={() => refresh()} className="mt-4 px-4 py-2 rounded-full" style={{ border: `1px solid ${RED}`, color: RED, fontSize: 12 }}>
           Reintentar
         </button>
@@ -114,7 +123,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
   if (!rankingData || rankingData.rankings.length === 0) {
     return (
       <div className="p-6 text-center rounded-2xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p style={{ fontSize: 14, color: '#A89A8C' }}>No hay datos de tabla disponibles.</p>
+        <p style={{ fontSize: 14, color: '#9A8F8B' }}>No hay datos de tabla disponibles.</p>
       </div>
     )
   }
@@ -221,9 +230,9 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
             className="w-full text-left relative overflow-hidden"
             style={{
               borderRadius: 18,
-              background: 'linear-gradient(135deg, #1e1600 0%, #241a02 60%, #1c1400 100%)',
-              border: `1.5px solid ${GOLD}`,
-              boxShadow: `0 8px 28px rgba(0,0,0,0.5), 0 0 30px rgba(232,193,88,0.10)`,
+              background: 'linear-gradient(135deg, #FDFAF5 0%, #F9F3E9 60%, #F6EFE2 100%)',
+              border: `1.5px solid ${PAPER_GOLD}`,
+              boxShadow: `0 10px 30px rgba(0,0,0,0.45), 0 0 0 1px rgba(127,93,7,0.10)`,
               padding: 14,
               minHeight: 118
             }}
@@ -231,30 +240,30 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
             {leader.playerPhoto && (
               <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '38%' }}>
                 <Image src={leader.playerPhoto} alt={leader.playerName} fill className="object-cover object-top" unoptimized />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #1e1600 0%, transparent 55%)' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, #1c1400 0%, transparent 34%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #FDFAF5 0%, rgba(253,250,245,0.55) 38%, transparent 62%)' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, #F6EFE2 0%, transparent 34%)' }} />
               </div>
             )}
             <div style={{ position: 'relative', zIndex: 1, maxWidth: leader.playerPhoto ? '62%' : '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ fontSize: 13 }}>👑</span>
-                <span style={{ fontSize: 12, fontWeight: 800, color: GOLD, letterSpacing: '0.1em' }}>LÍDER DEL TORNEO</span>
+                <span style={{ fontSize: 12, fontWeight: 800, color: PAPER_GOLD, letterSpacing: '0.1em' }}>LÍDER DEL TORNEO</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-                <span style={{ fontSize: 26, fontWeight: 900, color: '#fff' }}>#1</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: '#F5EFE6' }}>{shortName(leader.playerName)}</span>
+                <span style={{ fontSize: 26, fontWeight: 900, color: PAPER_INK }}>#1</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: PAPER_INK }}>{shortName(leader.playerName)}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                <span style={{ fontSize: 20, fontWeight: 900, color: GOLD }}>{scoreOf(leader)}</span>
-                <span style={{ fontSize: 12, color: '#A89A8C' }}>{SCORE_LABELS.points}</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: PAPER_GOLD }}>{scoreOf(leader)}</span>
+                <span style={{ fontSize: 12, color: PAPER_INK_2 }}>{SCORE_LABELS.points}</span>
                 {delta !== 0 && (
-                  <span style={{ fontSize: 12, fontWeight: 800, color: delta > 0 ? '#7CD07F' : RED, marginLeft: 4 }}>
-                    {delta > 0 ? `+${delta} ▲` : `${delta} ▼`} <span style={{ fontWeight: 500, color: '#A89A8C' }}>posiciones vs fecha anterior</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: delta > 0 ? PAPER_GREEN : PAPER_ORANGE, marginLeft: 4 }}>
+                    {delta > 0 ? `+${delta} ▲` : `${delta} ▼`} <span style={{ fontWeight: 500, color: PAPER_INK_2 }}>posiciones vs fecha anterior</span>
                   </span>
                 )}
               </div>
               {leader.playerAlias && (
-                <div style={{ fontSize: 13, color: '#C9B27A', fontStyle: 'italic', marginTop: 6 }}>&ldquo;{leader.playerAlias}&rdquo;</div>
+                <div style={{ fontSize: 13, color: PAPER_GOLD, fontStyle: 'italic', marginTop: 6 }}>&ldquo;{leader.playerAlias}&rdquo;</div>
               )}
             </div>
             <div
@@ -265,7 +274,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                 gap: 8,
                 marginTop: 12,
                 paddingTop: 10,
-                borderTop: '1px solid rgba(232,193,88,0.28)'
+                borderTop: '1px solid rgba(127,93,7,0.22)'
               }}
             >
               {[
@@ -274,8 +283,8 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                 { v: leader.firstPlaces, l: 'VICTORIAS' }
               ].map(({ v, l }) => (
                 <div key={l} style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: '#fff', lineHeight: 1.1 }}>{v}</div>
-                  <div style={{ fontSize: 12, color: '#A89A8C', letterSpacing: '0.03em' }}>{l}</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: PAPER_INK, lineHeight: 1.1 }}>{v}</div>
+                  <div style={{ fontSize: 12, color: PAPER_INK_2, letterSpacing: '0.03em' }}>{l}</div>
                 </div>
               ))}
             </div>
@@ -296,7 +305,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                 className="flex-1 text-left"
                 style={{
                   borderRadius: 16,
-                  background: '#2A292B',
+                  background: '#382E2C',
                   border: `1px solid ${medal}55`,
                   padding: 12,
                   display: 'flex',
@@ -312,9 +321,9 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                     <span style={{ fontSize: 13, fontWeight: 900, color: '#F5EFE6' }}>{scoreOf(player)}</span>
-                    <span style={{ fontSize: 12, color: '#A89A8C' }}>{SCORE_LABELS.pointsShort}</span>
+                    <span style={{ fontSize: 12, color: '#9A8F8B' }}>{SCORE_LABELS.pointsShort}</span>
                     {delta !== 0 && (
-                      <span style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? '#7CD07F' : RED }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? GREEN_ON_DARK : ORANGE_ON_DARK }}>
                         {delta > 0 ? `+${delta} ▲` : `${delta} ▼`}
                       </span>
                     )}
@@ -337,7 +346,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
               style={{
                 fontSize: 12,
                 fontWeight: 700,
-                color: view === v.id ? '#fff' : '#B5A996',
+                color: view === v.id ? '#fff' : '#9A8F8B',
                 background: view === v.id ? RED : 'rgba(255,255,255,0.06)',
                 border: 'none',
                 borderRadius: 100,
@@ -372,7 +381,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
       </div>
 
       {/* QUÉ ESTOY MIRANDO — siempre visible, en tamaño de lectura */}
-      <p style={{ fontSize: 12.5, lineHeight: 1.5, color: '#B5A996', margin: '-4px 2px 0' }}>{viewNote}</p>
+      <p style={{ fontSize: 12.5, lineHeight: 1.5, color: '#9A8F8B', margin: '-4px 2px 0' }}>{viewNote}</p>
 
       {/* TABLA */}
       <div style={{ borderRadius: 14, overflow: 'hidden', border: `1px solid ${GRID}` }}>
@@ -493,7 +502,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
       </div>
 
       {view === 'elimina' && !eliminasActive && (
-        <p style={{ fontSize: 12, lineHeight: 1.5, color: '#B5A996', margin: '0 2px' }}>
+        <p style={{ fontSize: 12, lineHeight: 1.5, color: '#9A8F8B', margin: '0 2px' }}>
           En gris, las fechas que se descartarían: todavía no se restan de {SCORE_LABELS.points}. Empiezan a contar a mitad
           del torneo.
         </p>

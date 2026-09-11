@@ -31,7 +31,7 @@ export function PlayerEvolutionChart({ evolution }: { evolution: EvolutionPoint[
           <Tooltip
             contentStyle={{ background: '#17140F', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 13 }}
             labelStyle={{ color: '#F5EFE6' }}
-            itemStyle={{ color: '#E53935' }}
+            itemStyle={{ color: '#FF6B6B' }}
             formatter={(value: number) => [`#${value}`, 'Posición']}
           />
           <Line type="monotone" dataKey="position" stroke="#E53935" strokeWidth={2.5} dot={{ r: 3, fill: '#E53935' }} activeDot={{ r: 5 }} />

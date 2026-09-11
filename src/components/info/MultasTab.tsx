@@ -33,7 +33,7 @@ export default function MultasTab() {
         className="rounded-2xl p-4 text-center"
         style={{ background: 'var(--cp-surface)', border: '1px solid var(--cp-surface-border)' }}
       >
-        <Receipt className="w-10 h-10 mx-auto mb-2" style={{ color: '#E53935' }} />
+        <Receipt className="w-10 h-10 mx-auto mb-2" style={{ color: '#FF6B6B' }} />
         <h2 className="text-lg font-bold" style={{ color: 'var(--cp-on-surface)' }}>
           Multas Registradas
         </h2>
@@ -74,7 +74,7 @@ export default function MultasTab() {
                   className="px-2 py-0.5 rounded-full text-xs font-medium"
                   style={{
                     background: multa.paid ? 'rgba(22,163,74,0.15)' : 'rgba(229,57,53,0.15)',
-                    color: multa.paid ? '#16a34a' : '#E53935',
+                    color: multa.paid ? '#4FA854' : '#E53935',
                   }}
                 >
                   {multa.paid ? 'Pagada' : 'Pendiente'}
@@ -85,7 +85,7 @@ export default function MultasTab() {
               </p>
               <div className="flex items-center gap-4 mt-2">
                 {multa.pointsPenalty > 0 && (
-                  <span className="flex items-center gap-1" style={{ fontSize: '13px', color: '#E53935', fontWeight: 600 }}>
+                  <span className="flex items-center gap-1" style={{ fontSize: '13px', color: '#FF6B6B', fontWeight: 600 }}>
                     <Hash size={12} /> -{multa.pointsPenalty} pts
                   </span>
                 )}

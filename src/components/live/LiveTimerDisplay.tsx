@@ -34,7 +34,7 @@ export function LiveTimerDisplay({ currentBlind, isActive }: LiveTimerDisplayPro
       <div className="mb-4">
         <div className={`text-6xl font-bold mb-2 ${
           isActive && duration > 0 && timeRemaining <= 300 
-            ? 'text-poker-red animate-pulse' 
+            ? 'text-poker-red-light animate-pulse' 
             : 'text-white'
         }`}>
           {formattedTime}
@@ -61,7 +61,7 @@ export function LiveTimerDisplay({ currentBlind, isActive }: LiveTimerDisplayPro
       {isActive && (
         <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/10">
           <span className="w-3 h-3 bg-poker-red rounded-full animate-pulse"></span>
-          <span className="text-poker-red text-sm font-medium">EN VIVO</span>
+          <span className="text-poker-red-light text-sm font-medium">EN VIVO</span>
         </div>
       )}
     </div>

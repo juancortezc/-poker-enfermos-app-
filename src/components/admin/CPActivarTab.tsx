@@ -11,12 +11,12 @@ import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 
 const RED = '#E53935'
-const PINK = '#EC407A'
+const PINK = '#E8863C'
 
 function RosterAvatar({ photoUrl, name, size = 32 }: { photoUrl?: string; name: string; size?: number }) {
   const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#3A322B' }}>
+    <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#382E2C' }}>
       {photoUrl ? (
         <Image src={photoUrl} alt={name} width={size} height={size} className="object-cover w-full h-full" unoptimized />
       ) : (
@@ -508,8 +508,8 @@ export default function CPActivarTab() {
           borderRadius: '4px',
         }}
       >
-        <Play size={32} className="mx-auto mb-3" style={{ color: '#22c55e' }} />
-        <p style={{ color: '#22c55e', fontSize: 'var(--cp-body-size)', fontWeight: 600 }}>
+        <Play size={32} className="mx-auto mb-3" style={{ color: '#6ECB71' }} />
+        <p style={{ color: '#6ECB71', fontSize: 'var(--cp-body-size)', fontWeight: 600 }}>
           Fecha Activa
         </p>
         <p style={{ color: 'var(--cp-on-surface)', fontSize: 'var(--cp-body-size)' }} className="mt-2">
@@ -536,8 +536,8 @@ export default function CPActivarTab() {
           }}
         >
           <div className="flex items-center gap-2 mb-2">
-            <Calendar size={20} style={{ color: '#FBBF24' }} />
-            <p style={{ color: '#FBBF24', fontSize: 'var(--cp-body-size)', fontWeight: 600 }}>
+            <Calendar size={20} style={{ color: '#E8C158' }} />
+            <p style={{ color: '#E8C158', fontSize: 'var(--cp-body-size)', fontWeight: 600 }}>
               Fecha {missingDate} - Necesita ser creada
             </p>
           </div>
@@ -691,7 +691,7 @@ export default function CPActivarTab() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        background: isSelected ? '#22c55e' : 'transparent',
+                        background: isSelected ? '#6ECB71' : 'transparent',
                         border: isSelected ? 'none' : '1.5px solid rgba(255,255,255,0.25)'
                       }}
                     >
@@ -951,7 +951,7 @@ export default function CPActivarTab() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      background: isSelected ? '#22c55e' : 'transparent',
+                      background: isSelected ? '#6ECB71' : 'transparent',
                       border: isSelected ? 'none' : '1.5px solid rgba(255,255,255,0.25)'
                     }}
                   >
@@ -1025,8 +1025,8 @@ export default function CPActivarTab() {
             borderRadius: '4px',
           }}
         >
-          <Trophy size={32} className="mx-auto mb-3" style={{ color: '#10b981' }} />
-          <p style={{ color: '#10b981', fontSize: 'var(--cp-body-size)', fontWeight: 600 }}>
+          <Trophy size={32} className="mx-auto mb-3" style={{ color: '#6ECB71' }} />
+          <p style={{ color: '#6ECB71', fontSize: 'var(--cp-body-size)', fontWeight: 600 }}>
             Torneo Completado
           </p>
           <p style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }} className="mb-4">
@@ -1036,7 +1036,7 @@ export default function CPActivarTab() {
             onClick={() => setShowCompletionModal(true)}
             className="flex items-center justify-center gap-2 mx-auto px-6 py-3"
             style={{
-              background: '#10b981',
+              background: '#6ECB71',
               color: 'white',
               borderRadius: '4px',
               fontWeight: 600,

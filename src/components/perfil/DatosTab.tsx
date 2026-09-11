@@ -166,7 +166,7 @@ export default function DatosTab() {
         <div
           className="relative w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #E53935, #f97316)',
+            background: 'linear-gradient(135deg, #E53935, #E8863C)',
           }}
         >
           {profile.photoUrl ? (
@@ -200,7 +200,7 @@ export default function DatosTab() {
             className="inline-block mt-2 px-3 py-1 text-xs font-medium"
             style={{
               background: 'rgba(229, 57, 53, 0.2)',
-              color: '#E53935',
+              color: '#FF6B6B',
               borderRadius: '4px',
             }}
           >
@@ -338,7 +338,7 @@ export default function DatosTab() {
             border: '1px solid rgba(229, 57, 53, 0.3)',
           }}
         >
-          <p style={{ color: '#E53935', fontSize: 'var(--cp-caption-size)' }}>
+          <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-caption-size)' }}>
             {error}
           </p>
         </div>
@@ -352,7 +352,7 @@ export default function DatosTab() {
             border: '1px solid rgba(34, 197, 94, 0.3)',
           }}
         >
-          <p style={{ color: '#22c55e', fontSize: 'var(--cp-caption-size)' }}>
+          <p style={{ color: '#6ECB71', fontSize: 'var(--cp-caption-size)' }}>
             Perfil actualizado correctamente
           </p>
         </div>

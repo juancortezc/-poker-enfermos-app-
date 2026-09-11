@@ -46,7 +46,7 @@ export function FechaTimelineItem({
   const winner = eliminations.find((e) => e.position === 1)
   const myElim = eliminations.find((e) => e.eliminatedPlayer.id === currentUserId)
 
-  const dotColor = isCompleted ? '#4CAF50' : isNext ? '#E53935' : 'transparent'
+  const dotColor = isCompleted ? '#6ECB71' : isNext ? '#E53935' : 'transparent'
   const dotBorder = isCompleted || isNext ? 'none' : '2px solid #4A4038'
 
   return (
@@ -69,7 +69,7 @@ export function FechaTimelineItem({
           {isCompleted && <Check size={14} color="#0D0A08" strokeWidth={3} />}
           {!isCompleted && isNext && <CalendarPlus size={13} color="#fff" />}
         </div>
-        {!isLast && <div style={{ flex: 1, width: 2, background: '#3A322B', marginTop: 2 }} />}
+        {!isLast && <div style={{ flex: 1, width: 2, background: '#382E2C', marginTop: 2 }} />}
       </div>
 
       {/* Card */}
@@ -90,7 +90,7 @@ export function FechaTimelineItem({
         <div style={{ textAlign: 'center', flexShrink: 0, width: 40 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: CREAM_MUTED }}>FECHA</div>
           <div style={{ fontSize: 18, fontWeight: 900, color: CREAM_TEXT, lineHeight: 1.1 }}>{dateNumber}</div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#E53935' }}>{day} {month}</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#FF6B6B' }}>{day} {month}</div>
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -98,7 +98,7 @@ export function FechaTimelineItem({
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <HomeAvatar playerId={winner.eliminatedPlayer.id} name={winner.eliminatedPlayer.firstName} photoUrl={winner.eliminatedPlayer.photoUrl} size={40} fontSize={13} />
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#4CAF50', letterSpacing: '0.04em' }}>GANADOR</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#6ECB71', letterSpacing: '0.04em' }}>GANADOR</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: CREAM_TEXT }}>
                   {winner.eliminatedPlayer.firstName} {winner.eliminatedPlayer.lastName[0]}.
                 </div>
@@ -114,7 +114,7 @@ export function FechaTimelineItem({
             </div>
           ) : isNext ? (
             <div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: '#E53935', letterSpacing: '0.04em' }}>PRÓXIMA FECHA</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#FF6B6B', letterSpacing: '0.04em' }}>PRÓXIMA FECHA</div>
               <div style={{ fontSize: 12, fontWeight: 700, color: CREAM_TEXT }}>Faltan {daysUntil} {daysUntil === 1 ? 'día' : 'días'}</div>
               <div style={{ fontSize: 12, color: CREAM_MUTED, marginTop: 1 }}>{time}</div>
             </div>

@@ -104,7 +104,7 @@ export function PushActivationBanner() {
     >
       <div className="flex-shrink-0 mt-0.5">
         {blocked ? (
-          <AlertTriangle className="w-5 h-5" style={{ color: '#f97316' }} />
+          <AlertTriangle className="w-5 h-5" style={{ color: '#E8863C' }} />
         ) : iosNeedsInstall ? (
           <Share className="w-5 h-5" style={{ color: 'var(--cp-primary)' }} />
         ) : (
@@ -136,7 +136,7 @@ export function PushActivationBanner() {
         </p>
 
         {error && (
-          <p className="mt-2" style={{ fontSize: 'var(--cp-caption-size)', color: '#f97316' }}>
+          <p className="mt-2" style={{ fontSize: 'var(--cp-caption-size)', color: '#E8863C' }}>
             {error}
           </p>
         )}

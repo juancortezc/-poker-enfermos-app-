@@ -57,7 +57,7 @@ export function CPHeader({
       {/* Tournament Title - Center */}
       <div className="flex flex-col items-center" style={{ gap: '2px' }}>
         <div className="flex items-baseline gap-1.5">
-          <span style={{ fontSize: '13px', fontWeight: 800, color: '#E53935', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '13px', fontWeight: 800, color: '#FF6B6B', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
             Torneo
           </span>
           <span style={{ fontSize: '22px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.01em', lineHeight: 1 }}>
@@ -81,7 +81,7 @@ export function CPHeader({
           >
             <ClipboardList
               size={16}
-              style={{ color: '#f97316' }}
+              style={{ color: '#E8863C' }}
             />
           </Link>
         )}
@@ -98,7 +98,7 @@ export function CPHeader({
           >
             <Settings
               size={16}
-              style={{ color: '#E53935' }}
+              style={{ color: '#FF6B6B' }}
             />
           </Link>
         )}

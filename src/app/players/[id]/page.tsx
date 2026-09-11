@@ -85,7 +85,7 @@ function TrendBadge({ positionsChanged }: { positionsChanged: number }) {
 function StatRow({ label, value }: { label: string; value: string | number }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <span style={{ fontSize: 12, color: '#B5A996' }}>{label}</span>
+      <span style={{ fontSize: 12, color: '#9A8F8B' }}>{label}</span>
       <span style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{value}</span>
     </div>
   )
@@ -196,7 +196,7 @@ export default function PlayerProfilePage() {
       <main className="pb-24 px-4 pt-4 space-y-4">
         <button
           onClick={() => router.back()}
-          style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 13, fontWeight: 700, color: '#A89A8C', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 13, fontWeight: 700, color: '#9A8F8B', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           <ChevronLeft size={14} /> VOLVER
         </button>
@@ -303,18 +303,18 @@ export default function PlayerProfilePage() {
                       <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={44} fontSize={15} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 800, color: '#A89A8C', letterSpacing: '0.06em', background: 'rgba(255,255,255,0.06)', padding: '2px 5px', borderRadius: 4 }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: '#9A8F8B', letterSpacing: '0.06em', background: 'rgba(255,255,255,0.06)', padding: '2px 5px', borderRadius: 4 }}>
                             {tag}
                           </span>
                           <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{player.playerName}</div>
                         </div>
-                        <div style={{ fontSize: 12, color: '#A89A8C', marginTop: 2 }}>#{player.position} en el torneo</div>
+                        <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 2 }}>#{player.position} en el torneo</div>
                       </div>
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>
                           {Math.abs((currentStats.finalScore ?? currentStats.totalPoints) - (player.finalScore ?? player.totalPoints))} pts
                         </div>
-                        <div style={{ fontSize: 12, color: '#A89A8C' }}>de diferencia</div>
+                        <div style={{ fontSize: 12, color: '#9A8F8B' }}>de diferencia</div>
                       </div>
                     </div>
                   </HomeCard>
@@ -396,14 +396,14 @@ export default function PlayerProfilePage() {
                   <HomeCard key={d.id}>
                     <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ textAlign: 'center', flexShrink: 0, width: 34 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C' }}>FECHA</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>FECHA</div>
                         <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{d.dateNumber}</div>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {winner && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <HomeAvatar playerId={winner.eliminatedPlayer.id} name={winner.eliminatedPlayer.firstName} photoUrl={winner.eliminatedPlayer.photoUrl} size={26} fontSize={10} />
-                            <div style={{ fontSize: 13, color: '#B5A996' }}>
+                            <div style={{ fontSize: 13, color: '#9A8F8B' }}>
                               Ganó <span style={{ color: '#F5EFE6', fontWeight: 700 }}>{winner.eliminatedPlayer.firstName}</span>
                             </div>
                           </div>
@@ -412,13 +412,13 @@ export default function PlayerProfilePage() {
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         {participated ? (
                           <>
-                            <div style={{ fontSize: 12, color: '#A89A8C', fontWeight: 700 }}>
+                            <div style={{ fontSize: 12, color: '#9A8F8B', fontWeight: 700 }}>
                               {!myElim ? '¡GANÓ!' : `#${myElim.position}`}
                             </div>
                             <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{myElim?.points ?? winner?.points ?? ''} pts</div>
                           </>
                         ) : (
-                          <div style={{ fontSize: 12, color: '#A89A8C' }}>No participó</div>
+                          <div style={{ fontSize: 12, color: '#9A8F8B' }}>No participó</div>
                         )}
                       </div>
                     </div>
@@ -440,10 +440,10 @@ export default function PlayerProfilePage() {
                 <HomeCard key={d.dateNumber}>
                   <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ textAlign: 'center', flexShrink: 0, width: 34 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C' }}>FECHA</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>FECHA</div>
                       <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{d.dateNumber}</div>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0, fontSize: 13, color: '#B5A996' }}>
+                    <div style={{ flex: 1, minWidth: 0, fontSize: 13, color: '#9A8F8B' }}>
                       {d.isAbsent ? 'Ausencia' : d.eliminationPosition ? `Posición #${d.eliminationPosition}` : 'Ganador'}
                     </div>
                     <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-negative)', flexShrink: 0 }}>−{d.points} pts</div>
@@ -474,13 +474,13 @@ export default function PlayerProfilePage() {
                 >
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 12, color: '#F5EFE6', fontWeight: 700 }}>{multa.reason}</div>
-                    <div style={{ fontSize: 12, color: '#B5A996' }}>
+                    <div style={{ fontSize: 12, color: '#9A8F8B' }}>
                       {multa.pointsPenalty > 0 && `-${multa.pointsPenalty} pts`}
                       {!!multa.chipsAmount && `${multa.pointsPenalty > 0 ? ' · ' : ''}${multa.chipsAmount} fichas`}
                       {!!multa.moneyAmount && `${multa.pointsPenalty > 0 || multa.chipsAmount ? ' · ' : ''}$${multa.moneyAmount}`}
                     </div>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: multa.paid ? '#4CAF50' : '#E53935', flexShrink: 0 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: multa.paid ? '#6ECB71' : '#E53935', flexShrink: 0 }}>
                     {multa.paid ? 'PAGADA' : 'PENDIENTE'}
                   </span>
                 </div>

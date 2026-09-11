@@ -45,7 +45,7 @@ export function ImportResults({ result, onStartOver, onBackToPreview }: ImportRe
         {success && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-poker-red">{imported}</div>
+              <div className="text-3xl font-bold text-poker-red-light">{imported}</div>
               <div className="text-poker-text">Eliminaciones Importadas</div>
             </div>
             {tournamentNumber && (

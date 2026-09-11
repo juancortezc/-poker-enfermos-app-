@@ -192,7 +192,7 @@ export default function GameDateConfirmPage() {
 
                 <div className="text-center">
                   <div className="bg-poker-card rounded-lg p-3">
-                    <Clock className="w-6 h-6 text-poker-red mx-auto mb-2" />
+                    <Clock className="w-6 h-6 text-poker-red-light mx-auto mb-2" />
                     <p className="text-xs text-poker-muted">Estado</p>
                     <p className="text-sm font-semibold text-white capitalize">
                       {gameDate.status === 'CREATED' ? 'Configurada' : gameDate.status}

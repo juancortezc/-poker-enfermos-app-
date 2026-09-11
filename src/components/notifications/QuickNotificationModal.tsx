@@ -229,14 +229,14 @@ export function QuickNotificationModal({ isOpen, onClose }: QuickNotificationMod
       {/* Modal */}
       <div className="relative w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="relative border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1b2b]/95 via-[#141625]/95 to-[#10111b]/95 backdrop-blur-md" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#382E2C]/95 via-[#2B2120]/95 to-[#1D1615]/95 backdrop-blur-md" />
 
           <div className="relative">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-gradient-to-r from-poker-red/20 to-poker-red/10">
-                  <Bell className="w-5 h-5 text-poker-red" />
+                  <Bell className="w-5 h-5 text-poker-red-light" />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-white">Send Quick Notification</h2>
@@ -396,13 +396,13 @@ export function QuickNotificationModal({ isOpen, onClose }: QuickNotificationMod
               {title && body && (
                 <div className="p-4 rounded-lg border border-white/10 bg-white/5">
                   <div className="flex items-center gap-2 mb-2">
-                    <Target className="w-4 h-4 text-poker-red" />
+                    <Target className="w-4 h-4 text-poker-red-light" />
                     <span className="text-xs font-medium text-white">Preview</span>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-white">{title}</p>
                     <p className="text-xs text-white/70">{body}</p>
-                    <p className="text-xs text-poker-red mt-2">{getAudienceInfo()}</p>
+                    <p className="text-xs text-poker-red-light mt-2">{getAudienceInfo()}</p>
                   </div>
                 </div>
               )}

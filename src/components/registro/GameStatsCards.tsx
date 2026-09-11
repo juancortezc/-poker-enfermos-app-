@@ -31,7 +31,7 @@ export function GameStatsCards({ activePlayers, totalPlayers, winnerPoints }: Ga
             {stat.label}
           </div>
           <div className={`text-2xl font-bold ${
-            stat.highlight ? 'text-poker-red' : 'text-white'
+            stat.highlight ? 'text-poker-red-light' : 'text-white'
           }`}>
             {stat.value}
           </div>

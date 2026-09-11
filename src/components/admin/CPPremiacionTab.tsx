@@ -200,7 +200,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
                 {tournament.status === 'ACTIVO' && (
                   <span
                     className="ml-2 px-1.5 py-0.5 rounded text-xs"
-                    style={{ background: 'rgba(229, 57, 53, 0.2)', color: '#E53935' }}
+                    style={{ background: 'rgba(229, 57, 53, 0.2)', color: '#FF6B6B' }}
                   >
                     Activo
                   </span>
@@ -248,7 +248,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             title="Gay del Torneo"
             description="Menor cantidad de eliminaciones"
             icon={<UserX size={20} />}
-            accentColor="#AB47BC"
+            accentColor="#E8863C"
             players={awards.gay.map(g => ({ player: g.player, value: g.eliminations }))}
             valueLabel="Elims"
           />
@@ -258,7 +258,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             title="Victorias"
             description="Mayor cantidad de 1er lugar"
             icon={<Crown size={20} />}
-            accentColor="#FFB300"
+            accentColor="#E8C158"
             players={awards.victorias.map(v => ({ player: v.player, value: v.count }))}
             valueLabel="Wins"
           />
@@ -268,7 +268,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             title="Podios"
             description="Mayor cantidad de Top 3"
             icon={<Medal size={20} />}
-            accentColor="#FFB300"
+            accentColor="#C9C6C2"
             players={awards.podios.map(p => ({ player: p.player, value: p.count }))}
             valueLabel="Podios"
           />
@@ -282,7 +282,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             title="Ultimos"
             description="Ultimo lugar"
             icon={<Target size={20} />}
-            accentColor="#EC407A"
+            accentColor="#E8863C"
             players={awards.sieteYDos.map(s => ({ player: s.player, value: s.count }))}
             valueLabel="Veces"
           />
@@ -292,7 +292,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             title="Mesas Finales"
             description="Mayor cantidad en Top 9"
             icon={<Users size={20} />}
-            accentColor="#66BB6A"
+            accentColor="#E53935"
             players={awards.mesasFinales.map(m => ({ player: m.player, value: m.count }))}
             valueLabel="Veces"
           />
@@ -302,7 +302,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             title="Sin Podio"
             description="Nunca en el Top 3"
             icon={<CalendarX size={20} />}
-            accentColor="#42A5F5"
+            accentColor="#5BC8C0"
             players={awards.sinPodio.map(p => ({ player: p }))}
           />
 
@@ -311,7 +311,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             title="Faltas"
             description="Mayor cantidad de ausencias"
             icon={<UserX size={20} />}
-            accentColor="#EC407A"
+            accentColor="#E8863C"
             players={awards.faltas.map(f => ({ player: f.player, value: f.count }))}
             valueLabel="Faltas"
           />
@@ -663,7 +663,7 @@ function CPParentChildCard({ relation }: CPParentChildCardProps) {
             className="px-2 py-0.5 mt-1"
             style={{
               fontSize: '12px',
-              color: '#E53935',
+              color: '#FF6B6B',
               background: 'rgba(229, 57, 53, 0.15)',
               borderRadius: '4px',
               textTransform: 'uppercase',
@@ -676,7 +676,7 @@ function CPParentChildCard({ relation }: CPParentChildCardProps) {
         </div>
 
         {/* Child */}
-        <PlayerAvatar player={childPlayer} label="Hijo" color="#EC407A" />
+        <PlayerAvatar player={childPlayer} label="Hijo" color="#E8863C" />
       </div>
     </div>
   )

@@ -159,7 +159,7 @@ export default function CPMultasTab({ tournamentId }: CPMultasTabProps) {
                 </p>
                 <div className="flex items-center gap-3 mt-1">
                   {multa.pointsPenalty > 0 && (
-                    <span className="flex items-center gap-1" style={{ fontSize: '13px', color: '#E53935' }}>
+                    <span className="flex items-center gap-1" style={{ fontSize: '13px', color: '#FF6B6B' }}>
                       <Hash size={11} /> -{multa.pointsPenalty} pts
                     </span>
                   )}
@@ -177,7 +177,7 @@ export default function CPMultasTab({ tournamentId }: CPMultasTabProps) {
               </div>
 
               {multa.paid ? (
-                <CheckCircle2 size={18} style={{ color: '#16a34a' }} />
+                <CheckCircle2 size={18} style={{ color: '#4FA854' }} />
               ) : (
                 <Circle size={18} style={{ color: 'var(--cp-on-surface-muted)' }} />
               )}

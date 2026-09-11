@@ -150,7 +150,7 @@ export default function NotificacionesTab() {
         }}
       >
         <ListItem
-          icon={permission === 'granted' ? <CheckCircle className="w-5 h-5" style={{ color: '#22c55e' }} /> : <AlertTriangle className="w-5 h-5" style={{ color: '#f97316' }} />}
+          icon={permission === 'granted' ? <CheckCircle className="w-5 h-5" style={{ color: '#6ECB71' }} /> : <AlertTriangle className="w-5 h-5" style={{ color: '#E8863C' }} />}
           label="Permiso del Sistema"
           description={permission === 'granted' ? 'Activado' : permission === 'denied' ? 'Bloqueado en ajustes' : 'Sin permiso'}
           trailing={
@@ -181,7 +181,7 @@ export default function NotificacionesTab() {
         }}
       >
         <ListItem
-          icon={<Bell className="w-5 h-5" style={{ color: pushEnabled ? '#22c55e' : 'var(--cp-on-surface-muted)' }} />}
+          icon={<Bell className="w-5 h-5" style={{ color: pushEnabled ? '#6ECB71' : 'var(--cp-on-surface-muted)' }} />}
           label="Notificaciones Push"
           description={pushEnabled ? 'Activas en segundo plano' : 'Recibe alertas con la app cerrada'}
           trailing={
@@ -198,7 +198,7 @@ export default function NotificacionesTab() {
           }
         />
         {permission !== 'granted' && !pushEnabled && (
-          <p className="text-xs pl-9 -mt-1" style={{ color: '#f97316' }}>
+          <p className="text-xs pl-9 -mt-1" style={{ color: '#E8863C' }}>
             Primero activa el permiso del sistema
           </p>
         )}

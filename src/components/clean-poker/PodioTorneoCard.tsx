@@ -107,7 +107,7 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
                   {scoreOf(player)} <span style={{ fontSize: 12, fontWeight: 700, color: 'inherit' }}>{SCORE_LABELS.pointsShort}</span>
                 </div>
                 {showNightContext && (
-                  <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? '#7CD07F' : delta < 0 ? '#E53935' : '#A89A8C', marginTop: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? '#7CD07F' : delta < 0 ? '#E53935' : '#9A8F8B', marginTop: 1 }}>
                     {delta > 0 ? `+${delta}` : delta === 0 ? '+0' : delta}
                   </div>
                 )}
@@ -122,7 +122,7 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
           <div style={{ fontSize: 12, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.02em' }}>
             TRES JUGADORES SEPARADOS POR {spread} {spread === 1 ? 'PUNTO' : 'PUNTOS'}
           </div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#E53935', marginTop: 2 }}>¡Esto se puso feo!</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#FF6B6B', marginTop: 2 }}>¡Esto se puso feo!</div>
         </div>
       )}
 

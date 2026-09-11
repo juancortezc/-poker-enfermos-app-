@@ -20,9 +20,9 @@ interface MalazoCardProps {
 
 export function MalazoCard({ players }: MalazoCardProps) {
   const getTrendColor = (trend: number) => {
-    if (trend > 0) return '#4CAF50' // Verde
+    if (trend > 0) return '#6ECB71' // Verde
     if (trend < 0) return '#E53935' // Rojo
-    return '#FFC107' // Amarillo
+    return '#E8C158' // Amarillo
   }
 
   const getTrendSymbol = (trend: number) => {
@@ -41,7 +41,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
   }
 
   // Pink color for "malazo" theme
-  const PINK_COLOR = '#EC407A'
+  const PINK_COLOR = '#E8863C'
 
   return (
     <div
@@ -68,8 +68,8 @@ export function MalazoCard({ players }: MalazoCardProps) {
           href="/ranking"
           className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity hover:opacity-80"
         >
-          <span style={{ color: '#E53935', fontSize: '12px' }}>Todos</span>
-          <span style={{ color: '#E53935', fontSize: '12px' }}>→</span>
+          <span style={{ color: '#FF6B6B', fontSize: '12px' }}>Todos</span>
+          <span style={{ color: '#FF6B6B', fontSize: '12px' }}>→</span>
         </Link>
       </div>
 

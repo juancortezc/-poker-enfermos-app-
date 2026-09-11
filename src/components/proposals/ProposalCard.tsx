@@ -76,7 +76,7 @@ export function ProposalCard({
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'Comision':
-        return 'border border-poker-red/40 bg-poker-red/20 text-poker-red'
+        return 'border border-poker-red/40 bg-poker-red/20 text-poker-red-light'
       case 'Enfermo':
         return 'border border-white/20 bg-white/10 text-white/80'
       case 'Invitado':
@@ -178,7 +178,7 @@ export function ProposalCard({
 
   return (
     <Card
-      className={`overflow-hidden border border-white/12 bg-gradient-to-br from-[#1b1d2f] via-[#181a2c] to-[#111221] transition-all duration-500 hover:-translate-y-1 hover:border-poker-red/60 hover:shadow-[0_24px_60px_rgba(255,93,143,0.25)] shadow-[0_18px_40px_rgba(11,12,32,0.45)] ${
+      className={`overflow-hidden border border-white/12 bg-gradient-to-br from-[#382E2C] via-[#2B2120] to-[#1D1615] transition-all duration-500 hover:-translate-y-1 hover:border-poker-red/60 hover:shadow-[0_24px_60px_rgba(255,93,143,0.25)] shadow-[0_18px_40px_rgba(11,12,32,0.45)] ${
         proposal.isActive ? '' : 'opacity-90'
       }`}
     >
@@ -248,7 +248,7 @@ export function ProposalCard({
         <div className="px-5 pb-5 pt-4 space-y-4">
           {/* Objetivo */}
           <div>
-            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red/80">Objetivo</h4>
+            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red-light/80">Objetivo</h4>
             <p className="text-sm leading-relaxed text-white/75">
               {proposal.objective}
             </p>
@@ -256,7 +256,7 @@ export function ProposalCard({
 
           {/* Situación a modificar */}
           <div>
-            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red/80">Situación a Modificar</h4>
+            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red-light/80">Situación a Modificar</h4>
             <p className="whitespace-pre-line text-sm leading-relaxed text-white/75">
               {proposal.situation}
             </p>
@@ -264,7 +264,7 @@ export function ProposalCard({
 
           {/* Propuesta */}
           <div>
-            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red/80">Propuesta</h4>
+            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red-light/80">Propuesta</h4>
             <p className="whitespace-pre-line text-sm leading-relaxed text-white/75">
               {proposal.proposal}
             </p>
@@ -273,7 +273,7 @@ export function ProposalCard({
           {/* Imagen */}
           {proposal.imageUrl && (
             <div>
-              <h4 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red/80">
+              <h4 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red-light/80">
                 <ImageIcon className="w-4 h-4" />
                 Imagen
               </h4>

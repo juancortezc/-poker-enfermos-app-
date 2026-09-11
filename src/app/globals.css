@@ -7,40 +7,83 @@
    ============================================ */
 @theme inline {
   /* Paleta del club: negro, rojo y blanco. El naranja queda reservado para lo
-     negativo (ver --cp-negative en clean-poker-tokens.css). Los nombres
-     poker-* se conservan porque hay ~500 usos en clases de Tailwind; lo que
-     cambio son los valores, que ahora apuntan al sistema CleanPoker. */
+     negativo y el frio para lo informativo (ver clean-poker-tokens.css, que es
+     la fuente de verdad). Aqui solo se exponen esos valores con los nombres
+     `poker-*` que usa Tailwind, porque hay ~700 usos en clases del codigo.
+
+     OJO: en Tailwind v4 una clase solo existe si existe el token con su nombre
+     EXACTO. `bg-poker-dark` necesita --color-poker-dark; tener definido
+     --color-poker-dark-900 no alcanza y la clase no emite ninguna regla.
+     Asi habia 340 usos de color que no pintaban nada. Antes de borrar un token
+     de aqui, buscar la clase en src/. */
+
+  /* Superficies — la escala de cinco pisos */
+  --color-poker-dark: #1D1615;        /* L*  8 — fondo (104 usos) */
+  --color-poker-card: #2B2120;        /* L* 14 — tarjeta */
+  --color-poker-raised: #382E2C;      /* L* 20 — elevada, hover, lider */
+  --color-poker-line: #483E3C;        /* L* 27 — bordes e inputs */
+  --color-poker-edge: #584E4C;        /* L* 34 — bordes vivos */
+  --color-poker-dark-950: #14100F;
+  --color-poker-dark-900: #1D1615;
+  --color-poker-dark-800: #2B2120;
+
+  /* Papel — lo que se celebra */
+  --color-poker-paper: #FBF7F2;
+  --color-poker-paper-2: #F1EAE4;
+  --color-poker-ink: #1D1615;
+  --color-poker-ink-2: #574C49;
+
+  /* Rojo — marca, accion y estado */
+  --color-poker-red: #E53935;
+  --color-poker-red-light: #FF6B6B;   /* el rojo CUANDO ES TEXTO */
   --color-poker-red-500: #E53935;
   --color-poker-red-600: #C62828;
   --color-poker-red-700: #B71C1C;
-  --color-poker-dark-950: #14070E;
-  --color-poker-dark-900: #1e0c14;
-  --color-poker-dark-800: #2A292B;
+
+  /* Frio — lo informativo y lo que esta en curso */
+  --color-poker-cyan: #5BC8C0;
+  --color-poker-accent: #5BC8C0;
+  --color-poker-accent-hover: #8FDBD5;
+
+  /* Feedback */
+  --color-poker-green: #6ECB71;
+  --color-poker-orange: #E8863C;      /* lo que resta */
+  --color-poker-yellow: #E8C158;
+
+  /* Podio */
+  --color-poker-gold: #E8C158;
   --color-poker-gold-500: #E8C158;
   --color-poker-gold-600: #C9A144;
+  --color-poker-silver: #C9C6C2;
+  --color-poker-bronze: #C08A54;
+
+  /* Texto */
   --color-poker-text: #F5EFE6;
-  --color-poker-muted: #e8e3e3;
-  --color-poker-card: #2A292B;
+  --color-poker-muted: #C9BFBA;
+  --color-poker-faint: #9A8F8B;
 
-  /* Semantic tokens */
+  /* Tokens semanticos */
   --color-primary: #E53935;
+  --color-primary-foreground: #FFFFFF;
   --color-secondary: #C2410C;
-  --color-accent: #E8C158;
-  --color-background: #1e0c14;
-  --color-surface: #2A292B;
-  --color-surface-elevated: #3A3A3C;
-  --color-text-primary: rgba(245, 239, 230, 0.95);
-  --color-text-secondary: rgba(245, 239, 230, 0.75);
-  --color-text-muted: rgba(245, 239, 230, 0.60);
+  --color-secondary-foreground: #FFFFFF;
+  --color-accent: #5BC8C0;
+  --color-accent-foreground: #1D1615;
+  --color-background: #1D1615;
+  --color-surface: #2B2120;
+  --color-surface-elevated: #382E2C;
+  --color-text-primary: #F5EFE6;
+  --color-text-secondary: #C9BFBA;
+  --color-text-muted: #9A8F8B;
 
-  /* Typography tokens - Unified Inter */
+  /* Tipografia */
   --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-weight-normal: 500;
   --font-weight-bold: 700;
   --font-weight-black: 800;
 
-  /* Radius system */
+  /* Radius */
   --radius: 0.75rem;
   --radius-sm: 0.5rem;
   --radius-lg: 1rem;
@@ -49,14 +92,14 @@
 
 
 :root {
-  --bg: #1e0c14;
-  --bg-elev: #2A292B;
-  --ink: #0b0706;
-  --text: #F5EFE6;
-  --muted: #e8e3e3;
-  --accent: #E53935;
-  --accent-2: #C2410C;
-  --line: #3A3A3C;
+  --bg: var(--cp-surface-0);
+  --bg-elev: var(--cp-surface-1);
+  --ink: var(--cp-ink);
+  --text: var(--cp-on-surface);
+  --muted: var(--cp-on-surface-muted);
+  --accent: var(--cp-primary);
+  --accent-2: var(--cp-negative);
+  --line: var(--cp-surface-border);
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
   --noise-texture: url('/textures/noise.png');
   --transition-soft: 220ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -121,9 +164,9 @@
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--cp-primary-light);
     outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(232, 193, 88, 0.35);
+    box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.30);
   }
 }
 
@@ -134,8 +177,8 @@
   .app-bg {
     background-color: var(--bg);
     background-image:
-      radial-gradient(circle at 10% 10%, rgba(229, 57, 53, 0.10), transparent 45%),
-      radial-gradient(circle at 80% 80%, rgba(194, 65, 12, 0.08), transparent 55%),
+      radial-gradient(circle at 12% 8%, rgba(229, 57, 53, 0.07), transparent 42%),
+      radial-gradient(circle at 85% 85%, rgba(91, 200, 192, 0.05), transparent 50%),
       var(--noise-texture);
     background-blend-mode: screen, multiply, normal;
     background-size: 100% 100%, 100% 100%, 520px;
@@ -148,81 +191,80 @@
   
   /* Card Base - Mesa de Póker */
   .card-poker {
-    background: linear-gradient(145deg, #2A2A2A 0%, #1B1B1B 50%, #171717 100%);
+    background: var(--cp-surface-1);
     border-radius: 0.75rem;
     padding: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(4px);
+    box-shadow: var(--cp-elevation-2);
+    border: 1px solid var(--cp-surface-border);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .card-poker:hover {
-    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.4);
+    background: var(--cp-surface-2);
     transform: scale(1.02);
-    border-color: rgba(229, 9, 20, 0.3);
+    border-color: var(--cp-outline);
   }
   
   /* Posiciones - Top 3 con Glow */
   .position-1st {
-    background: linear-gradient(135deg, #FFD700 0%, #FFC107 30%, #FFB300 70%, #FF8F00 100%);
-    color: black;
+    background: linear-gradient(135deg, #F0D07A 0%, #E8C158 50%, #C9A144 100%);
+    color: var(--cp-ink);
     font-weight: 900;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 18px rgba(232, 193, 88, 0.35);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
   
   .position-2nd {
-    background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 30%, #A8A8A8 70%, #909090 100%);
-    color: black;
+    background: linear-gradient(135deg, #E2E0DD 0%, #C9C6C2 50%, #A8A4A0 100%);
+    color: var(--cp-ink);
     font-weight: 900;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 0 20px rgba(192, 192, 192, 0.6), 0 0 40px rgba(192, 192, 192, 0.4);
+    box-shadow: 0 0 18px rgba(201, 198, 194, 0.28);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
   
   .position-3rd {
-    background: linear-gradient(135deg, #CD7F32 0%, #B8860B 30%, #A0522D 70%, #8B4513 100%);
-    color: white;
+    background: linear-gradient(135deg, #D6A171 0%, #C08A54 50%, #8B5E2F 100%);
+    color: var(--cp-ink);
     font-weight: 900;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 0 20px rgba(205, 127, 50, 0.6), 0 0 40px rgba(205, 127, 50, 0.4);
+    box-shadow: 0 0 18px rgba(192, 138, 84, 0.28);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
   
   /* Input Base */
   .input-poker {
-    background: #2A2A2A;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--cp-surface-3);
+    border: 1px solid var(--cp-outline);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--cp-on-surface);
     min-height: 48px;
     font-size: 16px; /* Evita zoom en iOS */
     font-weight: 600;
   }
   
   .input-poker::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--cp-on-surface-variant);
   }
   
   .input-poker:focus {
-    border-color: #E50914;
-    box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.3);
+    border-color: var(--cp-primary);
+    box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.35);
     outline: none;
   }
   
   /* Dashboard Cards con Efectos 3D */
   .dashboard-card {
-    background: linear-gradient(145deg, #2A2A2A 0%, #1B1B1B 50%, #171717 100%);
+    background: var(--cp-surface-1);
     border-radius: 0.75rem;
     padding: 1.5rem;
-    border: 2px solid rgba(229, 9, 20, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--cp-surface-border);
+    box-shadow: var(--cp-elevation-2);
     transform: scale(1);
     transition: all 0.3s ease;
     position: relative;
@@ -243,23 +285,25 @@
   
   .dashboard-card:hover {
     transform: scale(1.02);
-    border-color: rgba(229, 9, 20, 0.6);
-    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.4);
+    background: var(--cp-surface-2);
+    border-color: var(--cp-primary);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   }
   
   .dashboard-card:hover::before {
     opacity: 1;
   }
   
-  /* Cards para últimas posiciones con borde rosa */
+  /* Ultimas posiciones. El rosa (#ec4899) se retiro: esto es lo negativo, y
+     lo negativo va en naranja — nunca en rojo y nunca en un color de fuera. */
   .card-last-position {
-    border: 2px solid #ec4899 !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 20px rgba(236, 72, 153, 0.3);
+    border: 1px solid var(--cp-negative) !important;
+    box-shadow: var(--cp-elevation-2);
   }
-  
+
   .card-last-position:hover {
-    border-color: #db2777 !important;
-    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 30px rgba(236, 72, 153, 0.5);
+    border-color: var(--cp-negative) !important;
+    box-shadow: var(--cp-elevation-2), 0 0 18px rgba(232, 134, 60, 0.25);
   }
 
   .podium-border-gold {
@@ -547,7 +591,7 @@
   }
 
   .glow-red {
-    box-shadow: 0 0 20px rgba(229, 9, 20, 0.6), 0 0 40px rgba(229, 9, 20, 0.4);
+    box-shadow: 0 0 20px rgba(229, 57, 53, 0.5), 0 0 40px rgba(229, 57, 53, 0.3);
   }
 
   /* Shadow Glow para RankCards */
@@ -563,13 +607,13 @@
     box-shadow: 0 20px 50px rgba(182, 131, 81, 0.30), 0 0 30px rgba(182, 131, 81, 0.12);
   }
 
-  /* Shadow Glow Pink para posiciones 2 y 3 */
+  /* Antes eran rosa (#ec4899 / #f472b6): color de fuera de la paleta. */
   .shadow-glow-pink {
-    box-shadow: 0 20px 50px rgba(236, 72, 153, 0.35), 0 0 35px rgba(236, 72, 153, 0.18);
+    box-shadow: 0 20px 50px rgba(232, 134, 60, 0.30), 0 0 35px rgba(232, 134, 60, 0.15);
   }
 
   .shadow-glow-pink-light {
-    box-shadow: 0 20px 50px rgba(244, 114, 182, 0.30), 0 0 35px rgba(244, 114, 182, 0.15);
+    box-shadow: 0 20px 50px rgba(232, 134, 60, 0.22), 0 0 35px rgba(232, 134, 60, 0.12);
   }
 
   /* Border utilities */
@@ -616,7 +660,7 @@
   /* Scrollbar Customizado */
   .scrollbar-custom {
     scrollbar-width: thin;
-    scrollbar-color: rgba(229, 9, 20, 0.6) rgba(42, 42, 42, 0.3);
+    scrollbar-color: var(--cp-surface-4) var(--cp-surface-1);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch; /* iOS smooth scroll */
   }
@@ -627,22 +671,22 @@
   }
   
   .scrollbar-custom::-webkit-scrollbar-track {
-    background: rgba(42, 42, 42, 0.3);
+    background: var(--cp-surface-1);
     border-radius: 4px;
   }
   
   .scrollbar-custom::-webkit-scrollbar-thumb {
-    background: rgba(229, 9, 20, 0.6);
+    background: var(--cp-surface-4);
     border-radius: 4px;
-    border: 1px solid rgba(42, 42, 42, 0.5);
+    border: 1px solid var(--cp-surface-1);
   }
   
   .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-    background: rgba(229, 9, 20, 0.8);
+    background: var(--cp-on-surface-variant);
   }
   
   .scrollbar-custom::-webkit-scrollbar-corner {
-    background: rgba(42, 42, 42, 0.3);
+    background: var(--cp-surface-1);
   }
 }
 

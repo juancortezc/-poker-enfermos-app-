@@ -96,12 +96,12 @@ export default function ContactosPage() {
           <Users size={20} color="#E53935" />
           <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>Contactos</div>
           {totalContacts !== null && (
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#A89A8C' }}>{totalContacts}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#9A8F8B' }}>{totalContacts}</span>
           )}
         </div>
 
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#A89A8C' }} />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#9A8F8B' }} />
           <input
             type="text"
             value={search}
@@ -109,7 +109,7 @@ export default function ContactosPage() {
             placeholder="Buscar por nombre..."
             className="w-full pl-9 pr-3 py-2.5"
             style={{
-              background: '#2A292B',
+              background: '#382E2C',
               border: '1px solid rgba(255,255,255,0.09)',
               color: '#F5EFE6',
               fontSize: 13,
@@ -128,7 +128,7 @@ export default function ContactosPage() {
         ) : filteredContacts.length === 0 ? (
           <HomeCard>
             <div style={{ padding: 24, textAlign: 'center' }}>
-              <p style={{ fontSize: 12, color: '#B5A996' }}>No se encontraron jugadores.</p>
+              <p style={{ fontSize: 12, color: '#9A8F8B' }}>No se encontraron jugadores.</p>
             </div>
           </HomeCard>
         ) : (
@@ -144,14 +144,14 @@ export default function ContactosPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 14, fontWeight: 800, color: '#F5EFE6' }}>
                           {player.firstName} {player.lastName}
-                          {isCurrentUser && <span style={{ color: '#A89A8C', fontWeight: 600 }}> (Tú)</span>}
+                          {isCurrentUser && <span style={{ color: '#9A8F8B', fontWeight: 600 }}> (Tú)</span>}
                         </span>
                         {player.role === 'Comision' && (
                           <span
                             style={{
                               fontSize: 12,
                               fontWeight: 800,
-                              color: '#E53935',
+                              color: '#FF6B6B',
                               background: 'rgba(229,57,53,0.16)',
                               borderRadius: '50%',
                               width: 16,
@@ -170,26 +170,26 @@ export default function ContactosPage() {
                       <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {player.phone && (
                           <a href={`tel:${player.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Phone size={11} style={{ color: '#A89A8C', flexShrink: 0 }} />
-                            <span style={{ fontSize: 13, color: '#B5A996' }}>{player.phone}</span>
+                            <Phone size={11} style={{ color: '#9A8F8B', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: '#9A8F8B' }}>{player.phone}</span>
                           </a>
                         )}
                         {player.email && (
                           <a href={`mailto:${player.email}`} style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                            <Mail size={11} style={{ color: '#A89A8C', flexShrink: 0 }} />
-                            <span style={{ fontSize: 13, color: '#B5A996', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Mail size={11} style={{ color: '#9A8F8B', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: '#9A8F8B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {player.email}
                             </span>
                           </a>
                         )}
                         {birthday && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Cake size={11} style={{ color: '#A89A8C', flexShrink: 0 }} />
-                            <span style={{ fontSize: 13, color: '#B5A996' }}>{birthday}</span>
+                            <Cake size={11} style={{ color: '#9A8F8B', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: '#9A8F8B' }}>{birthday}</span>
                           </div>
                         )}
                         {!player.phone && !player.email && !birthday && (
-                          <span style={{ fontSize: 13, color: '#A89A8C' }}>Sin datos de contacto</span>
+                          <span style={{ fontSize: 13, color: '#9A8F8B' }}>Sin datos de contacto</span>
                         )}
                       </div>
                     </div>

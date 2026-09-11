@@ -38,7 +38,7 @@ export function ImportProgress() {
         <div className="text-center space-y-6">
           {/* Animated Icon */}
           <div className="relative">
-            <div className="text-6xl text-poker-red animate-pulse">
+            <div className="text-6xl text-poker-red-light animate-pulse">
               📊
             </div>
             <div className="absolute -top-2 -right-2 w-4 h-4 bg-poker-red rounded-full animate-ping"></div>

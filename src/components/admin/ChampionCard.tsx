@@ -45,7 +45,7 @@ export default function ChampionCard({ champion, rank, isTopThree }: ChampionCar
       case 1: return 'text-yellow-500 border-yellow-500/30'
       case 2: return 'text-gray-400 border-gray-400/30'
       case 3: return 'text-orange-500 border-orange-500/30'
-      default: return 'text-poker-red border-poker-red/30'
+      default: return 'text-poker-red-light border-poker-red/30'
     }
   }
 
@@ -88,7 +88,7 @@ export default function ChampionCard({ champion, rank, isTopThree }: ChampionCar
             text-center p-2 rounded-lg bg-black/30
             ${isTopThree ? 'text-2xl' : 'text-lg'}
           `}>
-            <div className="font-bold text-poker-red">
+            <div className="font-bold text-poker-red-light">
               {championshipsCount}
             </div>
             <div className={`

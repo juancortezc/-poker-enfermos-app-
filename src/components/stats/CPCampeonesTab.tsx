@@ -74,7 +74,7 @@ export default function CPCampeonesTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        <p style={{ color: '#E53935', fontSize: 'var(--cp-body-size)' }}>
+        <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-body-size)' }}>
           Error: {error}
         </p>
         <button
@@ -122,9 +122,9 @@ export default function CPCampeonesTab() {
 
   const getPositionColor = (index: number) => {
     switch (index) {
-      case 0: return '#fbbf24' // gold
+      case 0: return '#E8C158' // gold
       case 1: return '#94a3b8' // silver
-      case 2: return '#f97316' // bronze
+      case 2: return '#E8863C' // bronze
       default: return 'var(--cp-on-surface-muted)'
     }
   }
@@ -205,7 +205,7 @@ export default function CPCampeonesTab() {
                     <div
                       className="flex h-full w-full items-center justify-center text-xs font-semibold"
                       style={{
-                        background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                        background: 'linear-gradient(135deg, #E8C158, #E8C158)',
                         color: 'white',
                       }}
                     >
@@ -231,7 +231,7 @@ export default function CPCampeonesTab() {
                       className="truncate"
                       style={{
                         fontSize: '12px',
-                        color: '#f97316',
+                        color: '#E8863C',
                       }}
                     >
                       ({getPlayerAlias(champion)})
@@ -244,7 +244,7 @@ export default function CPCampeonesTab() {
                   className="px-3 py-1 rounded-lg font-bold"
                   style={{
                     background: '#fbbf2420',
-                    color: '#fbbf24',
+                    color: '#E8C158',
                     fontSize: 'var(--cp-body-size)',
                   }}
                 >
@@ -323,7 +323,7 @@ function ChampionCard({ champion, position, color, size }: ChampionCardProps) {
         {getAlias() && (
           <p
             className="truncate w-full text-center"
-            style={{ fontSize: '12px', color: '#f97316' }}
+            style={{ fontSize: '12px', color: '#E8863C' }}
           >
             ({getAlias()})
           </p>

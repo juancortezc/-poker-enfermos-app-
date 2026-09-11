@@ -64,7 +64,7 @@ export default function CalendarioTab() {
     const s = status?.toLowerCase()
     switch (s) {
       case 'completed':
-        return '#22c55e' // green
+        return '#6ECB71' // green
       case 'in_progress':
         return '#E53935' // red
       default:
@@ -105,7 +105,7 @@ export default function CalendarioTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        <p style={{ color: '#E53935', fontSize: 'var(--cp-body-size)' }}>
+        <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-body-size)' }}>
           Error: {error}
         </p>
         <button
@@ -216,7 +216,7 @@ export default function CalendarioTab() {
                 {/* Month */}
                 <p
                   className="text-sm font-semibold"
-                  style={{ color: '#f97316' }}
+                  style={{ color: '#E8863C' }}
                 >
                   {month}
                 </p>

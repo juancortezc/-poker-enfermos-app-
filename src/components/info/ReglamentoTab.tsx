@@ -65,7 +65,7 @@ export default function ReglamentoTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        <BookOpen className="w-10 h-10 mx-auto mb-2" style={{ color: '#E53935' }} />
+        <BookOpen className="w-10 h-10 mx-auto mb-2" style={{ color: '#FF6B6B' }} />
         <h2
           className="text-lg font-bold"
           style={{ color: 'var(--cp-on-surface)' }}
@@ -95,7 +95,7 @@ export default function ReglamentoTab() {
             className="flex items-center gap-3 px-4 py-3"
             style={{ borderBottom: '1px solid var(--cp-surface-border)' }}
           >
-            <div style={{ color: '#E53935' }}>
+            <div style={{ color: '#FF6B6B' }}>
               {section.icon}
             </div>
             <h3
@@ -118,7 +118,7 @@ export default function ReglamentoTab() {
               >
                 <span
                   className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
-                  style={{ background: '#f97316' }}
+                  style={{ background: '#E8863C' }}
                 />
                 <p
                   style={{

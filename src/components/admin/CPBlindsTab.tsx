@@ -309,7 +309,7 @@ export default function CPBlindsTab({ tournamentId }: CPBlindsTabProps) {
                   background: 'var(--cp-background)',
                   border: '1px solid var(--cp-surface-border)',
                   borderRadius: '4px',
-                  color: blind.duration === 0 ? '#FFC107' : 'var(--cp-on-surface)',
+                  color: blind.duration === 0 ? '#E8C158' : 'var(--cp-on-surface)',
                   width: '100%'
                 }}
                 placeholder="0=sin limite"
@@ -324,7 +324,7 @@ export default function CPBlindsTab({ tournamentId }: CPBlindsTabProps) {
                   opacity: blindLevels.length <= 1 ? 0.3 : 1
                 }}
               >
-                <Trash2 size={14} style={{ color: '#ef4444' }} />
+                <Trash2 size={14} style={{ color: '#FF6B6B' }} />
               </button>
             </div>
           ))}

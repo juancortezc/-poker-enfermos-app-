@@ -167,7 +167,7 @@ export default function GuestSelector({
                         type="checkbox"
                         checked={selectedGuests.includes(member.id)}
                         onChange={() => toggleGuest(member.id)}
-                        className="mr-2 rounded-sm border-gray-400 text-poker-red focus:ring-poker-red w-3 h-3 accent-poker-red"
+                        className="mr-2 rounded-sm border-gray-400 text-poker-red-light focus:ring-poker-red w-3 h-3 accent-poker-red"
                       />
                       <span className="text-white text-xs truncate">
                         {member.firstName} {member.lastName}

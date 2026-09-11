@@ -40,7 +40,7 @@ export default function LoginForm() {
       {/* Patrón de fondo sutil */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImEiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCI+PHBhdGggZD0iTTM2IDM0djItaDZ2LTJ6bTAgMHYtMmgtNnYyem0wLTEwaC02djJ6bTAgMGg2di0yem0tMTAgMTB2Mmg2di0yem0wIDB2LTJoLTZ2MnptMC0xMGgtNnYyem0wIDBoNnYtMnoiIGZpbGw9IiMyNDI0MjQiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2EpIi8+PC9zdmc+')] opacity-30" />
       
-      <Card className="w-full max-w-md bg-poker-card border-poker-red/20 shadow-2xl animate-enter relative z-10">
+      <Card className="w-full max-w-md bg-poker-card border-poker-line shadow-2xl animate-enter relative z-10">
         <CardContent className="p-8">
           {/* Logo */}
           <div className="flex justify-center mb-8">
@@ -89,7 +89,7 @@ export default function LoginForm() {
                   }
                 }}
                 disabled={loading}
-                className="w-full pl-10 h-12 bg-poker-dark/50 border-poker-red/30 text-poker-text placeholder:text-poker-muted focus:border-poker-red focus:ring-poker-red/30 transition-smooth"
+                className="w-full pl-10 h-12 bg-poker-dark/50 border-poker-line text-poker-text placeholder:text-poker-muted focus:border-poker-red focus:ring-poker-red/30 transition-smooth"
                 autoComplete="off"
               />
             </div>

@@ -144,7 +144,7 @@ export function HomeTorneo({
       text: (
         <>
           {seasonHighlights.longestTop3Streak.playerName.split(' ')[0]} lleva{' '}
-          <span style={{ color: '#4CAF50' }}>{seasonHighlights.longestTop3Streak.streakLength} fechas seguidas</span> en el Top 3
+          <span style={{ color: '#6ECB71' }}>{seasonHighlights.longestTop3Streak.streakLength} fechas seguidas</span> en el Top 3
         </>
       )
     },
@@ -184,7 +184,7 @@ export function HomeTorneo({
           <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', marginTop: 2, letterSpacing: '-0.01em' }}>
             {formattedDate ?? 'Por definir'}
           </div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#A89A8C', marginTop: 2 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#9A8F8B', marginTop: 2 }}>
             {days !== null ? `Faltan ${days} ${days === 1 ? 'día' : 'días'}` : 'Sin fecha programada'}
             {nextDate?.dateNumber ? ` · Fecha ${nextDate.dateNumber}` : ''}
           </div>
@@ -204,7 +204,7 @@ export function HomeTorneo({
               background: 'rgba(255,255,255,0.08)',
               border: '1px solid rgba(255,255,255,0.14)',
               borderRadius: '50%',
-              color: '#A89A8C',
+              color: '#9A8F8B',
               cursor: 'pointer'
             }}
           >
@@ -266,7 +266,7 @@ export function HomeTorneo({
             <div style={{ fontSize: 12, opacity: 0.5, marginTop: 6 }}>*solo fechas jugadas, sin ausencias</div>
           </div>
           <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#A89A8C' }}>Tus puntos</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>Tus puntos</div>
             <div style={{ fontSize: 26, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.02em', marginTop: 2 }}>
               {scoreOf(myRanking)} <span style={{ fontSize: 13, fontWeight: 700, color: 'inherit' }}>pts</span>
             </div>
@@ -278,11 +278,11 @@ export function HomeTorneo({
             </div>
 
             <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontSize: 12, color: '#A89A8C' }}>
+              <div style={{ fontSize: 12, color: '#9A8F8B' }}>
                 Te separan del líder: <span style={{ fontWeight: 800, color: '#F5EFE6' }}>{gapToLeader ?? 0} {gapToLeader === 1 ? 'pt' : 'pts'}</span>
               </div>
               {gapToMalazos !== null && (
-                <div style={{ fontSize: 12, color: '#A89A8C', marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 2 }}>
                   {gapToMalazos} {gapToMalazos === 1 ? 'pt' : 'pts'} de la zona 7/2
                 </div>
               )}

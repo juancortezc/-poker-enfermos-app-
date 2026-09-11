@@ -317,7 +317,7 @@ export default function TournamentOverview() {
               <Button
                 onClick={() => setShowCompletionModal(true)}
                 variant="outline"
-                className="w-full border-poker-red/50 text-poker-red hover:bg-poker-red/10 mb-4"
+                className="w-full border-poker-red/50 text-poker-red-light hover:bg-poker-red/10 mb-4"
               >
                 <Trophy className="w-4 h-4 mr-2" />
                 Finalizar Torneo Anticipadamente
