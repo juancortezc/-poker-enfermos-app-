@@ -131,15 +131,15 @@ export default function TournamentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1208] via-[#0f0a04] to-[#0a0703] pb-24 pt-6 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#171619] via-[#0f0a04] to-[#0a0703] pb-24 pt-6 px-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <h1 className="text-3xl font-bold text-[#f3e6c5] tracking-tight">Torneos</h1>
+          <h1 className="text-3xl font-bold text-[#F5EFE6] tracking-tight">Torneos</h1>
           {canEdit && (
             <Button
               onClick={handleCreateTournament}
-              className="bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5] self-start md:self-auto"
+              className="bg-[#C2410C] hover:bg-[#9A3309] text-[#F5EFE6] self-start md:self-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Crear Torneo
@@ -149,13 +149,13 @@ export default function TournamentsPage() {
 
         {/* Tabs */}
         <div className="flex justify-center">
-          <div className="inline-flex rounded-lg border border-[#e0b66c]/20 bg-[#2a1a14]/60 p-1">
+          <div className="inline-flex rounded-lg border border-[#E53935]/20 bg-[#2A292B]/60 p-1">
             <button
               onClick={() => setActiveTab('activos')}
               className={`px-6 py-3 font-semibold rounded-lg text-sm uppercase tracking-wider transition-all ${
                 activeTab === 'activos'
-                  ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
-                  : 'bg-transparent text-[#e8e3e3] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
+                  ? 'bg-[#C2410C] text-[#F5EFE6] shadow-lg'
+                  : 'bg-transparent text-[#e8e3e3] hover:text-[#F5EFE6] hover:bg-[#201F22]/40'
               }`}
             >
               Torneos Activos
@@ -164,8 +164,8 @@ export default function TournamentsPage() {
               onClick={() => setActiveTab('finalizados')}
               className={`px-6 py-3 font-semibold rounded-lg text-sm uppercase tracking-wider transition-all ${
                 activeTab === 'finalizados'
-                  ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
-                  : 'bg-transparent text-[#e8e3e3] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
+                  ? 'bg-[#C2410C] text-[#F5EFE6] shadow-lg'
+                  : 'bg-transparent text-[#e8e3e3] hover:text-[#F5EFE6] hover:bg-[#201F22]/40'
               }`}
             >
               Finalizados
@@ -176,7 +176,7 @@ export default function TournamentsPage() {
         {/* Lista de Torneos */}
         <div className="space-y-4">
           {tournaments.length === 0 ? (
-            <div className="text-center py-12 bg-[#2a1a14]/40 rounded-3xl border border-[#e0b66c]/20">
+            <div className="text-center py-12 bg-[#2A292B]/40 rounded-3xl border border-[#E53935]/20">
               <Trophy className="w-16 h-16 mx-auto text-[#e8e3e3] mb-4" />
               <p className="text-[#e8e3e3]">
                 {activeTab === 'activos'
@@ -187,7 +187,7 @@ export default function TournamentsPage() {
               {canEdit && activeTab === 'activos' && (
                 <Button
                   onClick={handleCreateTournament}
-                  className="mt-4 bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5]"
+                  className="mt-4 bg-[#C2410C] hover:bg-[#9A3309] text-[#F5EFE6]"
                 >
                   Crear primer torneo
                 </Button>
@@ -204,12 +204,12 @@ export default function TournamentsPage() {
                 <div
                   key={tournament.id}
                   onClick={() => handleTournamentClick(tournament.id)}
-                  className="bg-gradient-to-br from-[#2a1a14] via-[#24160f] to-[#1a1208] border border-[#e0b66c]/20 rounded-xl p-6 hover:border-[#e0b66c]/40 cursor-pointer transition-all group hover:-translate-y-1 hover:shadow-lg hover:shadow-[#e0b66c]/10 flex flex-col h-full"
+                  className="bg-gradient-to-br from-[#2A292B] via-[#201F22] to-[#171619] border border-[#E53935]/20 rounded-xl p-6 hover:border-[#E53935]/40 cursor-pointer transition-all group hover:-translate-y-1 hover:shadow-lg hover:shadow-[#E53935]/10 flex flex-col h-full"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-[#f3e6c5] group-hover:text-[#e0b66c] transition-colors truncate">
+                        <h3 className="text-xl font-bold text-[#F5EFE6] group-hover:text-[#FF6B6B] transition-colors truncate">
                           Torneo {tournament.number}
                         </h3>
                         {getStatusBadge(tournament.status)}
@@ -224,7 +224,7 @@ export default function TournamentsPage() {
                         <div className="mb-4 space-y-2">
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-[#e8e3e3]">Progreso del torneo</span>
-                            <span className="text-[#e0b66c] font-medium">{completedDates}/{totalDates} fechas</span>
+                            <span className="text-[#FF6B6B] font-medium">{completedDates}/{totalDates} fechas</span>
                           </div>
                           <ProgressBar
                             value={completedDates}
@@ -237,7 +237,7 @@ export default function TournamentsPage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-4">
                         <div className="flex items-center space-x-2 text-[#e8e3e3]">
-                          <Users className="w-4 h-4 text-[#e0b66c]" />
+                          <Users className="w-4 h-4 text-[#FF6B6B]" />
                           <span>{tournament._count.tournamentParticipants} participantes</span>
                         </div>
 
@@ -247,7 +247,7 @@ export default function TournamentsPage() {
                         </div>
 
                         <div className="flex items-center space-x-2 text-[#e8e3e3]">
-                          <Clock className="w-4 h-4 text-[#e0b66c]" />
+                          <Clock className="w-4 h-4 text-[#FF6B6B]" />
                           <span>{formatDate(tournament.createdAt)}</span>
                         </div>
                       </div>
@@ -259,7 +259,7 @@ export default function TournamentsPage() {
                           className={`w-full mt-2 ${
                             completedDates === totalDates
                               ? 'bg-[#10b981] hover:bg-[#059669] text-white'
-                              : 'bg-transparent border border-[#a9441c]/50 text-[#a9441c] hover:bg-[#a9441c]/10'
+                              : 'bg-transparent border border-[#C2410C]/50 text-[#C2410C] hover:bg-[#C2410C]/10'
                           }`}
                         >
                           <CheckCircle className="w-4 h-4 mr-2" />

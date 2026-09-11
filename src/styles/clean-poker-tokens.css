@@ -22,8 +22,20 @@
 
   /* === PRIMARY (Red) === */
   --cp-primary: #E53935;
-  --cp-primary-variant: #C62828;
+  --cp-primary-variant: #C62828;   /* fondo de botones: con texto blanco da 5.6:1 */
+  --cp-primary-light: #FF6B6B;     /* rojo COMO TEXTO sobre superficies oscuras: 5.2:1 */
   --cp-on-primary: #ffffff;
+
+  /* === ESCALA TIPOGRÁFICA ===
+     Piso duro de 12px: por debajo no se lee en un teléfono, y el público son
+     socios adultos leyendo de noche. 12px queda reservado a los overlines en
+     mayúscula con letter-spacing; cualquier texto explicativo va de 13 para
+     arriba. */
+  --cp-text-micro: 12px;    /* overlines en mayúscula */
+  --cp-text-caption: 13px;  /* secundario y explicativo */
+  --cp-text-body: 15px;     /* lectura por defecto */
+  --cp-text-strong: 16px;
+  --cp-text-title: 18px;
 
   /* === FEEDBACK ===
      Los colores del club son negro, rojo y blanco: se reservan para lo que

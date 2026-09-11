@@ -508,7 +508,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1208] via-[#0f0a04] to-[#0a0703] pb-safe">
+    <div className="min-h-screen bg-gradient-to-br from-[#171619] via-[#0f0a04] to-[#0a0703] pb-safe">
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -517,13 +517,13 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
               variant="ghost"
               size="sm"
               onClick={() => router.push('/tournaments')}
-              className="text-[#e8e3e3] hover:text-[#f3e6c5] hover:bg-[#24160f]/40"
+              className="text-[#e8e3e3] hover:text-[#F5EFE6] hover:bg-[#201F22]/40"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Volver
             </Button>
             <div className="flex items-center space-x-3">
-              <h1 className="text-xl font-bold text-[#f3e6c5]">
+              <h1 className="text-xl font-bold text-[#F5EFE6]">
                 {isEditing ? `Editar Torneo ${tournamentNumber}` : `Nuevo Torneo ${tournamentNumber}`}
               </h1>
             </div>
@@ -557,14 +557,14 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
         </div>
 
         {/* Tabs de navegación */}
-        <div className="bg-[#2a1a14]/60 rounded-lg p-1 border border-[#e0b66c]/20">
+        <div className="bg-[#2A292B]/60 rounded-lg p-1 border border-[#E53935]/20">
           <div className="flex space-x-1">
             <button
               onClick={() => setActiveTab('participants')}
               className={`flex-1 py-3 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 min-h-[44px] ${
                 activeTab === 'participants'
-                  ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
-                  : 'text-[#e8e3e3] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
+                  ? 'bg-[#C2410C] text-[#F5EFE6] shadow-lg'
+                  : 'text-[#e8e3e3] hover:text-[#F5EFE6] hover:bg-[#201F22]/40'
               }`}
             >
               <span className="text-xs sm:text-sm">
@@ -572,7 +572,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                 <span className="sm:hidden">Miembros</span>
               </span>
               {formData.participantIds.length > 0 && (
-                <span className="text-xs bg-[#e0b66c]/30 px-1.5 py-0.5 rounded-full">
+                <span className="text-xs bg-[#E53935]/30 px-1.5 py-0.5 rounded-full">
                   {formData.participantIds.length}
                 </span>
               )}
@@ -581,13 +581,13 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
               onClick={() => setActiveTab('dates')}
               className={`flex-1 py-3 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 min-h-[44px] ${
                 activeTab === 'dates'
-                  ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
-                  : 'text-[#e8e3e3] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
+                  ? 'bg-[#C2410C] text-[#F5EFE6] shadow-lg'
+                  : 'text-[#e8e3e3] hover:text-[#F5EFE6] hover:bg-[#201F22]/40'
               }`}
             >
               <span className="text-xs sm:text-sm">Fechas</span>
               {formData.gameDates.filter(d => d.scheduledDate).length > 0 && (
-                <span className="text-xs bg-[#e0b66c]/30 px-1.5 py-0.5 rounded-full">
+                <span className="text-xs bg-[#E53935]/30 px-1.5 py-0.5 rounded-full">
                   {formData.gameDates.filter(d => d.scheduledDate).length}/12
                 </span>
               )}
@@ -596,12 +596,12 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
               onClick={() => setActiveTab('blinds')}
               className={`flex-1 py-3 px-2 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 min-h-[44px] ${
                 activeTab === 'blinds'
-                  ? 'bg-[#a9441c] text-[#f3e6c5] shadow-lg'
-                  : 'text-[#e8e3e3] hover:text-[#f3e6c5] hover:bg-[#24160f]/40'
+                  ? 'bg-[#C2410C] text-[#F5EFE6] shadow-lg'
+                  : 'text-[#e8e3e3] hover:text-[#F5EFE6] hover:bg-[#201F22]/40'
               }`}
             >
               <span className="text-xs sm:text-sm">Blinds</span>
-              <span className="text-xs bg-[#e0b66c]/30 px-1.5 py-0.5 rounded-full">
+              <span className="text-xs bg-[#E53935]/30 px-1.5 py-0.5 rounded-full">
                 {formData.blindLevels.length}
               </span>
             </button>
@@ -611,9 +611,9 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Tab: Blinds */}
           {activeTab === 'blinds' && (
-            <div className="space-y-6 bg-[#2a1a14]/60 p-4 sm:p-6 rounded-lg border border-[#e0b66c]/20">
+            <div className="space-y-6 bg-[#2A292B]/60 p-4 sm:p-6 rounded-lg border border-[#E53935]/20">
               <div className="space-y-4">
-                <div className="bg-[#24160f]/50 p-3 rounded-lg border border-[#e0b66c]/10">
+                <div className="bg-[#201F22]/50 p-3 rounded-lg border border-[#E53935]/10">
                   <p className="text-xs text-[#e8e3e3]">
                     💡 Configura los niveles de ciegas para el torneo. Duración en minutos.
                   </p>
@@ -622,18 +622,18 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="bg-[#24160f]/70 border-b-2 border-[#e0b66c]/30">
-                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#e0b66c]">Nivel</th>
-                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#e0b66c]">Ciega Chica</th>
-                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#e0b66c]">Ciega Grande</th>
-                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#e0b66c]">Duración (min)</th>
+                      <tr className="bg-[#201F22]/70 border-b-2 border-[#E53935]/30">
+                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#FF6B6B]">Nivel</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#FF6B6B]">Ciega Chica</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#FF6B6B]">Ciega Grande</th>
+                        <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider text-[#FF6B6B]">Duración (min)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {formData.blindLevels.map((blind, index) => (
-                        <tr key={index} className="border-b border-[#e0b66c]/10 hover:bg-[#24160f]/40 transition-colors">
+                        <tr key={index} className="border-b border-[#E53935]/10 hover:bg-[#201F22]/40 transition-colors">
                           <td className="py-3 px-4">
-                            <span className="text-sm font-medium text-[#f3e6c5]">{blind.level}</span>
+                            <span className="text-sm font-medium text-[#F5EFE6]">{blind.level}</span>
                           </td>
                           <td className="py-3 px-4">
                             <input
@@ -644,7 +644,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                                 newBlinds[index] = { ...newBlinds[index], smallBlind: parseInt(e.target.value) || 0 }
                                 updateFormData('blindLevels', newBlinds)
                               }}
-                              className="w-full px-3 py-2 bg-[#24160f] border border-[#e0b66c]/20 rounded-lg text-sm text-[#f3e6c5] focus:border-[#e0b66c] focus:ring-1 focus:ring-[#e0b66c]"
+                              className="w-full px-3 py-2 bg-[#201F22] border border-[#E53935]/20 rounded-lg text-sm text-[#F5EFE6] focus:border-[#E53935] focus:ring-1 focus:ring-[#E53935]"
                               min="0"
                               step="25"
                             />
@@ -658,7 +658,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                                 newBlinds[index] = { ...newBlinds[index], bigBlind: parseInt(e.target.value) || 0 }
                                 updateFormData('blindLevels', newBlinds)
                               }}
-                              className="w-full px-3 py-2 bg-[#24160f] border border-[#e0b66c]/20 rounded-lg text-sm text-[#f3e6c5] focus:border-[#e0b66c] focus:ring-1 focus:ring-[#e0b66c]"
+                              className="w-full px-3 py-2 bg-[#201F22] border border-[#E53935]/20 rounded-lg text-sm text-[#F5EFE6] focus:border-[#E53935] focus:ring-1 focus:ring-[#E53935]"
                               min="0"
                               step="50"
                             />
@@ -672,7 +672,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                                 newBlinds[index] = { ...newBlinds[index], duration: parseInt(e.target.value) || 0 }
                                 updateFormData('blindLevels', newBlinds)
                               }}
-                              className="w-full px-3 py-2 bg-[#24160f] border border-[#e0b66c]/20 rounded-lg text-sm text-[#f3e6c5] focus:border-[#e0b66c] focus:ring-1 focus:ring-[#e0b66c]"
+                              className="w-full px-3 py-2 bg-[#201F22] border border-[#E53935]/20 rounded-lg text-sm text-[#F5EFE6] focus:border-[#E53935] focus:ring-1 focus:ring-[#E53935]"
                               min="0"
                               step="5"
                             />
@@ -688,10 +688,10 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
 
           {/* Tab: Fechas */}
           {activeTab === 'dates' && (
-            <div className="space-y-6 bg-[#2a1a14]/60 p-4 sm:p-6 rounded-lg border border-[#e0b66c]/20">
+            <div className="space-y-6 bg-[#2A292B]/60 p-4 sm:p-6 rounded-lg border border-[#E53935]/20">
 
               <div className="space-y-4 max-w-full">
-                <div className="bg-[#24160f]/50 p-3 rounded-lg border border-[#e0b66c]/10">
+                <div className="bg-[#201F22]/50 p-3 rounded-lg border border-[#E53935]/10">
                   <p className="text-xs text-[#e8e3e3] mb-2">
                     💡 Las fechas se generan automáticamente cada 15 días en martes. Solo configura la primera fecha.
                   </p>
@@ -699,12 +699,12 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
 
                 <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                   {formData.gameDates.map((gameDate, index) => (
-                    <div key={index} className="bg-[#24160f] border-2 border-[#a9441c]/40 rounded-xl p-4 hover:border-[#e0b66c]/60 transition-all duration-200 hover:shadow-lg hover:shadow-[#e0b66c]/10">
+                    <div key={index} className="bg-[#201F22] border-2 border-[#C2410C]/40 rounded-xl p-4 hover:border-[#E53935]/60 transition-all duration-200 hover:shadow-lg hover:shadow-[#E53935]/10">
                       <div className="text-center space-y-3">
                         <div className="flex items-center justify-center space-x-2">
                           <span className="text-xs text-[#e8e3e3] font-medium">Fecha {gameDate.dateNumber}</span>
                           {index === 0 && (
-                            <div className="w-2 h-2 bg-[#e0b66c] rounded-full"></div>
+                            <div className="w-2 h-2 bg-[#E53935] rounded-full"></div>
                           )}
                         </div>
 
@@ -731,10 +731,10 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
 
                           return (
                             <div className="space-y-1">
-                              <div className="text-2xl sm:text-3xl font-bold text-[#f3e6c5]">
+                              <div className="text-2xl sm:text-3xl font-bold text-[#F5EFE6]">
                                 {dateObj.getDate()}
                               </div>
-                              <div className="text-lg sm:text-xl font-semibold text-[#e0b66c]">
+                              <div className="text-lg sm:text-xl font-semibold text-[#FF6B6B]">
                                 {dateObj.toLocaleDateString('es-ES', {
                                   month: 'short'
                                 }).toUpperCase()}
@@ -763,9 +763,9 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
 
           {/* Tab: Participantes */}
           {activeTab === 'participants' && (
-            <div className="space-y-4 bg-[#2a1a14]/60 p-6 rounded-lg border border-[#e0b66c]/20">
+            <div className="space-y-4 bg-[#2A292B]/60 p-6 rounded-lg border border-[#E53935]/20">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-[#f3e6c5]">
+                <h3 className="text-lg font-semibold text-[#F5EFE6]">
                   Participantes ({formData.participantIds.length})
                 </h3>
                 <p className="text-xs text-[#e8e3e3]">
@@ -782,15 +782,15 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
 
               {/* Listado estilo Excel - 3 columnas */}
               {availablePlayers.length > 0 && (
-                <div className="max-h-96 overflow-y-auto border border-[#e0b66c]/20 rounded-lg">
-                  <div className="grid grid-cols-3 gap-0 divide-x divide-[#e0b66c]/10">
+                <div className="max-h-96 overflow-y-auto border border-[#E53935]/20 rounded-lg">
+                  <div className="grid grid-cols-3 gap-0 divide-x divide-[#E53935]/10">
                     {availablePlayers.map((player) => (
                     <label
                       key={player.id}
-                      className={`flex flex-col p-2 sm:p-3 cursor-pointer transition-all border-b border-[#e0b66c]/10 hover:bg-[#24160f]/50 min-h-[50px] border-l-2 ${
+                      className={`flex flex-col p-2 sm:p-3 cursor-pointer transition-all border-b border-[#E53935]/10 hover:bg-[#201F22]/50 min-h-[50px] border-l-2 ${
                         formData.participantIds.includes(player.id)
-                          ? 'border-l-[#e0b66c] bg-[#24160f] text-[#f3e6c5]'
-                          : 'border-l-[#e8e3e3]/30 bg-[#2a1a14] text-[#e8e3e3] hover:text-[#f3e6c5]'
+                          ? 'border-l-[#E53935] bg-[#201F22] text-[#F5EFE6]'
+                          : 'border-l-[#e8e3e3]/30 bg-[#2A292B] text-[#e8e3e3] hover:text-[#F5EFE6]'
                       }`}
                     >
                       <div className="flex items-center mb-1">
@@ -806,7 +806,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                       </div>
                       {/* Mostrar primer alias si existe */}
                       {player.aliases && player.aliases.length > 0 && (
-                        <span className="text-xs text-[#e0b66c] truncate ml-5">
+                        <span className="text-xs text-[#FF6B6B] truncate ml-5">
                           {player.aliases[0]}
                         </span>
                       )}
@@ -814,7 +814,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                   ))}
                     {/* Rellenar celdas vacías para completar la grilla */}
                     {Array.from({ length: (3 - (availablePlayers.length % 3)) % 3 }).map((_, i) => (
-                      <div key={`empty-${i}`} className="p-2 sm:p-3 min-h-[50px] bg-[#2a1a14] border-b border-[#e0b66c]/10 border-l-2 border-l-[#e8e3e3]/30" />
+                      <div key={`empty-${i}`} className="p-2 sm:p-3 min-h-[50px] bg-[#2A292B] border-b border-[#E53935]/10 border-l-2 border-l-[#e8e3e3]/30" />
                     ))}
                   </div>
                 </div>
@@ -847,7 +847,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                   const resetDates = generateInitialDates()
                   updateFormData('gameDates', resetDates)
                 } : () => router.push('/tournaments')}
-                className="w-full sm:flex-1 border-[#e0b66c]/30 text-[#e8e3e3] hover:bg-[#24160f]/40 hover:text-[#f3e6c5] text-sm py-2.5"
+                className="w-full sm:flex-1 border-[#E53935]/30 text-[#e8e3e3] hover:bg-[#201F22]/40 hover:text-[#F5EFE6] text-sm py-2.5"
                 disabled={loading}
               >
                 {activeTab === 'dates' ? 'Reset' : 'Cancelar'}
@@ -858,7 +858,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                 className={`w-full sm:flex-1 text-sm py-2.5 transition-all ${
                   !isValid || !!numberValidationError
                     ? 'bg-gray-600 hover:bg-gray-700 text-gray-300 cursor-not-allowed'
-                    : 'bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5]'
+                    : 'bg-[#C2410C] hover:bg-[#9A3309] text-[#F5EFE6]'
                 }`}
               >
                 {loading ? (
@@ -896,7 +896,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
               <Button
                 type="submit"
                 disabled={loading || !isValid}
-                className="px-6 bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5] text-sm py-2"
+                className="px-6 bg-[#C2410C] hover:bg-[#9A3309] text-[#F5EFE6] text-sm py-2"
               >
                 {loading ? (
                   <>
@@ -919,7 +919,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
               <Button
                 type="submit"
                 disabled={loading || !isValid}
-                className="px-6 bg-[#a9441c] hover:bg-[#8d3717] text-[#f3e6c5] text-sm py-2"
+                className="px-6 bg-[#C2410C] hover:bg-[#9A3309] text-[#F5EFE6] text-sm py-2"
               >
                 {loading ? (
                   <>
