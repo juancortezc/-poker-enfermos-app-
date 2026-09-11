@@ -444,7 +444,13 @@ function HomeWithLiveGame({
     : 'PE'
 
   return (
-    <CPAppShell>
+    /*
+     * OSCURO A PROPOSITO. Mientras se juega, el home es el tablero de la mesa:
+     * se mira de noche, en la mesa, junto al timer. Ahi el fondo oscuro tiene
+     * razon de ser — es el unico contexto donde la vuelve mas comoda, no mas
+     * sombria. El resto de la app va en claro; esto no.
+     */
+    <CPAppShell tone="dark">
       {/* Header */}
       <CPHeader
         userInitials={userInitials}
@@ -452,6 +458,7 @@ function HomeWithLiveGame({
         tournamentNumber={tournamentNumber}
         isComision={isCommission}
         hasActiveGameDate={true}
+        tone="dark"
       />
 
       {/*
@@ -464,7 +471,7 @@ function HomeWithLiveGame({
       </main>
 
       {/* Bottom Nav */}
-      <CPBottomNav />
+      <CPBottomNav tone="dark" />
     </CPAppShell>
   )
 }
