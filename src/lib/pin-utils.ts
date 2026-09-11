@@ -1,12 +1,15 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
+import { normalizePin, isValidPinForCreation, PIN_RULE_TEXT } from './pin-rules'
+
+export * from './pin-rules'
 
 /**
  * Hash a PIN using bcrypt
  */
 export async function hashPin(pin: string): Promise<string> {
   const saltRounds = 10
-  return await bcrypt.hash(pin, saltRounds)
+  return await bcrypt.hash(normalizePin(pin), saltRounds)
 }
 
 /**
@@ -32,7 +35,7 @@ export async function isPinUnique(pin: string, excludePlayerId?: string): Promis
   // Check if any player has this PIN (compare against hashed versions)
   for (const player of players) {
     if (player.pin) {
-      const matches = await bcrypt.compare(pin, player.pin)
+      const matches = await bcrypt.compare(normalizePin(pin), player.pin)
       if (matches) {
         return false // PIN already in use
       }
@@ -53,8 +56,8 @@ export async function validateAndHashPin(
   excludePlayerId?: string
 ): Promise<{ success: true; hashedPin: string } | { success: false; error: string }> {
   // Validate format
-  if (!/^\d{4}$/.test(pin)) {
-    return { success: false, error: 'El PIN debe ser de 4 dígitos' }
+  if (!isValidPinForCreation(pin)) {
+    return { success: false, error: `La clave debe tener ${PIN_RULE_TEXT.toLowerCase()}` }
   }
 
   // Check uniqueness

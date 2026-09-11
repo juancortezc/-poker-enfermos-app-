@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withAuth } from '@/lib/api-auth'
 import bcrypt from 'bcryptjs'
+import { isValidPinForCreation } from '@/lib/pin-utils'
 
 // GET /api/profile - Obtener perfil del usuario autenticado
 export async function GET(req: NextRequest) {
@@ -56,7 +57,7 @@ export async function PUT(req: NextRequest) {
       const { pin, birthDate, email, phone } = body
 
       // Validaciones
-      if (pin && (typeof pin !== 'string' || pin.length !== 4 || !/^\d{4}$/.test(pin))) {
+      if (pin && (typeof pin !== 'string' || !isValidPinForCreation(pin))) {
         return Response.json(
           { message: 'PIN debe ser de 4 dígitos numéricos' },
           { status: 400 }

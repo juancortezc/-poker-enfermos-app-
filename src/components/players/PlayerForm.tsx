@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { X, Save, Loader2, Plus, Minus } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { isValidPinForCreation } from '@/lib/pin-rules'
 
 interface Player {
   id: string
@@ -141,7 +142,7 @@ export default function PlayerForm({
         throw new Error('El apellido es obligatorio')
       }
 
-      if (formData.pin && formData.pin !== '****' && !/^\d{4}$/.test(formData.pin)) {
+      if (formData.pin && formData.pin !== '****' && !isValidPinForCreation(formData.pin)) {
         throw new Error('El PIN debe ser de 4 dígitos')
       }
 

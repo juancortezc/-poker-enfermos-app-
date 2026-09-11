@@ -21,6 +21,7 @@ import { HomeUltimaFecha } from './HomeUltimaFecha'
 import { HomeTorneo } from './HomeTorneo'
 import { isWithinRecapWindow, openAddToCalendar } from '@/lib/home-view'
 import type { PlayerRanking, TournamentInsightsData } from '@/lib/ranking-utils'
+import { isValidPinForLogin } from '@/lib/pin-rules'
 
 // Logo URL
 const LOGO_URL = 'https://storage.googleapis.com/poker-enfermos/logo.png'
@@ -151,14 +152,14 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
   const { login } = useAuth()
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 4)
+    const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12)
     setPin(value)
     setError('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (pin.length !== 4) return
+    if (!isValidPinForLogin(pin)) return
 
     setLoading(true)
     setError('')
@@ -166,7 +167,7 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
     const success = await login(pin)
 
     if (!success) {
-      setError('PIN invalido')
+      setError('Clave incorrecta')
       setPin('')
     }
 
@@ -213,9 +214,12 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
         <form onSubmit={handleSubmit} className="w-full max-w-xs mx-auto mb-8">
           <input
             type="password"
-            inputMode="numeric"
-            pattern="\d{4}"
-            placeholder="Ingresa tu PIN"
+            inputMode="text"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            maxLength={12}
+            placeholder="Ingresa tu clave"
             value={pin}
             onChange={handlePinChange}
             disabled={loading}
@@ -233,10 +237,10 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
           {/* Botón LOGIN */}
           <button
             type="submit"
-            disabled={loading || pin.length !== 4}
+            disabled={loading || !isValidPinForLogin(pin)}
             className="w-full flex items-center justify-center gap-2 touch-manipulation"
             style={{
-              backgroundColor: pin.length === 4 ? '#E53935' : '#444444',
+              backgroundColor: isValidPinForLogin(pin) ? '#E53935' : '#444444',
               color: 'white',
               fontSize: '18px',
               fontWeight: 'bold',
@@ -245,8 +249,8 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
               border: 'none',
               marginTop: '16px',
               minHeight: '56px',
-              opacity: loading || pin.length !== 4 ? 0.5 : 1,
-              cursor: loading || pin.length !== 4 ? 'not-allowed' : 'pointer',
+              opacity: loading || !isValidPinForLogin(pin) ? 0.5 : 1,
+              cursor: loading || !isValidPinForLogin(pin) ? 'not-allowed' : 'pointer',
             }}
           >
             {loading ? (

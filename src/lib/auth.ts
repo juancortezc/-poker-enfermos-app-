@@ -1,6 +1,7 @@
 import { prisma } from './prisma'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { isValidPinForLogin, normalizePin } from './pin-rules'
 
 export interface AuthUser {
   id: string
@@ -18,7 +19,7 @@ export interface AuthUser {
 export async function authenticateUserByPin(pin: string): Promise<AuthUser | null> {
   try {
     // Validate PIN format (4 digits exactly)
-    if (!/^\d{4}$/.test(pin)) {
+    if (!isValidPinForLogin(pin)) {
       console.log('Invalid PIN format - must be 4 digits')
       return null
     }
@@ -41,7 +42,7 @@ export async function authenticateUserByPin(pin: string): Promise<AuthUser | nul
 
     // Check each player's hashed PIN
     for (const player of players) {
-      if (player.pin && await bcrypt.compare(pin, player.pin)) {
+      if (player.pin && await bcrypt.compare(normalizePin(pin), player.pin)) {
         return {
           id: player.id,
           firstName: player.firstName,

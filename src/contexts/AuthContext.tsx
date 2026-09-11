@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { AuthUser } from '@/lib/auth'
 import { clearStoredAuthTokens, storePin, storeAdminKey, getStoredAuthToken } from '@/lib/client-auth'
+import { isValidPinForLogin } from '@/lib/pin-rules'
 
 interface AuthContextType {
   user: AuthUser | null
@@ -47,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (pin: string): Promise<boolean> => {
     try {
       // Validate PIN format on client side
-      if (!/^\d{4}$/.test(pin)) {
+      if (!isValidPinForLogin(pin)) {
         console.error('PIN must be exactly 4 digits')
         return false
       }

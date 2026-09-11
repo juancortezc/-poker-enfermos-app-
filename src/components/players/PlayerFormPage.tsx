@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save, Loader2, Plus, X, ChevronDown, ChevronUp } from 'lucide-react'
 import Image from 'next/image'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+import { isValidPinForCreation } from '@/lib/pin-rules'
 
 interface Player {
   id: string
@@ -144,7 +145,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
       // Validar PIN solo si se está ingresando uno nuevo
       if (formData.pin && formData.pin !== '****') {
-        if (!/^\d{4}$/.test(formData.pin)) {
+        if (!isValidPinForCreation(formData.pin)) {
           throw new Error('El PIN debe ser de 4 dígitos')
         }
       }

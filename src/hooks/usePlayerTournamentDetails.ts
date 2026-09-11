@@ -3,7 +3,6 @@ import useSWR from 'swr';
 import { useTournamentRanking } from './useTournamentRanking';
 import { useGameDates } from './useGameDates';
 import { swrKeys } from '@/lib/swr-config';
-import { buildAuthHeaders } from '@/lib/client-auth';
 
 interface PlayerPublicData {
   id: string;
@@ -55,6 +54,11 @@ interface PlayerTournamentDetails {
   bestResult: string;
 }
 
+interface DateWithEliminations {
+  id: number;
+  eliminations: EliminationRecord[];
+}
+
 interface EliminationRecord {
   eliminatedPlayer: {
     id: string;
@@ -97,6 +101,15 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
     revalidateOnReconnect: false,
   });
 
+  // Las eliminaciones de TODAS las fechas vienen embebidas aqui. Antes se pedia
+  // una por fecha completada (Promise.all sobre N fechas = N requests en
+  // paralelo, cada una con cache: 'no-store'). Esta es ademas la misma URL que
+  // ya pide la pagina de perfil, asi que SWR la deduplica.
+  const { data: datesWithEliminations } = useSWR<DateWithEliminations[]>(
+    tournamentId ? `/api/tournaments/${tournamentId}/dates` : null,
+    { revalidateOnFocus: false, revalidateOnReconnect: false }
+  );
+
   const {
     data: player,
     error: playerError,
@@ -114,9 +127,11 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
   gameDatesRef.current = gameDates;
   const playerRef = useRef(player);
   playerRef.current = player;
+  const datesWithEliminationsRef = useRef(datesWithEliminations);
+  datesWithEliminationsRef.current = datesWithEliminations;
 
   const allReady = !rankingLoading && !datesLoading && !playerLoading
-    && !!rankingData && !!gameDates && !!player;
+    && !!rankingData && !!gameDates && !!player && !!datesWithEliminations;
 
   useEffect(() => {
     if (!playerId || !tournamentId) {
@@ -146,31 +161,9 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
           throw new Error('Player not found in tournament ranking');
         }
 
-        const eliminationMap = new Map<number, EliminationRecord[]>();
-
-        const completedDates = gameDates.filter(date => date.status === 'completed' && date.id);
-
-        if (completedDates.length > 0) {
-          const eliminationResponses = await Promise.all(
-            completedDates.map(async date => {
-              const response = await fetch(`/api/eliminations/game-date/${date.id}`, {
-                headers: buildAuthHeaders(),
-                cache: 'no-store'
-              });
-
-              if (!response.ok) {
-                throw new Error('Failed to fetch eliminations');
-              }
-
-              const eliminations: EliminationRecord[] = await response.json();
-              return { dateId: date.id, eliminations };
-            })
-          );
-
-          eliminationResponses.forEach(({ dateId, eliminations }) => {
-            eliminationMap.set(dateId, eliminations);
-          });
-        }
+        const eliminationMap = new Map<number, EliminationRecord[]>(
+          (datesWithEliminationsRef.current ?? []).map(d => [d.id, d.eliminations ?? []])
+        );
 
         const computeFallbackPosition = (dateNumber: number) => {
           if (!rankingData?.rankings?.length) return null;

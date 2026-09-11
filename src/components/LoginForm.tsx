@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { KeyRound, Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import { isValidPinForLogin } from '@/lib/pin-rules'
 
 export default function LoginForm() {
   const [pin, setPin] = useState('')
@@ -19,7 +20,7 @@ export default function LoginForm() {
     setLoading(true)
     setError('')
 
-    if (!/^\d{4}$/.test(pin)) {
+    if (!isValidPinForLogin(pin)) {
       setError('El PIN debe tener exactamente 4 dígitos')
       setLoading(false)
       return
@@ -73,13 +74,16 @@ export default function LoginForm() {
               </div>
               <Input
                 type="password"
-                inputMode="numeric"
-                pattern="\d{4}"
+                inputMode="text"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                maxLength={12}
                 placeholder="Ingresa tu PIN (4 dígitos)"
                 value={pin}
-                onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                onChange={(e) => setPin(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12))}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && pin.length === 4 && !loading) {
+                  if (e.key === 'Enter' && isValidPinForLogin(pin) && !loading) {
                     e.preventDefault()
                     handleSubmit(e as any)
                   }
@@ -93,10 +97,10 @@ export default function LoginForm() {
             {/* Botón INGRESAR - visible justo debajo del input */}
             <button
               type="submit"
-              disabled={loading || pin.length !== 4}
+              disabled={loading || !isValidPinForLogin(pin)}
               className="w-full flex items-center justify-center gap-2 touch-manipulation"
               style={{
-                backgroundColor: pin.length === 4 ? '#E53935' : '#666666',
+                backgroundColor: isValidPinForLogin(pin) ? '#E53935' : '#666666',
                 color: 'white',
                 fontSize: '20px',
                 fontWeight: 'bold',
@@ -105,8 +109,8 @@ export default function LoginForm() {
                 border: 'none',
                 marginTop: '16px',
                 minHeight: '64px',
-                opacity: loading || pin.length !== 4 ? 0.5 : 1,
-                cursor: loading || pin.length !== 4 ? 'not-allowed' : 'pointer',
+                opacity: loading || !isValidPinForLogin(pin) ? 0.5 : 1,
+                cursor: loading || !isValidPinForLogin(pin) ? 'not-allowed' : 'pointer',
               }}
             >
               {loading ? (

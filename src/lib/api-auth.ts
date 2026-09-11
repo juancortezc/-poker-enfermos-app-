@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from './prisma'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { isValidPinForLogin, normalizePin } from './pin-utils'
 
 export interface AuthenticatedUser {
   id: string
@@ -84,8 +85,8 @@ async function validateTokenFromDB(token: string): Promise<AuthenticatedUser | n
   if (token.startsWith('PIN:')) {
     const pin = token.substring(4) // Remover "PIN:"
 
-    // Validar formato del PIN (4 dígitos exactamente)
-    if (!/^\d{4}$/.test(pin)) {
+    // Validar formato antes de tocar la base
+    if (!isValidPinForLogin(pin)) {
       return null
     }
 
@@ -107,7 +108,7 @@ async function validateTokenFromDB(token: string): Promise<AuthenticatedUser | n
 
     // Verificar PIN hasheado
     for (const user of users) {
-      if (user.pin && await bcrypt.compare(pin, user.pin)) {
+      if (user.pin && await bcrypt.compare(normalizePin(pin), user.pin)) {
         return {
           id: user.id,
           firstName: user.firstName,

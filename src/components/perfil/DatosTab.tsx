@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 import { Phone, Mail, Cake, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { isValidPinForCreation, PIN_RULE_TEXT, PIN_MAX_LENGTH } from '@/lib/pin-rules'
 
 interface PlayerProfile {
   id: string
@@ -87,8 +88,8 @@ export default function DatosTab() {
         setError('Los PINs no coinciden')
         return
       }
-      if (form.pin.length !== 4 || !/^\d{4}$/.test(form.pin)) {
-        setError('El PIN debe ser de 4 dígitos')
+      if (!isValidPinForCreation(form.pin)) {
+        setError(`${PIN_RULE_TEXT}.`)
         return
       }
     }
@@ -287,9 +288,12 @@ export default function DatosTab() {
           <input
             type={showPin ? 'text' : 'password'}
             value={form.pin}
-            onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
-            placeholder="Nuevo PIN (4 dígitos)"
-            maxLength={4}
+            onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, PIN_MAX_LENGTH) })}
+            placeholder="Nueva clave"
+            maxLength={PIN_MAX_LENGTH}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             className="w-full px-3 py-2.5 pr-10"
             style={inputStyle}
           />
@@ -308,9 +312,9 @@ export default function DatosTab() {
           <input
             type={showConfirmPin ? 'text' : 'password'}
             value={form.confirmPin}
-            onChange={(e) => setForm({ ...form, confirmPin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+            onChange={(e) => setForm({ ...form, confirmPin: e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, PIN_MAX_LENGTH) })}
             placeholder="Confirmar PIN"
-            maxLength={4}
+            maxLength={PIN_MAX_LENGTH}
             className="w-full px-3 py-2.5 pr-10"
             style={inputStyle}
           />

@@ -2,12 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getEcuadorToday } from '@/lib/date-utils'
 import { UserRole } from '@prisma/client'
-import { withComisionAuth } from '@/lib/api-auth'
+import { withComisionAuth, validateApiAccess } from '@/lib/api-auth'
+import { playerSelectForRole } from '@/lib/player-select'
 import { validateAndHashPin } from '@/lib/pin-utils'
 
-// GET /api/players - Lista de jugadores con filtros (público para mostrar directorio)
+// GET /api/players - Directorio de jugadores.
+// Exige sesión: trae teléfono, email y cumpleaños de los socios. Lo que se
+// devuelve depende de quién pregunta (ver player-select.ts). Nunca incluye
+// `pin` ni `adminKey`.
 export async function GET(req: NextRequest) {
   try {
+    const requester = await validateApiAccess(req)
+    if (!requester) {
+      return NextResponse.json(
+        { error: 'Debes iniciar sesión para ver el directorio' },
+        { status: 401 }
+      )
+    }
     const { searchParams } = new URL(req.url)
     const roleParam = searchParams.get('role')
     const search = searchParams.get('search')
@@ -53,7 +64,8 @@ export async function GET(req: NextRequest) {
 
     const players = await prisma.player.findMany({
       where,
-      include: {
+      select: {
+        ...playerSelectForRole(requester.role),
         inviter: {
           select: {
             id: true,

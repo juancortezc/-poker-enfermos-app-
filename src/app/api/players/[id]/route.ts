@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
 import { withAuth, withComisionAuth } from '@/lib/api-auth'
+import { playerSelectForRole } from '@/lib/player-select'
 import { validateAndHashPin } from '@/lib/pin-utils'
 
 // GET /api/players/:id - Obtener jugador específico
@@ -9,13 +10,14 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withAuth(req, async (_req) => {
+  return withAuth(req, async (_req, requester) => {
   try {
     const { id } = await params
 
     const player = await prisma.player.findUnique({
       where: { id },
-      include: {
+      select: {
+        ...playerSelectForRole(requester?.role),
         inviter: {
           select: {
             id: true,

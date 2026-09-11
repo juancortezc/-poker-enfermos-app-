@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { UserRole } from '@prisma/client'
 import { X, Loader2, Plus, Minus, ChevronDown, User, Shield, Phone, Mail, Cake, Link2, Hash } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { isValidPinForCreation } from '@/lib/pin-rules'
 
 interface Player {
   id: string
@@ -132,7 +133,7 @@ export default function CPPlayerForm({
         throw new Error('El apellido es obligatorio')
       }
 
-      if (formData.pin && formData.pin !== '****' && !/^\d{4}$/.test(formData.pin)) {
+      if (formData.pin && formData.pin !== '****' && !isValidPinForCreation(formData.pin)) {
         throw new Error('El PIN debe ser de 4 digitos')
       }
 
