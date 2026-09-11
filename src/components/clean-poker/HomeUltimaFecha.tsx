@@ -5,10 +5,9 @@ import Image from 'next/image'
 import { scoreOf } from '@/lib/ranking-utils'
 import type { PlayerRanking, PlayerPositionDelta } from '@/lib/ranking-utils'
 import { HomeAvatar } from './HomeAvatar'
-import { HomeCard } from './HomeCard'
 import { LinkCta } from './LinkCta'
-import { PodioTorneoCard } from './PodioTorneoCard'
-import { StreaksCards } from './StreaksCards'
+import { Score } from './Score'
+import { tile, overline, BENTO, SOBRE_COLOR } from './bento'
 
 interface EliminationDTO {
   id: number
@@ -50,9 +49,9 @@ export function HomeUltimaFecha({
 
   if (!eliminations || eliminations.length === 0 || rankings.length === 0) {
     return (
-      <HomeCard style={{ padding: 24, textAlign: 'center' }}>
-        <div style={{ fontSize: 12, color: '#9A8F8B' }}>Cargando la última fecha...</div>
-      </HomeCard>
+      <div style={{ ...tile('papel'), padding: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>Cargando la última fecha...</div>
+      </div>
     )
   }
 
@@ -103,7 +102,7 @@ export function HomeUltimaFecha({
     varonDeLaNoche && {
       key: 'varon',
       label: 'EL VARÓN DE LA NOCHE',
-      color: '#6ECB71',
+      color: 'var(--cp-primary-light)',
       name: varonDeLaNoche.name,
       detail: `${varonDeLaNoche.count} eliminaciones`,
       playerId: varonDeLaNoche.playerId
@@ -111,7 +110,7 @@ export function HomeUltimaFecha({
     elMalazoElim && {
       key: 'malazo',
       label: 'EL MALAZO',
-      color: '#E53935',
+      color: 'var(--cp-malazo-text)',
       name: `${elMalazoElim.eliminatedPlayer.firstName} ${elMalazoElim.eliminatedPlayer.lastName}`,
       detail: 'primero eliminado',
       playerId: elMalazoElim.eliminatedPlayer.id
@@ -119,7 +118,7 @@ export function HomeUltimaFecha({
     nocheParaOlvidar && {
       key: 'olvidar',
       label: 'NOCHE PARA OLVIDAR',
-      color: '#6FA3E0',
+      color: 'var(--cp-negative)',
       name: nocheParaOlvidar.playerName,
       detail: `bajó ${Math.abs(nocheParaOlvidar.positionsChanged)} puestos en el Torneo`,
       playerId: nocheParaOlvidar.playerId
@@ -127,180 +126,221 @@ export function HomeUltimaFecha({
     elQueMasSubio && {
       key: 'contento',
       label: 'EL MÁS CONTENTO',
-      color: '#6ECB71',
+      color: 'var(--cp-positive)',
       name: elQueMasSubio.playerName,
       detail: `+${elQueMasSubio.positionsChanged} posiciones`,
       playerId: elQueMasSubio.playerId
     }
   ].filter((c): c is NonNullable<typeof c> => Boolean(c))
 
+  const tinta = 'var(--cp-on-surface)'
+  const suave = 'var(--cp-on-surface-muted)'
+  const tenue = 'var(--cp-on-surface-variant)'
+
   return (
-    <>
-      {/* WINNER HERO */}
+    <div style={BENTO}>
+
+      {/* ── EL CAMPEÓN DE LA NOCHE — el ancla negra ───────────────── */}
       {winner && (() => {
         const winnerPhoto = photoByPlayerId.get(winner.eliminatedPlayer.id)
         return (
-          <HomeCard style={{ padding: 0, position: 'relative', overflow: 'hidden', minHeight: 168 }}>
+          <section className="cp-rise" style={{ ...tile('negro'), animationDelay: '0ms', padding: 0, minHeight: 172 }}>
             {winnerPhoto && (
-              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '46%' }}>
-                <Image
-                  src={winnerPhoto}
-                  alt={winner.eliminatedPlayer.firstName}
-                  fill
-                  className="object-cover object-top"
-                  unoptimized
-                />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(42,41,43,0.45) 0%, transparent 16%)' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 68%, rgba(20,17,14,0.45) 100%)' }} />
+              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%' }}>
+                <Image src={winnerPhoto} alt={winner.eliminatedPlayer.firstName} fill className="object-cover object-top" unoptimized />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #17120F 0%, rgba(23,18,15,0.55) 30%, transparent 72%)' }} />
               </div>
             )}
-            <div style={{ padding: '18px 16px', position: 'relative', zIndex: 1, maxWidth: winnerPhoto ? '52%' : '100%' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
-                Fecha {lastCompletedDate.dateNumber}
-              </div>
-              <div style={{ fontSize: 26, fontWeight: 900, color: '#F5EFE6', lineHeight: 1.05, letterSpacing: '-0.01em' }}>
+            <div style={{ padding: 16, position: 'relative', zIndex: 1, maxWidth: winnerPhoto ? '58%' : '100%' }}>
+              <div style={overline(SOBRE_COLOR.tenue)}>Fecha {lastCompletedDate.dateNumber}</div>
+              <div className="cp-display" style={{ fontSize: 27, fontWeight: 900, color: '#FFF', lineHeight: 1.02, marginTop: 5 }}>
                 ¡{winner.eliminatedPlayer.firstName.toUpperCase()}<br />GANÓ LA FECHA!
               </div>
-              <button
-                onClick={onSeeAllResults}
-                style={{
-                  marginTop: 12,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  background: '#E53935',
-                  color: '#fff',
-                  padding: '9px 16px',
-                  borderRadius: 100,
-                  fontSize: 13,
-                  fontWeight: 800,
-                  letterSpacing: '0.03em',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              >
+              <button onClick={onSeeAllResults}
+                style={{ marginTop: 13, display: 'inline-flex', alignItems: 'center', gap: 6, background: '#E53935', color: '#fff', padding: '9px 16px', borderRadius: 100, fontSize: 12.5, fontWeight: 800, letterSpacing: '0.03em', border: 'none', cursor: 'pointer' }}>
                 VER RESULTADOS
               </button>
             </div>
             {!winnerPhoto && (
               <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)' }}>
-                <HomeAvatar
-                  playerId={winner.eliminatedPlayer.id}
-                  name={`${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`}
-                  size={88}
-                  fontSize={26}
-                />
+                <HomeAvatar playerId={winner.eliminatedPlayer.id} name={`${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`} size={84} fontSize={25} round />
               </div>
             )}
-          </HomeCard>
+          </section>
         )
       })()}
 
-      {/* PODIUM DE LA FECHA */}
-      {podium.length > 0 && (
-        <HomeCard style={{ padding: 16 }}>
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              Podio Fecha {lastCompletedDate.dateNumber}
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {podium.map(e => (
-              <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <HomeAvatar
-                  playerId={e.eliminatedPlayer.id}
-                  name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`}
-                  photoUrl={photoByPlayerId.get(e.eliminatedPlayer.id)}
-                  size={52}
-                  fontSize={15}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>
-                    {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName[0]}.
-                  </div>
-                  <div style={{ fontSize: 12, fontWeight: e.position === 1 ? 800 : 600, color: e.position === 1 ? '#E8C158' : '#9A8F8B', letterSpacing: e.position === 1 ? '0.04em' : undefined }}>
-                    {e.position === 1 ? 'CAMPEÓN' : `${e.position}° puesto`}
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: e.position === 1 ? '#E8C158' : '#F5EFE6' }}>{e.points}</div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>PTS</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
-            <LinkCta onClick={onSeeResultsTab}>VER TODOS LOS RESULTADOS →</LinkCta>
-          </div>
-        </HomeCard>
-      )}
-
-      {/* PERSONAL STATS */}
+      {/* ── TU NOCHE — bloque rojo ────────────────────────────────── */}
       {myRanking && myNightElim && (
-        <div style={{ display: 'flex', gap: 10 }}>
-          <div style={{ flex: 1, background: 'linear-gradient(160deg,#E53935,#B32623)', borderRadius: 16, padding: 14, color: '#fff' }}>
-            {myNightElim.position === 1 ? (
-              <>
-                <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.85 }}>{myNightElim.eliminatedPlayer.firstName}</div>
-                <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', marginTop: 2 }}>¡Ganaste!</div>
-                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} pts</div>
-              </>
-            ) : (
-              <>
-                <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', opacity: 0.85 }}>Te eliminaron en posición:</div>
-                <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.02em', marginTop: 2 }}>#{myNightElim.position}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, marginTop: 6 }}>{myNightElim.points} pts</div>
-                {myNightElim.eliminatorPlayer && (
-                  <div style={{ fontSize: 12, fontWeight: 600, opacity: 0.85, marginTop: 2 }}>
-                    Te eliminó: {myNightElim.eliminatorPlayer.firstName} {myNightElim.eliminatorPlayer.lastName}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-          <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>En el campeonato estás</div>
-            <div style={{ fontSize: 30, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.02em', marginTop: 2 }}>#{myRanking.position}</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6', marginTop: 2 }}>{scoreOf(myRanking)} puntos</div>
-            {gapToLeader !== null && (
-              <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 6 }}>
-                {gapToLeader === 0 ? 'eres el líder' : `a ${gapToLeader} ${gapToLeader === 1 ? 'punto' : 'puntos'} del líder`}
+        <section className="cp-rise" style={{ ...tile('papel', 1), animationDelay: '60ms', background: 'linear-gradient(150deg,#E53935,#B32623)', border: 'none', color: '#FFF', boxShadow: '0 12px 26px rgba(179,38,35,0.28)', gap: 3 }}>
+          {myNightElim.position === 1 ? (
+            <>
+              <div style={overline(SOBRE_COLOR.suave)}>tu noche</div>
+              <div className="cp-display" style={{ fontSize: 24, fontWeight: 900, marginTop: 2 }}>¡Ganaste!</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 4 }}>
+                <Score value={myNightElim.points} size={20} color="#FFF" />
+                <span style={overline(SOBRE_COLOR.suave)}>pts</span>
               </div>
-            )}
-            <LinkCta onClick={onOpenProfile} style={{ marginTop: 'auto', paddingTop: 8 }}>VER MI TORNEO →</LinkCta>
-          </HomeCard>
-        </div>
+            </>
+          ) : (
+            <>
+              <div style={overline(SOBRE_COLOR.suave)}>te eliminaron en</div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 1, marginTop: 1 }}>
+                <span className="cp-score" style={{ fontSize: 20, color: 'rgba(255,255,255,0.7)', lineHeight: 1.4 }}>#</span>
+                <Score value={myNightElim.position} size={46} color="#FFF" style={{ lineHeight: 1 }} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                <Score value={myNightElim.points} size={18} color="#FFF" />
+                <span style={overline(SOBRE_COLOR.suave)}>pts</span>
+              </div>
+              {myNightElim.eliminatorPlayer && (
+                <div style={{ fontSize: 11.5, color: SOBRE_COLOR.suave, marginTop: 3, lineHeight: 1.3 }}>
+                  Te eliminó {myNightElim.eliminatorPlayer.firstName}
+                </div>
+              )}
+            </>
+          )}
+        </section>
       )}
 
-      {/* LO QUE DEJO LA NOCHE */}
-      {insightCards.length > 0 && (
-        <div>
-          <div style={{ marginBottom: 10, padding: '0 2px' }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>LO QUE DEJÓ LA NOCHE</div>
+      {/* ── EN EL CAMPEONATO — bloque papel al lado ───────────────── */}
+      {myRanking && myNightElim && (
+        <section className="cp-rise" style={{ ...tile('papel', 1), animationDelay: '110ms', gap: 3 }}>
+          <div style={overline()}>en el campeonato</div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 1, marginTop: 1 }}>
+            <span className="cp-score" style={{ fontSize: 20, color: 'var(--cp-primary)', lineHeight: 1.4 }}>#</span>
+            <Score value={myRanking.position} size={46} color={tinta} style={{ lineHeight: 1 }} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${insightCards.length}, minmax(0,1fr))`, gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+            <Score value={scoreOf(myRanking)} size={18} color={tinta} />
+            <span style={overline()}>pts</span>
+          </div>
+          {gapToLeader !== null && (
+            <div style={{ fontSize: 11.5, color: suave, marginTop: 3, lineHeight: 1.3 }}>
+              {gapToLeader === 0 ? 'sos el líder' : `a ${gapToLeader} del líder`}
+            </div>
+          )}
+          <LinkCta onClick={onOpenProfile} style={{ marginTop: 'auto', paddingTop: 6, color: 'var(--cp-primary-light)', fontSize: 11.5 }}>MI TORNEO →</LinkCta>
+        </section>
+      )}
+
+      {/* ── PODIO DE LA FECHA — bloque oro ────────────────────────── */}
+      {podium.length > 0 && (
+        <section className="cp-rise" style={{ ...tile('oro'), animationDelay: '160ms' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+            <span style={overline('#8A6508')}>podio fecha {lastCompletedDate.dateNumber}</span>
+            <LinkCta onClick={onSeeResultsTab} style={{ color: '#C62828', fontSize: 11.5 }}>TODOS →</LinkCta>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginTop: 11 }}>
+            {podium.map(e => {
+              const metal = ['#8A6508', '#6E6A67', '#8B5E2F'][e.position - 1] ?? tenue
+              return (
+                <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ borderRadius: '50%', padding: 2, border: `2px solid ${metal}`, flexShrink: 0 }}>
+                    <HomeAvatar playerId={e.eliminatedPlayer.id} name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`} photoUrl={photoByPlayerId.get(e.eliminatedPlayer.id)} size={44} fontSize={14} round />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: tinta }}>
+                      {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName[0]}.
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: metal, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      {e.position === 1 ? 'campeón' : `${e.position}° puesto`}
+                    </div>
+                  </div>
+                  <div className="cp-score" style={{ fontSize: 19, color: metal }}>{e.points}</div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ── LO QUE DEJÓ LA NOCHE ──────────────────────────────────── */}
+      {insightCards.length > 0 && (
+        <section className="cp-rise" style={{ ...tile('papel'), animationDelay: '220ms' }}>
+          <span style={overline()}>lo que dejó la noche</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 12, marginTop: 12 }}>
             {insightCards.map(card => (
-              <HomeCard key={card.key} style={{ padding: 8, textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <HomeAvatar playerId={card.playerId} name={card.name} photoUrl={photoByPlayerId.get(card.playerId)} size={64} fontSize={20} />
+              <div key={card.key} style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+                <div style={{ borderRadius: '50%', padding: 2, border: `2px solid ${card.color}`, flexShrink: 0 }}>
+                  <HomeAvatar playerId={card.playerId} name={card.name} photoUrl={photoByPlayerId.get(card.playerId)} size={40} fontSize={14} round />
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: card.color, marginTop: 6, minHeight: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1.3 }}>
-                  {card.label}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 9.5, fontWeight: 800, color: card.color, letterSpacing: '0.1em', lineHeight: 1.25 }}>{card.label}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: tinta, marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {card.name.split(' ')[0]}
+                  </div>
+                  <div style={{ fontSize: 10.5, color: tenue, lineHeight: 1.25 }}>{card.detail}</div>
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6', marginTop: 3, minHeight: 22, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {card.name}
-                </div>
-                <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 'auto', paddingTop: 2, lineHeight: 1.3 }}>{card.detail}</div>
-              </HomeCard>
+              </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} showNightContext onSeeTabla={onSeeTabla} />
+      {/* ── EL PODIO DEL TORNEO ───────────────────────────────────── */}
+      {rankings.length >= 3 && (
+        <section className="cp-rise" style={{ ...tile('papel'), animationDelay: '270ms' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+            <span style={overline()}>podio torneo {tournamentNumber}</span>
+            <LinkCta onClick={onSeeTabla} style={{ color: 'var(--cp-primary-light)', fontSize: 11.5 }}>TABLA →</LinkCta>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 12, marginTop: 12 }}>
+            {[rankings[1], rankings[0], rankings[2]].map(p => {
+              const idx = rankings.indexOf(p)
+              const metal = ['#8A6508', '#6E6A67', '#8B5E2F'][idx]
+              const primero = idx === 0
+              return (
+                <div key={p.playerId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, marginBottom: primero ? 10 : 0, minWidth: 0 }}>
+                  <div style={{ position: 'relative', borderRadius: '50%', padding: 3, border: `2px solid ${metal}` }}>
+                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={primero ? 66 : 50} fontSize={primero ? 18 : 14} round />
+                    <span className="cp-score" style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 10.5, minWidth: 18, height: 18, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{idx + 1}</span>
+                  </div>
+                  <div style={{ fontSize: 11.5, fontWeight: 700, color: tinta, marginTop: 3 }}>{p.playerName.split(' ')[0]}</div>
+                  <div className="cp-score" style={{ fontSize: primero ? 17 : 14, color: metal }}>{scoreOf(p)}</div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
-      {(streaks || bottom2.length > 0) && <StreaksCards hot={streaks?.hot ?? []} cold={bottom2} />}
-    </>
+      {/* ── LOS MALAZOS — ROSA ────────────────────────────────────── */}
+      {bottom2.length > 0 && (
+        <section className="cp-rise" style={{ ...tile('rosa', 1), animationDelay: '320ms', gap: 10 }}>
+          <span style={overline(SOBRE_COLOR.suave)}>malazos 7/2</span>
+          {bottom2.map(p => (
+            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
+                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={32} fontSize={12} round />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.playerName.split(' ')[0]}</div>
+                <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>{scoreOf(p)}</div>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* ── LOS CALIENTES — verde ─────────────────────────────────── */}
+      {(streaks?.hot?.length ?? 0) > 0 && (
+        <section className="cp-rise" style={{ ...tile('verde', 1), animationDelay: '360ms', gap: 10 }}>
+          <span style={overline(SOBRE_COLOR.suave)}>calientes</span>
+          {(streaks?.hot ?? []).slice(0, 2).map(p => (
+            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
+                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={32} fontSize={12} round />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.playerName.split(' ')[0]}</div>
+                <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>+{p.positionsChanged}</div>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+    </div>
   )
 }
 

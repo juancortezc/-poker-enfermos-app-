@@ -8,6 +8,7 @@ import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCOR
 import { Score, Meter } from './Score'
 import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
+import { tile, overline, BENTO, SOBRE_COLOR } from './bento'
 
 interface DaysWithoutVictoryResponse {
   players: Array<{ id: string; firstName: string; lastName: string; daysWithoutVictory: number; hasNeverWon: boolean }>
@@ -168,53 +169,8 @@ export function HomeTorneo({
   const suave = 'var(--cp-on-surface-muted)'
   const tenue = 'var(--cp-on-surface-variant)'
 
-  const overline = (color?: string): React.CSSProperties => ({
-    fontFamily: 'var(--cp-font-display)',
-    fontSize: 10.5, fontWeight: 800, letterSpacing: '0.16em',
-    textTransform: 'uppercase', color: color ?? tenue
-  })
-
-  /**
-   * Bento: bloques de distinto tamano y peso en una grilla de dos columnas.
-   *
-   * La version anterior era papel de punta a punta — "una sabana blanca sin
-   * divisiones". El punto medio no es un gris entre negro y blanco: es papel de
-   * fondo con BLOQUES QUE ANCLAN. El negro y el rosa vuelven, pero como piezas
-   * dentro de la pantalla, no como el suelo de todo.
-   */
-  const tile = (v: 'papel' | 'negro' | 'rosa' | 'verde' | 'oro', span = 2): React.CSSProperties => {
-    const base: React.CSSProperties = {
-      gridColumn: `span ${span}`,
-      borderRadius: 20,
-      padding: 16,
-      position: 'relative',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      minWidth: 0
-    }
-    switch (v) {
-      case 'negro': return { ...base,
-        background: 'linear-gradient(150deg, #241D19 0%, #17120F 100%)',
-        color: '#FFF', boxShadow: '0 14px 30px rgba(23,18,15,0.28)' }
-      case 'rosa': return { ...base,
-        background: 'linear-gradient(150deg, #D81B60 0%, #AD1457 100%)',
-        color: '#FFF', boxShadow: '0 12px 26px rgba(173,20,87,0.30)' }
-      case 'verde': return { ...base,
-        background: 'linear-gradient(150deg, #15803D 0%, #0F5C2C 100%)',
-        color: '#FFF', boxShadow: '0 12px 26px rgba(15,92,44,0.28)' }
-      case 'oro': return { ...base,
-        background: 'linear-gradient(150deg, #FCF4DE 0%, #F3E6C2 100%)',
-        border: '1px solid rgba(138,101,8,0.30)', color: tinta,
-        boxShadow: '0 10px 24px rgba(23,18,15,0.07)' }
-      default: return { ...base,
-        background: '#FFF', border: '1px solid var(--cp-surface-border)',
-        color: tinta, boxShadow: '0 6px 18px rgba(23,18,15,0.05)' }
-    }
-  }
-
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
+    <div style={BENTO}>
 
       {/* ── TU POSICIÓN — el ancla negra ──────────────────────────── */}
       {myRanking && (
@@ -226,7 +182,7 @@ export function HomeTorneo({
           >
             {myRanking.position}
           </span>
-          <div style={overline('rgba(255,255,255,0.55)')}>{myRanking.playerName.split(' ')[0]}, estás</div>
+          <div style={overline(SOBRE_COLOR.tenue)}>{myRanking.playerName.split(' ')[0]}, estás</div>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginTop: 4, position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
               <span className="cp-score" style={{ fontSize: 34, color: '#FF5A56', lineHeight: 1.2 }}>#</span>
@@ -235,7 +191,7 @@ export function HomeTorneo({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 10 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
                 <Score value={scoreOf(myRanking)} size={26} color="#FFF" />
-                <span style={overline('rgba(255,255,255,0.5)')}>{SCORE_LABELS.points}</span>
+                <span style={overline(SOBRE_COLOR.tenue)}>{SCORE_LABELS.points}</span>
               </div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
                 {SCORE_LABELS.accumulatedLong} <span style={{ color: '#FF9E5E', fontWeight: 700 }}>{myRanking.totalPoints}</span>
@@ -361,7 +317,7 @@ export function HomeTorneo({
       {/* ── LOS MALAZOS — el bloque ROSA. No negociable. ──────────── */}
       {bottom2.length > 0 && (
         <section className="cp-rise" style={{ ...tile('rosa', 1), animationDelay: '220ms', gap: 10 }}>
-          <span style={overline('rgba(255,255,255,0.75)')}>malazos 7/2</span>
+          <span style={overline(SOBRE_COLOR.suave)}>malazos 7/2</span>
           {bottom2.map(p => (
             <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
               <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
@@ -379,7 +335,7 @@ export function HomeTorneo({
       {/* ── LOS CALIENTES — bloque verde, al lado del rosa ────────── */}
       {(streaks?.hot?.length ?? 0) > 0 && (
         <section className="cp-rise" style={{ ...tile('verde', 1), animationDelay: '260ms', gap: 10 }}>
-          <span style={overline('rgba(255,255,255,0.75)')}>calientes</span>
+          <span style={overline(SOBRE_COLOR.suave)}>calientes</span>
           {(streaks?.hot ?? []).slice(0, 2).map(p => (
             <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
               <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>

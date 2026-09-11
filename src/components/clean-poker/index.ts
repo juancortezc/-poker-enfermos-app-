@@ -7,8 +7,6 @@ export { CPBottomNav } from './CPBottomNav'
 
 // Cards
 export { PositionCard } from './PositionCard'
-export { PodioCard } from './PodioCard'
-export { MalazoCard } from './MalazoCard'
 export { TournamentCard } from './TournamentCard'
 export { NextDateCard } from './NextDateCard'
 export { LiveDateBoard } from './LiveDateBoard'
