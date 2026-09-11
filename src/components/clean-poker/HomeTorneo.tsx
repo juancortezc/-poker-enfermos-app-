@@ -1,13 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import useSWR from 'swr'
 import { CalendarPlus } from 'lucide-react'
 import type { PlayerRanking, PlayerPositionDelta, TournamentInsightsData } from '@/lib/ranking-utils'
 import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
-import { PodioTorneoCard } from './PodioTorneoCard'
 import { Score, Meter } from './Score'
-import { StreaksCards } from './StreaksCards'
-import { HomeCard } from './HomeCard'
+import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
 
 interface DaysWithoutVictoryResponse {
@@ -160,177 +159,275 @@ export function HomeTorneo({
     }
   ].filter((c): c is NonNullable<typeof c> => Boolean(c))
 
+  const podio = sortedByPosition.slice(0, 3)
+  const [abierto, setAbierto] = useState<string | null>(null)
+
+  // Anillo de cuenta regresiva: 14 dias es el ciclo entre fechas del club.
+  const CICLO = 14
+  const avance = days !== null ? Math.max(0, Math.min(1, 1 - days / CICLO)) : 0
+  const R = 26
+  const CIRC = 2 * Math.PI * R
+
+  const tinta = 'var(--cp-on-surface)'
+  const suave = 'var(--cp-on-surface-muted)'
+  const tenue = 'var(--cp-on-surface-variant)'
+  const linea = '1px solid var(--cp-surface-border)'
+
+  const overline: React.CSSProperties = {
+    fontFamily: 'var(--cp-font-display)',
+    fontSize: 11, fontWeight: 800, letterSpacing: '0.18em',
+    textTransform: 'uppercase', color: tenue
+  }
+
   return (
-    <>
-      {/* NEXT DATE HERO */}
-      <div
-        style={{
-          background: 'linear-gradient(155deg,#12615C,#0C4A46)',
-          border: '1px solid rgba(91,200,192,0.45)',
-          boxShadow: '0 10px 30px rgba(12,74,70,0.35)',
-          borderRadius: 18,
-          padding: '14px 16px',
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 10
-        }}
-      >
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#E8C158' }}>Próxima fecha</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', marginTop: 2, letterSpacing: '-0.01em' }}>
-            {formattedDate ?? 'Por definir'}
-          </div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#9A8F8B', marginTop: 2 }}>
-            {days !== null ? `Faltan ${days} ${days === 1 ? 'día' : 'días'}` : 'Sin fecha programada'}
-            {nextDate?.dateNumber ? ` · Fecha ${nextDate.dateNumber}` : ''}
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <button
-            onClick={onAddToPersonalCalendar}
-            title="Guarda esta fecha en tu calendario"
-            aria-label="Guarda esta fecha en tu calendario"
-            style={{
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 30,
-              height: 30,
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.14)',
-              borderRadius: '50%',
-              color: '#9A8F8B',
-              cursor: 'pointer'
-            }}
-          >
-            <CalendarPlus size={14} />
-          </button>
-          <button
-            onClick={onOpenCalendarPage}
-            style={{
-              flexShrink: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              background: '#E53935',
-              color: '#fff',
-              padding: '7px 12px',
-              borderRadius: 100,
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: '0.02em',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            CALENDARIO T{tournamentNumber}
-          </button>
-        </div>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 30 }}>
 
-      {/* PERSONAL STATS */}
+      {/* ── TU POSICIÓN ──────────────────────────────────────────────
+          Sin tarjeta, directo sobre el papel. El salto de 11px a 96px es
+          la jerarquía que faltaba: antes todo medía lo mismo. */}
       {myRanking && (
-        <div style={{ display: 'flex', gap: 10 }}>
-          <div style={{ flex: 1, background: 'linear-gradient(160deg,#E53935,#B32623)', borderRadius: 16, padding: 14, color: '#fff' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.85 }}>{myRanking.playerName.split(' ')[0]}, estás</div>
-            <div style={{ marginTop: 2, display: 'flex', alignItems: 'baseline', gap: 2 }}>
-              <span className="cp-score" style={{ fontSize: 26, opacity: 0.75 }}>#</span>
-              <Score value={myRanking.position} size={44} />
+        <section className="cp-rise" style={{ animationDelay: '0ms' }}>
+          <div style={overline}>{myRanking.playerName.split(' ')[0]}, estás</div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, marginTop: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+              <span className="cp-score" style={{ fontSize: 40, color: 'var(--cp-primary)', lineHeight: 1.15 }}>#</span>
+              <Score value={myRanking.position} size={96} color={tinta} style={{ lineHeight: 0.88 }} />
             </div>
-            <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.75, marginTop: 2, marginBottom: 8 }}>En el campeonato</div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.18)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, whiteSpace: 'nowrap' }}>
-                <span style={{ opacity: 0.75, color: 'inherit' }}>Última fecha</span>
-                <span style={{ fontWeight: 800, color: 'inherit' }}>
-                  {myRanking.positionsChanged === 0
-                    ? 'sin cambios'
-                    : `${myRanking.positionsChanged > 0 ? '+' : ''}${myRanking.positionsChanged} pos`}
-                </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, paddingTop: 8, flex: 1, minWidth: 0 }}>
+              <div style={{ ...overline, fontSize: 10, color: suave }}>en el campeonato</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                <Score value={scoreOf(myRanking)} size={26} color={tinta} />
+                <span style={{ ...overline, fontSize: 10 }}>{SCORE_LABELS.points}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, whiteSpace: 'nowrap' }}>
-                <span style={{ opacity: 0.75, color: 'inherit' }}>Puesto prom.</span>
-                <span style={{ fontWeight: 800, color: 'inherit' }}>{avgNightlyPosition !== null ? `#${Math.round(avgNightlyPosition)}` : '—'}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, whiteSpace: 'nowrap' }}>
-                <span style={{ opacity: 0.75, color: 'inherit' }}>Prom./fecha*</span>
-                <span style={{ fontWeight: 800, color: 'inherit' }}>{avgPointsPerDate !== null ? `${Math.round(avgPointsPerDate)} pts` : '—'}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 12, whiteSpace: 'nowrap' }}>
-                <span style={{ opacity: 0.75, color: 'inherit' }}>Últimas 3</span>
-                <span style={{ fontWeight: 800, color: 'inherit' }}>{last3 ? `${last3.mine}/${last3.max} pts` : '—'}</span>
+              <div style={{ fontSize: 12, color: suave }}>
+                {SCORE_LABELS.accumulatedLong} <span style={{ color: 'var(--cp-negative)', fontWeight: 700 }}>{myRanking.totalPoints}</span>
               </div>
             </div>
-            <div style={{ fontSize: 12, opacity: 0.5, marginTop: 6 }}>*solo fechas jugadas, sin ausencias</div>
           </div>
-          <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>Tus puntos</div>
-            <div style={{ marginTop: 2 }}>
-              <Score value={scoreOf(myRanking)} suffix="PTS" size={40} />
-            </div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 2 }}>
-              {SCORE_LABELS.accumulatedLong}: {myRanking.totalPoints} pts
-            </div>
 
-            {/* Cuanto te falta para el lider, como barra. Era una frase: un
-                numero suelto no deja ver si estas cerca o lejos. */}
-            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <Meter
-                value={leaderScore > 0 ? scoreOf(myRanking) / leaderScore : 0}
-                color="var(--cp-primary)"
-                left={<span style={{ color: 'var(--cp-on-surface-variant)', whiteSpace: 'nowrap' }}>Hacia el líder</span>}
-                right={
-                  <span className="cp-score" style={{ fontSize: 13, color: 'var(--cp-on-surface)' }}>
-                    −{gapToLeader ?? 0} <span style={{ fontSize: 11, fontWeight: 700, opacity: 0.65 }}>PTS</span>
-                  </span>
-                }
-              />
-              {gapToMalazos !== null && (
-                <div style={{ marginTop: 8 }}>
-                  <Meter
-                    value={Math.max(0, Math.min(1, gapToMalazos / Math.max(leaderScore, 1)))}
-                    color="var(--cp-malazo)"
-                    left={<span style={{ color: 'var(--cp-on-surface-variant)', whiteSpace: 'nowrap' }}>Colchón 7/2</span>}
-                    right={
-                      <span className="cp-score" style={{ fontSize: 13, color: 'var(--cp-malazo-text)' }}>
-                        {gapToMalazos} <span style={{ fontSize: 11, fontWeight: 700, opacity: 0.65 }}>PTS</span>
-                      </span>
-                    }
-                  />
+          <div style={{ display: 'flex', gap: 0, marginTop: 16, borderTop: linea, paddingTop: 12 }}>
+            {[
+              { v: myRanking.positionsChanged, l: 'última fecha', signo: true },
+              { v: avgNightlyPosition !== null ? Math.round(avgNightlyPosition) : null, l: 'puesto prom.', prefijo: '#' },
+              { v: avgPointsPerDate !== null ? Math.round(avgPointsPerDate) : null, l: 'prom./fecha' },
+              { v: last3 ? last3.mine : null, l: 'últimas 3' }
+            ].map((m, k) => (
+              <div key={m.l} style={{ flex: 1, minWidth: 0, paddingLeft: k === 0 ? 0 : 12, borderLeft: k === 0 ? 'none' : linea }}>
+                <div className="cp-score" style={{
+                  fontSize: 19,
+                  color: m.signo && typeof m.v === 'number' && m.v < 0 ? 'var(--cp-negative)'
+                       : m.signo && typeof m.v === 'number' && m.v > 0 ? 'var(--cp-positive)' : tinta
+                }}>
+                  {m.v === null ? '—' : `${m.prefijo ?? ''}${m.signo && m.v > 0 ? '+' : ''}${m.v}`}
                 </div>
-              )}
-            </div>
-            <LinkCta onClick={onOpenProfile} style={{ marginTop: 'auto', paddingTop: 8 }}>VER MI TORNEO →</LinkCta>
-          </HomeCard>
-        </div>
-      )}
-
-      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} onSeeTabla={onSeeTabla} />
-
-      {(streaks || bottom2.length > 0) && <StreaksCards hot={streaks?.hot ?? []} cold={bottom2} />}
-
-      {highlightCards.length > 0 && (
-        <div>
-          <div style={{ marginBottom: 10, padding: '0 2px' }}>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em' }}>LA TEMPORADA EN NÚMEROS</div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {highlightCards.map(card => (
-              <HomeCard key={card.key} style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: card.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {card.icon}
-                </div>
-                <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{card.text}</div>
-              </HomeCard>
+                <div style={{ fontSize: 11, color: tenue, marginTop: 1 }}>{m.l}</div>
+              </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
-    </>
+
+      {/* ── PRÓXIMA FECHA ────────────────────────────────────────────
+          Un anillo, no otro rectángulo. La cuenta regresiva se ve, no se lee. */}
+      {formattedDate && (
+        <section className="cp-rise" style={{ animationDelay: '70ms', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
+            <svg width="64" height="64" viewBox="0 0 64 64" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="32" cy="32" r={R} fill="none" stroke="var(--cp-surface-3)" strokeWidth="5" />
+              <circle
+                cx="32" cy="32" r={R} fill="none"
+                stroke="var(--cp-primary)" strokeWidth="5" strokeLinecap="round"
+                strokeDasharray={CIRC}
+                strokeDashoffset={CIRC * (1 - avance)}
+                style={{ transition: 'stroke-dashoffset 900ms cubic-bezier(0.22,1,0.36,1)' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span className="cp-score" style={{ fontSize: 22, color: tinta, lineHeight: 1 }}>{days ?? '—'}</span>
+              <span style={{ fontSize: 9, color: tenue, letterSpacing: '0.1em' }}>DÍAS</span>
+            </div>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={overline}>próxima fecha</div>
+            <div className="cp-display" style={{ fontSize: 22, fontWeight: 800, color: tinta, marginTop: 1 }}>{formattedDate}</div>
+            <div style={{ fontSize: 12, color: suave, marginTop: 1 }}>Fecha {nextDate?.dateNumber ?? '—'} · Torneo {tournamentNumber}</div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+            <button
+              onClick={onAddToPersonalCalendar}
+              aria-label="Agregar a mi calendario"
+              style={{ width: 38, height: 38, borderRadius: '50%', border: linea, background: 'var(--cp-surface-1)', color: suave, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              <CalendarPlus size={17} />
+            </button>
+            <LinkCta onClick={onOpenCalendarPage} style={{ fontSize: 11, color: tenue, justifyContent: 'center' }}>T{tournamentNumber}</LinkCta>
+          </div>
+        </section>
+      )}
+
+      {/* ── EL PODIO ─────────────────────────────────────────────────
+          Con la forma de un podio: escalonado y en círculos. Tocar a alguien
+          abre sus números acá mismo — no es un botón para irse a otro lado. */}
+      {podio.length === 3 && (
+        <section className="cp-rise" style={{ animationDelay: '140ms' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+            <span style={overline}>el podio</span>
+            <LinkCta onClick={onSeeTabla} style={{ color: 'var(--cp-primary-light)', fontSize: 12 }}>TABLA COMPLETA →</LinkCta>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginTop: 14 }}>
+            {[podio[1], podio[0], podio[2]].map((p) => {
+              const idx = podio.indexOf(p)
+              const metal = ['var(--cp-gold)', 'var(--cp-silver)', 'var(--cp-bronze)'][idx]
+              const primero = idx === 0
+              const tam = primero ? 84 : 62
+              const activo = abierto === p.playerId
+              return (
+                <button
+                  key={p.playerId}
+                  onClick={() => setAbierto(activo ? null : p.playerId)}
+                  aria-expanded={activo}
+                  style={{
+                    background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    gap: 7, marginBottom: primero ? 14 : 0, flex: primero ? '0 0 auto' : '1 1 0', minWidth: 0
+                  }}
+                >
+                  <div style={{
+                    position: 'relative', borderRadius: '50%', padding: 3,
+                    border: `2px solid ${metal}`,
+                    boxShadow: activo ? `0 0 0 4px var(--cp-surface-2)` : 'none',
+                    transition: 'box-shadow 200ms ease, transform 200ms ease',
+                    transform: activo ? 'translateY(-3px)' : 'none'
+                  }}>
+                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={tam} fontSize={primero ? 22 : 16} round />
+                    <span className="cp-score" style={{
+                      position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)',
+                      background: metal, color: '#FFF', fontSize: 12, minWidth: 20, height: 20,
+                      borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>{idx + 1}</span>
+                  </div>
+                  <div style={{ fontSize: primero ? 13 : 12, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>
+                    {p.playerName.split(' ')[0]}
+                  </div>
+                  <div className="cp-score" style={{ fontSize: primero ? 20 : 16, color: metal }}>{scoreOf(p)}</div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* El panel se abre acá abajo, sin sacarte de la pantalla. */}
+          {abierto && (() => {
+            const p = podio.find(x => x.playerId === abierto)
+            if (!p) return null
+            const podios = p.firstPlaces + p.secondPlaces + p.thirdPlaces
+            return (
+              <div className="cp-rise" style={{ marginTop: 14, paddingTop: 12, borderTop: linea, display: 'flex', gap: 0 }}>
+                {[
+                  { v: p.firstPlaces, l: 'victorias' },
+                  { v: podios, l: 'podios' },
+                  { v: p.totalPoints, l: SCORE_LABELS.accumulatedLong.toLowerCase() },
+                  { v: scoreOf(p) - (myRanking ? scoreOf(myRanking) : 0), l: 'vs vos', signo: true }
+                ].map((m, k) => (
+                  <div key={m.l} style={{ flex: 1, minWidth: 0, paddingLeft: k === 0 ? 0 : 10, borderLeft: k === 0 ? 'none' : linea }}>
+                    <div className="cp-score" style={{ fontSize: 17, color: m.signo ? (m.v > 0 ? 'var(--cp-negative)' : 'var(--cp-positive)') : tinta }}>
+                      {m.signo && m.v > 0 ? '+' : ''}{m.v}
+                    </div>
+                    <div style={{ fontSize: 11, color: tenue, marginTop: 1 }}>{m.l}</div>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
+        </section>
+      )}
+
+      {/* ── TU CARRERA ───────────────────────────────────────────────── */}
+      {myRanking && (
+        <section className="cp-rise" style={{ animationDelay: '210ms', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <span style={overline}>tu carrera</span>
+          <Meter
+            value={leaderScore > 0 ? scoreOf(myRanking) / leaderScore : 0}
+            color="var(--cp-primary)"
+            track="var(--cp-surface-3)"
+            left={<span style={{ color: suave, whiteSpace: 'nowrap' }}>Hacia el líder</span>}
+            right={<span className="cp-score" style={{ fontSize: 15, color: tinta }}>−{gapToLeader ?? 0}</span>}
+          />
+          {gapToMalazos !== null && (
+            <Meter
+              value={Math.max(0, Math.min(1, gapToMalazos / Math.max(leaderScore, 1)))}
+              color="var(--cp-malazo)"
+              track="var(--cp-surface-3)"
+              left={<span style={{ color: suave, whiteSpace: 'nowrap' }}>Colchón sobre el 7/2</span>}
+              right={<span className="cp-score" style={{ fontSize: 15, color: 'var(--cp-malazo-text)' }}>{gapToMalazos}</span>}
+            />
+          )}
+          <LinkCta onClick={onOpenProfile} style={{ color: 'var(--cp-primary-light)', alignSelf: 'flex-start' }}>VER MI TORNEO →</LinkCta>
+        </section>
+      )}
+
+      {/* ── LOS MALAZOS ──────────────────────────────────────────────
+          Rosa, el color del club para todo lo del 7/2. Chico y al margen:
+          importa, pero no manda la pantalla. */}
+      {bottom2.length > 0 && (
+        <section className="cp-rise" style={{ animationDelay: '280ms' }}>
+          <span style={{ ...overline, color: 'var(--cp-malazo-text)' }}>los malazos 7/2</span>
+          <div style={{ display: 'flex', gap: 18, marginTop: 10 }}>
+            {bottom2.map(p => (
+              <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+                <div style={{ borderRadius: '50%', padding: 2, border: '2px solid var(--cp-malazo)', flexShrink: 0 }}>
+                  <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={36} fontSize={13} round />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: tinta, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {p.playerName.split(' ')[0]}
+                  </div>
+                  <div className="cp-score" style={{ fontSize: 14, color: 'var(--cp-malazo-text)' }}>{scoreOf(p)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── LOS QUE VIENEN CALIENTES ─────────────────────────────── */}
+      {(streaks?.hot?.length ?? 0) > 0 && (
+        <section className="cp-rise" style={{ animationDelay: '315ms' }}>
+          <span style={{ ...overline, color: 'var(--cp-positive)' }}>los que vienen calientes</span>
+          <div style={{ display: 'flex', gap: 18, marginTop: 10, flexWrap: 'wrap' }}>
+            {(streaks?.hot ?? []).slice(0, 3).map(p => (
+              <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+                <div style={{ borderRadius: '50%', padding: 2, border: '2px solid var(--cp-positive)', flexShrink: 0 }}>
+                  <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={36} fontSize={13} round />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: tinta, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {p.playerName.split(' ')[0]}
+                  </div>
+                  <div className="cp-score" style={{ fontSize: 14, color: 'var(--cp-positive)' }}>+{p.positionsChanged}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── DE LA TEMPORADA ──────────────────────────────────────────
+          Sin tarjeta cada una: una lista con filete, que respira. */}
+      {highlightCards.length > 0 && (
+        <section className="cp-rise" style={{ animationDelay: '350ms' }}>
+          <span style={overline}>de la temporada</span>
+          <div style={{ marginTop: 8 }}>
+            {highlightCards.map(card => (
+              <div key={card.key} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 0', borderBottom: linea }}>
+                <span style={{ flexShrink: 0, display: 'flex' }}>{card.icon}</span>
+                <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: suave, lineHeight: 1.45 }}>{card.text}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
   )
 }
 

@@ -362,7 +362,7 @@ function HomeAuthenticated({
   const [view, setView] = useState<HomeView>(defaultView)
 
   return (
-    <CPAppShell>
+    <CPAppShell tone="light">
       {/* Header */}
       <CPHeader
         userInitials={userInitials}
@@ -370,10 +370,11 @@ function HomeAuthenticated({
         tournamentNumber={tournamentNumber}
         isComision={isCommission}
         hasActiveGameDate={hasActiveDate}
+        tone="light"
       />
 
       {/* Content */}
-      <main className="pb-20 px-4 space-y-4">
+      <main className="pb-24 px-5 pt-5 space-y-5">
         {/* Celebrations - Birthdays (first position, dismissible) */}
         <CelebrationsCard />
 
@@ -412,7 +413,7 @@ function HomeAuthenticated({
       </main>
 
       {/* Bottom Nav */}
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }

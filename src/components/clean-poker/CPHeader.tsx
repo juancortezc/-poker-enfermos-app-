@@ -13,6 +13,7 @@ interface CPHeaderProps {
   isComision?: boolean
   hasActiveGameDate?: boolean
   onAvatarClick?: () => void
+  tone?: 'dark' | 'light'
 }
 
 export function CPHeader({
@@ -20,14 +21,18 @@ export function CPHeader({
   userPhotoUrl,
   tournamentNumber = 29,
   isComision = false,
-  hasActiveGameDate = false
+  hasActiveGameDate = false,
+  tone = 'dark'
 }: CPHeaderProps) {
+  const claro = tone === 'light'
   return (
     <header
       className="relative flex items-center justify-center px-4 py-3 overflow-hidden"
       style={{
         borderBottom: '1px solid var(--cp-surface-border)',
-        background: 'linear-gradient(180deg, rgba(43,33,32,0.85) 0%, transparent 100%)',
+        background: claro
+          ? 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, transparent 100%)'
+          : 'linear-gradient(180deg, rgba(43,33,32,0.85) 0%, transparent 100%)',
       }}
     >
       {/* Ghost "30" watermark */}
@@ -36,7 +41,8 @@ export function CPHeader({
         style={{
           position: 'absolute', right: '-4px', top: '50%',
           transform: 'translateY(-52%)', fontSize: '80px', fontWeight: 900,
-          color: 'rgba(220,40,60,0.065)', letterSpacing: '-0.04em', lineHeight: 1,
+          color: claro ? 'rgba(23,18,15,0.045)' : 'rgba(220,40,60,0.065)',
+          letterSpacing: '-0.04em', lineHeight: 1,
           pointerEvents: 'none', userSelect: 'none',
         }}
       >
@@ -57,7 +63,7 @@ export function CPHeader({
       {/* Tournament Title - Center */}
       <div className="flex flex-col items-center" style={{ gap: '2px' }}>
         <div className="flex items-baseline gap-1.5">
-          <span style={{ fontSize: '13px', fontWeight: 800, color: '#FF6B6B', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--cp-primary-light)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
             Torneo
           </span>
           <span style={{ fontSize: '22px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.01em', lineHeight: 1 }}>
@@ -92,13 +98,13 @@ export function CPHeader({
             href="/admin"
             className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/10"
             style={{
-              background: 'rgba(229, 57, 53, 0.15)',
-              border: '1px solid rgba(229, 57, 53, 0.3)',
+              background: 'rgba(229, 57, 53, 0.12)',
+              border: '1px solid rgba(229, 57, 53, 0.35)',
             }}
           >
             <Settings
               size={16}
-              style={{ color: '#FF6B6B' }}
+              style={{ color: 'var(--cp-primary-light)' }}
             />
           </Link>
         )}
@@ -113,8 +119,8 @@ export function CPHeader({
           }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="8" r="4" fill="rgba(255,255,255,0.55)" />
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round" fill="none" />
+            <circle cx="12" cy="8" r="4" fill="var(--cp-on-surface-variant)" />
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="var(--cp-on-surface-variant)" strokeWidth="2" strokeLinecap="round" fill="none" />
           </svg>
         </Link>
       </div>

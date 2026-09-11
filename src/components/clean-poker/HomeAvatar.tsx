@@ -9,13 +9,16 @@ interface HomeAvatarProps {
   photoUrl?: string | null
   size: number
   fontSize?: number
+  /** Circular en vez de cuadrado redondeado. Lo usa el podio, donde el circulo
+   *  es lo que rompe la cuadricula de la pantalla. */
+  round?: boolean
 }
 
-export function HomeAvatar({ playerId, name, photoUrl, size, fontSize }: HomeAvatarProps) {
+export function HomeAvatar({ playerId, name, photoUrl, size, fontSize, round = false }: HomeAvatarProps) {
   const style: React.CSSProperties = {
     width: size,
     height: size,
-    borderRadius: 10,
+    borderRadius: round ? '50%' : 10,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

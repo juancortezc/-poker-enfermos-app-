@@ -38,7 +38,13 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
-export function CPBottomNav() {
+interface CPBottomNavProps {
+  /** Acompaña el tono del shell; sobre suelo claro el degradado va en papel. */
+  tone?: 'dark' | 'light'
+}
+
+export function CPBottomNav({ tone = 'dark' }: CPBottomNavProps = {}) {
+  const claro = tone === 'light'
   const pathname = usePathname()
   const router = useRouter()
 
@@ -67,7 +73,9 @@ export function CPBottomNav() {
       <div
         className="w-full max-w-md"
         style={{
-          background: 'linear-gradient(180deg, rgba(29,22,21,0) 0%, rgba(29,22,21,0.94) 16%, rgba(29,22,21,0.99) 100%)',
+          background: claro
+            ? 'linear-gradient(180deg, rgba(250,247,242,0) 0%, rgba(250,247,242,0.95) 16%, rgba(250,247,242,0.99) 100%)'
+            : 'linear-gradient(180deg, rgba(29,22,21,0) 0%, rgba(29,22,21,0.94) 16%, rgba(29,22,21,0.99) 100%)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
         }}

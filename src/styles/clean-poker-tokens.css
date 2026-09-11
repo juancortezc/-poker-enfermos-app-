@@ -286,3 +286,79 @@
 @media (prefers-reduced-motion: reduce) {
   .cp-bar-fill { animation: none; }
 }
+
+/* ============================================
+   SUELO CLARO
+   ============================================
+
+   El negro de base era lo que hacia pesar la app. Aca se invierte: el papel
+   manda y el negro y el rojo pasan a ser acento. Siguen siendo los colores del
+   club — cambia cual es el suelo.
+
+   Redefine los mismos tokens, asi que cualquier componente que ya use
+   var(--cp-on-surface) o var(--cp-surface) queda legible adentro sin tocarlo.
+   Se aplica por subarbol: hoy solo la home. */
+.cp-light {
+  --cp-surface-0: #FAF7F2;   /* el suelo */
+  --cp-surface-1: #FFFFFF;   /* tarjeta */
+  --cp-surface-2: #F3EDE4;   /* elevada, seleccionada */
+  --cp-surface-3: #E7DED2;   /* inputs, separadores */
+  --cp-surface-4: #CEC2B3;   /* bordes vivos */
+
+  --cp-background: var(--cp-surface-0);
+  --cp-background-subtle: var(--cp-surface-2);
+  --cp-surface: var(--cp-surface-1);
+  --cp-surface-solid: var(--cp-surface-1);
+  --cp-surface-container: var(--cp-surface-2);
+  --cp-surface-elevated: var(--cp-surface-1);
+  --cp-surface-border: #E7DED2;
+  --cp-outline: #CEC2B3;
+  --cp-outline-variant: #E7DED2;
+
+  /* Tinta. El negro del club como TEXTO, que es donde ahora vive. */
+  --cp-on-surface: #17120F;         /* 16.9:1 sobre el suelo */
+  --cp-on-surface-muted: #574C49;   /*  7.6:1 */
+  --cp-on-surface-medium: #574C49;
+  --cp-on-surface-variant: #786B66;  /*  5.0:1 */
+
+  /* Sobre claro, el rojo del club no llega como texto: 4.3:1. Como texto va
+     el oscuro; el vivo queda para rellenos y bordes. */
+  --cp-primary: #E53935;
+  --cp-primary-light: #C62828;      /* rojo COMO TEXTO: 5.2:1 */
+  --cp-on-primary: #FFFFFF;
+
+  --cp-negative: #C2410C;
+  --cp-positive: #15803D;
+  --cp-success: #15803D;
+  --cp-info: #0F766E;
+  --cp-warning: #8A6508;
+
+  --cp-malazo: #D81B60;
+  --cp-malazo-text: #C2185B;        /* 5.4:1 sobre el suelo */
+
+  --cp-gold: #8A6508;
+  --cp-silver: #6E6A67;
+  --cp-bronze: #8B5E2F;
+
+  --cp-elevation-1: 0 1px 2px rgba(23, 18, 15, 0.06), 0 2px 8px rgba(23, 18, 15, 0.05);
+  --cp-elevation-2: 0 2px 6px rgba(23, 18, 15, 0.07), 0 12px 28px rgba(23, 18, 15, 0.08);
+
+  background: var(--cp-surface-0);
+  color: var(--cp-on-surface);
+}
+
+/* === ENTRADA ESCALONADA ===
+   La pantalla llegaba entera y quieta. Que cada banda entre con un desfase
+   minimo le da el pulso que faltaba, sin convertirlo en un carrusel. */
+@keyframes cp-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.cp-rise {
+  animation: cp-rise 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-rise { animation: none; }
+}
