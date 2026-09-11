@@ -337,7 +337,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             <div
               className="p-8 text-center"
               style={{
-                background: 'rgba(0, 0, 0, 0.2)',
+                background: 'var(--cp-surface-2)',
                 border: '1px solid rgba(255, 255, 255, 0.06)',
                 borderRadius: '4px',
               }}
@@ -358,7 +358,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
         <div
           className="p-8 text-center"
           style={{
-            background: 'rgba(0, 0, 0, 0.2)',
+            background: 'var(--cp-surface-2)',
             border: '1px solid rgba(255, 255, 255, 0.06)',
             borderRadius: '4px',
           }}

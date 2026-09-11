@@ -155,7 +155,7 @@ export default function CPMultaForm({ multa, tournamentId, players, isOpen, onCl
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-      style={{ background: 'rgba(0, 0, 0, 0.8)' }}
+      style={{ background: 'var(--cp-surface)' }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}

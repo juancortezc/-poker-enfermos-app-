@@ -30,7 +30,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 key={player.playerId}
                 style={{
                   textAlign: 'center',
-                  background: 'rgba(0,0,0,0.18)',
+                  background: 'var(--cp-surface-2)',
                   border: '1px solid rgba(255,255,255,0.14)',
                   borderRadius: 14,
                   padding: '12px 6px',
@@ -70,7 +70,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 key={player.playerId}
                 style={{
                   textAlign: 'center',
-                  background: 'rgba(0,0,0,0.16)',
+                  background: 'var(--cp-surface-2)',
                   border: '1px solid rgba(76,175,80,0.30)',
                   borderRadius: 14,
                   padding: '12px 6px',

@@ -49,7 +49,7 @@ export default function InfoPage() {
           <div
             className="rounded-2xl p-6 text-center max-w-sm"
             style={{
-              background: 'rgba(0, 0, 0, 0.3)',
+              background: 'var(--cp-surface)',
               border: '1px solid rgba(255, 255, 255, 0.06)',
             }}
           >

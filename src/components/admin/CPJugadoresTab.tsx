@@ -210,7 +210,7 @@ export default function CPJugadoresTab() {
         <div
           className="flex-1 rounded-xl px-3 py-2.5 flex items-center gap-2"
           style={{
-            background: 'rgba(0, 0, 0, 0.3)',
+            background: 'var(--cp-surface)',
             border: '1px solid rgba(255, 255, 255, 0.06)',
           }}
         >
@@ -273,7 +273,7 @@ export default function CPJugadoresTab() {
               onClick={() => handleEditPlayer(player)}
               className="w-full rounded-xl px-3 py-2.5 flex items-center gap-3 text-left transition-all duration-200 cursor-pointer group"
               style={{
-                background: 'rgba(0, 0, 0, 0.2)',
+                background: 'var(--cp-surface-2)',
                 border: '1px solid rgba(255, 255, 255, 0.06)',
               }}
               onMouseEnter={(e) => {

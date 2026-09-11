@@ -17,18 +17,15 @@ export function CPAppShell({ children }: CPAppShellProps) {
     <div
       className="min-h-screen"
       style={{
-        backgroundColor: '#1D1615',
+        backgroundColor: 'var(--cp-surface-0)',
         backgroundImage: `
-          url('/textures/noise.png'),
-          radial-gradient(ellipse 90% 45% at 50% 20%, rgba(200, 20, 60, 0.28) 0%, transparent 65%),
-          radial-gradient(ellipse 70% 35% at 15% 55%, rgba(160, 15, 45, 0.18) 0%, transparent 60%),
-          radial-gradient(ellipse 55% 30% at 85% 65%, rgba(180, 18, 52, 0.16) 0%, transparent 55%),
-          radial-gradient(ellipse 80% 40% at 50% 85%, rgba(140, 12, 38, 0.20) 0%, transparent 60%),
-          linear-gradient(170deg, #1D1615 0%, #260e1a 30%, #2e1020 60%, #38142a 100%)
+          radial-gradient(ellipse 95% 40% at 50% 6%, rgba(229, 57, 53, 0.10) 0%, transparent 58%),
+          radial-gradient(ellipse 75% 38% at 85% 88%, rgba(91, 200, 192, 0.05) 0%, transparent 55%),
+          linear-gradient(170deg, #1D1615 0%, #221A19 55%, #271E1C 100%)
         `,
-        backgroundSize: '180px 180px, 100% 100%, 70% 80%, 60% 60%, 80% 50%, 100% 100%',
-        backgroundRepeat: 'repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat',
-        backgroundBlendMode: 'soft-light, normal, normal, normal, normal, normal',
+        backgroundSize: '100% 100%, 100% 100%, 100% 100%',
+        backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
+        backgroundBlendMode: 'screen, screen, normal',
       }}
     >
       {/* Desktop: Center the app in a phone-like container */}

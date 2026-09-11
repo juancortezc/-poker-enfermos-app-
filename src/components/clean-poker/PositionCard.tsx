@@ -38,7 +38,7 @@ export function PositionCard({
         borderRadius: '5px',
         background: 'linear-gradient(135deg, #0e0510 0%, #1c0a1a 45%, #0a0308 100%)',
         boxShadow: '0 6px 20px rgba(0,0,0,0.55), 0 0 32px rgba(180,15,55,0.18)',
-        border: '1px solid rgba(220,40,80,0.18)',
+        border: '1px solid var(--cp-surface-border)',
       }}
     >
       {/* Top row: position + inline stats */}

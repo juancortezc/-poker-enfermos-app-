@@ -110,7 +110,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
 
   if (isError) {
     return (
-      <div className="p-6 text-center rounded-2xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="p-6 text-center rounded-2xl" style={{ background: 'var(--cp-surface)', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p style={{ fontSize: 14, color: '#F5EFE6' }}>Error al cargar la tabla</p>
         <p className="mt-1" style={{ fontSize: 13, color: '#9A8F8B' }}>{errorMessage}</p>
         <button onClick={() => refresh()} className="mt-4 px-4 py-2 rounded-full" style={{ border: `1px solid ${RED}`, color: RED, fontSize: 12 }}>
@@ -122,7 +122,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
 
   if (!rankingData || rankingData.rankings.length === 0) {
     return (
-      <div className="p-6 text-center rounded-2xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="p-6 text-center rounded-2xl" style={{ background: 'var(--cp-surface)', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p style={{ fontSize: 14, color: '#9A8F8B' }}>No hay datos de tabla disponibles.</p>
       </div>
     )

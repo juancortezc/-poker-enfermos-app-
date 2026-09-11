@@ -26,8 +26,8 @@ export function CPHeader({
     <header
       className="relative flex items-center justify-center px-4 py-3 overflow-hidden"
       style={{
-        borderBottom: '1px solid rgba(220, 40, 80, 0.18)',
-        background: 'linear-gradient(180deg, rgba(40,10,18,0.70) 0%, transparent 100%)',
+        borderBottom: '1px solid var(--cp-surface-border)',
+        background: 'linear-gradient(180deg, rgba(43,33,32,0.85) 0%, transparent 100%)',
       }}
     >
       {/* Ghost "30" watermark */}

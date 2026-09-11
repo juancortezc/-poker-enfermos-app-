@@ -1503,7 +1503,7 @@ function CPPlayersModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+      style={{ background: 'var(--cp-surface)' }}
       onClick={(e) => {
         if (e.target === e.currentTarget && !isProcessing) onClose()
       }}
