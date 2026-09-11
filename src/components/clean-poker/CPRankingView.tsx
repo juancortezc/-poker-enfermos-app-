@@ -35,8 +35,9 @@ const HEADER_BG = '#2A292B'
  * puntos que el jugador no se lleva.
  */
 const POINTS_TINT = '#FFF5F4'
+/** Rojo profundo: el mismo del club, con contraste suficiente para texto blanco. */
+const RED_DEEP = '#C62828'
 const ORANGE = '#C2410C'
-const ORANGE_SOFT = '#D97B4A'
 const INACTIVE_TEXT = '#9A9A9A'
 const MESA_FINAL_THRESHOLD = 9
 
@@ -152,7 +153,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
 
   const thPointsStyle: React.CSSProperties = {
     ...thStyle,
-    background: RED,
+    background: RED_DEEP,
     color: '#fff'
   }
 
@@ -464,7 +465,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                       </td>
                     )}
                     {view === 'elimina' && (
-                      <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.8)' : ORANGE_SOFT, fontWeight: 500 }}>
+                      <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.8)' : ORANGE, fontWeight: 500 }}>
                         {player.totalPoints}
                       </td>
                     )}
