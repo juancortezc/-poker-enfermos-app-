@@ -9,7 +9,7 @@ import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
 import { usePlayerTournamentDetails } from '@/hooks/usePlayerTournamentDetails'
-import { averageNightlyPosition, averagePointsPerDate } from '@/lib/ranking-utils'
+import { averageNightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
@@ -56,6 +56,8 @@ interface DatesGameDate {
 const CREAM_BG = '#F3E6D0'
 const CREAM_TEXT = '#2A1F14'
 const CREAM_MUTED = '#8A7860'
+/** Naranja de "lo que no cuenta" sobre la tarjeta crema. */
+const NEGATIVE = '#C2410C'
 
 function TrendBadge({ positionsChanged }: { positionsChanged: number }) {
   if (positionsChanged > 0) {
@@ -261,13 +263,31 @@ export default function PlayerProfilePage() {
 
           <div style={{ display: 'flex', borderTop: '1px solid rgba(0,0,0,0.08)', marginTop: 14, paddingTop: 12 }}>
             {[
-              { label: 'FINAL', val: currentStats.finalScore ?? currentStats.totalPoints },
-              { label: 'TOTAL', val: currentStats.totalPoints },
-              { label: 'FECHAS', val: `${totalCompletedDates - absences}/${totalCompletedDates}` }
-            ].map(({ label, val }) => (
+              { label: SCORE_LABELS.points, val: scoreOf(currentStats), lead: true },
+              { label: SCORE_LABELS.accumulated, val: currentStats.totalPoints, lead: false },
+              { label: 'FECHAS', val: `${totalCompletedDates - absences}/${totalCompletedDates}`, lead: false }
+            ].map(({ label, val, lead }) => (
               <div key={label} style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: 9, color: CREAM_MUTED, letterSpacing: '0.1em', marginBottom: 2 }}>{label}</div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: CREAM_TEXT }}>{val}</div>
+                <div
+                  style={{
+                    fontSize: 9,
+                    color: lead ? CREAM_TEXT : CREAM_MUTED,
+                    fontWeight: lead ? 800 : 400,
+                    letterSpacing: '0.1em',
+                    marginBottom: 2
+                  }}
+                >
+                  {label}
+                </div>
+                <div
+                  style={{
+                    fontSize: lead ? 20 : 15,
+                    fontWeight: 900,
+                    color: label === SCORE_LABELS.accumulated ? NEGATIVE : CREAM_TEXT
+                  }}
+                >
+                  {val}
+                </div>
               </div>
             ))}
           </div>
@@ -434,15 +454,15 @@ export default function PlayerProfilePage() {
                     <div style={{ flex: 1, minWidth: 0, fontSize: 11, color: '#B5A996' }}>
                       {d.isAbsent ? 'Ausencia' : d.eliminationPosition ? `Posición #${d.eliminationPosition}` : 'Ganador'}
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: '#E53935', flexShrink: 0 }}>-{d.points} pts</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-negative)', flexShrink: 0 }}>−{d.points} pts</div>
                   </div>
                 </HomeCard>
               ))}
               <HomeCard>
                 <div style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6' }}>Total eliminado</span>
-                  <span style={{ fontSize: 15, fontWeight: 900, color: '#E53935' }}>
-                    -{eliminatedDates.reduce((sum, d) => sum + d.points, 0)} pts
+                  <span style={{ fontSize: 15, fontWeight: 900, color: 'var(--cp-negative)' }}>
+                    −{eliminatedDates.reduce((sum, d) => sum + d.points, 0)} pts
                   </span>
                 </div>
               </HomeCard>

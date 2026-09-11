@@ -24,7 +24,7 @@ export function LiveGameCard({
   playersRemaining,
   playersTotal,
   lastElimination,
-  tablaHref = '/tabla',
+  tablaHref = '/ranking',
   eliminadosHref = '/registro'
 }: LiveGameCardProps) {
   const eliminationsCount = playersTotal - playersRemaining

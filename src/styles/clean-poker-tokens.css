@@ -25,9 +25,15 @@
   --cp-primary-variant: #C62828;
   --cp-on-primary: #ffffff;
 
-  /* === FEEDBACK === */
+  /* === FEEDBACK ===
+     Los colores del club son negro, rojo y blanco: se reservan para lo que
+     suma. Lo negativo — puntos que se pierden, fechas descartadas, el
+     acumulado que no cuenta — va en naranja, nunca en rojo.
+     `on-light` es para las tablas de fondo blanco; el otro para las tarjetas
+     oscuras. */
   --cp-positive: #4CAF50;
-  --cp-negative: #808080;
+  --cp-negative: #E8863C;
+  --cp-negative-on-light: #C2410C;
   --cp-neutral: #666666;
   --cp-warning: #ca8a04;
 

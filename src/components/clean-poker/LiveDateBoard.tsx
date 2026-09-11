@@ -1,6 +1,7 @@
 'use client'
 
 import useSWR from 'swr'
+import { SCORE_LABELS } from '@/lib/ranking-utils'
 import type { LiveRankingData, LiveRankingRow } from '@/lib/live-ranking'
 
 interface BlindInfo {
@@ -237,7 +238,7 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
             className="uppercase text-right flex-shrink-0"
             style={{ width: 34, fontSize: 9, letterSpacing: '0.08em', color: MUTED }}
           >
-            Pts
+            {SCORE_LABELS.pointsShort}
           </span>
           <span
             className="uppercase text-right flex-shrink-0"
@@ -255,8 +256,8 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
           className="px-3 py-1.5"
           style={{ fontSize: 9, color: MUTED, borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
-          Puntaje final con ELIMINA {projection.datesToEliminate}
-          {projection.eliminasActive ? '' : ' (informativo)'} · en{' '}
+          {SCORE_LABELS.points} descarta tus {projection.datesToEliminate} peores fechas
+          {projection.eliminasActive ? '' : ' (todavía informativo)'} · en{' '}
           <span style={{ color: '#F0B429' }}>ámbar</span> lo proyectado si sale ahora
         </p>
       </div>

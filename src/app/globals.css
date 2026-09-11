@@ -510,19 +510,6 @@
     letter-spacing: -0.025em;
   }
 
-  /* Estilos específicos para TotalTable con scroll horizontal */
-  .total-table-container {
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 4px;
-  }
-
-  .total-table {
-    min-width: 100%;
-    white-space: nowrap;
-  }
-
   /* Mobile Optimizations para Excel Tables */
   @media (max-width: 640px) {
     .excel-table {

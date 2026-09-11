@@ -2,6 +2,7 @@
 
 import useSWR from 'swr'
 import Image from 'next/image'
+import { scoreOf } from '@/lib/ranking-utils'
 import type { PlayerRanking, PlayerPositionDelta } from '@/lib/ranking-utils'
 import { HomeAvatar } from './HomeAvatar'
 import { HomeCard } from './HomeCard'
@@ -29,10 +30,7 @@ interface HomeUltimaFechaProps {
   onSeeAllResults: () => void
   onSeeResultsTab: () => void
   onSeeTabla: () => void
-  onSeePosiciones: () => void
 }
-
-const scoreOf = (r: PlayerRanking) => r.finalScore ?? r.totalPoints
 
 export function HomeUltimaFecha({
   user,
@@ -43,8 +41,7 @@ export function HomeUltimaFecha({
   onOpenProfile,
   onSeeAllResults,
   onSeeResultsTab,
-  onSeeTabla,
-  onSeePosiciones
+  onSeeTabla
 }: HomeUltimaFechaProps) {
   const { data: eliminations } = useSWR<EliminationDTO[]>(
     `/api/eliminations/game-date/${lastCompletedDate.id}`,
@@ -300,7 +297,7 @@ export function HomeUltimaFecha({
         </div>
       )}
 
-      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} showNightContext onSeeTabla={onSeeTabla} onSeePosiciones={onSeePosiciones} />
+      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} showNightContext onSeeTabla={onSeeTabla} />
 
       {(streaks || bottom2.length > 0) && <StreaksCards hot={streaks?.hot ?? []} cold={bottom2} />}
     </>

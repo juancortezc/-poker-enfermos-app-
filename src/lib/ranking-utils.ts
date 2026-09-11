@@ -766,3 +766,42 @@ export function averagePointsPerDate(player: PlayerRanking): number {
   if (scores.length === 0) return 0;
   return scores.reduce((sum, points) => sum + points, 0) / scores.length;
 }
+
+/**
+ * Vocabulario de puntaje. Un solo par de nombres en toda la app.
+ *
+ * PUNTOS   → finalScore. Es el que ordena la tabla y el único que decide el
+ *            campeonato. Siempre va destacado.
+ * ACUM.    → totalPoints. Suma cruda de todas las fechas, sin descartar nada.
+ *            Es informativo: siempre va discreto y nunca compite con PUNTOS.
+ *
+ * No escribir estas etiquetas a mano en los componentes.
+ */
+export const SCORE_LABELS = {
+  points: 'PUNTOS',
+  pointsShort: 'PTS',
+  accumulated: 'ACUM.',
+  accumulatedLong: 'Acumulado'
+} as const;
+
+/**
+ * El puntaje que manda: el que ordena la tabla del torneo.
+ * finalScore ya trae descontadas las fechas del ELIMINA y las multas de puntos.
+ */
+export function scoreOf(player: Pick<PlayerRanking, 'finalScore' | 'totalPoints'>): number {
+  return player.finalScore ?? player.totalPoints;
+}
+
+/**
+ * Fechas que el jugador descarta por el sistema ELIMINA, con el mismo criterio
+ * que calculateTournamentRanking: puntos ascendente y orden estable, así que en
+ * empate se descarta la fecha más antigua.
+ */
+export function eliminatedDateNumbers(player: PlayerRanking, datesToEliminate: number): Set<number> {
+  if (!player.eliminasActive || datesToEliminate <= 0) return new Set();
+  const dateNumbers = Object.keys(player.pointsByDate).map(Number).sort((a, b) => a - b);
+  const worstFirst = [...dateNumbers].sort(
+    (a, b) => (player.pointsByDate[a] ?? 0) - (player.pointsByDate[b] ?? 0)
+  );
+  return new Set(worstFirst.slice(0, datesToEliminate));
+}

@@ -165,7 +165,7 @@ export default function TournamentRankingTable({
       {compact && rankings.length > 5 && (
         <div className="p-3 border-t border-white/10 text-center">
           <Link
-            href="/tabla"
+            href="/ranking"
             className="text-poker-accent hover:text-poker-accent-hover text-sm font-medium transition-colors"
           >
             Ver ranking completo →

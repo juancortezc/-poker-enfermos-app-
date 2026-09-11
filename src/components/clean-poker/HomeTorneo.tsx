@@ -3,7 +3,7 @@
 import useSWR from 'swr'
 import { CalendarPlus } from 'lucide-react'
 import type { PlayerRanking, PlayerPositionDelta, TournamentInsightsData } from '@/lib/ranking-utils'
-import { playedDateNumbers, nightlyPosition, averagePointsPerDate } from '@/lib/ranking-utils'
+import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
 import { PodioTorneoCard } from './PodioTorneoCard'
 import { StreaksCards } from './StreaksCards'
 import { HomeCard } from './HomeCard'
@@ -30,10 +30,7 @@ interface HomeTorneoProps {
   onOpenCalendarPage: () => void
   onAddToPersonalCalendar: () => void
   onSeeTabla: () => void
-  onSeePosiciones: () => void
 }
-
-const scoreOf = (r: PlayerRanking) => r.finalScore ?? r.totalPoints
 
 function ClockIcon() {
   return (
@@ -76,8 +73,7 @@ export function HomeTorneo({
   onOpenProfile,
   onOpenCalendarPage,
   onAddToPersonalCalendar,
-  onSeeTabla,
-  onSeePosiciones
+  onSeeTabla
 }: HomeTorneoProps) {
   const { data: droughtData } = useSWR<DaysWithoutVictoryResponse>(
     tournamentId ? `/api/stats/days-without-victory/${tournamentId}` : null,
@@ -275,9 +271,11 @@ export function HomeTorneo({
               {scoreOf(myRanking)} <span style={{ fontSize: 13, fontWeight: 700, color: 'inherit' }}>pts</span>
             </div>
             {eliminaSum > 0 && (
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#A89A8C', marginTop: 2 }}>Eliminas {eliminaSum} pts</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 2 }}>Descartas {eliminaSum} pts</div>
             )}
-            <div style={{ fontSize: 9, fontWeight: 500, color: '#7A6E62', marginTop: 1 }}>Sin eliminar: {myRanking.totalPoints} pts</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 1 }}>
+              {SCORE_LABELS.accumulatedLong}: {myRanking.totalPoints} pts
+            </div>
 
             <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               <div style={{ fontSize: 9, color: '#A89A8C' }}>
@@ -294,7 +292,7 @@ export function HomeTorneo({
         </div>
       )}
 
-      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} onSeeTabla={onSeeTabla} onSeePosiciones={onSeePosiciones} />
+      <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} onSeeTabla={onSeeTabla} />
 
       {(streaks || bottom2.length > 0) && <StreaksCards hot={streaks?.hot ?? []} cold={bottom2} />}
 
