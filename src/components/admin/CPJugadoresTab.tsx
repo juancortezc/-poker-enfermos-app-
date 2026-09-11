@@ -266,7 +266,7 @@ export default function CPJugadoresTab() {
         <div className="space-y-1.5">
           {filteredPlayers.map((player) => {
             const isInvitado = player.role === UserRole.Invitado
-            const shadowColor = isInvitado ? 'rgba(236, 64, 122, 0.4)' : 'rgba(229, 57, 53, 0.4)'
+            const shadowColor = isInvitado ? 'rgba(91, 200, 192, 0.4)' : 'rgba(229, 57, 53, 0.4)'
             return (
             <button
               key={player.id}
@@ -279,7 +279,7 @@ export default function CPJugadoresTab() {
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)'
                 e.currentTarget.style.boxShadow = `0 8px 20px ${shadowColor}`
-                e.currentTarget.style.borderColor = isInvitado ? 'rgba(236, 64, 122, 0.3)' : 'rgba(229, 57, 53, 0.3)'
+                e.currentTarget.style.borderColor = isInvitado ? 'rgba(91, 200, 192, 0.3)' : 'rgba(229, 57, 53, 0.3)'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)'

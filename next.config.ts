@@ -14,6 +14,16 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  // Next 16 arranca en Turbopack por defecto. El plugin de PWA inyecta un
+  // config de `webpack`, y ver uno sin config de turbopack es un error duro:
+  // `npm run dev` no levantaba.
+  //
+  // En desarrollo el plugin se desactiva solo (disable: NODE_ENV === development),
+  // asi que no hay nada de PWA que perder y Turbopack corre mas rapido. El build
+  // de produccion SI necesita el paso de webpack del plugin para generar el
+  // service worker, y por eso el script conserva `next build --webpack`.
+  // Si algun dia se quita ese flag, el sw.js deja de generarse en silencio.
+  turbopack: {},
   images: {
     remotePatterns: [
       {

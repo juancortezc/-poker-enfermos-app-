@@ -21,7 +21,7 @@ interface MalazoCardProps {
 export function MalazoCard({ players }: MalazoCardProps) {
   const getTrendColor = (trend: number) => {
     if (trend > 0) return '#6ECB71' // Verde
-    if (trend < 0) return '#E53935' // Rojo
+    if (trend < 0) return '#E8863C' // Naranja: lo que resta
     return '#E8C158' // Amarillo
   }
 
@@ -41,16 +41,16 @@ export function MalazoCard({ players }: MalazoCardProps) {
   }
 
   // Pink color for "malazo" theme
-  const PINK_COLOR = '#E8863C'
+  const ACCENT_COLOR = '#E8863C'
 
   return (
     <div
       className="p-4 pt-5"
       style={{
         borderRadius: '5px',
-        background: 'linear-gradient(135deg, rgba(80, 8, 38, 0.97) 0%, rgba(180, 30, 90, 0.88) 60%, rgba(220, 50, 120, 0.82) 100%)',
+        background: 'var(--cp-surface-1)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.50), 0 0 40px rgba(229, 57, 53, 0.18)',
-        border: '1px solid rgba(236, 64, 122, 0.22)',
+        border: '1px solid rgba(229, 57, 53, 0.35)',
       }}
     >
       {/* Header with title and link */}
@@ -82,7 +82,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
             style={{
               borderRadius: '5px',
               background: 'var(--cp-surface)',
-              border: '1px solid rgba(236, 64, 122, 0.18)',
+              border: '1px solid var(--cp-surface-border)',
               maxWidth: '160px',
               minHeight: '200px',
               paddingTop: '62px', // space for avatar overflow (108/2 + 8)
@@ -211,7 +211,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
             {/* Pink Divider */}
             <div
               className="w-full h-0.5 mb-1"
-              style={{ backgroundColor: PINK_COLOR }}
+              style={{ backgroundColor: ACCENT_COLOR }}
             />
 
             {/* Position Number */}
@@ -219,7 +219,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
               className="font-bold mb-1"
               style={{
                 fontSize: 'var(--cp-body-size)',
-                color: PINK_COLOR,
+                color: ACCENT_COLOR,
               }}
             >
               #{player.position}
@@ -232,7 +232,7 @@ export function MalazoCard({ players }: MalazoCardProps) {
                   className="font-bold"
                   style={{
                     fontSize: 'var(--cp-label-size)',
-                    color: player.lastPlaces > 0 ? PINK_COLOR : 'var(--cp-on-surface-muted)',
+                    color: player.lastPlaces > 0 ? ACCENT_COLOR : 'var(--cp-on-surface-muted)',
                   }}
                 >
                   {player.lastPlaces}

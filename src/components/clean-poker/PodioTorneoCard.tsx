@@ -6,9 +6,9 @@ import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
 
 const MEDALS = [
-  { bg: 'rgba(232,193,88,0.20)', border: 'rgba(232,193,88,0.55)', color: '#F5D274' },
-  { bg: 'rgba(180,185,200,0.16)', border: 'rgba(180,185,200,0.45)', color: '#D6D8E2' },
-  { bg: 'rgba(201,138,78,0.20)', border: 'rgba(201,138,78,0.52)', color: '#E0A268' }
+  { bg: 'var(--cp-surface-2)', border: 'rgba(232,193,88,0.60)', color: '#E8C158' },
+  { bg: 'var(--cp-surface-2)', border: 'rgba(201,198,194,0.50)', color: '#C9C6C2' },
+  { bg: 'var(--cp-surface-2)', border: 'rgba(192,138,84,0.55)', color: '#C08A54' }
 ]
 
 const TIGHT_RACE_THRESHOLD = 3
@@ -40,8 +40,8 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
   return (
     <div
       style={{
-        background: 'linear-gradient(160deg, rgba(232,193,88,0.16), rgba(232,193,88,0.05))',
-        border: '1.5px solid rgba(232,193,88,0.45)',
+        background: 'var(--cp-surface-1)',
+        border: '1px solid rgba(232,193,88,0.38)',
         borderRadius: 18,
         padding: 16,
         boxShadow: '0 4px 20px rgba(232,193,88,0.10)'

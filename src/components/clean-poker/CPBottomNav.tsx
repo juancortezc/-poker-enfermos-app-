@@ -67,7 +67,9 @@ export function CPBottomNav() {
       <div
         className="w-full max-w-md"
         style={{
-          background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.95) 100%)',
+          background: 'linear-gradient(180deg, rgba(29,22,21,0) 0%, rgba(29,22,21,0.94) 16%, rgba(29,22,21,0.99) 100%)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
         }}
       >
       <div className="flex items-center py-2 px-1">

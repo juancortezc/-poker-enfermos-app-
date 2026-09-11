@@ -620,7 +620,7 @@ export default function CPActivarTab() {
             style={{
               padding: '12px 14px',
               borderRadius: 14,
-              background: activeTab === 'invitados' ? 'rgba(236,64,122,0.16)' : 'var(--cp-surface)',
+              background: activeTab === 'invitados' ? 'rgba(91, 200, 192,0.16)' : 'var(--cp-surface)',
               border: `1px solid ${activeTab === 'invitados' ? PINK : 'var(--cp-surface-border)'}`,
             }}
           >
@@ -708,8 +708,8 @@ export default function CPActivarTab() {
                 onClick={handleCreateGuest}
                 className="w-full mt-3 py-2 flex items-center justify-center gap-2"
                 style={{
-                  background: 'rgba(236, 64, 122, 0.15)',
-                  border: '1px solid rgba(236, 64, 122, 0.3)',
+                  background: 'rgba(91, 200, 192, 0.15)',
+                  border: '1px solid rgba(91, 200, 192, 0.3)',
                   color: PINK,
                   borderRadius: 100,
                   fontSize: 'var(--cp-caption-size)',
@@ -857,7 +857,7 @@ export default function CPActivarTab() {
             style={{
               padding: '10px 10px',
               borderRadius: 14,
-              background: activeTab === 'invitados' ? 'rgba(236,64,122,0.16)' : 'var(--cp-surface)',
+              background: activeTab === 'invitados' ? 'rgba(91, 200, 192,0.16)' : 'var(--cp-surface)',
               border: `1px solid ${activeTab === 'invitados' ? PINK : 'var(--cp-surface-border)'}`,
             }}
           >
@@ -968,8 +968,8 @@ export default function CPActivarTab() {
               onClick={handleCreateGuest}
               className="w-full mt-3 py-2 flex items-center justify-center gap-2"
               style={{
-                background: 'rgba(236, 64, 122, 0.15)',
-                border: '1px solid rgba(236, 64, 122, 0.3)',
+                background: 'rgba(91, 200, 192, 0.15)',
+                border: '1px solid rgba(91, 200, 192, 0.3)',
                 color: PINK,
                 borderRadius: 100,
                 fontSize: 'var(--cp-caption-size)',
