@@ -8,6 +8,7 @@ import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
+import { tile, SOBRE_COLOR } from '@/components/clean-poker/bento'
 import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { FechaTimelineItem } from '@/components/clean-poker/FechaTimelineItem'
 import { downloadSeasonIcs } from '@/lib/ics'
@@ -92,8 +93,8 @@ export default function FechaPage() {
   }
 
   return (
-    <CPAppShell>
-      <CPHeader
+    <CPAppShell tone="light">
+      <CPHeader tone="light"
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
@@ -103,8 +104,8 @@ export default function FechaPage() {
 
       <main className="pb-24 px-4 pt-4 space-y-4">
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>CALENDARIO</div>
-          <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 2 }}>Todas las fechas del Torneo {tournamentNumber}</div>
+          <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--cp-on-surface)', letterSpacing: '-0.01em' }}>CALENDARIO</div>
+          <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)', marginTop: 2 }}>Todas las fechas del Torneo {tournamentNumber}</div>
         </div>
 
         {/* PRÓXIMA FECHA HERO */}
@@ -121,7 +122,7 @@ export default function FechaPage() {
             <div
               style={{
                 display: 'inline-block',
-                background: '#E53935',
+                background: 'var(--cp-primary-light)',
                 color: '#fff',
                 fontSize: 12,
                 fontWeight: 800,
@@ -137,7 +138,7 @@ export default function FechaPage() {
             <div style={{ fontSize: 32, fontWeight: 900, color: '#2A1F14', lineHeight: 1.05 }}>
               {new Date(nextDate.scheduledDate ?? '').toLocaleDateString('es-EC', { day: 'numeric', month: 'short' }).toUpperCase()}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, color: '#E53935', fontSize: 12, fontWeight: 700 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, color: 'var(--cp-primary-light)', fontSize: 12, fontWeight: 700 }}>
               <Clock size={14} />
               FALTAN {nextDaysUntil} {nextDaysUntil === 1 ? 'DÍA' : 'DÍAS'}
             </div>
@@ -147,8 +148,7 @@ export default function FechaPage() {
         {/* TEMPORADA STATS */}
         <div
           style={{
-            background: '#17140F',
-            border: '1px solid rgba(255,255,255,0.08)',
+            ...tile('negro'),
             borderRadius: 16,
             padding: 14
           }}
@@ -159,19 +159,19 @@ export default function FechaPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#F5EFE6' }}>{completedCount}</div>
-              <div style={{ fontSize: 12, color: '#9A8F8B' }}>JUGADAS</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#FFF' }}>{completedCount}</div>
+              <div style={{ fontSize: 12, color: SOBRE_COLOR.tenue }}>JUGADAS</div>
             </div>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: '#F5EFE6' }}>{remaining}</div>
-              <div style={{ fontSize: 12, color: '#9A8F8B' }}>POR JUGAR</div>
+              <div style={{ fontSize: 20, fontWeight: 900, color: '#FFF' }}>{remaining}</div>
+              <div style={{ fontSize: 12, color: SOBRE_COLOR.tenue }}>POR JUGAR</div>
             </div>
           </div>
-          <div style={{ marginTop: 10, height: 6, borderRadius: 100, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${progressPct}%`, background: '#E53935', borderRadius: 100 }} />
+          <div style={{ marginTop: 10, height: 6, borderRadius: 100, background: 'rgba(255,255,255,0.18)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${progressPct}%`, background: 'var(--cp-primary)', borderRadius: 100 }} />
           </div>
           {seasonEndDate && (
-            <div style={{ marginTop: 10, fontSize: 12, color: '#9A8F8B' }}>
+            <div style={{ marginTop: 10, fontSize: 12, color: SOBRE_COLOR.tenue }}>
               Final: {new Date(seasonEndDate).toLocaleDateString('es-EC', { day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
           )}
@@ -180,7 +180,7 @@ export default function FechaPage() {
         {/* LINEA DE TIEMPO */}
         {sortedDates.length > 0 && (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 10 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.06em', marginBottom: 10 }}>
               LÍNEA DE TIEMPO DEL TORNEO
             </div>
             {sortedDates.map((d, index) => (
@@ -213,13 +213,13 @@ export default function FechaPage() {
         >
           <CalendarPlus size={20} color="#E53935" />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6' }}>Agrega las fechas a tu calendario</div>
-            <div style={{ fontSize: 12, color: '#9A8F8B' }}>No te pierdas ninguna fecha del torneo.</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--cp-on-surface)' }}>Agrega las fechas a tu calendario</div>
+            <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>No te pierdas ninguna fecha del torneo.</div>
           </div>
           <button
             onClick={handleDownloadIcs}
             style={{
-              background: '#E53935',
+              background: 'var(--cp-primary-light)',
               color: '#fff',
               fontSize: 13,
               fontWeight: 800,
@@ -235,7 +235,7 @@ export default function FechaPage() {
         </div>
       </main>
 
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }

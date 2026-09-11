@@ -38,7 +38,7 @@ export default function PerfilPage() {
   }
 
   return (
-    <CPAppShell>
+    <CPAppShell tone="light">
       <div className="min-h-screen pb-24">
         {/* Header with Close Button */}
         <div
@@ -91,7 +91,7 @@ export default function PerfilPage() {
       </div>
 
         {/* Bottom Navigation */}
-        <CPBottomNav />
+        <CPBottomNav tone="light" />
       </div>
     </CPAppShell>
   )

@@ -39,9 +39,9 @@ export default function InfoPage() {
   // Not authenticated
   if (!user) {
     return (
-      <CPAppShell>
+      <CPAppShell tone="light">
         <div className="min-h-screen flex flex-col">
-        <CPHeader
+        <CPHeader tone="light"
           userInitials="?"
           tournamentNumber={29}
         />
@@ -72,7 +72,7 @@ export default function InfoPage() {
             </p>
           </div>
         </main>
-        <CPBottomNav />
+        <CPBottomNav tone="light" />
         </div>
       </CPAppShell>
     )
@@ -85,9 +85,9 @@ export default function InfoPage() {
   const isComision = user.role === 'Comision'
 
   return (
-    <CPAppShell>
+    <CPAppShell tone="light">
       {/* Header */}
-      <CPHeader
+      <CPHeader tone="light"
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
@@ -123,7 +123,7 @@ export default function InfoPage() {
       </main>
 
       {/* Bottom Nav */}
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }

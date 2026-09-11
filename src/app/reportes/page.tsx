@@ -86,8 +86,8 @@ export default function ReportesPage() {
   const selectedTournament = tournaments?.find((t) => t.id === selectedId)
 
   return (
-    <CPAppShell>
-      <CPHeader
+    <CPAppShell tone="light">
+      <CPHeader tone="light"
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
@@ -98,15 +98,15 @@ export default function ReportesPage() {
       <main className="pb-24 px-4 pt-4 space-y-4">
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <FileSpreadsheet size={20} color="#E53935" />
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>Reportes</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--cp-on-surface)', letterSpacing: '-0.01em' }}>Reportes</div>
         </div>
-        <p style={{ fontSize: 12, color: '#9A8F8B', marginTop: -8 }}>
+        <p style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)', marginTop: -8 }}>
           Descarga el reporte completo de un torneo en Excel: resultados por fecha, matriz de eliminaciones,
           premiación final y días sin ganar.
         </p>
 
         <div>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#9A8F8B', marginBottom: 8 }}>Torneo</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--cp-on-surface-variant)', marginBottom: 8 }}>Torneo</p>
           <div
             className="relative flex items-center gap-2"
             style={{
@@ -116,10 +116,10 @@ export default function ReportesPage() {
               border: '1px solid rgba(255,255,255,0.09)'
             }}
           >
-            <div style={{ flex: 1, fontSize: 14, fontWeight: 800, color: '#F5EFE6' }}>
+            <div style={{ flex: 1, fontSize: 14, fontWeight: 800, color: 'var(--cp-on-surface)' }}>
               {selectedTournament ? `Torneo ${selectedTournament.number} — ${selectedTournament.name}` : 'Selecciona un torneo'}
             </div>
-            <ChevronDown size={16} style={{ color: '#9A8F8B', flexShrink: 0 }} />
+            <ChevronDown size={16} style={{ color: 'var(--cp-on-surface-variant)', flexShrink: 0 }} />
             <select
               value={selectedId ?? ''}
               onChange={(e) => setSelectedId(Number(e.target.value))}
@@ -140,7 +140,7 @@ export default function ReportesPage() {
           className="w-full flex items-center justify-center gap-2"
           style={{
             padding: '13px 16px',
-            background: '#E53935',
+            background: 'var(--cp-primary-light)',
             color: '#fff',
             borderRadius: 100,
             fontSize: 13,
@@ -156,13 +156,13 @@ export default function ReportesPage() {
 
         {error && (
           <div style={{ padding: 12, borderRadius: 12, background: 'rgba(229,57,53,0.10)', border: '1px solid rgba(229,57,53,0.28)' }}>
-            <p style={{ fontSize: 12, color: '#E53935' }}>{error}</p>
+            <p style={{ fontSize: 12, color: 'var(--cp-primary-light)' }}>{error}</p>
           </div>
         )}
 
         <HomeCard>
           <div style={{ padding: 14 }}>
-            <p style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.04em', marginBottom: 8 }}>
+            <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.04em', marginBottom: 8 }}>
               QUÉ INCLUYE EL REPORTE
             </p>
             <ul style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -172,7 +172,7 @@ export default function ReportesPage() {
                 'Premiación final: Varón del Torneo, Podio Final, 7/2 Final, Padres e Hijos.',
                 'Días sin ganar: última victoria de cada jugador, con la fecha de referencia usada para el cálculo.'
               ].map((text) => (
-                <li key={text} style={{ fontSize: 13, color: '#9A8F8B', lineHeight: 1.4 }}>
+                <li key={text} style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)', lineHeight: 1.4 }}>
                   · {text}
                 </li>
               ))}
@@ -181,7 +181,7 @@ export default function ReportesPage() {
         </HomeCard>
       </main>
 
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }

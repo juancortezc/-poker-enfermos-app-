@@ -82,8 +82,8 @@ export default function ContactosPage() {
   const isComision = user.role === 'Comision'
 
   return (
-    <CPAppShell>
-      <CPHeader
+    <CPAppShell tone="light">
+      <CPHeader tone="light"
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
@@ -94,14 +94,14 @@ export default function ContactosPage() {
       <main className="pb-24 px-4 pt-4 space-y-4">
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <Users size={20} color="#E53935" />
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.01em' }}>Contactos</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--cp-on-surface)', letterSpacing: '-0.01em' }}>Contactos</div>
           {totalContacts !== null && (
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#9A8F8B' }}>{totalContacts}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--cp-on-surface-variant)' }}>{totalContacts}</span>
           )}
         </div>
 
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#9A8F8B' }} />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--cp-on-surface-variant)' }} />
           <input
             type="text"
             value={search}
@@ -111,7 +111,7 @@ export default function ContactosPage() {
             style={{
               background: '#382E2C',
               border: '1px solid rgba(255,255,255,0.09)',
-              color: '#F5EFE6',
+              color: 'var(--cp-on-surface)',
               fontSize: 13,
               borderRadius: 100,
             }}
@@ -122,13 +122,13 @@ export default function ContactosPage() {
           <div className="flex justify-center py-8">
             <div
               className="w-8 h-8 border-2 rounded-full animate-spin"
-              style={{ borderColor: 'rgba(255,255,255,0.08)', borderTopColor: '#E53935' }}
+              style={{ borderColor: 'var(--cp-surface-border)', borderTopColor: 'var(--cp-primary-light)' }}
             />
           </div>
         ) : filteredContacts.length === 0 ? (
           <HomeCard>
             <div style={{ padding: 24, textAlign: 'center' }}>
-              <p style={{ fontSize: 12, color: '#9A8F8B' }}>No se encontraron jugadores.</p>
+              <p style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>No se encontraron jugadores.</p>
             </div>
           </HomeCard>
         ) : (
@@ -142,9 +142,9 @@ export default function ContactosPage() {
                     <HomeAvatar playerId={player.id} name={`${player.firstName} ${player.lastName}`} photoUrl={player.photoUrl} size={52} fontSize={18} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 14, fontWeight: 800, color: '#F5EFE6' }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--cp-on-surface)' }}>
                           {player.firstName} {player.lastName}
-                          {isCurrentUser && <span style={{ color: '#9A8F8B', fontWeight: 600 }}> (Tú)</span>}
+                          {isCurrentUser && <span style={{ color: 'var(--cp-on-surface-variant)', fontWeight: 600 }}> (Tú)</span>}
                         </span>
                         {player.role === 'Comision' && (
                           <span
@@ -170,26 +170,26 @@ export default function ContactosPage() {
                       <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {player.phone && (
                           <a href={`tel:${player.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Phone size={11} style={{ color: '#9A8F8B', flexShrink: 0 }} />
-                            <span style={{ fontSize: 13, color: '#9A8F8B' }}>{player.phone}</span>
+                            <Phone size={11} style={{ color: 'var(--cp-on-surface-variant)', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)' }}>{player.phone}</span>
                           </a>
                         )}
                         {player.email && (
                           <a href={`mailto:${player.email}`} style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                            <Mail size={11} style={{ color: '#9A8F8B', flexShrink: 0 }} />
-                            <span style={{ fontSize: 13, color: '#9A8F8B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Mail size={11} style={{ color: 'var(--cp-on-surface-variant)', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {player.email}
                             </span>
                           </a>
                         )}
                         {birthday && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Cake size={11} style={{ color: '#9A8F8B', flexShrink: 0 }} />
-                            <span style={{ fontSize: 13, color: '#9A8F8B' }}>{birthday}</span>
+                            <Cake size={11} style={{ color: 'var(--cp-on-surface-variant)', flexShrink: 0 }} />
+                            <span style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)' }}>{birthday}</span>
                           </div>
                         )}
                         {!player.phone && !player.email && !birthday && (
-                          <span style={{ fontSize: 13, color: '#9A8F8B' }}>Sin datos de contacto</span>
+                          <span style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)' }}>Sin datos de contacto</span>
                         )}
                       </div>
                     </div>
@@ -201,7 +201,7 @@ export default function ContactosPage() {
         )}
       </main>
 
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }

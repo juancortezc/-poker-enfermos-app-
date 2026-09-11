@@ -42,8 +42,8 @@ export default function MasPage() {
   ]
 
   return (
-    <CPAppShell>
-      <CPHeader
+    <CPAppShell tone="light">
+      <CPHeader tone="light"
         userInitials={userInitials}
         userPhotoUrl={user?.photoUrl}
         tournamentNumber={activeTournament?.number ?? 29}
@@ -60,18 +60,18 @@ export default function MasPage() {
                 key={item.href}
                 href={item.href}
                 className="flex items-center gap-3 px-3 py-3"
-                style={{ borderBottom: index < items.length - 1 ? '1px solid rgba(255,255,255,0.08)' : undefined }}
+                style={{ borderBottom: index < items.length - 1 ? '1px solid var(--cp-surface-border)' : undefined }}
               >
-                <Icon size={18} style={{ color: '#9A8F8B' }} />
-                <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: '#F5EFE6' }}>{item.label}</span>
-                <ChevronRight size={16} style={{ color: '#9A8F8B' }} />
+                <Icon size={18} style={{ color: 'var(--cp-on-surface-variant)' }} />
+                <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--cp-on-surface)' }}>{item.label}</span>
+                <ChevronRight size={16} style={{ color: 'var(--cp-on-surface-variant)' }} />
               </Link>
             )
           })}
         </HomeCard>
       </main>
 
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }

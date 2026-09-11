@@ -58,7 +58,7 @@ export default function AdminNewPage() {
   // Not authorized (not Comision)
   if (user.role !== 'Comision') {
     return (
-      <CPAppShell>
+      <CPAppShell tone="light">
         <div className="min-h-screen flex items-center justify-center px-4">
           <div
             className="rounded-2xl p-6 text-center max-w-sm"
@@ -96,10 +96,10 @@ export default function AdminNewPage() {
     : 'PE'
 
   return (
-    <CPAppShell>
+    <CPAppShell tone="light">
       <div className="min-h-screen pb-24">
         {/* CPHeader */}
-        <CPHeader
+        <CPHeader tone="light"
           userInitials={userInitials}
           userPhotoUrl={user.photoUrl}
           tournamentNumber={tournamentNumber}
@@ -138,8 +138,8 @@ export default function AdminNewPage() {
                     minWidth: 64,
                     padding: '10px 8px',
                     borderRadius: 14,
-                    background: active ? '#E53935' : 'var(--cp-surface)',
-                    border: `1px solid ${active ? '#E53935' : 'var(--cp-surface-border)'}`,
+                    background: active ? 'var(--cp-primary-light)' : 'var(--cp-surface)',
+                    border: `1px solid ${active ? 'var(--cp-primary-light)' : 'var(--cp-surface-border)'}`,
                   }}
                 >
                   <Icon size={18} color={active ? '#fff' : 'var(--cp-on-surface-muted)'} />
@@ -169,7 +169,7 @@ export default function AdminNewPage() {
         </div>
 
         {/* Bottom Navigation */}
-        <CPBottomNav />
+        <CPBottomNav tone="light" />
       </div>
     </CPAppShell>
   )

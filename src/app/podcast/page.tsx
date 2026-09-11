@@ -23,8 +23,8 @@ export default function PodcastPage() {
     : 'PE'
 
   return (
-    <CPAppShell>
-      <CPHeader
+    <CPAppShell tone="light">
+      <CPHeader tone="light"
         userInitials={userInitials}
         userPhotoUrl={user?.photoUrl}
         tournamentNumber={activeTournament?.number ?? 29}
@@ -36,7 +36,7 @@ export default function PodcastPage() {
         <PodcastTab />
       </main>
 
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }
