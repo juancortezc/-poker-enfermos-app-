@@ -19,7 +19,7 @@ import { PushActivationBanner } from './PushActivationBanner'
 import { HomeViewToggle, type HomeView } from './HomeViewToggle'
 import { HomeUltimaFecha } from './HomeUltimaFecha'
 import { HomeTorneo } from './HomeTorneo'
-import { isWithinRecapWindow, openAddToCalendar } from '@/lib/home-view'
+import { openAddToCalendar } from '@/lib/home-view'
 import type { PlayerRanking, TournamentInsightsData } from '@/lib/ranking-utils'
 import { isValidPinForLogin } from '@/lib/pin-rules'
 
@@ -358,7 +358,16 @@ function HomeAuthenticated({
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
     : 'PE'
 
-  const defaultView: HomeView = lastCompletedDate && isWithinRecapWindow(lastCompletedDate.scheduledDate) ? 'ultimaFecha' : 'torneo'
+  /*
+   * Ultima Fecha es SIEMPRE la vista de entrada, mientras haya una fecha
+   * jugada. Antes la decidia una ventana de tiempo (isWithinRecapWindow): el
+   * recap se mostraba solo unas horas despues de la fecha y luego la home
+   * cambiaba sola a Torneo. Eso hacia que la misma pantalla te recibiera
+   * distinto segun el dia, sin que hubieras tocado nada.
+   * El unico caso que cae en Torneo es el arranque del torneo, cuando todavia
+   * no hay fecha jugada — ahi el toggle de Ultima Fecha va deshabilitado.
+   */
+  const defaultView: HomeView = lastCompletedDate ? 'ultimaFecha' : 'torneo'
   const [view, setView] = useState<HomeView>(defaultView)
 
   return (
