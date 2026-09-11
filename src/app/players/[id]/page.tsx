@@ -56,21 +56,21 @@ interface DatesGameDate {
 
 const CREAM_BG = '#F3E6D0'
 const CREAM_TEXT = '#2A1F14'
-const CREAM_MUTED = '#8A7860'
+const CREAM_MUTED = 'var(--cp-on-surface-variant)'
 /** Naranja de "lo que no cuenta" sobre la tarjeta crema. */
 const NEGATIVE = '#C2410C'
 
 function TrendBadge({ positionsChanged }: { positionsChanged: number }) {
   if (positionsChanged > 0) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: '#2E7D32', fontSize: 13, fontWeight: 800 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: 'var(--cp-positive)', fontSize: 13, fontWeight: 800 }}>
         <TrendingUp size={12} /> +{positionsChanged}
       </div>
     )
   }
   if (positionsChanged < 0) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: '#C62828', fontSize: 13, fontWeight: 800 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2, color: NEGATIVE, fontSize: 13, fontWeight: 800 }}>
         <TrendingDown size={12} /> {positionsChanged}
       </div>
     )
@@ -84,9 +84,9 @@ function TrendBadge({ positionsChanged }: { positionsChanged: number }) {
 
 function StatRow({ label, value }: { label: string; value: string | number }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <span style={{ fontSize: 12, color: '#9A8F8B' }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: '1px solid var(--cp-surface-2)' }}>
+      <span style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)' }}>{value}</span>
     </div>
   )
 }
@@ -184,8 +184,8 @@ export default function PlayerProfilePage() {
   const absences = details.datePerformance.filter((d) => d.status === 'completed' && d.isAbsent).length
 
   return (
-    <CPAppShell>
-      <CPHeader
+    <CPAppShell tone="light">
+      <CPHeader tone="light"
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
@@ -196,7 +196,7 @@ export default function PlayerProfilePage() {
       <main className="pb-24 px-4 pt-4 space-y-4">
         <button
           onClick={() => router.back()}
-          style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 13, fontWeight: 700, color: '#9A8F8B', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 13, fontWeight: 700, color: 'var(--cp-on-surface-variant)', letterSpacing: '0.04em', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           <ChevronLeft size={14} /> VOLVER
         </button>
@@ -215,7 +215,7 @@ export default function PlayerProfilePage() {
                   height: 26,
                   padding: '0 6px',
                   borderRadius: 8,
-                  background: '#E53935',
+                  background: 'var(--cp-primary-light)',
                   color: '#fff',
                   display: 'flex',
                   alignItems: 'center',
@@ -233,12 +233,12 @@ export default function PlayerProfilePage() {
                 {player.firstName} {player.lastName}
               </div>
               {player.aliases.length > 0 && (
-                <div style={{ fontSize: 12, color: '#B5442C', fontWeight: 700, marginTop: 2 }}>&ldquo;{player.aliases[0]}&rdquo;</div>
+                <div style={{ fontSize: 12, color: 'var(--cp-negative)', fontWeight: 700, marginTop: 2 }}>&ldquo;{player.aliases[0]}&rdquo;</div>
               )}
               {(playerChampionships?.championshipsCount ?? 0) > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
                   <Trophy size={12} color="#8A6A2E" />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#8A6A2E' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--cp-gold)' }}>
                     {playerChampionships!.championshipsCount}x campeón
                   </span>
                 </div>
@@ -288,7 +288,7 @@ export default function PlayerProfilePage() {
         {/* RIVAL DIRECTO */}
         {(rivals.above || rivals.below) && (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'TU RIVAL DIRECTO' : 'RIVAL CERCANO'}
             </div>
             <div className="space-y-2">
@@ -303,18 +303,18 @@ export default function PlayerProfilePage() {
                       <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={44} fontSize={15} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 12, fontWeight: 800, color: '#9A8F8B', letterSpacing: '0.06em', background: 'rgba(255,255,255,0.06)', padding: '2px 5px', borderRadius: 4 }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--cp-on-surface-variant)', letterSpacing: '0.06em', background: 'var(--cp-surface-2)', padding: '2px 5px', borderRadius: 4 }}>
                             {tag}
                           </span>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>{player.playerName}</div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--cp-on-surface)' }}>{player.playerName}</div>
                         </div>
-                        <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 2 }}>#{player.position} en el torneo</div>
+                        <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)', marginTop: 2 }}>#{player.position} en el torneo</div>
                       </div>
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>
+                        <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)' }}>
                           {Math.abs((currentStats.finalScore ?? currentStats.totalPoints) - (player.finalScore ?? player.totalPoints))} pts
                         </div>
-                        <div style={{ fontSize: 12, color: '#9A8F8B' }}>de diferencia</div>
+                        <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>de diferencia</div>
                       </div>
                     </div>
                   </HomeCard>
@@ -326,7 +326,7 @@ export default function PlayerProfilePage() {
         {/* LOGROS */}
         {achievements && (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>LOGROS</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.06em', marginBottom: 8 }}>LOGROS</div>
             <HomeCard>
               <div className="grid grid-cols-4" style={{ padding: '10px 4px' }}>
                 {[
@@ -340,11 +340,11 @@ export default function PlayerProfilePage() {
                     style={{
                       textAlign: 'center',
                       padding: '0 4px',
-                      borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.08)' : undefined
+                      borderLeft: i > 0 ? '1px solid var(--cp-surface-border)' : undefined
                     }}
                   >
-                    <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{kpi.val}</div>
-                    <div style={{ fontSize: 12, color: '#8A7E70', marginTop: 1, lineHeight: 1.3 }}>{kpi.label}</div>
+                    <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--cp-on-surface)' }}>{kpi.val}</div>
+                    <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)', marginTop: 1, lineHeight: 1.3 }}>{kpi.label}</div>
                   </div>
                 ))}
               </div>
@@ -355,7 +355,7 @@ export default function PlayerProfilePage() {
         {/* EVOLUCION */}
         {details.rankingEvolution.length > 1 && (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'MI EVOLUCIÓN EN EL TORNEO' : 'EVOLUCIÓN EN EL TORNEO'}
             </div>
             <HomeCard>
@@ -368,7 +368,7 @@ export default function PlayerProfilePage() {
 
         {/* RESUMEN */}
         <div>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.06em', marginBottom: 8 }}>
             RESUMEN DE {isOwnProfile ? 'TU' : 'SU'} TORNEO
           </div>
           <HomeCard>
@@ -384,7 +384,7 @@ export default function PlayerProfilePage() {
         {/* ULTIMAS FECHAS */}
         {lastThreeDates.length > 0 && (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'TUS ÚLTIMAS FECHAS' : 'ÚLTIMAS FECHAS'}
             </div>
             <div className="space-y-2">
@@ -396,15 +396,15 @@ export default function PlayerProfilePage() {
                   <HomeCard key={d.id}>
                     <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ textAlign: 'center', flexShrink: 0, width: 34 }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>FECHA</div>
-                        <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{d.dateNumber}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--cp-on-surface-variant)' }}>FECHA</div>
+                        <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--cp-on-surface)' }}>{d.dateNumber}</div>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {winner && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <HomeAvatar playerId={winner.eliminatedPlayer.id} name={winner.eliminatedPlayer.firstName} photoUrl={winner.eliminatedPlayer.photoUrl} size={26} fontSize={10} />
-                            <div style={{ fontSize: 13, color: '#9A8F8B' }}>
-                              Ganó <span style={{ color: '#F5EFE6', fontWeight: 700 }}>{winner.eliminatedPlayer.firstName}</span>
+                            <div style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)' }}>
+                              Ganó <span style={{ color: 'var(--cp-on-surface)', fontWeight: 700 }}>{winner.eliminatedPlayer.firstName}</span>
                             </div>
                           </div>
                         )}
@@ -412,13 +412,13 @@ export default function PlayerProfilePage() {
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
                         {participated ? (
                           <>
-                            <div style={{ fontSize: 12, color: '#9A8F8B', fontWeight: 700 }}>
+                            <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)', fontWeight: 700 }}>
                               {!myElim ? '¡GANÓ!' : `#${myElim.position}`}
                             </div>
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{myElim?.points ?? winner?.points ?? ''} pts</div>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)' }}>{myElim?.points ?? winner?.points ?? ''} pts</div>
                           </>
                         ) : (
-                          <div style={{ fontSize: 12, color: '#9A8F8B' }}>No participó</div>
+                          <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>No participó</div>
                         )}
                       </div>
                     </div>
@@ -432,7 +432,7 @@ export default function PlayerProfilePage() {
         {/* FECHAS QUE ELIMINA */}
         {eliminatedDates.length > 0 && (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.06em', marginBottom: 8 }}>
               {isOwnProfile ? 'FECHAS QUE ELIMINAS' : 'FECHAS QUE ELIMINA'}
             </div>
             <div className="space-y-2">
@@ -440,10 +440,10 @@ export default function PlayerProfilePage() {
                 <HomeCard key={d.dateNumber}>
                   <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ textAlign: 'center', flexShrink: 0, width: 34 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>FECHA</div>
-                      <div style={{ fontSize: 16, fontWeight: 900, color: '#F5EFE6' }}>{d.dateNumber}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--cp-on-surface-variant)' }}>FECHA</div>
+                      <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--cp-on-surface)' }}>{d.dateNumber}</div>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0, fontSize: 13, color: '#9A8F8B' }}>
+                    <div style={{ flex: 1, minWidth: 0, fontSize: 13, color: 'var(--cp-on-surface-variant)' }}>
                       {d.isAbsent ? 'Ausencia' : d.eliminationPosition ? `Posición #${d.eliminationPosition}` : 'Ganador'}
                     </div>
                     <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-negative)', flexShrink: 0 }}>−{d.points} pts</div>
@@ -452,7 +452,7 @@ export default function PlayerProfilePage() {
               ))}
               <HomeCard>
                 <div style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#F5EFE6' }}>Total eliminado</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--cp-on-surface)' }}>Total eliminado</span>
                   <span style={{ fontSize: 15, fontWeight: 900, color: 'var(--cp-negative)' }}>
                     −{eliminatedDates.reduce((sum, d) => sum + d.points, 0)} pts
                   </span>
@@ -465,7 +465,7 @@ export default function PlayerProfilePage() {
         {/* MULTAS */}
         {multas && multas.length > 0 && (
           <div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.06em', marginBottom: 8 }}>MULTAS</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface)', letterSpacing: '0.06em', marginBottom: 8 }}>MULTAS</div>
             <div className="space-y-1.5">
               {multas.map((multa) => (
                 <div
@@ -473,14 +473,14 @@ export default function PlayerProfilePage() {
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderRadius: 12, background: 'rgba(229,57,53,0.10)', border: '1px solid rgba(229,57,53,0.22)' }}
                 >
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 12, color: '#F5EFE6', fontWeight: 700 }}>{multa.reason}</div>
-                    <div style={{ fontSize: 12, color: '#9A8F8B' }}>
+                    <div style={{ fontSize: 12, color: 'var(--cp-on-surface)', fontWeight: 700 }}>{multa.reason}</div>
+                    <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>
                       {multa.pointsPenalty > 0 && `-${multa.pointsPenalty} pts`}
                       {!!multa.chipsAmount && `${multa.pointsPenalty > 0 ? ' · ' : ''}${multa.chipsAmount} fichas`}
                       {!!multa.moneyAmount && `${multa.pointsPenalty > 0 || multa.chipsAmount ? ' · ' : ''}$${multa.moneyAmount}`}
                     </div>
                   </div>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: multa.paid ? '#6ECB71' : '#E53935', flexShrink: 0 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: multa.paid ? 'var(--cp-positive)' : 'var(--cp-primary-light)', flexShrink: 0 }}>
                     {multa.paid ? 'PAGADA' : 'PENDIENTE'}
                   </span>
                 </div>
@@ -501,9 +501,9 @@ export default function PlayerProfilePage() {
               gap: 8,
               padding: '13px',
               borderRadius: 100,
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: '#F5EFE6',
+              background: 'var(--cp-surface-2)',
+              border: '1px solid var(--cp-surface-border)',
+              color: 'var(--cp-on-surface)',
               fontSize: 12,
               fontWeight: 700,
               cursor: 'pointer'
@@ -514,7 +514,7 @@ export default function PlayerProfilePage() {
         )}
       </main>
 
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }
