@@ -6,7 +6,6 @@ import type { PlayerRanking, PlayerPositionDelta, TournamentInsightsData } from 
 import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
 import { PodioTorneoCard } from './PodioTorneoCard'
 import { Score, Meter } from './Score'
-import { EliminaStrip } from './EliminaStrip'
 import { StreaksCards } from './StreaksCards'
 import { HomeCard } from './HomeCard'
 import { LinkCta } from './LinkCta'
@@ -22,8 +21,6 @@ interface NextDateInfo {
 
 interface HomeTorneoProps {
   user: { id: string }
-  /** Cuantas peores fechas descarta el torneo (2 o 3). */
-  datesToEliminate?: number
   tournamentId: number
   tournamentNumber: number
   rankings: PlayerRanking[]
@@ -68,7 +65,6 @@ function daysUntil(dateStr: string | null): number | null {
 
 export function HomeTorneo({
   user,
-  datesToEliminate = 2,
   tournamentId,
   tournamentNumber,
   rankings,
@@ -311,17 +307,6 @@ export function HomeTorneo({
             <LinkCta onClick={onOpenProfile} style={{ marginTop: 'auto', paddingTop: 8 }}>VER MI TORNEO →</LinkCta>
           </HomeCard>
         </div>
-      )}
-
-      {myRanking && playedDates.length > 0 && (
-        <HomeCard style={{ padding: 14 }}>
-          <EliminaStrip
-            player={myRanking}
-            completedDates={playedDates}
-            totalDates={Math.max(playedDates.length, 14)}
-            datesToEliminate={datesToEliminate}
-          />
-        </HomeCard>
       )}
 
       <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} onSeeTabla={onSeeTabla} />
