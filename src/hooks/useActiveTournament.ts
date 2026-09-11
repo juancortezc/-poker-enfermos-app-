@@ -11,6 +11,9 @@ interface Tournament {
   participantCount?: number
   completedDates?: number
   totalDates?: number
+  /** Cuantas peores fechas descarta el ELIMINA. El API ya lo devolvia; faltaba
+   *  declararlo, asi que la home asumia 2 y en T30 son 3. */
+  datesToEliminate?: number
 }
 
 interface GameDate {

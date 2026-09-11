@@ -160,7 +160,8 @@
     0 4px 12px rgba(0, 0, 0, 0.25);
 
   /* === TIPOGRAFIA === */
-  --cp-font: 'Inter', system-ui, -apple-system, sans-serif;
+  --cp-font: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+  --cp-font-display: var(--font-display), 'Archivo', 'Helvetica Neue', Arial, sans-serif;
 
   --cp-display-size: 40px;
   --cp-display-weight: 800;
@@ -252,4 +253,36 @@
 @keyframes cp-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* === MARCADOR ===
+   Para cualquier cifra que sea un puntaje, una posicion o una cuenta. Ancho
+   fijo para que no baile al animarse, y tracking negativo para que las cifras
+   grandes se lean como un marcador y no como texto. */
+.cp-score {
+  font-family: var(--cp-font-display);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+.cp-display {
+  font-family: var(--cp-font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Barra que se llena al aparecer. */
+@keyframes cp-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.cp-bar-fill {
+  transform-origin: left center;
+  animation: cp-fill 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-bar-fill { animation: none; }
 }

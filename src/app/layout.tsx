@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Archivo } from "next/font/google";
 import "./globals.css";
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -14,6 +14,21 @@ const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
   variable: '--font-inter',
+  display: 'swap'
+})
+
+/**
+ * Cara de titulares y, sobre todo, de NUMEROS.
+ *
+ * Toda la app corria con Inter y nada mas. Inter es la tipografia por defecto
+ * de cualquier producto de los ultimos diez anos: correcta y sin cara. Un
+ * marcador necesita presencia — cifras anchas, pesadas y de ancho fijo, que es
+ * lo que hace que un puntaje se lea como puntaje y no como un dato de tabla.
+ */
+const archivo = Archivo({
+  subsets: ['latin'],
+  weight: ['600', '700', '800', '900'],
+  variable: '--font-display',
   display: 'swap'
 })
 
@@ -69,7 +84,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} antialiased app-bg`}>
+      <body className={`${inter.variable} ${archivo.variable} antialiased app-bg`}>
         <SWRProvider>
           <AuthProvider>
             <PlayerSearchProvider>

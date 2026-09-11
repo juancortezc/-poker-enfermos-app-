@@ -116,6 +116,7 @@ export function HomePage() {
       isCommission={isCommission}
       tournamentNumber={activeTournament?.number ?? 29}
       tournamentId={activeTournament?.id || 0}
+      datesToEliminate={activeTournament?.datesToEliminate ?? 2}
       rankings={rankings}
       lastCompletedDate={lastCompletedDate}
       nextDate={nextGameDateFromTournament ?? null}
@@ -335,6 +336,8 @@ interface HomeAuthenticatedProps {
   isCommission: boolean
   tournamentNumber: number
   tournamentId: number
+  /** Cuantas peores fechas descarta el torneo (2 o 3). */
+  datesToEliminate: number
   rankings: PlayerRanking[]
   lastCompletedDate: { id: number; dateNumber: number; scheduledDate: string | null } | null
   nextDate: { dateNumber: number; scheduledDate: string | null } | null
@@ -347,6 +350,7 @@ function HomeAuthenticated({
   isCommission,
   tournamentNumber,
   tournamentId,
+  datesToEliminate,
   rankings,
   lastCompletedDate,
   nextDate,
@@ -396,6 +400,7 @@ function HomeAuthenticated({
           />
         ) : (
           <HomeTorneo
+          datesToEliminate={datesToEliminate}
             user={user}
             tournamentId={tournamentId}
             tournamentNumber={tournamentNumber}

@@ -5,6 +5,8 @@ import { CalendarPlus } from 'lucide-react'
 import type { PlayerRanking, PlayerPositionDelta, TournamentInsightsData } from '@/lib/ranking-utils'
 import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
 import { PodioTorneoCard } from './PodioTorneoCard'
+import { Score, Meter } from './Score'
+import { EliminaStrip } from './EliminaStrip'
 import { StreaksCards } from './StreaksCards'
 import { HomeCard } from './HomeCard'
 import { LinkCta } from './LinkCta'
@@ -20,6 +22,8 @@ interface NextDateInfo {
 
 interface HomeTorneoProps {
   user: { id: string }
+  /** Cuantas peores fechas descarta el torneo (2 o 3). */
+  datesToEliminate?: number
   tournamentId: number
   tournamentNumber: number
   rankings: PlayerRanking[]
@@ -64,6 +68,7 @@ function daysUntil(dateStr: string | null): number | null {
 
 export function HomeTorneo({
   user,
+  datesToEliminate = 2,
   tournamentId,
   tournamentNumber,
   rankings,
@@ -86,6 +91,7 @@ export function HomeTorneo({
   const leaderScore = rankings.length ? scoreOf(rankings[0]) : 0
   const gapToLeader = myRanking ? leaderScore - scoreOf(myRanking) : null
 
+
   // 7/2: los últimos 2 lugares de la tabla actual (no un dato de tendencia)
   const bottom2 = rankings.length >= 2
     ? [...rankings].sort((a, b) => b.position - a.position).slice(0, 2).reverse()
@@ -95,10 +101,6 @@ export function HomeTorneo({
   const penultimate = sortedByPosition.length >= 2 ? sortedByPosition[sortedByPosition.length - 2] : null
   const isNearBottom = myRanking && penultimate ? myRanking.position >= penultimate.position : false
   const gapToMalazos = myRanking && penultimate && !isNearBottom ? scoreOf(myRanking) - scoreOf(penultimate) : null
-
-  const eliminaSum = myRanking?.eliminasActive
-    ? (myRanking.elimina1 ?? 0) + (myRanking.elimina2 ?? 0) + (myRanking.elimina3 ?? 0)
-    : 0
 
   // Forma reciente: rendimiento noche a noche (independiente del puntaje acumulado de temporada)
   const playedDates = playedDateNumbers(rankings)
@@ -239,7 +241,10 @@ export function HomeTorneo({
         <div style={{ display: 'flex', gap: 10 }}>
           <div style={{ flex: 1, background: 'linear-gradient(160deg,#E53935,#B32623)', borderRadius: 16, padding: 14, color: '#fff' }}>
             <div style={{ fontSize: 12, fontWeight: 700, opacity: 0.85 }}>{myRanking.playerName.split(' ')[0]}, estás</div>
-            <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.02em', marginTop: 2 }}>#{myRanking.position}</div>
+            <div style={{ marginTop: 2, display: 'flex', alignItems: 'baseline', gap: 2 }}>
+              <span className="cp-score" style={{ fontSize: 26, opacity: 0.75 }}>#</span>
+              <Score value={myRanking.position} size={44} />
+            </div>
             <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.75, marginTop: 2, marginBottom: 8 }}>En el campeonato</div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.18)' }}>
@@ -268,29 +273,55 @@ export function HomeTorneo({
           </div>
           <HomeCard style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#9A8F8B' }}>Tus puntos</div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: '#F5EFE6', letterSpacing: '-0.02em', marginTop: 2 }}>
-              {scoreOf(myRanking)} <span style={{ fontSize: 13, fontWeight: 700, color: 'inherit' }}>pts</span>
+            <div style={{ marginTop: 2 }}>
+              <Score value={scoreOf(myRanking)} suffix="PTS" size={40} />
             </div>
-            {eliminaSum > 0 && (
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 2 }}>Descartas {eliminaSum} pts</div>
-            )}
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--cp-negative)', marginTop: 2 }}>
               {SCORE_LABELS.accumulatedLong}: {myRanking.totalPoints} pts
             </div>
 
-            <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <div style={{ fontSize: 12, color: '#9A8F8B' }}>
-                Te separan del líder: <span style={{ fontWeight: 800, color: '#F5EFE6' }}>{gapToLeader ?? 0} {gapToLeader === 1 ? 'pt' : 'pts'}</span>
-              </div>
+            {/* Cuanto te falta para el lider, como barra. Era una frase: un
+                numero suelto no deja ver si estas cerca o lejos. */}
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <Meter
+                value={leaderScore > 0 ? scoreOf(myRanking) / leaderScore : 0}
+                color="var(--cp-primary)"
+                left={<span style={{ color: 'var(--cp-on-surface-variant)', whiteSpace: 'nowrap' }}>Hacia el líder</span>}
+                right={
+                  <span className="cp-score" style={{ fontSize: 13, color: 'var(--cp-on-surface)' }}>
+                    −{gapToLeader ?? 0} <span style={{ fontSize: 11, fontWeight: 700, opacity: 0.65 }}>PTS</span>
+                  </span>
+                }
+              />
               {gapToMalazos !== null && (
-                <div style={{ fontSize: 12, color: '#9A8F8B', marginTop: 2 }}>
-                  {gapToMalazos} {gapToMalazos === 1 ? 'pt' : 'pts'} de la zona 7/2
+                <div style={{ marginTop: 8 }}>
+                  <Meter
+                    value={Math.max(0, Math.min(1, gapToMalazos / Math.max(leaderScore, 1)))}
+                    color="var(--cp-malazo)"
+                    left={<span style={{ color: 'var(--cp-on-surface-variant)', whiteSpace: 'nowrap' }}>Colchón 7/2</span>}
+                    right={
+                      <span className="cp-score" style={{ fontSize: 13, color: 'var(--cp-malazo-text)' }}>
+                        {gapToMalazos} <span style={{ fontSize: 11, fontWeight: 700, opacity: 0.65 }}>PTS</span>
+                      </span>
+                    }
+                  />
                 </div>
               )}
             </div>
             <LinkCta onClick={onOpenProfile} style={{ marginTop: 'auto', paddingTop: 8 }}>VER MI TORNEO →</LinkCta>
           </HomeCard>
         </div>
+      )}
+
+      {myRanking && playedDates.length > 0 && (
+        <HomeCard style={{ padding: 14 }}>
+          <EliminaStrip
+            player={myRanking}
+            completedDates={playedDates}
+            totalDates={Math.max(playedDates.length, 14)}
+            datesToEliminate={datesToEliminate}
+          />
+        </HomeCard>
       )}
 
       <PodioTorneoCard tournamentNumber={tournamentNumber} top3={rankings.slice(0, 3)} onSeeTabla={onSeeTabla} />
