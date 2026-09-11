@@ -5,17 +5,19 @@ import type { PlayerRanking } from '@/lib/ranking-utils'
 import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
 
+// chip = fondo de la medalla (claro, con el numero oscuro encima)
+// text = el mismo metal COMO TEXTO sobre papel: 5:1 o mejor
 const MEDALS = [
-  { bg: 'var(--cp-surface-2)', border: 'rgba(232,193,88,0.60)', color: '#E8C158' },
-  { bg: 'var(--cp-surface-2)', border: 'rgba(201,198,194,0.50)', color: '#C9C6C2' },
-  { bg: 'var(--cp-surface-2)', border: 'rgba(192,138,84,0.55)', color: '#C08A54' }
+  { chip: '#E8C158', border: 'rgba(127,93,7,0.45)',  text: '#7F5D07' },
+  { chip: '#C9C6C2', border: 'rgba(110,106,103,0.40)', text: '#6E6A67' },
+  { chip: '#C08A54', border: 'rgba(139,94,47,0.42)', text: '#8B5E2F' }
 ]
 
 const TIGHT_RACE_THRESHOLD = 3
 
 function TrophyIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8C158" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7F5D07" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" y1="19" x2="12" y2="23" />
@@ -40,16 +42,16 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
   return (
     <div
       style={{
-        background: 'var(--cp-surface-1)',
-        border: '1px solid rgba(232,193,88,0.38)',
+        background: 'linear-gradient(150deg,#FCF4DE 0%,#F5E7BE 60%,#EEDCA6 100%)',
+        border: '1px solid rgba(127,93,7,0.45)',
         borderRadius: 18,
         padding: 16,
-        boxShadow: '0 4px 20px rgba(232,193,88,0.10)'
+        boxShadow: '0 12px 34px rgba(0,0,0,0.45), 0 0 30px rgba(232,193,88,0.14)'
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
         <TrophyIcon />
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.05em' }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: '#7F5D07', letterSpacing: '0.05em' }}>
           PODIO TORNEO {tournamentNumber}
         </div>
       </div>
@@ -63,7 +65,7 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
               key={player.playerId}
               style={{
                 textAlign: 'center',
-                background: medal.bg,
+                background: 'rgba(255,255,255,0.62)',
                 border: `1px solid ${medal.border}`,
                 borderRadius: 14,
                 padding: '12px 6px',
@@ -87,8 +89,8 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
                     width: 16,
                     height: 16,
                     borderRadius: 5,
-                    background: medal.color,
-                    color: '#1A1512',
+                    background: medal.chip,
+                    color: '#1D1615',
                     fontSize: 12,
                     fontWeight: 900,
                     display: 'flex',
@@ -99,15 +101,15 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
                   {index + 1}
                 </div>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#F5EFE6', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#1D1615', minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {player.playerName}
               </div>
               <div style={{ marginTop: 'auto', paddingTop: 4 }}>
-                <div style={{ fontSize: 16, fontWeight: 900, color: medal.color }}>
+                <div style={{ fontSize: 16, fontWeight: 900, color: medal.text }}>
                   {scoreOf(player)} <span style={{ fontSize: 12, fontWeight: 700, color: 'inherit' }}>{SCORE_LABELS.pointsShort}</span>
                 </div>
                 {showNightContext && (
-                  <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? '#7CD07F' : delta < 0 ? '#E53935' : '#9A8F8B', marginTop: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: delta > 0 ? '#136B34' : delta < 0 ? '#A8360A' : '#574C49', marginTop: 1 }}>
                     {delta > 0 ? `+${delta}` : delta === 0 ? '+0' : delta}
                   </div>
                 )}
@@ -119,15 +121,15 @@ export function PodioTorneoCard({ tournamentNumber, top3, showNightContext = fal
 
       {isTightRace && (
         <div style={{ marginTop: 12, textAlign: 'center' }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#F5EFE6', letterSpacing: '0.02em' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#1D1615', letterSpacing: '0.02em' }}>
             TRES JUGADORES SEPARADOS POR {spread} {spread === 1 ? 'PUNTO' : 'PUNTOS'}
           </div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#FF6B6B', marginTop: 2 }}>¡Esto se puso feo!</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#C62828', marginTop: 2 }}>¡Esto se puso feo!</div>
         </div>
       )}
 
       <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
-        <LinkCta onClick={onSeeTabla}>VER LA TABLA DEL TORNEO →</LinkCta>
+        <LinkCta onClick={onSeeTabla} style={{ color: '#C62828' }}>VER LA TABLA DEL TORNEO →</LinkCta>
       </div>
     </div>
   )

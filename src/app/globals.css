@@ -45,6 +45,11 @@
   --color-poker-accent: #5BC8C0;
   --color-poker-accent-hover: #8FDBD5;
 
+  /* Rosa — identidad de los malazos / 7-2 */
+  --color-poker-pink: #EC4899;
+  --color-poker-pink-light: #FF6FA5;
+  --color-poker-pink-deep: #AD1457;
+
   /* Feedback */
   --color-poker-green: #6ECB71;
   --color-poker-orange: #E8863C;      /* lo que resta */
@@ -293,16 +298,17 @@
     opacity: 1;
   }
   
-  /* Ultimas posiciones. El rosa (#ec4899) se retiro: esto es lo negativo, y
-     lo negativo va en naranja — nunca en rojo y nunca en un color de fuera. */
+  /* Ultimas posiciones = los malazos, y los malazos son ROSA. No es lo mismo
+     que lo negativo: el naranja dice "esto te resta puntos", el rosa dice
+     "esto es de los malazos". */
   .card-last-position {
-    border: 1px solid var(--cp-negative) !important;
-    box-shadow: var(--cp-elevation-2);
+    border: 2px solid var(--cp-malazo) !important;
+    box-shadow: var(--cp-elevation-2), 0 0 20px rgba(236, 72, 153, 0.28);
   }
 
   .card-last-position:hover {
-    border-color: var(--cp-negative) !important;
-    box-shadow: var(--cp-elevation-2), 0 0 18px rgba(232, 134, 60, 0.25);
+    border-color: var(--cp-malazo-text) !important;
+    box-shadow: var(--cp-elevation-2), 0 0 30px rgba(236, 72, 153, 0.45);
   }
 
   .podium-border-gold {
@@ -606,13 +612,13 @@
     box-shadow: 0 20px 50px rgba(182, 131, 81, 0.30), 0 0 30px rgba(182, 131, 81, 0.12);
   }
 
-  /* Antes eran rosa (#ec4899 / #f472b6): color de fuera de la paleta. */
+  /* Rosa de los malazos. */
   .shadow-glow-pink {
-    box-shadow: 0 20px 50px rgba(232, 134, 60, 0.30), 0 0 35px rgba(232, 134, 60, 0.15);
+    box-shadow: 0 20px 50px rgba(236, 72, 153, 0.35), 0 0 35px rgba(236, 72, 153, 0.18);
   }
 
   .shadow-glow-pink-light {
-    box-shadow: 0 20px 50px rgba(232, 134, 60, 0.22), 0 0 35px rgba(232, 134, 60, 0.12);
+    box-shadow: 0 20px 50px rgba(255, 111, 165, 0.30), 0 0 35px rgba(255, 111, 165, 0.15);
   }
 
   /* Border utilities */

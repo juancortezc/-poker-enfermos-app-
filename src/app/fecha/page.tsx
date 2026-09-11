@@ -186,20 +186,32 @@ function FechaPageInner() {
 
             {tab === 'posiciones' && (
               <div className="space-y-1.5">
-                {results.map((e) => (
-                  <HomeCard key={e.id}>
-                    <div style={{ padding: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 900, color: e.position <= 3 ? '#D8A84E' : '#9A8F8B' }}>
+                {results.map((e) => {
+                  // Una lista de veinte filas iguales no cuenta nada. El podio y
+                  // los malazos son lo que se mira primero, asi que se marcan:
+                  // metal arriba, rosa en los dos ultimos.
+                  const MEDAL = ['#E8C158', '#C9C6C2', '#C08A54']
+                  const medal = e.position <= 3 ? MEDAL[e.position - 1] : null
+                  const esMalazo = e.position > results.length - 2
+                  const acento = medal ?? (esMalazo ? 'var(--cp-malazo-text)' : null)
+                  return (
+                  <HomeCard key={e.id} style={acento ? { borderColor: acento, borderWidth: 1 } : undefined}>
+                    <div style={{ padding: 10, display: 'flex', alignItems: 'center', gap: 10, position: 'relative' }}>
+                      {acento && (
+                        <span aria-hidden style={{ position: 'absolute', left: 0, top: 8, bottom: 8, width: 3, borderRadius: 2, background: acento }} />
+                      )}
+                      <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 900, color: acento ?? '#9A8F8B' }}>
                         #{e.position}
                       </div>
                       <HomeAvatar playerId={e.eliminatedPlayer.id} name={e.eliminatedPlayer.firstName} photoUrl={e.eliminatedPlayer.photoUrl} size={32} fontSize={12} />
                       <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#F5EFE6' }}>
                         {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName}
                       </div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: '#F5EFE6' }}>{pointsLabel(e)}</div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: acento ?? '#F5EFE6' }}>{pointsLabel(e)}</div>
                     </div>
                   </HomeCard>
-                ))}
+                  )
+                })}
               </div>
             )}
 

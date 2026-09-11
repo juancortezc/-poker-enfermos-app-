@@ -282,7 +282,7 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
             title="Ultimos"
             description="Ultimo lugar"
             icon={<Target size={20} />}
-            accentColor="#E8863C"
+            accentColor="#EC4899"
             players={awards.sieteYDos.map(s => ({ player: s.player, value: s.count }))}
             valueLabel="Veces"
           />

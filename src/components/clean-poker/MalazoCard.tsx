@@ -41,16 +41,16 @@ export function MalazoCard({ players }: MalazoCardProps) {
   }
 
   // Pink color for "malazo" theme
-  const ACCENT_COLOR = '#E8863C'
+  const ACCENT_COLOR = '#FF6FA5'
 
   return (
     <div
       className="p-4 pt-5"
       style={{
         borderRadius: '5px',
-        background: 'var(--cp-surface-1)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.50), 0 0 40px rgba(229, 57, 53, 0.18)',
-        border: '1px solid rgba(229, 57, 53, 0.35)',
+        background: 'linear-gradient(135deg, #D81B60 0%, #AD1457 60%, #8E0F47 100%)',
+        boxShadow: '0 10px 34px rgba(0, 0, 0, 0.45), 0 0 40px rgba(216, 27, 96, 0.22)',
+        border: '1px solid rgba(236, 72, 153, 0.45)',
       }}
     >
       {/* Header with title and link */}

@@ -167,8 +167,9 @@ export function HomeTorneo({
       {/* NEXT DATE HERO */}
       <div
         style={{
-          background: 'linear-gradient(155deg,#2D2C2E,#242226)',
-          border: '1px solid rgba(255,255,255,0.09)',
+          background: 'linear-gradient(155deg,#12615C,#0C4A46)',
+          border: '1px solid rgba(91,200,192,0.45)',
+          boxShadow: '0 10px 30px rgba(12,74,70,0.35)',
           borderRadius: 18,
           padding: '14px 16px',
           position: 'relative',

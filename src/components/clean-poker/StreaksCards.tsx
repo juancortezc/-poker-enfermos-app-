@@ -18,13 +18,14 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
       {cold.length > 0 && (
         <div
           style={{
-            background: 'rgba(232,134,60,0.12)',
-            border: '1.5px solid rgba(232,134,60,0.55)',
+            background: 'linear-gradient(150deg, #D81B60 0%, #AD1457 100%)',
+            border: '1px solid rgba(236,72,153,0.55)',
+            boxShadow: '0 10px 30px rgba(173,20,87,0.35)',
             borderRadius: 16,
             padding: 14
           }}
         >
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#E8863C', letterSpacing: '0.04em', marginBottom: 10 }}>LOS MALAZOS 7/2</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', letterSpacing: '0.04em', marginBottom: 10 }}>LOS MALAZOS 7/2</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 8 }}>
             {cold.map(player => (
               <div
@@ -32,7 +33,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 style={{
                   textAlign: 'center',
                   background: 'var(--cp-surface-2)',
-                  border: '1px solid rgba(232,134,60,0.30)',
+                  border: '1px solid rgba(255,255,255,0.18)',
                   borderRadius: 14,
                   padding: '12px 6px',
                   display: 'flex',
@@ -57,14 +58,15 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
       {hot.length > 0 && (
         <div
           style={{
-            background: 'rgba(110,203,113,0.14)',
-            border: '1.5px solid rgba(110,203,113,0.65)',
+            background: 'linear-gradient(150deg, #2E7D32 0%, #1B5E20 100%)',
+            border: '1px solid rgba(110,203,113,0.50)',
+            boxShadow: '0 10px 30px rgba(27,94,32,0.30)',
             borderRadius: 16,
             padding: 14
           }}
         >
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#6ECB71', letterSpacing: '0.04em' }}>LOS QUE VIENEN CALIENTES</div>
-          <div style={{ fontSize: 12, color: '#C9BFBA', marginTop: 2, marginBottom: 10 }}>Más posiciones ganadas en las últimas 3 fechas</div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', letterSpacing: '0.04em' }}>LOS QUE VIENEN CALIENTES</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.82)', marginTop: 2, marginBottom: 10 }}>Más posiciones ganadas en las últimas 3 fechas</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
             {hot.map(player => (
               <div
@@ -72,7 +74,7 @@ export function StreaksCards({ hot, cold }: StreaksCardsProps) {
                 style={{
                   textAlign: 'center',
                   background: 'var(--cp-surface-2)',
-                  border: '1px solid rgba(110,203,113,0.30)',
+                  border: '1px solid rgba(255,255,255,0.18)',
                   borderRadius: 14,
                   padding: '12px 6px',
                   display: 'flex',

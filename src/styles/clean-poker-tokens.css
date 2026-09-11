@@ -105,6 +105,18 @@
   --cp-silver-on-light: #6E6A67;    /* 5.0:1 sobre papel */
   --cp-bronze-on-light: #8B5E2F;    /* 5.3:1 sobre papel */
 
+  /* === ROSA — los malazos y todo el 7/2 ===
+     No es un color decorativo ni un resto: en el club, TODO lo referente a los
+     malazos se maneja en rosa. Los dos ultimos puestos, la zona 7/2, el premio
+     a los ultimos. Es identidad, igual que el oro es del podio.
+     Va aparte del naranja: el naranja es "esto te resta puntos", el rosa es
+     "esto es de los malazos". Un jugador puede perder puntos sin ser malazo. */
+  --cp-malazo: #EC4899;            /* el color de identidad */
+  --cp-malazo-text: #FF6FA5;       /* rosa COMO TEXTO sobre oscuro: 6.0:1 */
+  --cp-malazo-block: #D81B60;      /* bloque con texto blanco: 5.0:1 */
+  --cp-malazo-deep: #AD1457;       /* bloque, extremo oscuro: 7.0:1 */
+  --cp-malazo-soft: rgba(236, 72, 153, 0.14);
+
   /* === ACENTOS === */
   --cp-chip: #E8863C;        /* ficha de poker; misma familia que lo negativo */
   --cp-magenta: #C2185B;
