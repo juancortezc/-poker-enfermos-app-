@@ -3,10 +3,10 @@
 import type { CSSProperties, ReactNode } from 'react'
 
 const BASE_STYLE: CSSProperties = {
-  background: '#382E2C',
-  border: '1px solid rgba(255,255,255,0.09)',
+  background: 'var(--cp-surface-1)',
+  border: '1px solid var(--cp-surface-border)',
   borderRadius: 18,
-  boxShadow: '0 1px 2px rgba(0,0,0,0.4), 0 10px 28px rgba(0,0,0,0.45)'
+  boxShadow: 'var(--cp-elevation-2)'
 }
 
 interface HomeCardProps {
