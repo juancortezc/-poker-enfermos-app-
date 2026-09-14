@@ -97,7 +97,10 @@ export default function AdminNewPage() {
 
   return (
     <CPAppShell tone="light">
-      <div className="min-h-screen pb-24">
+      <div
+        className="min-h-screen"
+        style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}
+      >
         {/* CPHeader */}
         <CPHeader tone="light"
           userInitials={userInitials}

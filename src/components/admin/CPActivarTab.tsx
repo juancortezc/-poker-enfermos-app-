@@ -647,7 +647,7 @@ export default function CPActivarTab() {
               borderRadius: 14,
             }}
           >
-            <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
+            <div className="grid grid-cols-2 gap-2">
               {currentPlayers.map((player) => {
                 const isSelected = activeTab === 'enfermos'
                   ? selectedPlayers.includes(player.id)
@@ -907,7 +907,7 @@ export default function CPActivarTab() {
             borderRadius: 14,
           }}
         >
-          <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
+          <div className="grid grid-cols-2 gap-2">
             {currentPlayers.map((player) => {
               const isSelected = activeTab === 'enfermos'
                 ? selectedPlayers.includes(player.id)

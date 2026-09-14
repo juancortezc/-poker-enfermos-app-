@@ -119,6 +119,7 @@ export default function PodcastTab() {
           }}
         >
           Escucha nuestro podcast donde hablamos de poker, estrategias, y anecdotas del grupo.
+          Los episodios con video se ven desde la app de Spotify.
         </p>
 
         {/* Open in Spotify Button */}
@@ -134,7 +135,7 @@ export default function PodcastTab() {
           }}
         >
           <Headphones className="w-5 h-5" />
-          Abrir en Spotify
+          Mira el video o escucha en Spotify
           <ExternalLink className="w-4 h-4" />
         </a>
       </div>
@@ -176,7 +177,8 @@ export default function PodcastTab() {
             color: 'var(--cp-on-surface-variant)',
           }}
         >
-          💡 Sigue el podcast en Spotify para recibir nuevos episodios automaticamente
+          💡 El reproductor de aqui es solo audio. Para ver el video, abre el episodio
+          en la app de Spotify.
         </p>
       </div>
     </div>
