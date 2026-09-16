@@ -13,7 +13,7 @@ export interface PlayerDTO {
   primaryAlias?: string;
   photoUrl?: string;
   isActive: boolean;
-  joinYear: number;
+  joinYear?: number;
   inviterId?: string;
   inviterName?: string;
   inviteesCount: number;

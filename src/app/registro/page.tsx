@@ -1019,7 +1019,7 @@ function CPEliminationHistory({
         return `${elimination.eliminatedPlayer.firstName} ${elimination.eliminatedPlayer.lastName}`
       }
       // Fallback to players array
-      const playerId = elimination.eliminatedPlayerId || elimination.eliminatedPlayer?.id
+      const playerId = elimination.eliminatedPlayerId
       const player = players.find(p => p.id === playerId)
       return player ? `${player.firstName} ${player.lastName}` : 'Desconocido'
     } else {
@@ -1028,7 +1028,7 @@ function CPEliminationHistory({
         return `${elimination.eliminatorPlayer.firstName} ${elimination.eliminatorPlayer.lastName}`
       }
       // Fallback to players array
-      const eliminatorId = elimination.eliminatorPlayerId || elimination.eliminatorPlayer?.id
+      const eliminatorId = elimination.eliminatorPlayerId
       if (!eliminatorId) return 'N/A'
       const player = players.find(p => p.id === eliminatorId)
       return player ? `${player.firstName} ${player.lastName}` : 'Desconocido'

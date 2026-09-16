@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import type { TournamentRepository } from '@/application/tournament';
 import {
@@ -9,14 +10,39 @@ import {
   type GameDateStatus,
 } from '@/domain/tournament';
 
-type PrismaTournamentStatus = 'ACTIVO' | 'COMPLETADO' | 'CANCELLED';
+/**
+ * El include y el tipo del resultado se declaran juntos y el tipo se DERIVA
+ * del include. Antes la firma de toDomain se escribia a mano y habia quedado
+ * desincronizada del esquema: declaraba `guestIds`, `location` y `createdAt`,
+ * tres campos que no existen en la base. Compilaba solo porque el build
+ * ignoraba los errores de tipos.
+ */
+const TOURNAMENT_INCLUDE = {
+  gameDates: {
+    orderBy: { dateNumber: 'asc' as const },
+  },
+  tournamentParticipants: {
+    include: {
+      player: {
+        select: { id: true, firstName: true, lastName: true },
+      },
+    },
+  },
+  blindLevels: {
+    orderBy: { level: 'asc' as const },
+  },
+} satisfies Prisma.TournamentInclude;
+
+type TournamentConRelaciones = Prisma.TournamentGetPayload<{
+  include: typeof TOURNAMENT_INCLUDE;
+}>;
 
 /**
  * Prisma implementation of TournamentRepository.
  */
 export class PrismaTournamentRepository implements TournamentRepository {
   async findAll(status?: TournamentStatus): Promise<Tournament[]> {
-    const where = status ? { status: status as PrismaTournamentStatus } : {};
+    const where: Prisma.TournamentWhereInput = status ? { status } : {};
 
     const tournaments = await prisma.tournament.findMany({
       where,
@@ -55,6 +81,10 @@ export class PrismaTournamentRepository implements TournamentRepository {
   }
 
   private getIncludeClause() {
+    return TOURNAMENT_INCLUDE;
+  }
+
+  private getIncludeClauseUnused() {
     return {
       gameDates: {
         orderBy: { dateNumber: 'asc' as const },
@@ -76,41 +106,13 @@ export class PrismaTournamentRepository implements TournamentRepository {
     };
   }
 
-  private toDomain(
-    data: Awaited<ReturnType<typeof prisma.tournament.findFirst>> & {
-      gameDates: Array<{
-        id: number;
-        dateNumber: number;
-        scheduledDate: Date;
-        status: string;
-        playerIds: string[];
-        guestIds: string[];
-        location: string | null;
-      }>;
-      tournamentParticipants: Array<{
-        playerId: string;
-        confirmed: boolean;
-        createdAt: Date;
-        player: { id: string; firstName: string; lastName: string };
-      }>;
-      blindLevels: Array<{
-        level: number;
-        smallBlind: number;
-        bigBlind: number;
-        duration: number;
-      }>;
-    }
-  ): Tournament {
-    if (!data) throw new Error('Cannot convert null tournament');
-
+  private toDomain(data: TournamentConRelaciones): Tournament {
     const gameDates: GameDateInfo[] = data.gameDates.map((gd) => ({
       id: gd.id,
       dateNumber: gd.dateNumber,
       scheduledDate: gd.scheduledDate,
       status: gd.status as GameDateStatus,
       playerIds: gd.playerIds,
-      guestIds: gd.guestIds,
-      location: gd.location ?? undefined,
     }));
 
     const participants: TournamentParticipant[] = data.tournamentParticipants.map(
@@ -118,7 +120,7 @@ export class PrismaTournamentRepository implements TournamentRepository {
         playerId: tp.playerId,
         playerName: `${tp.player.firstName} ${tp.player.lastName}`,
         confirmed: tp.confirmed,
-        joinedAt: tp.createdAt,
+        joinedAt: tp.joinedAt,
       })
     );
 

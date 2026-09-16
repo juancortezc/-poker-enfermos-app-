@@ -17,7 +17,7 @@ export class PrismaTimerRepository implements TimerRepository {
   async update(
     timerId: number,
     data: Partial<{
-      status: string;
+      status: TimerStatus;
       currentLevel: number;
       timeRemaining: number;
       totalElapsed: number;

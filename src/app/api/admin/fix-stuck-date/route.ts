@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
               points: winnerPoints,
               eliminatedPlayerId: remainingPlayerId,
               eliminatorPlayerId: remainingPlayerId, // Winner eliminates themselves (convention)
-              eliminationTime: new Date(),
+              eliminationTime: new Date().toISOString(),
             }
           })
 

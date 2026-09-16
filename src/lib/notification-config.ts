@@ -2,6 +2,23 @@ import { prisma } from './prisma'
 import { broadcastPushNotification } from './push-service'
 import type { NotificationType } from '@prisma/client'
 
+import { Prisma } from '@prisma/client'
+
+/**
+ * Los campos JSON de Prisma tienen su propio tipo (InputJsonValue al escribir,
+ * JsonValue al leer) y no aceptan Record<string, unknown> ni se dejan castear
+ * directo. Estas dos funciones concentran la conversion en un solo lugar en
+ * vez de repartir casts por todo el archivo.
+ */
+function aJson(valor: NotificationEventSettings): Prisma.InputJsonValue {
+  return valor as unknown as Prisma.InputJsonValue
+}
+
+function desdeJson(valor: Prisma.JsonValue | null | undefined): NotificationEventSettings | null {
+  if (!valor || typeof valor !== 'object' || Array.isArray(valor)) return null
+  return valor as unknown as NotificationEventSettings
+}
+
 export interface NotificationEventSettings {
   isEnabled: boolean
   timing: 'immediate' | 'delayed'
@@ -209,7 +226,7 @@ export async function getNotificationSettings(eventType: string): Promise<Notifi
       return eventDef?.defaultSettings || null
     }
 
-    return setting.settings as NotificationEventSettings
+    return desdeJson(setting.settings)
   } catch (error) {
     console.error(`Error getting notification settings for ${eventType}:`, error)
     return null
@@ -229,11 +246,11 @@ export async function updateNotificationSettings(
       create: {
         eventType,
         isEnabled: settings.isEnabled,
-        settings: settings as unknown as Record<string, unknown>
+        settings: aJson(settings)
       },
       update: {
         isEnabled: settings.isEnabled,
-        settings: settings as unknown as Record<string, unknown>,
+        settings: aJson(settings),
         updatedAt: new Date()
       }
     })
@@ -261,7 +278,8 @@ export async function getAllNotificationSettings(): Promise<Record<string, Notif
     // Override with stored settings
     settings.forEach(setting => {
       if (setting.settings) {
-        result[setting.eventType] = setting.settings as NotificationEventSettings
+        const parsed = desdeJson(setting.settings)
+        if (parsed) result[setting.eventType] = parsed
       }
     })
 
@@ -403,7 +421,7 @@ export async function logNotificationHistory({
         success,
         errorMessage,
         sentByPlayerId,
-        metadata: metadata as unknown as Record<string, unknown>
+        metadata: metadata as unknown as Prisma.InputJsonValue
       }
     })
   } catch (error) {
@@ -480,7 +498,7 @@ export async function initializeDefaultSettings(): Promise<void> {
       .map(event => ({
         eventType: event.eventType,
         isEnabled: event.defaultSettings.isEnabled,
-        settings: event.defaultSettings as unknown as Record<string, unknown>
+        settings: aJson(event.defaultSettings)
       }))
 
     if (newSettings.length > 0) {

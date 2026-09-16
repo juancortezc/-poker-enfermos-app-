@@ -1,3 +1,4 @@
+import type { TimerStatus } from '@/domain/timer';
 import type { TimerState } from '@/domain/timer';
 
 /**
@@ -15,7 +16,7 @@ export interface TimerRepository {
   update(
     timerId: number,
     data: Partial<{
-      status: string;
+      status: TimerStatus;
       currentLevel: number;
       timeRemaining: number;
       totalElapsed: number;

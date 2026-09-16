@@ -44,12 +44,7 @@ export {
   TIMER_DEPS,
 } from './di/timer';
 
-// Proposal context dependencies
-export {
-  registerProposalDependencies,
-  getGetProposalsUseCase,
-  PROPOSAL_DEPS,
-} from './di/proposal';
+// Las propuestas se manejan en las rutas /api/proposals-v2, sin contexto propio.
 
 // Repositories (for direct access if needed)
 export { PrismaEliminationRepository } from './persistence/prisma/repositories/PrismaEliminationRepository';
@@ -58,7 +53,6 @@ export { PrismaPlayerRepository } from './persistence/prisma/repositories/Prisma
 export { PrismaTournamentRepository } from './persistence/prisma/repositories/PrismaTournamentRepository';
 export { PrismaPlayerQueryRepository } from './persistence/prisma/repositories/PrismaPlayerQueryRepository';
 export { PrismaTimerRepository } from './persistence/prisma/repositories/PrismaTimerRepository';
-export { PrismaProposalRepository } from './persistence/prisma/repositories/PrismaProposalRepository';
 
 // Services
 export { NotificationServiceAdapter } from './services/NotificationServiceAdapter';

@@ -1,12 +1,26 @@
 /**
  * Tournament status enum.
  */
-export type TournamentStatus = 'ACTIVO' | 'COMPLETADO' | 'CANCELLED';
+/**
+ * Los dos estados que existen en la base. Antes este tipo declaraba
+ * 'COMPLETADO' y 'CANCELLED', que no estan en el enum del esquema
+ * (ACTIVO | FINALIZADO) y no los escribe nadie.
+ */
+export type TournamentStatus = 'ACTIVO' | 'FINALIZADO';
 
 /**
  * Game date status enum.
  */
-export type GameDateStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+/**
+ * Los estados reales del esquema. Antes decia 'scheduled', que no existe en
+ * la base: getNextGameDate() lo comparaba y por eso nunca encontraba nada.
+ */
+export type GameDateStatus =
+  | 'pending'
+  | 'CREATED'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled';
 
 /**
  * Blind level configuration.
@@ -27,8 +41,6 @@ export interface GameDateInfo {
   scheduledDate: Date;
   status: GameDateStatus;
   playerIds: string[];
-  guestIds: string[];
-  location?: string;
 }
 
 /**
@@ -127,11 +139,12 @@ export class Tournament {
   }
 
   isCompleted(): boolean {
-    return this._status === 'COMPLETADO';
+    return this._status === 'FINALIZADO';
   }
 
   getNextGameDate(): GameDateInfo | undefined {
-    return this._gameDates.find((d) => d.status === 'scheduled');
+    // 'pending' y 'CREATED' son las fechas que todavia no se juegan.
+    return this._gameDates.find((d) => d.status === 'pending' || d.status === 'CREATED');
   }
 
   getGameDateInProgress(): GameDateInfo | undefined {

@@ -1,7 +1,12 @@
 /**
  * Timer status enum.
  */
-export type TimerStatus = 'idle' | 'active' | 'paused' | 'completed';
+/**
+ * Los estados reales del esquema. Antes decia 'idle', que no existe en la
+ * base (el enum es inactive | active | paused | completed), asi que isIdle()
+ * nunca podia dar true.
+ */
+export type TimerStatus = 'inactive' | 'active' | 'paused' | 'completed';
 
 /**
  * Computed timer state with calculated values.
@@ -100,7 +105,7 @@ export class TimerState {
   }
 
   isIdle(): boolean {
-    return this._status === 'idle';
+    return this._status === 'inactive';
   }
 
   isCompleted(): boolean {

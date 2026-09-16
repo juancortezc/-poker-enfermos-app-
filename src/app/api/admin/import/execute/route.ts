@@ -88,12 +88,16 @@ async function updateGameDateStatus(gameDateId: number, date: string): Promise<v
 /**
  * Find or suggest GameDate for import
  */
+/**
+ * El defecto real estaba en los ids de eliminacion: se tipaban como string
+ * cuando en el esquema son enteros.
+ */
 async function findGameDateForImport(tournamentName: string, dateNumber: number): Promise<{
   gameDate: {
     id: number;
-    eliminations: Array<{ id: string }>;
-    tournament: { number: number };
     dateNumber: number;
+    eliminations: Array<{ id: number }>;
+    tournament: { number: number };
   } | null;
   suggestions: string[];
 }> {

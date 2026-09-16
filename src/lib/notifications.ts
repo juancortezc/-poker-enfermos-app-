@@ -86,7 +86,9 @@ export class NotificationService {
 
       const subscribeOptions: PushSubscriptionOptionsInit = {
         userVisibleOnly: true,
-        applicationServerKey: this.toUint8Array(vapidKey),
+        // .buffer: el tipo de PushSubscriptionOptionsInit pide BufferSource,
+        // y Uint8Array<ArrayBufferLike> ya no encaja directo.
+        applicationServerKey: this.toUint8Array(vapidKey).buffer as ArrayBuffer,
       };
 
       this.pushSubscription = await pushManager.subscribe(subscribeOptions);
@@ -208,7 +210,7 @@ export class NotificationService {
 
     try {
       // Si ya hay un SW activo, obtener el registro
-      this.serviceWorkerRegistration = await navigator.serviceWorker.getRegistration();
+      this.serviceWorkerRegistration = (await navigator.serviceWorker.getRegistration()) ?? null;
 
       if (!this.serviceWorkerRegistration) {
         this.serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js');

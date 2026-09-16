@@ -25,7 +25,7 @@ export function useFormDraft<T extends Record<string, any>>(
   const [hasDraft, setHasDraft] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [isAutoSaving, setIsAutoSaving] = useState(false)
-  const autosaveTimeoutRef = useRef<NodeJS.Timeout>()
+  const autosaveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const storageKey = `tournament-draft-${key}`
 
   // Verificar si existe draft al montar
@@ -123,13 +123,18 @@ export function useFormDraft<T extends Record<string, any>>(
   }
 }
 
-export function useFormValidation<T extends Record<string, unknown>>(
+/**
+ * `E` es lo que el validador ponga en errors/warnings. Estaba fijado a
+ * string[], pero los validadores reales devuelven objetos
+ * {field, message, type} — que es tambien lo que espera ValidationSummary.
+ */
+export function useFormValidation<T extends Record<string, unknown>, E = unknown>(
   data: T,
-  validator: (data: T) => { isValid: boolean; errors: string[]; warnings: string[] }
+  validator: (data: T) => { isValid: boolean; errors: E[]; warnings: E[] }
 ) {
   const [validationResult, setValidationResult] = useState(() => validator(data))
   const [isValidating, setIsValidating] = useState(false)
-  const debounceTimeoutRef = useRef<NodeJS.Timeout>()
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   const validateWithDebounce = useCallback((newData: T, delay = 300) => {
     setIsValidating(true)

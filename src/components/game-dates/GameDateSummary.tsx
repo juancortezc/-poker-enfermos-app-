@@ -6,13 +6,18 @@ import { Calendar, Users, Trophy, Edit, Clock } from 'lucide-react'
 
 interface GameDateSummaryProps {
   gameDate: { 
-    id: string; 
+    // La fecha activa trae id numerico y la recien creada tambien.
+    id: string | number; 
     dateNumber: number; 
     scheduledDate: string; 
-    status: string;
+    status?: string;
     playerIds?: string[];
     guestIds?: string[];
     pointsForWinner?: number;
+    // Los declara el componente porque los lee; antes los usaba sin tenerlos
+    // en el tipo y solo compilaba porque el build ignoraba los errores.
+    playersCount?: number;
+    tournament?: { number?: number; name?: string };
   }
   onEdit?: () => void
 }

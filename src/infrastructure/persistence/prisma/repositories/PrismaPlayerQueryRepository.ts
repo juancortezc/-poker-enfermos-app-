@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import type { PlayerRepository, PlayerFilter } from '@/application/player';
 import { Player, type PlayerRole } from '@/domain/player';
@@ -6,6 +7,21 @@ import type { UserRole } from '@prisma/client';
 /**
  * Prisma implementation of PlayerRepository for queries.
  */
+/**
+ * El tipo del resultado se DERIVA del include, en vez de reescribirse a mano.
+ * La firma escrita a mano se habia separado de lo que la consulta devuelve.
+ */
+const PLAYER_INCLUDE = {
+  inviter: {
+    select: { id: true, firstName: true, lastName: true },
+  },
+  _count: {
+    select: { invitees: true },
+  },
+} satisfies Prisma.PlayerInclude;
+
+type PlayerConRelaciones = Prisma.PlayerGetPayload<{ include: typeof PLAYER_INCLUDE }>;
+
 export class PrismaPlayerQueryRepository implements PlayerRepository {
   async findAll(filter?: PlayerFilter): Promise<Player[]> {
     const where: Record<string, unknown> = {};
@@ -74,20 +90,7 @@ export class PrismaPlayerQueryRepository implements PlayerRepository {
     return player ? this.toDomain(player) : null;
   }
 
-  private toDomain(
-    data: {
-      id: string;
-      firstName: string;
-      lastName: string;
-      role: UserRole;
-      aliases: string[];
-      photoUrl: string | null;
-      isActive: boolean;
-      joinYear: number;
-      inviter: { id: string; firstName: string; lastName: string } | null;
-      _count: { invitees: number };
-    }
-  ): Player {
+  private toDomain(data: PlayerConRelaciones): Player {
     return Player.create({
       id: data.id,
       firstName: data.firstName,
@@ -96,7 +99,7 @@ export class PrismaPlayerQueryRepository implements PlayerRepository {
       aliases: data.aliases,
       photoUrl: data.photoUrl ?? undefined,
       isActive: data.isActive,
-      joinYear: data.joinYear,
+      joinYear: data.joinYear ?? undefined,
       inviterId: data.inviter?.id,
       inviterName: data.inviter
         ? `${data.inviter.firstName} ${data.inviter.lastName}`

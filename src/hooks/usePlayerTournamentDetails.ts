@@ -13,6 +13,25 @@ interface PlayerPublicData {
   lastVictoryDate?: string;
 }
 
+/**
+ * Una fila del rendimiento por fecha. Antes estaba escrita inline y cada rama
+ * del map devolvia una forma distinta, asi que TypeScript infería una union y
+ * no dejaba leer isAbsent ni eliminationPosition.
+ */
+export interface DatePerformance {
+  dateNumber: number;
+  status: 'completed' | 'in_progress' | 'pending' | 'CREATED';
+  eliminationPosition?: number;
+  eliminatedBy?: {
+    name: string;
+    alias?: string;
+    isGuest: boolean;
+  };
+  points: number;
+  rankingPosition?: number;
+  isAbsent?: boolean;
+}
+
 interface PlayerTournamentDetails {
   player: {
     id: string;
@@ -33,19 +52,7 @@ interface PlayerTournamentDetails {
     finalScore?: number;
   };
   datesToEliminate: number;
-  datePerformance: Array<{
-    dateNumber: number;
-    status: 'completed' | 'in_progress' | 'pending' | 'CREATED';
-    eliminationPosition?: number;
-    eliminatedBy?: {
-      name: string;
-      alias?: string;
-      isGuest: boolean;
-    };
-    points: number;
-    rankingPosition?: number;
-    isAbsent?: boolean;
-  }>;
+  datePerformance: DatePerformance[];
   rankingEvolution: Array<{
     dateNumber: number;
     position: number;
@@ -184,10 +191,10 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
         };
 
         const datePerformance = await Promise.all(
-          gameDates.map(async date => {
-            const baseDate = {
+          gameDates.map(async (date): Promise<DatePerformance> => {
+            const baseDate: DatePerformance = {
               dateNumber: date.dateNumber,
-              status: date.status,
+              status: date.status as DatePerformance['status'],
               points: playerRanking.pointsByDate[date.dateNumber] || 0
             };
 
@@ -343,7 +350,9 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
 // Helper function to calculate ranking evolution with ELIMINA N system
 function calculateRankingEvolution(
   playerPointsByDate: { [dateNumber: number]: number },
-  allRankings: Array<{ playerId: string; pointsByDate: { [key: number]: number }; [key: string]: unknown }>,
+  // Solo necesita id y puntos por fecha. La firma pedia ademas un index
+  // signature, que ningun tipo concreto satisface: PlayerRanking no encajaba.
+  allRankings: Array<{ playerId: string; pointsByDate: { [key: number]: number } }>,
   targetPlayerId: string,
   totalDates: number = 12,
   datesToEliminate: number = 2

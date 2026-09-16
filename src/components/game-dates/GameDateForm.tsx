@@ -208,7 +208,7 @@ export default function GameDateForm() {
             variant="ghost"
             size="sm"
             onClick={() => {
-              if (currentStep === 'date-info' || currentStep === 'loading') {
+              if (currentStep === 'date-info') {
                 router.push('/admin')
               } else if (currentStep === 'select-players') {
                 setCurrentStep('date-info')
@@ -387,15 +387,22 @@ export default function GameDateForm() {
         )}
 
         {/* Step 5: Summary */}
-        {currentStep === 'summary' && (activeDate || createdGameDate) && (
+        {currentStep === 'summary' && (() => {
+          // Se calcula una vez: con `(a || b) && <X gameDate={a || b} />` la
+          // guarda y el valor son expresiones distintas y TypeScript no puede
+          // descartar el null.
+          const fechaResumen = activeDate ?? createdGameDate
+          if (!fechaResumen) return null
+          return (
           <GameDateSummary
-            gameDate={activeDate || createdGameDate}
+            gameDate={fechaResumen}
             onEdit={() => {
               // Permitir editar regresando al paso de selección de jugadores
               setCurrentStep('select-players')
             }}
           />
-        )}
+          )
+        })()}
       </div>
     </div>
   )

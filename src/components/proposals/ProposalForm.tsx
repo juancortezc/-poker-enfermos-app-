@@ -246,7 +246,7 @@ export function ProposalForm({
             Imagen (Opcional)
           </label>
           <Input
-            value={formData.imageUrl}
+            value={formData.imageUrl ?? ''}
             onChange={(e) => handleInputChange('imageUrl', e.target.value)}
             placeholder="https://ejemplo.com/imagen.jpg"
             disabled={saving}

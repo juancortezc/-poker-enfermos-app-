@@ -170,9 +170,10 @@ export default function TournamentCompletionModal({
               <label className="text-sm font-medium text-poker-text">
                 Nueva Fecha Final
               </label>
+              {/* DatePicker trabaja con strings ISO, no con Date. */}
               <DatePicker
-                selected={newEndDate}
-                onSelect={setNewEndDate}
+                value={newEndDate ? newEndDate.toISOString().slice(0, 10) : ''}
+                onChange={(valor) => setNewEndDate(valor ? new Date(valor) : undefined)}
                 placeholder="Seleccionar fecha..."
                 className="w-full"
               />

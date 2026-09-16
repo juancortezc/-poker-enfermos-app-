@@ -45,8 +45,6 @@ export class GetActiveTournamentHandler implements GetActiveTournamentUseCase {
         scheduledDate: gd.scheduledDate,
         status: gd.status,
         playerIds: gd.playerIds,
-        guestIds: gd.guestIds,
-        location: gd.location,
       })),
       participants: tournament.participants.map((p) => ({
         playerId: p.playerId,
@@ -78,8 +76,6 @@ export class GetActiveTournamentHandler implements GetActiveTournamentUseCase {
             scheduledDate: nextDate.scheduledDate,
             status: nextDate.status,
             playerIds: nextDate.playerIds,
-            guestIds: nextDate.guestIds,
-            location: nextDate.location,
           }
         : null,
       startDate,

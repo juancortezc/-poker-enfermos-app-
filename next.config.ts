@@ -55,17 +55,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // DEUDA CONOCIDA: el build ignora los errores de TypeScript.
+  // El build FALLA si hay errores de TypeScript, como debe ser.
   //
-  // Hoy `npx tsc --noEmit` reporta ~46 errores reales repartidos en repos de
-  // Prisma, hooks y formularios. Apagar esta bandera sin limpiarlos primero
-  // deja el proyecto sin poder desplegar, asi que se documenta en vez de
-  // quitarla a ciegas.
-  //
-  // Correrlo de vez en cuando igual sirve: es lo que destapo, entre otros,
-  // que PrismaTournamentRepository espera campos que no existen en el schema.
+  // Estuvo en ignoreBuildErrors durante mucho tiempo y eso dejo pasar defectos
+  // reales: tipos que declaraban campos inexistentes en el esquema
+  // (guestIds, location, createdAt), enums desalineados con la base
+  // ('COMPLETADO' por 'FINALIZADO', 'scheduled' por 'pending', 'idle' por
+  // 'inactive') y dos implementaciones del ranking conviviendo sin que nadie
+  // lo notara. Si el build vuelve a romper por tipos, hay algo que arreglar,
+  // no una bandera que apagar.
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   // Optimize for production
   compress: true,

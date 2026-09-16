@@ -9,6 +9,7 @@ import { ArrowLeft, Save, Users, AlertTriangle } from 'lucide-react'
 import { toast } from 'react-toastify'
 import PlayerSelector from '@/components/game-dates/PlayerSelector'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import type { UserRole } from '@prisma/client'
 
 interface GameDate {
   id: number
@@ -27,7 +28,8 @@ interface Player {
   id: string
   firstName: string
   lastName: string
-  role: string
+  // El enum real, no un string cualquiera: es lo que espera PlayerSelector.
+  role: UserRole
   photoUrl?: string
   isActive: boolean
 }

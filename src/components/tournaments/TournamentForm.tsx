@@ -26,6 +26,7 @@ interface Player {
   lastName: string
   role: UserRole
   photoUrl?: string
+  aliases?: string[]
   isActive: boolean
 }
 

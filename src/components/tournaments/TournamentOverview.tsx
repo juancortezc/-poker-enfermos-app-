@@ -79,7 +79,7 @@ export default function TournamentOverview() {
       }
 
       // Next tournament is always null with current architecture
-      setNextTournament(null)
+      setNextTournament({ tournament: null })
     } catch (error) {
       console.error('Error fetching tournaments:', error)
       setError('Error al cargar torneos')

@@ -15,7 +15,8 @@ export class Player {
     private readonly _aliases: string[],
     private readonly _photoUrl: string | undefined,
     private readonly _isActive: boolean,
-    private readonly _joinYear: number,
+    // Nullable en la base: hay jugadores sin anio de ingreso registrado.
+    private readonly _joinYear: number | undefined,
     private readonly _inviterId: string | undefined,
     private readonly _inviterName: string | undefined,
     private readonly _inviteesCount: number
@@ -29,7 +30,7 @@ export class Player {
     aliases: string[];
     photoUrl?: string;
     isActive: boolean;
-    joinYear: number;
+    joinYear?: number;
     inviterId?: string;
     inviterName?: string;
     inviteesCount: number;
@@ -85,7 +86,7 @@ export class Player {
     return this._isActive;
   }
 
-  get joinYear(): number {
+  get joinYear(): number | undefined {
     return this._joinYear;
   }
 

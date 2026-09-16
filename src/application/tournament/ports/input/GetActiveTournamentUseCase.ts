@@ -9,8 +9,6 @@ export interface GameDateDTO {
   scheduledDate: Date;
   status: GameDateStatus;
   playerIds: string[];
-  guestIds: string[];
-  location?: string;
 }
 
 /**
