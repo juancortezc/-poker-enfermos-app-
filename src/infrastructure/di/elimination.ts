@@ -37,7 +37,15 @@ export const ELIMINATION_DEPS = {
   // Repositories
   ELIMINATION_REPOSITORY: 'EliminationRepository',
   GAME_DATE_REPOSITORY: 'GameDateRepository',
-  PLAYER_REPOSITORY: 'PlayerRepository',
+  /**
+   * Clave propia a proposito. El contexto de Player registra SU repositorio
+   * bajo 'PlayerRepository' y, como corre despues en el bootstrap, pisaba a
+   * este: el handler de eliminaciones terminaba recibiendo
+   * PrismaPlayerQueryRepository, que devuelve entidades de dominio y no
+   * implementa este puerto. Funcionaba de casualidad porque ambos tenian un
+   * findById de forma parecida.
+   */
+  PLAYER_REPOSITORY: 'EliminationPlayerRepository',
 
   // Services
   NOTIFICATION_SERVICE: 'NotificationService',
