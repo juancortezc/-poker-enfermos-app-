@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, X, Share, AlertTriangle } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useIosInstall } from '@/hooks/useIosInstall'
 
 const DISMISSED_KEY = 'push_banner_dismissed'
 // Se vuelve a mostrar pasada una semana: insistir sin ser molesto.
@@ -22,22 +23,6 @@ function isSnoozed(): boolean {
   }
 }
 
-/** iOS solo permite push si la app está instalada en la pantalla de inicio. */
-function useIosNeedsInstall() {
-  const [needsInstall, setNeedsInstall] = useState(false)
-
-  useEffect(() => {
-    const nav = window.navigator as Navigator & { standalone?: boolean }
-    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    const isStandalone =
-      window.matchMedia?.('(display-mode: standalone)').matches === true ||
-      nav.standalone === true
-    setNeedsInstall(isIos && !isStandalone)
-  }, [])
-
-  return needsInstall
-}
-
 export function PushActivationBanner() {
   const router = useRouter()
   const {
@@ -49,7 +34,7 @@ export function PushActivationBanner() {
     subscribeToPush,
   } = useNotifications()
 
-  const iosNeedsInstall = useIosNeedsInstall()
+  const { needsInstall: iosNeedsInstall } = useIosInstall()
   const [dismissed, setDismissed] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -88,8 +73,12 @@ export function PushActivationBanner() {
     }
   }
 
-  // Nada que pedir: sin soporte, todavía cargando, ya suscrito o pospuesto.
-  if (isInitializing || !isSupported || pushSubscription || dismissed) return null
+  // Nada que pedir: todavía cargando, ya suscrito o pospuesto.
+  if (isInitializing || pushSubscription || dismissed) return null
+  // En iPhone sin instalar, `isSupported` es false porque Safari no expone la
+  // API de notificaciones. Ese es precisamente el caso que hay que explicar,
+  // asi que no se puede descartar por falta de soporte.
+  if (!isSupported && !iosNeedsInstall) return null
 
   const blocked = permission === 'denied'
 
@@ -143,7 +132,7 @@ export function PushActivationBanner() {
 
         {!blocked && (
           <button
-            onClick={iosNeedsInstall ? () => router.push('/perfil') : handleActivate}
+            onClick={iosNeedsInstall ? () => router.push('/perfil?tab=notificaciones') : handleActivate}
             disabled={loading}
             className="mt-3 px-4 py-2 font-semibold transition-opacity"
             style={{

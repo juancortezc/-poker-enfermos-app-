@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -26,6 +26,16 @@ export default function PerfilPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('datos')
+
+  // Permite entrar directo a una pestana con ?tab=notificaciones, que es como
+  // el banner de push manda al instructivo de iPhone. Se lee de window en vez
+  // de useSearchParams para no obligar a un Suspense en una pagina estatica.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab')
+    if (requested && TABS.some((t) => t.id === requested)) {
+      setActiveTab(requested as TabType)
+    }
+  }, [])
 
   // Loading state
   if (loading) {

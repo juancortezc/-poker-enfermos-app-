@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useIosInstall } from '@/hooks/useIosInstall'
+import IosInstallInstructions from '@/components/notifications/IosInstallInstructions'
 import { Bell, BellOff, AlertTriangle, CheckCircle } from 'lucide-react'
 
 // Clean Checkbox (16x16, compact)
@@ -82,6 +84,7 @@ export default function NotificacionesTab() {
     subscribeToPush,
     unsubscribeFromPush,
   } = useNotifications()
+  const { needsInstall: iosNeedsInstall } = useIosInstall()
 
   const [saving, setSaving] = useState(false)
   const [pushLoading, setPushLoading] = useState(false)
@@ -120,6 +123,12 @@ export default function NotificacionesTab() {
   }
 
   if (!isSupported) {
+    // En iPhone esto no es "tu navegador no puede": es que falta instalar la
+    // app. Sin esta rama el usuario llegaba a un callejon sin salida.
+    if (iosNeedsInstall) {
+      return <IosInstallInstructions />
+    }
+
     return (
       <div
         className="rounded-2xl p-6 text-center"
