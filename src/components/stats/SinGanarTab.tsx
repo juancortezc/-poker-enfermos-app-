@@ -4,6 +4,8 @@ import useSWR from 'swr'
 import Image from 'next/image'
 import { useMemo } from 'react'
 import { useGameDates } from '@/hooks/useGameDates'
+import { tile, overline, SOBRE_COLOR } from '../clean-poker/bento'
+import { Score, Meter } from '../clean-poker/Score'
 
 interface PlayerWithVictoryData {
   id: string
@@ -77,66 +79,51 @@ function getMilestoneDate(lastVictoryDate: string | null | undefined): Date | nu
   return m
 }
 
-// ── MILESTONE TIERS (ordered highest → lowest) ──
+/**
+ * Rampa de severidad de la sequia.
+ *
+ * Esta pantalla corria con su propio sistema — neon arcade, scanlines y colores
+ * tipo #FF0040 / #FAFF00 / #00FF88. Era el tercer lenguaje visual de la app y no
+ * sobrevivia al fondo claro. La LOGICA de los tramos no se toca: lo unico que
+ * cambia es que los colores salen de la paleta del club.
+ *
+ * Va de rosa a verde porque es una rampa de gravedad, no una lista de
+ * categorias: rosa es territorio de malazos, naranja lo que resta, oro el aviso
+ * y verde el que esta al dia. Todos verificados sobre papel (minimo 4.69:1) y
+ * como bloque con texto blanco encima (minimo 5.02:1).
+ */
 const TIERS = [
-  { key: 'club',    min: 1000, emoji: '💀', label: 'CLUB 1000',    color: '#FF0040', border: 'rgba(255,0,64,0.45)',    glow: 'rgba(255,0,64,0.30)'    },
-  { key: 'danger',  min: 900,  emoji: '☠️', label: 'ZONA CRÍTICA', color: '#FF2255', border: 'rgba(255,34,85,0.40)',   glow: 'rgba(255,34,85,0.25)'   },
-  { key: '2years',  min: 730,  emoji: '🔴', label: '+ 2 AÑOS',     color: '#FF6020', border: 'rgba(255,96,32,0.38)',   glow: 'rgba(255,96,32,0.22)'   },
-  { key: '1year',   min: 365,  emoji: '🟠', label: '+ 1 AÑO',      color: '#FF8C35', border: 'rgba(255,140,53,0.35)',  glow: 'rgba(255,140,53,0.18)'  },
-  { key: '6months', min: 180,  emoji: '🟡', label: '+ 6 MESES',    color: '#FAFF00', border: 'rgba(250,255,0,0.30)',   glow: 'rgba(250,255,0,0.16)'   },
-  { key: 'recent',  min: 0,    emoji: '🟢', label: 'RECIENTES',    color: '#00FF88', border: 'rgba(0,255,136,0.30)',   glow: 'rgba(0,255,136,0.16)'   },
+  { key: 'club',    min: 1000, label: 'CLUB 1000',    color: '#AD1457' },
+  { key: 'danger',  min: 900,  label: 'ZONA CRÍTICA', color: '#C2185B' },
+  { key: '2years',  min: 730,  label: '+ 2 AÑOS',     color: '#9A3412' },
+  { key: '1year',   min: 365,  label: '+ 1 AÑO',      color: '#C2410C' },
+  { key: '6months', min: 180,  label: '+ 6 MESES',    color: '#8A6508' },
+  { key: 'recent',  min: 0,    label: 'RECIENTES',    color: '#15803D' },
 ]
 
 function getTier(days: number) {
   return TIERS.find(t => days >= t.min) ?? TIERS[TIERS.length - 1]
 }
 
-const SCANLINES = `
-  repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
-  repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px)
-`
-
-// ── XP BAR ──
-function XPBar({ days, color, glow, height = 4 }: { days: number; color: string; glow: string; height?: number }) {
-  const pct = Math.min(100, (days / 1000) * 100)
-  const isCritical = pct >= 90
-  return (
-    <div style={{ height, borderRadius: '3px', background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
-      <div style={{
-        height: '100%', width: `${pct}%`,
-        background: isCritical ? `linear-gradient(90deg, ${color} 0%, #fff 100%)` : color,
-        boxShadow: `0 0 8px ${glow}`, borderRadius: '3px', position: 'relative',
-      }}>
-        {isCritical && (
-          <div style={{
-            position: 'absolute', right: 0, top: '-1px', bottom: '-1px', width: '4px',
-            background: '#fff', boxShadow: '0 0 8px rgba(255,255,255,0.9)', borderRadius: '2px',
-          }} />
-        )}
-      </div>
-    </div>
-  )
-}
-
 // ── GAME DATE BADGE ──
-function GameDateBadge({ match }: { match: MatchingGameDate }) {
+/** El hito cae justo en una fecha del calendario: eso es lo informativo, y lo
+ *  informativo es el color frio. */
+function GameDateBadge({ match, sobreOscuro = false }: { match: MatchingGameDate; sobreOscuro?: boolean }) {
   return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: '4px',
-      padding: '3px 8px', borderRadius: '5px', marginTop: '5px',
-      background: 'rgba(0,229,255,0.12)',
-      border: '1px solid rgba(0,229,255,0.45)',
-      boxShadow: '0 0 12px rgba(0,229,255,0.20)',
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      padding: '3px 9px', borderRadius: 100, marginTop: 6,
+      background: sobreOscuro ? 'rgba(91,200,192,0.18)' : 'rgba(15,118,110,0.10)',
+      border: `1px solid ${sobreOscuro ? 'rgba(91,200,192,0.5)' : 'rgba(15,118,110,0.35)'}`,
+      fontSize: 11, fontWeight: 800, letterSpacing: '0.08em',
+      color: sobreOscuro ? '#5BC8C0' : '#0F766E',
     }}>
-      <span style={{ fontSize: '13px' }}>🎮</span>
-      <span style={{ fontSize: '12px', fontWeight: 800, color: '#00E5FF', letterSpacing: '0.10em' }}>
-        COINCIDE CON F{match.dateNumber}
-      </span>
-    </div>
+      CAE EN LA FECHA {match.dateNumber}
+    </span>
   )
 }
 
-// ── STATS STRIP ──
+// ── TIRA DE RESUMEN ──
 function StatsStrip({ players }: { players: PlayerWithVictoryData[] }) {
   const tierCounts = TIERS.map((tier, i) => {
     const upper = i > 0 ? TIERS[i - 1].min : Infinity
@@ -150,69 +137,32 @@ function StatsStrip({ players }: { players: PlayerWithVictoryData[] }) {
     : 0
   const total = players.length
 
-  const cardBase: React.CSSProperties = {
-    padding: '8px 10px', borderRadius: '5px',
-    background: 'rgba(255,255,255,0.03)',
-    display: 'flex', flexDirection: 'column', gap: '2px',
-  }
-
   return (
-    <div style={{
-      borderRadius: '5px', padding: '10px',
-      background: 'rgba(6,9,20,0.88)', backgroundImage: SCANLINES,
-      border: '1px solid rgba(0,229,255,0.14)',
-    }}>
-      <div className="grid grid-cols-3 gap-2">
-        {/* Tier count cards */}
-        {tierCounts.map(({ tier, count }) => {
-          const pct = Math.round((count / total) * 100)
-          return (
-            <div key={tier.key} style={{ ...cardBase, border: `1px solid ${tier.border}` }}>
-              <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
-                {tier.label}
-              </p>
-              <p style={{ fontSize: '24px', fontWeight: 900, color: '#fff', lineHeight: 1, textAlign: 'right' }}>
-                {count}
-              </p>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.32)', textAlign: 'right' }}>
-                {pct}% del total
-              </p>
-            </div>
-          )
-        })}
-
-        {/* Average card */}
-        <div style={{ ...cardBase, border: '1px solid rgba(0,229,255,0.22)' }}>
-          <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
-            PROMEDIO
-          </p>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', gap: '2px' }}>
-            <span style={{ fontSize: '24px', fontWeight: 900, color: '#fff', lineHeight: 1 }}>{avg}</span>
-            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.38)', fontWeight: 600 }}>d</span>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 10 }}>
+      {tierCounts.map(({ tier, count }) => (
+        <div key={tier.key} style={{ ...tile('papel', 1), padding: 13, gap: 2, borderLeft: `3px solid ${tier.color}` }}>
+          <span style={overline(tier.color)}>{tier.label}</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, marginTop: 2 }}>
+            <Score value={count} size={26} color="var(--cp-on-surface)" />
+            <span style={{ fontSize: 11.5, color: 'var(--cp-on-surface-variant)' }}>
+              {Math.round((count / total) * 100)}%
+            </span>
           </div>
-          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.32)', textAlign: 'right' }}>
-            días sin ganar
-          </p>
         </div>
+      ))}
 
-        {/* Historical record card — placeholder, data not yet in DB */}
-        <div style={{ ...cardBase, border: '1px solid rgba(255,255,255,0.08)', opacity: 0.55 }}>
-          <p style={{ fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.08em' }}>
-            RÉCORD HISTÓRICO
-          </p>
-          <p style={{ fontSize: '24px', fontWeight: 900, color: 'rgba(255,255,255,0.30)', lineHeight: 1, textAlign: 'right', marginTop: 'auto' }}>
-            —
-          </p>
-          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.22)', textAlign: 'right' }}>
-            días sin ganar
-          </p>
+      <div style={{ ...tile('papel', 1), padding: 13, gap: 2, borderLeft: '3px solid var(--cp-info)' }}>
+        <span style={overline('var(--cp-info)')}>promedio</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginTop: 2 }}>
+          <Score value={avg} size={26} color="var(--cp-on-surface)" />
+          <span style={{ fontSize: 11.5, color: 'var(--cp-on-surface-variant)' }}>días</span>
         </div>
       </div>
     </div>
   )
 }
 
-// ── CLUB 1000 COUNTDOWN HERO ──
+// ── EL HITO DE LOS 1000 DÍAS — el ancla negra ──
 function Club1000Hero({ player, milestoneDate, matchingGameDate }: {
   player: PlayerWithVictoryData
   milestoneDate: Date | null
@@ -222,112 +172,102 @@ function Club1000Hero({ player, milestoneDate, matchingGameDate }: {
   const isPast = days >= 1000
   const remaining = 1000 - days
   const pct = Math.min(100, Math.round((days / 1000) * 100))
-  const tier = getTier(days)
+  // Sobre el bloque negro el rosa profundo no se lee: ahi va el claro.
+  const acento = isPast ? '#FF6FA5' : '#FF9E5E'
 
   return (
-    <div style={{
-      borderRadius: '5px', padding: '16px',
-      background: '#060914', backgroundImage: SCANLINES,
-      border: `1px solid ${tier.border}`,
-      boxShadow: `0 0 32px ${tier.glow}, inset 0 1px 0 ${tier.border}`,
-    }}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <p style={{ fontSize: '12px', fontWeight: 800, color: tier.color, letterSpacing: '0.22em', marginBottom: '4px' }}>
-            {isPast ? '💀 MIEMBRO DEL CLUB 1000' : '⚠️ MÁS CERCA DEL HITO'}
-          </p>
-          <div className="flex items-baseline gap-2">
-            <span style={{ fontSize: '40px', fontWeight: 900, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>
-              {days}
-            </span>
-            <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.38)', fontWeight: 600 }}>días</span>
+    <section className="cp-rise" style={{ ...tile('negro'), gap: 0 }}>
+      <span
+        aria-hidden
+        className="cp-score"
+        style={{ position: 'absolute', right: -16, top: -30, fontSize: 150, color: 'rgba(255,255,255,0.05)', lineHeight: 1, pointerEvents: 'none' }}
+      >
+        {days}
+      </span>
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, position: 'relative' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={overline(acento)}>
+            {isPast ? 'miembro del club 1000' : 'más cerca del hito'}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+            <Score value={days} size={46} color="#FFF" />
+            <span style={{ fontSize: 13, color: SOBRE_COLOR.tenue, fontWeight: 600 }}>días</span>
           </div>
 
           {!isPast && (
-            <p style={{ fontSize: '12px', fontWeight: 700, color: tier.color, marginTop: '3px' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: acento, marginTop: 3 }}>
               Faltan {remaining} días
-            </p>
+            </div>
           )}
 
-          {/* Milestone date */}
           {milestoneDate && (
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginTop: '3px' }}>
-              📅 {isPast ? 'Cumplió el' : 'Se cumple el'}{' '}
-              <span style={{ fontWeight: 700, color: tier.color }}>{formatDateEs(milestoneDate)}</span>
-            </p>
+            <div style={{ fontSize: 12, color: SOBRE_COLOR.suave, marginTop: 4 }}>
+              {isPast ? 'Cumplió el ' : 'Se cumple el '}
+              <span style={{ fontWeight: 700, color: '#FFF' }}>{formatDateEs(milestoneDate)}</span>
+            </div>
           )}
 
-          {/* Game date match */}
-          {matchingGameDate && <GameDateBadge match={matchingGameDate} />}
+          {matchingGameDate && <GameDateBadge match={matchingGameDate} sobreOscuro />}
 
-          {!player.hasNeverWon && player.lastVictoryDate && (
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.28)', marginTop: '5px' }}>
-              Última victoria: {player.lastVictoryDate}
-            </p>
-          )}
-          {player.hasNeverWon && (
-            <p style={{ fontSize: '12px', fontWeight: 800, color: tier.color, marginTop: '5px', letterSpacing: '0.08em' }}>
+          {player.hasNeverWon ? (
+            <div style={{ fontSize: 11.5, fontWeight: 800, color: acento, marginTop: 6, letterSpacing: '0.08em' }}>
               NUNCA HA GANADO
-            </p>
-          )}
+            </div>
+          ) : player.lastVictoryDate ? (
+            <div style={{ fontSize: 11.5, color: SOBRE_COLOR.tenue, marginTop: 6 }}>
+              Última victoria: {player.lastVictoryDate}
+            </div>
+          ) : null}
         </div>
 
         <div style={{ flexShrink: 0, textAlign: 'center' }}>
           <div style={{
-            width: 58, height: 58, borderRadius: '5px', overflow: 'hidden',
-            border: `2px solid ${tier.border}`, boxShadow: `0 0 20px ${tier.glow}`,
+            width: 62, height: 62, borderRadius: '50%', overflow: 'hidden',
+            border: `2px solid ${acento}`,
           }}>
             {player.photoUrl ? (
-              <Image src={player.photoUrl} alt={player.firstName} width={58} height={58} className="object-cover w-full h-full" unoptimized />
+              <Image src={player.photoUrl} alt={player.firstName} width={62} height={62} className="object-cover w-full h-full" unoptimized />
             ) : (
-              <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(255,0,64,0.10)' }}>
-                <span style={{ fontSize: '17px', fontWeight: 900, color: tier.color }}>
+              <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                <span className="cp-score" style={{ fontSize: 17, color: acento }}>
                   {player.firstName[0]}{player.lastName[0]}
                 </span>
               </div>
             )}
           </div>
-          <p style={{ fontSize: '13px', fontWeight: 700, color: '#fff', marginTop: '5px' }}>{player.firstName}</p>
-          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)' }}>{player.lastName}</p>
+          <div style={{ fontSize: 12.5, fontWeight: 700, color: '#FFF', marginTop: 6 }}>{player.firstName}</div>
+          <div style={{ fontSize: 11, color: SOBRE_COLOR.tenue }}>{player.lastName}</div>
         </div>
       </div>
 
-      <div className="mt-3">
-        <XPBar days={days} color={tier.color} glow={tier.glow} height={8} />
-        <div className="flex justify-between mt-1.5">
-          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.18)' }}>0</span>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: tier.color }}>{pct}%</span>
-          <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.18)' }}>1000</span>
-        </div>
+      <div style={{ marginTop: 14, position: 'relative' }}>
+        <Meter
+          value={pct / 100}
+          color={acento}
+          track="rgba(255,255,255,0.14)"
+          height={8}
+          left={<span style={{ color: SOBRE_COLOR.tenue }}>0</span>}
+          right={<span className="cp-score" style={{ fontSize: 14, color: acento }}>{pct}% de 1000</span>}
+        />
       </div>
-    </div>
+    </section>
   )
 }
 
-// ── MILESTONE SECTION HEADER ──
+// ── ENCABEZADO DE TRAMO ──
 function TierHeader({ tier, count }: { tier: typeof TIERS[0]; count: number }) {
   return (
-    <div className="flex items-center gap-2 mt-4 mb-2">
-      <div style={{ height: '1px', flex: 1, background: `linear-gradient(90deg, transparent, ${tier.border})` }} />
-      <div style={{
-        padding: '4px 12px', borderRadius: '5px',
-        background: 'rgba(6,9,20,0.96)', border: `1px solid ${tier.border}`,
-        boxShadow: `0 0 14px ${tier.glow}`,
-        display: 'flex', alignItems: 'center', gap: '6px',
-      }}>
-        <span style={{ fontSize: '13px' }}>{tier.emoji}</span>
-        <span style={{ fontSize: '12px', fontWeight: 800, color: tier.color, letterSpacing: '0.18em' }}>{tier.label}</span>
-        <span style={{
-          fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.30)',
-          borderLeft: '1px solid rgba(255,255,255,0.12)', paddingLeft: '6px',
-        }}>×{count}</span>
-      </div>
-      <div style={{ height: '1px', flex: 1, background: `linear-gradient(90deg, ${tier.border}, transparent)` }} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 18, marginBottom: 8 }}>
+      <span style={{ width: 3, height: 15, borderRadius: 2, background: tier.color, flexShrink: 0 }} />
+      <span style={overline(tier.color)}>{tier.label}</span>
+      <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--cp-on-surface-variant)' }}>×{count}</span>
+      <span style={{ height: 1, flex: 1, background: 'var(--cp-surface-border)' }} />
     </div>
   )
 }
 
-// ── PLAYER ROW ──
+// ── FILA DE JUGADOR ──
 function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
   player: PlayerWithVictoryData
   rank: number
@@ -340,82 +280,74 @@ function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
 
   return (
     <div style={{
-      padding: '9px 10px', borderRadius: '5px', marginBottom: '3px',
-      background: matchingGameDate ? 'rgba(0,229,255,0.05)' : 'rgba(255,255,255,0.025)',
-      border: matchingGameDate ? '1px solid rgba(0,229,255,0.28)' : '1px solid rgba(255,255,255,0.05)',
-      boxShadow: matchingGameDate ? '0 0 14px rgba(0,229,255,0.10)' : 'none',
+      ...tile('papel'),
+      padding: 11,
+      marginBottom: 7,
+      borderLeft: `3px solid ${tier.color}`,
     }}>
-      <div className="flex items-center gap-2.5">
-        {/* Rank */}
-        <span style={{ width: '18px', textAlign: 'center', flexShrink: 0, fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.22)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span className="cp-score" style={{ width: 18, textAlign: 'center', flexShrink: 0, fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>
           {rank}
         </span>
 
-        {/* Photo */}
         <div style={{
-          width: 36, height: 36, flexShrink: 0, borderRadius: '5px', overflow: 'hidden',
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.06)',
+          width: 38, height: 38, flexShrink: 0, borderRadius: '50%', overflow: 'hidden',
+          border: `2px solid ${tier.color}`,
         }}>
           {player.photoUrl ? (
             <Image
               src={player.photoUrl}
               alt={`${player.firstName} ${player.lastName}`}
-              width={36} height={36}
+              width={38} height={38}
               className="object-cover w-full h-full"
               loading="lazy"
               unoptimized
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span style={{ fontSize: '13px', fontWeight: 800, color: tier.color }}>
+            <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--cp-surface-2)' }}>
+              <span className="cp-score" style={{ fontSize: 12, color: tier.color }}>
                 {player.firstName[0]}{player.lastName[0]}
               </span>
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline justify-between gap-1">
-            <p style={{ fontSize: '13px', fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--cp-on-surface)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {player.firstName}{' '}
-              <span style={{ color: 'rgba(255,255,255,0.42)', fontWeight: 400 }}>{player.lastName}</span>
-            </p>
-            <div className="flex items-baseline gap-0.5 shrink-0">
-              <span style={{ fontSize: '16px', fontWeight: 900, color: tier.color, lineHeight: 1 }}>{days}</span>
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.28)' }}>d</span>
+              <span style={{ color: 'var(--cp-on-surface-muted)', fontWeight: 400 }}>{player.lastName}</span>
+            </span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, flexShrink: 0 }}>
+              <span className="cp-score" style={{ fontSize: 17, color: tier.color }}>{days}</span>
+              <span style={{ fontSize: 11, color: 'var(--cp-on-surface-variant)' }}>d</span>
             </div>
           </div>
 
-          <div className="mt-1.5">
-            <XPBar days={days} color={tier.color} glow={tier.glow} height={3} />
+          <div style={{ marginTop: 7 }}>
+            <Meter value={Math.min(1, days / 1000)} color={tier.color} track="var(--cp-surface-3)" height={4} />
           </div>
 
-          {/* Bottom row: last victory OR milestone date */}
-          <div className="mt-1 flex items-center justify-between gap-1">
-            <div>
-              {player.hasNeverWon ? (
-                <span style={{ fontSize: '12px', fontWeight: 800, color: tier.color, letterSpacing: '0.08em' }}>NUNCA HA GANADO</span>
-              ) : player.lastVictoryDate ? (
-                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.22)' }}>Ú.V: {player.lastVictoryDate}</span>
-              ) : null}
-            </div>
+          <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+            {player.hasNeverWon ? (
+              <span style={{ fontSize: 10.5, fontWeight: 800, color: tier.color, letterSpacing: '0.08em' }}>NUNCA HA GANADO</span>
+            ) : player.lastVictoryDate ? (
+              <span style={{ fontSize: 11, color: 'var(--cp-on-surface-variant)' }}>Últ. victoria: {player.lastVictoryDate}</span>
+            ) : <span />}
 
-            {/* Milestone date (right side) */}
             {milestoneDate && (
-              <div className="flex items-center gap-1 shrink-0">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                 {matchingGameDate && (
                   <span style={{
-                    fontSize: '12px', fontWeight: 800, color: '#00E5FF',
-                    padding: '1px 5px', borderRadius: '3px',
-                    background: 'rgba(0,229,255,0.14)', border: '1px solid rgba(0,229,255,0.38)',
-                    letterSpacing: '0.06em',
+                    fontSize: 10, fontWeight: 800, color: '#0F766E', letterSpacing: '0.06em',
+                    padding: '2px 7px', borderRadius: 100,
+                    background: 'rgba(15,118,110,0.10)', border: '1px solid rgba(15,118,110,0.35)',
                   }}>
-                    🎮 F{matchingGameDate.dateNumber}
+                    F{matchingGameDate.dateNumber}
                   </span>
                 )}
-                <span style={{ fontSize: '12px', color: isPast ? tier.color : 'rgba(255,255,255,0.35)', fontWeight: isPast ? 700 : 400 }}>
-                  {isPast ? '✓ ' : '→ '}{formatDateEs(milestoneDate)}
+                <span style={{ fontSize: 11, color: isPast ? tier.color : 'var(--cp-on-surface-variant)', fontWeight: isPast ? 700 : 400 }}>
+                  {formatDateEs(milestoneDate)}
                 </span>
               </div>
             )}
@@ -454,10 +386,10 @@ export default function SinGanarTab({ tournamentId }: { tournamentId?: number })
   if (isLoading) {
     return (
       <div className="space-y-3 pt-1">
-        <div className="h-14 animate-pulse" style={{ borderRadius: '5px', background: 'rgba(0,229,255,0.06)' }} />
-        <div className="h-40 animate-pulse" style={{ borderRadius: '5px', background: 'rgba(255,0,64,0.07)' }} />
+        <div className="cp-skeleton" style={{ height: 78, borderRadius: 20 }} />
+        <div className="cp-skeleton" style={{ height: 190, borderRadius: 20 }} />
         {[0, 1, 2, 3, 4].map(i => (
-          <div key={i} className="h-14 animate-pulse" style={{ borderRadius: '5px', background: 'rgba(255,255,255,0.03)' }} />
+          <div key={i} className="cp-skeleton" style={{ height: 82, borderRadius: 20 }} />
         ))}
       </div>
     )
@@ -465,12 +397,11 @@ export default function SinGanarTab({ tournamentId }: { tournamentId?: number })
 
   if (error) {
     return (
-      <div className="p-6 text-center" style={{ borderRadius: '5px', background: 'rgba(255,0,64,0.08)', border: '1px solid rgba(255,0,64,0.25)' }}>
-        <p style={{ fontSize: '14px', color: '#FF0040', fontWeight: 700 }}>Error al cargar</p>
+      <div style={{ ...tile('papel'), padding: 24, alignItems: 'center', textAlign: 'center' }}>
+        <p style={{ fontSize: 14, color: 'var(--cp-primary-light)', fontWeight: 700 }}>No se pudieron cargar las sequías</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-3 px-4 py-2 font-bold"
-          style={{ borderRadius: '5px', background: '#FF0040', color: '#fff', fontSize: '12px' }}
+          style={{ marginTop: 12, padding: '9px 18px', borderRadius: 100, background: '#C62828', color: '#fff', fontSize: 12, fontWeight: 800, border: 'none', cursor: 'pointer' }}
         >
           Reintentar
         </button>
@@ -481,8 +412,8 @@ export default function SinGanarTab({ tournamentId }: { tournamentId?: number })
   const players = data?.players ?? []
   if (players.length === 0) {
     return (
-      <div className="p-8 text-center" style={{ borderRadius: '5px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-        <p style={{ color: 'rgba(255,255,255,0.40)', fontSize: '13px' }}>Sin datos disponibles</p>
+      <div style={{ ...tile('papel'), padding: 32, alignItems: 'center' }}>
+        <p style={{ color: 'var(--cp-on-surface-variant)', fontSize: 13 }}>Sin datos disponibles</p>
       </div>
     )
   }
@@ -507,7 +438,7 @@ export default function SinGanarTab({ tournamentId }: { tournamentId?: number })
   let rankCursor = 0
 
   return (
-    <div className="space-y-1 pt-1">
+    <div className="pt-1">
       {players.length > 0 && <StatsStrip players={players} />}
 
       <Club1000Hero

@@ -41,9 +41,9 @@ export default function StatsPage() {
   // Not authenticated
   if (!user) {
     return (
-      <CPAppShell>
+      <CPAppShell tone="light">
         <div className="min-h-screen flex flex-col">
-        <CPHeader
+        <CPHeader tone="light"
           userInitials="?"
           tournamentNumber={29}
         />
@@ -52,7 +52,7 @@ export default function StatsPage() {
             className="rounded-2xl p-6 text-center max-w-sm"
             style={{
               background: 'var(--cp-surface)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
+              border: '1px solid var(--cp-surface-border)',
             }}
           >
             <p
@@ -74,7 +74,7 @@ export default function StatsPage() {
             </p>
           </div>
         </main>
-        <CPBottomNav />
+        <CPBottomNav tone="light" />
         </div>
       </CPAppShell>
     )
@@ -87,9 +87,9 @@ export default function StatsPage() {
   const isComision = user.role === 'Comision'
 
   return (
-    <CPAppShell>
+    <CPAppShell tone="light">
       {/* Header */}
-      <CPHeader
+      <CPHeader tone="light"
         userInitials={userInitials}
         userPhotoUrl={user.photoUrl}
         tournamentNumber={tournamentNumber}
@@ -99,23 +99,36 @@ export default function StatsPage() {
 
       {/* Content */}
       <main className="pb-20 px-4 space-y-4">
-        {/* Tab Navigation */}
-        <div className="flex justify-center gap-6">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="pb-2 transition-all duration-200 cursor-pointer"
-              style={{
-                fontSize: 'var(--cp-body-size)',
-                fontWeight: activeTab === tab.id ? 700 : 400,
-                color: activeTab === tab.id ? 'var(--cp-on-surface)' : 'var(--cp-on-surface-muted)',
-                borderBottom: activeTab === tab.id ? '2px solid #E53935' : '2px solid transparent',
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Tab Navigation — los mismos chips que /fecha y /ranking */}
+        <div
+          className="flex gap-1.5 overflow-x-auto pb-1"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {TABS.map((tab) => {
+            const activo = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                aria-pressed={activo}
+                className="shrink-0 cursor-pointer"
+                style={{
+                  fontFamily: 'var(--cp-font-display)',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                  color: activo ? '#fff' : 'var(--cp-on-surface-muted)',
+                  background: activo ? '#C62828' : 'var(--cp-surface-2)',
+                  border: 'none',
+                  borderRadius: 100,
+                  padding: '9px 16px',
+                  transition: 'background 180ms ease, color 180ms ease',
+                }}
+              >
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
 
         {/* Tab Content */}
@@ -126,7 +139,7 @@ export default function StatsPage() {
       </main>
 
       {/* Bottom Nav */}
-      <CPBottomNav />
+      <CPBottomNav tone="light" />
     </CPAppShell>
   )
 }
