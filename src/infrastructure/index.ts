@@ -20,13 +20,7 @@ export {
   ELIMINATION_DEPS,
 } from './di/elimination';
 
-// Ranking context dependencies
-export {
-  registerRankingDependencies,
-  getGetTournamentRankingUseCase,
-  getGetPlayerRankingUseCase,
-  RANKING_DEPS,
-} from './di/ranking';
+// El ranking se calcula en lib/ranking-utils, no tiene contexto propio.
 
 // Tournament context dependencies
 export {
@@ -61,7 +55,6 @@ export {
 export { PrismaEliminationRepository } from './persistence/prisma/repositories/PrismaEliminationRepository';
 export { PrismaGameDateRepository } from './persistence/prisma/repositories/PrismaGameDateRepository';
 export { PrismaPlayerRepository } from './persistence/prisma/repositories/PrismaPlayerRepository';
-export { PrismaTournamentRankingRepository } from './persistence/prisma/repositories/PrismaTournamentRankingRepository';
 export { PrismaTournamentRepository } from './persistence/prisma/repositories/PrismaTournamentRepository';
 export { PrismaPlayerQueryRepository } from './persistence/prisma/repositories/PrismaPlayerQueryRepository';
 export { PrismaTimerRepository } from './persistence/prisma/repositories/PrismaTimerRepository';

@@ -1,5 +1,4 @@
 import { registerEliminationDependencies } from './di/elimination';
-import { registerRankingDependencies } from './di/ranking';
 import { registerTournamentDependencies } from './di/tournament';
 import { registerPlayerDependencies } from './di/player';
 import { registerTimerDependencies } from './di/timer';
@@ -21,8 +20,6 @@ export function bootstrapInfrastructure(): void {
   // Register Elimination bounded context
   registerEliminationDependencies();
 
-  // Register Ranking bounded context
-  registerRankingDependencies();
 
   // Register Tournament bounded context
   registerTournamentDependencies();
