@@ -102,55 +102,10 @@ export function useGameDates(
 }
 
 /**
- * Hook for active game date (currently in progress)
+ * El hook de la fecha activa vive en `@/hooks/useActiveGameDate`.
+ * Aqui habia una segunda copia, sin consumidores y ya divergida de la otra.
  */
-export function useActiveGameDate(options: UseGameDatesOptions = {}) {
-  const {
-    refreshInterval = 5000, // 5 seconds for active game date
-    revalidateOnFocus = true,
-    revalidateOnReconnect = true
-  } = options
 
-  const swrResponse = useSWR<GameDate>(
-    swrKeys.activeGameDate(),
-    {
-      refreshInterval,
-      revalidateOnFocus,
-      revalidateOnReconnect,
-      dedupingInterval: 2000, // Faster deduping for active data
-      errorRetryInterval: 3000,
-      errorRetryCount: 5
-    }
-  )
-
-  return {
-    ...swrResponse,
-    
-    // Convenience properties
-    activeGameDate: swrResponse.data,
-    isLoading: !swrResponse.error && !swrResponse.data,
-    isError: !!swrResponse.error,
-    hasActiveDate: !!swrResponse.data,
-    
-    // Enhanced error information
-    errorMessage: swrResponse.error?.message || 'Error loading active game date',
-    isNotFound: swrResponse.error?.status === 404,
-    
-    // Utility functions
-    refresh: () => swrResponse.mutate(),
-    
-    // Active date info
-    isInProgress: swrResponse.data?.status === 'in_progress',
-    participantCount: swrResponse.data?.participantCount || swrResponse.data?.playerIds?.length || 0,
-    dateNumber: swrResponse.data?.dateNumber,
-    
-    // Time information
-    duration: swrResponse.data?.startTime && swrResponse.data?.endTime ? 
-      new Date(swrResponse.data.endTime).getTime() - new Date(swrResponse.data.startTime).getTime() : null,
-    
-    startedAt: swrResponse.data?.startTime ? new Date(swrResponse.data.startTime) : null
-  }
-}
 
 /**
  * Hook for specific game date details

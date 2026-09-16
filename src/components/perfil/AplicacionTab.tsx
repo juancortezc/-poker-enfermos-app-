@@ -247,10 +247,10 @@ export default function AplicacionTab() {
                     className="font-medium"
                     style={{ color: 'var(--cp-on-surface)', fontSize: 'var(--cp-body-size)' }}
                   >
-                    Selecciona "Instalar aplicación"
+                    Selecciona &ldquo;Instalar aplicación&rdquo;
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--cp-on-surface-muted)' }}>
-                    O "Agregar a pantalla de inicio"
+                    O &ldquo;Agregar a pantalla de inicio&rdquo;
                   </p>
                 </div>
               </div>

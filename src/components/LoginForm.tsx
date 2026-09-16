@@ -85,7 +85,8 @@ export default function LoginForm() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && isValidPinForLogin(pin) && !loading) {
                     e.preventDefault()
-                    handleSubmit(e as any)
+                    // handleSubmit solo usa preventDefault(), que este evento ya tiene.
+                    handleSubmit(e as unknown as React.FormEvent)
                   }
                 }}
                 disabled={loading}

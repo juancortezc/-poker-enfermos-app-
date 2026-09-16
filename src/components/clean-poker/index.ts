@@ -11,7 +11,6 @@ export { TournamentCard } from './TournamentCard'
 export { NextDateCard } from './NextDateCard'
 export { LiveDateBoard } from './LiveDateBoard'
 export { LeaderCard } from './LeaderCard'
-export { CPTimerCard } from './CPTimerCard'
 
 // Pages
 export { HomePage } from './HomePage'
