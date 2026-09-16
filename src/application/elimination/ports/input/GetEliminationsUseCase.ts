@@ -17,11 +17,13 @@ export interface EliminationDTO {
     id: string;
     firstName: string;
     lastName: string;
+    photoUrl?: string | null;
   };
   eliminatorPlayer: {
     id: string;
     firstName: string;
     lastName: string;
+    photoUrl?: string | null;
   } | null;
   eliminationTime: string;
 }

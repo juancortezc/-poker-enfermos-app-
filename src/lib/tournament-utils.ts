@@ -16,6 +16,12 @@ export function calculatePointsForPosition(position: number, totalPlayers: numbe
 
   // Soporte mínimo de 9 jugadores, máximo de 24
   const players = Math.max(9, Math.min(24, totalPlayers));
+
+  // La validacion de arriba mira totalPlayers, pero la tabla se construye con
+  // tope de 24. Con 25 jugadores, la posicion 25 pasaba el filtro y caia fuera
+  // del array: devolvia undefined, que se guardaba en la base y salia como NaN
+  // en la proyeccion. Se fija al ultimo puesto, que vale 1 punto.
+  const slot = Math.min(position, players);
   
   // Crear array de puntos para esta cantidad de jugadores
   const pointsArray = new Array(players);
@@ -43,7 +49,7 @@ export function calculatePointsForPosition(position: number, totalPlayers: numbe
     pointsArray[i] = pointsArray[i + 1] + 3;
   }
   
-  return pointsArray[position - 1];
+  return pointsArray[slot - 1];
 }
 
 export function getWinnerPoints(totalPlayers: number): number {

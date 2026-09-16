@@ -16,6 +16,7 @@ interface Player {
   role: UserRole
   photoUrl?: string
   inviter?: {
+    id: string
     firstName: string
     lastName: string
   }
@@ -112,12 +113,10 @@ export default function GuestSelector({
       // If no inviter info, allow selection (for backward compatibility)
       if (!invitado.inviter) return true
       
-      // Find the inviter in the available players data
+      // Por id: con homonimos (y en el grupo los hay), emparejar por nombre y
+      // apellido enganchaba al invitado con la persona equivocada.
       const allPlayers = [...groupMembers, ...externalGuests]
-      const inviter = allPlayers.find(p => 
-        p.firstName === invitado.inviter?.firstName && 
-        p.lastName === invitado.inviter?.lastName
-      )
+      const inviter = allPlayers.find(p => p.id === invitado.inviter?.id)
       
       // If inviter found, check if they're selected to play
       if (inviter) {

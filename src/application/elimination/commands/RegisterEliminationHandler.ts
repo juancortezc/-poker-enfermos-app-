@@ -133,12 +133,14 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
         eliminatorId: command.eliminatorPlayerId,
         eliminatedId: command.eliminatedPlayerId,
         gameDateDate: gameDate.scheduledDate,
+        position: savedElimination.position.value,
       });
     }
 
     // 10. Check for auto-complete (position 2 with eliminator)
     let winnerResult: EliminationResult | undefined;
     let triggeredAutoComplete = false;
+    let autoCompleteError: string | undefined;
 
     if (savedElimination.isRunnerUp() && command.eliminatorPlayerId) {
       const autoCompleteResult = await this.handleAutoComplete(
@@ -150,6 +152,11 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
       if (autoCompleteResult) {
         triggeredAutoComplete = true;
         winnerResult = autoCompleteResult;
+      } else {
+        // La posicion 2 si se guardo, pero la fecha no se cerro. Se reporta
+        // para que la Comision lo vea y no quede colgada en in_progress.
+        autoCompleteError =
+          'La eliminación se guardó, pero la fecha no se pudo cerrar automáticamente. Ciérrala a mano.';
       }
     }
 
@@ -173,6 +180,7 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
         : null,
       eliminationTime: savedElimination.eliminationTime.toISOString(),
       triggeredAutoComplete,
+      autoCompleteError,
       winnerElimination: winnerResult,
     };
   }

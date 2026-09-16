@@ -53,6 +53,10 @@ export async function GET(
       where: {
         eliminatorPlayerId: relation.parentPlayerId,
         eliminatedPlayerId: relation.childPlayerId,
+        // El ganador figura como su propio eliminador en la posicion 1. El
+        // contador de la tarjeta la excluye; esta lista no, y por eso el
+        // numero y el detalle podian no cuadrar.
+        position: { not: 1 },
         gameDate: {
           tournamentId
         }

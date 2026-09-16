@@ -211,7 +211,10 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
               const totalPlayers = date.playerIds?.length || 0;
               const eliminatedCount = eliminations.length;
 
-              if (baseDate.points === 0) {
+              // Ausencia = no figurar en la lista de la fecha. Deducirla de
+              // "0 puntos" marcaba como ausente a quien si estuvo y salio
+              // primero, que es justo el que menos merece que lo borren.
+              if (!date.playerIds?.includes(playerId)) {
                 return {
                   ...baseDate,
                   isAbsent: true
@@ -255,8 +258,10 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
         datePerformance
           .filter(date => date.status === 'completed' && !date.isAbsent)
           .forEach(date => {
-            const numericPosition = date.eliminationPosition ?? 1;
-            if (numericPosition < bestNumericPosition) {
+            // Sin posicion registrada no se asume nada: tomarlo como 1
+            // convertia un dato faltante en una victoria inventada.
+            const numericPosition = date.eliminationPosition;
+            if (numericPosition !== undefined && numericPosition < bestNumericPosition) {
               bestNumericPosition = numericPosition;
               bestResultLabel = numericPosition === 1 ? 'Ganador' : `${numericPosition}° lugar`;
             }

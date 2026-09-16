@@ -10,12 +10,14 @@ export class ParentChildStatsAdapter implements ParentChildStatsService {
     eliminatorId: string;
     eliminatedId: string;
     gameDateDate: Date;
+    position?: number;
   }): Promise<void> {
     await updateParentChildStats(
       params.tournamentId,
       params.eliminatorId,
       params.eliminatedId,
-      params.gameDateDate
+      params.gameDateDate,
+      params.position
     );
   }
 }

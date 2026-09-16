@@ -4,10 +4,19 @@ import {
   EliminationDTO,
 } from '../ports/input/GetEliminationsUseCase';
 import { EliminationRepository } from '../ports/output/EliminationRepository';
-import { PlayerRepository } from '../ports/output/PlayerRepository';
+import { PlayerRepository, PlayerInfo } from '../ports/output/PlayerRepository';
 
 /**
  * Handles querying eliminations for a game date.
+ *
+ * Los jugadores se piden en UNA sola consulta. Antes se hacia un findById por
+ * eliminado y otro por eliminador, en secuencia: con 20 jugadores eran ~40
+ * viajes a la base en el endpoint mas consultado durante la fecha, y era el
+ * primer candidato a pasarse de tiempo y terminar sirviendo cache vieja.
+ *
+ * El DTO incluye la foto: si no, quien la necesita tiene que cruzarla contra
+ * el ranking del torneo, y ahi se pierden los que no son participantes (por
+ * ejemplo los invitados), que terminan mostrando iniciales en vez de foto.
  */
 export class GetEliminationsHandler implements GetEliminationsUseCase {
   constructor(
@@ -18,16 +27,31 @@ export class GetEliminationsHandler implements GetEliminationsUseCase {
   async execute(query: GetEliminationsQuery): Promise<EliminationDTO[]> {
     const eliminations = await this.eliminationRepository.findByGameDateId(query.gameDateId);
 
-    // Map to DTOs with player info
+    const ids = new Set<string>();
+    for (const elimination of eliminations) {
+      ids.add(elimination.eliminatedPlayerId);
+      if (elimination.eliminatorPlayerId) {
+        ids.add(elimination.eliminatorPlayerId);
+      }
+    }
+
+    const players = await this.playerRepository.findByIds([...ids]);
+    const byId = new Map<string, PlayerInfo>(players.map((p) => [p.id, p]));
+
+    const toDto = (player: PlayerInfo) => ({
+      id: player.id,
+      firstName: player.firstName,
+      lastName: player.lastName,
+      photoUrl: player.photoUrl ?? null,
+    });
+
     const results: EliminationDTO[] = [];
 
     for (const elimination of eliminations) {
-      const eliminatedPlayer = await this.playerRepository.findById(
-        elimination.eliminatedPlayerId
-      );
+      const eliminatedPlayer = byId.get(elimination.eliminatedPlayerId);
       const eliminatorPlayer = elimination.eliminatorPlayerId
-        ? await this.playerRepository.findById(elimination.eliminatorPlayerId)
-        : null;
+        ? byId.get(elimination.eliminatorPlayerId)
+        : undefined;
 
       if (!eliminatedPlayer) {
         continue; // Skip if player not found (shouldn't happen)
@@ -38,18 +62,8 @@ export class GetEliminationsHandler implements GetEliminationsUseCase {
         gameDateId: elimination.gameDateId,
         position: elimination.position.value,
         points: elimination.points.value,
-        eliminatedPlayer: {
-          id: eliminatedPlayer.id,
-          firstName: eliminatedPlayer.firstName,
-          lastName: eliminatedPlayer.lastName,
-        },
-        eliminatorPlayer: eliminatorPlayer
-          ? {
-              id: eliminatorPlayer.id,
-              firstName: eliminatorPlayer.firstName,
-              lastName: eliminatorPlayer.lastName,
-            }
-          : null,
+        eliminatedPlayer: toDto(eliminatedPlayer),
+        eliminatorPlayer: eliminatorPlayer ? toDto(eliminatorPlayer) : null,
         eliminationTime: elimination.eliminationTime.toISOString(),
       });
     }

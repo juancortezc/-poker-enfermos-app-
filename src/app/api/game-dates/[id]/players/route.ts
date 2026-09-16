@@ -127,8 +127,25 @@ export async function POST(
 
       // Usar transacción para asegurar consistencia
       const result = await prisma.$transaction(async (tx) => {
+        // La lista se relee DENTRO de la transaccion. Leerla afuera permitia
+        // que dos altas simultaneas partieran de la misma foto y una pisara a
+        // la otra, y que una eliminacion registrada en ese instante calculara
+        // sus puntos sobre el total viejo.
+        const fresh = await tx.gameDate.findUnique({
+          where: { id: gameDateId },
+          select: { playerIds: true }
+        });
+
+        if (!fresh) {
+          throw new Error('La fecha ya no existe');
+        }
+
+        if (fresh.playerIds.includes(playerId)) {
+          throw new Error('El jugador ya está registrado en esta fecha');
+        }
+
         // 1. Agregar jugador al array playerIds
-        const newPlayerIds = [...gameDate.playerIds, playerId];
+        const newPlayerIds = [...fresh.playerIds, playerId];
 
         await tx.gameDate.update({
           where: { id: gameDateId },
@@ -164,7 +181,7 @@ export async function POST(
           newTotalPlayers,
           recalculatedEliminations: allEliminations.length
         };
-      });
+      }, { isolationLevel: 'Serializable' });
 
       return NextResponse.json({
         success: true,

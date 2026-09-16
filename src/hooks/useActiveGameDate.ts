@@ -61,7 +61,7 @@ export function useActiveGameDate(options: UseActiveGameDateOptions = {}) {
     
     // Convenience properties
     gameDate: swrResponse.data || null,
-    isLoading: !swrResponse.error && !swrResponse.data === undefined,
+    isLoading: !swrResponse.error && swrResponse.data === undefined,
     isError: !!swrResponse.error,
     hasActiveGameDate: !!swrResponse.data,
     

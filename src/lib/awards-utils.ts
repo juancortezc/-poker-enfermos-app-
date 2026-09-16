@@ -40,7 +40,10 @@ export async function computeTournamentAwards(tournamentIdNum: number): Promise<
       name: true,
       tournamentParticipants: {
         select: {
-          playerId: true
+          playerId: true,
+          player: {
+            select: { id: true, firstName: true, lastName: true, photoUrl: true }
+          }
         }
       }
     }
@@ -54,8 +57,11 @@ export async function computeTournamentAwards(tournamentIdNum: number): Promise<
     tournament.tournamentParticipants.map(tp => tp.playerId)
   )
 
+  // Solo fechas cerradas. Con una fecha en curso, el que mas puntos llevaba
+  // esa noche figuraba como VICTORIA y PODIO del torneo, y los que seguian
+  // sentados entraban con 0 puntos y sumaban una FALTA.
   const gameDates = await prisma.gameDate.findMany({
-    where: { tournamentId: tournamentIdNum },
+    where: { tournamentId: tournamentIdNum, status: 'completed' },
     include: {
       eliminations: {
         include: {
@@ -152,6 +158,22 @@ export async function computeTournamentAwards(tournamentIdNum: number): Promise<
   // 1. VARÓN - más eliminaciones (solo jugadores registrados)
   const eliminationsByEliminator = new Map<string, { player: AwardPlayer; count: number }>()
 
+  // Se siembra en 0 a todos los participantes. Si el mapa se llenara solo con
+  // quienes eliminaron a alguien, el premio a MENOS eliminaciones jamas podria
+  // recaer en quien no elimino a nadie, que es justo a quien busca.
+  tournament.tournamentParticipants.forEach(tp => {
+    if (!tp.player) return
+    eliminationsByEliminator.set(tp.playerId, {
+      player: {
+        id: tp.player.id,
+        firstName: tp.player.firstName,
+        lastName: tp.player.lastName,
+        photoUrl: tp.player.photoUrl
+      },
+      count: 0
+    })
+  })
+
   allEliminations.forEach(elim => {
     if (!registeredPlayerIds.has(elim.eliminatorPlayer.id)) return
 
@@ -177,9 +199,15 @@ export async function computeTournamentAwards(tournamentIdNum: number): Promise<
     .map(p => ({ player: p.player, eliminations: p.count }))
 
   // 2. GAY - menos eliminaciones (solo jugadores registrados)
-  const minElims = sortedByElims[sortedByElims.length - 1]?.count || 0
+  //
+  // El minimo cuenta el 0: quien no elimino a nadie en todo el torneo es
+  // exactamente el que este premio busca. Pedir `> 0` se lo daba a alguien
+  // con 1, dejando fuera a los que mas lo merecian.
+  const minElims = sortedByElims.length > 0
+    ? sortedByElims[sortedByElims.length - 1].count
+    : 0
   const gay = sortedByElims
-    .filter(p => p.count === minElims && minElims > 0)
+    .filter(p => p.count === minElims)
     .map(p => ({ player: p.player, eliminations: p.count }))
 
   // 3. PODIOS - más top 3 (solo jugadores registrados)

@@ -7,9 +7,17 @@ export async function updateParentChildStats(
   tournamentId: number,
   eliminatorPlayerId: string,
   eliminatedPlayerId: string,
-  eliminationDate: Date
+  eliminationDate: Date,
+  position?: number
 ) {
   try {
+    // El ganador se guarda como su propio eliminador en la posicion 1.
+    // recalculateAllStats() ya la excluye; este camino no lo hacia, y por eso
+    // el contador de la tarjeta y la lista del detalle podian no coincidir.
+    if (position === 1) {
+      return
+    }
+
     // Verificar que ambos jugadores estén registrados en el torneo (no invitados)
     const participants = await prisma.tournamentParticipant.findMany({
       where: {
@@ -81,6 +89,31 @@ export async function updateParentChildStats(
   } catch (error) {
     console.error('Error actualizando estadísticas padre-hijo:', error)
     // No lanzar error para no afectar el flujo principal de eliminaciones
+  }
+}
+
+/**
+ * Rehace las estadisticas del torneo al que pertenece una eliminacion.
+ *
+ * Editar o borrar una eliminacion no tocaba `parentChildStats`: el contador
+ * quedaba inflado para siempre, hasta que alguien recalculaba a mano. Como el
+ * recalculo completo es barato a esta escala, se prefiere eso antes que
+ * intentar descontar de un contador incremental.
+ */
+export async function recalculateStatsForElimination(eliminationId: number) {
+  try {
+    const elimination = await prisma.elimination.findUnique({
+      where: { id: eliminationId },
+      select: { gameDate: { select: { tournamentId: true } } }
+    })
+    const tournamentId = elimination?.gameDate?.tournamentId
+    if (tournamentId) {
+      await recalculateAllStats(tournamentId)
+    }
+    return tournamentId ?? null
+  } catch (error) {
+    console.error('Error recalculando estadisticas padre-hijo:', error)
+    return null
   }
 }
 

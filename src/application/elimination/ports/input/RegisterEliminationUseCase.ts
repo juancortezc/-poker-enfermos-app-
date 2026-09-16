@@ -29,6 +29,12 @@ export interface EliminationResult {
   eliminationTime: string;
   /** True if this elimination triggered auto-completion of the game date */
   triggeredAutoComplete: boolean;
+  /**
+   * Presente cuando la eliminacion de posicion 2 se guardo pero el cierre
+   * automatico de la fecha fallo. La fecha queda en in_progress y hay que
+   * avisarlo: en silencio, se quedaba colgada toda la noche.
+   */
+  autoCompleteError?: string;
   /** The winner elimination if auto-complete was triggered */
   winnerElimination?: EliminationResult;
 }

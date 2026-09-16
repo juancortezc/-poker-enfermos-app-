@@ -13,10 +13,25 @@ export class PrismaPlayerRepository implements PlayerRepository {
         id: true,
         firstName: true,
         lastName: true,
+        photoUrl: true,
       },
     });
 
     return player;
+  }
+
+  async findByIds(ids: string[]): Promise<PlayerInfo[]> {
+    if (ids.length === 0) return [];
+
+    return prisma.player.findMany({
+      where: { id: { in: ids } },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        photoUrl: true,
+      },
+    });
   }
 
   async updateLastVictoryDate(playerId: string, victoryDate: string): Promise<void> {

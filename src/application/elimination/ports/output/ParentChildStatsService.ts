@@ -13,5 +13,7 @@ export interface ParentChildStatsService {
     eliminatorId: string;
     eliminatedId: string;
     gameDateDate: Date;
+    /** Posicion de la eliminacion; la 1 es el ganador y no cuenta. */
+    position?: number;
   }): Promise<void>;
 }
