@@ -60,12 +60,13 @@ const MESA_FINAL_THRESHOLD = 9
  * Una sola tabla con tres niveles de detalle. Todas ordenan por PUNTOS —
  * lo que cambia es cuánto se abre la información alrededor de ese número.
  */
-type TableView = 'resumen' | 'fechas' | 'elimina'
+type TableView = 'resumen' | 'fechas' | 'elimina' | 'acum'
 
 const VIEWS: { id: TableView; label: string }[] = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'fechas', label: 'Fechas' },
-  { id: 'elimina', label: 'Elimina' }
+  { id: 'elimina', label: 'Elimina' },
+  { id: 'acum', label: SCORE_LABELS.accumulated }
 ]
 
 function medalBadgeStyle(position: number) {
@@ -140,6 +141,38 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
   const hasPenalties = rankings.some(r => (r.pointPenalty ?? 0) > 0)
   const hasLiveProjection = rankings.some(r => r.liveProjection)
 
+  /**
+   * Vista ACUM.: el mismo torneo ordenado por puntos reales, sin descartar
+   * ninguna fecha. No reemplaza a la tabla oficial — es una lectura paralela,
+   * util para ver a quien le pesa el ELIMINA y a quien lo salva.
+   *
+   * Se ordena y se numera aparte; `rankings` sigue viniendo ordenado por el
+   * puntaje que manda y no se toca.
+   */
+  const acumDe = (p: PlayerRanking) => p.totalPoints + (p.liveProjection?.points ?? 0)
+
+  const filas = (() => {
+    if (view !== 'acum') {
+      return rankings.map(player => ({ player, posicion: player.position }))
+    }
+    const ordenadas = [...rankings].sort((a, b) => {
+      const dif = acumDe(b) - acumDe(a)
+      if (dif !== 0) return dif
+      // Mismos desempates que la tabla oficial, para no inventar criterios.
+      if (a.firstPlaces !== b.firstPlaces) return b.firstPlaces - a.firstPlaces
+      if (a.secondPlaces !== b.secondPlaces) return b.secondPlaces - a.secondPlaces
+      if (a.thirdPlaces !== b.thirdPlaces) return b.thirdPlaces - a.thirdPlaces
+      if (a.absences !== b.absences) return a.absences - b.absences
+      return a.playerName.localeCompare(b.playerName)
+    })
+    // Los empatados en puntos comparten puesto.
+    let puesto = 1
+    return ordenadas.map((player, i) => {
+      if (i > 0 && acumDe(ordenadas[i - 1]) !== acumDe(player)) puesto = i + 1
+      return { player, posicion: puesto }
+    })
+  })()
+
   const deltaFor = (player: PlayerRanking) => player.positionsChanged
 
   const mesasFinalesFor = (player: PlayerRanking) =>
@@ -180,6 +213,9 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
   const viewNote = (() => {
     if (view === 'fechas') {
       return 'Las fechas tachadas son las que se descartan. PROM es el promedio de las fechas jugadas.'
+    }
+    if (view === 'acum') {
+      return `Ordenado por ${SCORE_LABELS.accumulated}: todos los puntos, sin descartar ninguna fecha. No es la tabla oficial — DIF es lo que te quita el ELIMINA.`
     }
     if (view === 'elimina') {
       return hasPenalties
@@ -396,13 +432,15 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
               <tr>
                 <th style={{ ...thStyle, width: 36 }}>#</th>
                 <th style={{ ...thStyle, textAlign: 'left', width: view === 'resumen' ? 110 : 84 }}>JUGADOR</th>
-                <th style={{ ...thPointsStyle, width: 52 }}>{SCORE_LABELS.points}</th>
+                <th style={{ ...thPointsStyle, width: 52 }}>{view === 'acum' ? SCORE_LABELS.accumulated : SCORE_LABELS.points}</th>
 
                 {view === 'fechas' && completedDates.map(d => (
                   <th key={d} style={{ ...thStyle, width: 36 }}>F{d}</th>
                 ))}
                 {view === 'fechas' && <th style={{ ...thStyle, width: 46 }}>PROM</th>}
 
+                {view === 'acum' && <th style={{ ...thStyle, width: 54 }}>{SCORE_LABELS.points}</th>}
+                {view === 'acum' && <th style={{ ...thStyle, width: 46 }}>DIF</th>}
                 {view === 'elimina' && <th style={{ ...thStyle, width: 54 }}>{SCORE_LABELS.accumulated}</th>}
                 {view === 'elimina' && <th style={{ ...thStyle, width: 40 }}>E1</th>}
                 {view === 'elimina' && <th style={{ ...thStyle, width: 40 }}>E2</th>}
@@ -411,13 +449,14 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
               </tr>
             </thead>
             <tbody>
-              {rankings.map((player, index) => {
+              {filas.map(({ player, posicion }, index) => {
                 const isCurrentUser = currentUserId && player.playerId === currentUserId
-                const isMalazo = player.position > rankings.length - 2
+                const isMalazo = posicion > rankings.length - 2
                 const rowBg = isCurrentUser ? 'rgba(229,57,53,0.85)' : isMalazo ? '#FDEBEE' : index % 2 === 1 ? '#F7F7F7' : '#fff'
                 const textColor = isCurrentUser ? '#fff' : '#000'
-                const badge = medalBadgeStyle(player.position)
-                const points = scoreOf(player)
+                const badge = medalBadgeStyle(posicion)
+                // En ACUM. manda el total real; en el resto, el puntaje oficial.
+                const points = view === 'acum' ? acumDe(player) : scoreOf(player)
                 const prom = Math.round(averagePointsPerDate(player))
                 const eliminated = view === 'fechas' ? eliminatedDateNumbers(player, datesToEliminate) : null
                 // La franja dorada marca la columna que manda; en la fila propia
@@ -451,7 +490,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                         <span style={{ fontSize: 15 }}>💀</span>
                       ) : (
                         <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontWeight: 800, fontSize: 13, ...badge }}>
-                          {player.position}
+                          {posicion}
                         </div>
                       )}
                     </td>
@@ -498,6 +537,23 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                       )
                     })}
                     {view === 'fechas' && <td style={{ ...tdStyle, background: rowBg, color: textColor }}>{prom}</td>}
+
+                    {view === 'acum' && (() => {
+                      // Cuanto separa el total real del puntaje que manda: lo
+                      // que el ELIMINA descarta, mas las multas.
+                      const oficial = scoreOf(player)
+                      const dif = acumDe(player) - oficial
+                      return (
+                        <>
+                          <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.8)' : textColor, fontWeight: 500 }}>
+                            {oficial}
+                          </td>
+                          <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.85)' : (dif > 0 ? ORANGE : INACTIVE_TEXT) }}>
+                            {dif > 0 ? `−${dif}` : '—'}
+                          </td>
+                        </>
+                      )
+                    })()}
 
                     {view === 'elimina' && (
                       <td style={{ ...tdStyle, background: rowBg, color: proj ? PROJECTED : (isCurrentUser ? 'rgba(255,255,255,0.8)' : ORANGE), fontWeight: 500, fontStyle: proj ? 'italic' : undefined }}>
