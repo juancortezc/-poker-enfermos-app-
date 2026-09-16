@@ -9,7 +9,7 @@ import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
-import { BookOpen, User, Settings, ChevronRight, Calendar, Shield, Trophy, Users, Receipt, FileSpreadsheet, Bell } from 'lucide-react'
+import { BookOpen, User, Settings, ChevronRight, Calendar, Shield, Trophy, Users, Receipt, FileSpreadsheet, Bell, Share2 } from 'lucide-react'
 
 // Placeholder consciente: menú mínimo mientras se termina de diseñar esta
 // sección. Reúne lo que antes vivía directo en la barra de navegación.
@@ -38,7 +38,8 @@ export default function MasPage() {
     { href: '/ayuda/notificaciones', label: 'Activar notificaciones', icon: Bell },
     ...(isComision ? [
       { href: '/admin', label: 'Administración', icon: Shield },
-      { href: '/reportes', label: 'Reportes', icon: FileSpreadsheet }
+      { href: '/reportes', label: 'Reportes', icon: FileSpreadsheet },
+      { href: '/compartir', label: 'Compartir al grupo', icon: Share2 }
     ] : [])
   ]
 
