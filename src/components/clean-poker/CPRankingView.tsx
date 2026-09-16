@@ -11,6 +11,7 @@ import {
   averagePointsPerDate,
   eliminatedDateNumbers,
   scoreOf,
+  compareByTiebreak,
   SCORE_LABELS
 } from '@/lib/ranking-utils'
 import type { PlayerRanking } from '@/lib/ranking-utils'
@@ -158,12 +159,8 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
     const ordenadas = [...rankings].sort((a, b) => {
       const dif = acumDe(b) - acumDe(a)
       if (dif !== 0) return dif
-      // Mismos desempates que la tabla oficial, para no inventar criterios.
-      if (a.firstPlaces !== b.firstPlaces) return b.firstPlaces - a.firstPlaces
-      if (a.secondPlaces !== b.secondPlaces) return b.secondPlaces - a.secondPlaces
-      if (a.thirdPlaces !== b.thirdPlaces) return b.thirdPlaces - a.thirdPlaces
-      if (a.absences !== b.absences) return a.absences - b.absences
-      return a.playerName.localeCompare(b.playerName)
+      // Mismos desempates que la tabla oficial, importados y no copiados.
+      return compareByTiebreak(a, b)
     })
     // Los empatados en puntos comparten puesto.
     let puesto = 1

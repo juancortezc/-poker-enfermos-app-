@@ -26,6 +26,7 @@ export interface PlayerRanking {
   secondPlaces: number; // Cantidad de segundos lugares
   thirdPlaces: number;  // Cantidad de terceros lugares
   lastPlaces: number;   // Cantidad de últimos lugares (primer eliminado / 7-2)
+  secondToLastPlaces: number; // Cantidad de penúltimos lugares (segundo eliminado)
   absences: number;     // Cantidad de ausencias (0 puntos)
   /**
    * Solo mientras hay una fecha en curso y este jugador sigue en la mesa.
@@ -156,6 +157,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         secondPlaces: 0,
         thirdPlaces: 0,
         lastPlaces: 0,
+        secondToLastPlaces: 0,
         absences: 0
       });
     });
@@ -206,6 +208,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
             if (elimination.position === 2) ranking.secondPlaces++;
             if (elimination.position === 3) ranking.thirdPlaces++;
             if (elimination.position === maxPosition) ranking.lastPlaces++;  // Primer eliminado (7-2)
+            if (elimination.position === maxPosition - 1) ranking.secondToLastPlaces++;  // Segundo eliminado
           } else {
             // Jugador no fue eliminado
             // Solo asignar puntos si es el único jugador restante (ganador) o la fecha está completada
@@ -333,52 +336,8 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       };
     });
 
-    /**
-     * Función de comparación con criterios de desempate
-     * Criterios en orden de prioridad:
-     * 1. Puntos totales (mayor)
-     * 2. Más primeros lugares (victorias)
-     * 3. Más segundos lugares
-     * 4. Más terceros lugares
-     * 5. Menos ausencias (mejor asistencia)
-     */
-    const compareRankings = (a: PlayerRanking, b: PlayerRanking): number => {
-      const aScore = a.finalScore ?? a.totalPoints;
-      const bScore = b.finalScore ?? b.totalPoints;
-
-      // 1. Puntuación final (mayor gana)
-      if (aScore !== bScore) {
-        return bScore - aScore;
-      }
-
-      // 2. Puntos totales como desempate secundario (para contexto histórico)
-      if (a.totalPoints !== b.totalPoints) {
-        return b.totalPoints - a.totalPoints;
-      }
-
-      // 3. Más primeros lugares (victorias)
-      if (a.firstPlaces !== b.firstPlaces) {
-        return b.firstPlaces - a.firstPlaces;
-      }
-
-      // 4. Más segundos lugares
-      if (a.secondPlaces !== b.secondPlaces) {
-        return b.secondPlaces - a.secondPlaces;
-      }
-
-      // 5. Más terceros lugares
-      if (a.thirdPlaces !== b.thirdPlaces) {
-        return b.thirdPlaces - a.thirdPlaces;
-      }
-
-      // 6. Menos ausencias (mejor asistencia)
-      if (a.absences !== b.absences) {
-        return a.absences - b.absences; // Menor es mejor
-      }
-      
-      // Si todos los criterios son iguales, mantener orden alfabético por nombre
-      return a.playerName.localeCompare(b.playerName);
-    };
+    const compareRankings = (a: PlayerRanking, b: PlayerRanking): number =>
+      compareByTiebreak(a, b);
 
     // Ordenar con criterios de desempate y asignar posiciones
     const sortedRankings = Array.from(playerRankings.values())
@@ -869,6 +828,47 @@ export function averagePointsPerDate(player: PlayerRanking): number {
  *
  * No escribir estas etiquetas a mano en los componentes.
  */
+/**
+ * Criterios de desempate del torneo, en orden.
+ *
+ *   1. Puntaje final (el que manda, ya con el ELIMINA y las multas)
+ *   2. Mas victorias
+ *   3. Mas segundos
+ *   4. Mas terceros
+ *   5. MENOS ultimos lugares (el 7/2)
+ *   6. MENOS penultimos
+ *   7. Mas puntos totales
+ *   8. Orden alfabetico, para que nunca quede indefinido
+ *
+ * Antes los puntos totales se evaluaban en segundo lugar, asi que un empate
+ * lo ganaba quien mas habia acumulado y los podios no llegaban a mirarse.
+ * Ahora el podio pesa mas que el volumen: primero como te fue, despues cuanto
+ * sumaste. El acumulado queda como ultimo recurso.
+ *
+ * Es la unica fuente de la verdad: la tabla oficial, la proyeccion en vivo,
+ * la vista ACUM. y las imagenes para compartir usan esta funcion.
+ */
+export function compareByTiebreak(
+  a: Pick<PlayerRanking, 'finalScore' | 'totalPoints' | 'firstPlaces' | 'secondPlaces' | 'thirdPlaces' | 'lastPlaces' | 'secondToLastPlaces' | 'playerName'>,
+  b: typeof a
+): number {
+  const aScore = a.finalScore ?? a.totalPoints;
+  const bScore = b.finalScore ?? b.totalPoints;
+  if (aScore !== bScore) return bScore - aScore;
+
+  if (a.firstPlaces !== b.firstPlaces) return b.firstPlaces - a.firstPlaces;
+  if (a.secondPlaces !== b.secondPlaces) return b.secondPlaces - a.secondPlaces;
+  if (a.thirdPlaces !== b.thirdPlaces) return b.thirdPlaces - a.thirdPlaces;
+
+  // Menos es mejor: son las noches malas.
+  if (a.lastPlaces !== b.lastPlaces) return a.lastPlaces - b.lastPlaces;
+  if (a.secondToLastPlaces !== b.secondToLastPlaces) return a.secondToLastPlaces - b.secondToLastPlaces;
+
+  if (a.totalPoints !== b.totalPoints) return b.totalPoints - a.totalPoints;
+
+  return a.playerName.localeCompare(b.playerName);
+}
+
 export const SCORE_LABELS = {
   points: 'PUNTOS',
   pointsShort: 'PTS',

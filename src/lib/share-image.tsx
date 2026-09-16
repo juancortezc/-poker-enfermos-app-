@@ -117,7 +117,7 @@ export function Marco({
  * ──────────────────────────────────────────────────────────────────────── */
 
 import { ImageResponse } from 'next/og'
-import { calculateTournamentRanking, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
+import { calculateTournamentRanking, compareByTiebreak, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
 import { fullName, shortenFullName } from '@/lib/player-name'
 
 /** Nombre real abreviado. Las dos imagenes tienen que nombrar igual a la
@@ -304,12 +304,8 @@ export async function buildAcumImage(): Promise<Response> {
   const ordenadas = [...data.rankings].sort((a, b) => {
     const dif = acumDe(b) - acumDe(a)
     if (dif !== 0) return dif
-    // Mismos desempates que la tabla oficial, para no inventar criterios.
-    if (a.firstPlaces !== b.firstPlaces) return b.firstPlaces - a.firstPlaces
-    if (a.secondPlaces !== b.secondPlaces) return b.secondPlaces - a.secondPlaces
-    if (a.thirdPlaces !== b.thirdPlaces) return b.thirdPlaces - a.thirdPlaces
-    if (a.absences !== b.absences) return a.absences - b.absences
-    return a.playerName.localeCompare(b.playerName)
+    // Mismos desempates que la tabla oficial, importados y no copiados.
+    return compareByTiebreak(a, b)
   })
 
   let puesto = 1

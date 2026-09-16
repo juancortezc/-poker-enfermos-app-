@@ -1,6 +1,6 @@
 import { prisma } from './prisma'
 import { calculatePointsForPosition } from './tournament-utils'
-import { calculateTournamentRanking, type PlayerRanking } from './ranking-utils'
+import { calculateTournamentRanking, compareByTiebreak, type PlayerRanking } from './ranking-utils'
 
 /**
  * Proyección en vivo del ranking del torneo durante una fecha en curso.
@@ -106,11 +106,11 @@ function finalScoreFrom(
 }
 
 /**
- * Mismos criterios de desempate que el ranking oficial: puntaje, victorias,
- * segundos, terceros, menos ausencias y por último orden alfabético.
+ * Desempate: el mismo del ranking oficial, importado y no reimplementado.
+ * Aqui habia una copia que se quedaba atras cada vez que cambiaban las reglas.
  *
- * Las estadísticas de desempate se toman tal cual del ranking oficial, así
- * que en la tabla base (sin la fecha de hoy) incluyen los podios de hoy. Solo
+ * Las estadisticas de desempate se toman tal cual del ranking oficial, asi que
+ * en la tabla base (sin la fecha de hoy) incluyen los podios de hoy. Solo
  * cambia algo ante un empate exacto de puntaje, no vale la pena separarlas.
  */
 function compareByScore(
@@ -118,12 +118,7 @@ function compareByScore(
   b: { score: number; ranking: PlayerRanking }
 ): number {
   if (a.score !== b.score) return b.score - a.score
-  if (a.ranking.totalPoints !== b.ranking.totalPoints) return b.ranking.totalPoints - a.ranking.totalPoints
-  if (a.ranking.firstPlaces !== b.ranking.firstPlaces) return b.ranking.firstPlaces - a.ranking.firstPlaces
-  if (a.ranking.secondPlaces !== b.ranking.secondPlaces) return b.ranking.secondPlaces - a.ranking.secondPlaces
-  if (a.ranking.thirdPlaces !== b.ranking.thirdPlaces) return b.ranking.thirdPlaces - a.ranking.thirdPlaces
-  if (a.ranking.absences !== b.ranking.absences) return a.ranking.absences - b.ranking.absences
-  return a.ranking.playerName.localeCompare(b.ranking.playerName)
+  return compareByTiebreak(a.ranking, b.ranking)
 }
 
 /** Ordena y asigna posiciones, dejando empatados a los realmente iguales. */
