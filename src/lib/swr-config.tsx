@@ -108,8 +108,13 @@ export const swrKeys = {
   
   // Game dates
   gameDates: (tournamentId: number) => `/api/tournaments/${tournamentId}/dates/public`,
+  /**
+   * La version con eliminaciones, que consume /fecha. Es una clave distinta de
+   * gameDates: invalidar solo la publica dejaba esta servida con datos viejos
+   * toda la noche, porque ademas tiene revalidateOnFocus en false.
+   */
+  gameDatesDetailed: (tournamentId: number) => `/api/tournaments/${tournamentId}/dates`,
   activeGameDate: () => '/api/game-dates/active',
-  configuredOrActiveGameDate: () => '/api/game-dates/configured-or-active',
   gameDate: (gameDateId: number) => `/api/game-dates/${gameDateId}`,
   
   // Eliminations
@@ -131,9 +136,9 @@ export const mutateRelated = {
   // When game date changes, update related tournament data
   gameDate: (mutate: (key: string) => void, tournamentId: number, gameDateId?: number) => {
     mutate(swrKeys.gameDates(tournamentId))
+    mutate(swrKeys.gameDatesDetailed(tournamentId))
     mutate(swrKeys.tournamentRanking(tournamentId))
     mutate(swrKeys.activeGameDate())
-    mutate(swrKeys.configuredOrActiveGameDate())
     if (gameDateId) {
       mutate(swrKeys.gameDate(gameDateId))
       mutate(swrKeys.gameDateEliminations(gameDateId))

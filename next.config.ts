@@ -6,10 +6,27 @@ const withPWA = withPWAInit({
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  swcMinify: true,
   disable: process.env.NODE_ENV === "development",
+  // Las respuestas de la API NO se cachean.
+  //
+  // El default del plugin las guarda 24 h con NetworkFirst y 10 s de paciencia:
+  // en la sede, con la red saturada, cualquier peticion que pasara de 10 s
+  // devolvia los numeros de ANTES de la fecha como si fueran buenos, y se
+  // "arreglaba sola" cuando alguna respondia a tiempo. Ademas la clave no
+  // distinguia usuario, asi que un cache podia cruzarse entre personas.
+  //
+  // Durante una fecha en vivo, no tener datos es mucho mejor que tener datos
+  // viejos disfrazados de actuales.
+  extendDefaultRuntimeCaching: true,
   workboxOptions: {
     disableDevLogs: true,
+    runtimeCaching: [
+      {
+        urlPattern: ({ url, sameOrigin }: { url: URL; sameOrigin: boolean }) =>
+          sameOrigin && url.pathname.startsWith("/api/"),
+        handler: "NetworkOnly" as const,
+      },
+    ],
   },
 });
 
@@ -38,7 +55,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Disable TypeScript during builds on Vercel to prevent failures
+  // DEUDA CONOCIDA: el build ignora los errores de TypeScript.
+  //
+  // Hoy `npx tsc --noEmit` reporta ~46 errores reales repartidos en repos de
+  // Prisma, hooks y formularios. Apagar esta bandera sin limpiarlos primero
+  // deja el proyecto sin poder desplegar, asi que se documenta en vez de
+  // quitarla a ciegas.
+  //
+  // Correrlo de vez en cuando igual sirve: es lo que destapo, entre otros,
+  // que PrismaTournamentRepository espera campos que no existen en el schema.
   typescript: {
     ignoreBuildErrors: true,
   },

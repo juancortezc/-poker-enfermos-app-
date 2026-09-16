@@ -14,6 +14,7 @@ import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
 import { HomeAvatar } from '@/components/clean-poker/HomeAvatar'
 import { LinkCta } from '@/components/clean-poker/LinkCta'
+import { swrKeys } from '@/lib/swr-config'
 
 interface EliminationDTO {
   id: number
@@ -56,7 +57,7 @@ function FechaPageInner() {
   const tournamentId = activeTournament?.id ?? 0
 
   const { data: dates } = useSWR<DatesGameDate[]>(
-    tournamentId ? `/api/tournaments/${tournamentId}/dates` : null,
+    tournamentId ? swrKeys.gameDatesDetailed(tournamentId) : null,
     { revalidateOnFocus: false }
   )
 
@@ -208,7 +209,7 @@ function FechaPageInner() {
                       <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 900, color: acentoTexto ?? 'var(--cp-on-surface-variant)' }}>
                         #{e.position}
                       </div>
-                      <HomeAvatar playerId={e.eliminatedPlayer.id} name={e.eliminatedPlayer.firstName} photoUrl={e.eliminatedPlayer.photoUrl} size={32} fontSize={12} round />
+                      <HomeAvatar playerId={e.eliminatedPlayer.id} name={e.eliminatedPlayer.firstName} photoUrl={e.eliminatedPlayer.photoUrl} size={32} fontSize={12} />
                       <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: 'var(--cp-on-surface)' }}>
                         {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName}
                       </div>

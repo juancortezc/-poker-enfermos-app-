@@ -703,6 +703,7 @@ function CPEliminationForm({
       mutate(swrKeys.gameDateEliminations(gameDate.id))
       mutate(swrKeys.gameDate(gameDate.id))
       mutate(swrKeys.gameDates(tournamentId))
+      mutate(swrKeys.gameDatesDetailed(tournamentId))
       mutate(swrKeys.tournamentRanking(tournamentId))
 
     } catch (err) {
@@ -999,6 +1000,7 @@ function CPEliminationHistory({
       mutate(swrKeys.gameDateEliminations(gameDateId))
       mutate(swrKeys.gameDate(gameDateId))
       mutate(swrKeys.gameDates(tournamentId))
+      mutate(swrKeys.gameDatesDetailed(tournamentId))
       mutate(swrKeys.tournamentRanking(tournamentId))
 
     } catch (error) {
