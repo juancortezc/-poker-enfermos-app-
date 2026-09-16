@@ -16,6 +16,7 @@ import {
 import type { PlayerRanking } from '@/lib/ranking-utils'
 import { downloadCsv } from '@/lib/csv'
 import { tile, SOBRE_COLOR } from './bento'
+import { shortenFullName } from '@/lib/player-name'
 
 interface CPRankingViewProps {
   tournamentId: number
@@ -46,6 +47,8 @@ const GREEN_ON_DARK = '#6ECB71'
 const PAPER_INK = '#1D1615'
 const PAPER_INK_2 = '#574C49'
 const PAPER_GOLD = '#7F5D07'
+/** Ambar = proyectado, no jugado. Mismo codigo que el tablero en vivo. */
+const PROJECTED = '#B07A08'
 const PAPER_GREEN = '#136B34'
 const PAPER_SILVER = '#6E6A67'   // plata COMO TEXTO sobre papel: 5.0:1
 const PAPER_BRONZE = '#8B5E2F'   // bronce COMO TEXTO sobre papel: 5.3:1
@@ -70,11 +73,6 @@ function medalBadgeStyle(position: number) {
   if (position === 2) return { background: SILVER, color: '#1A1512' }
   if (position === 3) return { background: BRONZE, color: '#1A1512' }
   return { background: '#382E2C', color: '#F5EFE6' }
-}
-
-function shortName(full: string) {
-  const p = full.split(' ').filter(Boolean)
-  return p.length > 1 ? `${p[0]} ${p[p.length - 1][0]}.` : p[0]
 }
 
 function CircleAvatar({ photoUrl, name, size = 26 }: { photoUrl?: string; name: string; size?: number }) {
@@ -140,6 +138,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
   const eliminasActive = rankings.some(r => r.eliminasActive)
   const showElimina3 = datesToEliminate >= 3
   const hasPenalties = rankings.some(r => (r.pointPenalty ?? 0) > 0)
+  const hasLiveProjection = rankings.some(r => r.liveProjection)
 
   const deltaFor = (player: PlayerRanking) => player.positionsChanged
 
@@ -251,7 +250,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
                 <span className="cp-score" style={{ fontSize: 30, color: '#FFF' }}>#1</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: '#FFF' }}>{shortName(leader.playerName)}</span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#FFF' }}>{shortenFullName(leader.playerName)}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
                 <span className="cp-score" style={{ fontSize: 22, color: GOLD }}>{scoreOf(leader)}</span>
@@ -320,7 +319,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                 <div style={{ minWidth: 0 }}>
                   <div className="cp-score" style={{ fontSize: 13, color: medalTexto }}>#{player.position}</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--cp-on-surface)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {shortName(player.playerName)}
+                    {shortenFullName(player.playerName)}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                     <span className="cp-score" style={{ fontSize: 15, color: 'var(--cp-on-surface)' }}>{scoreOf(player)}</span>
@@ -425,6 +424,25 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                 // el rojo ya destaca, así que no se pisan.
                 const pointsBg = isCurrentUser ? rowBg : POINTS_TINT
                 const eliminaColor = player.eliminasActive ? ORANGE : INACTIVE_TEXT
+                /**
+                 * Durante una fecha en curso los ELIMINA se muestran contando
+                 * la proyeccion de hoy: es lo que de verdad se descartaria si
+                 * el jugador sale ahora. Van en ambar para no confundirlos con
+                 * el dato cerrado.
+                 */
+                const proj = player.liveProjection
+                const eliminaOf = (n: 1 | 2 | 3) => {
+                  const projected = proj ? proj[`elimina${n}` as const] : undefined
+                  const real = player[`elimina${n}` as const]
+                  const value = proj ? projected : real
+                  return {
+                    text: value !== undefined ? `−${value}` : '—',
+                    color: proj
+                      ? PROJECTED
+                      : (isCurrentUser ? 'rgba(255,255,255,0.85)' : eliminaColor),
+                    italic: Boolean(proj),
+                  }
+                }
 
                 return (
                   <tr key={player.playerId} onClick={() => goToPlayer(player.playerId)} style={{ cursor: 'pointer' }}>
@@ -442,7 +460,7 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: textColor }}>
                         <CircleAvatar photoUrl={player.playerPhoto} name={player.playerName} size={view === 'resumen' ? 26 : 22} />
                         <span style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>
-                          {view === 'resumen' ? player.playerName : shortName(player.playerName)}
+                          {view === 'resumen' ? player.playerName : shortenFullName(player.playerName)}
                           {isCurrentUser && ' (Tú)'}
                         </span>
                       </div>
@@ -455,42 +473,61 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
 
                     {view === 'fechas' && completedDates.map(d => {
                       const isEliminated = eliminated?.has(d)
+                      // Sigue en la mesa esta fecha: se muestra lo que se
+                      // llevaria si sale ahora, marcado como proyeccion.
+                      const proj = player.liveProjection?.dateNumber === d &&
+                        player.pointsByDate[d] === undefined
+                        ? player.liveProjection
+                        : null
                       return (
                         <td
                           key={d}
                           style={{
                             ...tdStyle,
                             background: rowBg,
-                            color: isEliminated ? (isCurrentUser ? 'rgba(255,255,255,0.55)' : '#B0B0B0') : textColor,
+                            color: proj
+                              ? PROJECTED
+                              : isEliminated ? (isCurrentUser ? 'rgba(255,255,255,0.55)' : '#B0B0B0') : textColor,
+                            fontStyle: proj ? 'italic' : undefined,
                             textDecoration: isEliminated ? 'line-through' : undefined
                           }}
+                          title={proj ? `Proyectado: ${proj.points} si sale ${proj.position}º` : undefined}
                         >
-                          {player.pointsByDate[d] ?? 0}
+                          {proj ? proj.points : (player.pointsByDate[d] ?? '—')}
                         </td>
                       )
                     })}
                     {view === 'fechas' && <td style={{ ...tdStyle, background: rowBg, color: textColor }}>{prom}</td>}
 
                     {view === 'elimina' && (
-                      <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.8)' : ORANGE, fontWeight: 500 }}>
-                        {player.totalPoints}
+                      <td style={{ ...tdStyle, background: rowBg, color: proj ? PROJECTED : (isCurrentUser ? 'rgba(255,255,255,0.8)' : ORANGE), fontWeight: 500, fontStyle: proj ? 'italic' : undefined }}>
+                        {proj ? player.totalPoints + proj.points : player.totalPoints}
                       </td>
                     )}
-                    {view === 'elimina' && (
-                      <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.85)' : eliminaColor }}>
-                        {player.elimina1 !== undefined ? `−${player.elimina1}` : '—'}
-                      </td>
-                    )}
-                    {view === 'elimina' && (
-                      <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.85)' : eliminaColor }}>
-                        {player.elimina2 !== undefined ? `−${player.elimina2}` : '—'}
-                      </td>
-                    )}
-                    {view === 'elimina' && showElimina3 && (
-                      <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.85)' : eliminaColor }}>
-                        {player.elimina3 !== undefined ? `−${player.elimina3}` : '—'}
-                      </td>
-                    )}
+                    {view === 'elimina' && (() => {
+                      const cell = eliminaOf(1)
+                      return (
+                        <td style={{ ...tdStyle, background: rowBg, color: cell.color, fontStyle: cell.italic ? 'italic' : undefined }}>
+                          {cell.text}
+                        </td>
+                      )
+                    })()}
+                    {view === 'elimina' && (() => {
+                      const cell = eliminaOf(2)
+                      return (
+                        <td style={{ ...tdStyle, background: rowBg, color: cell.color, fontStyle: cell.italic ? 'italic' : undefined }}>
+                          {cell.text}
+                        </td>
+                      )
+                    })()}
+                    {view === 'elimina' && showElimina3 && (() => {
+                      const cell = eliminaOf(3)
+                      return (
+                        <td style={{ ...tdStyle, background: rowBg, color: cell.color, fontStyle: cell.italic ? 'italic' : undefined }}>
+                          {cell.text}
+                        </td>
+                      )
+                    })()}
                     {view === 'elimina' && hasPenalties && (
                       <td style={{ ...tdStyle, background: rowBg, color: isCurrentUser ? 'rgba(255,255,255,0.85)' : ORANGE }}>
                         {(player.pointPenalty ?? 0) > 0 ? `−${player.pointPenalty}` : '—'}
@@ -503,6 +540,15 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
           </table>
         </div>
       </div>
+
+      {hasLiveProjection && (
+        <p style={{ fontSize: 12, lineHeight: 1.5, color: '#9A8F8B', margin: '0 2px' }}>
+          Hay una fecha en juego. En{' '}
+          <span style={{ color: PROJECTED, fontStyle: 'italic', fontWeight: 600 }}>ámbar y cursiva</span>{' '}
+          va lo proyectado: lo que se llevaría cada uno si sale ahora. La tabla no cambia
+          hasta que la fecha termine.
+        </p>
+      )}
 
       {view === 'elimina' && !eliminasActive && (
         <p style={{ fontSize: 12, lineHeight: 1.5, color: '#9A8F8B', margin: '0 2px' }}>

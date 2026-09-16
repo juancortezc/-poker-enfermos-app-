@@ -9,10 +9,10 @@ import { calculateTournamentRanking, type PlayerRanking } from './ranking-utils'
  * puntos que va a recibir el PRÓXIMO eliminado. Así la tabla muestra dónde
  * quedaría cada uno si sale ahora, y se mueve con cada eliminación.
  *
- * Ojo: calculateTournamentRanking() ya incluye la fecha en curso — los
- * eliminados de hoy tienen sus puntos reales y los que siguen jugando tienen
- * un 0 en pointsByDate. Ese 0 además entra al ELIMINA como si fuera una de
- * las peores fechas, así que la proyección lo reemplaza antes de recalcular.
+ * calculateTournamentRanking() incluye la fecha en curso solo con lo que ya
+ * ocurrio: los eliminados de hoy tienen sus puntos reales y los que siguen en
+ * la mesa NO tienen entrada en pointsByDate (antes tenian un 0 que el ELIMINA
+ * descartaba como si fuera un resultado). Aqui se les agrega la proyeccion.
  */
 
 export type LivePlayerState = 'eliminated' | 'playing' | 'absent'
@@ -30,8 +30,22 @@ export interface LiveRankingRow {
   positionsChanged: number
   /** Puntaje final proyectado (total − N peores fechas − multas). */
   score: number
+  /**
+   * El mismo puntaje pero sin la fecha de hoy: lo que el jugador tiene ya
+   * asegurado. La diferencia contra `score` es lo que hoy le suma de verdad,
+   * que no siempre coincide con `todayPoints` porque el ELIMINA puede estar
+   * descartando la fecha de hoy por ser una de las peores.
+   */
+  baseScore: number
   /** Lo que suma hoy: real si ya salió, proyectado si sigue en mesa. */
   todayPoints: number
+  /**
+   * true = aguantar una eliminación más NO le movería el puntaje final,
+   * porque el ELIMINA está absorbiendo la fecha de hoy (es de sus peores).
+   * Es la causa de que la tabla se vea con los puntos congelados y la posición
+   * moviéndose: lo que cambia es lo que hacen los demás.
+   */
+  todayAbsorbed: boolean
   state: LivePlayerState
   /** Posición con la que salió de la fecha (solo si ya fue eliminado). */
   eliminationPosition?: number
@@ -155,7 +169,7 @@ export function projectLiveRanking(
   const eliminationByPlayer = new Map(snapshot.eliminations.map((e) => [e.eliminatedPlayerId, e]))
   const inDate = new Set(snapshot.playerIds)
 
-  const projected: Array<{ score: number; ranking: PlayerRanking; todayPoints: number; state: LivePlayerState }> = []
+  const projected: Array<{ score: number; ranking: PlayerRanking; todayPoints: number; state: LivePlayerState; baseScore: number; todayAbsorbed: boolean }> = []
   const base: Array<{ score: number; ranking: PlayerRanking }> = []
   let eliminasActive = false
 
@@ -186,11 +200,21 @@ export function projectLiveRanking(
     const projectedScore = finalScoreFrom({ pointsByDate: projectedPoints, pointPenalty }, totalDates, datesToEliminate)
     eliminasActive = projectedScore.eliminasActive
 
+    // Se mide el sintoma directo en vez de deducirlo: si sumarle un punto a la
+    // fecha de hoy deja el puntaje final igual, entonces sobrevivir una
+    // eliminacion mas no le cambia nada.
+    const bumped = finalScoreFrom(
+      { pointsByDate: { ...projectedPoints, [snapshot.dateNumber]: todayPoints + 1 }, pointPenalty },
+      totalDates,
+      datesToEliminate
+    )
+    const todayAbsorbed = state === 'playing' && bumped.score === projectedScore.score
+
     const basePoints = { ...player.pointsByDate }
     delete basePoints[snapshot.dateNumber]
     const baseScore = finalScoreFrom({ pointsByDate: basePoints, pointPenalty }, totalDates, datesToEliminate)
 
-    projected.push({ score: projectedScore.score, ranking: player, todayPoints, state })
+    projected.push({ score: projectedScore.score, ranking: player, todayPoints, state, baseScore: baseScore.score, todayAbsorbed })
     base.push({ score: baseScore.score, ranking: player })
   }
 
@@ -211,7 +235,9 @@ export function projectLiveRanking(
         basePosition,
         positionsChanged: basePosition - position,
         score: entry.score,
+        baseScore: entry.baseScore,
         todayPoints: entry.todayPoints,
+        todayAbsorbed: entry.todayAbsorbed,
         state: entry.state,
         eliminationPosition: eliminationByPlayer.get(entry.ranking.playerId)?.position
       }

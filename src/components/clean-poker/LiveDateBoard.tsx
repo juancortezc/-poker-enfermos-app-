@@ -2,6 +2,8 @@
 
 import useSWR from 'swr'
 import { SCORE_LABELS } from '@/lib/ranking-utils'
+import { TIMER_ENABLED } from '@/lib/feature-flags'
+import { shortenFullName } from '@/lib/player-name'
 import type { LiveRankingData, LiveRankingRow } from '@/lib/live-ranking'
 
 interface BlindInfo {
@@ -10,12 +12,6 @@ interface BlindInfo {
   bigBlind: number
   timeRemaining: number
   status: string
-}
-
-/** "Juan Fernando Ochoa" → "Juan Fernando O." */
-function shortName(full: string) {
-  const parts = full.split(' ').filter(Boolean)
-  return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0]
 }
 
 const MEDALS: Record<number, string> = { 1: '#F0B429', 2: '#C0C0C0', 3: '#C08A54' }
@@ -64,6 +60,65 @@ function Var({ change }: { change: number }) {
   )
 }
 
+/**
+ * Responde las tres preguntas que el jugador se hace en la mesa: cuánto tenía,
+ * cuánto gana si sale ahora y con cuánto termina, más la posición resultante.
+ *
+ * El punto fino: el ELIMINA descarta un número FIJO de peores fechas. Al
+ * entrar la fecha de hoy al conjunto cambia cuál fecha se descarta, así que lo
+ * que hoy le suma al puntaje final casi nunca es igual al premio de la fecha.
+ * Puede ser 0 (hoy es de las peores y se descarta) o incluso mayor que el
+ * premio (hoy destapa una fecha peor que ya no se descarta). Ese desfase era
+ * lo que no se entendía: el puntaje quieto y la posición moviéndose. Por eso
+ * se nombra en vez de dejarlo implícito.
+ */
+function MyStatus({ row, nextPosition }: { row: LiveRankingRow; nextPosition: number }) {
+  const playing = row.state === 'playing'
+  // Lo que la fecha de hoy le suma de verdad al puntaje final.
+  const realGain = row.score - row.baseScore
+
+  let note: string | null = null
+  if (row.todayAbsorbed) {
+    note = `Hoy entra entre tus peores fechas, asi que el ELIMINA la descarta: aguantar mas no te mueve el ${SCORE_LABELS.points} y la posicion cambia por lo que hagan los demas.`
+  } else if (playing && realGain !== row.todayPoints) {
+    note = `El total no es una suma directa: al entrar esta fecha el ELIMINA cambia cual de tus fechas viejas se descarta.`
+  }
+
+  return (
+    <div
+      className="px-2.5 py-1.5"
+      style={{ background: 'rgba(229,57,53,0.16)', border: '1px solid rgba(229,57,53,0.35)', borderRadius: 10 }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <p className="uppercase truncate" style={{ fontSize: 12, letterSpacing: '0.1em', color: MUTED }}>
+          {playing ? `Tú · sales ${nextPosition}º` : `Tú · saliste ${row.eliminationPosition}º`}
+        </p>
+        <p className="flex items-center gap-1.5 flex-shrink-0">
+          <span style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>{row.position}º</span>
+          <Var change={row.positionsChanged} />
+        </p>
+      </div>
+
+      <div className="flex items-baseline gap-1.5 mt-0.5" style={{ fontSize: 13 }}>
+        <span style={{ color: MUTED }}>Traías</span>
+        <span style={{ fontWeight: 800, color: '#fff' }}>{row.baseScore}</span>
+        <span style={{ color: MUTED }}>·</span>
+        <span style={{ color: MUTED }}>{playing ? 'ganas' : 'ganaste'}</span>
+        <span style={{ fontWeight: 800, color: playing ? '#F0B429' : '#fff' }}>+{row.todayPoints}</span>
+        <span style={{ color: MUTED }}>·</span>
+        <span style={{ color: MUTED }}>{playing ? 'terminas' : 'terminaste'}</span>
+        <span style={{ fontWeight: 800, color: playing ? '#F0B429' : '#fff' }}>{row.score}</span>
+      </div>
+
+      {note && (
+        <p className="mt-0.5" style={{ fontSize: 12, color: MUTED, lineHeight: 1.3 }}>
+          {note}
+        </p>
+      )}
+    </div>
+  )
+}
+
 function Row({ row, isMe, striped }: { row: LiveRankingRow; isMe: boolean; striped: boolean }) {
   // Los puntos proyectados (sigue en mesa) van en ámbar y sin negrita; los ya
   // definidos en blanco y en negrita.
@@ -108,7 +163,7 @@ function Row({ row, isMe, striped }: { row: LiveRankingRow; isMe: boolean; strip
           color: row.state === 'absent' ? 'rgba(255,255,255,0.4)' : '#fff',
         }}
       >
-        {shortName(row.playerName)}
+        {shortenFullName(row.playerName)}
       </span>
 
       <span
@@ -153,6 +208,8 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
   }
 
   const { gameDate, projection, lastElimination, rows, currentBlind } = data
+  const me = rows.find((r) => r.playerId === userId)
+  const showMyStatus = me && me.state !== 'absent'
 
   return (
     <div className="space-y-2">
@@ -170,12 +227,15 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
           hint={`${gameDate.eliminationsCount} fuera`}
           tint="rgba(34,197,94,0.14)"
         />
-        <Kpi
-          label="Blind"
-          value={currentBlind ? String(currentBlind.level) : '—'}
-          hint={currentBlind ? `${currentBlind.smallBlind}/${currentBlind.bigBlind}` : 'sin timer'}
-          tint="rgba(168,85,247,0.14)"
-        />
+        {/* Con el timer apagado este KPI solo mostraria un guion. */}
+        {TIMER_ENABLED && (
+          <Kpi
+            label="Blind"
+            value={currentBlind ? String(currentBlind.level) : '—'}
+            hint={currentBlind ? `${currentBlind.smallBlind}/${currentBlind.bigBlind}` : 'sin timer'}
+            tint="rgba(168,85,247,0.14)"
+          />
+        )}
       </div>
 
       {/* Último eliminado */}
@@ -193,8 +253,8 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
               Último eliminado · {lastElimination.position}º
             </p>
             <p className="truncate" style={{ fontSize: 13, color: '#fff' }}>
-              <span style={{ fontWeight: 700 }}>{shortName(lastElimination.playerName)}</span>
-              <span style={{ color: MUTED }}> por {shortName(lastElimination.eliminatorName)}</span>
+              <span style={{ fontWeight: 700 }}>{shortenFullName(lastElimination.playerName)}</span>
+              <span style={{ color: MUTED }}> por {shortenFullName(lastElimination.eliminatorName)}</span>
             </p>
           </div>
           <span className="flex-shrink-0" style={{ fontSize: 20, fontWeight: 800, color: '#F0B429' }}>
@@ -202,6 +262,8 @@ export function LiveDateBoard({ gameDateId, userId }: { gameDateId: number; user
           </span>
         </div>
       )}
+
+      {showMyStatus && <MyStatus row={me} nextPosition={projection.nextPosition} />}
 
       {/* Tabla del torneo */}
       <div style={{ background: 'rgba(255,255,255,0.03)', border: PANEL, borderRadius: 10, overflow: 'hidden' }}>

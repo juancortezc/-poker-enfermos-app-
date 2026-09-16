@@ -27,6 +27,33 @@ export interface PlayerRanking {
   thirdPlaces: number;  // Cantidad de terceros lugares
   lastPlaces: number;   // Cantidad de últimos lugares (primer eliminado / 7-2)
   absences: number;     // Cantidad de ausencias (0 puntos)
+  /**
+   * Solo mientras hay una fecha en curso y este jugador sigue en la mesa.
+   *
+   * NO forma parte de la tabla real: totalPoints, finalScore y los elimina de
+   * arriba se calculan como si la fecha de hoy no existiera, porque todavia no
+   * existe. Esto es lo que se veria SI saliera ahora mismo, para poder mirar la
+   * tabla durante la fecha y entender donde quedaria uno.
+   *
+   * Antes aqui se escribia un 0 en pointsByDate, indistinguible de un resultado
+   * real: se pintaba como celda, contaba como fecha jugada (adelantando el
+   * umbral del ELIMINA una fecha) y se descartaba como la peor de todas.
+   */
+  liveProjection?: {
+    dateNumber: number;
+    /** Posicion que le toca al proximo eliminado. */
+    position: number;
+    /** Puntos que se lleva esa posicion. */
+    points: number;
+    /** Puntaje final si sale ahora, ya con el ELIMINA aplicado. */
+    finalScore: number;
+    /** Las N peores fechas contando la de hoy. */
+    elimina1?: number;
+    elimina2?: number;
+    elimina3?: number;
+    /** true = con la fecha de hoy el ELIMINA ya afecta al puntaje. */
+    eliminasActive: boolean;
+  };
 }
 
 export interface TournamentRankingData {
@@ -133,6 +160,18 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       });
     });
 
+    /**
+     * Quienes siguen sentados en una fecha en curso. Se recolectan aqui y su
+     * proyeccion se calcula al final, cuando ya existe el puntaje real, para
+     * que la proyeccion nunca pueda contaminar la tabla de verdad.
+     */
+    const stillPlaying: Array<{
+      playerId: string;
+      dateNumber: number;
+      totalPlayersInDate: number;
+      eliminatedCount: number;
+    }> = [];
+
     // Procesar cada fecha completada
     tournament.gameDates.forEach(gameDate => {
       const totalPlayersInDate = gameDate.playerIds.length;
@@ -172,8 +211,12 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
             // Solo asignar puntos si es el único jugador restante (ganador) o la fecha está completada
             const eliminatedCount = gameDate.eliminations.length;
             const activePlayersCount = totalPlayersInDate - eliminatedCount;
-            
-            if (activePlayersCount === 1 || gameDate.status === 'completed') {
+
+            // Se exige que quede UNO solo sin eliminacion. Antes bastaba con
+            // que la fecha estuviera cerrada, asi que si por un import parcial
+            // o un arreglo manual quedaban dos jugadores sin fila, a los dos se
+            // les acreditaban puntos de ganador y una victoria.
+            if (activePlayersCount === 1) {
               // Es el ganador - calcular puntos
               const secondPlace = gameDate.eliminations.find(e => e.position === 2);
               const winnerPoints = secondPlace 
@@ -187,9 +230,16 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
               datePositions.set(playerId, 1);
               ranking.firstPlaces++;
             } else {
-              // Aún jugando, no tiene puntos todavía
-              ranking.pointsByDate[gameDate.dateNumber] = 0;
-              // No sumar a totalPoints (permanece sin cambios)
+              // Sigue en la mesa: la fecha NO tiene resultado todavia, asi que
+              // no se escribe nada en pointsByDate. Escribir un 0 aqui lo hacia
+              // indistinguible de haber sacado 0 y contaminaba toda la tabla.
+              // La proyeccion se calcula despues, aparte.
+              stillPlaying.push({
+                playerId,
+                dateNumber: gameDate.dateNumber,
+                totalPlayersInDate,
+                eliminatedCount,
+              });
             }
           }
         }
@@ -239,6 +289,48 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         ranking.eliminasActive = false;
         ranking.finalScore = ranking.totalPoints - (ranking.pointPenalty ?? 0);
       }
+    });
+
+    /**
+     * PROYECCION DE LA FECHA EN CURSO
+     *
+     * A cada jugador que sigue en la mesa se le acreditan los puntos del
+     * PROXIMO eliminado: es el piso garantizado si sale ahora mismo. Con eso
+     * se recalcula su puntaje final y sus peores fechas, incluida la de hoy.
+     *
+     * Todo esto vive en `liveProjection` y no toca ni totalPoints ni finalScore
+     * ni los elimina reales. La tabla de verdad sigue siendo la de las fechas
+     * ya jugadas; esto es solo el "que pasaria si".
+     */
+    stillPlaying.forEach(({ playerId, dateNumber, totalPlayersInDate, eliminatedCount }) => {
+      const ranking = playerRankings.get(playerId);
+      if (!ranking) return;
+
+      // Las posiciones se reparten del primer eliminado hacia la 1.
+      const position = totalPlayersInDate - eliminatedCount;
+      const points = position > 0 ? calculatePointsForPosition(position, totalPlayersInDate) : 0;
+
+      const projectedScores = [
+        ...Object.values(ranking.pointsByDate),
+        points,
+      ];
+      const sorted = [...projectedScores].sort((a, b) => a - b);
+      const worst = sorted.slice(0, datesToEliminate);
+      const projectedTotal = ranking.totalPoints + points;
+      const eliminasActive = projectedScores.length >= eliminationThreshold;
+
+      ranking.liveProjection = {
+        dateNumber,
+        position,
+        points,
+        finalScore: eliminasActive
+          ? projectedTotal - worst.reduce((sum, v) => sum + v, 0) - (ranking.pointPenalty ?? 0)
+          : projectedTotal - (ranking.pointPenalty ?? 0),
+        elimina1: worst[0],
+        elimina2: worst[1],
+        elimina3: worst[2],
+        eliminasActive,
+      };
     });
 
     /**
@@ -342,7 +434,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
                 const eliminatedCount = gameDate.eliminations.length;
                 const activePlayersCount = totalPlayersInDate - eliminatedCount;
 
-                if (activePlayersCount === 1 || gameDate.status === 'completed') {
+                if (activePlayersCount === 1) {
                   const secondPlace = gameDate.eliminations.find(e => e.position === 2);
                   const winnerPoints = secondPlace
                     ? secondPlace.points + 3
@@ -528,7 +620,7 @@ function scoresAtPrefix(
       } else {
         const eliminatedCount = gameDate.eliminations.length;
         const activePlayersCount = totalPlayersInDate - eliminatedCount;
-        if (activePlayersCount === 1 || gameDate.status === 'completed') {
+        if (activePlayersCount === 1) {
           const secondPlace = gameDate.eliminations.find(e => e.position === 2);
           points = secondPlace ? secondPlace.points + 3 : calculatePointsForPosition(1, totalPlayersInDate);
         }
