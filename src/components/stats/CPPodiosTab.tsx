@@ -81,7 +81,7 @@ export default function CPPodiosTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-body-size)' }}>
+        <p style={{ color: 'var(--cp-primary-light)', fontSize: 'var(--cp-body-size)' }}>
           Error: {error}
         </p>
         <button
@@ -122,11 +122,21 @@ export default function CPPodiosTab() {
   const formatPlayerName = (player: Player) => `${player.firstName} ${player.lastName}`
   const getPlayerAlias = (player: Player) => player.aliases && player.aliases.length > 0 ? player.aliases[0] : ''
 
+  // Relleno: el metal vivo, con texto negro encima.
   const getPositionColor = (index: number) => {
     switch (index) {
       case 0: return '#E8C158'
-      case 1: return '#94a3b8'
-      case 2: return '#E8863C'
+      case 1: return '#C9C6C2'
+      case 2: return '#C08A54'
+      default: return 'var(--cp-on-surface-muted)'
+    }
+  }
+  // Texto: el mismo metal no se lee sobre papel (1.9:1 el oro). Estos si.
+  const getPositionInk = (index: number) => {
+    switch (index) {
+      case 0: return '#7F5D07'
+      case 1: return '#5A5653'
+      case 2: return '#754E27'
       default: return 'var(--cp-on-surface-muted)'
     }
   }
@@ -135,13 +145,14 @@ export default function CPPodiosTab() {
     <div className="space-y-4">
       {/* Top 3 Podium */}
       {topThree.length > 0 && (
-        <div className="flex justify-center items-end gap-3 py-4">
+        <div className="grid grid-cols-3 gap-2 items-end py-4">
           {/* Second Place */}
           {topThree[1] && (
             <PodiumCard
               stat={topThree[1]}
               position={2}
               color={getPositionColor(1)}
+              ink={getPositionInk(1)}
               size="medium"
             />
           )}
@@ -152,6 +163,7 @@ export default function CPPodiosTab() {
               stat={topThree[0]}
               position={1}
               color={getPositionColor(0)}
+              ink={getPositionInk(0)}
               size="large"
             />
           )}
@@ -162,6 +174,7 @@ export default function CPPodiosTab() {
               stat={topThree[2]}
               position={3}
               color={getPositionColor(2)}
+              ink={getPositionInk(2)}
               size="medium"
             />
           )}
@@ -182,9 +195,9 @@ export default function CPPodiosTab() {
           style={{ borderBottom: '1px solid var(--cp-surface-border)' }}
         >
           <span style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>JUGADOR</span>
-          <span className="text-center" style={{ fontSize: '12px', color: '#E8C158' }}>1ro</span>
-          <span className="text-center" style={{ fontSize: '12px', color: '#94a3b8' }}>2do</span>
-          <span className="text-center" style={{ fontSize: '12px', color: '#E8863C' }}>3ro</span>
+          <span className="text-center" style={{ fontSize: '12px', color: 'var(--cp-gold)' }}>1ro</span>
+          <span className="text-center" style={{ fontSize: '12px', color: 'var(--cp-on-surface-variant)' }}>2do</span>
+          <span className="text-center" style={{ fontSize: '12px', color: 'var(--cp-negative)' }}>3ro</span>
           <span className="text-center" style={{ fontSize: '12px', color: 'var(--cp-on-surface-muted)' }}>TOT</span>
         </div>
 
@@ -241,7 +254,7 @@ export default function CPPodiosTab() {
                   {getPlayerAlias(stat.player) && (
                     <p
                       className="truncate"
-                      style={{ fontSize: '12px', color: '#E8863C' }}
+                      style={{ fontSize: '12px', color: 'var(--cp-negative)' }}
                     >
                       ({getPlayerAlias(stat.player)})
                     </p>
@@ -252,19 +265,19 @@ export default function CPPodiosTab() {
               {/* Stats */}
               <span
                 className="text-center font-medium"
-                style={{ fontSize: 'var(--cp-caption-size)', color: '#E8C158' }}
+                style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-gold)' }}
               >
                 {stat.firstPlaces}
               </span>
               <span
                 className="text-center font-medium"
-                style={{ fontSize: 'var(--cp-caption-size)', color: '#94a3b8' }}
+                style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-on-surface-variant)' }}
               >
                 {stat.secondPlaces}
               </span>
               <span
                 className="text-center font-medium"
-                style={{ fontSize: 'var(--cp-caption-size)', color: '#E8863C' }}
+                style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-negative)' }}
               >
                 {stat.thirdPlaces}
               </span>
@@ -285,15 +298,19 @@ export default function CPPodiosTab() {
 interface PodiumCardProps {
   stat: PodiumStat
   position: number
+  /** Relleno del badge: el metal vivo, con texto negro encima. */
   color: string
+  /** El mismo metal pero legible COMO TEXTO sobre papel. */
+  ink: string
   size: 'large' | 'medium'
 }
 
-function PodiumCard({ stat, position, color, size }: PodiumCardProps) {
+function PodiumCard({ stat, position, color, ink, size }: PodiumCardProps) {
   const isLarge = size === 'large'
   // Increased by 50%: large w-28->w-42, h-40->h-60; medium w-24->w-36, h-36->h-54
-  const cardSize = isLarge ? 'w-[168px] h-[240px]' : 'w-36 h-[216px]'
-  const photoSize = isLarge ? 'w-20 h-20' : 'w-[72px] h-[72px]'
+  // Ancho fluido: la grilla reparte, asi entra en cualquier telefono.
+  const cardSize = isLarge ? 'w-full h-[232px]' : 'w-full h-[208px]'
+  const photoSize = isLarge ? 'w-[68px] h-[68px]' : 'w-[56px] h-[56px]'
 
   const getPlayerName = () => `${stat.player.firstName}`
   const getAlias = () => stat.player.aliases && stat.player.aliases.length > 0 ? stat.player.aliases[0] : ''
@@ -347,7 +364,7 @@ function PodiumCard({ stat, position, color, size }: PodiumCardProps) {
         {getAlias() && (
           <p
             className="truncate w-full text-center"
-            style={{ fontSize: isLarge ? '11px' : '10px', color: '#E8863C' }}
+            style={{ fontSize: isLarge ? '11px' : '10px', color: 'var(--cp-negative)' }}
           >
             ({getAlias()})
           </p>
@@ -355,9 +372,9 @@ function PodiumCard({ stat, position, color, size }: PodiumCardProps) {
 
         {/* Mini Stats */}
         <div className="flex gap-3 mt-2">
-          <span style={{ fontSize: isLarge ? '13px' : '12px', color: '#E8C158' }}>{stat.firstPlaces}</span>
-          <span style={{ fontSize: isLarge ? '13px' : '12px', color: '#94a3b8' }}>{stat.secondPlaces}</span>
-          <span style={{ fontSize: isLarge ? '13px' : '12px', color: '#E8863C' }}>{stat.thirdPlaces}</span>
+          <span style={{ fontSize: isLarge ? '13px' : '12px', color: 'var(--cp-gold)' }}>{stat.firstPlaces}</span>
+          <span style={{ fontSize: isLarge ? '13px' : '12px', color: 'var(--cp-on-surface-variant)' }}>{stat.secondPlaces}</span>
+          <span style={{ fontSize: isLarge ? '13px' : '12px', color: 'var(--cp-negative)' }}>{stat.thirdPlaces}</span>
         </div>
       </div>
 
@@ -365,8 +382,8 @@ function PodiumCard({ stat, position, color, size }: PodiumCardProps) {
       <div
         className="mt-3 px-4 py-1.5 rounded-full font-bold"
         style={{
-          background: `${color}20`,
-          color: color,
+          background: `${color}30`,
+          color: ink,
           fontSize: isLarge ? '18px' : 'var(--cp-body-size)',
         }}
       >

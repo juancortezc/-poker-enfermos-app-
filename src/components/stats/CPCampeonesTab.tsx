@@ -74,7 +74,7 @@ export default function CPCampeonesTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-body-size)' }}>
+        <p style={{ color: 'var(--cp-primary-light)', fontSize: 'var(--cp-body-size)' }}>
           Error: {error}
         </p>
         <button
@@ -120,11 +120,21 @@ export default function CPCampeonesTab() {
     return champion.player.aliases && champion.player.aliases.length > 0 ? champion.player.aliases[0] : ''
   }
 
+  // Relleno: el metal vivo, con texto negro encima.
   const getPositionColor = (index: number) => {
     switch (index) {
-      case 0: return '#E8C158' // gold
-      case 1: return '#94a3b8' // silver
-      case 2: return '#E8863C' // bronze
+      case 0: return '#E8C158'
+      case 1: return '#C9C6C2'
+      case 2: return '#C08A54'
+      default: return 'var(--cp-on-surface-muted)'
+    }
+  }
+  // Texto: el mismo metal no se lee sobre papel (1.9:1 el oro). Estos si.
+  const getPositionInk = (index: number) => {
+    switch (index) {
+      case 0: return '#7F5D07'
+      case 1: return '#5A5653'
+      case 2: return '#754E27'
       default: return 'var(--cp-on-surface-muted)'
     }
   }
@@ -140,6 +150,7 @@ export default function CPCampeonesTab() {
               champion={topThree[1]}
               position={2}
               color={getPositionColor(1)}
+              ink={getPositionInk(1)}
               size="medium"
             />
           )}
@@ -150,6 +161,7 @@ export default function CPCampeonesTab() {
               champion={topThree[0]}
               position={1}
               color={getPositionColor(0)}
+              ink={getPositionInk(0)}
               size="large"
             />
           )}
@@ -160,6 +172,7 @@ export default function CPCampeonesTab() {
               champion={topThree[2]}
               position={3}
               color={getPositionColor(2)}
+              ink={getPositionInk(2)}
               size="medium"
             />
           )}
@@ -231,7 +244,7 @@ export default function CPCampeonesTab() {
                       className="truncate"
                       style={{
                         fontSize: '12px',
-                        color: '#E8863C',
+                        color: 'var(--cp-negative)',
                       }}
                     >
                       ({getPlayerAlias(champion)})
@@ -244,7 +257,7 @@ export default function CPCampeonesTab() {
                   className="px-3 py-1 rounded-lg font-bold"
                   style={{
                     background: '#fbbf2420',
-                    color: '#E8C158',
+                    color: 'var(--cp-gold)',
                     fontSize: 'var(--cp-body-size)',
                   }}
                 >
@@ -262,11 +275,14 @@ export default function CPCampeonesTab() {
 interface ChampionCardProps {
   champion: ChampionData
   position: number
+  /** Relleno del badge: el metal vivo, con texto negro encima. */
   color: string
+  /** El mismo metal pero legible COMO TEXTO sobre papel. */
+  ink: string
   size: 'large' | 'medium'
 }
 
-function ChampionCard({ champion, position, color, size }: ChampionCardProps) {
+function ChampionCard({ champion, position, color, ink, size }: ChampionCardProps) {
   const isLarge = size === 'large'
   const cardSize = isLarge ? 'w-28 h-36' : 'w-24 h-32'
   const photoSize = isLarge ? 'w-16 h-16' : 'w-12 h-12'
@@ -323,7 +339,7 @@ function ChampionCard({ champion, position, color, size }: ChampionCardProps) {
         {getAlias() && (
           <p
             className="truncate w-full text-center"
-            style={{ fontSize: '12px', color: '#E8863C' }}
+            style={{ fontSize: '12px', color: 'var(--cp-negative)' }}
           >
             ({getAlias()})
           </p>
@@ -334,8 +350,8 @@ function ChampionCard({ champion, position, color, size }: ChampionCardProps) {
       <div
         className="mt-2 px-3 py-1 rounded-full font-bold"
         style={{
-          background: `${color}20`,
-          color: color,
+          background: `${color}30`,
+          color: ink,
           fontSize: 'var(--cp-body-size)',
         }}
       >

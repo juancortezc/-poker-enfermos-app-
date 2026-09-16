@@ -160,7 +160,7 @@ export default function CPTorneosTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        <p style={{ color: '#E53935', fontSize: 'var(--cp-body-size)' }}>
+        <p style={{ color: 'var(--cp-primary-light)', fontSize: 'var(--cp-body-size)' }}>
           Error: {error}
         </p>
         <button
@@ -206,11 +206,11 @@ export default function CPTorneosTab() {
               color: 'var(--cp-on-surface)',
             }}
           >
-            <option value="all" style={{ background: '#2B2120' }}>
+            <option value="all" style={{ background: 'var(--cp-surface-1)' }}>
               Torneo
             </option>
             {tournaments.map(t => (
-              <option key={t.tournamentNumber} value={t.tournamentNumber} style={{ background: '#2B2120' }}>
+              <option key={t.tournamentNumber} value={t.tournamentNumber} style={{ background: 'var(--cp-surface-1)' }}>
                 T{t.tournamentNumber}
               </option>
             ))}
@@ -233,11 +233,11 @@ export default function CPTorneosTab() {
               color: 'var(--cp-on-surface)',
             }}
           >
-            <option value="all" style={{ background: '#2B2120' }}>
+            <option value="all" style={{ background: 'var(--cp-surface-1)' }}>
               Campeon
             </option>
             {uniqueChampions.map(c => (
-              <option key={`${c.firstName}-${c.lastName}`} value={`${c.firstName} ${c.lastName}`} style={{ background: '#2B2120' }}>
+              <option key={`${c.firstName}-${c.lastName}`} value={`${c.firstName} ${c.lastName}`} style={{ background: 'var(--cp-surface-1)' }}>
                 {c.firstName} {c.lastName.charAt(0)}.
               </option>
             ))}
@@ -260,11 +260,11 @@ export default function CPTorneosTab() {
               color: 'var(--cp-on-surface)',
             }}
           >
-            <option value="all" style={{ background: '#2B2120' }}>
+            <option value="all" style={{ background: 'var(--cp-surface-1)' }}>
               Jugador
             </option>
             {uniquePlayers.map(p => (
-              <option key={`player-${p.firstName}-${p.lastName}`} value={`${p.firstName} ${p.lastName}`} style={{ background: '#2B2120' }}>
+              <option key={`player-${p.firstName}-${p.lastName}`} value={`${p.firstName} ${p.lastName}`} style={{ background: 'var(--cp-surface-1)' }}>
                 {p.firstName} {p.lastName.charAt(0)}.
               </option>
             ))}
@@ -333,7 +333,7 @@ export default function CPTorneosTab() {
               <div className="flex-1">
                 <span
                   className="text-xs uppercase tracking-wider"
-                  style={{ color: '#E8C158' }}
+                  style={{ color: 'var(--cp-gold)' }}
                 >
                   Campeon
                 </span>
@@ -347,7 +347,7 @@ export default function CPTorneosTab() {
                   {formatPlayerName(tournament.champion)}
                 </h3>
                 {getPlayerAlias(tournament.champion) && (
-                  <p style={{ fontSize: 'var(--cp-caption-size)', color: '#E8863C' }}>
+                  <p style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-negative)' }}>
                     ({getPlayerAlias(tournament.champion)})
                   </p>
                 )}
@@ -363,21 +363,21 @@ export default function CPTorneosTab() {
             {/* Runner Up */}
             <PositionCard
               badge="2"
-              badgeColor="#94a3b8"
+              badgeColor="#5A5653"
               player={tournament.runnerUp}
             />
 
             {/* Third Place */}
             <PositionCard
               badge="3"
-              badgeColor="#E8863C"
+              badgeColor="#754E27"
               player={tournament.thirdPlace}
             />
 
             {/* Siete */}
             <PositionCard
               badge="7"
-              badgeColor="#ec4899"
+              badgeColor="#C2185B"
               player={tournament.siete}
               isMalazo
             />
@@ -385,7 +385,7 @@ export default function CPTorneosTab() {
             {/* Dos */}
             <PositionCard
               badge="2"
-              badgeColor="#ec4899"
+              badgeColor="#C2185B"
               player={tournament.dos}
               isMalazo
             />
