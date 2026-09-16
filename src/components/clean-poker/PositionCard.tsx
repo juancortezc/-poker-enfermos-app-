@@ -1,5 +1,7 @@
 'use client'
 
+import { shortenFullName } from '@/lib/player-name'
+
 interface PositionCardProps {
   position: number
   totalPoints: number
@@ -24,9 +26,7 @@ export function PositionCard({
   const gap = leaderPoints - finalPoints
   const pct = leaderPoints > 0 ? Math.round((finalPoints / leaderPoints) * 100) : 100
 
-  const shortName = playerName
-    ? (() => { const p = playerName.split(' ').filter(Boolean); return p.length > 1 ? `${p[0]} ${p[p.length-1][0]}.` : p[0] })()
-    : 'Tú'
+  const shortName = playerName ? shortenFullName(playerName) : 'Tú'
 
   const trendColor = trend > 0 ? '#6ECB71' : trend < 0 ? '#E53935' : '#E8C158'
   const trendSymbol = trend > 0 ? '▲' : trend < 0 ? '▼' : '●'

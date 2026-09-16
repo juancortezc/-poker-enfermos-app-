@@ -17,6 +17,7 @@ import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
 import { HomeAvatar } from '@/components/clean-poker/HomeAvatar'
 import { PlayerEvolutionChart } from '@/components/clean-poker/PlayerEvolutionChart'
+import { playerLabel, fullName } from '@/lib/player-name'
 
 interface ChampionPlayer {
   id: string
@@ -402,9 +403,9 @@ export default function PlayerProfilePage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {winner && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <HomeAvatar playerId={winner.eliminatedPlayer.id} name={winner.eliminatedPlayer.firstName} photoUrl={winner.eliminatedPlayer.photoUrl} size={26} fontSize={10} />
+                            <HomeAvatar playerId={winner.eliminatedPlayer.id} name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={26} fontSize={10} />
                             <div style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)' }}>
-                              Ganó <span style={{ color: 'var(--cp-on-surface)', fontWeight: 700 }}>{winner.eliminatedPlayer.firstName}</span>
+                              Ganó <span style={{ color: 'var(--cp-on-surface)', fontWeight: 700 }}>{playerLabel(winner.eliminatedPlayer)}</span>
                             </div>
                           </div>
                         )}

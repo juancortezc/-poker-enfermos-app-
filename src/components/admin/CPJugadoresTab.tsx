@@ -6,6 +6,7 @@ import { Plus, Search, Loader2, Users } from 'lucide-react'
 import Image from 'next/image'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import CPPlayerForm from './CPPlayerForm'
+import { playerLabel } from '@/lib/player-name'
 
 interface Player {
   id: string
@@ -330,7 +331,7 @@ export default function CPJugadoresTab() {
                 >
                   {player.role === 'Comision' && 'Comision'}
                   {player.role === 'Enfermo' && 'Enfermo'}
-                  {player.role === 'Invitado' && player.inviter && `Invitado de ${player.inviter.firstName}`}
+                  {player.role === 'Invitado' && player.inviter && `Invitado de ${playerLabel(player.inviter)}`}
                 </p>
               </div>
 

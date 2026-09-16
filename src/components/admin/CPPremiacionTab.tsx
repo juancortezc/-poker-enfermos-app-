@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import { Award, Loader2, Trophy, UserX, Medal, Users, Crown, Target, CalendarX, ChevronDown, Zap } from 'lucide-react'
 import Image from 'next/image'
+import { playerLabel } from '@/lib/player-name'
 
 interface AwardPlayer {
   id: string
@@ -624,7 +625,7 @@ function CPParentChildCard({ relation }: CPParentChildCardProps) {
           fontWeight: 500,
         }}
       >
-        {player.firstName}
+        {playerLabel(player)}
       </span>
     </div>
   )

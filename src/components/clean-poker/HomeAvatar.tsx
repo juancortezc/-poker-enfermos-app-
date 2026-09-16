@@ -9,16 +9,26 @@ interface HomeAvatarProps {
   photoUrl?: string | null
   size: number
   fontSize?: number
-  /** Circular en vez de cuadrado redondeado. Lo usa el podio, donde el circulo
-   *  es lo que rompe la cuadricula de la pantalla. */
-  round?: boolean
 }
 
-export function HomeAvatar({ playerId, name, photoUrl, size, fontSize, round = false }: HomeAvatarProps) {
+/**
+ * Foto cuadrada, sin anillo. La mascara circular recortaba orejas y pelo, que
+ * es por donde uno reconoce a la gente, y ademas obligaba a dejar aire
+ * alrededor.
+ *
+ * El tamano lo decide QUIEN llama: en el home las caras se miran y van
+ * grandes; en tablas y listas manda el nombre con inicial de apellido y la
+ * foto es solo apoyo, asi que ahi se queda chica.
+ */
+const RADIUS = 8
+
+export function HomeAvatar({ playerId, name, photoUrl, size, fontSize }: HomeAvatarProps) {
+  const px = size
+
   const style: React.CSSProperties = {
-    width: size,
-    height: size,
-    borderRadius: round ? '50%' : 10,
+    width: px,
+    height: px,
+    borderRadius: RADIUS,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -26,14 +36,21 @@ export function HomeAvatar({ playerId, name, photoUrl, size, fontSize, round = f
     color: '#fff',
     flexShrink: 0,
     overflow: 'hidden',
-    fontSize: fontSize ?? Math.round(size * 0.34),
+    fontSize: fontSize ?? Math.round(px * 0.34),
     background: photoUrl ? undefined : getAvatarColor(playerId)
   }
 
   if (photoUrl) {
     return (
       <div style={style}>
-        <Image src={photoUrl} alt={name} width={size} height={size} className="w-full h-full object-cover" unoptimized />
+        <Image
+          src={photoUrl}
+          alt={name}
+          width={px}
+          height={px}
+          className="w-full h-full object-cover object-top"
+          unoptimized
+        />
       </div>
     )
   }

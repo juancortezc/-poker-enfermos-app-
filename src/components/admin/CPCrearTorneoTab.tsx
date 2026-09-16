@@ -7,6 +7,7 @@ import { generateTournamentDates } from '@/lib/date-utils'
 import { fetchCalendarDraft, saveCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
 import { toast } from 'react-toastify'
 import { UserRole } from '@prisma/client'
+import { playerLabel } from '@/lib/player-name'
 
 interface GeneratedDate {
   dateNumber: number
@@ -780,7 +781,7 @@ function ParticipantsStep({
                 className="text-sm truncate"
                 style={{ color: isSelected ? 'var(--cp-on-surface)' : 'var(--cp-on-surface-muted)' }}
               >
-                {player.firstName}
+                {playerLabel(player)}
               </p>
             </button>
           )

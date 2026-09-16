@@ -9,6 +9,7 @@ import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown, Trash2, Trophy, 
 import TournamentCompletionModal from '@/components/tournaments/TournamentCompletionModal'
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+import { playerLabel } from '@/lib/player-name'
 
 const RED = '#E53935'
 const PINK = '#E8863C'
@@ -415,13 +416,7 @@ export default function CPActivarTab() {
     }
   }
 
-  const getDisplayName = (player: Player) => {
-    const firstName = player.aliases && player.aliases.length > 0
-      ? player.aliases[0]
-      : player.firstName
-    const lastNameInitial = player.lastName ? player.lastName.charAt(0).toUpperCase() : ''
-    return lastNameInitial ? `${firstName} ${lastNameInitial}.` : firstName
-  }
+  const getDisplayName = (player: Player) => playerLabel(player)
 
   const currentPlayers = activeTab === 'enfermos'
     ? [...registeredPlayers, ...additionalPlayers]

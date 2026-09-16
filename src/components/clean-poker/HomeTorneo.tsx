@@ -9,6 +9,7 @@ import { Score, Meter } from './Score'
 import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
 import { tile, overline, BENTO, SOBRE_COLOR } from './bento'
+import { playerLabel, shortenFullName } from '@/lib/player-name'
 
 interface DaysWithoutVictoryResponse {
   players: Array<{ id: string; firstName: string; lastName: string; daysWithoutVictory: number; hasNeverWon: boolean }>
@@ -130,7 +131,7 @@ export function HomeTorneo({
       icon: <ClockIcon />,
       text: (
         <>
-          {droughtLeader.firstName} lleva <span style={{ color: 'var(--cp-primary-light)', fontWeight: 700 }}>{droughtLeader.daysWithoutVictory} días</span> sin ganar una fecha
+          {playerLabel(droughtLeader)} lleva <span style={{ color: 'var(--cp-primary-light)', fontWeight: 700 }}>{droughtLeader.daysWithoutVictory} días</span> sin ganar una fecha
         </>
       )
     },
@@ -139,7 +140,7 @@ export function HomeTorneo({
       icon: <span style={{ fontSize: 15 }}>🔥</span>,
       text: (
         <>
-          {seasonHighlights.longestTop3Streak.playerName.split(' ')[0]} lleva{' '}
+          {shortenFullName(seasonHighlights.longestTop3Streak.playerName)} lleva{' '}
           <span style={{ color: 'var(--cp-positive)', fontWeight: 700 }}>{seasonHighlights.longestTop3Streak.streakLength} fechas seguidas</span> en el Top 3
         </>
       )
@@ -151,7 +152,7 @@ export function HomeTorneo({
         <>
           La racha más grande de la temporada:{' '}
           <span style={{ color: 'var(--cp-gold)', fontWeight: 700 }}>+{seasonHighlights.biggestJump.positionsChanged} posiciones</span> (
-          {seasonHighlights.biggestJump.playerName.split(' ')[0]}, Fecha {seasonHighlights.biggestJump.dateNumber})
+          {shortenFullName(seasonHighlights.biggestJump.playerName)}, Fecha {seasonHighlights.biggestJump.dateNumber})
         </>
       )
     }
@@ -182,7 +183,7 @@ export function HomeTorneo({
           >
             {myRanking.position}
           </span>
-          <div style={overline(SOBRE_COLOR.tenue)}>{myRanking.playerName.split(' ')[0]}, estás</div>
+          <div style={overline(SOBRE_COLOR.tenue)}>{shortenFullName(myRanking.playerName)}, estás</div>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginTop: 4, position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
               <span className="cp-score" style={{ fontSize: 34, color: '#FF5A56', lineHeight: 1.2 }}>#</span>
@@ -271,18 +272,17 @@ export function HomeTorneo({
               const idx = podio.indexOf(p)
               const metal = ['#8A6508', '#6E6A67', '#8B5E2F'][idx]
               const primero = idx === 0
-              const tam = primero ? 76 : 56
+              const tam = primero ? 106 : 78
               const activo = abierto === p.playerId
               return (
                 <button key={p.playerId} onClick={() => setAbierto(activo ? null : p.playerId)} aria-expanded={activo}
                   style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: primero ? 12 : 0, minWidth: 0 }}>
-                  <div style={{ position: 'relative', borderRadius: '50%', padding: 3, border: `2px solid ${metal}`,
-                    background: activo ? 'rgba(255,255,255,0.9)' : 'transparent',
+                  <div style={{ position: 'relative',
                     transition: 'transform 200ms ease', transform: activo ? 'translateY(-3px)' : 'none' }}>
-                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={tam} fontSize={primero ? 20 : 15} round />
-                    <span className="cp-score" style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 11, minWidth: 19, height: 19, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{idx + 1}</span>
+                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={tam} fontSize={primero ? 27 : 20} />
+                    <span className="cp-score" style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 12, minWidth: 21, height: 21, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{idx + 1}</span>
                   </div>
-                  <div style={{ fontSize: primero ? 12.5 : 11.5, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>{p.playerName.split(' ')[0]}</div>
+                  <div style={{ fontSize: primero ? 12.5 : 11.5, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>{shortenFullName(p.playerName)}</div>
                   <div className="cp-score" style={{ fontSize: primero ? 19 : 15, color: metal }}>{scoreOf(p)}</div>
                 </button>
               )
@@ -320,11 +320,11 @@ export function HomeTorneo({
           <span style={overline(SOBRE_COLOR.suave)}>malazos 7/2</span>
           {bottom2.map(p => (
             <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
-                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={32} fontSize={12} round />
+              <div style={{ flexShrink: 0 }}>
+                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={45} fontSize={16} />
               </div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.playerName.split(' ')[0]}</div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
                 <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>{scoreOf(p)}</div>
               </div>
             </div>
@@ -338,11 +338,11 @@ export function HomeTorneo({
           <span style={overline(SOBRE_COLOR.suave)}>calientes</span>
           {(streaks?.hot ?? []).slice(0, 2).map(p => (
             <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
-                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={32} fontSize={12} round />
+              <div style={{ flexShrink: 0 }}>
+                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={45} fontSize={16} />
               </div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.playerName.split(' ')[0]}</div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
                 <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>+{p.positionsChanged}</div>
               </div>
             </div>

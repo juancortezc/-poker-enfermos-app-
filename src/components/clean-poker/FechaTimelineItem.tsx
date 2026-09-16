@@ -2,6 +2,7 @@
 
 import { Check, CalendarPlus, Cake } from 'lucide-react'
 import { HomeAvatar } from './HomeAvatar'
+import { fullName } from '@/lib/player-name'
 
 interface EliminationDTO {
   id: number
@@ -96,7 +97,7 @@ export function FechaTimelineItem({
         <div style={{ flex: 1, minWidth: 0 }}>
           {isCompleted && winner ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <HomeAvatar playerId={winner.eliminatedPlayer.id} name={winner.eliminatedPlayer.firstName} photoUrl={winner.eliminatedPlayer.photoUrl} size={40} fontSize={13} />
+              <HomeAvatar playerId={winner.eliminatedPlayer.id} name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={40} fontSize={13} />
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 800, color: '#6ECB71', letterSpacing: '0.04em' }}>GANADOR</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: CREAM_TEXT }}>

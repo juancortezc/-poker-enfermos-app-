@@ -8,14 +8,15 @@ import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
 import { Score } from './Score'
 import { tile, overline, BENTO, SOBRE_COLOR } from './bento'
+import { playerLabel, shortenFullName } from '@/lib/player-name'
 
 interface EliminationDTO {
   id: number
   gameDateId: number
   position: number
   points: number
-  eliminatedPlayer: { id: string; firstName: string; lastName: string }
-  eliminatorPlayer: { id: string; firstName: string; lastName: string } | null
+  eliminatedPlayer: { id: string; firstName: string; lastName: string; photoUrl?: string | null }
+  eliminatorPlayer: { id: string; firstName: string; lastName: string; photoUrl?: string | null } | null
   eliminationTime: string
 }
 
@@ -55,8 +56,13 @@ export function HomeUltimaFecha({
     )
   }
 
-  // Las eliminaciones no traen foto — se cruza con el ranking del torneo, que sí la tiene.
-  const photoByPlayerId = new Map(rankings.map(r => [r.playerId, r.playerPhoto]))
+  // La foto viene en la propia eliminacion; el ranking queda solo de respaldo.
+  // Cruzar contra el ranking perdia a quien no es participante del torneo (un
+  // invitado, por ejemplo), que terminaba mostrando iniciales en vez de foto.
+  const rankingPhoto = new Map(rankings.map(r => [r.playerId, r.playerPhoto]))
+  const photoOf = (player: { id: string; photoUrl?: string | null }) =>
+    player.photoUrl ?? rankingPhoto.get(player.id) ?? undefined
+  const photoByPlayerId = rankingPhoto
 
   const sorted = [...eliminations].sort((a, b) => a.position - b.position)
   const winner = sorted.find(e => e.position === 1)
@@ -66,6 +72,10 @@ export function HomeUltimaFecha({
   const killCounts = new Map<string, { name: string; count: number }>()
   sorted.forEach(e => {
     if (!e.eliminatorPlayer) return
+    // El ganador se guarda como su propio eliminador (posicion 1). Sin este
+    // filtro la tarjeta le regalaba +1 al campeon, y quedaba en desacuerdo con
+    // las estadisticas y los premios, que si lo excluyen.
+    if (e.position === 1) return
     const key = e.eliminatorPlayer.id
     const entry = killCounts.get(key) ?? { name: `${e.eliminatorPlayer.firstName} ${e.eliminatorPlayer.lastName}`, count: 0 }
     entry.count += 1
@@ -142,7 +152,7 @@ export function HomeUltimaFecha({
 
       {/* ── EL CAMPEÓN DE LA NOCHE — el ancla negra ───────────────── */}
       {winner && (() => {
-        const winnerPhoto = photoByPlayerId.get(winner.eliminatedPlayer.id)
+        const winnerPhoto = photoOf(winner.eliminatedPlayer)
         return (
           <section className="cp-rise" style={{ ...tile('negro'), animationDelay: '0ms', padding: 0, minHeight: 172 }}>
             {winnerPhoto && (
@@ -154,7 +164,7 @@ export function HomeUltimaFecha({
             <div style={{ padding: 16, position: 'relative', zIndex: 1, maxWidth: winnerPhoto ? '58%' : '100%' }}>
               <div style={overline(SOBRE_COLOR.tenue)}>Fecha {lastCompletedDate.dateNumber}</div>
               <div className="cp-display" style={{ fontSize: 27, fontWeight: 900, color: '#FFF', lineHeight: 1.02, marginTop: 5 }}>
-                ¡{winner.eliminatedPlayer.firstName.toUpperCase()}<br />GANÓ LA FECHA!
+                ¡{playerLabel(winner.eliminatedPlayer).toUpperCase()}<br />GANÓ LA FECHA!
               </div>
               <button onClick={onSeeAllResults}
                 style={{ marginTop: 13, display: 'inline-flex', alignItems: 'center', gap: 6, background: '#E53935', color: '#fff', padding: '9px 16px', borderRadius: 100, fontSize: 12.5, fontWeight: 800, letterSpacing: '0.03em', border: 'none', cursor: 'pointer' }}>
@@ -163,7 +173,7 @@ export function HomeUltimaFecha({
             </div>
             {!winnerPhoto && (
               <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)' }}>
-                <HomeAvatar playerId={winner.eliminatedPlayer.id} name={`${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`} size={84} fontSize={25} round />
+                <HomeAvatar playerId={winner.eliminatedPlayer.id} name={`${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`} size={118} fontSize={34} />
               </div>
             )}
           </section>
@@ -195,7 +205,7 @@ export function HomeUltimaFecha({
               </div>
               {myNightElim.eliminatorPlayer && (
                 <div style={{ fontSize: 11.5, color: SOBRE_COLOR.suave, marginTop: 3, lineHeight: 1.3 }}>
-                  Te eliminó {myNightElim.eliminatorPlayer.firstName}
+                  Te eliminó {playerLabel(myNightElim.eliminatorPlayer)}
                 </div>
               )}
             </>
@@ -236,8 +246,8 @@ export function HomeUltimaFecha({
               const metal = ['#8A6508', '#6E6A67', '#8B5E2F'][e.position - 1] ?? tenue
               return (
                 <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ borderRadius: '50%', padding: 2, border: `2px solid ${metal}`, flexShrink: 0 }}>
-                    <HomeAvatar playerId={e.eliminatedPlayer.id} name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`} photoUrl={photoByPlayerId.get(e.eliminatedPlayer.id)} size={44} fontSize={14} round />
+                  <div style={{ flexShrink: 0 }}>
+                    <HomeAvatar playerId={e.eliminatedPlayer.id} name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`} photoUrl={photoOf(e.eliminatedPlayer)} size={62} fontSize={19} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: tinta }}>
@@ -262,13 +272,13 @@ export function HomeUltimaFecha({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 12, marginTop: 12 }}>
             {insightCards.map(card => (
               <div key={card.key} style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
-                <div style={{ borderRadius: '50%', padding: 2, border: `2px solid ${card.color}`, flexShrink: 0 }}>
-                  <HomeAvatar playerId={card.playerId} name={card.name} photoUrl={photoByPlayerId.get(card.playerId)} size={40} fontSize={14} round />
+                <div style={{ flexShrink: 0 }}>
+                  <HomeAvatar playerId={card.playerId} name={card.name} photoUrl={photoByPlayerId.get(card.playerId)} size={56} fontSize={19} />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 9.5, fontWeight: 800, color: card.color, letterSpacing: '0.1em', lineHeight: 1.25 }}>{card.label}</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: tinta, marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {card.name.split(' ')[0]}
+                    {shortenFullName(card.name)}
                   </div>
                   <div style={{ fontSize: 10.5, color: tenue, lineHeight: 1.25 }}>{card.detail}</div>
                 </div>
@@ -292,11 +302,11 @@ export function HomeUltimaFecha({
               const primero = idx === 0
               return (
                 <div key={p.playerId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, marginBottom: primero ? 10 : 0, minWidth: 0 }}>
-                  <div style={{ position: 'relative', borderRadius: '50%', padding: 3, border: `2px solid ${metal}` }}>
-                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={primero ? 66 : 50} fontSize={primero ? 18 : 14} round />
-                    <span className="cp-score" style={{ position: 'absolute', bottom: -5, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 10.5, minWidth: 18, height: 18, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{idx + 1}</span>
+                  <div style={{ position: 'relative' }}>
+                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={primero ? 92 : 70} fontSize={primero ? 25 : 19} />
+                    <span className="cp-score" style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 11, minWidth: 20, height: 20, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{idx + 1}</span>
                   </div>
-                  <div style={{ fontSize: 11.5, fontWeight: 700, color: tinta, marginTop: 3 }}>{p.playerName.split(' ')[0]}</div>
+                  <div style={{ fontSize: 11.5, fontWeight: 700, color: tinta, marginTop: 3 }}>{shortenFullName(p.playerName)}</div>
                   <div className="cp-score" style={{ fontSize: primero ? 17 : 14, color: metal }}>{scoreOf(p)}</div>
                 </div>
               )
@@ -311,11 +321,11 @@ export function HomeUltimaFecha({
           <span style={overline(SOBRE_COLOR.suave)}>malazos 7/2</span>
           {bottom2.map(p => (
             <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
-                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={32} fontSize={12} round />
+              <div style={{ flexShrink: 0 }}>
+                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={45} fontSize={16} />
               </div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.playerName.split(' ')[0]}</div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
                 <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>{scoreOf(p)}</div>
               </div>
             </div>
@@ -329,11 +339,11 @@ export function HomeUltimaFecha({
           <span style={overline(SOBRE_COLOR.suave)}>calientes</span>
           {(streaks?.hot ?? []).slice(0, 2).map(p => (
             <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ borderRadius: '50%', padding: 2, border: '2px solid rgba(255,255,255,0.75)', flexShrink: 0 }}>
-                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={32} fontSize={12} round />
+              <div style={{ flexShrink: 0 }}>
+                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={45} fontSize={16} />
               </div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.playerName.split(' ')[0]}</div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
                 <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>+{p.positionsChanged}</div>
               </div>
             </div>

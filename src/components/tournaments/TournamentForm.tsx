@@ -18,6 +18,7 @@ import TournamentCompletionModal from './TournamentCompletionModal'
 import { toast } from 'react-toastify'
 import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
 import { fetchCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
+import { playerLabel } from '@/lib/player-name'
 
 interface Player {
   id: string
@@ -801,7 +802,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
                           className="rounded border-gray-500 text-gray-600 focus:ring-gray-500 focus:ring-1 w-3 h-3 mr-2 flex-shrink-0 accent-gray-600"
                         />
                         <span className="text-sm truncate flex-1 font-medium">
-                          {player.firstName}
+                          {playerLabel(player)}
                         </span>
                       </div>
                       {/* Mostrar primer alias si existe */}
