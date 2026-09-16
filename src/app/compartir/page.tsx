@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Share2, Download, RefreshCw, Trophy, ListOrdered } from 'lucide-react'
+import { Share2, Download, RefreshCw, Trophy, ListOrdered, Sparkles } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
@@ -21,12 +21,13 @@ import { HomeCard } from '@/components/clean-poker/HomeCard'
  * menu de compartir del telefono; no se captura el DOM, que obligaria a meter
  * html2canvas de vuelta en el bundle.
  *
- * Contenido generico a proposito: podio, quien jugo, el varon, la tabla. Nada
+ * Contenido generico a proposito: podio, los personajes de la noche y la
+ * tabla del torneo. Nada
  * de "tu noche" ni la posicion de quien comparte — esto lo ve todo el grupo.
  */
 
 type Pieza = {
-  clave: 'ultima-fecha' | 'elimina'
+  clave: 'ultima-fecha' | 'lo-que-dejo' | 'elimina'
   titulo: string
   detalle: string
   icono: typeof Trophy
@@ -37,9 +38,16 @@ const PIEZAS: Pieza[] = [
   {
     clave: 'ultima-fecha',
     titulo: 'Última fecha',
-    detalle: 'Podio, cuántos jugaron y el Varón de la noche.',
+    detalle: 'El podio de la fecha y cuántos jugaron.',
     icono: Trophy,
     archivo: 'ultima-fecha.png',
+  },
+  {
+    clave: 'lo-que-dejo',
+    titulo: 'Lo que dejó la noche',
+    detalle: 'El Varón, el Malazo, quién más bajó y quién más subió.',
+    icono: Sparkles,
+    archivo: 'lo-que-dejo-la-noche.png',
   },
   {
     clave: 'elimina',
