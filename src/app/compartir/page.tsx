@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Share2, Download, RefreshCw, Trophy, ListOrdered, Sparkles } from 'lucide-react'
+import { Share2, Download, RefreshCw, Trophy, ListOrdered, Sparkles, Sigma } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
@@ -27,7 +27,7 @@ import { HomeCard } from '@/components/clean-poker/HomeCard'
  */
 
 type Pieza = {
-  clave: 'ultima-fecha' | 'lo-que-dejo' | 'elimina'
+  clave: 'ultima-fecha' | 'lo-que-dejo' | 'elimina' | 'acum'
   titulo: string
   detalle: string
   icono: typeof Trophy
@@ -55,6 +55,13 @@ const PIEZAS: Pieza[] = [
     detalle: 'La tabla completa del torneo: posición, nombre y puntaje.',
     icono: ListOrdered,
     archivo: 'tabla-elimina.png',
+  },
+  {
+    clave: 'acum',
+    titulo: 'Tabla ACUM.',
+    detalle: 'Ordenada por puntos reales, sin descartar fechas. DIF es lo que quita el ELIMINA.',
+    icono: Sigma,
+    archivo: 'tabla-acum.png',
   },
 ]
 

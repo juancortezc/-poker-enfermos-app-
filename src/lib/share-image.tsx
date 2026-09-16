@@ -126,111 +126,223 @@ const nombreCorto = (p: { firstName: string; lastName?: string | null }) =>
   shortenFullName(fullName(p))
 import { prisma } from '@/lib/prisma'
 
-export async function buildEliminaImage(): Promise<Response> {
+/** Una columna numerica a la derecha de la tabla. */
+type Columna = { rotulo: string; ancho: number; valor: (i: number) => string; tenue?: boolean }
 
-    const torneo = await prisma.tournament.findFirst({
-      where: { status: 'ACTIVO' },
-      select: { id: true, number: true },
-    })
+/**
+ * Tabla del torneo. La usan la imagen del ELIMINA y la de ACUM., que solo se
+ * diferencian en como se ordenan y que columnas muestran.
+ */
+function TablaImagen({
+  titulo,
+  subtitulo,
+  rotuloPrincipal,
+  filas,
+  columnas,
+}: {
+  titulo: string
+  subtitulo: string
+  rotuloPrincipal: string
+  filas: Array<{ posicion: number; nombre: string; principal: number }>
+  columnas: Columna[]
+}) {
+  const ALTO_FILA = 58
+  const alto = 340 + filas.length * ALTO_FILA
+  const anchoExtras = columnas.reduce((a, c) => a + c.ancho, 0)
 
-    if (!torneo) {
-      return new Response('No hay torneo activo', { status: 404 })
-    }
-
-    const data = await calculateTournamentRanking(torneo.id)
-    if (!data) {
-      return new Response('No se pudo calcular la tabla', { status: 500 })
-    }
-
-    const filas = data.rankings
-    const ALTO_FILA = 58
-    const alto = 340 + filas.length * ALTO_FILA
-
-    return new ImageResponse(
-      (
-        <Marco titulo={`Tabla Torneo ${torneo.number}`} subtitulo="Elimina" alto={alto}>
-          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            {/* Encabezado */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                paddingBottom: 12,
-                borderBottom: `2px solid ${COLORES.borde}`,
-                fontSize: 22,
-                letterSpacing: 3,
-                color: COLORES.tintaSuave,
-              }}
-            >
-              <div style={{ display: 'flex', width: 70 }}>#</div>
-              <div style={{ display: 'flex', flex: 1 }}>JUGADOR</div>
-              <div style={{ display: 'flex', width: 150, justifyContent: 'flex-end' }}>
-                {SCORE_LABELS.points}
-              </div>
+  return {
+    alto,
+    nodo: (
+      <Marco titulo={titulo} subtitulo={subtitulo} alto={alto}>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              paddingBottom: 12,
+              borderBottom: `2px solid ${COLORES.borde}`,
+              fontSize: 22,
+              letterSpacing: 3,
+              color: COLORES.tintaSuave,
+            }}
+          >
+            <div style={{ display: 'flex', width: 70 }}>#</div>
+            <div style={{ display: 'flex', flex: 1 }}>JUGADOR</div>
+            <div style={{ display: 'flex', width: 150 - anchoExtras / 2, justifyContent: 'flex-end' }}>
+              {rotuloPrincipal}
             </div>
+            {columnas.map((c) => (
+              <div key={c.rotulo} style={{ display: 'flex', width: c.ancho, justifyContent: 'flex-end' }}>
+                {c.rotulo}
+              </div>
+            ))}
+          </div>
 
-            {filas.map((p, i) => {
-              const medalla = i < 3 ? MEDALLA[i] : null
-              return (
-                <div
-                  key={p.playerId}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    height: ALTO_FILA,
-                    borderBottom: `1px solid ${COLORES.borde}`,
-                    background: i % 2 === 1 ? COLORES.elevada : COLORES.tarjeta,
-                  }}
-                >
-                  <div style={{ display: 'flex', width: 70, alignItems: 'center' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 44,
-                        height: 44,
-                        borderRadius: 10,
-                        background: medalla ?? 'transparent',
-                        color: medalla ? '#FFFFFF' : COLORES.tintaSuave,
-                        fontSize: 26,
-                        fontWeight: 800,
-                      }}
-                    >
-                      {p.position}
-                    </div>
-                  </div>
+          {filas.map((f, i) => {
+            const medalla = f.posicion <= 3 ? MEDALLA[f.posicion - 1] : null
+            return (
+              <div
+                key={`${f.nombre}-${i}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: ALTO_FILA,
+                  borderBottom: `1px solid ${COLORES.borde}`,
+                  background: i % 2 === 1 ? COLORES.elevada : COLORES.tarjeta,
+                }}
+              >
+                <div style={{ display: 'flex', width: 70, alignItems: 'center' }}>
                   <div
                     style={{
                       display: 'flex',
-                      flex: 1,
-                      fontSize: 30,
-                      fontWeight: medalla ? 800 : 500,
-                      color: COLORES.tinta,
-                    }}
-                  >
-                    {shortenFullName(p.playerName)}
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      width: 150,
-                      justifyContent: 'flex-end',
-                      fontSize: 32,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 44,
+                      height: 44,
+                      borderRadius: 10,
+                      background: medalla ?? 'transparent',
+                      color: medalla ? '#FFFFFF' : COLORES.tintaSuave,
+                      fontSize: 26,
                       fontWeight: 800,
-                      color: medalla ?? COLORES.tinta,
                     }}
                   >
-                    {scoreOf(p)}
+                    {f.posicion}
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        </Marco>
-      ),
-      { width: ANCHO, height: alto }
-    )
+                <div
+                  style={{
+                    display: 'flex',
+                    flex: 1,
+                    fontSize: 30,
+                    fontWeight: medalla ? 800 : 500,
+                    color: COLORES.tinta,
+                  }}
+                >
+                  {f.nombre}
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    width: 150 - anchoExtras / 2,
+                    justifyContent: 'flex-end',
+                    fontSize: 32,
+                    fontWeight: 800,
+                    color: medalla ?? COLORES.tinta,
+                  }}
+                >
+                  {f.principal}
+                </div>
+                {columnas.map((c) => (
+                  <div
+                    key={c.rotulo}
+                    style={{
+                      display: 'flex',
+                      width: c.ancho,
+                      justifyContent: 'flex-end',
+                      fontSize: 27,
+                      color: c.tenue ? COLORES.tintaSuave : COLORES.tinta,
+                    }}
+                  >
+                    {c.valor(i)}
+                  </div>
+                ))}
+              </div>
+            )
+          })}
+        </div>
+      </Marco>
+    ),
+  }
+}
+
+/** Torneo activo, o null si no hay. */
+async function torneoActivo() {
+  return prisma.tournament.findFirst({
+    where: { status: 'ACTIVO' },
+    select: { id: true, number: true },
+  })
+}
+
+export async function buildEliminaImage(): Promise<Response> {
+  const torneo = await torneoActivo()
+  if (!torneo) return new Response('No hay torneo activo', { status: 404 })
+
+  const data = await calculateTournamentRanking(torneo.id)
+  if (!data) return new Response('No se pudo calcular la tabla', { status: 500 })
+
+  const { alto, nodo } = TablaImagen({
+    titulo: `Tabla Torneo ${torneo.number}`,
+    subtitulo: 'Elimina',
+    rotuloPrincipal: SCORE_LABELS.points,
+    filas: data.rankings.map((p) => ({
+      posicion: p.position,
+      nombre: shortenFullName(p.playerName),
+      principal: scoreOf(p),
+    })),
+    columnas: [],
+  })
+
+  return new ImageResponse(nodo, { width: ANCHO, height: alto })
+}
+
+/**
+ * La tabla sin descartar fechas: ordenada por puntos reales.
+ *
+ * Trae DIF, que es lo que el ELIMINA (y las multas) le quitan a cada uno —
+ * sin esa columna la imagen no se distingue de la otra tabla.
+ */
+export async function buildAcumImage(): Promise<Response> {
+  const torneo = await torneoActivo()
+  if (!torneo) return new Response('No hay torneo activo', { status: 404 })
+
+  const data = await calculateTournamentRanking(torneo.id)
+  if (!data) return new Response('No se pudo calcular la tabla', { status: 500 })
+
+  const acumDe = (p: (typeof data.rankings)[number]) =>
+    p.totalPoints + (p.liveProjection?.points ?? 0)
+
+  const ordenadas = [...data.rankings].sort((a, b) => {
+    const dif = acumDe(b) - acumDe(a)
+    if (dif !== 0) return dif
+    // Mismos desempates que la tabla oficial, para no inventar criterios.
+    if (a.firstPlaces !== b.firstPlaces) return b.firstPlaces - a.firstPlaces
+    if (a.secondPlaces !== b.secondPlaces) return b.secondPlaces - a.secondPlaces
+    if (a.thirdPlaces !== b.thirdPlaces) return b.thirdPlaces - a.thirdPlaces
+    if (a.absences !== b.absences) return a.absences - b.absences
+    return a.playerName.localeCompare(b.playerName)
+  })
+
+  let puesto = 1
+  const filas = ordenadas.map((p, i) => {
+    if (i > 0 && acumDe(ordenadas[i - 1]) !== acumDe(p)) puesto = i + 1
+    return {
+      posicion: puesto,
+      nombre: shortenFullName(p.playerName),
+      principal: acumDe(p),
+      oficial: scoreOf(p),
+    }
+  })
+
+  const { alto, nodo } = TablaImagen({
+    titulo: `Tabla Torneo ${torneo.number}`,
+    subtitulo: `${SCORE_LABELS.accumulated} · sin descartar fechas`,
+    rotuloPrincipal: SCORE_LABELS.accumulated,
+    filas,
+    columnas: [
+      { rotulo: SCORE_LABELS.points, ancho: 130, valor: (i) => String(filas[i].oficial) },
+      {
+        rotulo: 'DIF',
+        ancho: 110,
+        tenue: true,
+        valor: (i) => {
+          const dif = filas[i].principal - filas[i].oficial
+          return dif > 0 ? `−${dif}` : '—'
+        },
+      },
+    ],
+  })
+
+  return new ImageResponse(nodo, { width: ANCHO, height: alto })
 }
 
 export async function buildUltimaFechaImage(): Promise<Response> {
