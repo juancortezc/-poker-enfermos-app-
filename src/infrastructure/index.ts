@@ -37,12 +37,7 @@ export {
   PLAYER_DEPS,
 } from './di/player';
 
-// Timer context dependencies
-export {
-  registerTimerDependencies,
-  getGetTimerStateUseCase,
-  TIMER_DEPS,
-} from './di/timer';
+// El timer vive en lib/timer-engine, sin contexto propio.
 
 // Las propuestas se manejan en las rutas /api/proposals-v2, sin contexto propio.
 
@@ -52,7 +47,6 @@ export { PrismaGameDateRepository } from './persistence/prisma/repositories/Pris
 export { PrismaPlayerRepository } from './persistence/prisma/repositories/PrismaPlayerRepository';
 export { PrismaTournamentRepository } from './persistence/prisma/repositories/PrismaTournamentRepository';
 export { PrismaPlayerQueryRepository } from './persistence/prisma/repositories/PrismaPlayerQueryRepository';
-export { PrismaTimerRepository } from './persistence/prisma/repositories/PrismaTimerRepository';
 
 // Services
 export { NotificationServiceAdapter } from './services/NotificationServiceAdapter';

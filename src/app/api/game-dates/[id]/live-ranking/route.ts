@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { computeTimerState } from '@/lib/timer-state'
-import { syncTimerLevel } from '@/lib/timer-advance'
+import { readTimer } from '@/lib/timer-service'
 import { calculateLiveRanking } from '@/lib/live-ranking'
 
 export const dynamic = 'force-dynamic'
@@ -9,9 +7,9 @@ export const dynamic = 'force-dynamic'
 /**
  * GET /api/game-dates/[id]/live-ranking
  *
- * Todo lo que necesita el home durante una fecha en vivo: KPIs, la última
- * eliminación y la tabla del torneo proyectada con los puntos del próximo
- * eliminado. Devuelve 409 si la fecha no está en curso.
+ * Todo lo que necesita el home durante una fecha en vivo: KPIs, la ultima
+ * eliminacion y la tabla del torneo proyectada con los puntos del proximo
+ * eliminado. Devuelve 409 si la fecha no esta en curso.
  */
 export async function GET(
   request: NextRequest,
@@ -20,45 +18,37 @@ export async function GET(
   try {
     const gameDateId = parseInt((await params).id, 10)
     if (Number.isNaN(gameDateId)) {
-      return NextResponse.json({ error: 'ID de fecha inválido' }, { status: 400 })
+      return NextResponse.json({ error: 'ID de fecha invalido' }, { status: 400 })
     }
 
     const live = await calculateLiveRanking(gameDateId)
     if (!live) {
-      return NextResponse.json({ error: 'La fecha no está en curso' }, { status: 409 })
+      return NextResponse.json({ error: 'La fecha no esta en curso' }, { status: 409 })
     }
 
     // Nivel de blinds actual, para el tercer KPI.
-    const [timerState, blindLevels] = await Promise.all([
-      prisma.timerState.findUnique({ where: { gameDateId } }),
-      prisma.gameDate
-        .findUnique({
-          where: { id: gameDateId },
-          select: { tournament: { select: { blindLevels: { orderBy: { level: 'asc' } } } } }
-        })
-        .then((gd) => gd?.tournament.blindLevels ?? [])
-    ])
-
-    // El home también hace subir el nivel: si es la única pantalla abierta
-    // durante la fecha, el timer igual avanza.
-    const synced = timerState ? await syncTimerLevel(timerState, blindLevels) : null
-    const computed = synced ? computeTimerState(synced) : null
-    const current = blindLevels.find((bl) => bl.level === (computed?.currentLevel || 1)) ?? blindLevels[0] ?? null
+    //
+    // Antes esta lectura llamaba a syncTimerLevel() y ESCRIBIA para hacer
+    // subir el nivel: un GET que mutaba, con todas las pantallas abiertas
+    // compitiendo por escribir lo mismo. Ahora el nivel se deriva del ancla,
+    // asi que leer es solo leer.
+    const timer = await readTimer(gameDateId)
 
     return NextResponse.json({
       ...live,
-      currentBlind: current
-        ? {
-            level: current.level,
-            smallBlind: current.smallBlind,
-            bigBlind: current.bigBlind,
-            timeRemaining: computed?.timeRemaining ?? 0,
-            status: computed?.status ?? timerState?.status ?? 'inactive'
-          }
-        : null
+      currentBlind:
+        timer.status === 'inactive' || timer.smallBlind === null
+          ? null
+          : {
+              level: timer.level,
+              smallBlind: timer.smallBlind,
+              bigBlind: timer.bigBlind,
+              timeRemaining: Math.round(timer.remainingMs / 1000),
+              status: timer.status
+            }
     })
   } catch (error) {
-    console.error('Error building live ranking:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    console.error('Error en live-ranking:', error)
+    return NextResponse.json({ error: 'Error al calcular la fecha en vivo' }, { status: 500 })
   }
 }

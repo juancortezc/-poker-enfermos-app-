@@ -40,7 +40,6 @@ model Player {
   createdProposals       Proposal[]              @relation("ProposalCreator")
   createdProposalsV2     ProposalV2[]            @relation("ProposalV2Creator")
   t29Participation       T29Participant?
-  timerActions           TimerAction[]
   pushSubscriptions      PushSubscription[]
   tournamentParticipants TournamentParticipant[]
   tournamentRankings     TournamentRanking[]
@@ -138,39 +137,31 @@ model TournamentRanking {
   @@map("tournament_rankings")
 }
 
+/**
+ * Estado del timer: un ANCLA de tres datos, no un contador.
+ *
+ * El tiempo restante y el nivel actual NO se guardan: se derivan de
+ * (ancla, ahora) con lib/timer-engine. El esquema anterior guardaba
+ * timeRemaining, totalElapsed y pausedDuration — contadores que habia que ir
+ * actualizando, y que con dos pestanas abiertas o un doble clic se separaban
+ * de la realidad.
+ *
+ * anchorAt en null = el reloj no corre (pausado o sin arrancar).
+ */
 model TimerState {
-  id             Int           @id @default(autoincrement())
-  gameDateId     Int           @unique @map("game_date_id")
-  status         TimerStatus   @default(inactive)
-  currentLevel   Int           @default(1) @map("current_level")
-  timeRemaining  Int           @default(0) @map("time_remaining")
-  totalElapsed   Int           @default(0) @map("total_elapsed")
-  startTime      DateTime?     @map("start_time")
-  pausedAt       DateTime?     @map("paused_at")
-  pausedDuration Int           @default(0) @map("paused_duration")
-  levelStartTime DateTime?     @map("level_start_time")
-  blindLevels    Json?         @map("blind_levels")
-  warnedLevel    Int?          @map("warned_level")
-  lastUpdated    DateTime      @default(now()) @map("last_updated")
-  timerActions   TimerAction[]
-  gameDate       GameDate      @relation(fields: [gameDateId], references: [id], onDelete: Cascade)
+  id              Int         @id @default(autoincrement())
+  gameDateId      Int         @unique @map("game_date_id")
+  status          TimerStatus @default(inactive)
+  /// Nivel en el que estaba la fecha en el instante del ancla.
+  anchorLevel     Int         @default(1) @map("anchor_level")
+  /// Milisegundos ya corridos de ese nivel en el instante del ancla.
+  anchorElapsedMs Int         @default(0) @map("anchor_elapsed_ms")
+  /// Reloj de pared del ancla. null = congelado.
+  anchorAt        DateTime?   @map("anchor_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  gameDate        GameDate    @relation(fields: [gameDateId], references: [id], onDelete: Cascade)
 
   @@map("timer_states")
-}
-
-model TimerAction {
-  id           Int             @id @default(autoincrement())
-  timerStateId Int             @map("timer_state_id")
-  actionType   TimerActionType @map("action_type")
-  performedBy  String          @map("performed_by")
-  performedAt  DateTime        @default(now()) @map("performed_at")
-  fromLevel    Int?            @map("from_level")
-  toLevel      Int?            @map("to_level")
-  metadata     Json?
-  player       Player          @relation(fields: [performedBy], references: [id])
-  timerState   TimerState      @relation(fields: [timerStateId], references: [id], onDelete: Cascade)
-
-  @@map("timer_actions")
 }
 
 model BlindLevel {
@@ -376,15 +367,6 @@ enum TimerStatus {
   completed
 }
 
-enum TimerActionType {
-  start
-  pause
-  resume
-  stop
-  level_up
-  level_down
-  reset
-}
 
 enum VoteType {
   thumbsUp

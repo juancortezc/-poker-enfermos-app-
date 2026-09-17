@@ -6,9 +6,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Pause, Play, Smartphone, SmartphoneNfc, RotateCcw, FastForward } from 'lucide-react'
 import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { buildAuthHeaders } from '@/lib/client-auth'
-import { usePokerTimer } from '@/hooks/usePokerTimer'
+import { useBlindTimer, formatRemaining, type TimerAlert } from '@/hooks/useBlindTimer'
 import { useWakeLock } from '@/hooks/useWakeLock'
-import { formatTime } from '@/lib/timer-utils'
+import { avisarUnMinuto, avisarCambio, prepararAudio } from '@/lib/timer-alerts'
 import { TIMER_ENABLED } from '@/lib/feature-flags'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
 import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
@@ -38,6 +38,8 @@ interface GameDate {
   scheduledDate: string
   status: string
   playerIds: string[]
+  /** Se usa para calcular cuanto jugo cada eliminado. */
+  startTime?: string | null
   tournament: {
     id: number
     name: string
@@ -57,6 +59,8 @@ export default function RegistroPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isControlling, setIsControlling] = useState(false)
+  /** Cartel del aviso del timer; se apaga solo. */
+  const [avisoTimer, setAvisoTimer] = useState<string | null>(null)
 
   // Wake Lock para mantener pantalla activa
   const { isSupported: wakeLockSupported, isActive: wakeLockActive, request: requestWakeLock, release: releaseWakeLock } = useWakeLock()
@@ -66,131 +70,60 @@ export default function RegistroPage() {
     ? activeGameDate.id
     : null
 
-  const timer = usePokerTimer(timerGameDateId)
+  /**
+   * El timer tambien suena aqui. /registro es la pantalla que la Comision
+   * tiene abierta toda la noche para anotar eliminaciones: si no hay una
+   * pantalla proyectada, este es el dispositivo que da el aviso.
+   */
+  const alAvisar = useCallback((alerta: TimerAlert) => {
+    if (alerta.kind === 'one-minute') {
+      avisarUnMinuto()
+      setAvisoTimer('FALTA 1 MINUTO')
+    } else {
+      avisarCambio()
+      setAvisoTimer(`CAMBIO A ${alerta.smallBlind}/${alerta.bigBlind}`)
+    }
+  }, [])
 
-  const timerIsActive = timer.status === 'active'
-  const timerIsPaused = timer.status === 'paused'
-  const formattedTimeRemaining = timer.formattedTime
-  const timerState = timerGameDateId ? {
-    currentLevel: timer.currentLevel,
-    timeRemaining: timer.displayTimeRemaining,
-    status: timer.status
-  } : null
-  const currentBlindLevel = timer.currentBlind ?? null
-  const nextBlindLevel = timer.nextBlind ?? null
-  const refreshTimer = () => timer.refresh()
+  const timer = useBlindTimer({ gameDateId: timerGameDateId, onAlert: alAvisar })
 
-  // Control de timer (pausar/reiniciar)
-  const handlePauseTimer = async () => {
-    if (!activeGameDate || isControlling) return
+  useEffect(() => {
+    if (!avisoTimer) return
+    const id = setTimeout(() => setAvisoTimer(null), 6000)
+    return () => clearTimeout(id)
+  }, [avisoTimer])
+
+  const timerIsActive = timer.snapshot?.status === 'active'
+  const timerIsPaused = timer.snapshot?.status === 'paused'
+  const displayFormatted = timer.snapshot?.isUnlimited
+    ? 'SIN LÍMITE'
+    : formatRemaining(timer.remainingMs)
+  const isCritical = timerIsActive && timer.remainingMs <= 60_000 && timer.remainingMs > 0
+  const timerStatus = timer.snapshot?.status ?? 'inactive'
+  const displayBlind = timer.snapshot?.smallBlind != null
+    ? { smallBlind: timer.snapshot.smallBlind, bigBlind: timer.snapshot.bigBlind }
+    : null
+
+  /** Cualquier accion del timer. Idempotente del lado del servidor. */
+  const controlarTimer = async (accion: Parameters<typeof timer.control>[0]) => {
+    if (isControlling) return
     setIsControlling(true)
+    setError('')
+    prepararAudio()
     try {
-      const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/pause`, {
-        method: 'POST',
-        headers: buildAuthHeaders({}, { includeJson: true })
-      })
-      if (response.ok) {
-        await Promise.all([fetchAllData(), refreshTimer()])
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Error al pausar timer')
-      }
-    } catch (error) {
-      console.error('Error pausing timer:', error)
-      setError('Error al pausar timer')
+      await timer.control(accion)
+      await fetchAllData()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error controlando el timer')
     } finally {
       setIsControlling(false)
     }
   }
 
-  const handleResumeTimer = async () => {
-    if (!activeGameDate || isControlling) return
-    setIsControlling(true)
-    try {
-      const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/resume`, {
-        method: 'POST',
-        headers: buildAuthHeaders({}, { includeJson: true })
-      })
-      if (response.ok) {
-        await Promise.all([fetchAllData(), refreshTimer()])
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Error al reiniciar timer')
-      }
-    } catch (error) {
-      console.error('Error resuming timer:', error)
-      setError('Error al reiniciar timer')
-    } finally {
-      setIsControlling(false)
-    }
-  }
-
-  const handleResetTimer = async () => {
-    if (!activeGameDate || isControlling) return
-
-    // Confirmación antes de resetear
-    const confirmed = window.confirm(
-      '¿Estás seguro de que quieres reiniciar el tiempo del nivel actual?\n\n' +
-      'Esto restablecerá el tiempo completo del nivel pero mantendrá el progreso del juego.'
-    )
-
-    if (!confirmed) return
-
-    setIsControlling(true)
-    try {
-      const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/reset`, {
-        method: 'POST',
-        headers: buildAuthHeaders({}, { includeJson: true })
-      })
-      if (response.ok) {
-        await Promise.all([fetchAllData(), refreshTimer()])
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Error al resetear timer')
-      }
-    } catch (error) {
-      console.error('Error resetting timer:', error)
-      setError('Error al resetear timer')
-    } finally {
-      setIsControlling(false)
-    }
-  }
-
-  const handleLevelUp = async () => {
-    if (!activeGameDate || isControlling || !timerState || !nextBlindLevel) return
-
-    const nextLevel = timerState.currentLevel + 1
-
-    // Confirmación antes de avanzar
-    const confirmed = window.confirm(
-      `¿Avanzar al siguiente nivel de blinds?\n\n` +
-      `Nivel actual: ${timerState.currentLevel} (${currentBlindLevel?.smallBlind}/${currentBlindLevel?.bigBlind})\n` +
-      `Siguiente nivel: ${nextLevel} (${nextBlindLevel.smallBlind}/${nextBlindLevel.bigBlind})\n\n` +
-      `El timer se reiniciará con el tiempo del nuevo nivel.`
-    )
-
-    if (!confirmed) return
-
-    setIsControlling(true)
-    try {
-      const response = await fetch(`/api/timer/game-date/${activeGameDate.id}/level-up`, {
-        method: 'POST',
-        headers: buildAuthHeaders({}, { includeJson: true }),
-        body: JSON.stringify({ toLevel: nextLevel, fromLevel: timerState?.currentLevel })
-      })
-      if (response.ok) {
-        await Promise.all([fetchAllData(), refreshTimer()])
-      } else {
-        const errorData = await response.json()
-        setError(errorData.error || 'Error al avanzar nivel')
-      }
-    } catch (error) {
-      console.error('Error advancing level:', error)
-      setError('Error al avanzar nivel')
-    } finally {
-      setIsControlling(false)
-    }
-  }
+  const handlePauseTimer = () => controlarTimer('pause')
+  const handleResumeTimer = () => controlarTimer('resume')
+  const handleResetTimer = () => controlarTimer('restart-level')
+  const handleAdvanceLevel = () => controlarTimer('advance')
 
   // Función para obtener todos los datos
   const handleStartGame = async () => {
@@ -355,31 +288,6 @@ export default function RegistroPage() {
   // Calcular puntos del ganador usando la función del sistema
   const winnerPoints = calculatePointsForPosition(1, totalPlayers)
 
-  const displayBlind = currentBlindLevel
-    ? {
-        smallBlind: currentBlindLevel.smallBlind,
-        bigBlind: currentBlindLevel.bigBlind
-      }
-    : undefined
-
-  const timerSeconds = timerState?.timeRemaining ?? (currentBlindLevel ? currentBlindLevel.duration * 60 : 0)
-  const fallbackFormatted = currentBlindLevel
-    ? currentBlindLevel.duration === 0
-      ? 'SIN LÍMITE'
-      : formatTime(currentBlindLevel.duration * 60)
-    : '--:--'
-  const displayFormatted = timerState ? formattedTimeRemaining : fallbackFormatted
-  const timerStatus = timerIsPaused
-    ? 'paused'
-    : timerIsActive
-      ? 'active'
-      : activeGameDate.status === 'in_progress'
-        ? 'active'
-        : 'inactive'
-
-  // Determinar si el tiempo es crítico (< 1 minuto)
-  const isCritical = timerSeconds > 0 && timerSeconds < 60
-
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`
     : 'PE'
@@ -387,6 +295,26 @@ export default function RegistroPage() {
   return (
     <CPAppShell>
       <div className="min-h-screen pb-24">
+        {/* Aviso del timer: esta pantalla esta abierta toda la noche, asi que
+            es la que suena cuando no hay una pantalla proyectada. */}
+        {avisoTimer && (
+          <div
+            className="cp-rise"
+            style={{
+              margin: '12px 16px 0',
+              padding: '14px 16px',
+              borderRadius: 14,
+              background: '#E53935',
+              color: '#fff',
+              fontWeight: 900,
+              fontSize: 18,
+              letterSpacing: '0.04em',
+              textAlign: 'center',
+            }}
+          >
+            {avisoTimer}
+          </div>
+        )}
         {/* CPHeader */}
         <CPHeader
           userInitials={userInitials}
@@ -505,16 +433,16 @@ export default function RegistroPage() {
                       </button>
 
                       {/* Level Up / Fast Forward */}
-                      {nextBlindLevel && (
+                      {timer.snapshot?.nextLevel != null && (
                         <button
-                          onClick={handleLevelUp}
+                          onClick={handleAdvanceLevel}
                           disabled={isControlling}
                           className="w-9 h-9 flex items-center justify-center rounded transition-colors disabled:opacity-50"
                           style={{
                             background: '#E53935',
                             color: 'white',
                           }}
-                          title={`Avanzar a nivel ${(timerState?.currentLevel ?? 0) + 1} (${nextBlindLevel.smallBlind}/${nextBlindLevel.bigBlind})`}
+                          title={`Avanzar a nivel ${timer.snapshot?.nextLevel} (${timer.snapshot?.nextSmallBlind}/${timer.snapshot?.nextBigBlind})`}
                         >
                           <FastForward className="w-4 h-4" />
                         </button>
@@ -591,7 +519,7 @@ export default function RegistroPage() {
               tournamentId={activeGameDate.tournament.id}
               gameDateId={activeGameDate.id}
               onEliminationUpdated={fetchAllData}
-              gameDateStartTime={timer.gameDateStartTime}
+              gameDateStartTime={activeGameDate.startTime ?? undefined}
             />
           </div>
         </div>

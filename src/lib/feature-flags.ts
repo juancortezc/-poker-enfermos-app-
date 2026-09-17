@@ -1,9 +1,10 @@
 /**
- * Timer de blinds. APAGADO desde 2026-09-16: volvio a fallar en una fecha en
- * vivo. Mientras este en false, /timer muestra "en mantenimiento" y /registro
- * no dibuja el bloque de blinds ni los controles de pausa/resume.
+ * Timer de blinds. ENCENDIDO tras reescribirlo desde cero.
  *
- * Antes de volver a encenderlo hay que resolver la causa raiz de la falla, no
- * solo el sintoma: el historial es que se reactivo una vez y volvio a caer.
+ * Las dos veces anteriores se apago porque el estado se guardaba en
+ * contadores mutables (timeRemaining, totalElapsed, pausedDuration) que se
+ * desincronizaban con cada pausa. Ahora el estado es un ancla de tres datos y
+ * el tiempo se DERIVA: ver lib/timer-engine, con su prueba en
+ * scripts/test-timer-engine.ts, que reproduce una noche entera.
  */
-export const TIMER_ENABLED = false
+export const TIMER_ENABLED = true

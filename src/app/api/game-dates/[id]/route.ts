@@ -131,37 +131,26 @@ export async function PUT(
             }
           })
 
-          // 2. Crear TimerState inicial
-          const ecuadorNow = new Date()
-          const timerState = await tx.timerState.create({
-            data: {
-              gameDateId: gameDateId,
+          // 2. Arrancar el timer: un ancla en el nivel 1, nada mas.
+          //
+          // Antes se copiaba aqui la estructura de blinds entera dentro del
+          // TimerState y se calculaba timeRemaining a mano. Eso dejaba dos
+          // copias de la misma estructura que podian divergir si alguien la
+          // editaba. Ahora el motor lee los blinds del torneo en cada consulta.
+          const timerState = await tx.timerState.upsert({
+            where: { gameDateId },
+            create: {
+              gameDateId,
               status: 'active',
-              currentLevel: 1,
-              timeRemaining: existingDate.tournament.blindLevels[0]?.duration * 60 || 720, // en segundos
-              startTime: ecuadorNow,
-              levelStartTime: ecuadorNow,
-              blindLevels: existingDate.tournament.blindLevels.map(level => ({
-                level: level.level,
-                smallBlind: level.smallBlind,
-                bigBlind: level.bigBlind,
-                duration: level.duration
-              }))
-            }
-          })
-
-          // 3. Crear TimerAction de inicio
-          await tx.timerAction.create({
-            data: {
-              timerStateId: timerState.id,
-              actionType: 'start',
-              performedBy: _user.id,
-              fromLevel: null,
-              toLevel: 1,
-              metadata: {
-                totalPlayers: updatedGameDate.playerIds.length,
-                startedAt: ecuadorNow
-              }
+              anchorLevel: existingDate.tournament.blindLevels[0]?.level ?? 1,
+              anchorElapsedMs: 0,
+              anchorAt: new Date()
+            },
+            update: {
+              status: 'active',
+              anchorLevel: existingDate.tournament.blindLevels[0]?.level ?? 1,
+              anchorElapsedMs: 0,
+              anchorAt: new Date()
             }
           })
 
