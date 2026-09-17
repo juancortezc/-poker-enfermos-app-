@@ -5,7 +5,7 @@ import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { useBlindTimer, formatRemaining, type TimerAlert } from '@/hooks/useBlindTimer'
-import { avisarUnMinuto, avisarCambio, prepararAudio } from '@/lib/timer-alerts'
+import { avisarUnMinuto, avisarCambio, prepararAudio, audioListo } from '@/lib/timer-alerts'
 import { TIMER_ENABLED } from '@/lib/feature-flags'
 
 /**
@@ -25,6 +25,7 @@ export default function TimerPage() {
   const [destello, setDestello] = useState<Destello>(null)
   const [anuncio, setAnuncio] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [sonidoListo, setSonidoListo] = useState(true)
 
   const esComision = user?.role === 'Comision'
   const gameDateId = gameDate?.id ?? null
@@ -43,6 +44,27 @@ export default function TimerPage() {
 
   const { snapshot, remainingMs, control } = useBlindTimer({ gameDateId, onAlert: alAvisar })
 
+  /**
+   * El navegador no deja sonar hasta que hay un gesto del usuario. Los
+   * botones solo los ve la Comision, asi que en una pantalla proyectada con
+   * la sesion de cualquier jugador el audio no se desbloqueaba nunca — justo
+   * la pantalla que tiene que sonar. Sirve cualquier toque.
+   */
+  useEffect(() => {
+    setSonidoListo(audioListo())
+    if (audioListo()) return
+
+    const desbloquear = async () => {
+      if (await prepararAudio()) setSonidoListo(true)
+    }
+    window.addEventListener('pointerdown', desbloquear)
+    window.addEventListener('keydown', desbloquear)
+    return () => {
+      window.removeEventListener('pointerdown', desbloquear)
+      window.removeEventListener('keydown', desbloquear)
+    }
+  }, [sonidoListo])
+
   // El destello y el cartel se apagan solos.
   useEffect(() => {
     if (!destello) return
@@ -55,8 +77,8 @@ export default function TimerPage() {
 
   const accion = async (a: Parameters<typeof control>[0]) => {
     setError(null)
-    // Cualquier boton sirve para desbloquear el audio del navegador.
-    prepararAudio()
+    // Doble funcion: ademas de la accion, el clic desbloquea el audio.
+    if (await prepararAudio()) setSonidoListo(true)
     try {
       await control(a)
     } catch (e) {
@@ -156,12 +178,28 @@ export default function TimerPage() {
         <p style={{ fontSize: 14, color: '#FF9F9F', marginTop: 16, textAlign: 'center' }}>{error}</p>
       )}
 
+      {!sonidoListo && (
+        <p
+          className="animate-pulse"
+          style={{
+            marginTop: 28,
+            fontSize: 15,
+            color: '#E8C158',
+            textAlign: 'center',
+            letterSpacing: '0.04em',
+          }}
+        >
+          Toca la pantalla una vez para activar el sonido
+        </p>
+      )}
+
       {/* Controles: solo Comisión */}
       {esComision && (
         <div className="flex flex-wrap items-center justify-center gap-3" style={{ marginTop: 40 }}>
           {snapshot?.status === 'inactive' ? (
             <Boton onClick={() => accion('start')} destacado>
-              <Play className="w-5 h-5" /> Iniciar
+              <Play className="w-5 h-5" />
+              {sonidoListo ? 'Iniciar' : 'Iniciar y activar sonido'}
             </Boton>
           ) : (
             <>

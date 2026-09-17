@@ -35,10 +35,27 @@ function obtenerContexto(): AudioContext | null {
 /**
  * Desbloquea el audio. Debe llamarse dentro de un gesto del usuario; si no,
  * el navegador deja el contexto suspendido y el primer aviso no suena.
+ *
+ * Devuelve si quedo listo, para poder avisar en pantalla cuando todavia no lo
+ * esta: en una pantalla proyectada nadie toca botones, y sin un gesto previo
+ * el aviso no suena aunque todo lo demas funcione.
  */
-export function prepararAudio(): void {
+export async function prepararAudio(): Promise<boolean> {
   const ctx = obtenerContexto()
-  if (ctx && ctx.state === 'suspended') void ctx.resume()
+  if (!ctx) return false
+  if (ctx.state === 'suspended') {
+    try {
+      await ctx.resume()
+    } catch {
+      return false
+    }
+  }
+  return ctx.state === 'running'
+}
+
+/** Si el navegador ya deja sonar. Sin efectos: solo consulta. */
+export function audioListo(): boolean {
+  return contexto?.state === 'running'
 }
 
 /** Un pitido. `frecuencia` en Hz, `duracion` en segundos. */

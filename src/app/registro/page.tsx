@@ -8,7 +8,7 @@ import { calculatePointsForPosition } from '@/lib/tournament-utils'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { useBlindTimer, formatRemaining, type TimerAlert } from '@/hooks/useBlindTimer'
 import { useWakeLock } from '@/hooks/useWakeLock'
-import { avisarUnMinuto, avisarCambio, prepararAudio } from '@/lib/timer-alerts'
+import { avisarUnMinuto, avisarCambio, prepararAudio, audioListo } from '@/lib/timer-alerts'
 import { TIMER_ENABLED } from '@/lib/feature-flags'
 import CPAppShell from '@/components/clean-poker/CPAppShell'
 import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
@@ -87,6 +87,18 @@ export default function RegistroPage() {
 
   const timer = useBlindTimer({ gameDateId: timerGameDateId, onAlert: alAvisar })
 
+  /**
+   * Desbloqueo del audio con cualquier toque. Aqui anotar una eliminacion ya
+   * cuenta como gesto, pero si la noche arranca y nadie toco nada todavia, el
+   * primer aviso se perderia.
+   */
+  useEffect(() => {
+    if (audioListo()) return
+    const desbloquear = () => { void prepararAudio() }
+    window.addEventListener('pointerdown', desbloquear, { once: true })
+    return () => window.removeEventListener('pointerdown', desbloquear)
+  }, [])
+
   useEffect(() => {
     if (!avisoTimer) return
     const id = setTimeout(() => setAvisoTimer(null), 6000)
@@ -109,7 +121,8 @@ export default function RegistroPage() {
     if (isControlling) return
     setIsControlling(true)
     setError('')
-    prepararAudio()
+    // Doble funcion: ademas de la accion, el clic desbloquea el audio.
+    void prepararAudio()
     try {
       await timer.control(accion)
       await fetchAllData()
