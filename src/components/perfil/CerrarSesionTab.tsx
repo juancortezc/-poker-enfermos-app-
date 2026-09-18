@@ -95,7 +95,7 @@ export default function CerrarSesionTab() {
                 className="text-sm mt-1"
                 style={{ color: 'var(--cp-on-surface-muted)' }}
               >
-                Tendrás que ingresar tu PIN nuevamente para acceder
+                Tendrás que ingresar tu clave nuevamente para acceder
               </p>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function CerrarSesionTab() {
           className="text-center"
           style={{ color: 'var(--cp-on-surface-muted)', fontSize: 'var(--cp-caption-size)' }}
         >
-          Al cerrar sesión se borrarán tus preferencias locales y tendrás que autenticarte nuevamente con tu PIN
+          Al cerrar sesión se borrarán tus preferencias locales y tendrás que autenticarte nuevamente con tu clave
         </p>
       </div>
     </div>

@@ -29,7 +29,7 @@ export default function LoginForm() {
     const success = await login(pin)
     
     if (!success) {
-      setError('PIN inválido')
+      setError('Clave incorrecta')
     }
     
     setLoading(false)
@@ -62,7 +62,7 @@ export default function LoginForm() {
               Poker Enfermos
             </h1>
             <p className="text-poker-muted text-sm">
-              Ingresa tu PIN de acceso para continuar
+              Ingresa tu clave de acceso para continuar
             </p>
           </div>
 
