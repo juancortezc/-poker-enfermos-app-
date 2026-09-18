@@ -510,28 +510,39 @@ export default function CPPlayerForm({
           </div>
 
           {/* Error */}
-          {error && (
-            <div
-              className="rounded-xl p-4 text-center"
-              style={{
-                background: 'rgba(229, 57, 53, 0.1)',
-                border: '1px solid rgba(229, 57, 53, 0.3)',
-              }}
-            >
-              <p style={{ color: '#FF6B6B', fontSize: 'var(--cp-caption-size)' }}>{error}</p>
-            </div>
-          )}
-
         </form>
 
-        {/* Buttons - Fixed at bottom of modal */}
+        {/*
+          Pie fijo: botones Y mensaje de error.
+
+          El error vivia al final del <form>, que es el area con scroll. Como
+          los botones estan aca abajo, tocar "Actualizar" mostraba el error
+          fuera de la vista: desde el lado del usuario, no pasaba nada. Con
+          maxLength de 4 toda clave era invalida, asi que fallaba SIEMPRE con
+          un mensaje que nunca se veia.
+        */}
         <div
-          className="flex-shrink-0 px-4 py-4 flex gap-3"
+          className="flex-shrink-0 px-4 py-4 flex flex-col gap-3"
           style={{
             background: 'var(--cp-background)',
             borderTop: '1px solid var(--cp-surface-border)',
           }}
         >
+          {error && (
+            <div
+              className="rounded-xl px-4 py-3 text-center"
+              style={{
+                background: 'rgba(229, 57, 53, 0.12)',
+                border: '1px solid rgba(229, 57, 53, 0.35)',
+              }}
+            >
+              <p style={{ color: '#C62828', fontSize: 'var(--cp-caption-size)', fontWeight: 600 }}>
+                {error}
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -565,7 +576,8 @@ export default function CPPlayerForm({
             ) : (
               player ? 'Actualizar' : 'Crear'
             )}
-          </button>
+            </button>
+          </div>
         </div>
       </div>
     </div>
