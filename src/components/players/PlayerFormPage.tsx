@@ -17,11 +17,6 @@ import {
   PIN_RULE_TEXT,
 } from '@/lib/pin-rules'
 
-/**
- * Marca "la clave no se toca". No es una clave real: el formulario nunca
- * recibe la clave guardada, solo si existe.
- */
-const PIN_SIN_CAMBIOS = '****'
 
 interface Player {
   id: string
@@ -122,7 +117,8 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
           lastName: playerData.lastName,
           role: playerData.role,
           aliases: playerData.aliases.length > 0 ? playerData.aliases : [''],
-          pin: playerData.pin ? PIN_SIN_CAMBIOS : '',
+          // El API nunca devuelve la clave: el campo arranca vacio.
+          pin: '',
           birthDate: playerData.birthDate || '',
           phone: playerData.phone || '',
           email: playerData.email || '',
@@ -155,7 +151,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
       }
 
       // Validar PIN solo si se está ingresando uno nuevo
-      if (formData.pin && formData.pin !== PIN_SIN_CAMBIOS) {
+      if (formData.pin) {
         if (!isValidPinForCreation(formData.pin)) {
           throw new Error(PIN_RULE_TEXT)
         }
@@ -181,14 +177,14 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
       // Determinar si debemos enviar el PIN
       let pinToSend: string | undefined = undefined
-      if (formData.pin && formData.pin !== PIN_SIN_CAMBIOS) {
+      if (formData.pin) {
         // Usuario ingresó un nuevo PIN
         pinToSend = formData.pin
       } else if (!isEditing) {
         // Es creación y no hay PIN, no enviar nada
         pinToSend = undefined
       }
-      // Si es edición y el PIN está en ****, no enviamos nada (se mantiene el actual)
+      // Vacio = no se envia nada y la clave guardada no se toca.
 
       const submitData = {
         firstName: formData.firstName.trim(),
@@ -340,20 +336,20 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
           <div>
             <Label htmlFor="pin" className="text-poker-text">
               Clave de acceso
-              {isEditing && player?.pin && formData.pin === PIN_SIN_CAMBIOS && (
+              {isEditing && (
                 <span className="ml-2 text-xs text-white/50">
                   (Dejar en blanco para mantener la actual)
                 </span>
               )}
             </Label>
             {/*
-              Sin `pattern` ni maxLength de 4.
-              La regla cambio a alfanumerica de 6 a 12, pero este campo quedo
-              con la vieja: `pattern="\d{4}"` hacia que el navegador BLOQUEARA
-              el envio del formulario —sin mensaje— porque el centinela
-              `****` no son cuatro digitos. Presionar Actualizar no hacia nada,
-              ni siquiera para cambiar el nombre. Y con maxLength 4 era
-              imposible escribir una clave valida, que necesita al menos 6.
+              Sin `pattern` ni maxLength de 4: la regla es alfanumerica de 6 a
+              12, y el pattern viejo hacia que el navegador bloqueara el envio.
+
+              Tampoco hay centinela. El API NUNCA devuelve `pin` —es un hash y
+              no sale del servidor— asi que `player.pin` siempre es undefined y
+              toda la logica de `****` era codigo muerto. El campo arranca
+              vacio: vacio significa "no toques la clave guardada".
             */}
             <Input
               id="pin"
@@ -361,26 +357,12 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
               autoComplete="new-password"
               maxLength={PIN_MAX_LENGTH}
               value={formData.pin}
-              placeholder={player?.pin ? 'Click para cambiar la clave' : 'letras y numeros'}
-              onFocus={(e) => {
-                if (formData.pin === PIN_SIN_CAMBIOS) {
-                  updateFormData('pin', '')
-                  e.target.placeholder = 'Nueva clave'
-                }
-              }}
-              onBlur={(e) => {
-                // Si no escribio nada y ya tenia clave, vuelve el centinela.
-                if (formData.pin === '' && player?.pin) {
-                  updateFormData('pin', PIN_SIN_CAMBIOS)
-                  e.target.placeholder = 'Click para cambiar la clave'
-                }
-              }}
+              placeholder={isEditing ? 'Nueva clave (opcional)' : 'Clave de acceso'}
               onChange={(e) => updateFormData('pin', normalizePin(e.target.value))}
               className="bg-poker-dark/50 border-white/10 text-white focus:border-poker-red"
             />
             <p className="text-xs text-white/40 mt-1">{PIN_RULE_TEXT}</p>
             {formData.pin &&
-              formData.pin !== PIN_SIN_CAMBIOS &&
               !isValidPinForCreation(formData.pin) && (
                 <p className="text-xs text-yellow-400 mt-1">{PIN_RULE_TEXT}</p>
               )}

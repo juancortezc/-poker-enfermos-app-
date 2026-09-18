@@ -81,7 +81,8 @@ export default function CPPlayerForm({
         lastName: player.lastName,
         role: player.role,
         aliases: player.aliases.length > 0 ? player.aliases : [''],
-        pin: player.pin ? '****' : '',
+        // El API nunca devuelve la clave, asi que el campo arranca vacio.
+        pin: '',
         birthDate: player.birthDate || '',
         phone: player.phone || '',
         email: player.email || '',
@@ -138,7 +139,7 @@ export default function CPPlayerForm({
         throw new Error('El apellido es obligatorio')
       }
 
-      if (formData.pin && formData.pin !== '****' && !isValidPinForCreation(formData.pin)) {
+      if (formData.pin && !isValidPinForCreation(formData.pin)) {
         throw new Error(PIN_RULE_TEXT)
       }
 
@@ -153,7 +154,8 @@ export default function CPPlayerForm({
         lastName: formData.lastName.trim(),
         role: formData.role,
         aliases: cleanAliases,
-        pin: formData.pin && formData.pin !== '****' ? formData.pin : undefined,
+        // Vacio = no se toca la clave guardada.
+        pin: formData.pin || undefined,
         birthDate: formData.birthDate || undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
@@ -358,12 +360,18 @@ export default function CPPlayerForm({
               className="font-medium uppercase tracking-wider"
               style={{ fontSize: 'var(--cp-caption-size)', color: 'var(--cp-on-surface-muted)' }}
             >
-              PIN de Acceso
+              Clave de acceso
             </p>
+            {/*
+              La regla se muestra SIEMPRE, tambien al editar. Antes al editar
+              solo decia "deja en blanco" y el jugador nunca se enteraba de que
+              la clave necesita 6 caracteres: escribia 4 y el envio fallaba.
+            */}
             <p
               style={{ fontSize: '13px', color: 'var(--cp-on-surface-muted)', marginTop: '-4px' }}
             >
-              {player ? 'Deja en blanco para mantener la actual' : PIN_RULE_TEXT}
+              {PIN_RULE_TEXT}
+              {player ? '. Deja en blanco para mantener la actual.' : ''}
             </p>
 
             <div className="flex items-center gap-2">
@@ -373,10 +381,15 @@ export default function CPPlayerForm({
                 autoComplete="new-password"
                 maxLength={PIN_MAX_LENGTH}
                 value={formData.pin}
-                placeholder={player?.pin ? '****' : '1234'}
-                onFocus={() => {
-                  if (formData.pin === '****') updateFormData('pin', '')
-                }}
+                /*
+                  El placeholder decia "1234", que con la regla actual es
+                  invalido: el campo sugeria exactamente lo que iba a rechazar.
+                  Y no puede mostrar la clave guardada ni un centinela, porque
+                  el API nunca devuelve `pin` — es un hash y no sale del
+                  servidor. Por eso `player.pin` siempre es undefined y toda la
+                  logica de `****` que habia aqui era codigo muerto.
+                */
+                placeholder={player ? 'Nueva clave (opcional)' : 'Clave de acceso'}
                 onChange={(e) => updateFormData('pin', normalizePin(e.target.value))}
                 className="flex-1 px-3 py-2.5"
                 style={{ ...inputBaseStyle, borderRadius: '4px' }}
