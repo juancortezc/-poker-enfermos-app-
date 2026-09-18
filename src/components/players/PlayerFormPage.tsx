@@ -10,7 +10,18 @@ import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save, Loader2, Plus, X, ChevronDown, ChevronUp } from 'lucide-react'
 import Image from 'next/image'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
-import { isValidPinForCreation } from '@/lib/pin-rules'
+import {
+  isValidPinForCreation,
+  normalizePin,
+  PIN_MAX_LENGTH,
+  PIN_RULE_TEXT,
+} from '@/lib/pin-rules'
+
+/**
+ * Marca "la clave no se toca". No es una clave real: el formulario nunca
+ * recibe la clave guardada, solo si existe.
+ */
+const PIN_SIN_CAMBIOS = '****'
 
 interface Player {
   id: string
@@ -111,7 +122,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
           lastName: playerData.lastName,
           role: playerData.role,
           aliases: playerData.aliases.length > 0 ? playerData.aliases : [''],
-          pin: playerData.pin ? '****' : '',
+          pin: playerData.pin ? PIN_SIN_CAMBIOS : '',
           birthDate: playerData.birthDate || '',
           phone: playerData.phone || '',
           email: playerData.email || '',
@@ -144,9 +155,9 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
       }
 
       // Validar PIN solo si se está ingresando uno nuevo
-      if (formData.pin && formData.pin !== '****') {
+      if (formData.pin && formData.pin !== PIN_SIN_CAMBIOS) {
         if (!isValidPinForCreation(formData.pin)) {
-          throw new Error('El PIN debe ser de 4 dígitos')
+          throw new Error(PIN_RULE_TEXT)
         }
       }
 
@@ -170,7 +181,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
 
       // Determinar si debemos enviar el PIN
       let pinToSend: string | undefined = undefined
-      if (formData.pin && formData.pin !== '****') {
+      if (formData.pin && formData.pin !== PIN_SIN_CAMBIOS) {
         // Usuario ingresó un nuevo PIN
         pinToSend = formData.pin
       } else if (!isEditing) {
@@ -328,40 +339,51 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
           {/* PIN */}
           <div>
             <Label htmlFor="pin" className="text-poker-text">
-              PIN (4 dígitos)
-              {isEditing && player?.pin && formData.pin === '****' && (
+              Clave de acceso
+              {isEditing && player?.pin && formData.pin === PIN_SIN_CAMBIOS && (
                 <span className="ml-2 text-xs text-white/50">
-                  (Dejar en blanco para mantener el actual)
+                  (Dejar en blanco para mantener la actual)
                 </span>
               )}
             </Label>
+            {/*
+              Sin `pattern` ni maxLength de 4.
+              La regla cambio a alfanumerica de 6 a 12, pero este campo quedo
+              con la vieja: `pattern="\d{4}"` hacia que el navegador BLOQUEARA
+              el envio del formulario —sin mensaje— porque el centinela
+              `****` no son cuatro digitos. Presionar Actualizar no hacia nada,
+              ni siquiera para cambiar el nombre. Y con maxLength 4 era
+              imposible escribir una clave valida, que necesita al menos 6.
+            */}
             <Input
               id="pin"
               type="text"
-              inputMode="numeric"
-              maxLength={4}
-              pattern="\d{4}"
+              autoComplete="new-password"
+              maxLength={PIN_MAX_LENGTH}
               value={formData.pin}
-              placeholder={player?.pin ? 'Click para cambiar PIN' : '1234'}
+              placeholder={player?.pin ? 'Click para cambiar la clave' : 'letras y numeros'}
               onFocus={(e) => {
-                if (formData.pin === '****') {
+                if (formData.pin === PIN_SIN_CAMBIOS) {
                   updateFormData('pin', '')
-                  e.target.placeholder = 'Ingrese nuevo PIN'
+                  e.target.placeholder = 'Nueva clave'
                 }
               }}
               onBlur={(e) => {
-                // Si el usuario no ingresó nada y había un PIN antes, volver a mostrar ****
+                // Si no escribio nada y ya tenia clave, vuelve el centinela.
                 if (formData.pin === '' && player?.pin) {
-                  updateFormData('pin', '****')
-                  e.target.placeholder = 'Click para cambiar PIN'
+                  updateFormData('pin', PIN_SIN_CAMBIOS)
+                  e.target.placeholder = 'Click para cambiar la clave'
                 }
               }}
-              onChange={(e) => updateFormData('pin', e.target.value.replace(/\D/g, ''))}
+              onChange={(e) => updateFormData('pin', normalizePin(e.target.value))}
               className="bg-poker-dark/50 border-white/10 text-white focus:border-poker-red"
             />
-            {formData.pin && formData.pin !== '****' && formData.pin.length !== 4 && (
-              <p className="text-xs text-yellow-400 mt-1">El PIN debe tener exactamente 4 dígitos</p>
-            )}
+            <p className="text-xs text-white/40 mt-1">{PIN_RULE_TEXT}</p>
+            {formData.pin &&
+              formData.pin !== PIN_SIN_CAMBIOS &&
+              !isValidPinForCreation(formData.pin) && (
+                <p className="text-xs text-yellow-400 mt-1">{PIN_RULE_TEXT}</p>
+              )}
           </div>
 
           {/* Aliases */}

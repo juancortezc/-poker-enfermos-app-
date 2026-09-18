@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { KeyRound, Loader2 } from 'lucide-react'
 import Image from 'next/image'
-import { isValidPinForLogin } from '@/lib/pin-rules'
+import { isValidPinForLogin, PIN_MIN_LENGTH_LOGIN, PIN_MAX_LENGTH } from '@/lib/pin-rules'
 
 export default function LoginForm() {
   const [pin, setPin] = useState('')
@@ -21,7 +21,7 @@ export default function LoginForm() {
     setError('')
 
     if (!isValidPinForLogin(pin)) {
-      setError('El PIN debe tener exactamente 4 dígitos')
+      setError(`La clave debe tener entre ${PIN_MIN_LENGTH_LOGIN} y ${PIN_MAX_LENGTH} caracteres`)
       setLoading(false)
       return
     }
@@ -79,7 +79,7 @@ export default function LoginForm() {
                 autoCorrect="off"
                 spellCheck={false}
                 maxLength={12}
-                placeholder="Ingresa tu PIN (4 dígitos)"
+                placeholder="Ingresa tu clave"
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12))}
                 onKeyDown={(e) => {

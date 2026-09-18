@@ -4,7 +4,12 @@ import { useState, useEffect } from 'react'
 import { UserRole } from '@prisma/client'
 import { X, Loader2, Plus, Minus, ChevronDown, User, Shield, Phone, Mail, Cake, Link2, Hash } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
-import { isValidPinForCreation } from '@/lib/pin-rules'
+import {
+  isValidPinForCreation,
+  normalizePin,
+  PIN_MAX_LENGTH,
+  PIN_RULE_TEXT,
+} from '@/lib/pin-rules'
 
 interface Player {
   id: string
@@ -134,7 +139,7 @@ export default function CPPlayerForm({
       }
 
       if (formData.pin && formData.pin !== '****' && !isValidPinForCreation(formData.pin)) {
-        throw new Error('El PIN debe ser de 4 digitos')
+        throw new Error(PIN_RULE_TEXT)
       }
 
       if (formData.role === UserRole.Invitado && !formData.inviterId) {
@@ -358,20 +363,21 @@ export default function CPPlayerForm({
             <p
               style={{ fontSize: '13px', color: 'var(--cp-on-surface-muted)', marginTop: '-4px' }}
             >
-              {player ? 'Deja en blanco para mantener el actual' : '4 digitos para ingresar a la app'}
+              {player ? 'Deja en blanco para mantener la actual' : PIN_RULE_TEXT}
             </p>
 
             <div className="flex items-center gap-2">
               <Hash className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--cp-on-surface-muted)' }} />
               <input
                 type="text"
-                maxLength={4}
+                autoComplete="new-password"
+                maxLength={PIN_MAX_LENGTH}
                 value={formData.pin}
                 placeholder={player?.pin ? '****' : '1234'}
                 onFocus={() => {
                   if (formData.pin === '****') updateFormData('pin', '')
                 }}
-                onChange={(e) => updateFormData('pin', e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => updateFormData('pin', normalizePin(e.target.value))}
                 className="flex-1 px-3 py-2.5"
                 style={{ ...inputBaseStyle, borderRadius: '4px' }}
               />

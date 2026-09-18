@@ -9,7 +9,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { X, Save, Loader2, Plus, Minus } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
-import { isValidPinForCreation } from '@/lib/pin-rules'
+import {
+  isValidPinForCreation,
+  normalizePin,
+  PIN_MAX_LENGTH,
+  PIN_RULE_TEXT,
+} from '@/lib/pin-rules'
 
 interface Player {
   id: string
@@ -143,7 +148,7 @@ export default function PlayerForm({
       }
 
       if (formData.pin && formData.pin !== '****' && !isValidPinForCreation(formData.pin)) {
-        throw new Error('El PIN debe ser de 4 dígitos')
+        throw new Error(PIN_RULE_TEXT)
       }
 
       if (formData.role === UserRole.Invitado && !formData.inviterId) {
@@ -301,12 +306,14 @@ export default function PlayerForm({
 
             {/* PIN */}
             <div>
-              <Label htmlFor="pin" className="text-poker-text">PIN (4 dígitos)</Label>
+              <Label htmlFor="pin" className="text-poker-text">Clave de acceso</Label>
+              {/* Sin pattern ni maxLength de 4: la regla es alfanumerica de 6
+                  a 12, y el pattern viejo bloqueaba el envio del formulario. */}
               <Input
                 id="pin"
                 type="text"
-                maxLength={4}
-                pattern="\d{4}"
+                autoComplete="new-password"
+                maxLength={PIN_MAX_LENGTH}
                 value={formData.pin}
                 placeholder={player?.pin ? '****' : '1234'}
                 onFocus={() => {
@@ -314,7 +321,7 @@ export default function PlayerForm({
                     updateFormData('pin', '')
                   }
                 }}
-                onChange={(e) => updateFormData('pin', e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => updateFormData('pin', normalizePin(e.target.value))}
                 className="bg-poker-dark/50 border-white/10 text-poker-text"
               />
             </div>

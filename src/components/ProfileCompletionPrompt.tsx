@@ -103,7 +103,7 @@ export function ProfileCompletionPrompt() {
 
   if (status) {
     if (!status.checks.hasPinConfigured) {
-      missingItems.push('Configura tu PIN de 4 dígitos')
+      missingItems.push('Configura tu clave de acceso')
     }
     if (!status.checks.hasContactInfo) {
       missingItems.push('Agrega tu correo o teléfono de contacto')
