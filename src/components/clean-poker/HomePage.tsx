@@ -16,6 +16,7 @@ import { CPPageSkeleton } from './CPPageSkeleton'
 import { LiveDateBoard } from './LiveDateBoard'
 import { CelebrationsCard } from './CelebrationsCard'
 import { PushActivationBanner } from './PushActivationBanner'
+import { ClaveDebilBanner } from './ClaveDebilBanner'
 import { HomeViewToggle, type HomeView } from './HomeViewToggle'
 import { HomeUltimaFecha } from './HomeUltimaFecha'
 import { HomeTorneo } from './HomeTorneo'
@@ -386,6 +387,9 @@ function HomeAuthenticated({
       <main className="pb-24 px-5 pt-5 space-y-5">
         {/* Celebrations - Birthdays (first position, dismissible) */}
         <CelebrationsCard />
+
+        {/* Aviso de clave vieja - solo si la suya no cumple la regla actual */}
+        <ClaveDebilBanner />
 
         {/* Push opt-in - solo aparece si el usuario no tiene suscripción activa */}
         <PushActivationBanner />

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 import { Phone, Mail, Cake, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
-import { buildAuthHeaders } from '@/lib/client-auth'
+import { buildAuthHeaders, storePin } from '@/lib/client-auth'
 import { isValidPinForCreation, PIN_RULE_TEXT, PIN_MAX_LENGTH } from '@/lib/pin-rules'
 
 interface PlayerProfile {
@@ -111,6 +111,19 @@ export default function DatosTab() {
       })
 
       if (response.ok) {
+        /*
+          Si se cambio la clave hay que guardar la NUEVA en el dispositivo,
+          antes de cualquier otra peticion.
+
+          El header de autorizacion se arma con la clave guardada. Al cambiarla,
+          el servidor queda con el hash nuevo y el dispositivo seguia mandando
+          la vieja: la siguiente peticion daba 401 y la sesion se rompia en
+          silencio. El propio fetchProfile() de dos lineas mas abajo era la
+          primera en fallar.
+        */
+        if (form.pin) {
+          storePin(form.pin)
+        }
         setSuccess(true)
         setForm(prev => ({ ...prev, pin: '', confirmPin: '' }))
         await fetchProfile()
