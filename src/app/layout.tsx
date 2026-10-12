@@ -9,6 +9,7 @@ import { ToastContainer } from 'react-toastify'
 import { SWRProvider } from '@/lib/swr-config'
 import { OfflineIndicator } from '@/components/OfflineIndicator'
 import { NotificationInitializer } from '@/components/NotificationInitializer'
+import { ServiceWorkerUpdater } from '@/components/ServiceWorkerUpdater'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -94,6 +95,7 @@ export default function RootLayout({
             </PlayerSearchProvider>
           </AuthProvider>
         </SWRProvider>
+        <ServiceWorkerUpdater />
         <NotificationInitializer />
         <OfflineIndicator />
         <ToastContainer
