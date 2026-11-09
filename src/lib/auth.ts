@@ -18,9 +18,9 @@ export interface AuthUser {
  */
 export async function authenticateUserByPin(pin: string): Promise<AuthUser | null> {
   try {
-    // Validate PIN format (4 digits exactly)
+    // Formato aceptado al entrar: ver PIN_RULE_TEXT en pin-rules.
     if (!isValidPinForLogin(pin)) {
-      console.log('Invalid PIN format - must be 4 digits')
+      console.log('Formato de clave invalido')
       return null
     }
 
