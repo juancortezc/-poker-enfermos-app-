@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readTimer } from '@/lib/timer-service'
 import { calculateLiveRanking } from '@/lib/live-ranking'
 
 export const dynamic = 'force-dynamic'
@@ -26,27 +25,11 @@ export async function GET(
       return NextResponse.json({ error: 'La fecha no esta en curso' }, { status: 409 })
     }
 
-    // Nivel de blinds actual, para el tercer KPI.
-    //
-    // Antes esta lectura llamaba a syncTimerLevel() y ESCRIBIA para hacer
-    // subir el nivel: un GET que mutaba, con todas las pantallas abiertas
-    // compitiendo por escribir lo mismo. Ahora el nivel se deriva del ancla,
-    // asi que leer es solo leer.
-    const timer = await readTimer(gameDateId)
-
-    return NextResponse.json({
-      ...live,
-      currentBlind:
-        timer.status === 'inactive' || timer.smallBlind === null
-          ? null
-          : {
-              level: timer.level,
-              smallBlind: timer.smallBlind,
-              bigBlind: timer.bigBlind,
-              timeRemaining: Math.round(timer.remainingMs / 1000),
-              status: timer.status
-            }
-    })
+    // Ya no se lee el timer aqui. El tablero dejo de mostrar el blind, y esta
+    // ruta se consulta cada 5 segundos desde CADA telefono de la mesa: eran
+    // dos consultas por cliente cada 5s para un dato que se tiraba. Con diez
+    // telefonos, 240 consultas por minuto de puro descarte.
+    return NextResponse.json(live)
   } catch (error) {
     console.error('Error en live-ranking:', error)
     return NextResponse.json({ error: 'Error al calcular la fecha en vivo' }, { status: 500 })

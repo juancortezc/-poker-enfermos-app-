@@ -32,7 +32,7 @@ export function CPHeader({
         borderBottom: '1px solid var(--cp-surface-border)',
         background: claro
           ? 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, transparent 100%)'
-          : 'linear-gradient(180deg, rgba(43,33,32,0.85) 0%, transparent 100%)',
+          : 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)',
       }}
     >
       {/* Ghost "30" watermark */}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getEcuadorToday } from '@/lib/date-utils'
 import { UserRole } from '@prisma/client'
-import { withComisionAuth, validateApiAccess } from '@/lib/api-auth'
+import { withComisionAuth, validateApiAccess, ValidacionNoDisponible } from '@/lib/api-auth'
 import { playerSelectForRole } from '@/lib/player-select'
 import { validateAndHashPin } from '@/lib/pin-utils'
 
@@ -12,7 +12,24 @@ import { validateAndHashPin } from '@/lib/pin-utils'
 // `pin` ni `adminKey`.
 export async function GET(req: NextRequest) {
   try {
-    const requester = await validateApiAccess(req)
+    // `validateApiAccess` lanza `ValidacionNoDisponible` cuando no pudo
+    // comprobar la credencial (base caida, arranque en frio). Sin este caso la
+    // excepcion caia en el catch de abajo y el directorio respondia 500, que
+    // el cliente no distingue de un fallo real; y un 401 ahi habria cerrado la
+    // sesion del usuario por un tropiezo pasajero del servidor.
+    let requester
+    try {
+      requester = await validateApiAccess(req)
+    } catch (error) {
+      if (error instanceof ValidacionNoDisponible) {
+        return NextResponse.json(
+          { error: 'No se pudo validar tu sesion, reintenta' },
+          { status: 503 }
+        )
+      }
+      throw error
+    }
+
     if (!requester) {
       return NextResponse.json(
         { error: 'Debes iniciar sesión para ver el directorio' },

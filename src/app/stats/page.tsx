@@ -11,14 +11,16 @@ import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import CPTorneosTab from '@/components/stats/CPTorneosTab'
 import CPCampeonesTab from '@/components/stats/CPCampeonesTab'
 import CPPodiosTab from '@/components/stats/CPPodiosTab'
+import CPSieteTab from '@/components/stats/CPSieteTab'
 import SinGanarTab from '@/components/stats/SinGanarTab'
 
-type TabType = 'torneos' | 'campeones' | 'podios' | 'sin-ganar'
+type TabType = 'torneos' | 'campeones' | 'podios' | 'siete' | 'sin-ganar'
 
 const TABS = [
   { id: 'sin-ganar' as const, label: 'Sin Ganar' },
   { id: 'torneos' as const, label: 'Torneos' },
   { id: 'campeones' as const, label: 'Campeonatos' },
+  { id: 'siete' as const, label: '7/2' },
   { id: 'podios' as const, label: 'Podios' },
 ]
 
@@ -135,6 +137,7 @@ export default function StatsPage() {
         {activeTab === 'torneos' && <CPTorneosTab />}
         {activeTab === 'campeones' && <CPCampeonesTab />}
         {activeTab === 'podios' && <CPPodiosTab />}
+        {activeTab === 'siete' && <CPSieteTab />}
         {activeTab === 'sin-ganar' && <SinGanarTab tournamentId={activeTournament?.id} />}
       </main>
 

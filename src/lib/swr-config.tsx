@@ -2,6 +2,7 @@
 
 import { SWRConfig } from 'swr'
 import { ReactNode } from 'react'
+import { clearStoredAuthTokens, isAuthenticated } from '@/lib/client-auth'
 
 // Custom fetcher que incluye autenticación con PIN
 const fetcher = async (url: string) => {
@@ -59,9 +60,29 @@ const swrConfig = {
     // Don't retry on 404s
     if (error.status === 404) return
     
-    // Handle auth errors
-    if (error.status === 401 || error.status === 403) {
-      console.warn('Authentication error, consider refreshing auth token')
+    // 401 = la clave guardada ya no sirve (401 es credencial rechazada; el rol
+    // insuficiente responde 403, asi que un Enfermo que abre una pantalla de
+    // Comision NO pasa por aqui).
+    //
+    // Antes esto solo escribia un aviso en la consola y la pantalla se quedaba
+    // cargando para siempre: las pantallas que esperan datos obligatorios nunca
+    // los reciben y no tienen forma de enterarse. Asi se veia el "no carga
+    // nada" — un esqueleto eterno, sin un solo mensaje. Pasa cada vez que
+    // alguien cambia su clave en otro dispositivo, o cuando la Comision se la
+    // cambia.
+    //
+    // Ahora se borra la sesion y se vuelve al login, que es lo unico que puede
+    // arreglarlo. El guardia del `tenia` evita un bucle: despues de borrar ya no
+    // hay credencial, asi que un segundo 401 no recarga de nuevo.
+    if (error.status === 401 && typeof window !== 'undefined' && isAuthenticated()) {
+      // El borrado pasa por `client-auth`, que es el unico que conoce los
+      // nombres de las claves guardadas. Escribirlos aqui a mano dejaba los
+      // literales en tres sitios, y el dia que se renombre uno el cierre de
+      // sesion borraria la mitad.
+      clearStoredAuthTokens()
+      localStorage.removeItem('poker-user')
+      sessionStorage.setItem('poker-sesion-caducada', '1')
+      window.location.href = '/'
     }
   },
   

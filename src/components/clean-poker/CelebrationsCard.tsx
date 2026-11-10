@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import useSWR from 'swr'
 import { Cake, Trophy, User, X } from 'lucide-react'
 
@@ -159,26 +160,36 @@ export function CelebrationsCard() {
           <div className="space-y-2">
             {visibleBirthdays.map((player) => (
               <div key={player.id} className="flex items-center gap-3">
-                {/* Avatar */}
-                <div
-                  className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
-                    border: '2px solid #E8C158',
-                  }}
+                {/* Avatar — abre el perfil del cumpleanero. El enlace envuelve
+                    la foto entera (40px) para que se acierte con el pulgar, y
+                    el borde dorado queda en el div de siempre: el enlace no
+                    pone ni un pixel propio. */}
+                <Link
+                  href={`/players/${player.id}`}
+                  className="cp-foto-link flex-shrink-0"
+                  aria-label={`Ver el perfil de ${player.firstName} ${player.lastName}`}
+                  style={{ display: 'block', borderRadius: 9999, lineHeight: 0 }}
                 >
-                  {player.photoUrl ? (
-                    <Image
-                      src={player.photoUrl}
-                      alt={`${player.firstName} ${player.lastName}`}
-                      width={40}
-                      height={40}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <User className="w-5 h-5" style={{ color: 'var(--cp-on-surface-variant)' }} />
-                  )}
-                </div>
+                  <div
+                    className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
+                      border: '2px solid #E8C158',
+                    }}
+                  >
+                    {player.photoUrl ? (
+                      <Image
+                        src={player.photoUrl}
+                        alt={`${player.firstName} ${player.lastName}`}
+                        width={40}
+                        height={40}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <User className="w-5 h-5" style={{ color: 'var(--cp-on-surface-variant)' }} />
+                    )}
+                  </div>
+                </Link>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
@@ -252,26 +263,34 @@ export function CelebrationsCard() {
           <div className="space-y-2">
             {visibleDroughts.map((player) => (
               <div key={player.id} className="flex items-center gap-3">
-                {/* Avatar */}
-                <div
-                  className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
-                    border: '2px solid #9C27B0',
-                  }}
+                {/* Avatar — mismo criterio que en cumpleanos: la foto lleva al
+                    perfil de ese jugador, no al del que esta mirando. */}
+                <Link
+                  href={`/players/${player.id}`}
+                  className="cp-foto-link flex-shrink-0"
+                  aria-label={`Ver el perfil de ${player.firstName} ${player.lastName}`}
+                  style={{ display: 'block', borderRadius: 9999, lineHeight: 0 }}
                 >
-                  {player.photoUrl ? (
-                    <Image
-                      src={player.photoUrl}
-                      alt={`${player.firstName} ${player.lastName}`}
-                      width={40}
-                      height={40}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <User className="w-5 h-5" style={{ color: 'var(--cp-on-surface-variant)' }} />
-                  )}
-                </div>
+                  <div
+                    className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: player.photoUrl ? 'transparent' : 'var(--cp-surface-solid)',
+                      border: '2px solid #9C27B0',
+                    }}
+                  >
+                    {player.photoUrl ? (
+                      <Image
+                        src={player.photoUrl}
+                        alt={`${player.firstName} ${player.lastName}`}
+                        width={40}
+                        height={40}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <User className="w-5 h-5" style={{ color: 'var(--cp-on-surface-variant)' }} />
+                    )}
+                  </div>
+                </Link>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">

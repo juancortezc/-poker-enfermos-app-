@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     "apple-mobile-web-app-status-bar-style": "black-translucent",
     "apple-mobile-web-app-title": "Poker Enfermos",
     "application-name": "Poker Enfermos",
-    "msapplication-TileColor": "#1D1615",
+    "msapplication-TileColor": "#000000",
     "msapplication-TileImage": "/icons/favicon-192.png"
   }
 };
@@ -75,7 +75,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#1D1615"
+  themeColor: "#000000"
 };
 
 export default function RootLayout({

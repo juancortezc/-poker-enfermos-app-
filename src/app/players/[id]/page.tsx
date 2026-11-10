@@ -205,6 +205,8 @@ export default function PlayerProfilePage() {
         {/* HERO */}
         <div style={{ background: CREAM_BG, borderRadius: 18, padding: 18 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            {/* Esta foto NO enlaza: es el jugador de esta misma pantalla, y un
+                enlace a la pagina en la que ya estas solo roba el toque. */}
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <HomeAvatar playerId={player.id} name={`${player.firstName} ${player.lastName}`} photoUrl={player.photoUrl} size={84} fontSize={28} />
               <div
@@ -301,7 +303,7 @@ export default function PlayerProfilePage() {
                 .map(({ player, tag }) => (
                   <HomeCard key={player.playerId}>
                     <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={44} fontSize={15} />
+                      <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={44} fontSize={15} linkToProfile />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--cp-on-surface-variant)', letterSpacing: '0.06em', background: 'var(--cp-surface-2)', padding: '2px 5px', borderRadius: 4 }}>
@@ -403,7 +405,7 @@ export default function PlayerProfilePage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {winner && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <HomeAvatar playerId={winner.eliminatedPlayer.id} name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={26} fontSize={10} />
+                            <HomeAvatar playerId={winner.eliminatedPlayer.id} name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={26} fontSize={10} linkToProfile />
                             <div style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)' }}>
                               Ganó <span style={{ color: 'var(--cp-on-surface)', fontWeight: 700 }}>{playerLabel(winner.eliminatedPlayer)}</span>
                             </div>

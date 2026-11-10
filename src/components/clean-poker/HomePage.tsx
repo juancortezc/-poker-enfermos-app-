@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
@@ -8,6 +8,7 @@ import { useTournamentRanking } from '@/hooks/useTournamentRanking'
 import { useTournamentInsights } from '@/hooks/useTournamentInsights'
 import useSWR from 'swr'
 import Image from 'next/image'
+import {  } from 'lucide-react'
 
 import { CPHeader } from './CPHeader'
 import { CPBottomNav } from './CPBottomNav'
@@ -70,6 +71,14 @@ export function HomePage() {
     }
   )
 
+  /*
+   * Mientras se juega una fecha, el home es el tablero en vivo (estado C). Con
+   * esto el participante puede salir al home de siempre — Última Fecha y
+   * Torneo — y volver al tablero sin perderlo: es un cambio de vista, no una
+   * navegación, así que el SWR del tablero sigue caliente y volver es
+   * instantáneo. Arranca en el tablero porque es lo que importa en la mesa.
+   */
+
   // Loading state
   if (authLoading || tournamentLoading) {
     return <HomeLoading />
@@ -98,7 +107,8 @@ export function HomePage() {
   const isCommission = user.role === 'Comision'
   const isGameLive = activeGameDate?.status === 'in_progress'
 
-  // Estado C: Fecha en vivo
+  // Estado C: Fecha en vivo. Mientras se juega, el home ES el tablero y no hay
+  // salida propia: la navegacion de abajo ya lleva a la Tabla y al resto.
   if (isGameLive && activeGameDate) {
     return (
       <HomeWithLiveGame
@@ -151,6 +161,18 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { login } = useAuth()
+
+  // Si llegaste aqui porque tu clave dejo de servir, decirtelo. Sin esto la
+  // vuelta al login parece un cierre de sesion porque si, y nadie adivina que
+  // la clave cambio en otro lado.
+  const [caducada, setCaducada] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (sessionStorage.getItem('poker-sesion-caducada')) {
+      sessionStorage.removeItem('poker-sesion-caducada')
+      setCaducada(true)
+    }
+  }, [])
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12)
@@ -270,6 +292,12 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
           {error && (
             <p className="text-center mt-3" style={{ color: '#FF6B6B', fontSize: '13px' }}>
               {error}
+            </p>
+          )}
+
+          {!error && caducada && (
+            <p className="text-center mt-3" style={{ color: '#E0B66C', fontSize: '13px' }}>
+              Tu clave cambio. Volve a entrar con la nueva.
             </p>
           )}
         </form>
@@ -402,7 +430,6 @@ function HomeAuthenticated({
             tournamentNumber={tournamentNumber}
             rankings={rankings}
             lastCompletedDate={lastCompletedDate}
-            streaks={insights?.streaks}
             onOpenProfile={() => router.push(`/players/${user.id}`)}
             onSeeAllResults={() => router.push('/fecha')}
             onSeeResultsTab={() => router.push('/fecha?tab=eliminaciones')}
@@ -415,7 +442,6 @@ function HomeAuthenticated({
             tournamentNumber={tournamentNumber}
             rankings={rankings}
             nextDate={nextDate}
-            streaks={insights?.streaks}
             seasonHighlights={insights?.seasonHighlights}
             onOpenProfile={() => router.push(`/players/${user.id}`)}
             onOpenCalendarPage={() => router.push('/calendario')}
@@ -450,7 +476,7 @@ function HomeWithLiveGame({
   user,
   isCommission,
   tournamentNumber,
-  activeGameDate
+  activeGameDate,
 }: HomeWithLiveGameProps) {
   const userInitials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
@@ -475,9 +501,10 @@ function HomeWithLiveGame({
       />
 
       {/*
-        Durante la fecha en vivo el home es solo el tablero: KPIs, último
-        eliminado y la tabla proyectada. Las tarjetas del torneo vuelven
-        cuando la fecha termina.
+        Durante la fecha en vivo el home es solo el tablero. Las tarjetas del
+        torneo vuelven cuando la fecha termina. No hay boton de salida: toda la
+        altura que sobra es para la tabla, que es lo que se mira en la mesa, y
+        la navegacion de abajo ya lleva a la Tabla, las Estadisticas y el resto.
       */}
       <main className="pb-20 px-3 pt-2">
         <LiveDateBoard gameDateId={activeGameDate.id} userId={user.id} />

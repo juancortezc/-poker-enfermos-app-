@@ -64,6 +64,12 @@ export interface LiveRankingData {
     nextPosition: number
     /** Puntos que se le acreditan a esa posición. */
     nextPoints: number
+    /**
+     * Lo que se lleva quien gane la noche. Es fijo apenas se sabe cuántos
+     * juegan, y en la mesa es la otra mitad de la pregunta: cuánto se gana
+     * aguantando hasta el final, no solo cuánto paga salir ahora.
+     */
+    winnerPoints: number
     /** true = el ELIMINA ya afecta al ranking, no es solo informativo. */
     eliminasActive: boolean
     datesToEliminate: number
@@ -160,6 +166,7 @@ export function projectLiveRanking(
   // Las posiciones se reparten de la más alta (primer eliminado) hacia la 1.
   const nextPosition = playersRemaining
   const nextPoints = playersRemaining > 0 ? calculatePointsForPosition(nextPosition, totalPlayers) : 0
+  const winnerPoints = totalPlayers > 0 ? calculatePointsForPosition(1, totalPlayers) : 0
 
   const eliminationByPlayer = new Map(snapshot.eliminations.map((e) => [e.eliminatedPlayerId, e]))
   const inDate = new Set(snapshot.playerIds)
@@ -241,7 +248,7 @@ export function projectLiveRanking(
 
   return {
     rows,
-    projection: { nextPosition, nextPoints, eliminasActive, datesToEliminate },
+    projection: { nextPosition, nextPoints, winnerPoints, eliminasActive, datesToEliminate },
     playersRemaining
   }
 }

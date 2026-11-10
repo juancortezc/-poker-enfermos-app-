@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { Home, ChevronLeft, Mic, TrendingUp, MoreHorizontal } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Home, Mic, BarChart3, MoreHorizontal, ListOrdered } from 'lucide-react'
 
 interface NavItem {
   id: string
@@ -19,16 +19,26 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Home className="w-5 h-5" />,
   },
   {
+    // La tabla del torneo es lo que mas se mira y no tenia acceso directo:
+    // habia que pasar por Inicio o por Mas. Va segunda, pegada a Inicio.
+    id: 'tabla',
+    label: 'Tabla',
+    href: '/ranking',
+    icon: <ListOrdered className="w-5 h-5" />,
+  },
+  {
     id: 'podcast',
     label: 'Podcast',
     href: '/podcast',
     icon: <Mic className="w-5 h-5" />,
   },
   {
+    // Barras, no una flecha de tendencia: la flecha se leia como "subir/bajar"
+    // —que es justo lo que significa en las tablas— y no como "resultados".
     id: 'stats',
     label: 'Estadísticas',
     href: '/stats',
-    icon: <TrendingUp className="w-5 h-5" />,
+    icon: <BarChart3 className="w-5 h-5" />,
   },
   {
     id: 'mas',
@@ -46,20 +56,12 @@ interface CPBottomNavProps {
 export function CPBottomNav({ tone = 'dark' }: CPBottomNavProps = {}) {
   const claro = tone === 'light'
   const pathname = usePathname()
-  const router = useRouter()
 
   const isActive = (href: string) => {
     if (href === '/home') {
       return pathname === '/home' || pathname === '/'
     }
     return pathname?.startsWith(href) ?? false
-  }
-
-  // Show back button when not on home page
-  const isHomePage = pathname === '/home' || pathname === '/' || pathname === null
-
-  const handleBack = () => {
-    router.back()
   }
 
   return (
@@ -75,32 +77,19 @@ export function CPBottomNav({ tone = 'dark' }: CPBottomNavProps = {}) {
         style={{
           background: claro
             ? 'linear-gradient(180deg, rgba(250,247,242,0) 0%, rgba(250,247,242,0.95) 16%, rgba(250,247,242,0.99) 100%)'
-            : 'linear-gradient(180deg, rgba(29,22,21,0) 0%, rgba(29,22,21,0.94) 16%, rgba(29,22,21,0.99) 100%)',
+            : 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.94) 16%, rgba(0,0,0,1) 100%)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
         }}
       >
       <div className="flex items-center py-2 px-1">
-        {/* Back button - only show when not on home */}
-        {!isHomePage && (
-          <button
-            onClick={handleBack}
-            className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all cursor-pointer flex-1 min-w-0"
-            style={{
-              background: 'transparent',
-              color: 'var(--cp-on-surface-variant)',
-            }}
-          >
-            <ChevronLeft className="w-5 h-5" />
-            <span
-              className="font-medium truncate"
-              style={{ fontSize: '12px' }}
-            >
-              Atrás
-            </span>
-          </button>
-        )}
-
+        {/*
+          Aqui vivia un boton "Atras" que aparecia solo fuera del home. Esa
+          regla no se podia adivinar desde la pantalla: el mismo menu cambiaba
+          de forma segun donde estuvieras, y el destino dependia del historial,
+          asi que dos caminos distintos a la misma pantalla daban vueltas
+          distintas. El telefono ya tiene su propio gesto para volver.
+        */}
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href)
           return (

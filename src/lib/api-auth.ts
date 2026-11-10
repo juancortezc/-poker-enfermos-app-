@@ -202,8 +202,41 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
 
     return user
   } catch (error) {
+    // OJO: aqui NO sabemos si la credencial es mala. Fallo la validacion —la
+    // base no respondio, bcrypt reviento, el arranque en frio tardo— y eso no
+    // es lo mismo que una clave invalida. Devolver null los juntaba en el
+    // mismo 401, y el cliente cierra la sesion cuando ve un 401, asi que un
+    // tropiezo pasajero del servidor expulsaba al usuario con el mensaje
+    // "Tu clave cambio", que era mentira.
     console.error('Error validating API access:', error)
-    return null
+    throw new ValidacionNoDisponible()
+  }
+}
+
+/** La validacion no se pudo completar. No dice nada sobre la credencial. */
+export class ValidacionNoDisponible extends Error {
+  constructor() {
+    super('No se pudo validar la credencial')
+    this.name = 'ValidacionNoDisponible'
+  }
+}
+
+/**
+ * Resuelve al usuario, o devuelve la respuesta de error que corresponda:
+ * 401 cuando la credencial no sirve, 503 cuando no se pudo comprobar.
+ */
+async function resolverUsuario(
+  req: NextRequest
+): Promise<{ user: AuthenticatedUser } | { respuesta: Response }> {
+  try {
+    const user = await validateApiAccess(req)
+    if (!user) return { respuesta: createAuthResponse('Acceso no autorizado') }
+    return { user }
+  } catch (error) {
+    if (error instanceof ValidacionNoDisponible) {
+      return { respuesta: createAuthResponse('No se pudo validar tu sesion, reintenta', 503) }
+    }
+    throw error
   }
 }
 
@@ -228,11 +261,9 @@ export async function withAuth(
   req: NextRequest,
   handler: (req: NextRequest, user: AuthenticatedUser) => Promise<Response>
 ): Promise<Response> {
-  const user = await validateApiAccess(req)
-
-  if (!user) {
-    return createAuthResponse('Acceso no autorizado')
-  }
+  const r = await resolverUsuario(req)
+  if ('respuesta' in r) return r.respuesta
+  const user = r.user
 
   // Actualizar actividad del usuario (fire-and-forget)
   updateUserActivity(user.id)
@@ -245,11 +276,9 @@ export async function withComisionAuth(
   req: NextRequest,
   handler: (req: NextRequest, user: AuthenticatedUser) => Promise<Response>
 ): Promise<Response> {
-  const user = await validateApiAccess(req)
-
-  if (!user) {
-    return createAuthResponse('Acceso no autorizado')
-  }
+  const r = await resolverUsuario(req)
+  if ('respuesta' in r) return r.respuesta
+  const user = r.user
 
   if (!canModifyPlayers(user.role)) {
     return createAuthResponse('Sin permisos suficientes', 403)

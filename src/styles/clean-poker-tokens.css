@@ -20,7 +20,10 @@
   /* === SUPERFICIES ===
      L* medido en CIELAB. No intercalar valores sueltos entre estos pisos:
      la escala funciona porque los saltos son parejos. */
-  --cp-surface-0: #1D1615;   /* L*  8 — fondo de la app */
+  /* Pizarra fria. Era #1D1615, un marron, y como alimenta el fondo del body se
+     asomaba al estirar la pagina y por detras del menu inferior, dejando un
+     borde cafe contra el fondo oscuro de la fecha en vivo. */
+  --cp-surface-0: #000000;   /* negro plano: el suelo de la fecha en vivo */
   --cp-surface-1: #2B2120;   /* L* 14 — tarjeta, fila de tabla */
   --cp-surface-2: #382E2C;   /* L* 20 — elevada, hover, lider */
   --cp-surface-3: #483E3C;   /* L* 27 — inputs, chips, separadores */
@@ -299,6 +302,17 @@
    var(--cp-on-surface) o var(--cp-surface) queda legible adentro sin tocarlo.
    Se aplica por subarbol: hoy solo la home. */
 .cp-light {
+  /* Los alias de globals.css (--text, --bg, --muted, --line) se declaran en
+     :root y las custom properties se resuelven donde se declaran, asi que
+     quedaban congelados en los valores del tema OSCURO. Resultado: la regla
+     global `p, span, div { color: var(--text) }` pintaba de crema cualquier
+     texto que heredara color dentro de una pantalla clara, y desaparecia
+     sobre el papel. Se redefinen aqui para que resuelvan contra este tema. */
+  --text: var(--cp-on-surface);
+  --muted: var(--cp-on-surface-muted);
+  --bg: var(--cp-surface-0);
+  --line: var(--cp-surface-border);
+
   --cp-surface-0: #FAF7F2;   /* el suelo */
   --cp-surface-1: #FFFFFF;   /* tarjeta */
   --cp-surface-2: #F3EDE4;   /* elevada, seleccionada */
@@ -361,4 +375,22 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cp-rise { animation: none; }
+}
+
+/* === FOTO QUE LLEVA AL PERFIL ===
+   Toda foto de un jugador abre su perfil, asi que tiene que SENTIRSE tocable.
+   El anillo de foco va aca y no en el style inline porque :focus-visible no
+   existe en inline: sin esto, quien navega con teclado no ve donde esta
+   parado — las reglas de globals.css solo cubren button/input, no el <a>.
+   Es el mismo anillo del resto de la app, no un estilo nuevo. */
+.cp-foto-link {
+  cursor: pointer;
+  border-radius: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cp-foto-link:focus-visible {
+  outline: 2px solid var(--cp-primary-light);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.30);
 }

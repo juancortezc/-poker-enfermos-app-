@@ -2,8 +2,9 @@
 
 import useSWR from 'swr'
 import Image from 'next/image'
+import Link from 'next/link'
 import { scoreOf } from '@/lib/ranking-utils'
-import type { PlayerRanking, PlayerPositionDelta } from '@/lib/ranking-utils'
+import type { PlayerRanking } from '@/lib/ranking-utils'
 import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
 import { Score } from './Score'
@@ -25,7 +26,6 @@ interface HomeUltimaFechaProps {
   tournamentNumber: number
   rankings: PlayerRanking[]
   lastCompletedDate: { id: number; dateNumber: number }
-  streaks?: { hot: PlayerPositionDelta[] }
   onOpenProfile: () => void
   onSeeAllResults: () => void
   onSeeResultsTab: () => void
@@ -37,7 +37,6 @@ export function HomeUltimaFecha({
   tournamentNumber,
   rankings,
   lastCompletedDate,
-  streaks,
   onOpenProfile,
   onSeeAllResults,
   onSeeResultsTab,
@@ -156,10 +155,19 @@ export function HomeUltimaFecha({
         return (
           <section className="cp-rise" style={{ ...tile('negro'), animationDelay: '0ms', padding: 0, minHeight: 172 }}>
             {winnerPhoto && (
-              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%' }}>
+              /* La cara del campeon tambien lleva a su perfil. El degradado va
+                 DENTRO del enlace para que el toque caiga en la foto entera y
+                 no se coma por el velo que la oscurece. El bloque de texto va
+                 con zIndex 1, asi que VER RESULTADOS sigue ganando el toque. */
+              <Link
+                href={`/players/${winner.eliminatedPlayer.id}`}
+                className="cp-foto-link"
+                aria-label={`Ver el perfil de ${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`}
+                style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%', display: 'block', borderRadius: 0 }}
+              >
                 <Image src={winnerPhoto} alt={winner.eliminatedPlayer.firstName} fill className="object-cover object-top" unoptimized />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #17120F 0%, rgba(23,18,15,0.55) 30%, transparent 72%)' }} />
-              </div>
+              </Link>
             )}
             <div style={{ padding: 16, position: 'relative', zIndex: 1, maxWidth: winnerPhoto ? '58%' : '100%' }}>
               <div style={overline(SOBRE_COLOR.tenue)}>Fecha {lastCompletedDate.dateNumber}</div>
@@ -173,7 +181,7 @@ export function HomeUltimaFecha({
             </div>
             {!winnerPhoto && (
               <div style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)' }}>
-                <HomeAvatar playerId={winner.eliminatedPlayer.id} name={`${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`} size={118} fontSize={34} />
+                <HomeAvatar playerId={winner.eliminatedPlayer.id} name={`${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`} size={118} fontSize={34} linkToProfile />
               </div>
             )}
           </section>
@@ -247,7 +255,7 @@ export function HomeUltimaFecha({
               return (
                 <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{ flexShrink: 0 }}>
-                    <HomeAvatar playerId={e.eliminatedPlayer.id} name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`} photoUrl={photoOf(e.eliminatedPlayer)} size={62} fontSize={19} />
+                    <HomeAvatar playerId={e.eliminatedPlayer.id} name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`} photoUrl={photoOf(e.eliminatedPlayer)} size={62} fontSize={19} linkToProfile />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: tinta }}>
@@ -273,7 +281,7 @@ export function HomeUltimaFecha({
             {insightCards.map(card => (
               <div key={card.key} style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
                 <div style={{ flexShrink: 0 }}>
-                  <HomeAvatar playerId={card.playerId} name={card.name} photoUrl={photoByPlayerId.get(card.playerId)} size={56} fontSize={19} />
+                  <HomeAvatar playerId={card.playerId} name={card.name} photoUrl={photoByPlayerId.get(card.playerId)} size={56} fontSize={19} linkToProfile />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 9.5, fontWeight: 800, color: card.color, letterSpacing: '0.1em', lineHeight: 1.25 }}>{card.label}</div>
@@ -303,7 +311,7 @@ export function HomeUltimaFecha({
               return (
                 <div key={p.playerId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, marginBottom: primero ? 10 : 0, minWidth: 0 }}>
                   <div style={{ position: 'relative' }}>
-                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={primero ? 92 : 70} fontSize={primero ? 25 : 19} />
+                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={primero ? 92 : 70} fontSize={primero ? 25 : 19} linkToProfile />
                     <span className="cp-score" style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 11, minWidth: 20, height: 20, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{idx + 1}</span>
                   </div>
                   <div style={{ fontSize: 11.5, fontWeight: 700, color: tinta, marginTop: 3 }}>{shortenFullName(p.playerName)}</div>
@@ -315,39 +323,27 @@ export function HomeUltimaFecha({
         </section>
       )}
 
-      {/* ── LOS MALAZOS — ROSA ────────────────────────────────────── */}
+      {/* ── LOS MALAZOS — el bloque ROSA, ahora a todo el ancho ────
+          Compartia la fila con los CALIENTES. Al quedarse solo, los dos 7/2
+          van uno al lado del otro en vez de apilados: asi el rosa llena la
+          fila en lugar de estirarse medio vacio, y en 390px cada mitad
+          todavia tiene espacio para la foto y el nombre con inicial. */}
       {bottom2.length > 0 && (
-        <section className="cp-rise" style={{ ...tile('rosa', 1), animationDelay: '320ms', gap: 10 }}>
+        <section className="cp-rise" style={{ ...tile('rosa'), animationDelay: '320ms', gap: 12 }}>
           <span style={overline(SOBRE_COLOR.suave)}>malazos 7/2</span>
-          {bottom2.map(p => (
-            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ flexShrink: 0 }}>
-                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={45} fontSize={16} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 12 }}>
+            {bottom2.map((p, k) => (
+              <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, paddingLeft: k === 0 ? 0 : 12, borderLeft: k === 0 ? 'none' : SOBRE_COLOR.linea }}>
+                <div style={{ flexShrink: 0 }}>
+                  <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={52} fontSize={18} linkToProfile />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
+                  <div className="cp-score" style={{ fontSize: 16, color: '#FFF' }}>{scoreOf(p)}</div>
+                </div>
               </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
-                <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>{scoreOf(p)}</div>
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* ── LOS CALIENTES — verde ─────────────────────────────────── */}
-      {(streaks?.hot?.length ?? 0) > 0 && (
-        <section className="cp-rise" style={{ ...tile('verde', 1), animationDelay: '360ms', gap: 10 }}>
-          <span style={overline(SOBRE_COLOR.suave)}>calientes</span>
-          {(streaks?.hot ?? []).slice(0, 2).map(p => (
-            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ flexShrink: 0 }}>
-                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={45} fontSize={16} />
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
-                <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>+{p.positionsChanged}</div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
       )}
     </div>

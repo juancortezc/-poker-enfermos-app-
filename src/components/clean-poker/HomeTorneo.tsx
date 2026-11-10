@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import { CalendarPlus } from 'lucide-react'
-import type { PlayerRanking, PlayerPositionDelta, TournamentInsightsData } from '@/lib/ranking-utils'
+import type { PlayerRanking, TournamentInsightsData } from '@/lib/ranking-utils'
 import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
 import { Score, Meter } from './Score'
 import { HomeAvatar } from './HomeAvatar'
@@ -26,7 +26,6 @@ interface HomeTorneoProps {
   tournamentNumber: number
   rankings: PlayerRanking[]
   nextDate: NextDateInfo | null
-  streaks?: { hot: PlayerPositionDelta[] }
   seasonHighlights?: TournamentInsightsData['seasonHighlights']
   onOpenProfile: () => void
   onOpenCalendarPage: () => void
@@ -70,7 +69,6 @@ export function HomeTorneo({
   tournamentNumber,
   rankings,
   nextDate,
-  streaks,
   seasonHighlights,
   onOpenProfile,
   onOpenCalendarPage,
@@ -275,16 +273,25 @@ export function HomeTorneo({
               const tam = primero ? 106 : 78
               const activo = abierto === p.playerId
               return (
-                <button key={p.playerId} onClick={() => setAbierto(activo ? null : p.playerId)} aria-expanded={activo}
-                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: primero ? 12 : 0, minWidth: 0 }}>
+                /* Dos destinos en el mismo podio: la FOTO abre el perfil del
+                   jugador (es la regla: toda foto lleva a su perfil) y el
+                   nombre con el puntaje sigue abriendo la comparacion de aca
+                   abajo. Antes todo era un solo boton; el enlace no puede
+                   anidarse dentro de el, asi que el contenedor pasa a div y
+                   cada parte se queda con el estilo que ya tenia. */
+                <div key={p.playerId}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: primero ? 12 : 0, minWidth: 0 }}>
                   <div style={{ position: 'relative',
                     transition: 'transform 200ms ease', transform: activo ? 'translateY(-3px)' : 'none' }}>
-                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={tam} fontSize={primero ? 27 : 20} />
-                    <span className="cp-score" style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 12, minWidth: 21, height: 21, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{idx + 1}</span>
+                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={tam} fontSize={primero ? 27 : 20} linkToProfile />
+                    <span className="cp-score" style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 12, minWidth: 21, height: 21, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>{idx + 1}</span>
                   </div>
-                  <div style={{ fontSize: primero ? 12.5 : 11.5, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>{shortenFullName(p.playerName)}</div>
-                  <div className="cp-score" style={{ fontSize: primero ? 19 : 15, color: metal }}>{scoreOf(p)}</div>
-                </button>
+                  <button onClick={() => setAbierto(activo ? null : p.playerId)} aria-expanded={activo}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                    <div style={{ fontSize: primero ? 12.5 : 11.5, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>{shortenFullName(p.playerName)}</div>
+                    <div className="cp-score" style={{ fontSize: primero ? 19 : 15, color: metal }}>{scoreOf(p)}</div>
+                  </button>
+                </div>
               )
             })}
           </div>
@@ -314,39 +321,27 @@ export function HomeTorneo({
         </section>
       )}
 
-      {/* ── LOS MALAZOS — el bloque ROSA. No negociable. ──────────── */}
+      {/* ── LOS MALAZOS — el bloque ROSA. No negociable, y ahora ancho ──
+          Compartia la fila con los CALIENTES. Al quedarse solo, los dos 7/2
+          van uno al lado del otro en vez de apilados: asi el rosa llena la
+          fila en lugar de estirarse medio vacio, y en 390px cada mitad
+          todavia tiene espacio para la foto y el nombre con inicial. */}
       {bottom2.length > 0 && (
-        <section className="cp-rise" style={{ ...tile('rosa', 1), animationDelay: '220ms', gap: 10 }}>
+        <section className="cp-rise" style={{ ...tile('rosa'), animationDelay: '220ms', gap: 12 }}>
           <span style={overline(SOBRE_COLOR.suave)}>malazos 7/2</span>
-          {bottom2.map(p => (
-            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ flexShrink: 0 }}>
-                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={45} fontSize={16} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 12 }}>
+            {bottom2.map((p, k) => (
+              <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, paddingLeft: k === 0 ? 0 : 12, borderLeft: k === 0 ? 'none' : SOBRE_COLOR.linea }}>
+                <div style={{ flexShrink: 0 }}>
+                  <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={52} fontSize={18} linkToProfile />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
+                  <div className="cp-score" style={{ fontSize: 16, color: '#FFF' }}>{scoreOf(p)}</div>
+                </div>
               </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
-                <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>{scoreOf(p)}</div>
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* ── LOS CALIENTES — bloque verde, al lado del rosa ────────── */}
-      {(streaks?.hot?.length ?? 0) > 0 && (
-        <section className="cp-rise" style={{ ...tile('verde', 1), animationDelay: '260ms', gap: 10 }}>
-          <span style={overline(SOBRE_COLOR.suave)}>calientes</span>
-          {(streaks?.hot ?? []).slice(0, 2).map(p => (
-            <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-              <div style={{ flexShrink: 0 }}>
-                <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={45} fontSize={16} />
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
-                <div className="cp-score" style={{ fontSize: 14, color: '#FFF' }}>+{p.positionsChanged}</div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
       )}
 

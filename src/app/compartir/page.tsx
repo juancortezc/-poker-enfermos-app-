@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Share2, Download, RefreshCw, Trophy, ListOrdered, Sparkles, Sigma } from 'lucide-react'
+import { Share2, Download, RefreshCw, Trophy, ListOrdered, Sparkles, Sigma, Crown, Skull } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
@@ -27,20 +27,38 @@ import { HomeCard } from '@/components/clean-poker/HomeCard'
  */
 
 type Pieza = {
-  clave: 'ultima-fecha' | 'lo-que-dejo' | 'elimina' | 'acum'
+  clave:
+    | 'ultima-fecha'
+    | 'malazo-fecha'
+    | 'lo-que-dejo'
+    | 'podio-torneo'
+    | 'malazos-torneo'
+    | 'elimina'
+    | 'acum'
   titulo: string
   detalle: string
   icono: typeof Trophy
   archivo: string
 }
 
+/**
+ * Primero lo de la noche recien jugada, que es lo que el grupo espera al dia
+ * siguiente; despues lo del torneo, que cambia lento; al final las tablas.
+ */
 const PIEZAS: Pieza[] = [
   {
     clave: 'ultima-fecha',
-    titulo: 'Última fecha',
-    detalle: 'El podio de la fecha y cuántos jugaron.',
+    titulo: 'Podio de la noche',
+    detalle: 'Los tres primeros de la fecha, con sus fotos, el Varón y cuántos jugaron.',
     icono: Trophy,
-    archivo: 'ultima-fecha.png',
+    archivo: 'podio-de-la-noche.png',
+  },
+  {
+    clave: 'malazo-fecha',
+    titulo: 'El 7/2 de la noche',
+    detalle: 'El primero en salir de la mesa, el segundo y quién lo mandó a casa.',
+    icono: Skull,
+    archivo: 'siete-dos-de-la-noche.png',
   },
   {
     clave: 'lo-que-dejo',
@@ -50,9 +68,23 @@ const PIEZAS: Pieza[] = [
     archivo: 'lo-que-dejo-la-noche.png',
   },
   {
+    clave: 'podio-torneo',
+    titulo: 'Podio del torneo',
+    detalle: 'Los tres primeros de la tabla acumulada, con las mesas finales del líder.',
+    icono: Crown,
+    archivo: 'podio-del-torneo.png',
+  },
+  {
+    clave: 'malazos-torneo',
+    titulo: 'Los 7/2 del torneo',
+    detalle: 'Los dos últimos de la tabla y a cuántos puntos están de salir del fondo.',
+    icono: Skull,
+    archivo: 'siete-dos-del-torneo.png',
+  },
+  {
     clave: 'elimina',
     titulo: 'Tabla Elimina',
-    detalle: 'La tabla completa del torneo: posición, nombre y puntaje.',
+    detalle: 'La tabla completa del torneo, igual que en la app: PUNTOS, ACUM. y los ELIMINA.',
     icono: ListOrdered,
     archivo: 'tabla-elimina.png',
   },
@@ -67,6 +99,22 @@ const PIEZAS: Pieza[] = [
 
 type Estado = { url: string; blob: Blob } | null
 
+/**
+ * Las imagenes se arman de una en una.
+ *
+ * Cada tarjeta pide la suya al montarse, y son siete: pedirlas todas a la vez
+ * deja al servidor rasterizando siete PNG grandes en paralelo y el resto de la
+ * app se queda esperando. Esta cola las pone en fila sin cambiar nada de lo
+ * que ve la Comision.
+ */
+let cola: Promise<unknown> = Promise.resolve()
+
+function enFila<T>(tarea: () => Promise<T>): Promise<T> {
+  const turno = cola.then(tarea, tarea)
+  cola = turno.catch(() => undefined)
+  return turno
+}
+
 function Tarjeta({ pieza }: { pieza: Pieza }) {
   const [estado, setEstado] = useState<Estado>(null)
   const [cargando, setCargando] = useState(false)
@@ -77,18 +125,31 @@ function Tarjeta({ pieza }: { pieza: Pieza }) {
     setCargando(true)
     setError(null)
     try {
-      const res = await fetch(`/api/share/${pieza.clave}`, {
-        headers: buildAuthHeaders(),
-        cache: 'no-store',
+      // La cola tiene que envolver tambien la lectura del cuerpo. Antes solo
+      // envolvia el fetch, y fetch se resuelve en cuanto llegan las cabeceras:
+      // next/og transmite el PNG mientras lo rasteriza, asi que el trabajo
+      // pesado del servidor pasaba durante el res.blob(), ya fuera del turno.
+      // Resultado: las siete tarjetas liberaban la fila casi al instante y
+      // seguian rasterizando en paralelo, justo lo que la cola debia evitar
+      // (la app se quedaba lenta mientras se armaban las imagenes).
+      const blob = await enFila(async () => {
+        const res = await fetch(`/api/share/${pieza.clave}`, {
+          headers: buildAuthHeaders(),
+          cache: 'no-store',
+        })
+        if (!res.ok) {
+          throw new Error(
+            res.status === 404
+              ? 'Todavía no hay datos para esta imagen.'
+              : 'No se pudo generar la imagen.'
+          )
+        }
+        // El turno no se libera hasta tener el PNG completo en memoria.
+        return res.blob()
       })
-      if (!res.ok) {
-        throw new Error(
-          res.status === 404
-            ? 'Todavía no hay datos para esta imagen.'
-            : 'No se pudo generar la imagen.'
-        )
-      }
-      const blob = await res.blob()
+
+      // createObjectURL y el estado de React son locales e instantaneos: no
+      // tocan al servidor, asi que no hace falta ocupar el turno con ellos.
       setEstado((previo) => {
         if (previo) URL.revokeObjectURL(previo.url)
         return { blob, url: URL.createObjectURL(blob) }

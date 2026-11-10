@@ -27,15 +27,12 @@ export function CPAppShell({ children, tone = 'dark' }: CPAppShellProps) {
         `,
         backgroundRepeat: 'no-repeat, no-repeat',
       } : {
-        backgroundColor: 'var(--cp-surface-0)',
-        backgroundImage: `
-          radial-gradient(ellipse 95% 40% at 50% 6%, rgba(229, 57, 53, 0.10) 0%, transparent 58%),
-          radial-gradient(ellipse 75% 38% at 85% 88%, rgba(91, 200, 192, 0.05) 0%, transparent 55%),
-          linear-gradient(170deg, #1D1615 0%, #221A19 55%, #271E1C 100%)
-        `,
-        backgroundSize: '100% 100%, 100% 100%, 100% 100%',
-        backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
-        backgroundBlendMode: 'screen, screen, normal',
+        // Negro plano. Antes habia un degradado de tres paradas mas dos
+        // resplandores radiales encima; sumados a los rellenos de cada bloque
+        // la pantalla tenia media docena de superficies distintas y se veia
+        // sucia. El negro deja que los tres colores que quedan —blanco, ambar
+        // y rojo— sean lo unico que se ve, y de noche en la mesa descansa.
+        backgroundColor: '#000000',
       }}
     >
       {/* Desktop: Center the app in a phone-like container */}

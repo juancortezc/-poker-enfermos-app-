@@ -13,6 +13,18 @@ El proyecto es **Poker de Enfermos** (`/Users/jac/Apps/JAC/Poker/poker-app`):
 Next.js 16, React 19, TypeScript, Prisma sobre PostgreSQL en Neon, desplegado
 en Vercel. Lo usan 34 personas reales y la base de datos es de PRODUCCIÓN.
 
+## Antes de empezar: apaga el servidor de desarrollo
+
+`npm run build` y `npm run dev` escriben en el mismo directorio `.next`. Si
+corres el build con el servidor de desarrollo encendido, lo dejas mudo: la app
+carga el HTML pero se queda en el esqueleto, sin errores en consola, y parece
+un fallo del codigo. Ya paso una vez y le costo al usuario una sesion de
+diagnostico.
+
+Asi que **antes del paso 1**: `lsof -ti:3000 | xargs kill -9`, y cuando
+termines, borra `.next` y vuelve a levantarlo con `npm run dev`. Avisa en tu
+reporte que lo apagaste y lo volviste a levantar.
+
 ## El orden, sin saltarse pasos
 
 Ejecuta en este orden y **detente en el primer fallo**:
