@@ -9,17 +9,22 @@ import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
  * otro lado de la tabla. Se lee del mismo registro (TournamentWinners), asi que
  * no hay una segunda fuente de verdad.
  *
- * EL TOTAL SON LOS DOS PREMIOS, NO UNO
+ * QUE SIGNIFICAN EL 7 Y EL 2
  *
- * Cada torneo reparte un 7 y un 2, y son columnas distintas de la tabla
- * (`sieteId` y `dosId`). La primera version de este endpoint contaba solo los
- * sietes, asi que la mitad de los datos no aparecia: Juan Antonio C. figuraba
- * primero con 5 cuando en realidad hay un triple empate en 6. El total es
- * sietes + dos.
+ * Son los dos ultimos puestos del torneo, nombrados por la peor mano del
+ * poker: el **2 es el ULTIMO** y el **7 el PENULTIMO**. Cada torneo reparte uno
+ * de cada uno, en columnas distintas de la tabla (`dosId` y `sieteId`).
  *
- * El desempate es por cantidad de sietes, y despues alfabetico para que el
- * orden nunca quede indefinido. Por eso la respuesta trae `sieteCount` y
- * `dosCount` por separado: si el desempate usa un dato, tiene que poder verse.
+ * EL ORDEN
+ *
+ * Manda el TOTAL, porque es la cantidad de veces que te llevaste el 7/2. Si dos
+ * empatan en total, desempata quien fue ULTIMO mas veces —el 2 es peor que el
+ * 7—, y si no, alfabetico, para que el orden nunca quede indefinido. No hay un
+ * tercer criterio por sietes: como el total es siete + dos, empatar en los dos
+ * campos anteriores ya obliga a empatar tambien en sietes.
+ *
+ * El desempate iba antes por sietes, que es al reves: entre dos jugadores con
+ * seis apariciones, ponia primero al que casi nunca quedo ultimo.
  */
 export async function GET() {
   try {
@@ -71,7 +76,7 @@ export async function GET() {
       }))
       .sort((a, b) => {
         if (b.total !== a.total) return b.total - a.total
-        if (b.sieteCount !== a.sieteCount) return b.sieteCount - a.sieteCount
+        if (b.dosCount !== a.dosCount) return b.dosCount - a.dosCount
         const nombreA = `${a.player?.firstName ?? ''} ${a.player?.lastName ?? ''}`
         const nombreB = `${b.player?.firstName ?? ''} ${b.player?.lastName ?? ''}`
         return nombreA.localeCompare(nombreB)

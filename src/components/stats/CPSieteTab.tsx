@@ -22,9 +22,9 @@ import {
  * asi que el compartido prometia ser el dueño del color y no lo era: cambiar la
  * paleta dejaba media pestaña con el rosa viejo.
  *
- * El total son los dos premios juntos —el 7 y el 2— porque cada torneo reparte
- * los dos. Debajo de cada tarjeta del podio va el desglose, que es el unico
- * lugar donde cabe: las tarjetas no llevan nombre.
+ * El 2 es el ULTIMO del torneo y el 7 el penultimo. La cifra grande es el TOTAL
+ * —las veces que te llevaste el 7/2— y el desglose de abajo muestra de que esta
+ * hecho, que es ademas lo que desempata: primero quien fue ultimo mas veces.
  */
 
 interface FilaApi {
@@ -74,11 +74,14 @@ export default function CPSieteTab() {
 
   const datos = data.data
 
-  const listaTorneos = (sietes: number[], dos: number[]) => {
-    const partes: string[] = []
-    if (sietes.length) partes.push(`7: ${[...sietes].sort((a, b) => b - a).map(t => `T${t}`).join(' · ')}`)
-    if (dos.length) partes.push(`2: ${[...dos].sort((a, b) => b - a).map(t => `T${t}`).join(' · ')}`)
-    return partes.join('   ')
+  // Los dos van primero, y la FIRMA lo dice: eran dos `number[]` seguidos que
+  // TypeScript no distingue, asi que un intercambio en cualquiera de los dos
+  // extremos reetiquetaba en silencio todos los torneos de la linea. Este orden
+  // ya se cambio una vez.
+  const listaTorneos = (dos: number[], sietes: number[]) => {
+    const parte = (etiqueta: string, ts: number[]) =>
+      ts.length ? `${etiqueta}: ${[...ts].sort((a, b) => b - a).map(t => `T${t}`).join(' · ')}` : ''
+    return [parte('2', dos), parte('7', sietes)].filter(Boolean).join('   ')
   }
 
   const filas: FilaHistorico[] = datos.all
@@ -86,12 +89,12 @@ export default function CPSieteTab() {
     .map(f => ({
       jugador: f.player,
       total: f.total,
-      pie: `7:${f.sieteCount} · 2:${f.dosCount}`,
+      pie: `2:${f.dosCount} · 7:${f.sieteCount}`,
       detalle: (
         // Sin truncar: la queja fue justamente que no se veian los torneos del
         // primero. Si no caben en una linea, que bajen.
         <p style={{ fontSize: 11, color: 'var(--cp-on-surface-muted)', lineHeight: 1.5 }}>
-          {listaTorneos(f.sieteTournaments, f.dosTournaments)}
+          {listaTorneos(f.dosTournaments, f.sieteTournaments)}
         </p>
       ),
     }))
@@ -128,8 +131,9 @@ export default function CPSieteTab() {
               >
                 T{t.tournamentNumber}
               </div>
-              <Premio etiqueta="7" jugador={t.siete} />
+              {/* El 2 primero: es el ultimo del torneo, el peor de los dos. */}
               <Premio etiqueta="2" jugador={t.dos} />
+              <Premio etiqueta="7" jugador={t.siete} />
             </div>
           ))}
         </div>
