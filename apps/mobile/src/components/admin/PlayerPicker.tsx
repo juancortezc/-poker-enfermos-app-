@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { SearchField } from '@/components/jugador/Bits';
-import { PlayerAvatar } from '@/components/torneo/PlayerAvatar';
+import { PlayerAvatar, avatarProps } from '@/components/common/PlayerAvatar';
 import { Muted } from '@/components/ui/Typography';
 import { noir } from '@/theme/colors';
 
@@ -96,7 +96,7 @@ export function PlayerPicker({
                 onPress={() => toggle(p.id)}
                 style={{ width: '49%', borderColor: on ? accent : noir.border, backgroundColor: on ? `${accent}1A` : noir.surface }}
                 className={`min-h-[52px] flex-row items-center gap-2 rounded-xl border px-2 py-1.5 ${disabled ? 'opacity-40' : 'active:opacity-80'}`}>
-                <PlayerAvatar player={p} size={30} ring={on ? accent : noir.border} />
+                <PlayerAvatar {...avatarProps(p)} size={30} ringColor={on ? accent : noir.border} />
                 <View className="flex-1">
                   <Text numberOfLines={1} className="font-inter-semibold text-sm text-noir-text">
                     {fullName(p)}

@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 import useSWR from 'swr';
 
-import type { ActiveGameDate } from '@/components/envivo/types';
+import type { ActiveGameDate } from '@/hooks/useActiveGameDate';
 import { Segmented } from '@/components/jugador/Segmented';
 import { OptionPicker } from '@/components/torneo/OptionPicker';
 import { NoirButton } from '@/components/ui/NoirButton';

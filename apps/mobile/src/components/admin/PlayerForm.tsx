@@ -20,7 +20,7 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Segmented } from '@/components/jugador/Segmented';
-import { PlayerAvatar } from '@/components/torneo/PlayerAvatar';
+import { PlayerAvatar, avatarProps } from '@/components/common/PlayerAvatar';
 import { NoirButton } from '@/components/ui/NoirButton';
 import { NoirCard } from '@/components/ui/NoirCard';
 import { Overline } from '@/components/ui/Typography';
@@ -141,7 +141,7 @@ export function PlayerForm({ player }: { player?: EditablePlayer }) {
   return (
     <View className="gap-4">
       <NoirCard className="flex-row items-center gap-4 p-4">
-        <PlayerAvatar player={{ firstName: firstName || '?', lastName, photoUrl: photoUrl || null, role }} size={64} ring={noir.gold} />
+        <PlayerAvatar {...avatarProps({ firstName: firstName || '?', lastName, photoUrl: photoUrl || null, role })} size={64} ringColor={noir.gold} />
         <View className="flex-1">
           <Text className="font-cinzel-bold text-lg text-noir-text">{`${firstName} ${lastName}`.trim() || 'Nuevo jugador'}</Text>
           <Text className="font-inter text-sm text-noir-muted">{ROLE_LABEL[role]}</Text>

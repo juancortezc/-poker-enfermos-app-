@@ -23,7 +23,7 @@ import {
 import { FormError, Notice } from '@/components/admin/Form';
 import type { Elimination } from '@/components/envivo/types';
 import { SearchField } from '@/components/jugador/Bits';
-import { PlayerAvatar } from '@/components/torneo/PlayerAvatar';
+import { PlayerAvatar, avatarProps } from '@/components/common/PlayerAvatar';
 import { Header } from '@/components/ui/Header';
 import { NoirCard } from '@/components/ui/NoirCard';
 import { Screen } from '@/components/ui/Screen';
@@ -199,7 +199,7 @@ function PlayerRow({
   const color = action === 'add' ? noir.gold : noir.danger;
   return (
     <View className="min-h-[52px] flex-row items-center gap-3 border-b border-noir-border py-1.5">
-      <PlayerAvatar player={player} size={34} />
+      <PlayerAvatar {...avatarProps(player)} size={34} />
       <Text numberOfLines={1} className="flex-1 font-inter text-base text-noir-text">
         {name}
         {player.role === 'Invitado' ? <Text className="text-noir-muted"> · invitado</Text> : null}

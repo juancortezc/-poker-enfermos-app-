@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import useSWR from 'swr';
 
-import type { ActiveGameDate } from '@/components/envivo/types';
+import type { ActiveGameDate } from '@/hooks/useActiveGameDate';
 import { Segmented } from '@/components/jugador/Segmented';
 import { ParentChildTab } from '@/components/torneo/stats/ParentChildTab';
 import { PremiosTab as StatsPremios } from '@/components/torneo/stats/PremiosTab';
@@ -34,7 +34,7 @@ export function TorneoTab({ tournament }: { tournament: ActiveTournament | undef
           <Overline>Torneo activo</Overline>
           <Title>Torneo {tournament.number}</Title>
           <Muted>
-            {tournament.completedDates ?? 0}/{tournament.totalDates ?? 12} fechas · {tournament.participantCount ?? '—'} jugadores
+            {tournament.totalDates} fechas · {tournament.participantIds.length} jugadores
           </Muted>
           <NoirButton
             title="Administrar torneo"
