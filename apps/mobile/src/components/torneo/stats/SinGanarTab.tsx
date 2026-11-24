@@ -191,8 +191,9 @@ function Row({ player, rank, milestone, match }: { player: PlayerWithVictoryData
 }
 
 export function SinGanarTab({ tournamentId }: { tournamentId?: number }) {
-  // La web pide siempre /1: el endpoint solo usa el id para validar que exista.
-  const { data, error, isLoading, mutate } = useSWR<Response>('/api/stats/days-without-victory/1', {
+  // El endpoint solo usa el id para validar que exista (la web pide /1). Con
+  // el id del torneo actual se comparte la cache con Inicio.
+  const { data, error, isLoading, mutate } = useSWR<Response>(swrKeys.daysWithoutVictory(tournamentId ?? 1), {
     refreshInterval: 60000,
   });
   const { data: gameDates } = useSWR<GameDate[]>(tournamentId ? swrKeys.gameDates(tournamentId) : null);

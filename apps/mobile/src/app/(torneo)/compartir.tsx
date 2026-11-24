@@ -167,12 +167,13 @@ function Tarjeta({ pieza }: { pieza: Pieza }) {
 }
 
 export default function CompartirScreen() {
-  const { role } = useAuth();
+  // Mismo permiso que la entrada en Más: solo Comisión.
+  const { can } = useAuth();
 
   return (
     <>
       <Stack.Screen options={{ title: 'Compartir' }} />
-      {role !== 'Comision' ? (
+      {!can('tournaments') ? (
         <Screen scroll={false}>
           <RestrictedState message="Compartir al grupo es solo para la Comisión." />
         </Screen>

@@ -4,6 +4,8 @@
  */
 import useSWR from 'swr';
 
+import { swrKeys } from '@/lib/swr';
+
 export interface CelebrationPlayer {
   id: string;
   firstName: string;
@@ -31,7 +33,7 @@ export interface DaysWithoutVictoryResponse {
 }
 
 export function useDaysWithoutVictory(tournamentId: number | null | undefined) {
-  return useSWR<DaysWithoutVictoryResponse>(tournamentId ? `/api/stats/days-without-victory/${tournamentId}` : null);
+  return useSWR<DaysWithoutVictoryResponse>(tournamentId ? swrKeys.daysWithoutVictory(tournamentId) : null);
 }
 
 interface ChampionStatsResponse {

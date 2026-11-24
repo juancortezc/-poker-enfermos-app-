@@ -77,6 +77,9 @@ export const swrKeys = {
 
   gameDateEliminations: (gameDateId: number) => `/api/eliminations/game-date/${gameDateId}`,
 
+  /** El id solo se valida (los jugadores son los activos de siempre): Inicio y Stats comparten esta key. */
+  daysWithoutVictory: (tournamentId: number) => `/api/stats/days-without-victory/${tournamentId}`,
+
   availablePlayers: () => '/api/players?role=Enfermo,Comision&active=true',
   availableGuests: () => '/api/players/available-guests',
 } as const;

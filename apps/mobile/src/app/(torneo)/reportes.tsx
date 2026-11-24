@@ -27,12 +27,13 @@ const INCLUYE = [
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 export default function ReportesScreen() {
-  const { role } = useAuth();
+  // Mismo permiso que la entrada en Más: solo Comisión.
+  const { can } = useAuth();
   const t = useTournamentOptions();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (role !== 'Comision') {
+  if (!can('tournaments')) {
     return (
       <>
         <Stack.Screen options={{ title: 'Reportes' }} />
