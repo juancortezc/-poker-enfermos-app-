@@ -1,5 +1,6 @@
 import webpush from 'web-push'
 import { prisma } from './prisma'
+import { sendExpoPush, type ExpoDevice } from './expo-push'
 
 // Initialize VAPID configuration
 let vapidConfigured = false
@@ -92,6 +93,10 @@ async function deliverToSubscriptions(
   subscriptions: DeliverableSubscription[],
   notificationData: unknown
 ): Promise<number> {
+  // Sin suscripciones web (p. ej. jugador que solo usa la app): nada que hacer,
+  // y evita que el chequeo de "todas 403" de abajo se dispare con lista vacía.
+  if (subscriptions.length === 0) return 0
+
   const payload = JSON.stringify(notificationData)
 
   const results = await Promise.all(
@@ -135,6 +140,35 @@ async function deliverToSubscriptions(
 }
 
 /**
+ * Envía a los tokens Expo de la app móvil y desactiva los que Expo reporta
+ * como DeviceNotRegistered (app desinstalada o permiso revocado).
+ */
+async function deliverToExpoDevices(
+  devices: ExpoDevice[],
+  payload: PushNotificationPayload
+): Promise<number> {
+  if (devices.length === 0) return 0
+
+  const { sent, deadDeviceIds } = await sendExpoPush(devices, {
+    title: payload.title,
+    body: payload.body,
+    data: { url: payload.url, ...payload.data },
+    silent: payload.silent,
+    tag: payload.tag
+  })
+
+  if (deadDeviceIds.length > 0) {
+    await prisma.pushDevice.updateMany({
+      where: { id: { in: deadDeviceIds } },
+      data: { enabled: false }
+    })
+    console.log(`Desactivados ${deadDeviceIds.length} dispositivos Expo no registrados`)
+  }
+
+  return sent
+}
+
+/**
  * Send push notification to a specific player
  */
 export async function sendPushNotification(
@@ -143,15 +177,21 @@ export async function sendPushNotification(
 ): Promise<PushResult> {
   try {
     ensureVapidConfiguration()
-    // Get active subscriptions for the player
-    const subscriptions = await prisma.pushSubscription.findMany({
-      where: {
-        playerId: playerId,
-        isActive: true
-      }
-    })
+    // Get active subscriptions (web) and devices (app) for the player
+    const [subscriptions, devices] = await Promise.all([
+      prisma.pushSubscription.findMany({
+        where: {
+          playerId: playerId,
+          isActive: true
+        }
+      }),
+      prisma.pushDevice.findMany({
+        where: { playerId, enabled: true },
+        select: { id: true, expoToken: true }
+      })
+    ])
 
-    if (subscriptions.length === 0) {
+    if (subscriptions.length === 0 && devices.length === 0) {
       return {
         success: false,
         sentTo: 0,
@@ -175,12 +215,16 @@ export async function sendPushNotification(
       tag: payload.tag
     }
 
-    const successCount = await deliverToSubscriptions(subscriptions, notificationData)
+    const [webCount, appCount] = await Promise.all([
+      deliverToSubscriptions(subscriptions, notificationData),
+      deliverToExpoDevices(devices, payload)
+    ])
+    const successCount = webCount + appCount
 
     return {
       success: successCount > 0,
       sentTo: successCount,
-      totalSubscriptions: subscriptions.length
+      totalSubscriptions: subscriptions.length + devices.length
     }
 
   } catch (error) {
@@ -237,6 +281,14 @@ export async function broadcastPushNotification(
       }
     })
 
+    // Mismos filtros para los dispositivos de la app móvil
+    const deviceWhere: Record<string, unknown> = { ...whereClause, enabled: true }
+    delete deviceWhere.isActive
+    const devices = await prisma.pushDevice.findMany({
+      where: deviceWhere,
+      select: { id: true, expoToken: true }
+    })
+
     // Count all eligible players even if they don't have active subscriptions
     const eligiblePlayersClause: Record<string, unknown> = {}
 
@@ -256,7 +308,7 @@ export async function broadcastPushNotification(
       where: eligiblePlayersClause
     })
 
-    if (subscriptions.length === 0) {
+    if (subscriptions.length === 0 && devices.length === 0) {
       // Return success but indicate no actual notifications were sent
       return {
         success: true,
@@ -281,12 +333,16 @@ export async function broadcastPushNotification(
       tag: payload.tag
     }
 
-    const successCount = await deliverToSubscriptions(subscriptions, notificationData)
+    const [webCount, appCount] = await Promise.all([
+      deliverToSubscriptions(subscriptions, notificationData),
+      deliverToExpoDevices(devices, payload)
+    ])
+    const successCount = webCount + appCount
 
     return {
       success: successCount > 0,
       sentTo: successCount,
-      totalSubscriptions: Math.max(subscriptions.length, eligiblePlayers)
+      totalSubscriptions: Math.max(subscriptions.length + devices.length, eligiblePlayers)
     }
 
   } catch (error) {

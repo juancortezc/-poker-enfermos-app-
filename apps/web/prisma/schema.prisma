@@ -41,6 +41,7 @@ model Player {
   createdProposalsV2     ProposalV2[]            @relation("ProposalV2Creator")
   t29Participation       T29Participant?
   pushSubscriptions      PushSubscription[]
+  pushDevices            PushDevice[]
   tournamentParticipants TournamentParticipant[]
   tournamentRankings     TournamentRanking[]
   championWins           TournamentWinners[]     @relation("Champion")
@@ -387,6 +388,23 @@ model PushSubscription {
   player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@map("push_subscriptions")
+}
+
+/// Token de Expo Push de la app movil (uno por instalacion). Paralelo a
+/// PushSubscription, que es el web-push del navegador.
+model PushDevice {
+  id         String   @id @default(cuid())
+  playerId   String   @map("player_id")
+  expoToken  String   @unique @map("expo_token")
+  platform   String // 'ios' | 'android'
+  enabled    Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@map("push_devices")
 }
 
 model NotificationSettings {
