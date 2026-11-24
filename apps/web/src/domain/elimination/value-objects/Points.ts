@@ -1,5 +1,4 @@
 import {
-  MIN_PLAYERS,
   MAX_PLAYERS,
   calculatePointsForPosition,
   getPointsDistribution,
@@ -16,9 +15,7 @@ import {
  * calcular, que es el comportamiento histórico de /api/eliminations:
  * - 10 a 24 jugadores: idéntico a `calculatePointsForPosition` (el clamp no
  *   hace nada).
- * - 9 o menos: se calcula con la tabla de 9 y las posiciones 1..9 puntúan
- *   aunque haya menos jugadores. Pendiente de la tabla que está aprobando el
- *   usuario; no cambiar sin esa aprobación.
+ * - 9 o menos: la tabla aprobada de `@poker/shared` (sin recorte).
  * - Más de 24: tabla de 24; posiciones por encima de 24 valen 0.
  * Ver points-equivalence.test.ts.
  */
@@ -27,7 +24,7 @@ export class Points {
 
   /** Cantidad de jugadores con la que se construye la tabla. */
   private static clampPlayers(totalPlayers: number): number {
-    return Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, totalPlayers));
+    return Math.min(MAX_PLAYERS, totalPlayers);
   }
 
   /**

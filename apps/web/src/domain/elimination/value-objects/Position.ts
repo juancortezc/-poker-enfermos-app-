@@ -1,5 +1,5 @@
 import { InvalidPositionError } from '../errors/EliminationError';
-import { MIN_PLAYERS, MAX_PLAYERS } from '@poker/shared';
+import { MAX_PLAYERS } from '@poker/shared';
 
 /**
  * Value Object that represents a player's elimination position.
@@ -19,9 +19,9 @@ export class Position {
    * Creates a valid Position or throws InvalidPositionError.
    */
   static create(position: number, totalPlayers: number): Position {
-    const clampedTotal = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, totalPlayers));
+    const clampedTotal = Math.min(MAX_PLAYERS, totalPlayers);
 
-    if (position < 1 || position > clampedTotal) {
+    if (!Number.isInteger(position) || position < 1 || position > clampedTotal) {
       throw new InvalidPositionError(position, clampedTotal);
     }
 
