@@ -12,7 +12,7 @@ import { tile, SOBRE_COLOR } from '@/components/clean-poker/bento'
 import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { FechaTimelineItem } from '@/components/clean-poker/FechaTimelineItem'
 import { downloadSeasonIcs } from '@/lib/ics'
-import { isBirthdayNearDate } from '@/lib/birthday-utils'
+import { isBirthdayNearDate } from '@poker/shared'
 
 interface EliminationDTO {
   id: number

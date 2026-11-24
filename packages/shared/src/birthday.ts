@@ -1,3 +1,8 @@
+/**
+ * Cumpleaños: reglas puras compartidas por la web (calendario, celebraciones)
+ * y la app movil.
+ */
+
 /** Parsea "YYYY-MM-DD" o "MM-DD" y devuelve {month, day} (1-12, 1-31), o null si es inválido. */
 export function parseBirthMonthDay(birthDate: string | null | undefined): { month: number; day: number } | null {
   if (!birthDate) return null
