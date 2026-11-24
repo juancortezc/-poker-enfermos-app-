@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { CelebrationsCard } from '@/components/jugador/home/CelebrationsCard';
 import { ClaveDebilBanner } from '@/components/jugador/home/ClaveDebilBanner';
 import { HomeLive } from '@/components/jugador/home/HomeLive';
@@ -108,7 +108,7 @@ export default function HomeScreen() {
         right={
           user ? (
             <View>
-              <Avatar name={`${user.firstName} ${user.lastName}`} photoUrl={user.photoUrl} size={48} playerId={user.id} linkToProfile />
+              <PlayerAvatar name={`${user.firstName} ${user.lastName}`} photoUrl={user.photoUrl} size={48} playerId={user.id} linkToProfile />
             </View>
           ) : undefined
         }

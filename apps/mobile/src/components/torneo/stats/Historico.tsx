@@ -8,7 +8,7 @@ import { Text, View } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import useSWR from 'swr';
 
-import { PlayerAvatar } from '@/components/torneo/PlayerAvatar';
+import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { EmptyState, ErrorState, LoadingState, Muted, NoirCard, Overline } from '@/components/ui';
 import { fonts, noir } from '@/theme/colors';
 import { playerLabel } from '@poker/shared';
@@ -48,7 +48,7 @@ function TarjetaPodio({ fila, color, grande }: { fila: Fila; color: string; gran
   const w = grande ? 108 : 92;
   return (
     <View className="items-center" style={{ width: w + 8 }}>
-      <PlayerAvatar player={fila.jugador} size={w} height={grande ? 140 : 120} shape="card" ring={color} />
+      <PlayerAvatar {...avatarProps(fila.jugador)} size={w} height={grande ? 140 : 120} shape="card" ringColor={color} />
       <Text numberOfLines={1} className="mt-2 font-inter-semibold text-sm text-noir-text">
         {playerLabel(fila.jugador)}
       </Text>
@@ -93,7 +93,7 @@ function HistoricoList({ filas, paleta, vacio }: { filas: Fila[]; paleta: Paleta
                 fila.jugador.isActive ? '' : 'opacity-60'
               }`}>
               <Text className="w-6 text-center font-inter text-sm text-noir-muted">{i + 4}</Text>
-              <PlayerAvatar player={fila.jugador} size={40} />
+              <PlayerAvatar {...avatarProps(fila.jugador)} size={40} />
               <View className="flex-1">
                 <Text numberOfLines={1} className="font-inter-semibold text-base text-noir-text">
                   {fila.jugador.firstName} {fila.jugador.lastName}
@@ -235,7 +235,7 @@ function Premio({ etiqueta, jugador }: { etiqueta: string; jugador: Jugador | nu
       <Text style={{ color: PALETA_ROSA.metales[1] }} className="font-inter-bold text-sm">
         {etiqueta}
       </Text>
-      <PlayerAvatar player={jugador} size={28} ring={PALETA_ROSA.metales[2]} />
+      <PlayerAvatar {...avatarProps(jugador)} size={28} ringColor={PALETA_ROSA.metales[2]} />
       <Text numberOfLines={1} className="flex-1 font-inter text-sm text-noir-text">
         {playerLabel(jugador)}
       </Text>

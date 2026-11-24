@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import useSWR from 'swr';
 
 import { OptionPicker } from '@/components/torneo/OptionPicker';
-import { PlayerAvatar, type AvatarPlayer } from '@/components/torneo/PlayerAvatar';
+import { avatarProps, PlayerAvatar, type AvatarPlayer } from '@/components/common/PlayerAvatar';
 import { EmptyState, ErrorState, LoadingState, Muted, NoirCard, Overline, Title } from '@/components/ui';
 import { noir } from '@/theme/colors';
 import { playerLabel } from '@poker/shared';
@@ -51,7 +51,7 @@ function RelationCard({ relation, onPress }: { relation: Relation; onPress: () =
       className="active:opacity-80">
       <NoirCard className="flex-row items-center gap-3 p-4">
         <View className="items-center gap-1" style={{ width: 72 }}>
-          <PlayerAvatar player={relation.parentPlayer} size={52} ring={noir.gold} />
+          <PlayerAvatar {...avatarProps(relation.parentPlayer)} size={52} ringColor={noir.gold} />
           <Text numberOfLines={1} className="font-inter-semibold text-xs text-noir-text">
             {playerLabel(relation.parentPlayer)}
           </Text>
@@ -63,7 +63,7 @@ function RelationCard({ relation, onPress }: { relation: Relation; onPress: () =
           <Muted className="text-[11px]">eliminaciones</Muted>
         </View>
         <View className="items-center gap-1" style={{ width: 72 }}>
-          <PlayerAvatar player={relation.childPlayer} size={52} ring={noir.copper} />
+          <PlayerAvatar {...avatarProps(relation.childPlayer)} size={52} ringColor={noir.copper} />
           <Text numberOfLines={1} className="font-inter-semibold text-xs text-noir-text">
             {playerLabel(relation.childPlayer)}
           </Text>

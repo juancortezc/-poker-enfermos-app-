@@ -9,7 +9,7 @@ import { Text, View } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import useSWR from 'swr';
 
-import { PlayerAvatar } from '@/components/torneo/PlayerAvatar';
+import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { EmptyState, ErrorState, LoadingState, Muted, NoirCard, Overline } from '@/components/ui';
 import { swrKeys } from '@/lib/swr';
 import { fonts, noir } from '@/theme/colors';
@@ -139,7 +139,7 @@ function Hero({ player, milestone, match }: { player: PlayerWithVictoryData; mil
           ) : null}
         </View>
         <View className="items-center">
-          <PlayerAvatar player={player} size={64} ring={accent} />
+          <PlayerAvatar {...avatarProps(player)} size={64} ringColor={accent} />
           <Text className="mt-1 font-inter-bold text-sm text-noir-text">{player.firstName}</Text>
           <Muted className="text-xs">{player.lastName}</Muted>
         </View>
@@ -158,7 +158,7 @@ function Row({ player, rank, milestone, match }: { player: PlayerWithVictoryData
   return (
     <View className="flex-row items-center gap-3 rounded-2xl border border-noir-border bg-noir-surface p-3" style={{ borderLeftColor: tier.color, borderLeftWidth: 3 }}>
       <Text className="w-5 text-center font-inter text-xs text-noir-muted">{rank}</Text>
-      <PlayerAvatar player={player} size={38} ring={tier.color} />
+      <PlayerAvatar {...avatarProps(player)} size={38} ringColor={tier.color} />
       <View className="flex-1 gap-1.5">
         <View className="flex-row items-baseline justify-between gap-2">
           <Text numberOfLines={1} className="flex-1 font-inter-bold text-sm text-noir-text">

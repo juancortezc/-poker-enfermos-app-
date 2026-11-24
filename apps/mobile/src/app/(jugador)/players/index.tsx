@@ -9,7 +9,7 @@ import { router, Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { SearchField } from '@/components/jugador/Bits';
 import { Segmented } from '@/components/jugador/Segmented';
 import { Screen } from '@/components/ui/Screen';
@@ -107,7 +107,7 @@ function PlayerRow({ player, canEdit }: { player: DirectoryPlayer; canEdit: bool
       accessibilityLabel={`Ver el perfil de ${name}`}
       onPress={() => router.push({ pathname: '/players/[id]', params: { id: player.id } })}
       className="min-h-[64px] flex-row items-center gap-3 rounded-2xl border border-noir-border bg-noir-surface px-4 py-3 active:bg-noir-raised">
-      <Avatar name={name} photoUrl={player.photoUrl} size={44} />
+      <PlayerAvatar name={name} photoUrl={player.photoUrl} role={player.role} size={44} />
       <View className="flex-1">
         <View className="flex-row items-center gap-2">
           <Text numberOfLines={1} className="shrink font-inter-semibold text-base text-noir-text">

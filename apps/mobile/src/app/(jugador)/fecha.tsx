@@ -9,7 +9,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { MALAZO, MEDAL, Score } from '@/components/jugador/Bits';
 import { Segmented } from '@/components/jugador/Segmented';
 import { NoirButton } from '@/components/ui/NoirButton';
@@ -110,7 +110,7 @@ export default function FechaScreen() {
                       className="min-h-[56px] flex-row items-center gap-3 rounded-2xl border bg-noir-surface px-3 py-2 active:opacity-80">
                       {accent ? <View style={{ backgroundColor: accent }} className="absolute bottom-2 left-0 top-2 w-[3px] rounded" /> : null}
                       <Score value={`#${e.position}`} size={14} color={accent ?? noir.muted} />
-                      <Avatar name={fullName(e.eliminatedPlayer)} photoUrl={e.eliminatedPlayer.photoUrl} size={34} />
+                      <PlayerAvatar name={fullName(e.eliminatedPlayer)} photoUrl={e.eliminatedPlayer.photoUrl} role={e.eliminatedPlayer.role} size={34} />
                       <Text numberOfLines={1} className="flex-1 font-inter-semibold text-sm text-noir-text">
                         {fullName(e.eliminatedPlayer)}
                       </Text>
@@ -126,7 +126,7 @@ export default function FechaScreen() {
                 {events.map((e) => (
                   <View key={e.id} className="min-h-[56px] flex-row items-center gap-3 rounded-2xl border border-noir-border bg-noir-surface px-3 py-2">
                     <Score value={`#${e.position}`} size={13} color={noir.muted} />
-                    <Avatar name={fullName(e.eliminatedPlayer)} photoUrl={e.eliminatedPlayer.photoUrl} size={32} />
+                    <PlayerAvatar name={fullName(e.eliminatedPlayer)} photoUrl={e.eliminatedPlayer.photoUrl} role={e.eliminatedPlayer.role} size={32} />
                     <View className="flex-1">
                       <Text className="font-inter-semibold text-sm text-noir-text">{fullName(e.eliminatedPlayer)}</Text>
                       {e.eliminatorPlayer ? <Muted className="text-xs">eliminado por {playerLabel(e.eliminatorPlayer)}</Muted> : null}

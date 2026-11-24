@@ -2,7 +2,7 @@
 import { scoreOf, shortenFullName, type PlayerRanking } from '@poker/shared';
 import { Pressable, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { MALAZO, MEDAL, Score } from '@/components/jugador/Bits';
 import { NoirCard } from '@/components/ui/NoirCard';
 import { Overline } from '@/components/ui/Typography';
@@ -34,7 +34,7 @@ export function PodiumRow({
         return (
           <View key={p.playerId} className="min-w-0 flex-1 items-center" style={{ marginBottom: first ? 12 : 0 }}>
             <View style={{ transform: [{ translateY: selectedId === p.playerId ? -3 : 0 }] }}>
-              <Avatar
+              <PlayerAvatar
                 name={p.playerName}
                 photoUrl={p.playerPhoto}
                 size={first ? 96 : 72}
@@ -76,7 +76,7 @@ export function MalazosCard({ rankings }: { rankings: PlayerRanking[] }) {
       <View className="flex-row">
         {bottom2.map((p, k) => (
           <View key={p.playerId} className={`flex-1 flex-row items-center gap-3 ${k > 0 ? 'border-l border-noir-border pl-3' : ''}`}>
-            <Avatar name={p.playerName} photoUrl={p.playerPhoto} size={48} playerId={p.playerId} linkToProfile />
+            <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={48} playerId={p.playerId} linkToProfile />
             <View className="min-w-0 flex-1">
               <Text numberOfLines={1} className="font-inter-semibold text-sm text-noir-text">
                 {shortenFullName(p.playerName)}

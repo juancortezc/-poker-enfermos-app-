@@ -6,7 +6,7 @@
 import { playerLabel, scoreOf, shortenFullName, type PlayerRanking } from '@poker/shared';
 import { Text, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { LinkCta, MALAZO, MEDAL, NEGATIVE, POSITIVE, Score, SectionHeader } from '@/components/jugador/Bits';
 import { NoirButton } from '@/components/ui/NoirButton';
 import { NoirCard } from '@/components/ui/NoirCard';
@@ -113,7 +113,7 @@ export function HomeUltimaFecha({
             <Title className="text-2xl leading-tight">¡{playerLabel(winner.eliminatedPlayer).toUpperCase()} GANÓ LA FECHA!</Title>
             <NoirButton title="Ver resultados" onPress={onSeeAllResults} className="mt-1 self-start" />
           </View>
-          <Avatar
+          <PlayerAvatar
             name={`${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`}
             photoUrl={photoOf(winner.eliminatedPlayer)}
             size={104}
@@ -163,7 +163,7 @@ export function HomeUltimaFecha({
           <SectionHeader title={`Podio fecha ${lastCompletedDate.dateNumber}`} action="Todos" onAction={onSeeResultsTab} />
           {podium.map((e) => (
             <View key={e.id} className="flex-row items-center gap-3">
-              <Avatar
+              <PlayerAvatar
                 name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`}
                 photoUrl={photoOf(e.eliminatedPlayer)}
                 size={56}
@@ -190,7 +190,7 @@ export function HomeUltimaFecha({
           <View className="flex-row flex-wrap" style={{ rowGap: 14 }}>
             {insights.map((c) => (
               <View key={c.key} className="w-1/2 flex-row items-center gap-2 pr-2">
-                <Avatar name={c.name} photoUrl={rankingPhoto.get(c.playerId)} size={48} playerId={c.playerId} linkToProfile />
+                <PlayerAvatar name={c.name} photoUrl={rankingPhoto.get(c.playerId)} size={48} playerId={c.playerId} linkToProfile />
                 <View className="min-w-0 flex-1">
                   <Text style={{ color: c.color }} className="font-inter-bold text-[10px] tracking-[1px]">
                     {c.label}
