@@ -10,5 +10,9 @@
     "build:web": "npm run build -w apps/web",
     "lint:web": "npm run lint -w apps/web",
     "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "overrides": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   }
 }
