@@ -1,38 +1,51 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Poker Enfermos",
+    "slug": "poker-enfermos",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
-    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icons/favicon-512.png",
+    "scheme": "pokerenfermos",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#1F1410",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.pokerenfermos.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Usamos Face ID para desbloquear tu clave de Poker Enfermos sin tener que escribirla.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.pokerenfermos.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#1F1410",
+        "foregroundImage": "./assets/icons/favicon-512.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "server",
-      "favicon": "./assets/images/favicon.png"
+      "output": "single",
+      "favicon": "./assets/icons/favicon-64.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#1F1410",
+          "image": "./assets/icons/favicon-512.png",
+          "imageWidth": 200
         }
-      ]
+      ],
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Usamos Face ID para desbloquear tu clave de Poker Enfermos sin tener que escribirla."
+        }
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
