@@ -1,5 +1,5 @@
 {
-  "name": "poker-app",
+  "name": "@poker/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,10 +10,12 @@
     "start": "next start",
     "lint": "eslint",
     "analyze": "npm run build && npx @next/bundle-analyzer",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@poker/shared": "*",
     "@prisma/client": "^6.15.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",

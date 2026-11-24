@@ -2,7 +2,7 @@
 
 import { Check, CalendarPlus, Cake } from 'lucide-react'
 import { HomeAvatar } from './HomeAvatar'
-import { fullName } from '@/lib/player-name'
+import { fullName } from '@poker/shared'
 
 interface EliminationDTO {
   id: number

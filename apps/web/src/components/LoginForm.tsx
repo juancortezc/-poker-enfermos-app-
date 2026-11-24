@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { KeyRound, Loader2 } from 'lucide-react'
 import Image from 'next/image'
-import { isValidPinForLogin, PIN_MIN_LENGTH_LOGIN, PIN_MAX_LENGTH } from '@/lib/pin-rules'
+import { isValidPinForLogin, PIN_MIN_LENGTH_LOGIN, PIN_MAX_LENGTH } from '@poker/shared'
 
 export default function LoginForm() {
   const [pin, setPin] = useState('')

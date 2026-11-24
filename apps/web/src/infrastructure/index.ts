@@ -37,7 +37,7 @@ export {
   PLAYER_DEPS,
 } from './di/player';
 
-// El timer vive en lib/timer-engine, sin contexto propio.
+// El timer vive en timer-engine de @poker/shared, sin contexto propio.
 
 // Las propuestas se manejan en las rutas /api/proposals-v2, sin contexto propio.
 

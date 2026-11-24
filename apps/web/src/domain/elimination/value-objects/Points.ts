@@ -3,7 +3,7 @@ import {
   MAX_PLAYERS,
   SCORING_RULES,
   POSITION_RANGES,
-} from '@/lib/constants/scoring';
+} from '@poker/shared';
 
 /**
  * Value Object that represents points earned for an elimination position.

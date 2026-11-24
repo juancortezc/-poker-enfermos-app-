@@ -21,7 +21,7 @@
  *     red o que se reinicie el servidor.
  */
 
-export type TimerStatus = 'inactive' | 'active' | 'paused' | 'completed'
+import type { TimerStatus } from './types'
 
 /** Un nivel de la estructura de blinds. `durationMs` 0 = sin limite. */
 export interface BlindSpec {

@@ -9,7 +9,7 @@ import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown, Trash2, Trophy, 
 import TournamentCompletionModal from '@/components/tournaments/TournamentCompletionModal'
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
-import { playerLabel } from '@/lib/player-name'
+import { playerLabel } from '@poker/shared'
 
 const RED = '#E53935'
 const PINK = '#E8863C'

@@ -1,5 +1,5 @@
 import { InvalidPositionError } from '../errors/EliminationError';
-import { MIN_PLAYERS, MAX_PLAYERS } from '@/lib/constants/scoring';
+import { MIN_PLAYERS, MAX_PLAYERS } from '@poker/shared';
 
 /**
  * Value Object that represents a player's elimination position.

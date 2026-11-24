@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { TrophyIcon } from 'lucide-react';
 import Link from 'next/link';
-import type { TournamentRankingData } from '@/lib/ranking-utils';
+import type { TournamentRankingData } from '@poker/shared';
 
 interface TournamentRankingTableProps {
   tournamentId: number;

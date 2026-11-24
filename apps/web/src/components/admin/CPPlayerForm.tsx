@@ -9,7 +9,7 @@ import {
   normalizePin,
   PIN_MAX_LENGTH,
   PIN_RULE_TEXT,
-} from '@/lib/pin-rules'
+} from '@poker/shared'
 
 interface Player {
   id: string

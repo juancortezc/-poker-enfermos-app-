@@ -1,7 +1,7 @@
 import { prisma } from './prisma'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-import { isValidPinForLogin, normalizePin } from './pin-rules'
+import { isValidPinForLogin, normalizePin } from '@poker/shared'
 
 export interface AuthUser {
   id: string

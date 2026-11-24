@@ -1,6 +1,6 @@
 import useSWR from 'swr'
 import { swrKeys } from '@/lib/swr-config'
-import type { TournamentInsightsData } from '@/lib/ranking-utils'
+import type { TournamentInsightsData } from '@poker/shared'
 
 interface UseTournamentInsightsOptions {
   refreshInterval?: number

@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 import withPWAInit from "@ducanh2912/next-pwa";
 
@@ -30,7 +31,14 @@ const withPWA = withPWAInit({
   },
 });
 
+// Raiz del monorepo (apps/web -> ../..). Las dependencias se instalan ahi
+// con npm workspaces, y packages/shared vive fuera de apps/web.
+const monorepoRoot = path.join(__dirname, "..", "..");
+
 const nextConfig: NextConfig = {
+  // Logica pura compartida con la app movil. Se publica como fuente TS.
+  transpilePackages: ["@poker/shared"],
+  outputFileTracingRoot: monorepoRoot,
   // Next 16 arranca en Turbopack por defecto. El plugin de PWA inyecta un
   // config de `webpack`, y ver uno sin config de turbopack es un error duro:
   // `npm run dev` no levantaba.
@@ -40,7 +48,7 @@ const nextConfig: NextConfig = {
   // de produccion SI necesita el paso de webpack del plugin para generar el
   // service worker, y por eso el script conserva `next build --webpack`.
   // Si algun dia se quita ese flag, el sw.js deja de generarse en silencio.
-  turbopack: {},
+  turbopack: { root: monorepoRoot },
   images: {
     remotePatterns: [
       {

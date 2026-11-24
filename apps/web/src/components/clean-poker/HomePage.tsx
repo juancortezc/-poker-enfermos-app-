@@ -22,8 +22,8 @@ import { HomeViewToggle, type HomeView } from './HomeViewToggle'
 import { HomeUltimaFecha } from './HomeUltimaFecha'
 import { HomeTorneo } from './HomeTorneo'
 import { openAddToCalendar } from '@/lib/home-view'
-import type { PlayerRanking, TournamentInsightsData } from '@/lib/ranking-utils'
-import { isValidPinForLogin } from '@/lib/pin-rules'
+import type { PlayerRanking, TournamentInsightsData } from '@poker/shared'
+import { isValidPinForLogin } from '@poker/shared'
 
 // Logo URL
 const LOGO_URL = 'https://storage.googleapis.com/poker-enfermos/logo.png'

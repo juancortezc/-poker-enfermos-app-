@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withComisionAuth } from '@/lib/api-auth';
-import { calculatePointsForPosition } from '@/lib/tournament-utils';
+import { calculatePointsForPosition } from '@poker/shared';
 
 export async function GET(
   request: NextRequest,

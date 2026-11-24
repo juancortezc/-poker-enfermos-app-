@@ -3,13 +3,13 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import { CalendarPlus } from 'lucide-react'
-import type { PlayerRanking, TournamentInsightsData } from '@/lib/ranking-utils'
-import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
+import type { PlayerRanking, TournamentInsightsData } from '@poker/shared'
+import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@poker/shared'
 import { Score, Meter } from './Score'
 import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
 import { tile, overline, BENTO, SOBRE_COLOR } from './bento'
-import { playerLabel, shortenFullName } from '@/lib/player-name'
+import { playerLabel, shortenFullName } from '@poker/shared'
 
 interface DaysWithoutVictoryResponse {
   players: Array<{ id: string; firstName: string; lastName: string; daysWithoutVictory: number; hasNeverWon: boolean }>

@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { SCORE_LABELS } from '@/lib/ranking-utils'
-import { shortenFullName } from '@/lib/player-name'
+import { SCORE_LABELS } from '@poker/shared'
+import { shortenFullName } from '@poker/shared'
 import type { LiveRankingData, LiveRankingRow } from '@/lib/live-ranking'
 
 const MUTED = 'rgba(255,255,255,0.42)'

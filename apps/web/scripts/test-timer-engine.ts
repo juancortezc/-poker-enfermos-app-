@@ -19,7 +19,7 @@ import {
   advanceLevel,
   type TimerAnchor,
   type BlindSpec,
-} from '../src/lib/timer-engine'
+} from '@poker/shared'
 
 let fallas = 0
 let pruebas = 0

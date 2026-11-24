@@ -1,4 +1,4 @@
-import { UserRole } from '@prisma/client'
+import type { UserRole } from './types'
 
 /**
  * Sistema de permisos para controlar acceso a funcionalidades por rol

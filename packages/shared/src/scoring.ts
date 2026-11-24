@@ -78,4 +78,3 @@ export const USER_ROLES = {
   INVITADO: 'Invitado',
 } as const;
 
-export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];

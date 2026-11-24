@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { AuthUser } from '@/lib/auth'
 import { clearStoredAuthTokens, storePin, storeAdminKey, getStoredAuthToken } from '@/lib/client-auth'
-import { isValidPinForLogin } from '@/lib/pin-rules'
+import { isValidPinForLogin } from '@poker/shared'
 
 interface AuthContextType {
   user: AuthUser | null

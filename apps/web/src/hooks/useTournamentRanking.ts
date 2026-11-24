@@ -1,6 +1,6 @@
 import useSWR from 'swr'
 import { swrKeys } from '@/lib/swr-config'
-import type { TournamentRankingData } from '@/lib/ranking-utils'
+import type { TournamentRankingData } from '@poker/shared'
 
 interface UseTournamentRankingOptions {
   /** Auto-refresh interval in milliseconds. Default: 30000 (30s) */

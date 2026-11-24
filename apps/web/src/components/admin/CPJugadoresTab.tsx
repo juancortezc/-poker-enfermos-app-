@@ -6,7 +6,7 @@ import { Plus, Search, Loader2, Users } from 'lucide-react'
 import Image from 'next/image'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import CPPlayerForm from './CPPlayerForm'
-import { playerLabel } from '@/lib/player-name'
+import { playerLabel } from '@poker/shared'
 
 interface Player {
   id: string

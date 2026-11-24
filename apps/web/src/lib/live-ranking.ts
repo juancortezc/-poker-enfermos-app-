@@ -1,6 +1,6 @@
 import { prisma } from './prisma'
-import { calculatePointsForPosition } from './tournament-utils'
-import { calculateTournamentRanking, compareByTiebreak, type PlayerRanking } from './ranking-utils'
+import { calculatePointsForPosition, compareByTiebreak, type PlayerRanking } from '@poker/shared'
+import { calculateTournamentRanking } from './ranking-utils'
 
 /**
  * Proyección en vivo del ranking del torneo durante una fecha en curso.

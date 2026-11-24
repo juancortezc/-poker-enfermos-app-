@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 import { Phone, Mail, Cake, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
 import { buildAuthHeaders, storePin } from '@/lib/client-auth'
-import { isValidPinForCreation, PIN_RULE_TEXT, PIN_MAX_LENGTH } from '@/lib/pin-rules'
+import { isValidPinForCreation, PIN_RULE_TEXT, PIN_MAX_LENGTH } from '@poker/shared'
 
 interface PlayerProfile {
   id: string

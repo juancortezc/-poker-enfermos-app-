@@ -9,7 +9,7 @@ import {
   advanceLevel,
   type TimerAnchor,
   type TimerView,
-} from '@/lib/timer-engine'
+} from '@poker/shared'
 
 /**
  * Puente entre el motor puro y la base de datos.

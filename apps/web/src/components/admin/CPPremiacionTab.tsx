@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import { Award, Loader2, Trophy, UserX, Medal, Users, Crown, Target, CalendarX, ChevronDown, Zap } from 'lucide-react'
 import Image from 'next/image'
-import { playerLabel } from '@/lib/player-name'
+import { playerLabel } from '@poker/shared'
 
 interface AwardPlayer {
   id: string

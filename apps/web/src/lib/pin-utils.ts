@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
-import { normalizePin, isValidPinForCreation, PIN_RULE_TEXT } from './pin-rules'
+import { normalizePin, isValidPinForCreation, PIN_RULE_TEXT } from '@poker/shared'
 
-export * from './pin-rules'
+export * from '@poker/shared/pin-rules'
 
 /**
  * Hash a PIN using bcrypt

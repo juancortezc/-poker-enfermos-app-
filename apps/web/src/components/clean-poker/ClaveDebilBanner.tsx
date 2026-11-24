@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ShieldAlert, X } from 'lucide-react'
 import { getStoredAuthToken } from '@/lib/client-auth'
-import { isValidPinForCreation, PIN_RULE_TEXT } from '@/lib/pin-rules'
+import { isValidPinForCreation, PIN_RULE_TEXT } from '@poker/shared'
 
 /**
  * Le pide a quien entra con una clave vieja que la actualice.

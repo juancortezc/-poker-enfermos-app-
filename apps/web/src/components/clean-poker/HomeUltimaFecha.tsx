@@ -3,13 +3,13 @@
 import useSWR from 'swr'
 import Image from 'next/image'
 import Link from 'next/link'
-import { scoreOf } from '@/lib/ranking-utils'
-import type { PlayerRanking } from '@/lib/ranking-utils'
+import { scoreOf } from '@poker/shared'
+import type { PlayerRanking } from '@poker/shared'
 import { HomeAvatar } from './HomeAvatar'
 import { LinkCta } from './LinkCta'
 import { Score } from './Score'
 import { tile, overline, BENTO, SOBRE_COLOR } from './bento'
-import { playerLabel, shortenFullName } from '@/lib/player-name'
+import { playerLabel, shortenFullName } from '@poker/shared'
 
 interface EliminationDTO {
   id: number

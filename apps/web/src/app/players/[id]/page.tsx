@@ -9,7 +9,7 @@ import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
 import { usePlayerTournamentDetails } from '@/hooks/usePlayerTournamentDetails'
-import { averageNightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@/lib/ranking-utils'
+import { averageNightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@poker/shared'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
@@ -17,7 +17,7 @@ import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
 import { HomeAvatar } from '@/components/clean-poker/HomeAvatar'
 import { PlayerEvolutionChart } from '@/components/clean-poker/PlayerEvolutionChart'
-import { playerLabel, fullName } from '@/lib/player-name'
+import { playerLabel, fullName } from '@poker/shared'
 
 interface ChampionPlayer {
   id: string

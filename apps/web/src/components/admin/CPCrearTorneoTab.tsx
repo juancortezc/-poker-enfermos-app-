@@ -7,7 +7,7 @@ import { generateTournamentDates } from '@/lib/date-utils'
 import { fetchCalendarDraft, saveCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
 import { toast } from 'react-toastify'
 import { UserRole } from '@prisma/client'
-import { playerLabel } from '@/lib/player-name'
+import { playerLabel } from '@poker/shared'
 
 interface GeneratedDate {
   dateNumber: number

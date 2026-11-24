@@ -1,6 +1,6 @@
 'use client'
 
-import { shortenFullName } from '@/lib/player-name'
+import { shortenFullName } from '@poker/shared'
 
 interface PositionCardProps {
   position: number

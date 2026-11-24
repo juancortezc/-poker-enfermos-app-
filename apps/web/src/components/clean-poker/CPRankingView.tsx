@@ -13,11 +13,11 @@ import {
   scoreOf,
   compareByTiebreak,
   SCORE_LABELS
-} from '@/lib/ranking-utils'
-import type { PlayerRanking } from '@/lib/ranking-utils'
+} from '@poker/shared'
+import type { PlayerRanking } from '@poker/shared'
 import { downloadCsv } from '@/lib/csv'
 import { tile, SOBRE_COLOR } from './bento'
-import { shortenFullName } from '@/lib/player-name'
+import { shortenFullName } from '@poker/shared'
 
 interface CPRankingViewProps {
   tournamentId: number

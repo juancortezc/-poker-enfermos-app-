@@ -11,14 +11,14 @@ import { ValidationSummary } from '@/components/ui/ValidationMessage'
 import LoadingState, { FormSkeleton } from '@/components/ui/LoadingState'
 import { useFormValidation, useFormDraft } from '@/hooks/useFormDraft'
 import { validateTournamentForm, validateTournamentNumber } from '@/lib/tournament-validation'
-import { TOURNAMENT_PRESETS, getPresetById } from '@/lib/tournament-presets'
+import { TOURNAMENT_PRESETS, getPresetById } from '@poker/shared'
 import { generateTournamentDates } from '@/lib/date-utils'
 import { ArrowLeft, Save, Loader2, Check, AlertCircle, Target, X, Trash2, Trophy } from 'lucide-react'
 import TournamentCompletionModal from './TournamentCompletionModal'
 import { toast } from 'react-toastify'
 import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
 import { fetchCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
-import { playerLabel } from '@/lib/player-name'
+import { playerLabel } from '@poker/shared'
 
 interface Player {
   id: string

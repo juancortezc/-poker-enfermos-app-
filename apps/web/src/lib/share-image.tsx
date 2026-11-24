@@ -157,16 +157,17 @@ export function Marco({
 
 import sharp from 'sharp'
 import { ImageResponse } from 'next/og'
+import { calculateTournamentRanking } from '@/lib/ranking-utils'
 import {
-  calculateTournamentRanking,
   compareByTiebreak,
   nightlyPosition,
   playedDateNumbers,
   scoreOf,
   SCORE_LABELS,
+  fullName,
+  shortenFullName,
   type PlayerRanking,
-} from '@/lib/ranking-utils'
-import { fullName, shortenFullName } from '@/lib/player-name'
+} from '@poker/shared'
 import { getPlayerPhotoUrl } from '@/lib/player-utils'
 import { getAvatarColor, getInitials } from '@/lib/avatar-utils'
 import { prisma } from '@/lib/prisma'

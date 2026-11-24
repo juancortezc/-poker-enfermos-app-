@@ -1,5 +1,5 @@
 import { Points } from '../value-objects/Points';
-import { MIN_PLAYERS, MAX_PLAYERS } from '@/lib/constants/scoring';
+import { MIN_PLAYERS, MAX_PLAYERS } from '@poker/shared';
 
 /**
  * Domain Service for points calculation.
