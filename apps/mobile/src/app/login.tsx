@@ -13,7 +13,7 @@ import { NoirButton } from '@/components/ui/NoirButton';
 import { Screen } from '@/components/ui/Screen';
 import { Muted, Title } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
-import { isValidPinForLogin, PIN_MAX_LENGTH } from '@/lib/pin-rules';
+import { isValidPinForLogin, PIN_MAX_LENGTH } from '@poker/shared';
 import { fonts, noir } from '@/theme/colors';
 
 export default function LoginScreen() {

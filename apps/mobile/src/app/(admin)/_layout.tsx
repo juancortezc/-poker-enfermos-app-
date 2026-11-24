@@ -9,7 +9,7 @@ import { GroupStack } from '@/components/GroupStack';
 import { Screen } from '@/components/ui/Screen';
 import { RestrictedState } from '@/components/ui/States';
 import { useAuth } from '@/contexts/AuthContext';
-import { getRestrictionMessage } from '@/lib/permissions';
+import { getRestrictionMessage } from '@poker/shared';
 import { stackScreenOptions } from '@/theme/navigation';
 
 export default function AdminLayout() {

@@ -14,7 +14,7 @@ import { NoirCard } from '@/components/ui/NoirCard';
 import { Screen } from '@/components/ui/Screen';
 import { Body, Muted, Overline } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
-import type { FeaturePermission } from '@/lib/permissions';
+import type { FeaturePermission } from '@poker/shared';
 import { noir } from '@/theme/colors';
 
 type Item = {

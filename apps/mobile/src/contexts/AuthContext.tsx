@@ -17,8 +17,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { apiFetch, ApiError, setAuthPin, setUnauthorizedHandler } from '@/lib/api';
 import { authenticateWithBiometrics, getBiometricSupport, type BiometricSupport } from '@/lib/biometrics';
-import { canAccess, type FeaturePermission, type UserRole } from '@/lib/permissions';
-import { isValidPinForLogin, normalizePin, PIN_MAX_LENGTH, PIN_MIN_LENGTH_LOGIN } from '@/lib/pin-rules';
+import {
+  canAccess,
+  isValidPinForLogin,
+  normalizePin,
+  PIN_MAX_LENGTH,
+  PIN_MIN_LENGTH_LOGIN,
+  type FeaturePermission,
+  type UserRole,
+} from '@poker/shared';
 import { authStorage } from '@/lib/secure-auth-storage';
 
 export interface AuthUser {

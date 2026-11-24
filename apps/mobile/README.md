@@ -24,7 +24,7 @@ La API se toma de `EXPO_PUBLIC_API_URL` (en `apps/mobile/.env.local` o en las va
 - `src/contexts/AuthContext.tsx` — sesión: `useAuth()` con `user`, `role`, `can(feature)`, biometría
 - `src/lib/api.ts` — `apiFetch` / `fetcher` con `Authorization: Bearer PIN:<clave>`
 - `src/lib/swr.tsx` — `SWRProvider`, `swrKeys`, `mutateRelated` (mismas keys que la web)
-- `src/lib/permissions.ts` — copia de la web (TODO: mover a `@poker/shared`)
+- Permisos por rol y reglas de la clave: vienen de `@poker/shared` (`packages/shared`), los mismos que usa la web
 - `src/components/ui/` — `NoirButton`, `NoirCard`, `Screen`, `Header`, `Typography`, estados de carga/error/vacío
 - Estilos: NativeWind v4, tokens `noir-*` en `tailwind.config.js` (espejo en `src/theme/colors.ts`)
 
