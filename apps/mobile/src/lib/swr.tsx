@@ -65,6 +65,8 @@ export const swrKeys = {
   activeTournament: () => '/api/tournaments/active',
   previousTournament: () => '/api/tournaments/previous',
   tournament: (tournamentId: number) => `/api/tournaments/${tournamentId}`,
+  /** Podio oficial de cada torneo terminado (Inicio y Stats > Torneos comparten la key). */
+  tournamentWinners: () => '/api/tournaments/winners',
 
   playerDetails: (playerId: string) => `/api/players/${playerId}/public`,
   playerTournamentDetails: (playerId: string, tournamentId: number) =>

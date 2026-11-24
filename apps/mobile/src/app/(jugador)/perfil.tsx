@@ -14,7 +14,7 @@ import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, Switch, Text, TextInput, View, type TextInputProps } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { POSITIVE } from '@/components/jugador/Bits';
 import { NoirButton } from '@/components/ui/NoirButton';
 import { NoirCard } from '@/components/ui/NoirCard';
@@ -74,7 +74,7 @@ function PerfilContent() {
 function ProfileHero({ profile }: { profile: Profile }) {
   return (
     <NoirCard accent className="items-center gap-2">
-      <Avatar name={fullName(profile)} photoUrl={profile.photoUrl} size={88} ringColor={noir.gold} />
+      <PlayerAvatar name={fullName(profile)} photoUrl={profile.photoUrl} size={88} ringColor={noir.gold} />
       <Title className="text-center text-xl">{fullName(profile)}</Title>
       {profile.aliases?.[0] ? <Text className="font-inter text-sm italic text-noir-gold">“{profile.aliases[0]}”</Text> : null}
       {profile.role === 'Comision' ? (

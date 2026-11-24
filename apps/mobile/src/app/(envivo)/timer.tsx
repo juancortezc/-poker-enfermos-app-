@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AlertHints } from '@/components/envivo/AlertHints';
 import { TimerControls } from '@/components/envivo/TimerControls';
 import { DINNER_AFTER_LEVEL, formatChips, formatRemaining, isDinnerBreak } from '@/components/envivo/timer-view';
-import { useActiveGameDate } from '@/components/envivo/useActiveGameDate';
+import { useActiveGameDate } from '@/hooks/useActiveGameDate';
 import { useBlindTimer } from '@/components/envivo/useBlindTimer';
 import { useTimerAlerts } from '@/components/envivo/useTimerAlerts';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
@@ -37,7 +37,7 @@ export default function TimerScreen() {
   // compara role === 'Comision'; 'game-dates' es exactamente ese rol).
   const canControl = can('game-dates');
 
-  const { gameDate, error: dateError, isLoading: dateLoading, refresh } = useActiveGameDate(30_000);
+  const { gameDate, error: dateError, isLoading: dateLoading, refresh } = useActiveGameDate({ refreshInterval: 30_000 });
   // El timer existe desde que la fecha arranca; con CREATED daría inactivo.
   const timerDateId = gameDate ? gameDate.id : null;
   const {

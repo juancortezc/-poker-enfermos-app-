@@ -2,6 +2,8 @@
  * Home, vista "Torneo". Port de HomeTorneo de la web: tu posición, cuenta
  * regresiva y próxima fecha (con "agregar a mi calendario"), el podio con su
  * comparación, malazos 7/2, tu carrera y lo destacado de la temporada.
+ * Con el torneo FINALIZADO, la tarjeta final (podio oficial y "próximo torneo:
+ * por anunciar") reemplaza la cuenta regresiva, el calendario y el podio.
  */
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {
@@ -27,11 +29,14 @@ import { daysUntil } from '@/lib/dates';
 import { fonts, noir } from '@/theme/colors';
 
 import { MalazosCard, PodiumRow } from './shared';
+import { TorneoFinalizadoCard } from './TorneoFinalizadoCard';
 
 type Props = {
   userId: string;
   tournamentId: number;
   tournamentNumber: number;
+  /** Torneo FINALIZADO: podio final y "por anunciar" en vez de cuenta regresiva y calendario. */
+  finished?: boolean;
   rankings: PlayerRanking[];
   nextDate: { dateNumber?: number; scheduledDate: string | null } | null;
   seasonHighlights?: TournamentInsightsData['seasonHighlights'];
@@ -46,7 +51,6 @@ function formatDate(dateStr: string | null) {
   return new Date(dateStr).toLocaleDateString('es-EC', { day: 'numeric', month: 'long' });
 }
 
-
 const CICLO = 14;
 const R = 30;
 const CIRC = 2 * Math.PI * R;
@@ -55,6 +59,7 @@ export function HomeTorneo({
   userId,
   tournamentId,
   tournamentNumber,
+  finished = false,
   rankings,
   nextDate,
   seasonHighlights,
@@ -85,7 +90,7 @@ export function HomeTorneo({
       : null;
   const last3 = myRanking ? playedDates.slice(-3).reduce((acc, d) => acc + (myRanking.pointsByDate[d] ?? 0), 0) : null;
 
-  const formattedDate = formatDate(nextDate?.scheduledDate ?? null);
+  const formattedDate = finished ? null : formatDate(nextDate?.scheduledDate ?? null);
   const days = daysUntil(nextDate?.scheduledDate ?? null);
   const avance = days !== null ? Math.max(0, Math.min(1, 1 - days / CICLO)) : 0;
 
@@ -133,6 +138,8 @@ export function HomeTorneo({
 
   return (
     <View className="gap-4">
+      {finished ? <TorneoFinalizadoCard tournamentNumber={tournamentNumber} rankings={rankings} /> : null}
+
       {/* Tu posición */}
       {myRanking ? (
         <NoirCard accent className="gap-3">
@@ -216,8 +223,8 @@ export function HomeTorneo({
         </View>
       ) : null}
 
-      {/* Podio */}
-      {podio.length === 3 ? (
+      {/* Podio (con el torneo terminado ya está arriba, en la tarjeta final) */}
+      {!finished && podio.length === 3 ? (
         <NoirCard className="gap-3">
           <SectionHeader title="El podio" action="Tabla" onAction={onSeeTabla} />
           <PodiumRow podium={podio} selectedId={abierto} onPressName={(id) => setAbierto(abierto === id ? null : id)} />

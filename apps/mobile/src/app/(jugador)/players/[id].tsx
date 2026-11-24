@@ -9,7 +9,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { Delta, KeyValue, NEGATIVE, POSITIVE, Score, StatRow } from '@/components/jugador/Bits';
 import { EvolutionChart } from '@/components/jugador/EvolutionChart';
 import { NoirButton } from '@/components/ui/NoirButton';
@@ -72,7 +72,7 @@ export default function PlayerDetailScreen() {
         <>
           {p ? (
             <NoirCard className="flex-row items-center gap-4">
-              <Avatar name={fullName(p)} photoUrl={p.photoUrl} size={72} />
+              <PlayerAvatar name={fullName(p)} photoUrl={p.photoUrl} size={72} />
               <Title className="flex-1">{fullName(p)}</Title>
             </NoirCard>
           ) : null}
@@ -98,7 +98,7 @@ export default function PlayerDetailScreen() {
         <NoirCard accent className="gap-4">
           <View className="flex-row items-center gap-4">
             <View>
-              <Avatar name={fullName(player)} photoUrl={player.photoUrl} size={84} ringColor={noir.gold} />
+              <PlayerAvatar name={fullName(player)} photoUrl={player.photoUrl} size={84} ringColor={noir.gold} />
               <View className="absolute -bottom-1 -left-1 rounded-lg border-2 border-noir-surface bg-noir-copper px-1.5 py-0.5">
                 <Text className="font-inter-bold text-xs text-noir-text">#{currentStats.position}</Text>
               </View>
@@ -146,7 +146,7 @@ export default function PlayerDetailScreen() {
                   onPress={() => router.push({ pathname: '/players/[id]', params: { id: p.playerId } })}
                   className="active:opacity-80">
                   <NoirCard className="flex-row items-center gap-3 p-3">
-                    <Avatar name={p.playerName} photoUrl={p.playerPhoto} size={44} />
+                    <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={44} />
                     <View className="flex-1">
                       <View className="flex-row items-center gap-2">
                         <Text className="rounded bg-noir-raised px-1.5 py-0.5 font-inter-bold text-[10px] tracking-[1px] text-noir-muted">
@@ -220,7 +220,7 @@ export default function PlayerDetailScreen() {
                   <View className="flex-1 flex-row items-center gap-2">
                     {winner ? (
                       <>
-                        <Avatar
+                        <PlayerAvatar
                           name={fullName(winner.eliminatedPlayer)}
                           photoUrl={winner.eliminatedPlayer.photoUrl}
                           size={28}

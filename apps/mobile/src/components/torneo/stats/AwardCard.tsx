@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import { PlayerAvatar, type AvatarPlayer } from '@/components/torneo/PlayerAvatar';
+import { avatarProps, PlayerAvatar, type AvatarPlayer } from '@/components/common/PlayerAvatar';
 import { Muted, NoirCard } from '@/components/ui';
 
 export type AwardPlayer = AvatarPlayer & { id: string };
@@ -49,7 +49,7 @@ export function AwardCard({ title, description, icon, accent, players, valueLabe
           key={item.player.id}
           className={`flex-row items-center gap-3 px-4 py-2.5 ${i < shown.length - 1 ? 'border-b border-noir-border' : ''}`}>
           <Text className="w-5 text-center font-inter text-xs text-noir-muted">{i + 1}</Text>
-          <PlayerAvatar player={item.player} size={32} ring={i === 0 ? accent : undefined} />
+          <PlayerAvatar {...avatarProps(item.player)} size={32} ringColor={i === 0 ? accent : undefined} />
           <Text numberOfLines={1} className="flex-1 font-inter text-base text-noir-text">
             {item.player.firstName} {item.player.lastName}
           </Text>

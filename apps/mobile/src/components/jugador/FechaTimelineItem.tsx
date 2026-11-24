@@ -4,7 +4,7 @@ import { fullName } from '@poker/shared';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { POSITIVE, Score } from '@/components/jugador/Bits';
 import type { TournamentDate } from '@/hooks/useTournamentDates';
 import { daysUntil } from '@/lib/dates';
@@ -47,7 +47,7 @@ export function FechaTimelineItem({ date: gd, isNext, isLast, currentUserId, bir
       <View className="flex-1">
         {done && winner ? (
           <View className="flex-row items-center gap-2">
-            <Avatar name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={40} ringColor={noir.gold} />
+            <PlayerAvatar name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={40} ringColor={noir.gold} />
             <View>
               <Text style={{ color: POSITIVE }} className="font-inter-bold text-[11px] tracking-[1px]">
                 GANADOR

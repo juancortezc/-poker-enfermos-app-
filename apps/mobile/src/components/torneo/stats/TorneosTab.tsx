@@ -8,8 +8,9 @@ import { Text, View } from 'react-native';
 import useSWR from 'swr';
 
 import { OptionPicker, type Option } from '@/components/torneo/OptionPicker';
-import { PlayerAvatar } from '@/components/torneo/PlayerAvatar';
+import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { EmptyState, ErrorState, LoadingState, NoirButton, NoirCard, Overline, Title } from '@/components/ui';
+import { swrKeys } from '@/lib/swr';
 import { noir } from '@/theme/colors';
 import { playerLabel } from '@poker/shared';
 
@@ -66,7 +67,7 @@ function Puesto({ badge, color, player, malazo }: { badge: string; color: string
 
 export function TorneosTab() {
   const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data?: TournamentWinner[]; error?: string }>(
-    '/api/tournaments/winners'
+    swrKeys.tournamentWinners()
   );
   const [filtro, setFiltro] = useState<Filtro>(null);
 
@@ -127,7 +128,7 @@ export function TorneosTab() {
       {filtrados.map((t) => (
         <NoirCard key={t.tournamentNumber} className="p-0">
           <View className="flex-row items-center gap-4 p-4">
-            <PlayerAvatar player={t.champion} size={72} shape="card" ring={noir.gold} />
+            <PlayerAvatar {...avatarProps(t.champion)} size={72} shape="card" ringColor={noir.gold} />
             <View className="flex-1 gap-0.5">
               <Overline>Campeón</Overline>
               <Title className="text-lg">{nombre(t.champion)}</Title>

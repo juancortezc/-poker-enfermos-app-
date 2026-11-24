@@ -27,7 +27,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View, type TextStyle } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { Delta, MEDAL, NEGATIVE, PROJECTED, Score, StatRow } from '@/components/jugador/Bits';
 import { Segmented } from '@/components/jugador/Segmented';
 import { NoirCard } from '@/components/ui/NoirCard';
@@ -200,7 +200,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                   <Text className="font-inter text-sm italic text-noir-gold">“{leader.playerAlias}”</Text>
                 ) : null}
               </View>
-              <Avatar name={leader.playerName} photoUrl={leader.playerPhoto} size={84} ringColor={MEDAL[0]} />
+              <PlayerAvatar name={leader.playerName} photoUrl={leader.playerPhoto} size={84} ringColor={MEDAL[0]} />
             </View>
             <View className="border-t border-noir-border pt-3">
               <StatRow
@@ -225,7 +225,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
               onPress={() => goToPlayer(p.playerId)}
               className="flex-1 active:opacity-80">
               <NoirCard className="flex-row items-center gap-3 p-3" style={{ borderColor: MEDAL[p.position - 1] }}>
-                <Avatar name={p.playerName} photoUrl={p.playerPhoto} size={40} />
+                <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={40} />
                 <View className="min-w-0 flex-1">
                   <Score value={`#${p.position}`} size={13} color={MEDAL[p.position - 1]} />
                   <Text numberOfLines={1} className="font-inter-semibold text-sm text-noir-text">
@@ -368,7 +368,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                     )}
                   </View>
                   <View style={{ width: nameWidth }} className="flex-row items-center gap-2 pr-2">
-                    <Avatar name={player.playerName} photoUrl={player.playerPhoto} size={view === 'resumen' ? 28 : 24} />
+                    <PlayerAvatar name={player.playerName} photoUrl={player.playerPhoto} size={view === 'resumen' ? 28 : 24} />
                     <Text numberOfLines={1} className="flex-1 font-inter-semibold text-sm text-noir-text">
                       {view === 'resumen' ? player.playerName : shortenFullName(player.playerName)}
                       {isMe ? ' (Tú)' : ''}

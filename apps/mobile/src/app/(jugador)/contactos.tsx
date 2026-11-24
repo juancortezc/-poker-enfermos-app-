@@ -9,7 +9,7 @@ import { Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, Linking, Pressable, RefreshControl, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { SearchField } from '@/components/jugador/Bits';
 import { Screen } from '@/components/ui/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
@@ -102,7 +102,7 @@ function ContactCard({ player, isMe }: { player: DirectoryPlayer; isMe: boolean 
   return (
     <View className="gap-3 rounded-2xl border border-noir-border bg-noir-surface p-4">
       <View className="flex-row items-center gap-3">
-        <Avatar name={name} photoUrl={player.photoUrl} size={52} playerId={player.id} linkToProfile />
+        <PlayerAvatar name={name} photoUrl={player.photoUrl} size={52} playerId={player.id} linkToProfile />
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
             <Text numberOfLines={1} className="shrink font-inter-bold text-base text-noir-text">

@@ -9,7 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import { Avatar } from '@/components/jugador/Avatar';
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { NoirCard } from '@/components/ui/NoirCard';
 import { Body, Muted, Overline } from '@/components/ui/Typography';
 import { useCelebrations } from '@/hooks/useHomeExtras';
@@ -74,7 +74,7 @@ export function CelebrationsCard() {
           </View>
           {birthdays.map((p) => (
             <View key={p.id} className="flex-row items-center gap-3">
-              <Avatar name={`${p.firstName} ${p.lastName}`} photoUrl={p.photoUrl} size={44} playerId={p.id} linkToProfile />
+              <PlayerAvatar name={`${p.firstName} ${p.lastName}`} photoUrl={p.photoUrl} size={44} playerId={p.id} linkToProfile />
               <View className="flex-1">
                 <Body className="text-base">
                   {p.firstName} {p.lastName}
@@ -106,7 +106,7 @@ export function CelebrationsCard() {
           </View>
           {droughts.map((p) => (
             <View key={p.id} className="flex-row items-center gap-3">
-              <Avatar name={`${p.firstName} ${p.lastName}`} photoUrl={p.photoUrl} size={44} playerId={p.id} linkToProfile />
+              <PlayerAvatar name={`${p.firstName} ${p.lastName}`} photoUrl={p.photoUrl} size={44} playerId={p.id} linkToProfile />
               <View className="flex-1">
                 <Body className="text-base">
                   {p.firstName} {p.lastName}
