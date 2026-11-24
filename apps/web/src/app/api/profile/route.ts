@@ -1,8 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withAuth } from '@/lib/api-auth'
-import bcrypt from 'bcryptjs'
-import { isValidPinForCreation } from '@/lib/pin-utils'
+import { validateAndHashPin, PIN_RULE_TEXT } from '@/lib/pin-utils'
 
 // GET /api/profile - Obtener perfil del usuario autenticado
 export async function GET(req: NextRequest) {
@@ -53,13 +52,21 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   return withAuth(req, async (req, user) => {
     try {
-      const body = await req.json()
-      const { pin, birthDate, email, phone } = body
+      let body: unknown
+      try {
+        body = await req.json()
+      } catch {
+        return Response.json({ message: 'El cuerpo de la solicitud no es JSON válido' }, { status: 400 })
+      }
+      if (!body || typeof body !== 'object' || Array.isArray(body)) {
+        return Response.json({ message: 'El cuerpo de la solicitud debe ser un objeto JSON' }, { status: 400 })
+      }
+      const { pin, birthDate, email, phone } = body as Record<string, unknown>
 
       // Validaciones
-      if (pin && (typeof pin !== 'string' || !isValidPinForCreation(pin))) {
+      if (pin !== undefined && pin !== null && pin !== '' && typeof pin !== 'string') {
         return Response.json(
-          { message: 'PIN debe ser de 4 dígitos numéricos' },
+          { message: `La clave debe tener ${PIN_RULE_TEXT.toLowerCase()}` },
           { status: 400 }
         )
       }
@@ -78,43 +85,35 @@ export async function PUT(req: NextRequest) {
         )
       }
 
-      // Verificar si el PIN ya está en uso por otro usuario
-      if (pin) {
-        const allUsers = await prisma.player.findMany({
-          where: {
-            pin: { not: null },
-            NOT: { id: user.id },
-            isActive: true
-          },
-          select: { pin: true }
-        })
-
-        // Verificar si algún usuario ya tiene este PIN
-        for (const existingUser of allUsers) {
-          if (existingUser.pin && await bcrypt.compare(pin, existingUser.pin)) {
-            return Response.json(
-              { message: 'Este PIN ya está en uso por otro usuario' },
-              { status: 400 }
-            )
-          }
-        }
+      if (phone !== undefined && phone !== null && typeof phone !== 'string') {
+        return Response.json(
+          { message: 'Teléfono inválido' },
+          { status: 400 }
+        )
       }
 
       // Preparar datos para actualizar
       const updateData: Record<string, unknown> = {}
-      
-      if (pin) {
-        updateData.pin = await bcrypt.hash(pin, 10)
+
+      // La clave se normaliza (minúsculas, sin espacios) antes de validar,
+      // comprobar que no esté en uso y hashear: igual que el login. Antes se
+      // hasheaba tal cual y una clave con mayúsculas no volvía a entrar.
+      if (typeof pin === 'string' && pin.trim() !== '') {
+        const result = await validateAndHashPin(pin, user.id)
+        if (!result.success) {
+          return Response.json({ message: result.error }, { status: 400 })
+        }
+        updateData.pin = result.hashedPin
       }
-      
+
       if (birthDate !== undefined) {
         updateData.birthDate = birthDate
       }
-      
+
       if (email !== undefined) {
         updateData.email = email || null
       }
-      
+
       if (phone !== undefined) {
         updateData.phone = phone || null
       }
