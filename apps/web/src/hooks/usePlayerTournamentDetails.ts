@@ -4,81 +4,15 @@ import { useTournamentRanking } from './useTournamentRanking';
 import { useGameDates } from './useGameDates';
 import { swrKeys } from '@/lib/swr-config';
 
-interface PlayerPublicData {
-  id: string;
-  firstName: string;
-  lastName: string;
-  aliases: string[];
-  photoUrl?: string;
-  lastVictoryDate?: string;
-}
+import {
+  buildPlayerTournamentDetails,
+  type DetailsDateWithEliminations,
+  type PlayerPublicData,
+  type PlayerTournamentDetails,
+} from '@poker/shared';
 
-/**
- * Una fila del rendimiento por fecha. Antes estaba escrita inline y cada rama
- * del map devolvia una forma distinta, asi que TypeScript infería una union y
- * no dejaba leer isAbsent ni eliminationPosition.
- */
-export interface DatePerformance {
-  dateNumber: number;
-  status: 'completed' | 'in_progress' | 'pending' | 'CREATED';
-  eliminationPosition?: number;
-  eliminatedBy?: {
-    name: string;
-    alias?: string;
-    isGuest: boolean;
-  };
-  points: number;
-  rankingPosition?: number;
-  isAbsent?: boolean;
-}
-
-interface PlayerTournamentDetails {
-  player: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    aliases: string[];
-    photoUrl?: string;
-    lastVictoryDate?: string;
-  };
-  currentStats: {
-    position: number;
-    totalPoints: number;
-    pointsByDate: { [dateNumber: number]: number };
-    elimina1?: number;
-    elimina2?: number;
-    elimina3?: number;
-    eliminasActive?: boolean;
-    finalScore?: number;
-  };
-  datesToEliminate: number;
-  datePerformance: DatePerformance[];
-  rankingEvolution: Array<{
-    dateNumber: number;
-    position: number;
-    points: number;
-  }>;
-  bestResult: string;
-}
-
-interface DateWithEliminations {
-  id: number;
-  eliminations: EliminationRecord[];
-}
-
-interface EliminationRecord {
-  eliminatedPlayer: {
-    id: string;
-    firstName: string;
-    lastName: string;
-  };
-  eliminatorPlayer?: {
-    firstName: string;
-    lastName: string;
-  } | null;
-  position: number;
-  points: number;
-}
+// Los tipos y el armado viven en @poker/shared (los usa tambien la app movil).
+export type { DatePerformance, PlayerTournamentDetails } from '@poker/shared';
 
 export function usePlayerTournamentDetails(playerId: string, tournamentId: number) {
   const [details, setDetails] = useState<PlayerTournamentDetails | null>(null);
@@ -112,7 +46,7 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
   // una por fecha completada (Promise.all sobre N fechas = N requests en
   // paralelo, cada una con cache: 'no-store'). Esta es ademas la misma URL que
   // ya pide la pagina de perfil, asi que SWR la deduplica.
-  const { data: datesWithEliminations } = useSWR<DateWithEliminations[]>(
+  const { data: datesWithEliminations } = useSWR<DetailsDateWithEliminations[]>(
     tournamentId ? `/api/tournaments/${tournamentId}/dates` : null,
     { revalidateOnFocus: false, revalidateOnReconnect: false }
   );
@@ -157,153 +91,19 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
 
     let cancelled = false;
 
-    const buildDetails = async () => {
+    const buildDetails = () => {
       setLoading(true);
       setError(null);
 
       try {
-        const playerRanking = rankingData.rankings.find(r => r.playerId === playerId);
-
-        if (!playerRanking) {
-          throw new Error('Player not found in tournament ranking');
-        }
-
-        const eliminationMap = new Map<number, EliminationRecord[]>(
-          (datesWithEliminationsRef.current ?? []).map(d => [d.id, d.eliminations ?? []])
-        );
-
-        const computeFallbackPosition = (dateNumber: number) => {
-          if (!rankingData?.rankings?.length) return null;
-
-          const playersForDate = rankingData.rankings
-            .map(ranking => ({
-              playerId: ranking.playerId,
-              points: ranking.pointsByDate?.[dateNumber]
-            }))
-            .filter(entry => entry.points !== undefined && entry.points !== null);
-
-          if (!playersForDate.length) return null;
-
-          playersForDate.sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
-          const index = playersForDate.findIndex(entry => entry.playerId === playerId);
-
-          return index === -1 ? null : index + 1;
-        };
-
-        const datePerformance = await Promise.all(
-          gameDates.map(async (date): Promise<DatePerformance> => {
-            const baseDate: DatePerformance = {
-              dateNumber: date.dateNumber,
-              status: date.status as DatePerformance['status'],
-              points: playerRanking.pointsByDate[date.dateNumber] || 0
-            };
-
-            if (date.status === 'completed' && date.id) {
-              const eliminations = eliminationMap.get(date.id) || [];
-
-              const playerElimination = eliminations.find(e => e.eliminatedPlayer.id === playerId);
-
-              if (playerElimination) {
-                return {
-                  ...baseDate,
-                  eliminationPosition: playerElimination.position,
-                  eliminatedBy: playerElimination.eliminatorPlayer ? {
-                    name: `${playerElimination.eliminatorPlayer.firstName} ${playerElimination.eliminatorPlayer.lastName}`,
-                    alias: playerElimination.eliminatorPlayer.firstName || '',
-                    isGuest: false
-                  } : undefined
-                };
-              }
-
-              const totalPlayers = date.playerIds?.length || 0;
-              const eliminatedCount = eliminations.length;
-
-              // Ausencia = no figurar en la lista de la fecha. Deducirla de
-              // "0 puntos" marcaba como ausente a quien si estuvo y salio
-              // primero, que es justo el que menos merece que lo borren.
-              if (!date.playerIds?.includes(playerId)) {
-                return {
-                  ...baseDate,
-                  isAbsent: true
-                };
-              }
-
-              if (eliminatedCount === totalPlayers - 1) {
-                return {
-                  ...baseDate,
-                  eliminationPosition: undefined,
-                  eliminatedBy: undefined
-                };
-              }
-            }
-
-            const fallbackPosition = computeFallbackPosition(date.dateNumber);
-
-            if (fallbackPosition) {
-              return {
-                ...baseDate,
-                eliminationPosition: fallbackPosition,
-                eliminatedBy: undefined
-              };
-            }
-
-            return baseDate;
-          })
-        );
-
-        const rankingEvolution = calculateRankingEvolution(
-          playerRanking.pointsByDate,
-          rankingData.rankings,
+        const built = buildPlayerTournamentDetails({
           playerId,
-          rankingData.tournament?.totalDates ?? 12,
-          rankingData.tournament?.datesToEliminate ?? 2
-        );
-
-        let bestResultLabel = 'Sin datos';
-        let bestNumericPosition = Number.POSITIVE_INFINITY;
-
-        datePerformance
-          .filter(date => date.status === 'completed' && !date.isAbsent)
-          .forEach(date => {
-            // Sin posicion registrada no se asume nada: tomarlo como 1
-            // convertia un dato faltante en una victoria inventada.
-            const numericPosition = date.eliminationPosition;
-            if (numericPosition !== undefined && numericPosition < bestNumericPosition) {
-              bestNumericPosition = numericPosition;
-              bestResultLabel = numericPosition === 1 ? 'Ganador' : `${numericPosition}° lugar`;
-            }
-          });
-
-        if (bestNumericPosition === Number.POSITIVE_INFINITY) {
-          bestResultLabel = 'Sin participación';
-        }
-
-        if (!cancelled) {
-          setDetails({
-            player: {
-              id: player.id,
-              firstName: player.firstName,
-              lastName: player.lastName,
-              aliases: player.aliases || [],
-              photoUrl: player.photoUrl,
-              lastVictoryDate: player.lastVictoryDate
-            },
-            currentStats: {
-              position: playerRanking.position,
-              totalPoints: playerRanking.totalPoints,
-              pointsByDate: playerRanking.pointsByDate,
-              elimina1: playerRanking.elimina1,
-              elimina2: playerRanking.elimina2,
-              elimina3: playerRanking.elimina3,
-              eliminasActive: playerRanking.eliminasActive,
-              finalScore: playerRanking.finalScore
-            },
-            datesToEliminate: rankingData.tournament?.datesToEliminate ?? 2,
-            datePerformance: datePerformance.sort((a, b) => a.dateNumber - b.dateNumber),
-            rankingEvolution,
-            bestResult: bestResultLabel
-          });
-        }
+          ranking: rankingData,
+          gameDates,
+          datesWithEliminations: datesWithEliminationsRef.current ?? [],
+          player,
+        });
+        if (!cancelled) setDetails(built);
       } catch (err) {
         console.error('Error fetching player details:', err);
         if (!cancelled) {
@@ -345,73 +145,4 @@ export function usePlayerTournamentDetails(playerId: string, tournamentId: numbe
   };
 
   return { details, loading: combinedLoading, error: combinedError, refetch };
-}
-
-// Helper function to calculate ranking evolution with ELIMINA N system
-function calculateRankingEvolution(
-  playerPointsByDate: { [dateNumber: number]: number },
-  // Solo necesita id y puntos por fecha. La firma pedia ademas un index
-  // signature, que ningun tipo concreto satisface: PlayerRanking no encajaba.
-  allRankings: Array<{ playerId: string; pointsByDate: { [key: number]: number } }>,
-  targetPlayerId: string,
-  totalDates: number = 12,
-  datesToEliminate: number = 2
-): Array<{ dateNumber: number; position: number; points: number }> {
-  const evolution: Array<{ dateNumber: number; position: number; points: number }> = [];
-
-  // Get all date numbers that have been played by anyone
-  const allPlayedDates = new Set<number>();
-  allRankings.forEach(ranking => {
-    Object.keys(ranking.pointsByDate).forEach(date => {
-      allPlayedDates.add(Number(date));
-    });
-  });
-
-  const sortedDates = Array.from(allPlayedDates).sort((a, b) => a - b);
-
-  // Threshold for applying elimination (half of total dates)
-  const eliminationThreshold = Math.ceil(totalDates / 2);
-
-  // Function to calculate final score with ELIMINA N system
-  const calculateFinalScore = (pointsByDate: { [key: number]: number }, upToDateNumber: number): number => {
-    const datesUpTo = sortedDates.filter(d => d <= upToDateNumber);
-    const scores = datesUpTo.map(d => pointsByDate[d] || 0);
-    const totalPoints = scores.reduce((sum, pts) => sum + pts, 0);
-
-    // Apply ELIMINA N only if >= threshold dates
-    if (datesUpTo.length >= eliminationThreshold) {
-      const sortedScores = [...scores].sort((a, b) => a - b);
-      const eliminatedScores = sortedScores.slice(0, datesToEliminate);
-      const eliminatedSum = eliminatedScores.reduce((sum, s) => sum + s, 0);
-      return totalPoints - eliminatedSum;
-    }
-
-    return totalPoints;
-  };
-
-  sortedDates.forEach(dateNumber => {
-    // Calculate final score up to this date for the target player
-    const playerFinalScore = calculateFinalScore(playerPointsByDate, dateNumber);
-
-    // Calculate what the ranking would be after this date using finalScore
-    const rankingsAtDate = allRankings.map(ranking => {
-      const finalScore = calculateFinalScore(ranking.pointsByDate, dateNumber);
-
-      return {
-        playerId: ranking.playerId,
-        finalScore
-      };
-    }).sort((a, b) => b.finalScore - a.finalScore);
-
-    // Find the target player's ranking position
-    const position = rankingsAtDate.findIndex(r => r.playerId === targetPlayerId) + 1;
-
-    evolution.push({
-      dateNumber,
-      position: position > 0 ? position : allRankings.length + 1,
-      points: playerFinalScore
-    });
-  });
-
-  return evolution;
 }
