@@ -45,7 +45,6 @@ export function ProposalForm({ initial, onSaved, onCancel }: Props) {
   const [saving, setSaving] = useState(false);
   const [picking, setPicking] = useState(false);
 
-  const isDataUri = imageUrl.startsWith('data:');
   const valid = FIELDS.every((f) => form[f.key].trim().length > 0);
 
   const pick = async () => {
@@ -69,7 +68,7 @@ export function ProposalForm({ initial, onSaved, onCancel }: Props) {
     }
     const image = imageUrl.trim();
     if (image && !isValidUrl(image)) {
-      Alert.alert('Imagen', 'La URL de la imagen no es válida.');
+      Alert.alert('Imagen', 'La URL de la imagen tiene que empezar con https://');
       return;
     }
     const input: ProposalInput = {
@@ -149,18 +148,16 @@ export function ProposalForm({ initial, onSaved, onCancel }: Props) {
           onPress={pick}
           icon={<Ionicons name="image-outline" size={18} color={noir.gold} />}
         />
-        {isDataUri ? null : (
-          <TextInput
-            value={imageUrl}
-            onChangeText={setImageUrl}
-            placeholder="…o pegá una URL https://"
-            placeholderTextColor={`${noir.muted}80`}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-            className="min-h-[48px] rounded-xl border border-noir-border bg-noir-bg px-3 font-inter text-base text-noir-text"
-          />
-        )}
+        <TextInput
+          value={imageUrl}
+          onChangeText={setImageUrl}
+          placeholder="…o pegá una URL https://"
+          placeholderTextColor={`${noir.muted}80`}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+          className="min-h-[48px] rounded-xl border border-noir-border bg-noir-bg px-3 font-inter text-base text-noir-text"
+        />
       </View>
 
       <View className="flex-row gap-3">

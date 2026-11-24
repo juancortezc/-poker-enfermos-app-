@@ -118,7 +118,6 @@ export default function PropuestasV2Screen() {
           <ProposalCard
             key={p.id}
             proposal={p}
-            interactive={view === 'publicas'}
             onEdit={
               canManage
                 ? (proposal) => {

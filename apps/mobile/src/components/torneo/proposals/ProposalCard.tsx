@@ -1,7 +1,7 @@
 /**
  * Tarjeta de propuesta. Equivale a components/proposals/ProposalCard.tsx de
- * la web (acciones de autor y Comisión) más el bloque de votos y comentarios
- * de la antigua vista pública /t29.
+ * la web (acciones de autor y Comisión, etiqueta "Cerrada"). Sin votos ni
+ * comentarios: la web tampoco los tiene.
  *
  * Permisos, iguales que la web y la API:
  * - Editar y activar/desactivar: autor o Comisión.
@@ -19,14 +19,10 @@ import { Body, Muted, Overline, Title } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
 import { noir } from '@/theme/colors';
 
-import { CommentSection } from './CommentSection';
-import { VotingButtons } from './VotingButtons';
 import { deleteProposal, formatProposalDate, safeImageUri, setVotingClosed, toggleProposal, type Proposal } from './api';
 
 type Props = {
   proposal: Proposal;
-  /** Muestra votos y comentarios al expandir. */
-  interactive?: boolean;
   onEdit?: (proposal: Proposal) => void;
   /** Tras activar, cerrar votación o eliminar. */
   onChanged?: () => void;
@@ -78,7 +74,7 @@ function ActionChip({
   );
 }
 
-export function ProposalCard({ proposal, interactive = false, onEdit, onChanged }: Props) {
+export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState<'toggle' | 'voting' | 'delete' | null>(null);
@@ -115,7 +111,7 @@ export function ProposalCard({ proposal, interactive = false, onEdit, onChanged 
   };
 
   const confirmDelete = () => {
-    Alert.alert('¿Eliminar propuesta?', `"${proposal.title}" se borra con sus votos y comentarios. No se puede deshacer.`, [
+    Alert.alert('¿Eliminar propuesta?', `"${proposal.title}" se borra. No se puede deshacer.`, [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Eliminar',
@@ -179,13 +175,6 @@ export function ProposalCard({ proposal, interactive = false, onEdit, onChanged 
                 transition={200}
               />
             </Pressable>
-          ) : null}
-
-          {interactive && isActive ? (
-            <View className="gap-4 border-t border-noir-border pt-4">
-              <VotingButtons proposalId={proposal.id} closed={closed} />
-              <CommentSection proposalId={proposal.id} closed={closed} />
-            </View>
           ) : null}
         </View>
       ) : null}

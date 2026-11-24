@@ -19,6 +19,18 @@ export interface TimerSnapshot {
   isUnlimited: boolean;
   isLastLevel: boolean;
   serverNow: string;
+  /**
+   * Estructura de blinds del torneo (duración en minutos). La manda la API
+   * desde backend-2; una API anterior no la trae y el hook pide el torneo.
+   */
+  blindLevels?: TimerBlindLevel[];
+}
+
+export interface TimerBlindLevel {
+  level: number;
+  smallBlind: number;
+  bigBlind: number;
+  duration: number;
 }
 
 export type TimerAction = 'start' | 'pause' | 'resume' | 'restart-level' | 'advance';

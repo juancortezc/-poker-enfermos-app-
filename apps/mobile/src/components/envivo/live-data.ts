@@ -61,6 +61,16 @@ export function eliminationErrorMessage(error: unknown): string {
         return 'La fecha no está en curso.';
       case 'INVALID_POSITION':
         return 'Posición inválida para la cantidad de jugadores.';
+      case 'POSITION_NOT_NEXT':
+        return 'Esa no es la siguiente posición. Alguien registró otra desde otro teléfono: revisá la lista.';
+      case 'ELIMINATION_CONFLICT':
+        return 'Otro teléfono registró esa eliminación al mismo tiempo. Revisá la lista.';
+      case 'SELF_ELIMINATION':
+        return 'El eliminador no puede ser el mismo jugador eliminado.';
+      case 'PLAYER_NOT_IN_GAME_DATE':
+        return 'Ese jugador no está en esta fecha.';
+      case 'NOT_LAST_ELIMINATION':
+        return 'Solo se puede deshacer la última eliminación.';
     }
     if (error.status === 403) return 'Solo la Comisión puede registrar eliminaciones.';
     if (/later eliminations|occurred after/i.test(error.message)) {
