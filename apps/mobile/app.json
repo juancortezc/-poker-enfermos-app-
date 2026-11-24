@@ -50,6 +50,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b72c7d91-0b54-4501-8e06-0c72fddc6664"
+      }
+    },
+    "owner": "101grados"
   }
 }
