@@ -21,9 +21,9 @@ import { Segmented } from '@/components/jugador/Segmented';
 import { OptionPicker } from '@/components/torneo/OptionPicker';
 import { NoirButton } from '@/components/ui/NoirButton';
 import { NoirCard } from '@/components/ui/NoirCard';
-import { ErrorState, LoadingState } from '@/components/ui/States';
+import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline, Title } from '@/components/ui/Typography';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, ApiError } from '@/lib/api';
 import { swrKeys } from '@/lib/swr';
 
 import {
@@ -50,6 +50,16 @@ export function ActivarTab() {
     return <LoadingState />;
   }
   if (active.data) return <ActiveDateCard gameDate={active.data} />;
+  if (available.error instanceof ApiError && available.error.status === 404) {
+    return (
+      <EmptyState
+        icon="trophy-outline"
+        message="No hay torneo activo para activar fechas."
+        actionTitle="Crear torneo"
+        onAction={() => router.push('/tournaments/new')}
+      />
+    );
+  }
   if (available.error) {
     return <ErrorState error={available.error} onRetry={() => available.mutate()} />;
   }
