@@ -22,6 +22,9 @@ const ANDROID_CHANNEL_ID = 'default';
 let registeredToken: string | null = null;
 
 // Con la app abierta, mostrar la notificación igual que en segundo plano.
+// Es el ÚNICO setNotificationHandler de la app (es global): cubre el push del
+// servidor y los avisos locales del timer (envivo/timer-alerts.ts), que
+// necesitan banner y sonido también en primer plano.
 if (Platform.OS !== 'web') {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({

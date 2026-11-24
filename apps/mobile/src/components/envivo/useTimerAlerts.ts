@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import {
   cancelTimerAlerts,
+  retainTimerAlerts,
   hapticFor,
   hasExactAlarms,
   prepareTimerAlerts,
@@ -34,6 +35,12 @@ export interface TimerFlash {
 
 const ONE_MINUTE_MS = 60_000;
 
+/**
+ * Un cambio de nivel visto con más de esto transcurrido no es de ahora: pasó
+ * con la app en segundo plano y su notificación ya sonó. No se repite.
+ */
+const STALE_CHANGE_MS = 10_000;
+
 export function useTimerAlerts(view: TimerDisplay | null, levels: BlindSpec[], dateNumber: number | null) {
   const [permission, setPermission] = useState<AlertPermission | null>(null);
   const [exactAlarms, setExactAlarms] = useState(true);
@@ -52,6 +59,7 @@ export function useTimerAlerts(view: TimerDisplay | null, levels: BlindSpec[], d
 
   useEffect(() => {
     let cancelled = false;
+    const release = retainTimerAlerts();
     (async () => {
       const result = await prepareTimerAlerts();
       const exact = await hasExactAlarms();
@@ -61,7 +69,7 @@ export function useTimerAlerts(view: TimerDisplay | null, levels: BlindSpec[], d
     })();
     return () => {
       cancelled = true;
-      cancelTimerAlerts();
+      release();
     };
   }, []);
 
@@ -103,6 +111,7 @@ export function useTimerAlerts(view: TimerDisplay | null, levels: BlindSpec[], d
     const previous = previousLevelRef.current;
     previousLevelRef.current = view.level;
     if (previous === null || previous === view.level) return;
+    if (view.elapsedInLevelMs > STALE_CHANGE_MS) return;
 
     const message = `CAMBIO A ${formatChips(view.smallBlind)}/${formatChips(view.bigBlind)}`;
     fire('level-change', message);

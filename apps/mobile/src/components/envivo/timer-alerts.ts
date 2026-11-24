@@ -34,28 +34,11 @@ const ONE_MINUTE_MS = 60_000;
 
 export type AlertKind = 'one-minute' | 'level-change';
 
-let handlerInstalled = false;
-
-/**
- * Con la app en primer plano también se muestra y suena: la pantalla del
- * timer hace el destello, pero el sonido lo pone la notificación.
- *
- * OJO: setNotificationHandler es global. Si el agente de push instala otro
- * handler, tiene que mantener este comportamiento para `data.source ===
- * 'envivo-timer'`.
+/*
+ * El handler de primer plano (mostrar y hacer sonar la notificación con la app
+ * abierta) es global y lo instala una sola vez src/lib/push.ts, que se carga
+ * con AuthContext antes que cualquier pantalla. Cubre también estos avisos.
  */
-function installForegroundHandler() {
-  if (handlerInstalled) return;
-  handlerInstalled = true;
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
-  });
-}
 
 export type AlertPermission = 'granted' | 'denied' | 'unavailable';
 
@@ -66,7 +49,6 @@ export type AlertPermission = 'granted' | 'denied' | 'unavailable';
 export async function prepareTimerAlerts(): Promise<AlertPermission> {
   if (Platform.OS === 'web') return 'unavailable';
   try {
-    installForegroundHandler();
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync(CHANNEL_MINUTE, {
         name: 'Timer: falta 1 minuto',
@@ -145,6 +127,16 @@ function content(
 let lastPlan: LevelBoundary[] = [];
 let queue: Promise<unknown> = Promise.resolve();
 
+/**
+ * Notificaciones que de verdad quedaron programadas (y no se cancelaron).
+ * `level` es el nivel que empieza (cambio) o el que termina (minuto). Sirve
+ * para saber si un aviso ya sonó por su cuenta, aunque haya sido hace rato
+ * con la app en segundo plano.
+ */
+type ScheduledAlert = { kind: AlertKind; level: number; at: number };
+let scheduled: ScheduledAlert[] = [];
+const KEEP_LOG_MS = 12 * 60 * 60_000;
+
 function samePlan(a: LevelBoundary[], b: LevelBoundary[]): boolean {
   if (a.length !== b.length) return false;
   // Tolerancia de 1,5 s: el desfase se vuelve a medir en cada consulta y
@@ -160,6 +152,7 @@ function samePlan(a: LevelBoundary[], b: LevelBoundary[]): boolean {
 async function cancelOurs(): Promise<void> {
   const all = await Notifications.getAllScheduledNotificationsAsync();
   const keepUntil = Date.now() + 1500;
+  scheduled = scheduled.filter((e) => e.at <= keepUntil && e.at > keepUntil - KEEP_LOG_MS);
   await Promise.all(
     all
       .filter((n) => {
@@ -208,6 +201,7 @@ export function scheduleTimerAlerts(plan: LevelBoundary[], dateNumber: number | 
             channelId: CHANNEL_MINUTE,
           },
         });
+        scheduled.push({ kind: 'one-minute', level: b.fromLevel, at: minuteAt });
       }
       if (b.at > now + 500) {
         await Notifications.scheduleNotificationAsync({
@@ -218,6 +212,7 @@ export function scheduleTimerAlerts(plan: LevelBoundary[], dateNumber: number | 
             channelId: CHANNEL_CHANGE,
           },
         });
+        scheduled.push({ kind: 'level-change', level: b.level, at: b.at });
       }
     }
   };
@@ -240,15 +235,33 @@ export function cancelTimerAlerts(): Promise<void> {
 }
 
 /**
- * ¿Había un aviso programado para este momento? Si sí, ya sonó (o va a sonar)
- * la notificación y no hace falta otra. Si no, el cambio fue manual (alguien
- * adelantó el nivel) y hay que hacer sonar el aviso ahora.
+ * ¿Ya hay una notificación programada que cubre este aviso? Cuenta la que
+ * vence ahora y también la que venció antes: al volver a primer plano tras
+ * media hora en el bolsillo, el cambio de nivel ya sonó y no hay que repetirlo.
+ * Si no hay ninguna (alguien adelantó el nivel a mano, o la pantalla no
+ * estaba abierta), hay que hacer sonar el aviso ahora.
  */
 export function wasScheduledAround(kind: AlertKind, level: number, at: number, toleranceMs = 4000): boolean {
-  return lastPlan.some((b) => {
-    if (kind === 'level-change') return b.level === level && Math.abs(b.at - at) <= toleranceMs;
-    return b.fromLevel === level && Math.abs(b.at - ONE_MINUTE_MS - at) <= toleranceMs;
-  });
+  return scheduled.some((e) => e.kind === kind && e.level === level && e.at <= at + toleranceMs);
+}
+
+/** Pantallas que usan los avisos. Se cancelan cuando sale la última. */
+let holders = 0;
+
+/**
+ * Registro y Timer pueden estar montadas a la vez (una encima de la otra en
+ * el stack). Si la de arriba cancelara todo al salir, la de abajo se quedaría
+ * sin avisos hasta el próximo cambio de nivel. Devuelve la función de salida.
+ */
+export function retainTimerAlerts(): () => void {
+  holders += 1;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    holders = Math.max(0, holders - 1);
+    if (holders === 0) cancelTimerAlerts();
+  };
 }
 
 /** Notificación inmediata (para cambios manuales, que no estaban programados). */
