@@ -15,6 +15,18 @@ interface DaysWithoutVictoryResponse {
   players: Array<{ id: string; firstName: string; lastName: string; daysWithoutVictory: number; hasNeverWon: boolean }>
 }
 
+interface WinnerPlayer {
+  id: string
+  firstName: string
+  lastName: string
+  photoUrl: string | null
+}
+
+interface TournamentWinnersResponse {
+  success: boolean
+  data?: Array<{ tournamentNumber: number; champion: WinnerPlayer; runnerUp: WinnerPlayer; thirdPlace: WinnerPlayer }>
+}
+
 interface NextDateInfo {
   dateNumber?: number
   scheduledDate: string | null
@@ -24,6 +36,8 @@ interface HomeTorneoProps {
   user: { id: string }
   tournamentId: number
   tournamentNumber: number
+  /** Torneo FINALIZADO: podio final y "por anunciar" en vez de cuenta regresiva y calendario. */
+  finished?: boolean
   rankings: PlayerRanking[]
   nextDate: NextDateInfo | null
   seasonHighlights?: TournamentInsightsData['seasonHighlights']
@@ -67,6 +81,7 @@ export function HomeTorneo({
   user,
   tournamentId,
   tournamentNumber,
+  finished = false,
   rankings,
   nextDate,
   seasonHighlights,
@@ -81,6 +96,13 @@ export function HomeTorneo({
   )
 
   const droughtLeader = droughtData?.players.find(p => !p.hasNeverWon)
+
+  // Podio oficial del torneo terminado (el mismo registro que Stats > Torneos)
+  const { data: winnersData } = useSWR<TournamentWinnersResponse>(
+    finished ? '/api/tournaments/winners' : null,
+    { revalidateOnFocus: false }
+  )
+  const finalWinner = winnersData?.data?.find(w => w.tournamentNumber === tournamentNumber)
 
   const myRanking = rankings.find(r => r.playerId === user.id)
   const leaderScore = rankings.length ? scoreOf(rankings[0]) : 0
@@ -120,7 +142,7 @@ export function HomeTorneo({
       )
     : null
 
-  const formattedDate = formatDate(nextDate?.scheduledDate ?? null)
+  const formattedDate = finished ? null : formatDate(nextDate?.scheduledDate ?? null)
   const days = daysUntil(nextDate?.scheduledDate ?? null)
 
   const highlightCards = [
@@ -157,6 +179,14 @@ export function HomeTorneo({
   ].filter((c): c is NonNullable<typeof c> => Boolean(c))
 
   const podio = sortedByPosition.slice(0, 3)
+
+  // Con el torneo terminado: el podio oficial; si la Comision todavia no lo
+  // cargo, el top 3 de la tabla.
+  const podioFinal = finalWinner
+    ? [finalWinner.champion, finalWinner.runnerUp, finalWinner.thirdPlace].map(p => ({
+        id: p.id, name: playerLabel(p), photoUrl: p.photoUrl
+      }))
+    : podio.map(p => ({ id: p.playerId, name: shortenFullName(p.playerName), photoUrl: p.playerPhoto ?? null }))
   const [abierto, setAbierto] = useState<string | null>(null)
 
   const CICLO = 14
@@ -170,6 +200,43 @@ export function HomeTorneo({
 
   return (
     <div style={BENTO}>
+
+      {/* ── TORNEO FINALIZADO — reemplaza la cuenta regresiva ────────── */}
+      {finished && (
+        <section className="cp-rise" style={{ ...tile('oro'), animationDelay: '0ms', gap: 12 }}>
+          <div>
+            <span style={overline('#8A6508')}>temporada cerrada</span>
+            <div className="cp-display" style={{ fontSize: 22, fontWeight: 800, color: tinta, marginTop: 3, lineHeight: 1.1 }}>
+              T{tournamentNumber} finalizado
+            </div>
+          </div>
+
+          {podioFinal.length === 3 && (
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 12 }}>
+              {[1, 0, 2].map(idx => {
+                const p = podioFinal[idx]
+                const metal = ['#8A6508', '#6E6A67', '#8B5E2F'][idx]
+                const primero = idx === 0
+                return (
+                  <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: primero ? 12 : 0, minWidth: 0, flex: 1 }}>
+                    <div style={{ position: 'relative' }}>
+                      <HomeAvatar playerId={p.id} name={p.name} photoUrl={p.photoUrl} size={primero ? 106 : 78} fontSize={primero ? 27 : 20} linkToProfile />
+                      <span className="cp-score" style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 12, minWidth: 21, height: 21, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>{idx + 1}</span>
+                    </div>
+                    <div style={{ fontSize: primero ? 12.5 : 11.5, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>{p.name}</div>
+                    <div style={{ ...overline(metal), fontSize: 9.5 }}>{primero ? 'campeón' : `${idx + 1}º`}</div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid rgba(138,101,8,0.22)' }}>
+            <span style={{ fontSize: 12.5, color: suave }}>Próximo torneo</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#8A6508' }}>Por anunciar</span>
+          </div>
+        </section>
+      )}
 
       {/* ── TU POSICIÓN — el ancla negra ──────────────────────────── */}
       {myRanking && (
@@ -257,8 +324,8 @@ export function HomeTorneo({
         </section>
       )}
 
-      {/* ── EL PODIO — bloque ancho, en oro ───────────────────────── */}
-      {podio.length === 3 && (
+      {/* ── EL PODIO — bloque ancho, en oro (terminado, ya esta arriba) ── */}
+      {!finished && podio.length === 3 && (
         <section className="cp-rise" style={{ ...tile('oro'), animationDelay: '160ms' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
             <span style={overline('#8A6508')}>el podio</span>

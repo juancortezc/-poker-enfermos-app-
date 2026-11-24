@@ -50,7 +50,8 @@ export function HomePage() {
     isLoading: tournamentLoading,
     progress,
     nextDate: nextGameDateFromTournament,
-    lastCompletedDate
+    lastCompletedDate,
+    isFinished
   } = useActiveTournament({ refreshInterval: 300000 }) // 5 minutes
 
   const {
@@ -97,7 +98,8 @@ export function HomePage() {
     return (
       <HomeNotAuthenticated
         leader={rankingData?.rankings?.[0]}
-        nextDate={formatNextDateSimple(nextGameDateFromTournament?.dateNumber, nextGameDateFromTournament?.scheduledDate ?? null)}
+        nextLabel={isFinished ? 'Proximo Torneo' : 'Proxima Fecha'}
+        nextDate={isFinished ? 'Por anunciar' : formatNextDateSimple(nextGameDateFromTournament?.dateNumber, nextGameDateFromTournament?.scheduledDate ?? null)}
         tournamentNumber={activeTournament?.number ?? 29}
       />
     )
@@ -127,6 +129,7 @@ export function HomePage() {
       isCommission={isCommission}
       tournamentNumber={activeTournament?.number ?? 29}
       tournamentId={activeTournament?.id || 0}
+      finished={isFinished}
       rankings={rankings}
       lastCompletedDate={lastCompletedDate}
       nextDate={nextGameDateFromTournament ?? null}
@@ -153,10 +156,11 @@ interface HomeNotAuthenticatedProps {
     finalScore?: number
   }
   nextDate: string
+  nextLabel: string
   tournamentNumber: number
 }
 
-function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAuthenticatedProps) {
+function HomeNotAuthenticated({ leader, nextDate, nextLabel, tournamentNumber }: HomeNotAuthenticatedProps) {
   const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -335,7 +339,7 @@ function HomeNotAuthenticated({ leader, nextDate, tournamentNumber }: HomeNotAut
               marginBottom: '4px'
             }}
           >
-            Proxima Fecha
+            {nextLabel}
           </p>
           <p
             style={{
@@ -364,6 +368,7 @@ interface HomeAuthenticatedProps {
   isCommission: boolean
   tournamentNumber: number
   tournamentId: number
+  finished: boolean
   rankings: PlayerRanking[]
   lastCompletedDate: { id: number; dateNumber: number; scheduledDate: string | null } | null
   nextDate: { dateNumber: number; scheduledDate: string | null } | null
@@ -376,6 +381,7 @@ function HomeAuthenticated({
   isCommission,
   tournamentNumber,
   tournamentId,
+  finished,
   rankings,
   lastCompletedDate,
   nextDate,
@@ -440,6 +446,7 @@ function HomeAuthenticated({
             user={user}
             tournamentId={tournamentId}
             tournamentNumber={tournamentNumber}
+            finished={finished}
             rankings={rankings}
             nextDate={nextDate}
             seasonHighlights={insights?.seasonHighlights}
