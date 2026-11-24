@@ -1,53 +1,14 @@
 {
-  "name": "poker-app",
-  "version": "0.1.0",
+  "name": "poker-enfermos",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "NODE_ENV=production next build --webpack",
-    "build:css": "tailwindcss -o ./src/app/globals.css --minify",
-    "build:prod": "NODE_ENV=production npm run build:css && next build",
-    "start": "next start",
-    "lint": "eslint",
-    "analyze": "npm run build && npx @next/bundle-analyzer",
-    "postinstall": "prisma generate"
-  },
-  "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.9",
-    "@prisma/client": "^6.15.0",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@types/bcryptjs": "^2.4.6",
-    "bcryptjs": "^3.0.2",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "exceljs": "^4.4.0",
-    "framer-motion": "^12.23.12",
-    "lucide-react": "^0.542.0",
-    "next": "^16.4.6",
-    "prisma": "^6.15.0",
-    "react": "^19.2.1",
-    "react-day-picker": "^9.9.0",
-    "react-dom": "^19.2.1",
-    "react-toastify": "^11.0.5",
-    "recharts": "^3.2.0",
-    "sharp": "^0.34.5",
-    "swr": "^2.3.6",
-    "tailwind-merge": "^3.3.1",
-    "web-push": "^3.6.7"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@types/web-push": "^3.6.4",
-    "eslint": "^9",
-    "eslint-config-next": "^15.5.2",
-    "tailwindcss": "^4",
-    "tw-animate-css": "^1.3.7",
-    "typescript": "^5"
+    "dev:web": "npm run dev -w apps/web",
+    "build:web": "npm run build -w apps/web",
+    "lint:web": "npm run lint -w apps/web",
+    "typecheck": "npm run typecheck --workspaces --if-present"
   }
 }
