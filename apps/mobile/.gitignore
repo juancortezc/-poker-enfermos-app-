@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# config local de herramientas de la app movil (la decide cada usuario)
+.claude/
