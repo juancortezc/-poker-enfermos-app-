@@ -93,7 +93,10 @@ export async function apiFetch<T = unknown>(path: string, init: ApiRequestInit =
 
   if (!response.ok) {
     const info = await response.text().catch(() => '');
-    if (response.status === 401 && auth && onUnauthorized) onUnauthorized();
+    // Solo si la clave que falló sigue siendo la cargada: un request viejo que
+    // vuelve con 401 después de cerrar sesión y entrar con otra clave no
+    // debe sacar al usuario nuevo.
+    if (response.status === 401 && auth && auth === getAuthHeaderValue() && onUnauthorized) onUnauthorized();
     throw new ApiError(response.status, info);
   }
 
