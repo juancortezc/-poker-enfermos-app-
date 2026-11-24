@@ -5,7 +5,7 @@
  */
 import { calculatePointsForPosition } from '@poker/shared';
 import { useKeepAwake } from 'expo-keep-awake';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 
@@ -128,7 +128,7 @@ function StartDate({ gameDate, onStarted }: { gameDate: ActiveGameDate; onStarte
 }
 
 function LiveRegistro({ gameDate }: { gameDate: ActiveGameDate }) {
-  const { can } = useAuth();
+  const { can, role } = useAuth();
   const canWrite = can('eliminations');
   const refreshLive = useRefreshLive();
   const { players, eliminations, ranking } = useLiveDate(gameDate.id, gameDate.status === 'in_progress');
@@ -177,6 +177,14 @@ function LiveRegistro({ gameDate }: { gameDate: ActiveGameDate }) {
         <Kpi label="Jugadores" value={total} />
         <Kpi label="Pts máx" value={winnerPoints} />
       </View>
+
+      {role === 'Comision' && gameDate.status === 'in_progress' ? (
+        <NoirButton
+          title="Gestionar jugadores"
+          variant="outline"
+          onPress={() => router.push({ pathname: '/game-dates/[id]/manage-players', params: { id: String(gameDate.id) } })}
+        />
+      ) : null}
 
       {activePlayers.length > 1 ? (
         <EliminationForm
