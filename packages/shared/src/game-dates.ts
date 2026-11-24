@@ -122,11 +122,11 @@ export function generateTournamentDates(
  * Cambia la fecha `index` y recalcula las siguientes cada 14 días desde ella,
  * como el formulario de torneo de la web. Devuelve un arreglo nuevo.
  */
-export function rescheduleFrom(
-  dates: ReadonlyArray<{ id?: number; dateNumber: number; scheduledDate: string }>,
+export function rescheduleFrom<T extends { scheduledDate: string }>(
+  dates: ReadonlyArray<T>,
   index: number,
   scheduledDate: string
-): Array<{ id?: number; dateNumber: number; scheduledDate: string }> {
+): T[] {
   const start = parseToUTCNoon(scheduledDate)
   if (isNaN(start.getTime())) return dates.map((d) => ({ ...d }))
   const regenerated = generateTournamentDates(start, dates.length - index)
