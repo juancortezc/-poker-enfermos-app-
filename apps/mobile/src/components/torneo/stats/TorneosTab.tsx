@@ -10,6 +10,7 @@ import useSWR from 'swr';
 import { OptionPicker, type Option } from '@/components/torneo/OptionPicker';
 import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { EmptyState, ErrorState, LoadingState, NoirButton, NoirCard, Overline, Title } from '@/components/ui';
+import { swrKeys } from '@/lib/swr';
 import { noir } from '@/theme/colors';
 import { playerLabel } from '@poker/shared';
 
@@ -66,7 +67,7 @@ function Puesto({ badge, color, player, malazo }: { badge: string; color: string
 
 export function TorneosTab() {
   const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data?: TournamentWinner[]; error?: string }>(
-    '/api/tournaments/winners'
+    swrKeys.tournamentWinners()
   );
   const [filtro, setFiltro] = useState<Filtro>(null);
 

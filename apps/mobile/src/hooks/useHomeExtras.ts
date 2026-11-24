@@ -59,3 +59,33 @@ export interface PodcastInfo {
 export function usePodcast() {
   return useSWR<PodcastInfo>('/api/podcast');
 }
+
+export interface WinnerPlayer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl: string | null;
+  isActive: boolean;
+  aliases: string[];
+}
+
+/** Una fila de GET /api/tournaments/winners (envuelto en `{ success, data, total }`). */
+export interface TournamentWinner {
+  id: number;
+  tournamentNumber: number;
+  champion: WinnerPlayer;
+  runnerUp: WinnerPlayer;
+  thirdPlace: WinnerPlayer;
+  siete: WinnerPlayer | null;
+  dos: WinnerPlayer | null;
+}
+
+/** Podio oficial de un torneo terminado; `null` mientras la Comisión no lo cargó. Sin número no pide nada. */
+export function useTournamentWinner(tournamentNumber: number | null | undefined) {
+  const swr = useSWR<{ success: boolean; data?: TournamentWinner[] }>(
+    tournamentNumber ? swrKeys.tournamentWinners() : null,
+    { revalidateOnFocus: false }
+  );
+  const winner = swr.data?.data?.find((w) => w.tournamentNumber === tournamentNumber) ?? null;
+  return { winner, isLoading: swr.isLoading, error: swr.error, mutate: swr.mutate };
+}

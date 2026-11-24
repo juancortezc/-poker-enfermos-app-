@@ -84,6 +84,7 @@ export default function HomeScreen() {
             userId={user?.id ?? ''}
             tournamentId={tournament.id}
             tournamentNumber={number ?? 0}
+            finished={active.isFinished}
             rankings={rankings}
             nextDate={active.nextDate}
             seasonHighlights={insightsSwr.insights?.seasonHighlights}
