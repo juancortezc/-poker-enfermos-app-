@@ -22,7 +22,8 @@
         "backgroundColor": "#1F1410",
         "foregroundImage": "./assets/icons/favicon-512.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"]
     },
     "web": {
       "output": "single",
@@ -45,7 +46,13 @@
           "faceIDPermission": "Usamos Face ID para desbloquear tu clave de Poker Enfermos sin tener que escribirla."
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "sounds": ["./assets/sounds/timer_minuto.wav", "./assets/sounds/timer_cambio.wav"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
