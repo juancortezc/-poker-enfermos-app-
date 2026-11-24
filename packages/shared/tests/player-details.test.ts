@@ -4,6 +4,7 @@ import {
   buildPlayerTournamentDetails,
   calculateRankingEvolution,
   buildSeasonIcs,
+  buildCsv,
   googleCalendarUrl,
   isBirthdayNearDate,
   parseBirthMonthDay,
@@ -105,4 +106,8 @@ test('ics: un VEVENT por fecha, con texto escapado', () => {
   assert.match(ics, /SUMMARY:Fecha 1\\, T30/)
   assert.equal(ics.split('BEGIN:VEVENT').length - 1, 1)
   assert.match(googleCalendarUrl(3, '2026-01-01T00:20:00.000Z'), /Fecha%203&dates=20260101T002000Z\/20260101T042000Z$/)
+})
+
+test('csv: BOM, CRLF y comillas solo donde hacen falta', () => {
+  assert.equal(buildCsv(['#', 'Jugador'], [[1, 'Juan, "el mono"']]), '\uFEFF#,Jugador\r\n1,"Juan, ""el mono"""')
 })

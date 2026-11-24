@@ -1,17 +1,11 @@
-function escapeCsvCell(value: string | number): string {
-  const str = String(value)
-  if (/[",\n]/.test(str)) {
-    return `"${str.replace(/"/g, '""')}"`
-  }
-  return str
-}
+import { buildCsv } from '@poker/shared'
 
 /**
  * Genera un .csv a partir de encabezados + filas y dispara la descarga en el navegador.
+ * El texto lo arma @poker/shared (la app movil lo comparte en vez de bajarlo).
  */
 export function downloadCsv(headers: string[], rows: (string | number)[][], filename: string) {
-  const lines = [headers, ...rows].map((row) => row.map(escapeCsvCell).join(','))
-  const csv = '﻿' + lines.join('\r\n') // BOM para que Excel detecte UTF-8
+  const csv = buildCsv(headers, rows)
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
