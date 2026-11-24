@@ -1,11 +1,11 @@
-interface BlindLevel {
+export interface BlindLevel {
   level: number
   smallBlind: number
   bigBlind: number
   duration: number
 }
 
-interface TournamentPreset {
+export interface TournamentPreset {
   id: string
   name: string
   description: string
@@ -14,6 +14,45 @@ interface TournamentPreset {
   blindLevels: BlindLevel[]
 }
 
+/**
+ * Estructura de blinds del grupo: la que usan los formularios de torneo y el
+ * preset "Estandar". Es la UNICA copia; la web y la app movil la leen de aqui.
+ * 18 niveles: 12 min hasta el 6 (despues, cena con pausa manual), 16 min del
+ * 7 al 14, 10 min del 15 al 17 y el 18 sin limite (duracion 0).
+ */
+const STANDARD_BLIND_LEVELS: BlindLevel[] = [
+  { level: 1,  smallBlind: 50,    bigBlind: 100,   duration: 12 },
+  { level: 2,  smallBlind: 100,   bigBlind: 200,   duration: 12 },
+  { level: 3,  smallBlind: 150,   bigBlind: 300,   duration: 12 },
+  { level: 4,  smallBlind: 200,   bigBlind: 400,   duration: 12 },
+  { level: 5,  smallBlind: 300,   bigBlind: 600,   duration: 12 },
+  { level: 6,  smallBlind: 400,   bigBlind: 800,   duration: 12 },
+  { level: 7,  smallBlind: 500,   bigBlind: 1000,  duration: 16 },
+  { level: 8,  smallBlind: 600,   bigBlind: 1200,  duration: 16 },
+  { level: 9,  smallBlind: 800,   bigBlind: 1600,  duration: 16 },
+  { level: 10, smallBlind: 1000,  bigBlind: 2000,  duration: 16 },
+  { level: 11, smallBlind: 1500,  bigBlind: 3000,  duration: 16 },
+  { level: 12, smallBlind: 2000,  bigBlind: 4000,  duration: 16 },
+  { level: 13, smallBlind: 3000,  bigBlind: 6000,  duration: 16 },
+  { level: 14, smallBlind: 4000,  bigBlind: 8000,  duration: 16 },
+  { level: 15, smallBlind: 5000,  bigBlind: 10000, duration: 10 },
+  { level: 16, smallBlind: 6000,  bigBlind: 12000, duration: 10 },
+  { level: 17, smallBlind: 8000,  bigBlind: 16000, duration: 10 },
+  { level: 18, smallBlind: 10000, bigBlind: 20000, duration: 0  },
+]
+
+/**
+ * Copia nueva de la estructura estandar. Es una funcion y no una constante
+ * porque los formularios editan los niveles en el lugar: con un arreglo
+ * compartido, editar un torneo cambiaria los defaults de todos los demas.
+ */
+export function defaultBlindLevels(): BlindLevel[] {
+  return STANDARD_BLIND_LEVELS.map((l) => ({ ...l }))
+}
+
+/** Estructura estandar, solo lectura. Para editarla usa defaultBlindLevels(). */
+export const DEFAULT_BLIND_LEVELS: readonly Readonly<BlindLevel>[] = STANDARD_BLIND_LEVELS
+
 export const TOURNAMENT_PRESETS: TournamentPreset[] = [
   {
     id: 'standard',
@@ -21,26 +60,7 @@ export const TOURNAMENT_PRESETS: TournamentPreset[] = [
     description: 'Configuración del grupo — descanso manual al terminar el nivel 6',
     icon: '⚖️',
     estimatedDuration: '4-5 horas',
-    blindLevels: [
-      { level: 1,  smallBlind: 50,    bigBlind: 100,   duration: 12 },
-      { level: 2,  smallBlind: 100,   bigBlind: 200,   duration: 12 },
-      { level: 3,  smallBlind: 150,   bigBlind: 300,   duration: 12 },
-      { level: 4,  smallBlind: 200,   bigBlind: 400,   duration: 12 },
-      { level: 5,  smallBlind: 300,   bigBlind: 600,   duration: 12 },
-      { level: 6,  smallBlind: 400,   bigBlind: 800,   duration: 12 },
-      { level: 7,  smallBlind: 500,   bigBlind: 1000,  duration: 16 },
-      { level: 8,  smallBlind: 600,   bigBlind: 1200,  duration: 16 },
-      { level: 9,  smallBlind: 800,   bigBlind: 1600,  duration: 16 },
-      { level: 10, smallBlind: 1000,  bigBlind: 2000,  duration: 16 },
-      { level: 11, smallBlind: 1500,  bigBlind: 3000,  duration: 16 },
-      { level: 12, smallBlind: 2000,  bigBlind: 4000,  duration: 16 },
-      { level: 13, smallBlind: 3000,  bigBlind: 6000,  duration: 16 },
-      { level: 14, smallBlind: 4000,  bigBlind: 8000,  duration: 16 },
-      { level: 15, smallBlind: 5000,  bigBlind: 10000, duration: 10 },
-      { level: 16, smallBlind: 6000,  bigBlind: 12000, duration: 10 },
-      { level: 17, smallBlind: 8000,  bigBlind: 16000, duration: 10 },
-      { level: 18, smallBlind: 10000, bigBlind: 20000, duration: 0  },
-    ]
+    blindLevels: defaultBlindLevels()
   },
   {
     id: 'rapid',
