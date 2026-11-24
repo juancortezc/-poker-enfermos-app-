@@ -26,6 +26,7 @@ import {
   type FeaturePermission,
   type UserRole,
 } from '@poker/shared';
+import { registerPushDevice, unregisterPushDevice } from '@/lib/push';
 import { authStorage } from '@/lib/secure-auth-storage';
 
 export interface AuthUser {
@@ -137,6 +138,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => setUnauthorizedHandler(null);
   }, [clearLocalSession]);
 
+  // Push nativo: registrar el token cada vez que se entra (login, arranque o
+  // desbloqueo). Idempotente en el servidor; también refresca lastSeenAt.
+  const signedInUserId = status === 'signedIn' ? user?.id : undefined;
+  useEffect(() => {
+    if (signedInUserId) registerPushDevice();
+  }, [signedInUserId]);
+
   const login = useCallback(
     async (rawPin: string): Promise<LoginResult> => {
       const pin = normalizePin(rawPin);
@@ -177,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const pin = await authStorage.getPin();
       if (pin) {
+        await unregisterPushDevice(pin);
         // Invalida el cache de tokens del servidor (mismo formato que el header).
         await apiFetch('/api/auth/logout', {
           method: 'POST',
