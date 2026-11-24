@@ -31,7 +31,7 @@ npx tsx scripts/test-frontend-pages.ts      # Frontend pages verification
 - **Players**: 29 active (Comision/Enfermo/Invitado roles)
 - **Tournaments**: PROXIMO → ACTIVO → FINALIZADO states
 - **GameDate**: pending → CREATED → in_progress → completed
-- **BlindLevel**: 12 levels (50/100 to 2500/5000) + 30min dinner break after level 3
+- **BlindLevel**: 18 levels (50/100 to 10000/20000): 12 min levels 1-6, dinner break (manual pause) after level 6, 16 min levels 7-14, 10 min levels 15-17, level 18 open. Single source: `packages/shared/src/blinds.ts`
 - **Eliminations**: Position-based point system (max 30pts)
 - **TournamentWinners**: Historical podium tracking
 
