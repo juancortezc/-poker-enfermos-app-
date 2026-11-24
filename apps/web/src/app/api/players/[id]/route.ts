@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
-import { withAuth, withComisionAuth } from '@/lib/api-auth'
-import { playerSelectForRole } from '@/lib/player-select'
+import { withAuth, withComisionAuth, invalidatePlayerTokens } from '@/lib/api-auth'
+import { playerSelectForRole, PLAYER_ADMIN_SELECT } from '@/lib/player-select'
 import { validateAndHashPin } from '@/lib/pin-utils'
 
 // GET /api/players/:id - Obtener jugador específico
@@ -66,7 +66,7 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withComisionAuth(req, async (_req) => {
+  return withComisionAuth(req, async (_req, user) => {
   try {
     const { id } = await params
     const data = await req.json()
@@ -94,9 +94,27 @@ export async function PUT(
       )
     }
 
+    // Nadie se quita a si mismo la Comision ni se inactiva: se quedaria
+    // afuera sin que otro lo decida.
+    if (id === user.id) {
+      if (role !== undefined && role !== UserRole.Comision) {
+        return NextResponse.json(
+          { error: 'No puedes quitarte el rol Comisión a ti mismo', code: 'SELF_DEMOTION' },
+          { status: 403 }
+        )
+      }
+      if (isActive === false) {
+        return NextResponse.json(
+          { error: 'No puedes inactivarte a ti mismo', code: 'SELF_DEACTIVATION' },
+          { status: 403 }
+        )
+      }
+    }
+
     // Verificar que el jugador existe
     const existingPlayer = await prisma.player.findUnique({
-      where: { id }
+      where: { id },
+      select: { id: true, role: true }
     })
 
     if (!existingPlayer) {
@@ -175,7 +193,8 @@ export async function PUT(
     const updatedPlayer = await prisma.player.update({
       where: { id },
       data: updateData,
-      include: {
+      select: {
+        ...PLAYER_ADMIN_SELECT,
         inviter: {
           select: {
             id: true,
@@ -194,6 +213,9 @@ export async function PUT(
       }
     })
 
+    // Rol, clave o estado nuevos: que el cache de tokens no siga con los viejos.
+    invalidatePlayerTokens(id)
+
     return NextResponse.json(updatedPlayer)
   } catch (error) {
     console.error('Error updating player:', error)
@@ -210,12 +232,20 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withComisionAuth(req, async (_req) => {
+  return withComisionAuth(req, async (_req, user) => {
   try {
     const { id } = await params
 
+    if (id === user.id) {
+      return NextResponse.json(
+        { error: 'No puedes inactivarte a ti mismo', code: 'SELF_DEACTIVATION' },
+        { status: 403 }
+      )
+    }
+
     const existingPlayer = await prisma.player.findUnique({
-      where: { id }
+      where: { id },
+      select: { id: true }
     })
 
     if (!existingPlayer) {
@@ -227,8 +257,10 @@ export async function DELETE(
 
     const updatedPlayer = await prisma.player.update({
       where: { id },
-      data: { isActive: false }
+      data: { isActive: false },
+      select: PLAYER_ADMIN_SELECT
     })
+    invalidatePlayerTokens(id)
 
     return NextResponse.json({
       message: 'Jugador inactivado correctamente',

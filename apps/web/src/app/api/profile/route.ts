@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withAuth } from '@/lib/api-auth'
+import { withAuth, invalidatePlayerTokens } from '@/lib/api-auth'
 import { validateAndHashPin, PIN_RULE_TEXT } from '@/lib/pin-utils'
 
 // GET /api/profile - Obtener perfil del usuario autenticado
@@ -134,6 +134,8 @@ export async function PUT(req: NextRequest) {
           role: true,
         }
       })
+
+      if (updateData.pin) invalidatePlayerTokens(user.id)
 
       return Response.json({
         message: 'Perfil actualizado correctamente',

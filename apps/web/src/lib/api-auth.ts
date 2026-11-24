@@ -19,7 +19,18 @@ export interface AuthenticatedUser {
 // Reduce validación de 150-300ms a 1-5ms (99% mejora)
 interface CachedUser {
   user: AuthenticatedUser
+  /**
+   * Hash de la credencial con la que se valido (pin o adminKey). Si en la
+   * base ya no es el mismo, la clave se cambio y la entrada no sirve.
+   */
+  credentialHash: string
   expiry: number
+}
+
+/** Resultado de validar contra la base: el usuario y el hash que coincidio. */
+interface ValidatedToken {
+  user: AuthenticatedUser
+  credentialHash: string
 }
 
 const tokenCache = new Map<string, CachedUser>()
@@ -48,7 +59,8 @@ function updateUserActivity(userId: string): void {
   // Actualizar en background (no bloqueamos la respuesta)
   prisma.player.update({
     where: { id: userId },
-    data: { lastActiveAt: new Date() }
+    data: { lastActiveAt: new Date() },
+    select: { id: true }
   }).catch(err => {
     console.error('Error updating lastActiveAt:', err)
   })
@@ -77,10 +89,45 @@ export function invalidateTokenCache(token?: string) {
 }
 
 /**
+ * Borra del cache todas las entradas de un jugador. Llamarla al cambiar su
+ * rol, su clave o su estado activo. Solo alcanza a esta instancia; las demas
+ * lo detectan solas porque cada acierto del cache se revalida (ver
+ * `freshFromCache`).
+ */
+export function invalidatePlayerTokens(playerId: string) {
+  for (const [token, cached] of tokenCache.entries()) {
+    if (cached.user.id === playerId) tokenCache.delete(token)
+  }
+}
+
+/**
+ * Un acierto del cache se confirma con una lectura por id (barata, sin
+ * bcrypt): el jugador sigue activo y su credencial es la misma. El rol se
+ * toma de la base, asi que un Comision degradado deja de serlo al instante
+ * aunque su entrada siga en el cache de otra instancia.
+ */
+async function freshFromCache(cached: CachedUser, kind: 'PIN' | 'ADMIN'): Promise<AuthenticatedUser | null> {
+  const player = await prisma.player.findUnique({
+    where: { id: cached.user.id },
+    select: { id: true, firstName: true, lastName: true, role: true, photoUrl: true, isActive: true, pin: true, adminKey: true },
+  })
+  if (!player || !player.isActive) return null
+  const current = kind === 'PIN' ? player.pin : player.adminKey
+  if (current !== cached.credentialHash) return null
+  return {
+    id: player.id,
+    firstName: player.firstName,
+    lastName: player.lastName,
+    role: player.role,
+    photoUrl: player.photoUrl || undefined,
+  }
+}
+
+/**
  * Valida un token desde la base de datos (sin cache)
  * Usado internamente cuando el cache no tiene el token
  */
-async function validateTokenFromDB(token: string): Promise<AuthenticatedUser | null> {
+async function validateTokenFromDB(token: string): Promise<ValidatedToken | null> {
   // Verificar si es formato PIN:xxxx (nuevo sistema)
   if (token.startsWith('PIN:')) {
     const pin = token.substring(4) // Remover "PIN:"
@@ -110,11 +157,14 @@ async function validateTokenFromDB(token: string): Promise<AuthenticatedUser | n
     for (const user of users) {
       if (user.pin && await bcrypt.compare(normalizePin(pin), user.pin)) {
         return {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          photoUrl: user.photoUrl || undefined
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            photoUrl: user.photoUrl || undefined
+          },
+          credentialHash: user.pin
         }
       }
     }
@@ -146,11 +196,14 @@ async function validateTokenFromDB(token: string): Promise<AuthenticatedUser | n
     for (const user of users) {
       if (user.adminKey && await bcrypt.compare(adminKey, user.adminKey)) {
         return {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          photoUrl: user.photoUrl || undefined
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            photoUrl: user.photoUrl || undefined
+          },
+          credentialHash: user.adminKey
         }
       }
     }
@@ -183,24 +236,31 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
       return null
     }
 
-    // 1. Check cache first (Fast path)
+    // 1. Cache (sin bcrypt), confirmado contra la base por id
     const cached = tokenCache.get(token)
     if (cached && Date.now() < cached.expiry) {
-      return cached.user
+      const fresh = await freshFromCache(cached, token.startsWith('ADMIN:') ? 'ADMIN' : 'PIN')
+      if (fresh) {
+        cached.user = fresh
+        return fresh
+      }
+      // Clave cambiada, jugador inactivo o borrado: se valida de cero.
+      tokenCache.delete(token)
     }
 
     // 2. Cache miss - validate from DB (Slow path)
-    const user = await validateTokenFromDB(token)
+    const validated = await validateTokenFromDB(token)
 
     // 3. Store in cache if valid
-    if (user) {
+    if (validated) {
       tokenCache.set(token, {
-        user,
+        user: validated.user,
+        credentialHash: validated.credentialHash,
         expiry: Date.now() + CACHE_TTL
       })
     }
 
-    return user
+    return validated?.user ?? null
   } catch (error) {
     // OJO: aqui NO sabemos si la credencial es mala. Fallo la validacion —la
     // base no respondio, bcrypt reviento, el arranque en frio tardo— y eso no

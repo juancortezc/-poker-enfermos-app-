@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Nuevo sistema: autenticación por PIN
     if (pin) {
-      if (!isValidPinForLogin(pin)) {
+      if (typeof pin !== 'string' || !isValidPinForLogin(pin)) {
         recordFailedLogin(key)
         return NextResponse.json(
           { error: `Clave inválida. ${PIN_RULE_TEXT}.` },
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     // Sistema legacy: adminKey (para rollback temporal)
     if (adminKey) {
-      if (!adminKey) {
+      if (typeof adminKey !== 'string') {
         return NextResponse.json(
           { error: 'Admin key is required' },
           { status: 400 }
