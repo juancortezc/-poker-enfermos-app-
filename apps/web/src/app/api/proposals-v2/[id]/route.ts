@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withAuth } from '@/lib/api-auth'
+import { withAuth, validateApiAccess } from '@/lib/api-auth'
+import { parseProposalInput } from '@/lib/proposal-input'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -40,6 +41,19 @@ export async function GET(
         { error: 'Propuesta no encontrada' },
         { status: 404 }
       )
+    }
+
+    // Una propuesta inactiva solo la ven su autor y la Comision. Para el
+    // resto no existe (404, no 403: no se confirma que el id exista).
+    if (!proposal.isActive) {
+      const user = await validateApiAccess(request).catch(() => null)
+      const allowed = user && (user.role === 'Comision' || user.id === proposal.createdById)
+      if (!allowed) {
+        return NextResponse.json(
+          { error: 'Propuesta no encontrada' },
+          { status: 404 }
+        )
+      }
     }
 
     return NextResponse.json({ proposal })
@@ -90,66 +104,27 @@ export async function PATCH(
         )
       }
 
-      const { title, objective, situation, proposal, imageUrl } = await req.json()
-
-      // Validaciones básicas
-      if (!title || !objective || !situation || !proposal) {
-        return NextResponse.json(
-          { error: 'Título, objetivo, situación y propuesta son obligatorios' },
-          { status: 400 }
-        )
+      let body: unknown
+      try {
+        body = await req.json()
+      } catch {
+        return NextResponse.json({ error: 'El cuerpo de la solicitud no es JSON válido' }, { status: 400 })
       }
-
-      // Validaciones de longitud
-      if (title.length > 200) {
-        return NextResponse.json(
-          { error: 'El título no puede exceder 200 caracteres' },
-          { status: 400 }
-        )
+      const parsed = parseProposalInput(body)
+      if (!parsed.ok) {
+        return NextResponse.json({ error: parsed.error }, { status: 400 })
       }
-
-      if (objective.length > 1000) {
-        return NextResponse.json(
-          { error: 'El objetivo no puede exceder 1000 caracteres' },
-          { status: 400 }
-        )
-      }
-
-      if (situation.length > 2000) {
-        return NextResponse.json(
-          { error: 'La situación a modificar no puede exceder 2000 caracteres' },
-          { status: 400 }
-        )
-      }
-
-      if (proposal.length > 3000) {
-        return NextResponse.json(
-          { error: 'La propuesta no puede exceder 3000 caracteres' },
-          { status: 400 }
-        )
-      }
-
-      // Validar URL de imagen si se proporciona
-      if (imageUrl && imageUrl.trim()) {
-        try {
-          new URL(imageUrl.trim())
-        } catch {
-          return NextResponse.json(
-            { error: 'La URL de la imagen no es válida' },
-            { status: 400 }
-          )
-        }
-      }
+      const { title, objective, situation, proposal, imageUrl } = parsed.value
 
       // Actualizar propuesta
       const updatedProposal = await prisma.proposalV2.update({
         where: { id },
         data: {
-          title: String(title).trim(),
-          objective: String(objective).trim(),
-          situation: String(situation).trim(),
-          proposal: String(proposal).trim(),
-          imageUrl: imageUrl && imageUrl.trim() ? String(imageUrl).trim() : null
+          title,
+          objective,
+          situation,
+          proposal,
+          imageUrl
         },
         include: {
           createdBy: {

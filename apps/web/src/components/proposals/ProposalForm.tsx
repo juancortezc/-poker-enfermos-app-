@@ -7,7 +7,9 @@ import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea'
 import { Button } from '@/components/ui/button'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { toast } from 'react-toastify'
-import { Send, X, Image as ImageIcon } from 'lucide-react'
+import { Send, X, Image as ImageIcon, Upload } from 'lucide-react'
+import { isSafeImageUrl } from '@/lib/proposal-input'
+import { MAX_UPLOAD_BYTES } from '@/lib/image-upload'
 
 interface ProposalData {
   id?: number
@@ -39,8 +41,9 @@ export function ProposalForm({
     imageUrl: initialData?.imageUrl || ''
   })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(
-    initialData?.imageUrl || null
+    isSafeImageUrl(initialData?.imageUrl) ? initialData!.imageUrl! : null
   )
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export function ProposalForm({
         proposal: initialData.proposal || '',
         imageUrl: initialData.imageUrl || ''
       })
-      setImagePreview(initialData.imageUrl || null)
+      setImagePreview(isSafeImageUrl(initialData.imageUrl) ? initialData.imageUrl : null)
     } else {
       setFormData({
         title: '',
@@ -71,16 +74,42 @@ export function ProposalForm({
 
     // Handle image URL preview
     if (field === 'imageUrl') {
-      if (value.trim()) {
-        try {
-          new URL(value.trim())
-          setImagePreview(value.trim())
-        } catch {
-          setImagePreview(null)
-        }
-      } else {
-        setImagePreview(null)
+      // Solo https: es lo unico que acepta el servidor.
+      setImagePreview(isSafeImageUrl(value.trim()) ? value.trim() : null)
+    }
+  }
+
+  // Sube el archivo a /api/uploads/proposal-image y deja la URL en el campo.
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      toast.error('Solo se aceptan imágenes PNG, JPEG o WebP')
+      return
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      toast.error('La imagen supera 1 MB')
+      return
+    }
+    try {
+      setUploading(true)
+      const body = new FormData()
+      body.append('file', file)
+      const response = await fetch('/api/uploads/proposal-image', {
+        method: 'POST',
+        headers: buildAuthHeaders(),
+        body
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || typeof data.url !== 'string') {
+        throw new Error(data.error || 'No se pudo subir la imagen')
       }
+      handleInputChange('imageUrl', data.url)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'No se pudo subir la imagen')
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -252,9 +281,30 @@ export function ProposalForm({
             disabled={saving}
             className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
           />
-          <p className="text-xs text-white/50 mt-1">
-            URL de una imagen para acompañar tu propuesta
-          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <label
+              className={`inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-white/70 transition hover:border-white/35 hover:text-white ${
+                saving || uploading ? 'pointer-events-none opacity-50' : ''
+              }`}
+            >
+              {uploading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white/80"></div>
+              ) : (
+                <Upload className="w-4 h-4" />
+              )}
+              {uploading ? 'Subiendo...' : 'Subir imagen'}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleFileUpload}
+                disabled={saving || uploading}
+              />
+            </label>
+            <p className="text-xs text-white/50">
+              Pega un link https o sube una imagen (PNG, JPEG o WebP, máx. 1 MB)
+            </p>
+          </div>
 
           {/* Vista previa de imagen */}
           {imagePreview && (
@@ -280,7 +330,7 @@ export function ProposalForm({
         <div className="flex gap-3 pt-4">
           <Button
             type="submit"
-            disabled={saving || !isFormValid()}
+            disabled={saving || uploading || !isFormValid()}
             className="flex-1 bg-poker-red hover:bg-poker-red/90"
           >
             {saving ? (
