@@ -23,8 +23,15 @@ export interface GameDateRepository {
   findById(id: number): Promise<GameDateInfo | null>;
 
   /**
-   * Marks a game date as completed.
+   * Marks a game date as completed and stops its timer.
    * Called when auto-completing after position 2 is registered.
    */
   markAsCompleted(id: number): Promise<void>;
+
+  /**
+   * Runs `fn` atomically with the game date locked: concurrent writers on the
+   * same date run one after the other, and every repository call inside `fn`
+   * joins the same transaction.
+   */
+  runLocked<T>(id: number, fn: () => Promise<T>): Promise<T>;
 }

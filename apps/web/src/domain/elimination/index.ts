@@ -34,4 +34,11 @@ export {
   InvalidEliminatorError,
   GameDateNotInProgressError,
   InvalidPositionError,
+  EliminationNotFoundError,
+  SelfEliminationError,
+  PlayerNotInGameDateError,
+  PositionNotNextError,
+  NotLastEliminationError,
+  InvalidEliminationInputError,
+  EliminationConflictError,
 } from './errors/EliminationError';

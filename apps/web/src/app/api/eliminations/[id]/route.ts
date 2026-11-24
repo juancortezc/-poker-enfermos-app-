@@ -6,6 +6,7 @@ import {
   getDeleteEliminationUseCase,
 } from '@/infrastructure';
 import { handleEliminationError } from '@/infrastructure/http/errorHandler';
+import { parseEliminationId, parseUpdateElimination } from '@/infrastructure/http/eliminationInput';
 import { recalculateStatsForElimination, recalculateAllStats } from '@/lib/parent-child-stats';
 import { prisma } from '@/lib/prisma';
 
@@ -24,29 +25,8 @@ export async function PUT(
 ) {
   return withComisionAuth(request, async () => {
     try {
-      const { id } = await params;
-      const eliminationId = parseInt(id);
-
-      if (isNaN(eliminationId)) {
-        return NextResponse.json(
-          { error: 'Invalid elimination ID' },
-          { status: 400 }
-        );
-      }
-
-      const body = await request.json();
-
-      // Support both naming conventions from frontend
-      const eliminatedPlayerId = body.eliminatedPlayerId ?? body.eliminatedId;
-      const eliminatorPlayerId = body.eliminatorPlayerId ?? body.eliminatorId;
-
-      // Reject attempts to change position or points
-      if (body.position !== undefined || body.points !== undefined) {
-        return NextResponse.json(
-          { error: 'Cannot change position or points' },
-          { status: 400 }
-        );
-      }
+      const eliminationId = parseEliminationId((await params).id);
+      const { eliminatedPlayerId, eliminatorPlayerId } = await parseUpdateElimination(request);
 
       // Execute use case
       const useCase = getUpdateEliminationUseCase();
@@ -79,15 +59,7 @@ export async function DELETE(
 ) {
   return withComisionAuth(request, async () => {
     try {
-      const { id } = await params;
-      const eliminationId = parseInt(id);
-
-      if (isNaN(eliminationId)) {
-        return NextResponse.json(
-          { error: 'Invalid elimination ID' },
-          { status: 400 }
-        );
-      }
+      const eliminationId = parseEliminationId((await params).id);
 
       // Execute use case
       // Se lee el torneo ANTES de borrar: despues la eliminacion ya no existe.
