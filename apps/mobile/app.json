@@ -45,7 +45,16 @@
           "faceIDPermission": "Usamos Face ID para desbloquear tu clave de Poker Enfermos sin tener que escribirla."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Usamos tus fotos solo para adjuntar una imagen a tus propuestas.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
