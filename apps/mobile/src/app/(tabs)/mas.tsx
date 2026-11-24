@@ -1,8 +1,8 @@
 /**
- * "Más": índice de todas las secciones que no están en la barra inferior,
- * filtrado por rol con los mismos permisos que la web. El agente de F3 lo
- * ajustará a la página /mas de la web; mientras, sirve para navegar a todas
- * las pantallas y para cerrar sesión / gestionar la biometría.
+ * "Más": índice de las secciones que no están en la barra inferior, filtrado
+ * por rol con los mismos permisos que la web (/mas). Incluye lo que la web
+ * reparte entre Más y la barra superior (fecha, timer, jugadores, ayuda) y,
+ * para la Comisión, Administración, Reportes y Compartir.
  */
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, type Href } from 'expo-router';
@@ -19,7 +19,8 @@ import { noir } from '@/theme/colors';
 
 type Item = {
   title: string;
-  href: Href;
+  /** 'me' = el perfil de torneo del usuario (/players/[su id]). */
+  href: Href | 'me';
   icon: React.ComponentProps<typeof Ionicons>['name'];
   permission?: FeaturePermission;
 };
@@ -28,31 +29,34 @@ const SECTIONS: { title: string; items: Item[] }[] = [
   {
     title: 'Torneo',
     items: [
+      { title: 'Tabla del torneo', href: '/tabla', icon: 'trophy-outline' },
       { title: 'Fecha', href: '/fecha', icon: 'today-outline' },
       { title: 'Calendario', href: '/calendario', icon: 'calendar-outline', permission: 'calendar' },
-      { title: 'Tabla completa', href: '/tabla', icon: 'grid-outline' },
       { title: 'Timer', href: '/timer', icon: 'timer-outline' },
       { title: 'Registro', href: '/registro', icon: 'create-outline', permission: 'eliminations' },
       { title: 'Propuestas', href: '/propuestas-v2', icon: 'chatbubbles-outline', permission: 't29-proposals' },
-      { title: 'Reportes', href: '/reportes', icon: 'document-text-outline' },
     ],
   },
   {
     title: 'Grupo',
     items: [
-      { title: 'Perfil', href: '/perfil', icon: 'person-outline', permission: 'profile' },
+      { title: 'Mi perfil', href: 'me', icon: 'person-circle-outline' },
+      { title: 'Ajustes', href: '/perfil', icon: 'settings-outline', permission: 'profile' },
       { title: 'Jugadores', href: '/players', icon: 'people-outline' },
       { title: 'Contactos', href: '/contactos', icon: 'call-outline' },
-      { title: 'Multas', href: '/multas', icon: 'cash-outline' },
-      { title: 'Info', href: '/info', icon: 'information-circle-outline' },
+      { title: 'Multas', href: '/multas', icon: 'receipt-outline' },
+      { title: 'Reglamento e info', href: '/info', icon: 'book-outline', permission: 'regulations' },
+      { title: 'Notificaciones', href: '/ayuda/notificaciones', icon: 'notifications-outline' },
       { title: 'Ayuda', href: '/ayuda', icon: 'help-circle-outline' },
     ],
   },
   {
     title: 'Comisión',
     items: [
-      { title: 'Admin', href: '/admin', icon: 'shield-outline', permission: 'tournaments' },
+      { title: 'Administración', href: '/admin', icon: 'shield-outline', permission: 'tournaments' },
       { title: 'Torneos', href: '/tournaments', icon: 'trophy-outline', permission: 'tournaments' },
+      { title: 'Reportes', href: '/reportes', icon: 'document-text-outline', permission: 'tournaments' },
+      { title: 'Compartir al grupo', href: '/compartir', icon: 'share-social-outline', permission: 'tournaments' },
     ],
   },
 ];
@@ -85,7 +89,11 @@ export default function MasScreen() {
             {section.items.map((item, idx) => (
               <Pressable
                 key={item.title}
-                onPress={() => router.push(item.href)}
+                onPress={() =>
+                  item.href === 'me'
+                    ? user && router.push({ pathname: '/players/[id]', params: { id: user.id } })
+                    : router.push(item.href)
+                }
                 className={`flex-row items-center gap-3 px-5 py-4 active:bg-noir-raised ${
                   idx > 0 ? 'border-t border-noir-border' : ''
                 }`}>
