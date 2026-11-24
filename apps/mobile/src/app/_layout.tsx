@@ -1,18 +1,78 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import '../global.css';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { Cinzel_600SemiBold } from '@expo-google-fonts/cinzel/600SemiBold';
+import { Cinzel_700Bold } from '@expo-google-fonts/cinzel/700Bold';
+import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular';
+import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium';
+import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold';
+import { Inter_700Bold } from '@expo-google-fonts/inter/700Bold';
+import { useFonts } from 'expo-font';
+import { Stack, ThemeProvider } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { SWRProvider } from '@/lib/swr';
+import { navTheme, stackScreenOptions } from '@/theme/navigation';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Cinzel_600SemiBold,
+    Cinzel_700Bold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider value={navTheme}>
+        <StatusBar style="light" />
+        <AuthProvider>
+          <RootNavigator fontsReady={fontsLoaded || !!fontError} />
+        </AuthProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
+
+function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
+  const { status, user } = useAuth();
+  const ready = fontsReady && status !== 'loading';
+
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
+
+  const signedIn = status === 'signedIn';
+
+  return (
+    // La key por usuario descarta la cache de SWR al cambiar de sesión: un
+    // Enfermo no debe ver datos que cargó antes la Comisión en el mismo equipo.
+    <SWRProvider key={signedIn ? user?.id : 'anon'}>
+      <Stack screenOptions={{ ...stackScreenOptions, headerShown: false }}>
+        <Stack.Protected guard={signedIn}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(jugador)" />
+          <Stack.Screen name="(envivo)" />
+          <Stack.Screen name="(torneo)" />
+          <Stack.Screen name="(admin)" />
+        </Stack.Protected>
+        <Stack.Protected guard={status === 'signedOut'}>
+          <Stack.Screen name="login" options={{ animation: 'fade' }} />
+        </Stack.Protected>
+        <Stack.Protected guard={status === 'locked'}>
+          <Stack.Screen name="unlock" options={{ animation: 'fade' }} />
+        </Stack.Protected>
+      </Stack>
+    </SWRProvider>
   );
 }
