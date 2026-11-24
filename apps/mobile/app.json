@@ -52,6 +52,15 @@
           "color": "#E0B66C",
           "defaultChannel": "default"
         }
+      ],
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Usamos tus fotos solo para adjuntar una imagen a tus propuestas.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {
