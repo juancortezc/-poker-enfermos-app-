@@ -22,7 +22,8 @@
         "backgroundColor": "#1F1410",
         "foregroundImage": "./assets/icons/favicon-512.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"]
     },
     "web": {
       "output": "single",
@@ -50,7 +51,8 @@
         "expo-notifications",
         {
           "color": "#E0B66C",
-          "defaultChannel": "default"
+          "defaultChannel": "default",
+          "sounds": ["./assets/sounds/timer_minuto.wav", "./assets/sounds/timer_cambio.wav"]
         }
       ],
       "expo-sharing",
