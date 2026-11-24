@@ -20,7 +20,34 @@ import {
  * por escribir lo mismo. Ahora el nivel se deriva, asi que leer es leer.
  */
 
-export type TimerAction = 'start' | 'pause' | 'resume' | 'restart-level' | 'advance'
+/**
+ * `start` es idempotente: si el timer ya corre (o esta pausado) no lo toca.
+ * Para volver al nivel 1 de verdad hay que pedir `reset` explicitamente.
+ */
+export type TimerAction = 'start' | 'reset' | 'pause' | 'resume' | 'restart-level' | 'advance'
+
+export const TIMER_ACTIONS: TimerAction[] = ['start', 'reset', 'pause', 'resume', 'restart-level', 'advance']
+
+/** Error con status HTTP y codigo estable para el cliente. */
+export class TimerError extends Error {
+  constructor(
+    message: string,
+    readonly status: 404 | 409,
+    readonly code: 'GAME_DATE_NOT_FOUND' | 'GAME_DATE_NOT_IN_PROGRESS' | 'NO_BLIND_LEVELS'
+  ) {
+    super(message)
+    this.name = 'TimerError'
+  }
+}
+
+/** Un nivel de la estructura del torneo, tal como esta en BlindLevel. */
+export interface TimerBlindLevel {
+  level: number
+  smallBlind: number
+  bigBlind: number
+  /** Minutos. 0 = sin limite. */
+  duration: number
+}
 
 /** Lo que viaja al cliente. Las fechas van en ISO. */
 export interface TimerSnapshot {
@@ -42,6 +69,11 @@ export interface TimerSnapshot {
   isLastLevel: boolean
   /** Reloj del servidor, para que el cliente corrija su propio desfase. */
   serverNow: string
+  /**
+   * Estructura de blinds del torneo, para que el cliente reconstruya el
+   * ancla sin pedir el torneo entero.
+   */
+  blindLevels: TimerBlindLevel[]
 }
 
 const ESTADO_VACIO = {
@@ -57,27 +89,41 @@ async function cargar(gameDateId: number) {
     prisma.gameDate.findUnique({
       where: { id: gameDateId },
       select: {
+        status: true,
         tournament: {
-          select: { blindLevels: { orderBy: { level: 'asc' } } },
+          select: {
+            blindLevels: {
+              orderBy: { level: 'asc' },
+              select: { level: true, smallBlind: true, bigBlind: true, duration: true },
+            },
+          },
         },
       },
     }),
   ])
 
-  const niveles = toBlindSpecs(fecha?.tournament.blindLevels ?? [])
-  const anchor: TimerAnchor = estado
-    ? {
-        status: estado.status as TimerAnchor['status'],
-        anchorLevel: estado.anchorLevel,
-        anchorElapsedMs: estado.anchorElapsedMs,
-        anchorAt: estado.anchorAt,
-      }
-    : ESTADO_VACIO
+  if (!fecha) {
+    throw new TimerError('Fecha no encontrada', 404, 'GAME_DATE_NOT_FOUND')
+  }
 
-  return { anchor, niveles, existe: Boolean(estado) }
+  const blindLevels = fecha.tournament.blindLevels
+  const niveles = toBlindSpecs(blindLevels)
+  // Una fecha que ya no esta en curso no tiene reloj, aunque haya quedado un
+  // ancla vieja (fechas cerradas antes de que el cierre detuviera el timer).
+  const anchor: TimerAnchor =
+    estado && fecha.status === 'in_progress'
+      ? {
+          status: estado.status as TimerAnchor['status'],
+          anchorLevel: estado.anchorLevel,
+          anchorElapsedMs: estado.anchorElapsedMs,
+          anchorAt: estado.anchorAt,
+        }
+      : ESTADO_VACIO
+
+  return { anchor, niveles, blindLevels, existe: Boolean(estado), gameDateStatus: fecha.status }
 }
 
-function aSnapshot(vista: TimerView, now: Date): TimerSnapshot {
+function aSnapshot(vista: TimerView, now: Date, blindLevels: TimerBlindLevel[]): TimerSnapshot {
   return {
     status: vista.status,
     level: vista.level,
@@ -91,14 +137,15 @@ function aSnapshot(vista: TimerView, now: Date): TimerSnapshot {
     isUnlimited: vista.isUnlimited,
     isLastLevel: vista.isLastLevel,
     serverNow: now.toISOString(),
+    blindLevels,
   }
 }
 
 /** Estado actual. Solo lee. */
 export async function readTimer(gameDateId: number): Promise<TimerSnapshot> {
   const now = new Date()
-  const { anchor, niveles } = await cargar(gameDateId)
-  return aSnapshot(resolveTimer(anchor, niveles, now), now)
+  const { anchor, niveles, blindLevels } = await cargar(gameDateId)
+  return aSnapshot(resolveTimer(anchor, niveles, now), now, blindLevels)
 }
 
 /**
@@ -112,15 +159,30 @@ export async function applyTimerAction(
   action: TimerAction
 ): Promise<TimerSnapshot> {
   const now = new Date()
-  const { anchor, niveles } = await cargar(gameDateId)
+  const { anchor, niveles, blindLevels, gameDateStatus } = await cargar(gameDateId)
+
+  if (gameDateStatus !== 'in_progress') {
+    throw new TimerError(
+      `La fecha no esta en curso (estado: ${gameDateStatus})`,
+      409,
+      'GAME_DATE_NOT_IN_PROGRESS'
+    )
+  }
 
   if (niveles.length === 0) {
-    throw new Error('El torneo no tiene estructura de blinds cargada')
+    throw new TimerError('El torneo no tiene estructura de blinds cargada', 409, 'NO_BLIND_LEVELS')
   }
 
   let nuevo: TimerAnchor
   switch (action) {
     case 'start':
+      // Idempotente: un segundo toque (u otro telefono) no reinicia la noche.
+      if (anchor.status !== 'inactive') {
+        return aSnapshot(resolveTimer(anchor, niveles, now), now, blindLevels)
+      }
+      nuevo = startTimer(niveles, now)
+      break
+    case 'reset':
       nuevo = startTimer(niveles, now)
       break
     case 'pause':
@@ -150,7 +212,21 @@ export async function applyTimerAction(
     update: datos,
   })
 
-  return aSnapshot(resolveTimer(nuevo, niveles, now), now)
+  return aSnapshot(resolveTimer(nuevo, niveles, now), now, blindLevels)
+}
+
+/**
+ * Detiene el timer de una fecha (al cerrarla). Acepta un cliente de
+ * transaccion para quedar dentro del mismo cierre.
+ */
+export async function stopTimer(
+  gameDateId: number,
+  client: Pick<typeof prisma, 'timerState'> = prisma
+): Promise<void> {
+  await client.timerState.updateMany({
+    where: { gameDateId },
+    data: { status: 'inactive', anchorAt: null },
+  })
 }
 
 /** Arranca el timer junto con la fecha, si todavia no existe. */

@@ -19,7 +19,7 @@ import type { TimerSnapshot } from '@/lib/timer-service'
  *    puede estar minutos adelantado; `serverNow` permite descontarlo.
  */
 
-export type TimerAction = 'start' | 'pause' | 'resume' | 'restart-level' | 'advance'
+export type TimerAction = 'start' | 'reset' | 'pause' | 'resume' | 'restart-level' | 'advance'
 
 /** Lo que se dispara cuando toca avisar. */
 export type TimerAlert =
