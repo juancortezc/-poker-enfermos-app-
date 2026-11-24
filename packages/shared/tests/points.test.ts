@@ -65,12 +65,21 @@ test('getPointsTable cubre MIN..MAX y coincide con la distribucion', () => {
   for (let n = 10; n <= 24; n++) assert.deepEqual(t[n], getPointsDistribution(n))
 })
 
-// Defecto heredado (identico en 0b3ed0f): con 9 jugadores o menos la tabla se
-// construye sin posicion 10 y `pointsArray[9] + 2` da NaN, que contamina todo
-// el arreglo. Queda como `todo` hasta que la Comision confirme la tabla de 9.
-test('con 9 jugadores la tabla deberia ser numerica', { todo: 'pendiente: hoy devuelve NaN (defecto heredado)' }, () => {
-  const d = getPointsDistribution(9)
-  d.forEach((p) => assert.ok(Number.isInteger(p)))
+// Tabla aprobada para 9 jugadores o menos: ultimo = 1, +1 por puesto hasta el
+// 4to, +3 en cada puesto del podio. Con 3 o menos solo hay podio.
+test('9 jugadores o menos: tabla aprobada', () => {
+  assert.deepEqual(getPointsDistribution(9), [15, 12, 9, 6, 5, 4, 3, 2, 1])
+  assert.deepEqual(getPointsDistribution(8), [14, 11, 8, 5, 4, 3, 2, 1])
+  assert.deepEqual(getPointsDistribution(7), [13, 10, 7, 4, 3, 2, 1])
+  assert.deepEqual(getPointsDistribution(6), [12, 9, 6, 3, 2, 1])
+  assert.deepEqual(getPointsDistribution(5), [11, 8, 5, 2, 1])
+  assert.deepEqual(getPointsDistribution(4), [10, 7, 4, 1])
+  assert.deepEqual(getPointsDistribution(3), [7, 4, 1])
+  assert.deepEqual(getPointsDistribution(2), [4, 1])
+  for (let n = 2; n <= 9; n++) {
+    assert.equal(getWinnerPoints(n), getPointsDistribution(n)[0])
+    assert.equal(calculatePointsForPosition(n + 1, n), 0)
+  }
 })
 
 // Entradas no enteras: hoy devuelven undefined o lanzan RangeError (igual que

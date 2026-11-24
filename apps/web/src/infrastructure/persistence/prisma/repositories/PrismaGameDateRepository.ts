@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/prisma';
+import { db, withGameDateLock } from '@/lib/prisma-tx';
+import { stopTimer } from '@/lib/timer-service';
 import { GameDateRepository, GameDateInfo } from '@/application/elimination';
 
 /**
@@ -7,7 +8,7 @@ import { GameDateRepository, GameDateInfo } from '@/application/elimination';
  */
 export class PrismaGameDateRepository implements GameDateRepository {
   async findById(id: number): Promise<GameDateInfo | null> {
-    const gameDate = await prisma.gameDate.findUnique({
+    const gameDate = await db().gameDate.findUnique({
       where: { id },
       include: {
         tournament: {
@@ -29,10 +30,16 @@ export class PrismaGameDateRepository implements GameDateRepository {
 
   async markAsCompleted(id: number): Promise<void> {
     console.log(`[PrismaGameDateRepository] markAsCompleted called for id=${id}`);
-    const result = await prisma.gameDate.update({
+    const result = await db().gameDate.update({
       where: { id },
       data: { status: 'completed' },
     });
+    // Fecha cerrada = reloj detenido. Antes el timer seguia corriendo.
+    await stopTimer(id, db());
     console.log(`[PrismaGameDateRepository] markAsCompleted done: status=${result.status}`);
+  }
+
+  runLocked<T>(id: number, fn: () => Promise<T>): Promise<T> {
+    return withGameDateLock(id, fn);
   }
 }

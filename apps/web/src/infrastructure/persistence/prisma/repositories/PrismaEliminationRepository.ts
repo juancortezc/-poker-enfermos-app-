@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/prisma-tx';
 import { Elimination } from '@/domain/elimination';
 import { EliminationRepository } from '@/application/elimination';
 import { EliminationMapper } from '../mappers/EliminationMapper';
@@ -9,20 +9,20 @@ import { EliminationMapper } from '../mappers/EliminationMapper';
 export class PrismaEliminationRepository implements EliminationRepository {
   async save(elimination: Elimination): Promise<Elimination> {
     // Get total players for the game date (needed for domain reconstruction)
-    const gameDate = await prisma.gameDate.findUnique({
+    const gameDate = await db().gameDate.findUnique({
       where: { id: elimination.gameDateId },
       select: { playerIds: true },
     });
     const totalPlayers = gameDate?.playerIds.length ?? 0;
 
     const data = EliminationMapper.toPrismaCreate(elimination);
-    const created = await prisma.elimination.create({ data });
+    const created = await db().elimination.create({ data });
 
     return EliminationMapper.toDomain(created, totalPlayers);
   }
 
   async findById(id: number): Promise<Elimination | null> {
-    const elimination = await prisma.elimination.findUnique({
+    const elimination = await db().elimination.findUnique({
       where: { id },
       include: {
         gameDate: {
@@ -38,13 +38,13 @@ export class PrismaEliminationRepository implements EliminationRepository {
   }
 
   async findByGameDateId(gameDateId: number): Promise<Elimination[]> {
-    const gameDate = await prisma.gameDate.findUnique({
+    const gameDate = await db().gameDate.findUnique({
       where: { id: gameDateId },
       select: { playerIds: true },
     });
     const totalPlayers = gameDate?.playerIds.length ?? 0;
 
-    const eliminations = await prisma.elimination.findMany({
+    const eliminations = await db().elimination.findMany({
       where: { gameDateId },
       orderBy: { position: 'asc' }, // Ascendente: posición 1 (último eliminado) primero
     });
@@ -53,7 +53,7 @@ export class PrismaEliminationRepository implements EliminationRepository {
   }
 
   async existsByPlayerInGameDate(playerId: string, gameDateId: number): Promise<boolean> {
-    const count = await prisma.elimination.count({
+    const count = await db().elimination.count({
       where: {
         gameDateId,
         eliminatedPlayerId: playerId,
@@ -63,7 +63,7 @@ export class PrismaEliminationRepository implements EliminationRepository {
   }
 
   async existsByPositionInGameDate(position: number, gameDateId: number): Promise<boolean> {
-    const count = await prisma.elimination.count({
+    const count = await db().elimination.count({
       where: {
         gameDateId,
         position,
@@ -76,13 +76,13 @@ export class PrismaEliminationRepository implements EliminationRepository {
     playerId: string,
     gameDateId: number
   ): Promise<Elimination | null> {
-    const gameDate = await prisma.gameDate.findUnique({
+    const gameDate = await db().gameDate.findUnique({
       where: { id: gameDateId },
       select: { playerIds: true },
     });
     const totalPlayers = gameDate?.playerIds.length ?? 0;
 
-    const elimination = await prisma.elimination.findFirst({
+    const elimination = await db().elimination.findFirst({
       where: {
         gameDateId,
         eliminatedPlayerId: playerId,
@@ -94,8 +94,16 @@ export class PrismaEliminationRepository implements EliminationRepository {
     return EliminationMapper.toDomain(elimination, totalPlayers);
   }
 
+  async findLowestPosition(gameDateId: number): Promise<number | null> {
+    const agg = await db().elimination.aggregate({
+      where: { gameDateId },
+      _min: { position: true },
+    });
+    return agg._min.position;
+  }
+
   async countByGameDateId(gameDateId: number): Promise<number> {
-    return prisma.elimination.count({
+    return db().elimination.count({
       where: { gameDateId },
     });
   }
@@ -105,14 +113,14 @@ export class PrismaEliminationRepository implements EliminationRepository {
       throw new Error('Cannot update elimination without ID');
     }
 
-    const gameDate = await prisma.gameDate.findUnique({
+    const gameDate = await db().gameDate.findUnique({
       where: { id: elimination.gameDateId },
       select: { playerIds: true },
     });
     const totalPlayers = gameDate?.playerIds.length ?? 0;
 
     const data = EliminationMapper.toPrismaUpdate(elimination);
-    const updated = await prisma.elimination.update({
+    const updated = await db().elimination.update({
       where: { id: elimination.id },
       data,
     });
@@ -121,14 +129,14 @@ export class PrismaEliminationRepository implements EliminationRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await prisma.elimination.delete({
+    await db().elimination.delete({
       where: { id },
     });
   }
 
   async existsLaterEliminations(gameDateId: number, position: number): Promise<boolean> {
     // Later eliminations have LOWER position numbers (closer to 1)
-    const count = await prisma.elimination.count({
+    const count = await db().elimination.count({
       where: {
         gameDateId,
         position: { lt: position },

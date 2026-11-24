@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getEcuadorToday } from '@/lib/date-utils'
 import { UserRole } from '@prisma/client'
 import { withComisionAuth, validateApiAccess, ValidacionNoDisponible } from '@/lib/api-auth'
-import { playerSelectForRole } from '@/lib/player-select'
+import { playerSelectForRole, PLAYER_ADMIN_SELECT } from '@/lib/player-select'
 import { validateAndHashPin } from '@/lib/pin-utils'
 
 // GET /api/players - Directorio de jugadores.
@@ -214,7 +214,9 @@ export async function POST(req: NextRequest) {
         adminKey: adminKey,
         isActive: true
       },
-      include: {
+      // select, nunca include: include devolvia el hash del pin y el adminKey.
+      select: {
+        ...PLAYER_ADMIN_SELECT,
         inviter: {
           select: {
             id: true,

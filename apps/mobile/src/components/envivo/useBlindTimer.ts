@@ -18,16 +18,9 @@ import { apiFetch } from '@/lib/api';
 import { swrKeys } from '@/lib/swr';
 
 import { computeTimerView, type TimerDisplay, type TimerEntry } from './timer-view';
-import type { TimerAction, TimerSnapshot } from './types';
+import type { TimerAction, TimerBlindLevel, TimerSnapshot } from './types';
 
-type TournamentBlinds = {
-  blindLevels?: {
-    level: number;
-    smallBlind: number;
-    bigBlind: number;
-    duration: number;
-  }[];
-};
+type TournamentBlinds = { blindLevels?: TimerBlindLevel[] };
 
 export const timerKey = (gameDateId: number) => `/api/timer/${gameDateId}`;
 
@@ -55,16 +48,20 @@ export function useBlindTimer(gameDateId: number | null, tournamentId: number | 
     }
   );
 
-  // Los niveles casi nunca cambian: se piden una vez por sesión de pantalla.
-  const { data: tournament } = useSWR<TournamentBlinds>(tournamentId ? swrKeys.tournament(tournamentId) : null, {
-    revalidateOnFocus: false,
-    dedupingInterval: 10 * 60_000,
-  });
-
-  const levels: BlindSpec[] = useMemo(
-    () => (tournament?.blindLevels?.length ? toBlindSpecs(tournament.blindLevels) : []),
-    [tournament]
+  // Los niveles vienen en la respuesta del timer. Solo si la API es anterior
+  // y no los trae se pide el torneo entero (una vez por sesión de pantalla).
+  const snapshotLevels = data?.snapshot.blindLevels;
+  const needTournament = Boolean(data) && !snapshotLevels;
+  const { data: tournament } = useSWR<TournamentBlinds>(
+    needTournament && tournamentId ? swrKeys.tournament(tournamentId) : null,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 10 * 60_000,
+    }
   );
+
+  const rawLevels = snapshotLevels ?? tournament?.blindLevels;
+  const levels: BlindSpec[] = useMemo(() => (rawLevels?.length ? toBlindSpecs(rawLevels) : []), [rawLevels]);
 
   const [now, setNow] = useState(() => Date.now());
   const running = data?.snapshot.status === 'active';

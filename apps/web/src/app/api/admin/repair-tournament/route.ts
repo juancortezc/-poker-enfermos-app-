@@ -74,7 +74,8 @@ export async function POST(req: NextRequest) {
 
       for (const playerId of missingInTable) {
         const player = await prisma.player.findUnique({
-          where: { id: playerId }
+          where: { id: playerId },
+          select: { id: true, role: true }
         })
         
         if (player && player.role !== 'Invitado') {

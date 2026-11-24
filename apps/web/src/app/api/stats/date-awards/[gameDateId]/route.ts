@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient, UserRole } from '@prisma/client'
+import { PLAYER_PUBLIC_SELECT } from '@/lib/player-select'
 
 const prisma = new PrismaClient()
 
@@ -25,8 +26,8 @@ export async function GET(
         tournament: true,
         eliminations: {
           include: {
-            eliminatedPlayer: true,
-            eliminatorPlayer: true
+            eliminatedPlayer: { select: PLAYER_PUBLIC_SELECT },
+            eliminatorPlayer: { select: PLAYER_PUBLIC_SELECT }
           },
           orderBy: { position: 'asc' }
         }
@@ -58,6 +59,7 @@ export async function GET(
       .map(([playerId]) => playerId)
 
     const varonPlayers = await prisma.player.findMany({
+      select: PLAYER_PUBLIC_SELECT,
       where: { id: { in: varonPlayerIds } }
     })
 
@@ -79,6 +81,7 @@ export async function GET(
       .map(([playerId]) => playerId)
 
     const gayPlayers = await prisma.player.findMany({
+      select: PLAYER_PUBLIC_SELECT,
       where: { id: { in: gayPlayerIds } }
     })
 
@@ -94,6 +97,7 @@ export async function GET(
 
     const podioPlayerIds = podioEliminations.map(e => e.eliminatedPlayerId)
     const podioPlayers = await prisma.player.findMany({
+      select: PLAYER_PUBLIC_SELECT,
       where: { id: { in: podioPlayerIds } }
     })
 
@@ -109,6 +113,7 @@ export async function GET(
 
     const mesaFinalPlayerIds = mesaFinalEliminations.map(e => e.eliminatedPlayerId)
     const mesaFinalPlayers = await prisma.player.findMany({
+      select: PLAYER_PUBLIC_SELECT,
       where: { id: { in: mesaFinalPlayerIds } }
     })
 
@@ -123,6 +128,7 @@ export async function GET(
 
     const sieteYDosPlayerIds = lastTwoPositions.map(e => e.eliminatedPlayerId)
     const sieteYDosPlayers = await prisma.player.findMany({
+      select: PLAYER_PUBLIC_SELECT,
       where: { id: { in: sieteYDosPlayerIds } }
     })
 
@@ -132,6 +138,7 @@ export async function GET(
 
     // 5. Faltas (absent players from Comision and Enfermo roles)
     const allEnfermosComision = await prisma.player.findMany({
+      select: PLAYER_PUBLIC_SELECT,
       where: {
         isActive: true,
         role: { in: [UserRole.Comision, UserRole.Enfermo] }

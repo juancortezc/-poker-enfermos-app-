@@ -3,12 +3,15 @@ import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { isValidPinForLogin, normalizePin } from '@poker/shared'
 
+/**
+ * Lo que devuelve el login. Sin `pin` ni `adminKey`: la respuesta de
+ * /api/auth/login entregaba el hash de la clave.
+ */
 export interface AuthUser {
   id: string
   firstName: string
   lastName: string
   role: UserRole
-  pin?: string
   photoUrl?: string
 }
 
@@ -48,7 +51,6 @@ export async function authenticateUserByPin(pin: string): Promise<AuthUser | nul
           firstName: player.firstName,
           lastName: player.lastName,
           role: player.role,
-          pin: player.pin || undefined,
           photoUrl: player.photoUrl || undefined,
         }
       }
@@ -92,7 +94,6 @@ export async function authenticateUser(adminKey: string): Promise<AuthUser | nul
           firstName: player.firstName,
           lastName: player.lastName,
           role: player.role,
-          pin: player.pin || undefined,
           photoUrl: player.photoUrl || undefined,
         }
       }

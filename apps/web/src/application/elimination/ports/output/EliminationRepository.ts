@@ -39,6 +39,12 @@ export interface EliminationRepository {
   findByPlayerInGameDate(playerId: string, gameDateId: number): Promise<Elimination | null>;
 
   /**
+   * Lowest position already registered in a game date (the most recent
+   * elimination), or null if there are none.
+   */
+  findLowestPosition(gameDateId: number): Promise<number | null>;
+
+  /**
    * Counts eliminations in a game date.
    */
   countByGameDateId(gameDateId: number): Promise<number>;

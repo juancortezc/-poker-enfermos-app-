@@ -119,6 +119,10 @@ model Elimination {
   eliminatorPlayer   Player   @relation("EliminatorPlayer", fields: [eliminatorPlayerId], references: [id])
   gameDate           GameDate @relation(fields: [gameDateId], references: [id], onDelete: Cascade)
 
+  // Una posicion y un eliminado por fecha. Es la red de seguridad contra dos
+  // telefonos registrando a la vez (ver docs/mobile/migrations/002).
+  @@unique([gameDateId, position])
+  @@unique([gameDateId, eliminatedPlayerId])
   @@map("eliminations")
 }
 

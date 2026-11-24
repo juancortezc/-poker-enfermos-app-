@@ -4,6 +4,10 @@ import {
   PositionAlreadyTakenError,
   InvalidEliminatorError,
   GameDateNotInProgressError,
+  EliminationNotFoundError,
+  SelfEliminationError,
+  PlayerNotInGameDateError,
+  PositionNotNextError,
 } from '@/domain/elimination';
 import {
   RegisterEliminationUseCase,
@@ -11,18 +15,29 @@ import {
   EliminationResult,
 } from '../ports/input/RegisterEliminationUseCase';
 import { EliminationRepository } from '../ports/output/EliminationRepository';
-import { GameDateRepository } from '../ports/output/GameDateRepository';
+import { GameDateRepository, GameDateInfo } from '../ports/output/GameDateRepository';
 import { PlayerRepository } from '../ports/output/PlayerRepository';
 import { NotificationService } from '../ports/output/NotificationService';
 import { ParentChildStatsService } from '../ports/output/ParentChildStatsService';
+
+/** Lo que deja la parte transaccional del alta. */
+interface LockedResult {
+  gameDate: GameDateInfo;
+  savedElimination: Elimination;
+  /**
+   * Ganador guardado por el cierre automatico (posicion 2 con eliminador),
+   * 'skipped' si faltaban eliminaciones, o null si no aplica.
+   */
+  autoComplete: Elimination | 'skipped' | null;
+}
 
 /**
  * Handles the registration of a new player elimination.
  *
  * Orchestrates:
- * 1. Validation of business rules
- * 2. Creation and persistence of elimination
- * 3. Side effects (notifications, stats, auto-complete)
+ * 1. Validation of business rules and persistence, atomically with the game
+ *    date locked (two phones registering at once run one after the other)
+ * 2. Side effects (notifications, stats) after the commit
  */
 export class RegisterEliminationHandler implements RegisterEliminationUseCase {
   constructor(
@@ -34,74 +49,25 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
   ) {}
 
   async execute(command: RegisterEliminationCommand): Promise<EliminationResult> {
-    // 1. Validate game date exists and is in progress
-    const gameDate = await this.gameDateRepository.findById(command.gameDateId);
-    if (!gameDate) {
-      throw new Error(`Game date ${command.gameDateId} not found`);
-    }
-    if (gameDate.status !== 'in_progress') {
-      throw new GameDateNotInProgressError(command.gameDateId, gameDate.status);
-    }
-
-    // 2. Validate player not already eliminated
-    const alreadyEliminated = await this.eliminationRepository.existsByPlayerInGameDate(
-      command.eliminatedPlayerId,
-      command.gameDateId
+    const { gameDate, savedElimination, autoComplete } = await this.gameDateRepository.runLocked(
+      command.gameDateId,
+      () => this.registerLocked(command)
     );
-    if (alreadyEliminated) {
-      throw new PlayerAlreadyEliminatedError(command.eliminatedPlayerId);
-    }
 
-    // 3. Validate position not taken
-    const positionTaken = await this.eliminationRepository.existsByPositionInGameDate(
-      command.position,
-      command.gameDateId
-    );
-    if (positionTaken) {
-      throw new PositionAlreadyTakenError(command.position);
-    }
-
-    // 4. Validate eliminator not eliminated before this position
-    if (command.eliminatorPlayerId) {
-      const eliminatorElimination = await this.eliminationRepository.findByPlayerInGameDate(
-        command.eliminatorPlayerId,
-        command.gameDateId
-      );
-      if (eliminatorElimination && eliminatorElimination.position.value > command.position) {
-        throw new InvalidEliminatorError(
-          command.eliminatorPlayerId,
-          eliminatorElimination.position.value
-        );
-      }
-    }
-
-    // 5. Create elimination entity
-    const totalPlayers = gameDate.playerIds.length;
-    const elimination = Elimination.create({
-      gameDateId: command.gameDateId,
-      position: command.position,
-      totalPlayers,
-      eliminatedPlayerId: command.eliminatedPlayerId,
-      eliminatorPlayerId: command.eliminatorPlayerId,
-      eliminationTime: new Date(),
-    });
-
-    // 6. Save elimination
-    const savedElimination = await this.eliminationRepository.save(elimination);
-
-    // 7. Get player info for response and notifications
+    // Efectos secundarios: despues del commit, para no alargar el bloqueo ni
+    // notificar algo que despues se deshace.
     const eliminatedPlayer = await this.playerRepository.findById(command.eliminatedPlayerId);
+    const hasEliminator =
+      Boolean(command.eliminatorPlayerId) && command.eliminatorPlayerId !== command.eliminatedPlayerId;
     const eliminatorPlayer = command.eliminatorPlayerId
       ? await this.playerRepository.findById(command.eliminatorPlayerId)
       : null;
 
     if (!eliminatedPlayer) {
-      throw new Error(`Eliminated player ${command.eliminatedPlayerId} not found`);
+      throw new EliminationNotFoundError('player');
     }
 
-    // 8. Handle winner case (position 1)
     if (savedElimination.isWinner()) {
-      console.log(`[Elimination] Position 1 registered for gameDate ${command.gameDateId}, marking as completed`);
       await this.handleWinner(
         command.eliminatedPlayerId,
         eliminatedPlayer,
@@ -109,11 +75,7 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
         savedElimination.points.value,
         command.gameDateId
       );
-      // Mark game date as completed when winner is registered
-      await this.gameDateRepository.markAsCompleted(command.gameDateId);
-      console.log(`[Elimination] GameDate ${command.gameDateId} marked as completed`);
     } else {
-      // Send elimination notification
       await this.notificationService.notifyPlayerEliminated({
         playerId: command.eliminatedPlayerId,
         playerName: `${eliminatedPlayer.firstName} ${eliminatedPlayer.lastName}`,
@@ -126,8 +88,7 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
       });
     }
 
-    // 9. Update parent-child stats if there's an eliminator
-    if (command.eliminatorPlayerId) {
+    if (hasEliminator && command.eliminatorPlayerId) {
       await this.parentChildStatsService.updateStats({
         tournamentId: gameDate.tournamentId,
         eliminatorId: command.eliminatorPlayerId,
@@ -137,30 +98,17 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
       });
     }
 
-    // 10. Check for auto-complete (position 2 with eliminator)
     let winnerResult: EliminationResult | undefined;
-    let triggeredAutoComplete = false;
     let autoCompleteError: string | undefined;
-
-    if (savedElimination.isRunnerUp() && command.eliminatorPlayerId) {
-      const autoCompleteResult = await this.handleAutoComplete(
-        savedElimination,
-        command.eliminatorPlayerId,
-        totalPlayers,
-        gameDate
-      );
-      if (autoCompleteResult) {
-        triggeredAutoComplete = true;
-        winnerResult = autoCompleteResult;
-      } else {
-        // La posicion 2 si se guardo, pero la fecha no se cerro. Se reporta
-        // para que la Comision lo vea y no quede colgada en in_progress.
-        autoCompleteError =
-          'La eliminación se guardó, pero la fecha no se pudo cerrar automáticamente. Ciérrala a mano.';
-      }
+    if (autoComplete === 'skipped') {
+      // La posicion 2 si se guardo, pero la fecha no se cerro. Se reporta
+      // para que la Comision lo vea y no quede colgada en in_progress.
+      autoCompleteError =
+        'La eliminación se guardó, pero la fecha no se pudo cerrar automáticamente. Ciérrala a mano.';
+    } else if (autoComplete) {
+      winnerResult = await this.afterAutoComplete(autoComplete, gameDate);
     }
 
-    // 11. Build and return result
     return {
       id: savedElimination.id!,
       gameDateId: savedElimination.gameDateId,
@@ -179,9 +127,169 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
           }
         : null,
       eliminationTime: savedElimination.eliminationTime.toISOString(),
-      triggeredAutoComplete,
+      triggeredAutoComplete: Boolean(winnerResult),
       autoCompleteError,
       winnerElimination: winnerResult,
+    };
+  }
+
+  /** Validaciones y escrituras. Corre dentro de la transaccion, con la fecha bloqueada. */
+  private async registerLocked(command: RegisterEliminationCommand): Promise<LockedResult> {
+    // 1. La fecha existe y esta en curso
+    const gameDate = await this.gameDateRepository.findById(command.gameDateId);
+    if (!gameDate) {
+      throw new EliminationNotFoundError('gameDate');
+    }
+    if (gameDate.status !== 'in_progress') {
+      throw new GameDateNotInProgressError(command.gameDateId, gameDate.status);
+    }
+
+    // 2. Los dos jugadores estan en la fecha y no son el mismo (salvo el
+    // ganador en la posicion 1, que por convencion se "elimina" solo).
+    if (!gameDate.playerIds.includes(command.eliminatedPlayerId)) {
+      throw new PlayerNotInGameDateError(command.eliminatedPlayerId, 'eliminated');
+    }
+    if (command.eliminatorPlayerId) {
+      if (!gameDate.playerIds.includes(command.eliminatorPlayerId)) {
+        throw new PlayerNotInGameDateError(command.eliminatorPlayerId, 'eliminator');
+      }
+      if (command.eliminatorPlayerId === command.eliminatedPlayerId && command.position !== 1) {
+        throw new SelfEliminationError();
+      }
+    }
+
+    // 3. Entidad (valida el rango de la posicion y calcula los puntos)
+    const totalPlayers = gameDate.playerIds.length;
+    const elimination = Elimination.create({
+      gameDateId: command.gameDateId,
+      position: command.position,
+      totalPlayers,
+      eliminatedPlayerId: command.eliminatedPlayerId,
+      eliminatorPlayerId: command.eliminatorPlayerId,
+      eliminationTime: new Date(),
+    });
+
+    // 4. El eliminado no salio antes
+    const alreadyEliminated = await this.eliminationRepository.existsByPlayerInGameDate(
+      command.eliminatedPlayerId,
+      command.gameDateId
+    );
+    if (alreadyEliminated) {
+      throw new PlayerAlreadyEliminatedError(command.eliminatedPlayerId);
+    }
+
+    // 5. La posicion esta libre y es la siguiente (se llena del ultimo
+    // puesto hacia arriba, sin huecos)
+    const positionTaken = await this.eliminationRepository.existsByPositionInGameDate(
+      command.position,
+      command.gameDateId
+    );
+    if (positionTaken) {
+      throw new PositionAlreadyTakenError(command.position);
+    }
+    const lowest = await this.eliminationRepository.findLowestPosition(command.gameDateId);
+    const expected = (lowest ?? totalPlayers + 1) - 1;
+    if (command.position !== expected) {
+      throw new PositionNotNextError(command.position, expected);
+    }
+
+    // 6. El eliminador no salio antes de esta posicion
+    if (command.eliminatorPlayerId) {
+      const eliminatorElimination = await this.eliminationRepository.findByPlayerInGameDate(
+        command.eliminatorPlayerId,
+        command.gameDateId
+      );
+      if (eliminatorElimination && eliminatorElimination.position.value > command.position) {
+        throw new InvalidEliminatorError(
+          command.eliminatorPlayerId,
+          eliminatorElimination.position.value
+        );
+      }
+    }
+
+    // 7. Guardar, y cerrar la fecha si corresponde
+    const savedElimination = await this.eliminationRepository.save(elimination);
+
+    let autoComplete: LockedResult['autoComplete'] = null;
+    if (savedElimination.isWinner()) {
+      await this.gameDateRepository.markAsCompleted(command.gameDateId);
+    } else if (savedElimination.isRunnerUp() && command.eliminatorPlayerId) {
+      autoComplete = await this.autoCompleteLocked(
+        savedElimination,
+        command.eliminatorPlayerId,
+        totalPlayers,
+        gameDate.id
+      );
+    }
+
+    return { gameDate, savedElimination, autoComplete };
+  }
+
+  /**
+   * Posicion 2 con eliminador: ese eliminador gana. Guarda la posicion 1 y
+   * cierra la fecha en la misma transaccion.
+   */
+  private async autoCompleteLocked(
+    runnerUpElimination: Elimination,
+    winnerId: string,
+    totalPlayers: number,
+    gameDateId: number
+  ): Promise<Elimination | 'skipped'> {
+    const eliminationCount = await this.eliminationRepository.countByGameDateId(gameDateId);
+    const expectedBeforeWinner = totalPlayers - 1;
+    if (eliminationCount !== expectedBeforeWinner) {
+      console.log(
+        `[AutoComplete] GameDate ${gameDateId}: eliminationCount=${eliminationCount}, expected=${expectedBeforeWinner} - skipping`
+      );
+      return 'skipped';
+    }
+
+    const winnerElimination = runnerUpElimination.createWinnerElimination(winnerId, totalPlayers);
+    const savedWinner = await this.eliminationRepository.save(winnerElimination);
+    await this.gameDateRepository.markAsCompleted(gameDateId);
+    return savedWinner;
+  }
+
+  /** Efectos del ganador auto-registrado, ya fuera de la transaccion. */
+  private async afterAutoComplete(
+    savedWinner: Elimination,
+    gameDate: GameDateInfo
+  ): Promise<EliminationResult | undefined> {
+    const winnerId = savedWinner.eliminatedPlayerId;
+    const winnerPlayer = await this.playerRepository.findById(winnerId);
+    if (!winnerPlayer) return undefined;
+
+    try {
+      await this.handleWinner(
+        winnerId,
+        winnerPlayer,
+        gameDate.scheduledDate,
+        savedWinner.points.value,
+        gameDate.id
+      );
+    } catch (error) {
+      // El ganador y el cierre ya estan guardados: un fallo de notificacion
+      // no los revierte.
+      console.error(`[AutoComplete] winner side effects failed for gameDate ${gameDate.id}:`, error);
+    }
+
+    return {
+      id: savedWinner.id!,
+      gameDateId: savedWinner.gameDateId,
+      position: savedWinner.position.value,
+      points: savedWinner.points.value,
+      eliminatedPlayer: {
+        id: winnerPlayer.id,
+        firstName: winnerPlayer.firstName,
+        lastName: winnerPlayer.lastName,
+      },
+      eliminatorPlayer: {
+        id: winnerPlayer.id,
+        firstName: winnerPlayer.firstName,
+        lastName: winnerPlayer.lastName,
+      },
+      eliminationTime: savedWinner.eliminationTime.toISOString(),
+      triggeredAutoComplete: false,
     };
   }
 
@@ -203,76 +311,5 @@ export class RegisterEliminationHandler implements RegisterEliminationUseCase {
       points,
       gameDateId,
     });
-  }
-
-  private async handleAutoComplete(
-    runnerUpElimination: Elimination,
-    winnerId: string,
-    totalPlayers: number,
-    gameDate: { id: number; scheduledDate: Date; tournamentId: number }
-  ): Promise<EliminationResult | null> {
-    try {
-      // Check if we have all eliminations except winner
-      const eliminationCount = await this.eliminationRepository.countByGameDateId(gameDate.id);
-      const expectedBeforeWinner = totalPlayers - 1;
-
-      console.log(`[AutoComplete] GameDate ${gameDate.id}: eliminationCount=${eliminationCount}, expected=${expectedBeforeWinner}, totalPlayers=${totalPlayers}`);
-
-      if (eliminationCount !== expectedBeforeWinner) {
-        console.log(`[AutoComplete] Skipping - count mismatch`);
-        return null;
-      }
-
-      console.log(`[AutoComplete] Proceeding with auto-complete for winner ${winnerId}`);
-
-      // Create winner elimination
-      const winnerElimination = runnerUpElimination.createWinnerElimination(winnerId, totalPlayers);
-      const savedWinner = await this.eliminationRepository.save(winnerElimination);
-      console.log(`[AutoComplete] Winner elimination saved with id=${savedWinner.id}`);
-
-      // Get winner player info
-      const winnerPlayer = await this.playerRepository.findById(winnerId);
-      if (!winnerPlayer) {
-        throw new Error(`Winner player ${winnerId} not found`);
-      }
-
-      // Handle winner side effects
-      await this.handleWinner(
-        winnerId,
-        winnerPlayer,
-        gameDate.scheduledDate,
-        savedWinner.points.value,
-        gameDate.id
-      );
-      console.log(`[AutoComplete] Winner side effects handled`);
-
-      // Mark game date as completed
-      console.log(`[AutoComplete] Marking gameDate ${gameDate.id} as completed`);
-      await this.gameDateRepository.markAsCompleted(gameDate.id);
-      console.log(`[AutoComplete] GameDate ${gameDate.id} marked as completed successfully`);
-
-      return {
-        id: savedWinner.id!,
-        gameDateId: savedWinner.gameDateId,
-        position: savedWinner.position.value,
-        points: savedWinner.points.value,
-        eliminatedPlayer: {
-          id: winnerPlayer.id,
-          firstName: winnerPlayer.firstName,
-          lastName: winnerPlayer.lastName,
-        },
-        eliminatorPlayer: {
-          id: winnerPlayer.id,
-          firstName: winnerPlayer.firstName,
-          lastName: winnerPlayer.lastName,
-        },
-        eliminationTime: savedWinner.eliminationTime.toISOString(),
-        triggeredAutoComplete: false,
-      };
-    } catch (error) {
-      console.error(`[AutoComplete] ERROR in handleAutoComplete for gameDate ${gameDate.id}:`, error);
-      // Don't throw - let the position 2 registration succeed even if auto-complete fails
-      return null;
-    }
   }
 }

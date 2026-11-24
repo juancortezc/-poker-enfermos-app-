@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
 import { withAuth, withComisionAuth } from '@/lib/api-auth'
+import { PLAYER_PUBLIC_SELECT } from '@/lib/player-select'
 
 // GET /api/tournaments/[id]/participants - Obtener participantes de un torneo
 export async function GET(
@@ -94,7 +95,8 @@ export async function POST(
 
       // Verificar que el jugador existe y es Enfermo o Comisión
       const player = await prisma.player.findUnique({
-        where: { id: playerId }
+        where: { id: playerId },
+        select: PLAYER_PUBLIC_SELECT
       })
 
       if (!player) {

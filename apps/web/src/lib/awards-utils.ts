@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { PLAYER_PUBLIC_SELECT } from '@/lib/player-select'
 
 export interface AwardPlayer {
   id: string
@@ -65,8 +66,8 @@ export async function computeTournamentAwards(tournamentIdNum: number): Promise<
     include: {
       eliminations: {
         include: {
-          eliminatedPlayer: true,
-          eliminatorPlayer: true
+          eliminatedPlayer: { select: PLAYER_PUBLIC_SELECT },
+          eliminatorPlayer: { select: PLAYER_PUBLIC_SELECT }
         }
       }
     }

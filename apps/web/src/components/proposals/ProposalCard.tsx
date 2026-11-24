@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'react-toastify'
+import { isSafeImageUrl } from '@/lib/proposal-input'
 import {
   Edit,
   Power,
@@ -271,21 +272,27 @@ export function ProposalCard({
           </div>
 
           {/* Imagen */}
-          {proposal.imageUrl && (
+          {isSafeImageUrl(proposal.imageUrl) && (
             <div>
               <h4 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-poker-red-light/80">
                 <ImageIcon className="w-4 h-4" />
                 Imagen
               </h4>
-              <div className="overflow-hidden rounded-lg border border-white/15">
+              {/* Solo https (isSafeImageUrl): antes se abria cualquier URL con
+                  window.open, incluida una javascript: guardada en la base. */}
+              <a
+                href={proposal.imageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block overflow-hidden rounded-lg border border-white/15"
+              >
                 <img
                   src={proposal.imageUrl}
                   alt="Imagen de la propuesta"
                   className="h-auto w-full cursor-pointer transition-all hover:opacity-95"
                   style={{ maxHeight: '300px', objectFit: 'contain' }}
-                  onClick={() => window.open(proposal.imageUrl!, '_blank')}
                 />
-              </div>
+              </a>
               <p className="mt-2 text-center text-[13px] uppercase tracking-[0.2em] text-white/45">
                 Click para ver en tamaño completo
               </p>
