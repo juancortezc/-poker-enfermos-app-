@@ -640,10 +640,20 @@ function TablaImagen({
   }
 }
 
-/** Torneo activo, o null si no hay. */
+/**
+ * Torneo activo; si no hay, el ultimo FINALIZADO (mayor numero, el mismo orden
+ * que usa /api/tournaments/active). Entre torneos no hay ACTIVO y Compartir
+ * quedaba vacio con 404.
+ */
 async function torneoActivo() {
-  return prisma.tournament.findFirst({
+  const activo = await prisma.tournament.findFirst({
     where: { status: 'ACTIVO' },
+    select: { id: true, number: true },
+  })
+  if (activo) return activo
+  return prisma.tournament.findFirst({
+    where: { status: 'FINALIZADO' },
+    orderBy: { number: 'desc' },
     select: { id: true, number: true },
   })
 }
