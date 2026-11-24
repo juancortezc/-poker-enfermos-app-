@@ -40,3 +40,11 @@ Thumbs.db
 /*.jpeg
 /*.zip
 /docs/
+# Datos sensibles sueltos en la raiz (PINs, admin keys, telefonos): nunca al upload
+/NUEVOS_PINS_POKER_ENFERMOS.txt
+/enfermos.json
+/*.md
+/*.sh
+/*.pid
+/.claude/
+/Icon*

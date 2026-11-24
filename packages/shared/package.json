@@ -11,9 +11,12 @@
   },
   "sideEffects": false,
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p tests",
+    "test": "tsc -p tests && tsx --test tests/*.test.ts"
   },
   "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4",
     "typescript": "^5"
   }
 }

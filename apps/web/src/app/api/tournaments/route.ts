@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { TournamentStatus } from '@prisma/client'
 import { withComisionAuth } from '@/lib/api-auth'
 import { parseToUTCNoon } from '@/lib/date-utils'
+import { defaultBlindLevels } from '@poker/shared'
 
 // GET /api/tournaments - Listar todos los torneos
 export async function GET(req: NextRequest) {
@@ -159,7 +160,7 @@ export async function POST(req: NextRequest) {
             }))
           },
           blindLevels: {
-            create: blindLevels || getDefaultBlindLevels()
+            create: blindLevels || defaultBlindLevels()
           }
         },
         include: {
@@ -192,24 +193,4 @@ export async function POST(req: NextRequest) {
       )
     }
   })
-}
-
-// Niveles de blinds por defecto según la especificación (12 niveles + pausa cena)
-// NOTA: Pausa de 30min para cena después del nivel 3 (manual en timer)
-function getDefaultBlindLevels() {
-  return [
-    { level: 1, smallBlind: 50, bigBlind: 100, duration: 25 },
-    { level: 2, smallBlind: 100, bigBlind: 200, duration: 25 },
-    { level: 3, smallBlind: 150, bigBlind: 300, duration: 25 },
-    // PAUSA PARA CENA: 30 minutos (pausar timer manualmente)
-    { level: 4, smallBlind: 250, bigBlind: 500, duration: 25 },
-    { level: 5, smallBlind: 400, bigBlind: 800, duration: 25 },
-    { level: 6, smallBlind: 600, bigBlind: 1200, duration: 20 },
-    { level: 7, smallBlind: 800, bigBlind: 1600, duration: 20 },
-    { level: 8, smallBlind: 1000, bigBlind: 2000, duration: 20 },
-    { level: 9, smallBlind: 1250, bigBlind: 2500, duration: 20 },
-    { level: 10, smallBlind: 1500, bigBlind: 3000, duration: 20 },
-    { level: 11, smallBlind: 2000, bigBlind: 4000, duration: 15 },
-    { level: 12, smallBlind: 2500, bigBlind: 5000, duration: 0 } // Sin más aumentos
-  ]
 }
