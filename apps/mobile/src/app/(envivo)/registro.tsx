@@ -16,10 +16,9 @@ import { GameCompletedCard } from '@/components/envivo/GameCompletedCard';
 import { LiveRankingCard } from '@/components/envivo/LiveRankingCard';
 import { useLiveDate, useRefreshLive } from '@/components/envivo/live-data';
 import { TimerStrip } from '@/components/envivo/TimerStrip';
-import { useActiveGameDate } from '@/components/envivo/useActiveGameDate';
+import { useActiveGameDate, type ActiveGameDate } from '@/hooks/useActiveGameDate';
 import { useBlindTimer } from '@/components/envivo/useBlindTimer';
 import { useTimerAlerts } from '@/components/envivo/useTimerAlerts';
-import type { ActiveGameDate } from '@/components/envivo/types';
 import { Header } from '@/components/ui/Header';
 import { NoirButton } from '@/components/ui/NoirButton';
 import { NoirCard } from '@/components/ui/NoirCard';
@@ -54,7 +53,7 @@ function RegistroComision() {
   // La Comisión tiene esta pantalla abierta toda la noche.
   useKeepAwake('envivo-registro');
 
-  const { gameDate, error, isLoading, refresh } = useActiveGameDate(10_000);
+  const { gameDate, error, isLoading, refresh } = useActiveGameDate({ refreshInterval: 10_000 });
 
   if (isLoading) {
     return (

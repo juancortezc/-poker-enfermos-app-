@@ -23,17 +23,6 @@ export interface TimerSnapshot {
 
 export type TimerAction = 'start' | 'pause' | 'resume' | 'restart-level' | 'advance';
 
-/** GET /api/game-dates/active (null si no hay fecha CREATED o in_progress). */
-export interface ActiveGameDate {
-  id: number;
-  dateNumber: number;
-  scheduledDate: string;
-  status: 'pending' | 'CREATED' | 'in_progress' | 'completed' | 'cancelled';
-  playerIds: string[];
-  tournament: { id: number; name: string; number: number };
-  playersCount: number;
-}
-
 export interface DatePlayer {
   id: string;
   firstName: string;
