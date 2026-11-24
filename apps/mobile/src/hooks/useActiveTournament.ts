@@ -28,9 +28,10 @@ export interface TournamentDateRef {
   status?: string;
 }
 
+/** Sin ningún torneo en la base la API responde `{ tournament: null }`, sin `stats`. */
 interface ActiveTournamentResponse {
-  tournament: ActiveTournament;
-  stats: {
+  tournament: ActiveTournament | null;
+  stats?: {
     completedDates: number;
     totalDates: number;
     nextDate?: TournamentDateRef;
@@ -45,7 +46,7 @@ export function useActiveTournament(options: { refreshInterval?: number } = {}) 
   const { refreshInterval = 300000 } = options;
   const swr = useSWR<ActiveTournamentResponse>(swrKeys.activeTournament(), { refreshInterval });
   const data = swr.data;
-  const tournament = data?.tournament;
+  const tournament = data?.tournament ?? undefined;
 
   return {
     ...swr,
@@ -54,13 +55,13 @@ export function useActiveTournament(options: { refreshInterval?: number } = {}) 
     isNotFound: swr.error instanceof ApiError && swr.error.status === 404,
     progress: tournament
       ? {
-          completed: data?.stats.completedDates ?? 0,
-          total: data?.stats.totalDates ?? 12,
+          completed: data?.stats?.completedDates ?? 0,
+          total: data?.stats?.totalDates ?? 12,
         }
       : null,
-    nextDate: data?.stats.nextDate ?? null,
-    lastCompletedDate: data?.stats.lastCompletedDate ?? null,
-    seasonStartDate: data?.stats.startDate ?? null,
-    seasonEndDate: data?.stats.endDate ?? null,
+    nextDate: data?.stats?.nextDate ?? null,
+    lastCompletedDate: data?.stats?.lastCompletedDate ?? null,
+    seasonStartDate: data?.stats?.startDate ?? null,
+    seasonEndDate: data?.stats?.endDate ?? null,
   };
 }
