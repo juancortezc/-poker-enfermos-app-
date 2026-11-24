@@ -1,0 +1,67 @@
+{
+  "updated": "2026-11-24 · inicio",
+  "branch": "feat/mobile-expo",
+  "status": "Plan listo, esperando tu aprobación para empezar F1",
+  "phases": [
+    {"id": "F0", "name": "Preparación", "status": "doing"},
+    {"id": "F1", "name": "Monorepo", "status": "todo"},
+    {"id": "F2", "name": "Base móvil + PIN/biometría", "status": "todo"},
+    {"id": "F3", "name": "Pantallas jugador", "status": "todo"},
+    {"id": "F4", "name": "En vivo + push", "status": "todo"},
+    {"id": "F5", "name": "Torneo: propuestas, stats", "status": "todo"},
+    {"id": "F6", "name": "Admin Comisión", "status": "todo"},
+    {"id": "F7", "name": "Google + Apple login", "status": "todo"},
+    {"id": "F8", "name": "Endurecer y publicar", "status": "todo"}
+  ],
+  "agents": [
+    {"name": "Coordinador", "area": "Plan, reparto y monitor", "status": "doing", "now": "Plan escrito, instalando herramientas"},
+    {"name": "Infra", "area": "Monorepo, Vercel, EAS, rama Neon", "status": "idle", "now": "Arranca con F1 tras tu aprobación"},
+    {"name": "Backend", "area": "Endpoints y tablas nuevas, auth social, push", "status": "idle", "now": "—"},
+    {"name": "Mobile Core", "area": "Esqueleto Expo, tema, navegación, auth", "status": "idle", "now": "—"},
+    {"name": "Pantallas Jugador", "area": "F3", "status": "idle", "now": "—"},
+    {"name": "En Vivo", "area": "Timer, registro, notificaciones", "status": "idle", "now": "—"},
+    {"name": "Torneo", "area": "Propuestas, stats, premios, P&H", "status": "idle", "now": "—"},
+    {"name": "Admin", "area": "Pantallas de Comisión", "status": "idle", "now": "—"},
+    {"name": "QA", "area": "Revisión, limpieza, pruebas adversariales", "status": "idle", "now": "—"},
+    {"name": "Release", "area": "Commits, deploy Vercel, builds EAS", "status": "idle", "now": "—"}
+  ],
+  "you": [
+    {"title": "Instalar Xcode", "detail": "Desde la App Store (~15 GB). Ábrelo una vez para aceptar la licencia.", "done": false},
+    {"title": "Iniciar sesión en Expo", "detail": "Ejecuta `eas login` en la terminal, o crea la cuenta en expo.dev primero.", "done": false},
+    {"title": "Acceso a Neon para la rama de QA", "detail": "Una API key de Neon, o crea tú la rama desde la consola de Neon.", "done": false},
+    {"title": "Aprobar el plan", "detail": "docs/mobile/PLAN.md", "done": false}
+  ],
+  "tasks": [
+    {"id": "T01", "phase": "F0", "title": "Instalar watchman, CocoaPods, Java 17, Android Studio y SDK", "owner": "Coordinador", "status": "doing"},
+    {"id": "T02", "phase": "F0", "title": "Plan de desarrollo y monitor", "owner": "Coordinador", "status": "done"},
+    {"id": "T03", "phase": "F0", "title": "Crear rama feat/mobile-expo", "owner": "Release", "status": "todo"},
+    {"id": "T04", "phase": "F0", "title": "Crear rama Neon para QA", "owner": "Infra", "status": "blocked", "note": "Necesita acceso a Neon"},
+    {"id": "T05", "phase": "F1", "title": "Mover Next.js a apps/web con npm workspaces", "owner": "Infra", "status": "todo"},
+    {"id": "T06", "phase": "F1", "title": "packages/shared: tipos, cliente API, reglas de negocio", "owner": "Infra", "status": "todo"},
+    {"id": "T07", "phase": "F1", "title": "Proyecto Vercel nuevo apuntando a apps/web", "owner": "Infra", "status": "todo"},
+    {"id": "T08", "phase": "F2", "title": "Crear app Expo con Router, NativeWind y tema Noir Jazz", "owner": "Mobile Core", "status": "todo"},
+    {"id": "T09", "phase": "F2", "title": "Token de sesión en el servidor + tabla de sesiones (aditiva)", "owner": "Backend", "status": "todo"},
+    {"id": "T10", "phase": "F2", "title": "Login PIN + desbloqueo biométrico con SecureStore", "owner": "Mobile Core", "status": "todo"},
+    {"id": "T11", "phase": "F2", "title": "eas.json con perfiles development / preview / production", "owner": "Infra", "status": "todo"},
+    {"id": "T12", "phase": "F3", "title": "Home, ranking, tabla, calendario, fecha", "owner": "Pantallas Jugador", "status": "todo"},
+    {"id": "T13", "phase": "F3", "title": "Perfil, jugadores, contactos, multas, info, ayuda, podcast, más", "owner": "Pantallas Jugador", "status": "todo"},
+    {"id": "T14", "phase": "F4", "title": "Timer con blinds, alertas y pantalla encendida", "owner": "En Vivo", "status": "todo"},
+    {"id": "T15", "phase": "F4", "title": "Registro de eliminaciones en vivo", "owner": "En Vivo", "status": "todo"},
+    {"id": "T16", "phase": "F4", "title": "Push nativo: tabla PushDevice + expo-notifications", "owner": "Backend", "status": "todo"},
+    {"id": "T17", "phase": "F5", "title": "Propuestas T29: votos, comentarios, cierre", "owner": "Torneo", "status": "todo"},
+    {"id": "T18", "phase": "F5", "title": "Stats, premios, P&H, reportes y compartir", "owner": "Torneo", "status": "todo"},
+    {"id": "T19", "phase": "F6", "title": "Torneos y fechas: crear, editar, configurar, confirmar", "owner": "Admin", "status": "todo"},
+    {"id": "T20", "phase": "F6", "title": "Jugadores, invitados e importación", "owner": "Admin", "status": "todo"},
+    {"id": "T21", "phase": "F7", "title": "Endpoints Google/Apple + tabla PlayerIdentity", "owner": "Backend", "status": "todo"},
+    {"id": "T22", "phase": "F7", "title": "Vincular cuentas en perfil y botones de login", "owner": "Mobile Core", "status": "todo"},
+    {"id": "T23", "phase": "F8", "title": "Íconos, splash y nombre de la app", "owner": "Mobile Core", "status": "todo"},
+    {"id": "T24", "phase": "F8", "title": "Pasada QA final adversarial", "owner": "QA", "status": "todo"},
+    {"id": "T25", "phase": "F8", "title": "Builds preview: APK y TestFlight", "owner": "Release", "status": "todo"}
+  ],
+  "issues": [
+    {"id": "I01", "severity": "media", "title": "Xcode no está instalado", "detail": "Solo están las Command Line Tools. Sin Xcode no hay simulador iOS ni build local de iOS. EAS en la nube sí funciona sin él.", "status": "abierta", "by": "Coordinador"},
+    {"id": "I02", "severity": "baja", "title": "Cambios sin commitear en main", "detail": "public/sw.js modificado y AGENTS.md sin seguimiento. No se tocan; la rama nueva parte de main limpio.", "status": "abierta", "by": "Coordinador"}
+  ],
+  "commits": [],
+  "builds": []
+}
