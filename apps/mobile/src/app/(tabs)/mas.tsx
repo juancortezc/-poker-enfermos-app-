@@ -9,13 +9,13 @@ import { router, type Href } from 'expo-router';
 import { Alert, Pressable, Switch, View } from 'react-native';
 
 import { Header } from '@/components/ui/Header';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { Body, Muted, Overline } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
 import type { FeaturePermission } from '@poker/shared';
-import { noir } from '@/theme/colors';
+import { cpLight as c } from '@/theme/colors';
 
 type Item = {
   title: string;
@@ -75,7 +75,7 @@ export default function MasScreen() {
   };
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={['top']} tone="light" appBar>
       <Header
         overline={role ?? undefined}
         title="Más"
@@ -85,7 +85,7 @@ export default function MasScreen() {
       {sections.map((section) => (
         <View key={section.title} className="gap-2">
           <Overline>{section.title}</Overline>
-          <NoirCard className="p-0">
+          <CPCard className="p-2">
             {section.items.map((item, idx) => (
               <Pressable
                 key={item.title}
@@ -94,21 +94,21 @@ export default function MasScreen() {
                     ? user && router.push({ pathname: '/players/[id]', params: { id: user.id } })
                     : router.push(item.href)
                 }
-                className={`flex-row items-center gap-3 px-5 py-4 active:bg-noir-raised ${
-                  idx > 0 ? 'border-t border-noir-border' : ''
+                className={`min-h-[48px] flex-row items-center gap-3 rounded-cp px-3 py-3 active:bg-cp-surface-2 ${
+                  idx > 0 ? 'border-t border-cp-surface-border' : ''
                 }`}>
-                <Ionicons name={item.icon} size={22} color={noir.gold} />
-                <Body className="flex-1">{item.title}</Body>
-                <Ionicons name="chevron-forward" size={18} color={noir.muted} />
+                <Ionicons name={item.icon} size={20} color={c.onSurfaceVariant} />
+                <Body className="flex-1 font-inter-semibold text-[15px]">{item.title}</Body>
+                <Ionicons name="chevron-forward" size={16} color={c.onSurfaceVariant} />
               </Pressable>
             ))}
-          </NoirCard>
+          </CPCard>
         </View>
       ))}
 
       {biometric.available ? (
-        <NoirCard className="flex-row items-center gap-3">
-          <Ionicons name={biometric.kind === 'faceid' ? 'scan-outline' : 'finger-print-outline'} size={22} color={noir.gold} />
+        <CPCard className="flex-row items-center gap-3">
+          <Ionicons name={biometric.kind === 'faceid' ? 'scan-outline' : 'finger-print-outline'} size={20} color={c.onSurfaceVariant} />
           <View className="flex-1">
             <Body>Entrar con {biometric.label}</Body>
             <Muted>Desbloquea tu clave guardada al abrir la app.</Muted>
@@ -116,13 +116,13 @@ export default function MasScreen() {
           <Switch
             value={biometricEnabled}
             onValueChange={toggleBiometric}
-            trackColor={{ true: noir.copper, false: noir.border }}
-            thumbColor={biometricEnabled ? noir.gold : noir.muted}
+            trackColor={{ true: c.primary, false: c.surface3 }}
+            thumbColor={c.surface1}
           />
-        </NoirCard>
+        </CPCard>
       ) : null}
 
-      <NoirButton title="Cerrar sesión" variant="outline" onPress={logout} />
+      <CPButton title="Cerrar sesión" variant="outline" onPress={logout} />
     </Screen>
   );
 }

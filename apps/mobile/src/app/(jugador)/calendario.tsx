@@ -13,8 +13,8 @@ import { Alert, View } from 'react-native';
 
 import { Score, StatRow } from '@/components/jugador/Bits';
 import { FechaTimelineItem } from '@/components/jugador/FechaTimelineItem';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Body, Muted, Overline, Title } from '@/components/ui/Typography';
@@ -25,7 +25,7 @@ import { useRefresh } from '@/hooks/useRefresh';
 import { useTournamentDates } from '@/hooks/useTournamentDates';
 import { daysUntil } from '@/lib/dates';
 import { shareTextFile } from '@/lib/share-file';
-import { noir } from '@/theme/colors';
+import { cpLight as c } from '@/theme/colors';
 
 export default function CalendarioScreen() {
   const { user } = useAuth();
@@ -78,21 +78,21 @@ export default function CalendarioScreen() {
     return (
       <>
         {nextDate?.scheduledDate ? (
-          <NoirCard accent className="gap-1">
+          <CPCard className="gap-1">
             <Overline>Próxima fecha · Fecha {nextDate.dateNumber}</Overline>
             <Title className="text-4xl">
               {new Date(nextDate.scheduledDate).toLocaleDateString('es-EC', { day: 'numeric', month: 'short' }).toUpperCase()}
             </Title>
             <View className="flex-row items-center gap-2">
-              <Ionicons name="time-outline" size={15} color={noir.copper} />
-              <Score value={`FALTAN ${nextDays} ${nextDays === 1 ? 'DÍA' : 'DÍAS'}`} size={13} color={noir.copper} />
+              <Ionicons name="time-outline" size={15} color={c.primaryLight} />
+              <Score value={`FALTAN ${nextDays} ${nextDays === 1 ? 'DÍA' : 'DÍAS'}`} size={13} color={c.primaryLight} />
             </View>
-          </NoirCard>
+          </CPCard>
         ) : null}
 
-        <NoirCard className="gap-3">
+        <CPCard className="gap-3">
           <View className="flex-row items-center gap-2">
-            <Ionicons name="trophy-outline" size={15} color={noir.gold} />
+            <Ionicons name="trophy-outline" size={15} color={c.gold} />
             <Overline>Temporada</Overline>
           </View>
           <StatRow
@@ -101,15 +101,15 @@ export default function CalendarioScreen() {
               { value: remaining, label: 'POR JUGAR' },
             ]}
           />
-          <View className="h-1.5 overflow-hidden rounded-full bg-noir-raised">
-            <View style={{ width: `${Math.round(progress * 100)}%`, backgroundColor: noir.gold }} className="h-full rounded-full" />
+          <View className="h-1.5 overflow-hidden rounded-full bg-cp-surface-3">
+            <View style={{ width: `${Math.round(progress * 100)}%`, backgroundColor: c.primary }} className="h-full rounded-full" />
           </View>
           {active.seasonEndDate ? (
             <Muted className="text-xs">
               Final: {new Date(active.seasonEndDate).toLocaleDateString('es-EC', { day: 'numeric', month: 'short', year: 'numeric' })}
             </Muted>
           ) : null}
-        </NoirCard>
+        </CPCard>
 
         {dates.length > 0 ? (
           <View>
@@ -129,21 +129,21 @@ export default function CalendarioScreen() {
           <EmptyState icon="calendar-outline" message="Todavía no hay fechas programadas." />
         )}
 
-        <NoirCard className="gap-3">
+        <CPCard className="gap-3">
           <View className="flex-row items-center gap-3">
-            <Ionicons name="calendar-number-outline" size={24} color={noir.gold} />
+            <Ionicons name="calendar-number-outline" size={24} color={c.info} />
             <View className="flex-1">
               <Body className="font-inter-semibold text-base">Agregá las fechas a tu calendario</Body>
               <Muted>No te pierdas ninguna fecha del torneo.</Muted>
             </View>
           </View>
-          <NoirButton
+          <CPButton
             title={future.length > 0 ? 'Agregar' : 'No quedan fechas'}
             disabled={future.length === 0}
             loading={sharing}
             onPress={shareIcs}
           />
-        </NoirCard>
+        </CPCard>
       </>
     );
   })();
@@ -151,7 +151,7 @@ export default function CalendarioScreen() {
   return (
     <>
       <Stack.Screen options={{ title: number ? `Calendario · T${number}` : 'Calendario' }} />
-      <Screen refreshing={refreshing} onRefresh={onRefresh}>
+      <Screen tone="light" refreshing={refreshing} onRefresh={onRefresh}>
         {body}
       </Screen>
     </>

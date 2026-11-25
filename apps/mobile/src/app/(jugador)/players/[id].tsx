@@ -10,10 +10,10 @@ import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
-import { Delta, KeyValue, NEGATIVE, POSITIVE, Score, StatRow } from '@/components/jugador/Bits';
+import { Delta, KeyValue, Score, StatRow } from '@/components/jugador/Bits';
 import { EvolutionChart } from '@/components/jugador/EvolutionChart';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline, Title } from '@/components/ui/Typography';
@@ -23,7 +23,7 @@ import { useChampionships } from '@/hooks/useHomeExtras';
 import { useMultas } from '@/hooks/useMultas';
 import { usePlayerTournamentDetails } from '@/hooks/usePlayerTournamentDetails';
 import { useRefresh } from '@/hooks/useRefresh';
-import { noir } from '@/theme/colors';
+import { cpLight as c } from '@/theme/colors';
 
 const MESA_FINAL_MAX = 9;
 
@@ -71,10 +71,10 @@ export default function PlayerDetailScreen() {
       return (
         <>
           {p ? (
-            <NoirCard className="flex-row items-center gap-4">
+            <CPCard className="flex-row items-center gap-4">
               <PlayerAvatar name={fullName(p)} photoUrl={p.photoUrl} size={72} />
               <Title className="flex-1">{fullName(p)}</Title>
-            </NoirCard>
+            </CPCard>
           ) : null}
           <EmptyState icon="person-outline" message="Este jugador no figura en la tabla del torneo activo." />
         </>
@@ -95,21 +95,21 @@ export default function PlayerDetailScreen() {
     return (
       <>
         {/* HERO */}
-        <NoirCard accent className="gap-4">
+        <CPCard className="gap-4">
           <View className="flex-row items-center gap-4">
             <View>
-              <PlayerAvatar name={fullName(player)} photoUrl={player.photoUrl} size={84} ringColor={noir.gold} />
-              <View className="absolute -bottom-1 -left-1 rounded-lg border-2 border-noir-surface bg-noir-copper px-1.5 py-0.5">
-                <Text className="font-inter-bold text-xs text-noir-text">#{currentStats.position}</Text>
+              <PlayerAvatar name={fullName(player)} photoUrl={player.photoUrl} size={84} />
+              <View className="absolute -bottom-1 -left-1 rounded-cp border-2 border-cp-surface-1 bg-cp-primary px-1.5 py-0.5">
+                <Text className="font-display text-xs text-white">#{currentStats.position}</Text>
               </View>
             </View>
             <View className="flex-1 gap-1">
               <Title className="text-xl leading-tight">{fullName(player)}</Title>
-              {player.aliases.length > 0 ? <Text className="font-inter text-sm italic text-noir-gold">“{player.aliases[0]}”</Text> : null}
+              {player.aliases.length > 0 ? <Text className="font-inter text-sm italic text-cp-primary-light">“{player.aliases[0]}”</Text> : null}
               {champs.count > 0 ? (
                 <View className="flex-row items-center gap-1">
-                  <Ionicons name="trophy" size={13} color={noir.gold} />
-                  <Text className="font-inter-bold text-sm text-noir-gold">{champs.count}x campeón</Text>
+                  <Ionicons name="trophy" size={13} color={c.gold} />
+                  <Text style={{ color: c.gold }} className="font-inter-bold text-sm">{champs.count}x campeón</Text>
                 </View>
               ) : null}
             </View>
@@ -119,16 +119,16 @@ export default function PlayerDetailScreen() {
               {myEntry ? <Delta value={myEntry.positionsChanged} /> : null}
             </View>
           </View>
-          <View className="border-t border-noir-border pt-3">
+          <View className="border-t border-cp-surface-border pt-3">
             <StatRow
               items={[
-                { value: scoreOf(currentStats), label: SCORE_LABELS.points, color: noir.gold },
-                { value: currentStats.totalPoints, label: SCORE_LABELS.accumulated, color: NEGATIVE },
+                { value: scoreOf(currentStats), label: SCORE_LABELS.points, color: c.primaryLight },
+                { value: currentStats.totalPoints, label: SCORE_LABELS.accumulated, color: c.negative },
                 { value: `${totalCompleted - absences}/${totalCompleted}`, label: 'FECHAS' },
               ]}
             />
           </View>
-        </NoirCard>
+        </CPCard>
 
         {/* RIVAL DIRECTO */}
         {above || below ? (
@@ -145,14 +145,14 @@ export default function PlayerDetailScreen() {
                   accessibilityRole="button"
                   onPress={() => router.push({ pathname: '/players/[id]', params: { id: p.playerId } })}
                   className="active:opacity-80">
-                  <NoirCard className="flex-row items-center gap-3 p-3">
+                  <CPCard className="flex-row items-center gap-3 p-3">
                     <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={44} />
                     <View className="flex-1">
                       <View className="flex-row items-center gap-2">
-                        <Text className="rounded bg-noir-raised px-1.5 py-0.5 font-inter-bold text-[10px] tracking-[1px] text-noir-muted">
+                        <Text className="rounded bg-cp-surface-2 px-1.5 py-0.5 font-inter-bold text-[10px] tracking-[1px] text-cp-on-surface-muted">
                           {tag}
                         </Text>
-                        <Text numberOfLines={1} className="flex-1 font-inter-semibold text-sm text-noir-text">
+                        <Text numberOfLines={1} className="flex-1 font-inter-semibold text-sm text-cp-on-surface">
                           {p.playerName}
                         </Text>
                       </View>
@@ -162,7 +162,7 @@ export default function PlayerDetailScreen() {
                       <Score value={`${Math.abs(scoreOf(currentStats) - scoreOf(p))} pts`} size={14} />
                       <Muted className="text-xs">de diferencia</Muted>
                     </View>
-                  </NoirCard>
+                  </CPCard>
                 </Pressable>
               ))}
           </View>
@@ -172,7 +172,7 @@ export default function PlayerDetailScreen() {
         {achievements ? (
           <View className="gap-2">
             <Overline>Logros</Overline>
-            <NoirCard className="p-4">
+            <CPCard className="p-4">
               <StatRow
                 items={[
                   { value: achievements.victories, label: achievements.victories === 1 ? 'victoria' : 'victorias' },
@@ -181,7 +181,7 @@ export default function PlayerDetailScreen() {
                   { value: achievements.last, label: achievements.last === 1 ? 'último' : 'últimos' },
                 ]}
               />
-            </NoirCard>
+            </CPCard>
           </View>
         ) : null}
 
@@ -189,21 +189,21 @@ export default function PlayerDetailScreen() {
         {details.rankingEvolution.length > 1 ? (
           <View className="gap-2">
             <Overline>{isOwn ? 'Mi evolución en el torneo' : 'Evolución en el torneo'}</Overline>
-            <NoirCard className="p-3">
+            <CPCard className="p-3">
               <EvolutionChart evolution={details.rankingEvolution} />
-            </NoirCard>
+            </CPCard>
           </View>
         ) : null}
 
         {/* RESUMEN */}
         <View className="gap-2">
           <Overline>Resumen de {isOwn ? 'tu' : 'su'} torneo</Overline>
-          <NoirCard className="py-1">
+          <CPCard className="py-1">
             <KeyValue label="Mejor resultado" value={details.bestResult} />
             <KeyValue label="Fechas jugadas" value={`${totalCompleted - absences}/${totalCompleted}`} />
             <KeyValue label="Posición promedio" value={avgPosition !== null ? `#${Math.round(avgPosition)}` : '—'} />
             <KeyValue label="Puntos promedio" value={avgPoints !== null ? `${Math.round(avgPoints)} pts` : '—'} last />
-          </NoirCard>
+          </CPCard>
         </View>
 
         {/* ÚLTIMAS FECHAS */}
@@ -215,7 +215,7 @@ export default function PlayerDetailScreen() {
               const winner = gd.eliminations.find((e) => e.position === 1);
               const participated = !!myElim || winner?.eliminatedPlayer.id === playerId;
               return (
-                <NoirCard key={gd.id} className="flex-row items-center gap-3 p-3">
+                <CPCard key={gd.id} className="flex-row items-center gap-3 p-3">
                   <DateBadge n={gd.dateNumber} />
                   <View className="flex-1 flex-row items-center gap-2">
                     {winner ? (
@@ -228,7 +228,7 @@ export default function PlayerDetailScreen() {
                           linkToProfile
                         />
                         <Muted className="flex-1">
-                          Ganó <Text className="font-inter-semibold text-noir-text">{playerLabel(winner.eliminatedPlayer)}</Text>
+                          Ganó <Text className="font-inter-semibold text-cp-on-surface">{playerLabel(winner.eliminatedPlayer)}</Text>
                         </Muted>
                       </>
                     ) : null}
@@ -243,7 +243,7 @@ export default function PlayerDetailScreen() {
                       <Muted className="text-xs">No participó</Muted>
                     )}
                   </View>
-                </NoirCard>
+                </CPCard>
               );
             })}
           </View>
@@ -254,18 +254,18 @@ export default function PlayerDetailScreen() {
           <View className="gap-2">
             <Overline>{isOwn ? 'Fechas que eliminás' : 'Fechas que elimina'}</Overline>
             {eliminatedDates.map((x) => (
-              <NoirCard key={x.dateNumber} className="flex-row items-center gap-3 p-3">
+              <CPCard key={x.dateNumber} className="flex-row items-center gap-3 p-3">
                 <DateBadge n={x.dateNumber} />
                 <Muted className="flex-1">
                   {x.isAbsent ? 'Ausencia' : x.eliminationPosition ? `Posición #${x.eliminationPosition}` : 'Ganador'}
                 </Muted>
-                <Score value={`−${x.points} pts`} size={14} color={NEGATIVE} />
-              </NoirCard>
+                <Score value={`−${x.points} pts`} size={14} color={c.negative} />
+              </CPCard>
             ))}
-            <NoirCard className="flex-row items-center justify-between p-3">
-              <Text className="font-inter-semibold text-sm text-noir-text">Total eliminado</Text>
-              <Score value={`−${eliminatedDates.reduce((s, x) => s + x.points, 0)} pts`} size={15} color={NEGATIVE} />
-            </NoirCard>
+            <CPCard className="flex-row items-center justify-between p-3">
+              <Text className="font-inter-semibold text-sm text-cp-on-surface">Total eliminado</Text>
+              <Score value={`−${eliminatedDates.reduce((s, x) => s + x.points, 0)} pts`} size={15} color={c.negative} />
+            </CPCard>
           </View>
         ) : null}
 
@@ -274,9 +274,9 @@ export default function PlayerDetailScreen() {
           <View className="gap-2">
             <Overline>Multas</Overline>
             {multas.map((m) => (
-              <NoirCard key={m.id} className="flex-row items-center gap-3 p-3" style={{ borderColor: `${noir.copper}88` }}>
+              <CPCard key={m.id} className="flex-row items-center gap-3 p-3" style={{ borderColor: `${c.primary}88` }}>
                 <View className="flex-1">
-                  <Text className="font-inter-semibold text-sm text-noir-text">{m.reason}</Text>
+                  <Text className="font-inter-semibold text-sm text-cp-on-surface">{m.reason}</Text>
                   <Muted className="text-xs">
                     {[
                       m.pointsPenalty > 0 ? `-${m.pointsPenalty} pts` : null,
@@ -287,15 +287,15 @@ export default function PlayerDetailScreen() {
                       .join(' · ')}
                   </Muted>
                 </View>
-                <Text style={{ color: m.paid ? POSITIVE : noir.danger }} className="font-inter-bold text-xs">
+                <Text style={{ color: m.paid ? c.positive : c.negative }} className="font-inter-bold text-xs">
                   {m.paid ? 'PAGADA' : 'PENDIENTE'}
                 </Text>
-              </NoirCard>
+              </CPCard>
             ))}
           </View>
         ) : null}
 
-        {isOwn ? <NoirButton title="Editar perfil" variant="outline" onPress={() => router.push('/perfil')} /> : null}
+        {isOwn ? <CPButton title="Editar perfil" variant="outline" onPress={() => router.push('/perfil')} /> : null}
       </>
     );
   })();
@@ -303,7 +303,7 @@ export default function PlayerDetailScreen() {
   return (
     <>
       <Stack.Screen options={{ title }} />
-      <Screen refreshing={refreshing} onRefresh={onRefresh}>
+      <Screen tone="light" refreshing={refreshing} onRefresh={onRefresh}>
         {body}
       </Screen>
     </>
@@ -313,7 +313,7 @@ export default function PlayerDetailScreen() {
 function DateBadge({ n }: { n: number }) {
   return (
     <View className="w-10 items-center">
-      <Text className="font-inter text-[10px] uppercase tracking-[1px] text-noir-muted">Fecha</Text>
+      <Text className="font-inter text-[10px] uppercase tracking-[1px] text-cp-on-surface-muted">Fecha</Text>
       <Score value={n} size={16} />
     </View>
   );

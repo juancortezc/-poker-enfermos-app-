@@ -18,7 +18,7 @@ import { Muted } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRefresh } from '@/hooks/useRefresh';
 import { isMember, matchesSearch, usePlayers, type DirectoryPlayer } from '@/hooks/usePlayers';
-import { noir } from '@/theme/colors';
+import { cp as c } from '@/theme/colors';
 
 type Tab = 'enfermos' | 'invitados';
 
@@ -61,7 +61,7 @@ export default function PlayersScreen() {
                   hitSlop={10}
                   onPress={() => router.push('/players/new')}
                   className="h-11 w-11 items-center justify-center">
-                  <Ionicons name="add" size={26} color={noir.gold} />
+                  <Ionicons name="add" size={26} color={c.primaryLight} />
                 </Pressable>
               )
             : undefined,
@@ -89,7 +89,7 @@ export default function PlayersScreen() {
             keyExtractor={(p) => p.id}
             contentContainerClassName="gap-2 pb-10"
             keyboardShouldPersistTaps="handled"
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={noir.gold} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} />}
             ListEmptyComponent={<EmptyState icon="people-outline" message="No se encontraron jugadores." />}
             renderItem={({ item }) => <PlayerRow player={item} canEdit={canEdit} />}
           />
@@ -106,16 +106,16 @@ function PlayerRow({ player, canEdit }: { player: DirectoryPlayer; canEdit: bool
       accessibilityRole="button"
       accessibilityLabel={`Ver el perfil de ${name}`}
       onPress={() => router.push({ pathname: '/players/[id]', params: { id: player.id } })}
-      className="min-h-[64px] flex-row items-center gap-3 rounded-2xl border border-noir-border bg-noir-surface px-4 py-3 active:bg-noir-raised">
+      className="min-h-[64px] flex-row items-center gap-3 rounded-cp border border-cp-surface-border bg-cp-surface-1 px-4 py-3 active:bg-cp-surface-2">
       <PlayerAvatar name={name} photoUrl={player.photoUrl} role={player.role} size={44} />
       <View className="flex-1">
         <View className="flex-row items-center gap-2">
-          <Text numberOfLines={1} className="shrink font-inter-semibold text-base text-noir-text">
+          <Text numberOfLines={1} className="shrink font-inter-semibold text-base text-cp-on-surface">
             {name}
           </Text>
           {player.role === 'Comision' ? (
-            <View className="h-5 w-5 items-center justify-center rounded-full bg-noir-copper/40">
-              <Text className="font-inter-bold text-[10px] text-noir-text">C</Text>
+            <View className="h-5 w-5 items-center justify-center rounded-full bg-cp-primary">
+              <Text className="font-inter-bold text-[10px] text-white">C</Text>
             </View>
           ) : null}
         </View>
@@ -136,11 +136,11 @@ function PlayerRow({ player, canEdit }: { player: DirectoryPlayer; canEdit: bool
                 : { pathname: '/players/edit/[id]', params: { id: player.id } }
             )
           }
-          className="h-11 w-11 items-center justify-center rounded-full active:bg-noir-raised">
-          <Ionicons name="create-outline" size={20} color={noir.gold} />
+          className="h-11 w-11 items-center justify-center rounded-full active:bg-cp-surface-2">
+          <Ionicons name="create-outline" size={20} color={c.primaryLight} />
         </Pressable>
       ) : (
-        <Ionicons name="chevron-forward" size={18} color={noir.muted} />
+        <Ionicons name="chevron-forward" size={18} color={c.onSurfaceMuted} />
       )}
     </Pressable>
   );

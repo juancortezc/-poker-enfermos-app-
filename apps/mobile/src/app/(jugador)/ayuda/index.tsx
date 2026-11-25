@@ -6,11 +6,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, Stack, type Href } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { Body, Muted } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
-import { noir } from '@/theme/colors';
+import { cpLight as c } from '@/theme/colors';
 
 type Item = { icon: React.ComponentProps<typeof Ionicons>['name']; title: string; detail: string; href: Href; profileOnly?: boolean };
 
@@ -61,23 +61,23 @@ export default function AyudaScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Ayuda' }} />
-      <Screen>
-        <NoirCard className="p-0">
+      <Screen tone="light">
+        <CPCard className="p-0">
           {items.map((item, idx) => (
             <Pressable
               key={item.title}
               accessibilityRole="link"
               onPress={() => router.push(item.href)}
-              className={`min-h-[64px] flex-row items-center gap-3 px-5 py-4 active:bg-noir-raised ${idx > 0 ? 'border-t border-noir-border' : ''}`}>
-              <Ionicons name={item.icon} size={22} color={noir.gold} />
+              className={`min-h-[64px] flex-row items-center gap-3 px-5 py-4 active:bg-cp-surface-2 ${idx > 0 ? 'border-t border-cp-surface-border' : ''}`}>
+              <Ionicons name={item.icon} size={20} color={c.info} />
               <View className="flex-1 gap-0.5">
                 <Body className="text-base">{item.title}</Body>
                 <Muted>{item.detail}</Muted>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={noir.muted} />
+              <Ionicons name="chevron-forward" size={16} color={c.onSurfaceVariant} />
             </Pressable>
           ))}
-        </NoirCard>
+        </CPCard>
       </Screen>
     </>
   );

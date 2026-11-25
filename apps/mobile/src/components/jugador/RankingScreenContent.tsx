@@ -1,5 +1,7 @@
 /**
  * Pantalla de la tabla, compartida por la pestaña "Tabla" y la ruta /tabla.
+ * En claro, como /ranking en la web; la pestaña lleva además la barra de
+ * arriba (CPHeader).
  */
 import type { Edge } from 'react-native-safe-area-context';
 
@@ -34,7 +36,7 @@ export function RankingScreenContent({ edges, showHeader }: { edges?: Edge[]; sh
   })();
 
   return (
-    <Screen edges={edges} refreshing={refreshing} onRefresh={onRefresh}>
+    <Screen edges={edges} tone="light" appBar={showHeader} refreshing={refreshing} onRefresh={onRefresh}>
       {showHeader ? <Header overline={number ? `Torneo ${number}` : 'Torneo'} title="Tabla" /> : null}
       {body}
     </Screen>

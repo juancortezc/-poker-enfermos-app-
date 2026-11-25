@@ -23,17 +23,19 @@ import {
   type PlayerRanking,
   type TournamentRankingData,
 } from '@poker/shared';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View, type TextStyle } from 'react-native';
 
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
-import { Delta, MEDAL, NEGATIVE, PROJECTED, Score, StatRow } from '@/components/jugador/Bits';
+import { Delta, Score, StatRow, useMedals } from '@/components/jugador/Bits';
 import { Segmented } from '@/components/jugador/Segmented';
-import { NoirCard } from '@/components/ui/NoirCard';
-import { Muted, Overline } from '@/components/ui/Typography';
+import { CPCard } from '@/components/ui/CPCard';
+import { Muted } from '@/components/ui/Typography';
 import { shareTextFile } from '@/lib/share-file';
-import { fonts, noir } from '@/theme/colors';
+import { bento, cp, fonts } from '@/theme/colors';
+import { ToneView, useCP } from '@/theme/tone';
 
 type TableView = 'resumen' | 'fechas' | 'elimina' | 'acum';
 
@@ -45,10 +47,16 @@ const VIEWS: { id: TableView; label: string }[] = [
 ];
 
 const MESA_FINAL_THRESHOLD = 9;
-const INACTIVE = `${noir.muted}66`;
-const ROW_ME = 'rgba(169,68,28,0.55)'; // cobre: tu fila
-const ROW_MALAZO = 'rgba(236,72,153,0.10)';
-const ROW_ZEBRA = 'rgba(243,230,197,0.03)';
+/*
+ * La tabla va en blanco con encabezado oscuro, como CPRankingView de la web:
+ * PUNTOS es la unica columna en rojo (la que manda), tu fila va en rojo y los
+ * dos ultimos (7/2) en rosa palido.
+ */
+const HEADER_BG = cp.surface2;
+const POINTS_TINT = '#FFF5F4';
+const ROW_ME = 'rgba(229,57,53,0.85)';
+const ROW_MALAZO = '#FDEBEE';
+const ROW_ZEBRA = '#F7F7F7';
 
 const W = { pos: 38, points: 58, date: 40, small: 46 };
 
@@ -61,6 +69,11 @@ type Props = {
 };
 
 export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
+  const c = useCP();
+  const medals = useMedals();
+  const INACTIVE = c.onSurfaceVariant;
+  const NEGATIVE = c.negative;
+  const PROJECTED = c.warning;
   const [view, setView] = useState<TableView>('resumen');
   const [tableWidth, setTableWidth] = useState(0);
 
@@ -173,36 +186,41 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
   const fixedWidth = W.pos + W.points + extraCols.reduce((s, c) => s + c.width, 0);
   const nameWidth = Math.max(view === 'resumen' ? 150 : 118, tableWidth - fixedWidth);
 
-  const cell: TextStyle = { fontFamily: fonts.body, fontSize: 13, color: noir.text, textAlign: 'center' };
-  const head: TextStyle = { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.6, color: noir.muted, textAlign: 'center' };
+  const cell: TextStyle = { fontFamily: fonts.body, fontSize: 13, color: c.onSurface, textAlign: 'center' };
+  const head: TextStyle = { fontFamily: fonts.display, fontSize: 12, letterSpacing: 0.4, color: cp.onSurface, textAlign: 'center' };
 
   return (
     <View className="gap-4">
       {/* LÍDER */}
       {leader ? (
         <Pressable accessibilityRole="button" onPress={() => goToPlayer(leader.playerId)} className="active:opacity-80">
-          <NoirCard accent className="gap-3">
+          <ToneView tone="dark" className="overflow-hidden rounded-tile" style={{ shadowColor: '#17120F', shadowOpacity: 0.28, shadowRadius: 15, shadowOffset: { width: 0, height: 14 }, elevation: 6 }}>
+            <LinearGradient
+              colors={[bento.tile.negro.from, bento.tile.negro.to]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ padding: 14, gap: 12 }}>
             <View className="flex-row items-center gap-4">
               <View className="flex-1 gap-1">
-                <Overline>👑 Líder del torneo</Overline>
+                <Text style={{ fontFamily: fonts.display, fontSize: 12, letterSpacing: 1.2, color: cp.gold }}>👑 LÍDER DEL TORNEO</Text>
                 <View className="flex-row items-baseline gap-2">
-                  <Score value="#1" size={28} color={noir.text} />
-                  <Text numberOfLines={1} className="flex-1 font-inter-bold text-base text-noir-text">
+                  <Score value="#1" size={30} color="#FFFFFF" />
+                  <Text numberOfLines={1} className="flex-1 font-inter-bold text-base text-white">
                     {shortenFullName(leader.playerName)}
                   </Text>
                 </View>
                 <View className="flex-row flex-wrap items-baseline gap-2">
-                  <Score value={scoreOf(leader)} size={22} color={noir.gold} />
-                  <Muted className="text-xs">{SCORE_LABELS.points}</Muted>
+                  <Score value={scoreOf(leader)} size={22} color={cp.gold} />
+                  <Text style={{ fontFamily: fonts.body, fontSize: 12, color: bento.onColor.faint }}>{SCORE_LABELS.points}</Text>
                   {leader.positionsChanged !== 0 ? <Delta value={leader.positionsChanged} size={12} /> : null}
                 </View>
                 {leader.playerAlias ? (
-                  <Text className="font-inter text-sm italic text-noir-gold">“{leader.playerAlias}”</Text>
+                  <Text style={{ color: cp.gold }} className="font-inter text-sm italic">“{leader.playerAlias}”</Text>
                 ) : null}
               </View>
-              <PlayerAvatar name={leader.playerName} photoUrl={leader.playerPhoto} size={84} ringColor={MEDAL[0]} />
+              <PlayerAvatar name={leader.playerName} photoUrl={leader.playerPhoto} size={84} />
             </View>
-            <View className="border-t border-noir-border pt-3">
+            <View className="border-t pt-3" style={{ borderColor: bento.onColor.line }}>
               <StatRow
                 items={[
                   { value: mesasFinalesFor(leader), label: 'MESAS FINALES' },
@@ -211,7 +229,8 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                 ]}
               />
             </View>
-          </NoirCard>
+            </LinearGradient>
+          </ToneView>
         </Pressable>
       ) : null}
 
@@ -224,11 +243,11 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
               accessibilityRole="button"
               onPress={() => goToPlayer(p.playerId)}
               className="flex-1 active:opacity-80">
-              <NoirCard className="flex-row items-center gap-3 p-3" style={{ borderColor: MEDAL[p.position - 1] }}>
+              <CPCard className="flex-row items-center gap-3 p-3" style={{ borderColor: p.position === 2 ? cp.silver : cp.bronze }}>
                 <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={40} />
                 <View className="min-w-0 flex-1">
-                  <Score value={`#${p.position}`} size={13} color={MEDAL[p.position - 1]} />
-                  <Text numberOfLines={1} className="font-inter-semibold text-sm text-noir-text">
+                  <Score value={`#${p.position}`} size={13} color={medals[p.position - 1]} />
+                  <Text numberOfLines={1} className="font-inter-semibold text-sm text-cp-on-surface">
                     {shortenFullName(p.playerName)}
                   </Text>
                   <View className="flex-row items-baseline gap-1">
@@ -237,7 +256,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                   </View>
                   {p.positionsChanged !== 0 ? <Delta value={p.positionsChanged} size={11} /> : null}
                 </View>
-              </NoirCard>
+              </CPCard>
             </Pressable>
           ))}
         </View>
@@ -251,28 +270,28 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Compartir la tabla completa en CSV"
           onPress={shareCsv}
-          className="min-h-[44px] flex-row items-center gap-1 rounded-full border border-noir-border px-3 active:opacity-70">
-          <Ionicons name="share-outline" size={14} color={noir.muted} />
-          <Text className="font-inter-semibold text-xs text-noir-muted">CSV</Text>
+          className="min-h-[44px] flex-row items-center gap-1 rounded-cp border border-cp-surface-border bg-cp-surface-1 px-3 active:opacity-70">
+          <Ionicons name="share-outline" size={14} color={c.onSurfaceMuted} />
+          <Text className="font-inter-semibold text-xs text-cp-on-surface-muted">CSV</Text>
         </Pressable>
       </View>
 
       {/* TABLA */}
       <View
-        className="overflow-hidden rounded-2xl border border-noir-border bg-noir-surface"
+        className="overflow-hidden rounded-card border border-cp-surface-border bg-white"
         onLayout={(e) => setTableWidth(e.nativeEvent.layout.width)}>
         <ScrollView horizontal showsHorizontalScrollIndicator={view === 'fechas'} bounces={false}>
           <View>
             {/* Encabezado */}
-            <View className="flex-row border-b border-noir-border bg-noir-raised">
+            <View className="flex-row" style={{ backgroundColor: HEADER_BG }}>
               <View style={{ width: W.pos }} className="py-2">
                 <Text style={head}>#</Text>
               </View>
               <View style={{ width: nameWidth }} className="py-2">
                 <Text style={[head, { textAlign: 'left' }]}>JUGADOR</Text>
               </View>
-              <View style={{ width: W.points, backgroundColor: noir.copper }} className="py-2">
-                <Text style={[head, { color: noir.text }]}>
+              <View style={{ width: W.points, backgroundColor: c.primaryVariant }} className="py-2">
+                <Text style={[head, { color: '#FFFFFF' }]}>
                   {view === 'acum' ? SCORE_LABELS.accumulated : SCORE_LABELS.points}
                 </Text>
               </View>
@@ -307,7 +326,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                   case 'prom':
                     return { text: Math.round(averagePointsPerDate(player)) };
                   case 'oficial':
-                    return { text: scoreOf(player), style: { color: noir.muted } };
+                    return { text: scoreOf(player), style: { color: isMe ? 'rgba(255,255,255,0.8)' : c.onSurfaceMuted } };
                   case 'dif': {
                     const dif = acumDe(player) - scoreOf(player);
                     return { text: dif > 0 ? `−${dif}` : '—', style: { color: dif > 0 ? NEGATIVE : INACTIVE } };
@@ -338,7 +357,8 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                 }
               };
 
-              const medal = posicion <= 3 ? MEDAL[posicion - 1] : null;
+              const medal = posicion <= 3 ? [cp.gold, cp.silver, cp.bronze][posicion - 1] : null;
+              const textColor = isMe ? '#FFFFFF' : c.onSurface;
 
               return (
                 <Pressable
@@ -347,7 +367,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                   accessibilityLabel={`${posicion}. ${player.playerName}, ${points} puntos`}
                   onPress={() => goToPlayer(player.playerId)}
                   style={{ backgroundColor: rowBg }}
-                  className="min-h-[48px] flex-row items-center border-b border-noir-border/60 active:opacity-70">
+                  className="min-h-[48px] flex-row items-center border-b border-cp-surface-border/60 active:opacity-70">
                   <View style={{ width: W.pos }} className="items-center">
                     {isMalazo ? (
                       <Text style={{ fontSize: 15 }}>💀</Text>
@@ -359,9 +379,9 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                           borderRadius: 12,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: medal ?? noir.raised,
+                          backgroundColor: medal ?? cp.surface2,
                         }}>
-                        <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, color: medal ? noir.bg : noir.text }}>
+                        <Text style={{ fontFamily: fonts.display, fontSize: 12, color: medal ? '#1A1512' : cp.onSurface }}>
                           {posicion}
                         </Text>
                       </View>
@@ -369,21 +389,21 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                   </View>
                   <View style={{ width: nameWidth }} className="flex-row items-center gap-2 pr-2">
                     <PlayerAvatar name={player.playerName} photoUrl={player.playerPhoto} size={view === 'resumen' ? 28 : 24} />
-                    <Text numberOfLines={1} className="flex-1 font-inter-semibold text-sm text-noir-text">
+                    <Text numberOfLines={1} style={{ color: textColor }} className="flex-1 font-inter-semibold text-sm">
                       {view === 'resumen' ? player.playerName : shortenFullName(player.playerName)}
                       {isMe ? ' (Tú)' : ''}
                     </Text>
                   </View>
                   <View
-                    style={{ width: W.points, alignSelf: 'stretch', backgroundColor: isMe ? 'transparent' : 'rgba(224,182,108,0.08)' }}
+                    style={{ width: W.points, alignSelf: 'stretch', backgroundColor: isMe ? 'transparent' : POINTS_TINT }}
                     className="items-center justify-center">
-                    <Text style={[cell, { fontFamily: fonts.bodyBold, fontSize: 15, color: noir.gold }]}>{points}</Text>
+                    <Text style={[cell, { fontFamily: fonts.display, fontSize: 15, color: textColor }]}>{points}</Text>
                   </View>
                   {extraCols.map((c) => {
                     const v = extra(c.key);
                     return (
                       <View key={c.key} style={{ width: c.width }}>
-                        <Text style={[cell, v.style]}>{v.text}</Text>
+                        <Text style={[cell, { color: textColor }, v.style]}>{v.text}</Text>
                       </View>
                     );
                   })}

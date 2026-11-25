@@ -12,9 +12,11 @@ import { View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
 import { Muted } from '@/components/ui/Typography';
-import { fonts, noir } from '@/theme/colors';
+import { fonts } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 export function EvolutionChart({ evolution }: { evolution: RankingEvolutionPoint[] }) {
+  const c = useCP();
   const [width, setWidth] = useState(0);
   const sorted = [...evolution].sort((a, b) => a.dateNumber - b.dateNumber);
 
@@ -41,21 +43,21 @@ export function EvolutionChart({ evolution }: { evolution: RankingEvolutionPoint
           hideYAxisText
           yAxisLabelWidth={0}
           yAxisColor="transparent"
-          xAxisColor={noir.border}
-          rulesColor={noir.border}
+          xAxisColor={c.surfaceBorder}
+          rulesColor={c.surfaceBorder}
           rulesType="solid"
           initialSpacing={initialSpacing}
           endSpacing={initialSpacing}
           spacing={spacing}
-          color={noir.gold}
+          color={c.primary}
           thickness={2.5}
-          dataPointsColor={noir.gold}
+          dataPointsColor={c.primary}
           dataPointsRadius={4}
-          textColor={noir.text}
+          textColor={c.onSurface}
           textFontSize={12}
           textShiftY={-8}
           textShiftX={-3}
-          xAxisLabelTextStyle={{ color: noir.muted, fontFamily: fonts.body, fontSize: 11 }}
+          xAxisLabelTextStyle={{ color: c.onSurfaceVariant, fontFamily: fonts.body, fontSize: 12 }}
           disableScroll={width > 0 && spacing * (sorted.length - 1) + initialSpacing * 2 <= width}
           isAnimated
           animationDuration={600}

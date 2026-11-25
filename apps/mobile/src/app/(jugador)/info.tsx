@@ -7,15 +7,15 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { Segmented } from '@/components/jugador/Segmented';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Body, Muted, Overline, Title } from '@/components/ui/Typography';
 import { useActiveTournament } from '@/hooks/useActiveTournament';
 import { useRefresh } from '@/hooks/useRefresh';
 import { useTournamentDates } from '@/hooks/useTournamentDates';
-import { noir } from '@/theme/colors';
+import { cpLight as c } from '@/theme/colors';
 
 type Tab = 'calendario' | 'reglamento' | 'podcast';
 
@@ -74,7 +74,7 @@ export default function InfoScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Info' }} />
-      <Screen refreshing={refreshing} onRefresh={onRefresh}>
+      <Screen tone="light" refreshing={refreshing} onRefresh={onRefresh}>
         <Segmented
           options={[
             { id: 'calendario', label: 'Calendario' },
@@ -87,12 +87,12 @@ export default function InfoScreen() {
         {tab === 'calendario' ? <CalendarioGrid active={active} dates={datesSwr} /> : null}
         {tab === 'reglamento' ? <Reglamento /> : null}
         {tab === 'podcast' ? (
-          <NoirCard className="items-center gap-3">
-            <Ionicons name="mic-outline" size={36} color={noir.gold} />
+          <CPCard className="items-center gap-3">
+            <Ionicons name="mic-outline" size={36} color={c.primaryLight} />
             <Title className="text-xl">Poker de enfermos</Title>
             <Muted className="text-center">El podcast oficial del grupo.</Muted>
-            <NoirButton title="Ir al podcast" onPress={() => router.navigate('/podcast')} />
-          </NoirCard>
+            <CPButton title="Ir al podcast" onPress={() => router.navigate('/podcast')} />
+          </CPCard>
         ) : null}
       </Screen>
     </>
@@ -114,10 +114,10 @@ function CalendarioGrid({
 
   return (
     <View className="gap-3">
-      <NoirCard className="items-center gap-1 py-4">
+      <CPCard className="items-center gap-1 py-4">
         <Overline>Torneo</Overline>
         <Title className="text-3xl">#{active.tournament.number}</Title>
-      </NoirCard>
+      </CPCard>
       <View className="flex-row flex-wrap" style={{ gap: 8 }}>
         {list.map((d, i) => {
           const date = new Date(`${d.scheduledDate.split('T')[0]}T12:00:00`);
@@ -129,22 +129,22 @@ function CalendarioGrid({
               style={{
                 width: '31.5%',
                 borderWidth: done || isNext ? 2 : 1,
-                borderColor: isNext ? noir.copper : done ? `${noir.muted}66` : noir.border,
-                backgroundColor: isNext ? 'rgba(169,68,28,0.18)' : noir.surface,
+                borderColor: isNext ? c.primary : done ? `${c.onSurfaceMuted}66` : c.surfaceBorder,
+                backgroundColor: isNext ? 'rgba(229,57,53,0.08)' : c.surface1,
               }}
-              className="items-center rounded-xl py-3">
-              <Text style={{ color: isNext ? noir.copper : noir.muted }} className="font-inter-semibold text-xs">
+              className="items-center rounded-cp py-3">
+              <Text style={{ color: isNext ? c.primaryLight : c.onSurfaceMuted }} className="font-inter-semibold text-xs">
                 Fecha {d.dateNumber}
               </Text>
-              <Text className="font-inter-bold text-2xl text-noir-text">{date.getDate()}</Text>
-              <Text className="font-inter-semibold text-sm uppercase text-noir-muted">
+              <Text className="font-display text-2xl text-cp-on-surface">{date.getDate()}</Text>
+              <Text className="font-inter-semibold text-sm uppercase text-cp-on-surface-muted">
                 {date.toLocaleDateString('es-ES', { month: 'short' })}
               </Text>
             </View>
           );
         })}
       </View>
-      <NoirButton title="Ver calendario completo" variant="outline" onPress={() => router.push('/calendario')} />
+      <CPButton title="Ver calendario completo" variant="outline" onPress={() => router.push('/calendario')} />
     </View>
   );
 }
@@ -152,26 +152,26 @@ function CalendarioGrid({
 function Reglamento() {
   return (
     <View className="gap-3">
-      <NoirCard className="items-center gap-1">
-        <Ionicons name="book-outline" size={36} color={noir.gold} />
+      <CPCard className="items-center gap-1">
+        <Ionicons name="book-outline" size={36} color={c.info} />
         <Title className="text-xl">Reglamento Oficial</Title>
         <Muted>Poker Enfermos - Torneo Semanal</Muted>
-      </NoirCard>
+      </CPCard>
       {REGLAMENTO.map((s) => (
-        <NoirCard key={s.title} className="gap-3 p-0">
-          <View className="flex-row items-center gap-3 border-b border-noir-border px-4 py-3">
-            <Ionicons name={s.icon} size={20} color={noir.gold} />
+        <CPCard key={s.title} className="gap-3 p-0">
+          <View className="flex-row items-center gap-3 border-b border-cp-surface-border px-4 py-3">
+            <Ionicons name={s.icon} size={20} color={c.info} />
             <Body className="font-inter-semibold text-base">{s.title}</Body>
           </View>
           <View className="gap-2 px-4 pb-4">
             {s.items.map((item) => (
               <View key={item} className="flex-row items-start gap-2">
-                <View className="mt-2 h-1.5 w-1.5 rounded-full" style={{ backgroundColor: noir.copper }} />
+                <View className="mt-2 h-1.5 w-1.5 rounded-full" style={{ backgroundColor: c.primary }} />
                 <Muted className="flex-1 text-sm">{item}</Muted>
               </View>
             ))}
           </View>
-        </NoirCard>
+        </CPCard>
       ))}
     </View>
   );

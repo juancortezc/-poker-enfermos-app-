@@ -17,8 +17,9 @@ import { Muted } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRefresh } from '@/hooks/useRefresh';
 import { isMember, matchesSearch, usePlayers, type DirectoryPlayer } from '@/hooks/usePlayers';
-import { noir } from '@/theme/colors';
+import { cpLight as c } from '@/theme/colors';
 
+/** Verde de marca de WhatsApp: identifica la app, no es del sistema. */
 const WHATSAPP = '#25D366';
 /** Prefijo de Ecuador para números locales (0991234567 → 593991234567). */
 const DEFAULT_COUNTRY = '593';
@@ -69,7 +70,7 @@ export default function ContactosScreen() {
   return (
     <>
       <Stack.Screen options={{ title: players ? `Contactos · ${members.length}` : 'Contactos' }} />
-      <Screen scroll={false}>
+      <Screen tone="light" scroll={false}>
         <View className="pb-3">
           <SearchField value={search} onChangeText={setSearch} />
         </View>
@@ -83,7 +84,7 @@ export default function ContactosScreen() {
             keyExtractor={(p) => p.id}
             contentContainerClassName="gap-2 pb-10"
             keyboardShouldPersistTaps="handled"
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={noir.gold} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.primary} />}
             ListEmptyComponent={<EmptyState icon="people-outline" message="No se encontraron jugadores." />}
             renderItem={({ item }) => <ContactCard player={item} isMe={item.id === user?.id} />}
           />
@@ -100,18 +101,18 @@ function ContactCard({ player, isMe }: { player: DirectoryPlayer; isMe: boolean 
   const email = player.email?.trim();
 
   return (
-    <View className="gap-3 rounded-2xl border border-noir-border bg-noir-surface p-4">
+    <View className="gap-3 rounded-card border border-cp-surface-border bg-cp-surface-1 p-4">
       <View className="flex-row items-center gap-3">
         <PlayerAvatar name={name} photoUrl={player.photoUrl} size={52} playerId={player.id} linkToProfile />
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
-            <Text numberOfLines={1} className="shrink font-inter-bold text-base text-noir-text">
+            <Text numberOfLines={1} className="shrink font-inter-bold text-base text-cp-on-surface">
               {name}
-              {isMe ? <Text className="font-inter text-noir-muted"> (Tú)</Text> : null}
+              {isMe ? <Text className="font-inter text-cp-on-surface-muted"> (Tú)</Text> : null}
             </Text>
             {player.role === 'Comision' ? (
-              <View className="h-5 w-5 items-center justify-center rounded-full bg-noir-copper/40">
-                <Text className="font-inter-bold text-[10px] text-noir-text">C</Text>
+              <View className="h-5 w-5 items-center justify-center rounded-full bg-cp-primary">
+                <Text className="font-inter-bold text-[10px] text-white">C</Text>
               </View>
             ) : null}
           </View>
@@ -123,7 +124,7 @@ function ContactCard({ player, isMe }: { player: DirectoryPlayer; isMe: boolean 
           ) : null}
           {birthday ? (
             <View className="flex-row items-center gap-1">
-              <Ionicons name="gift-outline" size={12} color={noir.muted} />
+              <Ionicons name="gift-outline" size={12} color={c.onSurfaceMuted} />
               <Muted className="text-xs">{birthday}</Muted>
             </View>
           ) : null}
@@ -134,7 +135,7 @@ function ContactCard({ player, isMe }: { player: DirectoryPlayer; isMe: boolean 
       {!isMe && (phone || email) ? (
         <View className="flex-row gap-2">
           {phone ? (
-            <ActionButton icon="call" label="Llamar" color={noir.gold} onPress={() => open(`tel:${phone.replace(/\s+/g, '')}`)} />
+            <ActionButton icon="call" label="Llamar" color={c.info} onPress={() => open(`tel:${phone.replace(/\s+/g, '')}`)} />
           ) : null}
           {phone ? (
             <ActionButton
@@ -147,7 +148,7 @@ function ContactCard({ player, isMe }: { player: DirectoryPlayer; isMe: boolean 
               }}
             />
           ) : null}
-          {email ? <ActionButton icon="mail" label="Correo" color={noir.muted} onPress={() => open(`mailto:${email}`)} /> : null}
+          {email ? <ActionButton icon="mail" label="Correo" color={c.onSurfaceMuted} onPress={() => open(`mailto:${email}`)} /> : null}
         </View>
       ) : null}
     </View>
@@ -170,9 +171,9 @@ function ActionButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      className="min-h-[44px] flex-1 flex-row items-center justify-center gap-2 rounded-full border border-noir-border bg-noir-raised active:opacity-70">
+      className="min-h-[44px] flex-1 flex-row items-center justify-center gap-2 rounded-cp border border-cp-surface-border bg-cp-surface-2 active:opacity-70">
       <Ionicons name={icon} size={18} color={color} />
-      <Text className="font-inter-semibold text-sm text-noir-text">{label}</Text>
+      <Text className="font-inter-semibold text-sm text-cp-on-surface">{label}</Text>
     </Pressable>
   );
 }

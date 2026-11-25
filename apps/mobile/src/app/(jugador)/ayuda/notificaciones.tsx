@@ -11,11 +11,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack } from 'expo-router';
 import { Linking, Platform, View } from 'react-native';
 
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { Body, Muted, Title } from '@/components/ui/Typography';
-import { noir } from '@/theme/colors';
+import { cpLight as c } from '@/theme/colors';
 
 const AJUSTES = Platform.OS === 'ios' ? 'Ajustes → Notificaciones → Poker Enfermos' : 'Ajustes → Apps → Poker Enfermos → Notificaciones';
 
@@ -41,32 +41,32 @@ export default function AyudaNotificacionesScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Notificaciones' }} />
-      <Screen>
+      <Screen tone="light">
         <View className="gap-1">
           <Title className="text-xl">Notificaciones en la app</Title>
           <Muted>En el teléfono las notificaciones son nativas: funcionan igual en iPhone y Android.</Muted>
         </View>
 
-        <NoirCard className="gap-4">
+        <CPCard className="gap-4">
           {PASOS.map((p, i) => (
             <View key={p.titulo} className="flex-row items-start gap-3">
-              <View className="h-7 w-7 items-center justify-center rounded-full bg-noir-gold">
-                <Body className="font-inter-bold text-sm text-noir-bg">{i + 1}</Body>
+              <View className="h-7 w-7 items-center justify-center rounded-full bg-cp-primary">
+                <Body className="font-inter-bold text-sm text-white">{i + 1}</Body>
               </View>
               <View className="flex-1 gap-1">
                 <View className="flex-row items-center gap-2">
-                  <Ionicons name={p.icon} size={16} color={noir.muted} />
+                  <Ionicons name={p.icon} size={16} color={c.onSurfaceMuted} />
                   <Body className="font-inter-semibold text-base">{p.titulo}</Body>
                 </View>
                 <Muted>{p.detalle}</Muted>
               </View>
             </View>
           ))}
-        </NoirCard>
+        </CPCard>
 
-        <NoirButton
+        <CPButton
           title="Abrir ajustes del sistema"
-          icon={<Ionicons name="settings-outline" size={18} color={noir.bg} />}
+          icon={<Ionicons name="settings-outline" size={18} color="white" />}
           onPress={() => Linking.openSettings().catch(() => {})}
         />
       </Screen>
