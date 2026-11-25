@@ -1,64 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withAuth } from '@/lib/api-auth'
+import { requireUser } from '@/lib/api-auth'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseQuery } from '@/lib/http'
+import { adminProposalsQuerySchema } from '@poker/shared'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const maxDuration = 10
 
 // GET - Obtener todas las propuestas para admin (solo Comisión)
-export async function GET(request: NextRequest) {
-  return withAuth(request, async (req, user) => {
-    try {
-      // Solo Comisión puede ver todas las propuestas
-      if (user.role !== 'Comision') {
-        return NextResponse.json(
-          { error: 'Solo la Comisión puede acceder a esta vista' },
-          { status: 403 }
-        )
-      }
+export const GET = withErrorHandler(async (request: NextRequest) => {
+  const user = await requireUser(request)
+  if (user.role !== 'Comision') {
+    throw AppError.forbidden('Solo la Comisión puede acceder a esta vista')
+  }
 
-      // Obtener parámetros de query para filtros
-      const { searchParams } = new URL(req.url)
-      const includeInactive = searchParams.get('includeInactive') === 'true'
-      const authorId = searchParams.get('authorId')
+  const { includeInactive, authorId } = parseQuery(request, adminProposalsQuerySchema)
 
-      // Construir filtros
-      const where: Record<string, unknown> = {}
+  const where: Record<string, unknown> = {}
+  if (!includeInactive) {
+    where.isActive = true
+  }
+  if (authorId) {
+    where.createdById = authorId
+  }
 
-      if (!includeInactive) {
-        where.isActive = true
-      }
-
-      if (authorId) {
-        where.createdById = authorId
-      }
-
-      const proposals = await prisma.proposalV2.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          createdBy: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              role: true
-            }
-          }
+  const proposals = await prisma.proposalV2.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      createdBy: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          role: true
         }
-      })
-
-      return NextResponse.json({
-        proposals,
-        count: proposals.length
-      })
-    } catch (error) {
-      console.error('Error fetching admin proposals:', error)
-      return NextResponse.json(
-        { error: 'Error interno del servidor' },
-        { status: 500 }
-      )
+      }
     }
   })
-}
+
+  return ok({
+    proposals,
+    count: proposals.length
+  })
+})

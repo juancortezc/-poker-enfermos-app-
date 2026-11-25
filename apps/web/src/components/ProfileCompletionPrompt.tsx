@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { AlertTriangle, UserCog } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface ProfileStatusResponse {
   profileComplete: boolean
@@ -68,7 +69,7 @@ export function ProfileCompletionPrompt() {
           throw new Error('Error al verificar el perfil')
         }
 
-        const data: ProfileStatusResponse = await response.json()
+        const data: ProfileStatusResponse = await readApiJson(response)
         if (!cancelled) {
           setStatus(data)
           setVisible(!data.profileComplete)

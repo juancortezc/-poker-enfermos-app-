@@ -25,6 +25,7 @@ import {
   RefreshCw
 } from 'lucide-react'
 import type { NotificationEventSettings } from '@/lib/notification-config'
+import { readApiJson } from '@/lib/api-client'
 
 interface NotificationEvent {
   eventType: string
@@ -91,7 +92,7 @@ export function NotificationConfig() {
         throw new Error('Failed to load notification config')
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
       setEvents(data.events || [])
       setSettings(data.settings || {})
 
@@ -112,7 +113,7 @@ export function NotificationConfig() {
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setHistory(data.history || [])
       }
 
@@ -196,7 +197,7 @@ export function NotificationConfig() {
         throw new Error('Failed to send test notification')
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
       setResult(`✅ Test notification sent to ${data.sentTo}/${data.totalSubscriptions} subscriptions`)
 
       // Reload history to show the test

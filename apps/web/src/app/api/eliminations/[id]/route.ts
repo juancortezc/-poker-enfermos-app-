@@ -1,17 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { withComisionAuth } from '@/lib/api-auth';
+import { NextRequest } from 'next/server';
+import { idParamsSchema, updateEliminationSchema } from '@poker/shared';
+import { requireComision } from '@/lib/api-auth';
+import { withErrorHandler } from '@/lib/errors';
+import { ok, parseBody, parseParams } from '@/lib/http';
 import { bootstrapInfrastructure } from '@/infrastructure/bootstrap';
 import {
   getUpdateEliminationUseCase,
   getDeleteEliminationUseCase,
 } from '@/infrastructure';
-import { handleEliminationError } from '@/infrastructure/http/errorHandler';
-import { parseEliminationId, parseUpdateElimination } from '@/infrastructure/http/eliminationInput';
+import { toEliminationAppError } from '@/infrastructure/http/errorHandler';
 import { recalculateStatsForElimination, recalculateAllStats } from '@/lib/parent-child-stats';
 import { prisma } from '@/lib/prisma';
 
 // Ensure dependencies are registered
 bootstrapInfrastructure();
+
+type Ctx = { params: Promise<{ id: string }> };
 
 /**
  * PUT /api/eliminations/[id]
@@ -19,33 +23,28 @@ bootstrapInfrastructure();
  * Updates an existing elimination (only player assignments, not position/points).
  * Requires Comision role.
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  return withComisionAuth(request, async () => {
-    try {
-      const eliminationId = parseEliminationId((await params).id);
-      const { eliminatedPlayerId, eliminatorPlayerId } = await parseUpdateElimination(request);
+export const PUT = withErrorHandler(async (request: NextRequest, { params }: Ctx) => {
+  await requireComision(request);
+  const { id: eliminationId } = parseParams(await params, idParamsSchema);
+  const { eliminatedPlayerId, eliminatorPlayerId } = await parseBody(request, updateEliminationSchema);
 
-      // Execute use case
-      const useCase = getUpdateEliminationUseCase();
-      const result = await useCase.execute({
-        eliminationId,
-        eliminatedPlayerId,
-        eliminatorPlayerId,
-      });
+  try {
+    const useCase = getUpdateEliminationUseCase();
+    const result = await useCase.execute({
+      eliminationId,
+      eliminatedPlayerId,
+      eliminatorPlayerId,
+    });
 
-      // Cambiar quien elimino a quien mueve las relaciones P&H. Sin esto el
-      // contador se quedaba con la version vieja para siempre.
-      await recalculateStatsForElimination(eliminationId);
+    // Cambiar quien elimino a quien mueve las relaciones P&H. Sin esto el
+    // contador se quedaba con la version vieja para siempre.
+    await recalculateStatsForElimination(eliminationId);
 
-      return NextResponse.json(result);
-    } catch (error) {
-      return handleEliminationError(error);
-    }
-  });
-}
+    return ok(result);
+  } catch (error) {
+    throw toEliminationAppError(error);
+  }
+});
 
 /**
  * DELETE /api/eliminations/[id]
@@ -53,31 +52,26 @@ export async function PUT(
  * Deletes an elimination (only the most recent one can be deleted).
  * Requires Comision role.
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  return withComisionAuth(request, async () => {
-    try {
-      const eliminationId = parseEliminationId((await params).id);
+export const DELETE = withErrorHandler(async (request: NextRequest, { params }: Ctx) => {
+  await requireComision(request);
+  const { id: eliminationId } = parseParams(await params, idParamsSchema);
 
-      // Execute use case
-      // Se lee el torneo ANTES de borrar: despues la eliminacion ya no existe.
-      const tournamentId = await tournamentIdOfElimination(eliminationId);
+  try {
+    // Se lee el torneo ANTES de borrar: despues la eliminacion ya no existe.
+    const tournamentId = await tournamentIdOfElimination(eliminationId);
 
-      const useCase = getDeleteEliminationUseCase();
-      await useCase.execute({ eliminationId });
+    const useCase = getDeleteEliminationUseCase();
+    await useCase.execute({ eliminationId });
 
-      if (tournamentId) {
-        await recalculateAllStats(tournamentId);
-      }
-
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      return handleEliminationError(error);
+    if (tournamentId) {
+      await recalculateAllStats(tournamentId);
     }
-  });
-}
+
+    return ok(null);
+  } catch (error) {
+    throw toEliminationAppError(error);
+  }
+});
 
 /** Torneo al que pertenece una eliminacion, leido antes de borrarla. */
 async function tournamentIdOfElimination(eliminationId: number): Promise<number | null> {

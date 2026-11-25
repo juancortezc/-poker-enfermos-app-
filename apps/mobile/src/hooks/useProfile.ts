@@ -34,16 +34,13 @@ export interface ProfileUpdate {
 
 export const PROFILE_KEY = '/api/profile';
 
-/** La API del perfil responde `{ message }` (no `{ error }`) en los fallos. */
+/**
+ * ApiError ya toma el mensaje de cualquiera de los formatos: `error.message`
+ * (nuevo), `{ error }` o `{ message }` (el perfil viejo respondía así).
+ */
 function profileErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    try {
-      const parsed = JSON.parse(error.info) as { message?: unknown; error?: unknown };
-      const msg = parsed.message ?? parsed.error;
-      if (typeof msg === 'string' && msg) return msg;
-    } catch {
-      // cuerpo no JSON
-    }
+    if (error.message && !error.message.startsWith('HTTP Error')) return error.message;
     return error.status >= 500 ? 'Error del servidor. Probá de nuevo.' : error.message;
   }
   return 'Sin conexión. Revisá tu internet.';

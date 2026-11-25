@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { X, Loader2, ChevronDown, User, FileText, Hash, Coins, DollarSign } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface TournamentPlayer {
   playerId: string
@@ -112,7 +113,7 @@ export default function CPMultaForm({ multa, tournamentId, players, isOpen, onCl
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al guardar multa')
       }
 

@@ -1,11 +1,12 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { withErrorHandler } from '@/lib/errors'
+import { ok } from '@/lib/http'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const maxDuration = 10
 
-export async function GET() {
+export const GET = withErrorHandler(async () => {
   try {
     // Solo propuestas activas para la vista pública (usando v2)
     const proposals = await prisma.proposalV2.findMany({
@@ -30,11 +31,11 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json({ proposals })
+    return ok({ proposals })
   } catch (error) {
     console.error('Error fetching public proposals:', error)
 
-    // Return empty array instead of error to prevent UI breaking
-    return NextResponse.json({ proposals: [] })
+    // Lista vacia en vez de error para no romper la UI (comportamiento previo)
+    return ok({ proposals: [] })
   }
-}
+})

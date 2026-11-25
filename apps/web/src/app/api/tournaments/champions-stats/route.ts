@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
+import { withErrorHandler } from '@/lib/errors'
+import { ok } from '@/lib/http'
 
 /**
  * GET /api/tournaments/champions-stats
@@ -21,94 +22,79 @@ import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
  * aprobado de la tabla de campeones no lleva esas columnas. Se quedan porque el
  * orden los usa, no porque se vean.
  */
-export async function GET() {
-  try {
-    const winners = await getTournamentWinnersWithFallback(prisma)
+export const GET = withErrorHandler(async () => {
+  const winners = await getTournamentWinnersWithFallback(prisma)
 
-    type Jugador = (typeof winners)[number]['champion']
+  type Jugador = (typeof winners)[number]['champion']
 
-    const championsMap = new Map<string, {
-      player: Jugador
-      championshipsCount: number
-      secondPlacesCount: number
-      thirdPlacesCount: number
-      tournamentNumbers: number[]
-    }>()
+  const championsMap = new Map<string, {
+    player: Jugador
+    championshipsCount: number
+    secondPlacesCount: number
+    thirdPlacesCount: number
+    tournamentNumbers: number[]
+  }>()
 
-    /** Devuelve la fila del jugador, creandola vacia si es la primera vez. */
-    const filaDe = (player: Jugador) => {
-      if (!player) return null
-      let fila = championsMap.get(player.id)
-      if (!fila) {
-        fila = {
-          player,
-          championshipsCount: 0,
-          secondPlacesCount: 0,
-          thirdPlacesCount: 0,
-          tournamentNumbers: []
-        }
-        championsMap.set(player.id, fila)
+  /** Devuelve la fila del jugador, creandola vacia si es la primera vez. */
+  const filaDe = (player: Jugador) => {
+    if (!player) return null
+    let fila = championsMap.get(player.id)
+    if (!fila) {
+      fila = {
+        player,
+        championshipsCount: 0,
+        secondPlacesCount: 0,
+        thirdPlacesCount: 0,
+        tournamentNumbers: []
       }
-      return fila
+      championsMap.set(player.id, fila)
+    }
+    return fila
+  }
+
+  winners.forEach(winner => {
+    const campeon = filaDe(winner.champion)
+    if (campeon) {
+      campeon.championshipsCount += 1
+      campeon.tournamentNumbers.push(winner.tournamentNumber)
     }
 
-    winners.forEach(winner => {
-      const campeon = filaDe(winner.champion)
-      if (campeon) {
-        campeon.championshipsCount += 1
-        campeon.tournamentNumbers.push(winner.tournamentNumber)
+    // Los segundos y terceros se cuentan aunque nunca hayan ganado: hacen
+    // falta para desempatar a quienes si ganaron.
+    const segundo = filaDe(winner.runnerUp)
+    if (segundo) segundo.secondPlacesCount += 1
+
+    const tercero = filaDe(winner.thirdPlace)
+    if (tercero) tercero.thirdPlacesCount += 1
+  })
+
+  const championsWithDetails = Array.from(championsMap.values())
+    // Esta es la tabla de CAMPEONES: quien nunca gano no entra, solo aporto
+    // sus segundos y terceros al desempate de los demas.
+    .filter(champion => champion.championshipsCount > 0)
+    .sort((a, b) => {
+      if (b.championshipsCount !== a.championshipsCount) {
+        return b.championshipsCount - a.championshipsCount
       }
 
-      // Los segundos y terceros se cuentan aunque nunca hayan ganado: hacen
-      // falta para desempatar a quienes si ganaron.
-      const segundo = filaDe(winner.runnerUp)
-      if (segundo) segundo.secondPlacesCount += 1
-
-      const tercero = filaDe(winner.thirdPlace)
-      if (tercero) tercero.thirdPlacesCount += 1
-    })
-
-    const championsWithDetails = Array.from(championsMap.values())
-      // Esta es la tabla de CAMPEONES: quien nunca gano no entra, solo aporto
-      // sus segundos y terceros al desempate de los demas.
-      .filter(champion => champion.championshipsCount > 0)
-      .sort((a, b) => {
-        if (b.championshipsCount !== a.championshipsCount) {
-          return b.championshipsCount - a.championshipsCount
-        }
-
-        if (b.secondPlacesCount !== a.secondPlacesCount) {
-          return b.secondPlacesCount - a.secondPlacesCount
-        }
-
-        if (b.thirdPlacesCount !== a.thirdPlacesCount) {
-          return b.thirdPlacesCount - a.thirdPlacesCount
-        }
-
-        // Como último criterio, ordenar alfabéticamente
-        const nameA = `${a.player.firstName} ${a.player.lastName}`.toLowerCase()
-        const nameB = `${b.player.firstName} ${b.player.lastName}`.toLowerCase()
-        return nameA.localeCompare(nameB)
-      })
-
-    // Solo `all`. La respuesta traia ademas `top3` y `others` —el mismo `all`
-    // partido en dos, que la pestaña volvia a pegar con un concat— y los
-    // totales `totalChampions`/`totalChampionships`, que nadie renderizaba.
-    return NextResponse.json({
-      success: true,
-      data: {
-        all: championsWithDetails
+      if (b.secondPlacesCount !== a.secondPlacesCount) {
+        return b.secondPlacesCount - a.secondPlacesCount
       }
+
+      if (b.thirdPlacesCount !== a.thirdPlacesCount) {
+        return b.thirdPlacesCount - a.thirdPlacesCount
+      }
+
+      // Como último criterio, ordenar alfabéticamente
+      const nameA = `${a.player.firstName} ${a.player.lastName}`.toLowerCase()
+      const nameB = `${b.player.firstName} ${b.player.lastName}`.toLowerCase()
+      return nameA.localeCompare(nameB)
     })
 
-  } catch (error) {
-    console.error('Error fetching champions stats:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Error fetching champions stats'
-      },
-      { status: 500 }
-    )
-  }
-}
+  // Solo `all`. La respuesta traia ademas `top3` y `others` —el mismo `all`
+  // partido en dos, que la pestaña volvia a pegar con un concat— y los
+  // totales `totalChampions`/`totalChampionships`, que nadie renderizaba.
+  return ok({
+    all: championsWithDetails
+  })
+})

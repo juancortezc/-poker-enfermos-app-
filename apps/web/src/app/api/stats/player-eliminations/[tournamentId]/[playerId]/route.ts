@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseParams } from '@/lib/http'
+import { tournamentPlayerParamsSchema } from '@poker/shared'
 
 interface RouteParams {
   params: Promise<{
@@ -8,118 +11,99 @@ interface RouteParams {
   }>
 }
 
-export async function GET(
-  request: NextRequest,
+export const GET = withErrorHandler(async (
+  _request: NextRequest,
   context: RouteParams
-) {
-  try {
-    const { tournamentId, playerId } = await context.params
-    const tournamentIdNum = parseInt(tournamentId)
+) => {
+  const { tournamentId: tournamentIdNum, playerId } = parseParams(await context.params, tournamentPlayerParamsSchema)
 
-    if (isNaN(tournamentIdNum)) {
-      return NextResponse.json(
-        { error: 'ID de torneo inválido' },
-        { status: 400 }
-      )
+  // Get eliminator player
+  const eliminator = await prisma.player.findUnique({
+    where: { id: playerId },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      photoUrl: true
     }
+  })
 
-    // Get eliminator player
-    const eliminator = await prisma.player.findUnique({
-      where: { id: playerId },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        photoUrl: true
-      }
-    })
+  if (!eliminator) {
+    throw AppError.notFound('Jugador no encontrado')
+  }
 
-    if (!eliminator) {
-      return NextResponse.json(
-        { error: 'Jugador no encontrado' },
-        { status: 404 }
-      )
-    }
-
-    // Get all eliminations by this player in the tournament
-    // Exclude position 1 (winner) since the winner doesn't eliminate anyone
-    const eliminations = await prisma.elimination.findMany({
-      where: {
-        eliminatorPlayerId: playerId,
-        gameDate: {
-          tournamentId: tournamentIdNum
-        },
-        position: { not: 1 } // Winner doesn't count as an elimination
+  // Get all eliminations by this player in the tournament
+  // Exclude position 1 (winner) since the winner doesn't eliminate anyone
+  const eliminations = await prisma.elimination.findMany({
+    where: {
+      eliminatorPlayerId: playerId,
+      gameDate: {
+        tournamentId: tournamentIdNum
       },
-      include: {
-        eliminatedPlayer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true
-          }
-        },
-        gameDate: {
-          select: {
-            id: true,
-            dateNumber: true,
-            scheduledDate: true
-          }
+      position: { not: 1 } // Winner doesn't count as an elimination
+    },
+    include: {
+      eliminatedPlayer: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          photoUrl: true
         }
       },
-      orderBy: [
-        { gameDate: { dateNumber: 'asc' } },
-        { position: 'asc' }
-      ]
-    })
-
-    // Group eliminations by victim
-    const victimsMap = new Map<string, {
-      player: typeof eliminator
-      count: number
-      eliminations: Array<{
-        dateNumber: number
-        scheduledDate: string
-        position: number
-        gameDateId: number
-      }>
-    }>()
-
-    eliminations.forEach((elim) => {
-      const victimId = elim.eliminatedPlayer.id
-
-      if (!victimsMap.has(victimId)) {
-        victimsMap.set(victimId, {
-          player: elim.eliminatedPlayer,
-          count: 0,
-          eliminations: []
-        })
+      gameDate: {
+        select: {
+          id: true,
+          dateNumber: true,
+          scheduledDate: true
+        }
       }
+    },
+    orderBy: [
+      { gameDate: { dateNumber: 'asc' } },
+      { position: 'asc' }
+    ]
+  })
 
-      const victim = victimsMap.get(victimId)!
-      victim.count++
-      victim.eliminations.push({
-        dateNumber: elim.gameDate.dateNumber,
-        scheduledDate: elim.gameDate.scheduledDate.toISOString(),
-        position: elim.position,
-        gameDateId: elim.gameDate.id
+  // Group eliminations by victim
+  const victimsMap = new Map<string, {
+    player: typeof eliminator
+    count: number
+    eliminations: Array<{
+      dateNumber: number
+      scheduledDate: string
+      position: number
+      gameDateId: number
+    }>
+  }>()
+
+  eliminations.forEach((elim) => {
+    const victimId = elim.eliminatedPlayer.id
+
+    if (!victimsMap.has(victimId)) {
+      victimsMap.set(victimId, {
+        player: elim.eliminatedPlayer,
+        count: 0,
+        eliminations: []
       })
-    })
+    }
 
-    // Convert map to array and sort by count (descending)
-    const victims = Array.from(victimsMap.values()).sort((a, b) => b.count - a.count)
-
-    return NextResponse.json({
-      eliminator,
-      totalEliminations: eliminations.length,
-      victims
+    const victim = victimsMap.get(victimId)!
+    victim.count++
+    victim.eliminations.push({
+      dateNumber: elim.gameDate.dateNumber,
+      scheduledDate: elim.gameDate.scheduledDate.toISOString(),
+      position: elim.position,
+      gameDateId: elim.gameDate.id
     })
-  } catch (error) {
-    console.error('Error fetching player eliminations:', error)
-    return NextResponse.json(
-      { error: 'Error al obtener eliminaciones del jugador' },
-      { status: 500 }
-    )
-  }
-}
+  })
+
+  // Convert map to array and sort by count (descending)
+  const victims = Array.from(victimsMap.values()).sort((a, b) => b.count - a.count)
+
+  return ok({
+    eliminator,
+    totalEliminations: eliminations.length,
+    victims
+  })
+})

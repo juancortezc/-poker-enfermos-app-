@@ -9,6 +9,7 @@ import { ArrowLeft, Save, UserPlus, AlertTriangle } from 'lucide-react'
 import { toast } from 'react-toastify'
 import GuestSelector from '@/components/game-dates/GuestSelector'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface GameDate {
   id: number
@@ -55,7 +56,7 @@ export default function EditGuestsPage() {
         throw new Error('Error al cargar la fecha')
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
       setGameDate(data.gameDate)
       setSelectedPlayers(data.gameDate.playerIds)
       
@@ -99,7 +100,7 @@ export default function EditGuestsPage() {
         toast.success('Invitados actualizados exitosamente')
         router.push(`/game-dates/${gameDateId}/confirm`)
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         toast.error(errorData.error || 'Error al actualizar invitados')
       }
     } catch (error) {

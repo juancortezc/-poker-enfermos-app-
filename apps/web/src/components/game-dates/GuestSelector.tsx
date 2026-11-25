@@ -8,6 +8,7 @@ import { UserRole } from '@prisma/client'
 import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -84,7 +85,7 @@ export default function GuestSelector({
       })
       
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setGroupMembers(data.groupMembers || [])
         setExternalGuests(data.externalGuests || [])
       } else {

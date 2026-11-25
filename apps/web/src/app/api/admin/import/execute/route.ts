@@ -1,17 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { findPlayerByCSVName } from '@/lib/csv-import';
-import { withComisionAuth } from '@/lib/api-auth';
-
-interface CSVElimination {
-  torneo: string;
-  fecha: number;
-  date: string;
-  posicion: number;
-  eliminado: string;
-  eliminador: string;
-  puntos: number;
-}
+import { requireComision } from '@/lib/api-auth';
+import { AppError, withErrorHandler } from '@/lib/errors';
+import { ok, parseBody } from '@/lib/http';
+import { importExecuteSchema, type CsvElimination as CSVElimination } from '@poker/shared';
 
 /**
  * Import eliminations to database
@@ -34,7 +27,7 @@ async function importEliminationsToDatabase(
       const eliminatedPlayer = await findPlayerByCSVName(elim.eliminado);
       
       if (!eliminatedPlayer?.found) {
-        throw new Error(`Jugador eliminado no encontrado: ${elim.eliminado}`);
+        throw AppError.badRequest(`Jugador eliminado no encontrado: ${elim.eliminado}`, 'PLAYER_NOT_FOUND');
       }
 
       let eliminatorPlayerId = eliminatedPlayer.id; // Default to self-elimination
@@ -106,7 +99,7 @@ async function findGameDateForImport(tournamentName: string, dateNumber: number)
   // Extract tournament number from name (e.g., "Torneo 28" -> 28)
   const tournamentNumberMatch = tournamentName.match(/Torneo\s+(\d+)/i);
   if (!tournamentNumberMatch) {
-    throw new Error(`No se pudo extraer número de torneo de: ${tournamentName}`);
+    throw AppError.badRequest(`No se pudo extraer número de torneo de: ${tournamentName}`, 'INVALID_TOURNAMENT');
   }
   
   const tournamentNumber = parseInt(tournamentNumberMatch[1]);
@@ -154,75 +147,52 @@ async function findGameDateForImport(tournamentName: string, dateNumber: number)
   return { gameDate: null, suggestions };
 }
 
-export async function POST(request: NextRequest) {
-  return withComisionAuth(request, async (req) => {
-    try {
-      const body = await req.json();
-    const { eliminations } = body;
+/**
+ * Errores: 422 si el body no tiene la forma de /validate; 404
+ * GAME_DATE_NOT_FOUND (con `details.suggestions`); 400 PLAYER_NOT_FOUND /
+ * INVALID_TOURNAMENT si una fila no se puede importar (antes eran 500).
+ */
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  await requireComision(req);
+  const { eliminations } = await parseBody(req, importExecuteSchema);
 
-    if (!eliminations || !Array.isArray(eliminations) || eliminations.length === 0) {
-      return NextResponse.json(
-        { error: 'No se proporcionaron eliminaciones válidas' },
-        { status: 400 }
-      );
-    }
+  // Get first record for tournament/date info
+  const firstRecord = eliminations[0];
+  console.log(`🔍 Buscando GameDate para ${firstRecord.torneo}, Fecha ${firstRecord.fecha}`);
 
-    // Get first record for tournament/date info
-    const firstRecord = eliminations[0];
-    console.log(`🔍 Buscando GameDate para ${firstRecord.torneo}, Fecha ${firstRecord.fecha}`);
+  // Find GameDate
+  const { gameDate, suggestions } = await findGameDateForImport(
+    firstRecord.torneo,
+    firstRecord.fecha
+  );
 
-    // Find GameDate
-    const { gameDate, suggestions } = await findGameDateForImport(
-      firstRecord.torneo,
-      firstRecord.fecha
-    );
+  if (!gameDate) {
+    throw AppError.notFound('GameDate no encontrada', 'GAME_DATE_NOT_FOUND', { suggestions });
+  }
 
-    if (!gameDate) {
-      return NextResponse.json(
-        { 
-          error: 'GameDate no encontrada',
-          suggestions
-        },
-        { status: 404 }
-      );
-    }
+  console.log(`📅 GameDate encontrada (ID: ${gameDate.id})`);
 
-    console.log(`📅 GameDate encontrada (ID: ${gameDate.id})`);
-
-    // Clear existing eliminations if any
-    if (gameDate.eliminations.length > 0) {
-      console.log(`🗑️  Eliminando ${gameDate.eliminations.length} eliminaciones existentes...`);
-      await prisma.elimination.deleteMany({
-        where: { gameDateId: gameDate.id }
-      });
-    }
-
-    // Import eliminations
-    await importEliminationsToDatabase(eliminations, gameDate.id);
-
-    // Update GameDate status
-    await updateGameDateStatus(gameDate.id, firstRecord.date);
-
-    console.log('\n🎉 IMPORTACIÓN COMPLETADA EXITOSAMENTE');
-    
-    return NextResponse.json({
-      success: true,
-      message: `${eliminations.length} eliminaciones importadas exitosamente`,
-      imported: eliminations.length,
-      gameDateId: gameDate.id,
-      tournamentNumber: gameDate.tournament.number,
-      dateNumber: gameDate.dateNumber
+  // Clear existing eliminations if any
+  if (gameDate.eliminations.length > 0) {
+    console.log(`🗑️  Eliminando ${gameDate.eliminations.length} eliminaciones existentes...`);
+    await prisma.elimination.deleteMany({
+      where: { gameDateId: gameDate.id }
     });
+  }
 
-    } catch (error) {
-      console.error('💥 Error during import:', error);
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Error durante la importación: ${error instanceof Error ? error.message : 'Error desconocido'}`
-        },
-        { status: 500 }
-      );
-    }
+  // Import eliminations
+  await importEliminationsToDatabase(eliminations, gameDate.id);
+
+  // Update GameDate status
+  await updateGameDateStatus(gameDate.id, firstRecord.date);
+
+  console.log('\n🎉 IMPORTACIÓN COMPLETADA EXITOSAMENTE');
+  
+  return ok({
+    message: `${eliminations.length} eliminaciones importadas exitosamente`,
+    imported: eliminations.length,
+    gameDateId: gameDate.id,
+    tournamentNumber: gameDate.tournament.number,
+    dateNumber: gameDate.dateNumber
   });
-}
+});

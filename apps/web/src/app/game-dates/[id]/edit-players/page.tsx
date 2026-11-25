@@ -10,6 +10,7 @@ import { toast } from 'react-toastify'
 import PlayerSelector from '@/components/game-dates/PlayerSelector'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import type { UserRole } from '@prisma/client'
+import { readApiJson } from '@/lib/api-client'
 
 interface GameDate {
   id: number
@@ -66,7 +67,7 @@ export default function EditPlayersPage() {
         throw new Error('Error al cargar la fecha')
       }
 
-      const gameDateData = await gameDateResponse.json()
+      const gameDateData = await readApiJson(gameDateResponse)
       setGameDate(gameDateData.gameDate)
       setSelectedPlayers(gameDateData.gameDate.playerIds)
 
@@ -76,7 +77,7 @@ export default function EditPlayersPage() {
       })
 
       if (playersResponse.ok) {
-        const playersData = await playersResponse.json()
+        const playersData = await readApiJson(playersResponse)
         setRegisteredPlayers(playersData.registeredPlayers || [])
       }
     } catch (error) {
@@ -114,7 +115,7 @@ export default function EditPlayersPage() {
         toast.success('Participantes actualizados exitosamente')
         router.push(`/game-dates/${gameDateId}/confirm`)
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         toast.error(errorData.error || 'Error al actualizar participantes')
       }
     } catch (error) {

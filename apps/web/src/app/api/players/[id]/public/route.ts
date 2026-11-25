@@ -1,53 +1,41 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getPlayerPhotoUrl } from '@/lib/player-utils'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseParams } from '@/lib/http'
+import { playerIdParamsSchema } from '@poker/shared'
 
 // GET /api/players/:id/public - Obtener información pública del jugador
-export async function GET(
-  request: Request,
+export const GET = withErrorHandler(async (
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
+) => {
+  const { id } = parseParams(await params, playerIdParamsSchema)
 
-    const player = await prisma.player.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        aliases: true,
-        photoUrl: true,
-        role: true,
-        lastVictoryDate: true,
-        isActive: true
-      }
-    })
-
-    if (!player) {
-      return NextResponse.json(
-        { error: 'Player not found' },
-        { status: 404 }
-      )
+  const player = await prisma.player.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      aliases: true,
+      photoUrl: true,
+      role: true,
+      lastVictoryDate: true,
+      isActive: true
     }
+  })
 
-    if (!player.isActive) {
-      return NextResponse.json(
-        { error: 'Player is not active' },
-        { status: 404 }
-      )
-    }
-
-    // Return player with correct photo URL (guests always get duck image)
-    return NextResponse.json({
-      ...player,
-      photoUrl: getPlayerPhotoUrl(player.photoUrl, player.role)
-    })
-  } catch (error) {
-    console.error('Error fetching player public data:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch player data' },
-      { status: 500 }
-    )
+  if (!player) {
+    throw AppError.notFound('Jugador no encontrado', 'PLAYER_NOT_FOUND')
   }
-}
+
+  if (!player.isActive) {
+    throw AppError.notFound('El jugador no está activo', 'PLAYER_INACTIVE')
+  }
+
+  // Return player with correct photo URL (guests always get duck image)
+  return ok({
+    ...player,
+    photoUrl: getPlayerPhotoUrl(player.photoUrl, player.role)
+  })
+})

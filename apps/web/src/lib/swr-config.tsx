@@ -3,9 +3,11 @@
 import { SWRConfig } from 'swr'
 import { ReactNode } from 'react'
 import { clearStoredAuthTokens, isAuthenticated } from '@/lib/client-auth'
+import { parseApiResponse } from '@/lib/api-client'
 
 // Custom fetcher que incluye autenticación con PIN
-const fetcher = async (url: string) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const fetcher = async (url: string): Promise<any> => {
   // Get auth token from localStorage (PIN system)
   const pin = typeof window !== 'undefined' ? localStorage.getItem('poker-pin') : null
   // Legacy support for adminKey during transition
@@ -27,15 +29,10 @@ const fetcher = async (url: string) => {
     headers,
   })
   
-  if (!response.ok) {
-    // Create error object with status for better error handling
-    const error = new Error(`HTTP Error: ${response.status}`) as Error & { status?: number; info?: string }
-    error.status = response.status
-    error.info = await response.text()
-    throw error
-  }
-  
-  return response.json()
+  // Desenvuelve `{ success: true, data }` (la API vieja manda el body a secas:
+  // tambien sirve). En error lanza ApiError con status, info (texto crudo),
+  // code, errorId y un message legible en cualquiera de los dos formatos.
+  return parseApiResponse(response)
 }
 
 // SWR configuration optimized for Poker app

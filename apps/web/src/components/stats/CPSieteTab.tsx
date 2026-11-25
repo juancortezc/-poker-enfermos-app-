@@ -42,13 +42,10 @@ interface PorTorneo {
   dos: Jugador | null
 }
 
+/** `data` ya desenvuelto por el fetcher global (formato viejo o nuevo). */
 interface Respuesta {
-  success: boolean
-  error?: string
-  data?: {
-    all: FilaApi[]
-    porTorneo: PorTorneo[]
-  }
+  all: FilaApi[]
+  porTorneo: PorTorneo[]
 }
 
 export default function CPSieteTab() {
@@ -60,19 +57,19 @@ export default function CPSieteTab() {
 
   if (isLoading) return <CargandoHistorico texto="Cargando el 7/2..." />
 
-  if (error || (data && !data.success)) {
+  if (error) {
     return (
       <ErrorHistorico
-        mensaje={data?.error ?? 'Error al cargar el 7/2'}
+        mensaje={error.message || 'Error al cargar el 7/2'}
         paleta={PALETA_ROSA}
         onReintentar={() => void mutate()}
       />
     )
   }
 
-  if (!data?.data) return null
+  if (!data) return null
 
-  const datos = data.data
+  const datos = data
 
   // Los dos van primero, y la FIRMA lo dice: eran dos `number[]` seguidos que
   // TypeScript no distingue, asi que un intercambio en cualquiera de los dos

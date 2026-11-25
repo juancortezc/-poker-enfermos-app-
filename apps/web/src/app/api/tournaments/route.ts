@@ -1,196 +1,137 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { TournamentStatus } from '@prisma/client'
-import { withComisionAuth } from '@/lib/api-auth'
+import { requireComision } from '@/lib/api-auth'
 import { parseToUTCNoon } from '@/lib/date-utils'
-import { defaultBlindLevels } from '@poker/shared'
+import { createTournamentSchema, defaultBlindLevels, tournamentListQuerySchema } from '@poker/shared'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseBody, parseQuery } from '@/lib/http'
 
 // GET /api/tournaments - Listar todos los torneos
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url)
-    const status = searchParams.get('status') as TournamentStatus | null
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  const { status } = parseQuery(req, tournamentListQuerySchema)
 
-    const where: { status?: TournamentStatus } = {}
-    if (status) {
-      where.status = status
-    }
+  const where: { status?: TournamentStatus } = {}
+  if (status) {
+    where.status = status
+  }
 
-    const tournaments = await prisma.tournament.findMany({
-      where,
-      include: {
-        gameDates: {
-          orderBy: { dateNumber: 'asc' }
-        },
-        tournamentParticipants: {
-          include: {
-            player: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                role: true,
-                photoUrl: true
-              }
+  const tournaments = await prisma.tournament.findMany({
+    where,
+    include: {
+      gameDates: {
+        orderBy: { dateNumber: 'asc' }
+      },
+      tournamentParticipants: {
+        include: {
+          player: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              photoUrl: true
             }
-          }
-        },
-        blindLevels: {
-          orderBy: { level: 'asc' }
-        },
-        _count: {
-          select: {
-            tournamentParticipants: true,
-            gameDates: true
           }
         }
       },
-      orderBy: { number: 'desc' }
-    })
+      blindLevels: {
+        orderBy: { level: 'asc' }
+      },
+      _count: {
+        select: {
+          tournamentParticipants: true,
+          gameDates: true
+        }
+      }
+    },
+    orderBy: { number: 'desc' }
+  })
 
-    return NextResponse.json(tournaments)
-  } catch (error) {
-    console.error('Error fetching tournaments:', error)
-    return NextResponse.json(
-      { error: 'Error al obtener torneos' },
-      { status: 500 }
-    )
-  }
-}
+  return ok(tournaments)
+})
 
 // POST /api/tournaments - Crear nuevo torneo
-export async function POST(req: NextRequest) {
-  return withComisionAuth(req, async (req) => {
-    try {
-      const data = await req.json()
-      const {
-        number,
-        gameDates, // Array de fechas (cantidad configurable)
-        participantIds, // Array de IDs de jugadores
-        blindLevels, // Array de niveles de blinds
-        totalDates = 12, // Cantidad total de fechas (10-15, default 12)
-        datesToEliminate = 2 // Fechas a eliminar del ranking (2-3, default 2)
-      } = data
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  await requireComision(req)
+  const {
+    number,
+    gameDates, // Array de fechas (cantidad = totalDates, validado en el esquema)
+    participantIds, // Array de IDs de jugadores
+    blindLevels, // Array de niveles de blinds
+    totalDates, // Cantidad total de fechas (10-15, default 12)
+    datesToEliminate // Fechas a eliminar del ranking (2-3, default 2)
+  } = await parseBody(req, createTournamentSchema)
 
-      // Validaciones
-      if (!number || number < 1) {
-        return NextResponse.json(
-          { error: 'El número del torneo es obligatorio' },
-          { status: 400 }
-        )
+  // Verificar que el número no esté en uso
+  const existingTournament = await prisma.tournament.findUnique({
+    where: { number }
+  })
+
+  if (existingTournament) {
+    throw AppError.badRequest(`Ya existe un torneo con el número ${number}`, 'TOURNAMENT_NUMBER_TAKEN')
+  }
+
+  // Verificar restricción de un solo torneo activo
+  const activeTournament = await prisma.tournament.findFirst({
+    where: { status: 'ACTIVO' }
+  })
+
+  // Solo se puede tener un torneo activo a la vez
+  if (activeTournament) {
+    throw AppError.badRequest(
+      'Ya existe un torneo activo. Complete el torneo actual antes de crear uno nuevo.',
+      'ACTIVE_TOURNAMENT_EXISTS'
+    )
+  }
+
+  // Crear el torneo
+  const tournament = await prisma.tournament.create({
+    data: {
+      name: `Torneo ${number}`,
+      number,
+      status: 'ACTIVO', // Los nuevos torneos se crean como activos
+      participantIds,
+      totalDates,
+      datesToEliminate,
+      gameDates: {
+        create: gameDates.map((date, index) => ({
+          dateNumber: index + 1,
+          scheduledDate: parseToUTCNoon(date.scheduledDate),
+          playersMin: 9,
+          playersMax: 24
+        }))
+      },
+      tournamentParticipants: {
+        create: participantIds.map((playerId) => ({
+          playerId,
+          confirmed: false
+        }))
+      },
+      blindLevels: {
+        create: blindLevels || defaultBlindLevels()
       }
-
-      // Validar totalDates (10-15)
-      if (totalDates < 10 || totalDates > 15) {
-        return NextResponse.json(
-          { error: 'La cantidad de fechas debe estar entre 10 y 15' },
-          { status: 400 }
-        )
-      }
-
-      // Validar datesToEliminate (2-3)
-      if (datesToEliminate < 2 || datesToEliminate > 3) {
-        return NextResponse.json(
-          { error: 'Las fechas a eliminar deben ser 2 o 3' },
-          { status: 400 }
-        )
-      }
-
-      // Verificar que el número no esté en uso
-      const existingTournament = await prisma.tournament.findUnique({
-        where: { number }
-      })
-
-      if (existingTournament) {
-        return NextResponse.json(
-          { error: `Ya existe un torneo con el número ${number}` },
-          { status: 400 }
-        )
-      }
-
-      // Verificar restricción de un solo torneo activo
-      const activeTournament = await prisma.tournament.findFirst({
-        where: { status: 'ACTIVO' }
-      })
-
-      // Solo se puede tener un torneo activo a la vez
-      if (activeTournament) {
-        return NextResponse.json(
-          { error: 'Ya existe un torneo activo. Complete el torneo actual antes de crear uno nuevo.' },
-          { status: 400 }
-        )
-      }
-
-      // Validar que gameDates coincida con totalDates
-      if (!gameDates || gameDates.length !== totalDates) {
-        return NextResponse.json(
-          { error: `Debe programar exactamente ${totalDates} fechas` },
-          { status: 400 }
-        )
-      }
-
-      if (!participantIds || participantIds.length === 0) {
-        return NextResponse.json(
-          { error: 'Debe seleccionar al menos un participante' },
-          { status: 400 }
-        )
-      }
-
-      // Crear el torneo
-      const tournament = await prisma.tournament.create({
-        data: {
-          name: `Torneo ${number}`,
-          number,
-          status: 'ACTIVO', // Los nuevos torneos se crean como activos
-          participantIds,
-          totalDates,
-          datesToEliminate,
-          gameDates: {
-            create: gameDates.map((date: { scheduledDate: string }, index: number) => ({
-              dateNumber: index + 1,
-              scheduledDate: parseToUTCNoon(date.scheduledDate),
-              playersMin: 9,
-              playersMax: 24
-            }))
-          },
-          tournamentParticipants: {
-            create: participantIds.map((playerId: string) => ({
-              playerId,
-              confirmed: false
-            }))
-          },
-          blindLevels: {
-            create: blindLevels || defaultBlindLevels()
-          }
-        },
+    },
+    include: {
+      gameDates: true,
+      tournamentParticipants: {
         include: {
-          gameDates: true,
-          tournamentParticipants: {
-            include: {
-              player: {
-                select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
-                  role: true,
-                  photoUrl: true
-                }
-              }
+          player: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              photoUrl: true
             }
-          },
-          blindLevels: {
-            orderBy: { level: 'asc' }
           }
         }
-      })
-
-      return NextResponse.json(tournament, { status: 201 })
-    } catch (error) {
-      console.error('Error creating tournament:', error)
-      return NextResponse.json(
-        { error: 'Error al crear torneo' },
-        { status: 500 }
-      )
+      },
+      blindLevels: {
+        orderBy: { level: 'asc' }
+      }
     }
   })
-}
+
+  return ok(tournament, 201)
+})

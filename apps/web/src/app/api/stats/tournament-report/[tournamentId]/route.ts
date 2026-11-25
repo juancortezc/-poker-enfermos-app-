@@ -1,38 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withComisionAuth } from '@/lib/api-auth'
+import { requireComision } from '@/lib/api-auth'
 import { generateTournamentReportWorkbook } from '@/lib/tournament-report'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { parseParams } from '@/lib/http'
+import { tournamentIdParamsSchema } from '@poker/shared'
 
-export async function GET(
+/**
+ * Excepcion de formato: es una descarga (.xlsx), asi que la respuesta correcta
+ * es el archivo, no `{ success, data }`. Los errores si salen en el formato
+ * estandar de la API.
+ */
+export const GET = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ tournamentId: string }> }
-) {
-  return withComisionAuth(request, async () => {
-    try {
-      const { tournamentId } = await params
-      const tournamentIdNum = parseInt(tournamentId)
+) => {
+  await requireComision(request)
+  const { tournamentId } = parseParams(await params, tournamentIdParamsSchema)
 
-      if (isNaN(tournamentIdNum)) {
-        return NextResponse.json({ error: 'Invalid tournament ID' }, { status: 400 })
-      }
+  const result = await generateTournamentReportWorkbook(tournamentId)
+  if (!result) {
+    throw AppError.notFound('Torneo no encontrado')
+  }
 
-      const result = await generateTournamentReportWorkbook(tournamentIdNum)
+  const buffer = await result.workbook.xlsx.writeBuffer()
 
-      if (!result) {
-        return NextResponse.json({ error: 'Tournament not found' }, { status: 404 })
-      }
-
-      const buffer = await result.workbook.xlsx.writeBuffer()
-
-      return new NextResponse(buffer as unknown as BodyInit, {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': `attachment; filename="torneo-${result.tournamentNumber}-reporte.xlsx"`
-        }
-      })
-    } catch (error) {
-      console.error('Error generating tournament report:', error)
-      return NextResponse.json({ error: 'Failed to generate report' }, { status: 500 })
+  return new NextResponse(buffer as unknown as BodyInit, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="torneo-${result.tournamentNumber}-reporte.xlsx"`
     }
   })
-}
+})

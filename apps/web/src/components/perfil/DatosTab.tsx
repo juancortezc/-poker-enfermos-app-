@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Phone, Mail, Cake, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
 import { buildAuthHeaders, storePin } from '@/lib/client-auth'
 import { isValidPinForCreation, PIN_RULE_TEXT, PIN_MAX_LENGTH } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface PlayerProfile {
   id: string
@@ -62,7 +63,7 @@ export default function DatosTab() {
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setProfile(data)
         setForm({
           phone: data.phone || '',
@@ -129,7 +130,7 @@ export default function DatosTab() {
         await fetchProfile()
         setTimeout(() => setSuccess(false), 3000)
       } else {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setError(data.message || 'Error al guardar')
       }
     } catch {

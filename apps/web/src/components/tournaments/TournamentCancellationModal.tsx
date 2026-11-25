@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { X, AlertTriangle, Loader2 } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface Tournament {
   id: number
@@ -53,7 +54,7 @@ export default function TournamentCancellationModal({
         onCancel()
         handleClose()
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al cancelar torneo')
       }
     } catch (error) {

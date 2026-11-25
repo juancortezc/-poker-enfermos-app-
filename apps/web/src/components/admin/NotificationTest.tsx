@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { notificationService } from '@/lib/notifications'
 import { Bell, Send, Users, User } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 export function NotificationTest() {
   const [loading, setLoading] = useState(false)
@@ -104,7 +105,7 @@ export function NotificationTest() {
         body: JSON.stringify(requestBody)
       })
 
-      const data = await response.json()
+      const data = await readApiJson(response)
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send notification')

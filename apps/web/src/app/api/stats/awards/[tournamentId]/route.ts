@@ -1,29 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { computeTournamentAwards } from '@/lib/awards-utils'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseParams } from '@/lib/http'
+import { tournamentIdParamsSchema } from '@poker/shared'
 
-export async function GET(
-  request: NextRequest,
+export const GET = withErrorHandler(async (
+  _request: NextRequest,
   { params }: { params: Promise<{ tournamentId: string }> }
-) {
-  try {
-    const { tournamentId } = await params
-    const tournamentIdNum = parseInt(tournamentId)
+) => {
+  const { tournamentId } = parseParams(await params, tournamentIdParamsSchema)
 
-    const response = await computeTournamentAwards(tournamentIdNum)
-
-    if (!response) {
-      return NextResponse.json(
-        { error: 'Tournament not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(response)
-  } catch (error) {
-    console.error('Error fetching awards:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch awards' },
-      { status: 500 }
-    )
+  const response = await computeTournamentAwards(tournamentId)
+  if (!response) {
+    throw AppError.notFound('Torneo no encontrado')
   }
-}
+
+  return ok(response)
+})

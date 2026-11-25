@@ -1,6 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { validateCSVPlayerNames } from '@/lib/csv-import';
-import { withComisionAuth } from '@/lib/api-auth';
+import { requireComision } from '@/lib/api-auth';
+import { AppError, withErrorHandler } from '@/lib/errors';
+import { ok } from '@/lib/http';
 
 interface CSVElimination {
   torneo: string;
@@ -137,92 +139,81 @@ async function validateCSVData(eliminations: CSVElimination[]): Promise<{
   };
 }
 
-export async function POST(request: NextRequest) {
-  return withComisionAuth(request, async (req) => {
-    try {
-      // Get uploaded file
-      const formData = await req.formData();
-    const file = formData.get('file') as File;
-    
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No se proporcionó archivo' },
-        { status: 400 }
-      );
+/**
+ * El body es multipart (campo `file`), no JSON: la forma se valida a mano y
+ * sale como 400; el contenido del CSV se valida abajo y sus problemas van en
+ * la respuesta 200 (`valid: false` con `errors`).
+ */
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  await requireComision(req);
+
+  // Get uploaded file
+  let formData: FormData;
+  try {
+    formData = await req.formData();
+  } catch {
+    throw AppError.badRequest('Se esperaba un formulario con el archivo CSV', 'INVALID_FORM');
+  }
+  const file = formData.get('file');
+
+  if (!file || typeof file === 'string') {
+    throw AppError.badRequest('No se proporcionó archivo', 'FILE_REQUIRED');
+  }
+
+  // Validate file type
+  if (!file.name.toLowerCase().endsWith('.csv')) {
+    throw AppError.badRequest('Solo se permiten archivos CSV', 'INVALID_FILE_TYPE');
+  }
+
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    throw AppError.badRequest('Archivo demasiado grande (máximo 5MB)', 'FILE_TOO_LARGE');
+  }
+
+  // Read and parse CSV
+  const csvContent = await file.text();
+  console.log('📄 CSV content received, length:', csvContent.length);
+  
+  const eliminations = parseCSV(csvContent);
+  console.log(`📊 CSV parseado: ${eliminations.length} eliminaciones encontradas`);
+
+  if (eliminations.length === 0) {
+    throw AppError.badRequest('Archivo CSV vacío o sin datos válidos', 'EMPTY_CSV');
+  }
+
+  // Validate data
+  const validation = await validateCSVData(eliminations);
+  
+  // Create preview data
+  const firstRecord = eliminations[0];
+  const uniquePlayers = [...new Set([
+    ...eliminations.map(e => e.eliminado),
+    ...eliminations.filter(e => e.eliminador && e.eliminador.trim()).map(e => e.eliminador)
+  ])];
+
+  const previewData = {
+    totalRecords: eliminations.length,
+    playerCount: uniquePlayers.length,
+    tournamentInfo: {
+      tournament: firstRecord.torneo,
+      date: firstRecord.date,
+      dateNumber: firstRecord.fecha
     }
+  };
 
-    // Validate file type
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      return NextResponse.json(
-        { error: 'Solo se permiten archivos CSV' },
-        { status: 400 }
-      );
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'Archivo demasiado grande (máximo 5MB)' },
-        { status: 400 }
-      );
-    }
-
-    // Read and parse CSV
-    const csvContent = await file.text();
-    console.log('📄 CSV content received, length:', csvContent.length);
-    
-    const eliminations = parseCSV(csvContent);
-    console.log(`📊 CSV parseado: ${eliminations.length} eliminaciones encontradas`);
-
-    if (eliminations.length === 0) {
-      return NextResponse.json(
-        { error: 'Archivo CSV vacío o sin datos válidos' },
-        { status: 400 }
-      );
-    }
-
-    // Validate data
-    const validation = await validateCSVData(eliminations);
-    
-    // Create preview data
-    const firstRecord = eliminations[0];
-    const uniquePlayers = [...new Set([
-      ...eliminations.map(e => e.eliminado),
-      ...eliminations.filter(e => e.eliminador && e.eliminador.trim()).map(e => e.eliminador)
-    ])];
-
-    const previewData = {
-      totalRecords: eliminations.length,
-      playerCount: uniquePlayers.length,
-      tournamentInfo: {
-        tournament: firstRecord.torneo,
-        date: firstRecord.date,
-        dateNumber: firstRecord.fecha
-      }
-    };
-
-    console.log('✅ Validation completed:', {
-      valid: validation.valid,
-      errors: validation.errors.length,
-      warnings: validation.warnings.length,
-      players: validation.playerValidation.valid.length
-    });
-
-    return NextResponse.json({
-      valid: validation.valid,
-      errors: validation.errors,
-      warnings: validation.warnings,
-      playerValidation: validation.playerValidation,
-      eliminations,
-      previewData
-    });
-
-    } catch (error) {
-      console.error('💥 Error validating CSV:', error);
-      return NextResponse.json(
-        { error: `Error procesando archivo: ${error instanceof Error ? error.message : 'Error desconocido'}` },
-        { status: 500 }
-      );
-    }
+  console.log('✅ Validation completed:', {
+    valid: validation.valid,
+    errors: validation.errors.length,
+    warnings: validation.warnings.length,
+    players: validation.playerValidation.valid.length
   });
-}
+
+  return ok({
+    valid: validation.valid,
+    errors: validation.errors,
+    warnings: validation.warnings,
+    playerValidation: validation.playerValidation,
+    eliminations,
+    previewData
+  });
+});

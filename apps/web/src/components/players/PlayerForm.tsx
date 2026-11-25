@@ -15,6 +15,7 @@ import {
   PIN_MAX_LENGTH,
   PIN_RULE_TEXT,
 } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -122,7 +123,7 @@ export default function PlayerForm({
         headers: buildAuthHeaders()
       })
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setEnfermos(data.filter((p: Player) => p.role === UserRole.Enfermo || p.role === UserRole.Comision))
       }
     } catch (error) {
@@ -181,7 +182,7 @@ export default function PlayerForm({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al guardar jugador')
       }
 

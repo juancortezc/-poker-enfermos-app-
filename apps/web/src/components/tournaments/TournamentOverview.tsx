@@ -9,6 +9,7 @@ import TournamentCompletionModal from './TournamentCompletionModal'
 import TournamentCancellationModal from './TournamentCancellationModal'
 import { ArrowLeft, Users, Play, X, Loader2, CheckCircle, Trophy } from 'lucide-react'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface Tournament {
   id: number
@@ -74,7 +75,7 @@ export default function TournamentOverview() {
       })
 
       if (activeResponse.ok) {
-        const activeData = await activeResponse.json()
+        const activeData = await readApiJson(activeResponse)
         setActiveTournament(activeData)
       }
 
@@ -102,7 +103,7 @@ export default function TournamentOverview() {
         // Refresh data
         await fetchTournaments()
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al activar torneo')
       }
     } catch (error) {

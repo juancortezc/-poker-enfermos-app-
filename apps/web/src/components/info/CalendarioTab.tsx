@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Calendar } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 interface GameDate {
   id: string
@@ -35,7 +36,7 @@ export default function CalendarioTab() {
         throw new Error('Error al cargar torneo')
       }
 
-      const result = await response.json()
+      const result = await readApiJson(response)
 
       if (result.tournament) {
         setTournament(result.tournament)

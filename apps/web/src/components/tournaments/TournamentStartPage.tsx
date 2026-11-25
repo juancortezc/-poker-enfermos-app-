@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 export default function TournamentStartPage() {
   const { user } = useAuth()
@@ -41,7 +42,7 @@ export default function TournamentStartPage() {
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setNextTournamentNumber(data.nextNumber)
         setSelectedNumber(data.nextNumber)
       } else {

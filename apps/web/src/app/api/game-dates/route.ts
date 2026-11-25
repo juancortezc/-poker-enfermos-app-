@@ -1,122 +1,101 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { withComisionAuth } from '@/lib/api-auth'
+import { createGameDateSchema } from '@poker/shared'
+import { requireComision } from '@/lib/api-auth'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseBody } from '@/lib/http'
 
 // POST - Crear nueva fecha de juego
-export async function POST(request: NextRequest) {
-  return withComisionAuth(request, async (req, _user) => {
-    try {
-      const data = await req.json()
-      const {
-        tournamentId,
-        dateNumber,
-        scheduledDate,
-        playerIds,
-        guestIds = []
-      } = data
+export const POST = withErrorHandler(async (request: NextRequest) => {
+  await requireComision(request)
+  // tournamentId y dateNumber llegan como numero o texto; el esquema los deja en numero.
+  const {
+    tournamentId,
+    dateNumber,
+    scheduledDate,
+    playerIds,
+    guestIds
+  } = await parseBody(request, createGameDateSchema)
 
-      // Validaciones
-      if (!tournamentId || !dateNumber || !scheduledDate) {
-        return NextResponse.json(
-          { error: 'Datos obligatorios faltantes' },
-          { status: 400 }
-        )
-      }
-
-      if (!playerIds || playerIds.length === 0) {
-        return NextResponse.json(
-          { error: 'Debe seleccionar al menos un jugador' },
-          { status: 400 }
-        )
-      }
-
-      // Verificar que existe la fecha para actualizar
-      const existingDate = await prisma.gameDate.findFirst({
-        where: {
-          tournamentId: parseInt(tournamentId),
-          dateNumber: parseInt(dateNumber)
-        }
-      })
-
-      // Calcular puntos para el ganador basado en número de participantes
-      const totalParticipants = playerIds.length + guestIds.length
-      const pointsForWinner = calculateWinnerPoints(totalParticipants)
-
-      let gameDate
-
-      if (!existingDate) {
-        // Date doesn't exist - recreate it (was deleted)
-        // Parse the scheduled date properly
-        const parsedDate = new Date(scheduledDate + 'T12:00:00.000Z')
-
-        gameDate = await prisma.gameDate.create({
-          data: {
-            tournamentId: parseInt(tournamentId),
-            dateNumber: parseInt(dateNumber),
-            scheduledDate: parsedDate,
-            playerIds: playerIds,
-            status: 'CREATED',
-            playersMin: Math.min(9, totalParticipants),
-            playersMax: Math.max(24, totalParticipants)
-          },
-          include: {
-            tournament: {
-              select: {
-                id: true,
-                name: true,
-                number: true
-              }
-            }
-          }
-        })
-      } else {
-        if (existingDate.status !== 'pending') {
-          return NextResponse.json(
-            { error: `La fecha ${dateNumber} ya ha sido activada (estado: ${existingDate.status})` },
-            { status: 400 }
-          )
-        }
-
-        // Actualizar la fecha de juego existente
-        gameDate = await prisma.gameDate.update({
-          where: {
-            id: existingDate.id
-          },
-          data: {
-            playerIds: playerIds,
-            status: 'CREATED', // Configurada y lista para usar
-            playersMin: Math.min(9, totalParticipants),
-            playersMax: Math.max(24, totalParticipants)
-          },
-          include: {
-            tournament: {
-              select: {
-                id: true,
-                name: true,
-                number: true
-              }
-            }
-          }
-        })
-      }
-
-      return NextResponse.json({
-        gameDate: {
-          ...gameDate,
-          guestIds,
-          totalParticipants,
-          pointsForWinner
-        }
-      })
-    } catch (error) {
-      console.error('Error creating game date:', error)
-      return NextResponse.json(
-        { error: 'Error interno del servidor' },
-        { status: 500 }
-      )
+  // Verificar que existe la fecha para actualizar
+  const existingDate = await prisma.gameDate.findFirst({
+    where: {
+      tournamentId,
+      dateNumber
     }
   })
-}
+
+  // Calcular puntos para el ganador basado en número de participantes
+  const totalParticipants = playerIds.length + guestIds.length
+  const pointsForWinner = calculateWinnerPoints(totalParticipants)
+
+  let gameDate
+
+  if (!existingDate) {
+    // Date doesn't exist - recreate it (was deleted)
+    // Parse the scheduled date properly
+    const parsedDate = new Date(scheduledDate.length === 10 ? scheduledDate + 'T12:00:00.000Z' : scheduledDate)
+
+    gameDate = await prisma.gameDate.create({
+      data: {
+        tournamentId,
+        dateNumber,
+        scheduledDate: parsedDate,
+        playerIds: playerIds,
+        status: 'CREATED',
+        playersMin: Math.min(9, totalParticipants),
+        playersMax: Math.max(24, totalParticipants)
+      },
+      include: {
+        tournament: {
+          select: {
+            id: true,
+            name: true,
+            number: true
+          }
+        }
+      }
+    })
+  } else {
+    if (existingDate.status !== 'pending') {
+      throw AppError.badRequest(
+        `La fecha ${dateNumber} ya ha sido activada (estado: ${existingDate.status})`,
+        'GAME_DATE_ALREADY_ACTIVATED'
+      )
+    }
+
+    // Actualizar la fecha de juego existente
+    gameDate = await prisma.gameDate.update({
+      where: {
+        id: existingDate.id
+      },
+      data: {
+        playerIds: playerIds,
+        status: 'CREATED', // Configurada y lista para usar
+        playersMin: Math.min(9, totalParticipants),
+        playersMax: Math.max(24, totalParticipants)
+      },
+      include: {
+        tournament: {
+          select: {
+            id: true,
+            name: true,
+            number: true
+          }
+        }
+      }
+    })
+  }
+
+  return ok({
+    gameDate: {
+      ...gameDate,
+      guestIds,
+      totalParticipants,
+      pointsForWinner
+    }
+  })
+})
 
 // Función para calcular puntos del ganador
 function calculateWinnerPoints(totalParticipants: number): number {

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 import { AuthUser } from '@/lib/auth'
 import { clearStoredAuthTokens, storePin, storeAdminKey, getStoredAuthToken } from '@/lib/client-auth'
 import { isValidPinForLogin } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface AuthContextType {
   user: AuthUser | null
@@ -24,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch(`/api/auth/me?id=${userId}`)
       if (response.ok) {
-        const freshUser = await response.json()
+        const freshUser = await readApiJson(response)
         setUser(freshUser)
         localStorage.setItem('poker-user', JSON.stringify(freshUser))
       }
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (response.ok) {
-        const authUser = await response.json()
+        const authUser = await readApiJson(response)
         setUser(authUser)
         localStorage.setItem('poker-user', JSON.stringify(authUser))
         storePin(pin)
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (response.ok) {
-        const authUser = await response.json()
+        const authUser = await readApiJson(response)
         setUser(authUser)
         localStorage.setItem('poker-user', JSON.stringify(authUser))
         storeAdminKey(adminKey)

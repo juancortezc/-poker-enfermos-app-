@@ -153,7 +153,7 @@ export default function RegistroPage() {
         // Refresh data after starting
         await fetchAllData()
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al iniciar la fecha')
       }
     } catch (error) {
@@ -174,7 +174,7 @@ export default function RegistroPage() {
         throw new Error('No hay fecha activa')
       }
 
-      const gameDateData = await gameDateResponse.json()
+      const gameDateData = await readApiJson(gameDateResponse)
       if (!gameDateData) {
         throw new Error('No hay fecha activa en este momento')
       }
@@ -191,12 +191,12 @@ export default function RegistroPage() {
       ])
 
       if (playersRes.ok) {
-        const playersData = await playersRes.json()
+        const playersData = await readApiJson(playersRes)
         setPlayers(playersData)
       }
 
       if (eliminationsRes.ok) {
-        const eliminationsData = await eliminationsRes.json()
+        const eliminationsData = await readApiJson(eliminationsRes)
         setEliminations(eliminationsData)
       }
 
@@ -627,7 +627,7 @@ function CPEliminationForm({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al registrar eliminación')
       }
 
@@ -930,7 +930,7 @@ function CPEliminationHistory({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al actualizar eliminación')
       }
 
@@ -1302,7 +1302,7 @@ function CPPlayersModal({
           headers: buildAuthHeaders()
         })
         if (response.ok) {
-          const data = await response.json()
+          const data = await readApiJson(response)
           setAllPlayers(data)
         }
       } catch (err) {
@@ -1380,7 +1380,7 @@ function CPPlayersModal({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al agregar participante')
       }
 
@@ -1412,7 +1412,7 @@ function CPPlayersModal({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al remover participante')
       }
 
@@ -1732,6 +1732,7 @@ function CPPlayersModal({
 // GAME COMPLETED CARD COMPONENT
 // ============================================
 import { CheckCircle, Loader2 as Loader2Icon } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 interface GameCompletedCardProps {
   gameDate: GameDate
@@ -1754,7 +1755,7 @@ function GameCompletedCard({ gameDate, onDateClosed }: GameCompletedCardProps) {
         body: JSON.stringify({ gameDateId: gameDate.id })
       })
 
-      const data = await response.json()
+      const data = await readApiJson(response)
 
       if (response.ok) {
         setIsClosed(true)

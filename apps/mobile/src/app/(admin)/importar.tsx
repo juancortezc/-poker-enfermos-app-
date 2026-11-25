@@ -20,7 +20,7 @@ import { CPButton } from '@/components/ui/CPButton';
 import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { Muted, Overline } from '@/components/ui/Typography';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, ApiError } from '@/lib/api';
 import { useCP } from '@/theme/tone';
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -145,13 +145,9 @@ export default function ImportScreen() {
       mutate((key) => typeof key === 'string' && (key.startsWith('/api/tournaments') || key.startsWith('/api/game-dates') || key.startsWith('/api/eliminations')));
     } catch (e) {
       setError(errorMessage(e, 'Error durante la importación'));
-      try {
-        const info = (e as { info?: string }).info;
-        const parsed = info ? (JSON.parse(info) as { suggestions?: string[] }) : null;
-        setSuggestions(parsed?.suggestions ?? []);
-      } catch {
-        setSuggestions([]);
-      }
+      // `suggestions` viene en error.details (formato nuevo) o en la raíz (viejo): ApiError junta los dos.
+      const suggestions = e instanceof ApiError ? e.details.suggestions : undefined;
+      setSuggestions(Array.isArray(suggestions) ? (suggestions as string[]) : []);
     } finally {
       setBusy(null);
     }

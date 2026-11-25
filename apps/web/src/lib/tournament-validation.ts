@@ -1,4 +1,5 @@
 import type { ValidationError } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 // Blinds, participantes y el formulario completo viven en @poker/shared
 // (los usa tambien la app movil). Aqui quedan las que piden red o fechas.
@@ -42,7 +43,7 @@ export const validateTournamentNumber = async (
       })
       
       if (response.ok) {
-        const tournaments = await response.json()
+        const tournaments = await readApiJson(response)
         const existingTournament = tournaments.find((t: { number: number; id: string | number }) => 
           t.number === number && (!excludeId || t.id.toString() !== excludeId)
         )

@@ -5,6 +5,7 @@ import { Loader2, Plus, Trash2, Save, RotateCcw, Clock } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { toast } from 'react-toastify'
 import { defaultBlindLevels, type BlindLevel } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface CPBlindsTabProps {
   tournamentId?: number
@@ -35,7 +36,7 @@ export default function CPBlindsTab({ tournamentId }: CPBlindsTabProps) {
         })
 
         if (res.ok) {
-          const tournament = await res.json()
+          const tournament = await readApiJson(res)
           const levels = tournament.blindLevels || []
           setBlindLevels(levels)
           setOriginalBlinds(levels)
@@ -117,7 +118,7 @@ export default function CPBlindsTab({ tournamentId }: CPBlindsTabProps) {
         setHasChanges(false)
         toast.success('Estructura de blinds actualizada')
       } else {
-        const error = await res.json()
+        const error = await readApiJson(res)
         throw new Error(error.error || 'Error al guardar')
       }
     } catch (err) {

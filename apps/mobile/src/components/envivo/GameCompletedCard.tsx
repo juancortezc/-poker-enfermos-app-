@@ -38,12 +38,8 @@ export function GameCompletedCard({
       onClosed();
     } catch (e) {
       if (e instanceof ApiError) {
-        let hint: string | undefined;
-        try {
-          hint = (JSON.parse(e.info) as { hint?: string }).hint;
-        } catch {
-          hint = undefined;
-        }
+        // `hint` viene en error.details (formato nuevo) o en la raíz (viejo).
+        const hint = typeof e.details.hint === 'string' ? e.details.hint : undefined;
         setError(e.message || hint || 'Error al cerrar la fecha');
       } else {
         setError('Error de conexión');

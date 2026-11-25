@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Mic, ExternalLink, Headphones } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 interface PodcastInfo {
   showId: string
@@ -32,7 +33,7 @@ export default function PodcastTab() {
         throw new Error('Error al cargar podcast')
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
       setPodcastInfo(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')

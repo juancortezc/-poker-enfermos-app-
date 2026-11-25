@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { put } from '@vercel/blob'
 import { withAuth } from '@/lib/api-auth'
 import { checkUpload, MAX_UPLOAD_BYTES } from '@/lib/image-upload'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok } from '@/lib/http'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -16,37 +18,34 @@ export const maxDuration = 15
  * Cuerpo: multipart/form-data con el campo `file`. PNG, JPEG o WebP (se
  * comprueba por los bytes, no por la extension), maximo 1 MB.
  */
-export async function POST(request: NextRequest) {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   return withAuth(request, async (req, user) => {
     // Corte temprano si el cliente declara algo enorme (multipart agrega
     // unos cientos de bytes de cabeceras, de ahi el margen).
     const declared = Number(req.headers.get('content-length') ?? '0')
     if (declared > MAX_UPLOAD_BYTES + 16 * 1024) {
-      return NextResponse.json({ error: 'La imagen supera 1 MB' }, { status: 413 })
+      throw new AppError('La imagen supera 1 MB', 413, 'FILE_TOO_LARGE')
     }
 
     let file: FormDataEntryValue | null
     try {
       file = (await req.formData()).get('file')
     } catch {
-      return NextResponse.json(
-        { error: 'Se esperaba multipart/form-data con el campo "file"' },
-        { status: 400 }
-      )
+      throw AppError.badRequest('Se esperaba multipart/form-data con el campo "file"', 'INVALID_MULTIPART')
     }
     if (!file || typeof file === 'string') {
-      return NextResponse.json({ error: 'Falta el archivo en el campo "file"' }, { status: 400 })
+      throw AppError.badRequest('Falta el archivo en el campo "file"', 'FILE_REQUIRED')
     }
 
     const bytes = new Uint8Array(await file.arrayBuffer())
     const check = checkUpload(bytes)
     if (!check.ok) {
-      return NextResponse.json({ error: check.error }, { status: check.status })
+      throw new AppError(check.error, check.status, check.status === 413 ? 'FILE_TOO_LARGE' : 'INVALID_IMAGE')
     }
 
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       console.error('[upload] BLOB_READ_WRITE_TOKEN no configurado')
-      return NextResponse.json({ error: 'La subida de imágenes no está disponible' }, { status: 503 })
+      throw AppError.unavailable('La subida de imágenes no está disponible', 'UPLOAD_UNAVAILABLE')
     }
 
     try {
@@ -60,10 +59,10 @@ export async function POST(request: NextRequest) {
           cacheControlMaxAge: 60 * 60 * 24 * 365,
         }
       )
-      return NextResponse.json({ url: blob.url }, { status: 201 })
+      return ok({ url: blob.url }, 201)
     } catch (error) {
       console.error('[upload] Error subiendo a Blob:', error)
-      return NextResponse.json({ error: 'No se pudo subir la imagen' }, { status: 502 })
+      throw new AppError('No se pudo subir la imagen', 502, 'UPLOAD_FAILED')
     }
   })
-}
+})

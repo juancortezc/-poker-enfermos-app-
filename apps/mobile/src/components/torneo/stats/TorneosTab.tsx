@@ -78,14 +78,14 @@ function Puesto({
 }
 
 export function TorneosTab() {
-  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data?: TournamentWinner[]; error?: string }>(
+  const { data, error, isLoading, mutate } = useSWR<TournamentWinner[]>(
     swrKeys.tournamentWinners()
   );
   const [filtro, setFiltro] = useState<Filtro>(null);
   const { metal, rosa } = usePaletas();
 
   const torneos = useMemo(
-    () => [...(data?.data ?? [])].sort((a, b) => b.tournamentNumber - a.tournamentNumber),
+    () => [...(data ?? [])].sort((a, b) => b.tournamentNumber - a.tournamentNumber),
     [data]
   );
 
@@ -99,8 +99,8 @@ export function TorneosTab() {
   );
 
   if (isLoading) return <LoadingState message="Cargando torneos…" />;
-  if (error || (data && !data.success)) {
-    return <ErrorState message={data?.error ?? 'Error al cargar torneos'} onRetry={() => mutate()} />;
+  if (error) {
+    return <ErrorState message={error instanceof Error && error.message ? error.message : 'Error al cargar torneos'} onRetry={() => mutate()} />;
   }
   if (torneos.length === 0) return <EmptyState message="No hay datos de torneos históricos" icon="trophy-outline" />;
 

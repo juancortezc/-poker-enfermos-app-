@@ -8,6 +8,7 @@ import { fetchCalendarDraft, saveCalendarDraft, clearCalendarDraft } from '@/lib
 import { toast } from 'react-toastify'
 import { UserRole } from '@prisma/client'
 import { playerLabel, defaultBlindLevels, type BlindLevel } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface GeneratedDate {
   dateNumber: number
@@ -79,7 +80,7 @@ export default function CPCrearTorneoTab() {
           headers: buildAuthHeaders()
         })
         if (numberRes.ok) {
-          const data = await numberRes.json()
+          const data = await readApiJson(numberRes)
           setNextTournamentNumber(data.nextNumber)
           setTournamentNumber(data.nextNumber)
         }
@@ -89,7 +90,7 @@ export default function CPCrearTorneoTab() {
           headers: buildAuthHeaders()
         })
         if (playersRes.ok) {
-          const players = await playersRes.json()
+          const players = await readApiJson(playersRes)
           const activePlayers = players.filter((p: Player) => p.isActive)
           setAvailablePlayers(activePlayers)
           setSelectedParticipants(activePlayers.map((p: Player) => p.id))
@@ -251,7 +252,7 @@ export default function CPCrearTorneoTab() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al crear torneo')
       }
 
@@ -272,7 +273,7 @@ export default function CPCrearTorneoTab() {
         headers: buildAuthHeaders()
       })
       if (numberRes.ok) {
-        const data = await numberRes.json()
+        const data = await readApiJson(numberRes)
         setNextTournamentNumber(data.nextNumber)
         setTournamentNumber(data.nextNumber)
       }

@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
+import { withErrorHandler } from '@/lib/errors'
+import { ok } from '@/lib/http'
 
 /**
  * GET /api/tournaments/siete-stats
@@ -26,89 +27,78 @@ import { getTournamentWinnersWithFallback } from '@/lib/tournament-winners'
  * El desempate iba antes por sietes, que es al reves: entre dos jugadores con
  * seis apariciones, ponia primero al que casi nunca quedo ultimo.
  */
-export async function GET() {
-  try {
-    const winners = await getTournamentWinnersWithFallback(prisma)
+export const GET = withErrorHandler(async () => {
+  const winners = await getTournamentWinnersWithFallback(prisma)
 
-    type Jugador = (typeof winners)[number]['siete']
+  type Jugador = (typeof winners)[number]['siete']
 
-    interface Fila {
-      player: Jugador
-      sieteCount: number
-      dosCount: number
-      /** Torneos donde se llevo el 7. */
-      sieteTournaments: number[]
-      /** Torneos donde se llevo el 2. */
-      dosTournaments: number[]
-    }
-
-    const mapa = new Map<string, Fila>()
-
-    /** Devuelve la fila del jugador, creandola vacia si es la primera vez. */
-    const filaDe = (player: Jugador): Fila | null => {
-      if (!player) return null
-      let fila = mapa.get(player.id)
-      if (!fila) {
-        fila = { player, sieteCount: 0, dosCount: 0, sieteTournaments: [], dosTournaments: [] }
-        mapa.set(player.id, fila)
-      }
-      return fila
-    }
-
-    winners.forEach(winner => {
-      const siete = filaDe(winner.siete)
-      if (siete) {
-        siete.sieteCount += 1
-        siete.sieteTournaments.push(winner.tournamentNumber)
-      }
-
-      const dos = filaDe(winner.dos)
-      if (dos) {
-        dos.dosCount += 1
-        dos.dosTournaments.push(winner.tournamentNumber)
-      }
-    })
-
-    const all = Array.from(mapa.values())
-      .map(fila => ({
-        ...fila,
-        total: fila.sieteCount + fila.dosCount,
-      }))
-      .sort((a, b) => {
-        if (b.total !== a.total) return b.total - a.total
-        if (b.dosCount !== a.dosCount) return b.dosCount - a.dosCount
-        const nombreA = `${a.player?.firstName ?? ''} ${a.player?.lastName ?? ''}`
-        const nombreB = `${b.player?.firstName ?? ''} ${b.player?.lastName ?? ''}`
-        return nombreA.localeCompare(nombreB)
-      })
-
-    // El 7/2 de cada torneo, del mas reciente al mas viejo.
-    const porTorneo = [...winners]
-      .sort((a, b) => b.tournamentNumber - a.tournamentNumber)
-      .map(w => ({
-        tournamentNumber: w.tournamentNumber,
-        siete: w.siete,
-        dos: w.dos,
-      }))
-
-    // Solo lo que alguien lee. Esto devolvia ademas `top3`/`others` (el mismo
-    // `all` partido en dos, que el cliente volvia a pegar), `totalJugadores` y
-    // `totalPremios` —un recorrido de toda la tabla en cada request— y, por
-    // jugador, un `tournamentNumbers` con los dos premios revueltos: el cliente
-    // necesita saber cual es un 7 y cual un 2, asi que usa las dos listas
-    // separadas y esa nunca servia para nada.
-    return NextResponse.json({
-      success: true,
-      data: {
-        all,
-        porTorneo,
-      },
-    })
-  } catch (error) {
-    console.error('Error fetching siete stats:', error)
-    return NextResponse.json(
-      { success: false, error: 'Error fetching siete stats' },
-      { status: 500 }
-    )
+  interface Fila {
+    player: Jugador
+    sieteCount: number
+    dosCount: number
+    /** Torneos donde se llevo el 7. */
+    sieteTournaments: number[]
+    /** Torneos donde se llevo el 2. */
+    dosTournaments: number[]
   }
-}
+
+  const mapa = new Map<string, Fila>()
+
+  /** Devuelve la fila del jugador, creandola vacia si es la primera vez. */
+  const filaDe = (player: Jugador): Fila | null => {
+    if (!player) return null
+    let fila = mapa.get(player.id)
+    if (!fila) {
+      fila = { player, sieteCount: 0, dosCount: 0, sieteTournaments: [], dosTournaments: [] }
+      mapa.set(player.id, fila)
+    }
+    return fila
+  }
+
+  winners.forEach(winner => {
+    const siete = filaDe(winner.siete)
+    if (siete) {
+      siete.sieteCount += 1
+      siete.sieteTournaments.push(winner.tournamentNumber)
+    }
+
+    const dos = filaDe(winner.dos)
+    if (dos) {
+      dos.dosCount += 1
+      dos.dosTournaments.push(winner.tournamentNumber)
+    }
+  })
+
+  const all = Array.from(mapa.values())
+    .map(fila => ({
+      ...fila,
+      total: fila.sieteCount + fila.dosCount,
+    }))
+    .sort((a, b) => {
+      if (b.total !== a.total) return b.total - a.total
+      if (b.dosCount !== a.dosCount) return b.dosCount - a.dosCount
+      const nombreA = `${a.player?.firstName ?? ''} ${a.player?.lastName ?? ''}`
+      const nombreB = `${b.player?.firstName ?? ''} ${b.player?.lastName ?? ''}`
+      return nombreA.localeCompare(nombreB)
+    })
+
+  // El 7/2 de cada torneo, del mas reciente al mas viejo.
+  const porTorneo = [...winners]
+    .sort((a, b) => b.tournamentNumber - a.tournamentNumber)
+    .map(w => ({
+      tournamentNumber: w.tournamentNumber,
+      siete: w.siete,
+      dos: w.dos,
+    }))
+
+  // Solo lo que alguien lee. Esto devolvia ademas `top3`/`others` (el mismo
+  // `all` partido en dos, que el cliente volvia a pegar), `totalJugadores` y
+  // `totalPremios` —un recorrido de toda la tabla en cada request— y, por
+  // jugador, un `tournamentNumbers` con los dos premios revueltos: el cliente
+  // necesita saber cual es un 7 y cual un 2, asi que usa las dos listas
+  // separadas y esa nunca servia para nada.
+  return ok({
+    all,
+    porTorneo,
+  })
+})

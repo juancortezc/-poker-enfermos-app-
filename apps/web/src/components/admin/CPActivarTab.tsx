@@ -10,6 +10,7 @@ import TournamentCompletionModal from '@/components/tournaments/TournamentComple
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 import { playerLabel } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 const RED = '#E53935'
 const PINK = '#E8863C'
@@ -125,7 +126,7 @@ export default function CPActivarTab() {
       })
 
       if (activeResponse.ok) {
-        const activeData = await activeResponse.json()
+        const activeData = await readApiJson(activeResponse)
         if (activeData && activeData.activeDate) {
           setActiveGameDate(activeData.activeDate)
           setTournament(activeData.activeDate.tournament)
@@ -140,7 +141,7 @@ export default function CPActivarTab() {
       })
 
       if (availableResponse.ok) {
-        const data = await availableResponse.json()
+        const data = await readApiJson(availableResponse)
 
         if (data.blocked) {
           setError(data.blockedReason || 'No se pueden crear fechas en este momento')
@@ -202,7 +203,7 @@ export default function CPActivarTab() {
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setGuests(data.externalGuests)
       }
     } catch (err) {
@@ -261,12 +262,12 @@ export default function CPActivarTab() {
         })
 
         if (response.ok) {
-          const result = await response.json()
+          const result = await readApiJson(response)
           setActiveGameDate(result.gameDate)
           setMissingDate(null)
           router.push(`/game-dates/${result.gameDate.id}/confirm`)
         } else {
-          const errorData = await response.json()
+          const errorData = await readApiJson(response)
           setError(errorData.error || 'Error al crear fecha')
         }
       } catch (err) {
@@ -299,12 +300,12 @@ export default function CPActivarTab() {
       })
 
       if (response.ok) {
-        const result = await response.json()
+        const result = await readApiJson(response)
         setActiveGameDate(result.gameDate)
         setAvailableDates(prev => prev.filter(d => d.id !== selectedDateId))
         router.push(`/game-dates/${result.gameDate.id}/confirm`)
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al activar fecha')
       }
     } catch (err) {
@@ -365,7 +366,7 @@ export default function CPActivarTab() {
         setSelectedPlayers([])
         setSelectedGuests([])
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al eliminar fecha')
       }
     } catch (err) {
@@ -406,7 +407,7 @@ export default function CPActivarTab() {
         ))
         setError('')
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setDateError(errorData.error || 'Error al actualizar fecha')
       }
     } catch (err) {

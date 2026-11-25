@@ -10,6 +10,7 @@ import { ProposalCard } from '@/components/proposals/ProposalCard'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { toast } from 'react-toastify'
 import { Plus, Lightbulb, FileText } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 interface ProposalV2 {
   id: number
@@ -59,7 +60,7 @@ export default function PropuestasV2Page() {
         throw new Error('Error al cargar tus propuestas')
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
       setProposals(data.proposals || [])
     } catch (error) {
       console.error('Error fetching my proposals:', error)
@@ -90,7 +91,7 @@ export default function PropuestasV2Page() {
         headers: buildAuthHeaders()
       })
 
-      const data = await response.json().catch(() => ({})) as {
+      const data = await readApiJson(response).catch(() => ({})) as {
         proposal?: ProposalV2
         error?: string
       }

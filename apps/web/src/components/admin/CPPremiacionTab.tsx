@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { Award, Loader2, Trophy, UserX, Medal, Users, Crown, Target, CalendarX, ChevronDown, Zap } from 'lucide-react'
 import Image from 'next/image'
 import { playerLabel } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface AwardPlayer {
   id: string
@@ -72,7 +73,7 @@ const fetcher = async (url: string) => {
     headers: { 'Content-Type': 'application/json' }
   })
   if (!response.ok) throw new Error('Error fetching data')
-  return response.json()
+  return readApiJson(response)
 }
 
 type SubTabType = 'premios' | 'stats' | 'ph'
