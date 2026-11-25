@@ -1,5 +1,6 @@
 /**
- * Selector de pestañas en píldora (Resumen/Fechas/…, Posiciones/Eliminaciones,
+ * Selector segmentado (HomeViewToggle de la web): la opción activa es una
+ * píldora roja sólida con texto blanco; las demás, texto gris. Pestañas (Resumen/Fechas/…, Posiciones/Eliminaciones,
  * Última Fecha/Torneo). Cada opción mide al menos 44 pt de alto.
  */
 import * as Haptics from 'expo-haptics';
@@ -18,7 +19,7 @@ export function Segmented<T extends string>({ options, value, onChange, classNam
   return (
     <View
       accessibilityRole="tablist"
-      className={`flex-row gap-1 rounded-full border border-noir-border bg-noir-surface p-1 ${className}`}>
+      className={`flex-row gap-1 rounded-[12px] bg-white/5 p-1 ${className}`}>
       {options.map((o) => {
         const active = o.id === value;
         return (
@@ -32,12 +33,12 @@ export function Segmented<T extends string>({ options, value, onChange, classNam
               Haptics.selectionAsync().catch(() => {});
               onChange(o.id);
             }}
-            className={`min-h-[44px] flex-1 items-center justify-center rounded-full px-2 ${
-              active ? 'bg-noir-gold' : ''
+            className={`min-h-[44px] flex-1 items-center justify-center rounded-[9px] px-2 ${
+              active ? 'bg-cp-primary' : ''
             } ${o.disabled ? 'opacity-40' : 'active:opacity-70'}`}>
             <Text
               numberOfLines={1}
-              className={`font-inter-semibold text-sm ${active ? 'text-noir-bg' : 'text-noir-muted'}`}>
+              className={`font-inter-bold text-sm ${active ? 'text-white' : 'text-cp-on-surface-variant'}`}>
               {o.label}
             </Text>
           </Pressable>

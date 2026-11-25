@@ -10,10 +10,12 @@
  */
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { apiUrl } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { fonts } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 const GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/pato.png';
 
@@ -33,7 +35,7 @@ type Props = {
   size?: number;
   /** Alto distinto del ancho (tarjetas de campeón). */
   height?: number;
-  /** Círculo (por defecto) o tarjeta redondeada. */
+  /** Círculo (por defecto) o foto cuadrada con radio 8, como HomeAvatar de la web. */
   shape?: 'circle' | 'card';
   /** Borde de color (medalla, "tú"). */
   ringColor?: string;
@@ -71,22 +73,26 @@ export function PlayerAvatar({
   role,
   size = 40,
   height,
-  shape = 'circle',
+  shape = 'card',
   ringColor,
   playerId,
   linkToProfile = false,
 }: Props) {
-  const uri = photoUri(photoUrl, role);
+  const c = useCP();
+  const [failed, setFailed] = useState<string | null>(null);
+  const candidate = photoUri(photoUrl, role);
+  // Si la foto no carga, quedan las iniciales (antes quedaba un cuadro vacio).
+  const uri = candidate && failed !== candidate ? candidate : null;
   const content = (
     <View
       style={{
         width: size,
         height: height ?? size,
-        borderRadius: shape === 'circle' ? size / 2 : 16,
+        borderRadius: shape === 'circle' ? size / 2 : 8,
         overflow: 'hidden',
-        backgroundColor: noir.raised,
+        backgroundColor: c.surface2,
         borderWidth: ringColor ? 2 : 1,
-        borderColor: ringColor ?? noir.border,
+        borderColor: ringColor ?? c.surfaceBorder,
         alignItems: 'center',
         justifyContent: 'center',
       }}>
@@ -99,9 +105,10 @@ export function PlayerAvatar({
           transition={200}
           accessibilityLabel={name}
           accessibilityIgnoresInvertColors
+          onError={() => setFailed(candidate)}
         />
       ) : (
-        <Text style={{ fontFamily: 'Cinzel_700Bold', fontSize: Math.max(11, size * 0.34), color: ringColor ?? noir.gold }}>
+        <Text style={{ fontFamily: fonts.display, fontSize: Math.max(11, size * 0.34), color: ringColor ?? c.onSurfaceMuted }}>
           {initialsOf(name)}
         </Text>
       )}

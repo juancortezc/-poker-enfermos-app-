@@ -1,27 +1,28 @@
 /**
- * Panel `noir-card`: superficie algo más clara que el fondo, borde cobre
- * oscuro y sombra profunda. `accent` añade un filo dorado arriba.
+ * Tarjeta Clean Poker: superficie 1 del tono, borde neutro y elevacion 2.
+ * En claro es la HomeCard de la web (blanca, radio 18); en oscuro, `.cp-card`.
+ * `raised` sube un piso (`.cp-card-raised`): la tarjeta que hay que mirar.
  */
 import { View, type ViewProps } from 'react-native';
 
-type Props = ViewProps & { className?: string; accent?: boolean };
+import { useTone } from '@/theme/tone';
 
-export function NoirCard({ className = '', accent = false, style, children, ...rest }: Props) {
+type Props = ViewProps & { className?: string; raised?: boolean };
+
+export function CPCard({ className = '', raised = false, style, children, ...rest }: Props) {
+  const light = useTone() === 'light';
   return (
     <View
-      className={`overflow-hidden rounded-2xl border border-noir-border bg-noir-surface p-5 ${className}`}
+      className={`rounded-card border p-5 ${
+        raised ? 'border-cp-outline bg-cp-surface-2' : 'border-cp-surface-border bg-cp-surface-1'
+      } ${className}`}
       style={[
-        {
-          shadowColor: '#000',
-          shadowOpacity: 0.45,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 12 },
-          elevation: 8,
-        },
+        light
+          ? { shadowColor: '#17120F', shadowOpacity: 0.07, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 2 }
+          : { shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
         style,
       ]}
       {...rest}>
-      {accent ? <View className="absolute left-0 right-0 top-0 h-[2px] bg-noir-gold/70" /> : null}
       {children}
     </View>
   );

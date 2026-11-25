@@ -6,19 +6,45 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { Muted, Overline } from '@/components/ui/Typography';
-import { fonts, noir } from '@/theme/colors';
+import { cp, fonts, type ToneColors } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
-/** Medallas: oro, plata y bronce (el "metal" de la web, sobre fondo oscuro). */
-export const MEDAL = ['#E0B66C', '#C9C6C2', '#C08A54'] as const;
-export const POSITIVE = '#6ECB71';
-export const NEGATIVE = '#E8863C';
-/** Rosa de los malazos 7/2, como en la web. */
-export const MALAZO = '#EC4899';
+/**
+ * Colores con significado, en el tono OSCURO. En componentes que pueden ir en
+ * una pantalla clara usa las versiones `use*` o `useCP()`: sobre papel el oro,
+ * el verde, el naranja y el rosa cambian a su variante legible.
+ */
+export const MEDAL = [cp.gold, cp.silver, cp.bronze] as const;
+export const POSITIVE = cp.positive;
+export const NEGATIVE = cp.negative;
+/** Rosa de los malazos 7/2: identidad, como en la web. */
+export const MALAZO = cp.malazo;
 /** Ámbar = proyectado, no jugado (tabla durante una fecha en curso). */
-export const PROJECTED = '#F0B429';
+export const PROJECTED = cp.warning;
 
-export function Score({ value, size = 18, color = noir.text }: { value: string | number; size?: number; color?: string }) {
-  return <Text style={{ fontFamily: fonts.bodyBold, fontSize: size, color, fontVariant: ['tabular-nums'] }}>{value}</Text>;
+/** Oro, plata y bronce del tono actual. */
+export function medalsOf(c: ToneColors): readonly [string, string, string] {
+  return [c.gold, c.silver, c.bronze];
+}
+export function useMedals() {
+  return medalsOf(useCP());
+}
+
+/** Cifra de marcador: Archivo 800, ancho fijo y tracking negativo (`.cp-score`). */
+export function Score({ value, size = 18, color }: { value: string | number; size?: number; color?: string }) {
+  const c = useCP();
+  return (
+    <Text
+      style={{
+        fontFamily: fonts.display,
+        fontSize: size,
+        color: color ?? c.onSurface,
+        fontVariant: ['tabular-nums'],
+        letterSpacing: -0.03 * size,
+      }}>
+      {value}
+    </Text>
+  );
 }
 
 export type StatItem = { value: string | number; label: string; color?: string };
@@ -28,7 +54,7 @@ export function StatRow({ items, valueSize = 18 }: { items: StatItem[]; valueSiz
   return (
     <View className="flex-row">
       {items.map((s, i) => (
-        <View key={s.label} className={`flex-1 ${i > 0 ? 'border-l border-noir-border pl-3' : ''}`}>
+        <View key={s.label} className={`flex-1 ${i > 0 ? 'border-l border-cp-surface-border pl-3' : ''}`}>
           <Score value={s.value} size={valueSize} color={s.color} />
           <Muted className="text-xs leading-tight">{s.label}</Muted>
         </View>
@@ -49,16 +75,16 @@ export function SectionHeader({ title, action, onAction }: { title: string; acti
 export function LinkCta({ title, onPress }: { title: string; onPress: () => void }) {
   return (
     <Pressable accessibilityRole="link" onPress={onPress} hitSlop={10} className="min-h-[44px] justify-center active:opacity-60">
-      <Text className="font-inter-bold text-xs uppercase tracking-[1.5px] text-noir-gold">{title} →</Text>
+      <Text className="font-inter-bold text-xs uppercase tracking-[0.6px] text-cp-primary-light">{title} →</Text>
     </Pressable>
   );
 }
 
 export function KeyValue({ label, value, last = false }: { label: string; value: string | number; last?: boolean }) {
   return (
-    <View className={`flex-row items-center justify-between py-3 ${last ? '' : 'border-b border-noir-border'}`}>
+    <View className={`flex-row items-center justify-between py-3 ${last ? '' : 'border-b border-cp-surface-border'}`}>
       <Muted className="text-sm">{label}</Muted>
-      <Text className="font-inter-bold text-base text-noir-text">{value}</Text>
+      <Text className="font-inter-bold text-base text-cp-on-surface">{value}</Text>
     </View>
   );
 }
@@ -72,20 +98,21 @@ export function SearchField({
   onChangeText: (t: string) => void;
   placeholder?: string;
 }) {
+  const c = useCP();
   return (
-    <View className="min-h-[48px] flex-row items-center gap-2 rounded-full border border-noir-border bg-noir-surface px-4">
-      <Ionicons name="search" size={16} color={noir.muted} />
+    <View className="min-h-[48px] flex-row items-center gap-2 rounded-cp border border-cp-surface-border bg-cp-surface-1 px-4">
+      <Ionicons name="search" size={16} color={c.onSurfaceVariant} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={`${noir.muted}99`}
+        placeholderTextColor={c.onSurfaceVariant}
         autoCorrect={false}
         autoCapitalize="none"
         clearButtonMode="while-editing"
         returnKeyType="search"
         accessibilityLabel={placeholder}
-        style={{ flex: 1, fontFamily: fonts.body, fontSize: 16, color: noir.text, paddingVertical: 10 }}
+        style={{ flex: 1, fontFamily: fonts.body, fontSize: 16, color: c.onSurface, paddingVertical: 10 }}
       />
     </View>
   );
@@ -93,10 +120,11 @@ export function SearchField({
 
 /** Variación de puestos: ▲ verde, ▼ naranja, — gris. */
 export function Delta({ value, size = 13 }: { value: number; size?: number }) {
-  if (value === 0) return <Text style={{ fontFamily: fonts.bodyMedium, fontSize: size, color: `${noir.muted}88` }}>—</Text>;
+  const c = useCP();
+  if (value === 0) return <Text style={{ fontFamily: fonts.bodyMedium, fontSize: size, color: c.onSurfaceVariant }}>—</Text>;
   const up = value > 0;
   return (
-    <Text style={{ fontFamily: fonts.bodyBold, fontSize: size, color: up ? POSITIVE : NEGATIVE }}>
+    <Text style={{ fontFamily: fonts.bodyBold, fontSize: size, color: up ? c.positive : c.negative }}>
       {up ? `+${value} ▲` : `${value} ▼`}
     </Text>
   );

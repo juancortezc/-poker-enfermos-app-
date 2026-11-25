@@ -1,19 +1,30 @@
 /**
- * Contenedor de pantalla: fondo Noir, textura de papel sutil y safe area.
+ * Contenedor de pantalla Clean Poker: fondo del tono, safe area y cabecera.
  *
- * - En pantallas con cabecera nativa (stack) la cabecera ya respeta el notch:
- *   usar `edges={['bottom']}` (por defecto).
- * - En tabs (sin cabecera nativa) usar `edges={['top']}`; la barra inferior
- *   ya respeta el borde de abajo.
+ * - `tone`: 'light' (papel, como casi toda la web) o 'dark' (en vivo, timer,
+ *   registro, propuestas, formularios). Publica las variables del tono para
+ *   todo lo de adentro y ajusta la cabecera nativa y la barra de estado.
+ * - `appBar`: la barra de arriba de la web (CPHeader) — para las pestañas,
+ *   que no tienen cabecera nativa.
+ * - En pantallas con cabecera nativa (stack) usar `edges={['bottom']}` (por
+ *   defecto). En tabs, `edges={['top']}`.
  */
-import paper from '@/assets/textures/paper.jpg';
-import { Image, RefreshControl, ScrollView, View, type ViewProps } from 'react-native';
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { setStatusBarStyle } from 'expo-status-bar';
+import { useCallback, useLayoutEffect } from 'react';
+import { RefreshControl, ScrollView, View, type ViewProps } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
-import { noir } from '@/theme/colors';
+import { CPHeader } from '@/components/ui/CPHeader';
+import { fonts } from '@/theme/colors';
+import { ToneView, type Tone } from '@/theme/tone';
+import { tones } from '@poker/design';
 
 type Props = ViewProps & {
   edges?: Edge[];
+  tone?: Exclude<Tone, 'paper'>;
+  appBar?: boolean;
   /** Envuelve el contenido en ScrollView (por defecto true). */
   scroll?: boolean;
   /** Pull-to-refresh (solo con scroll). */
@@ -25,6 +36,8 @@ type Props = ViewProps & {
 
 export function Screen({
   edges = ['bottom'],
+  tone = 'dark',
+  appBar = false,
   scroll = true,
   refreshing,
   onRefresh,
@@ -33,23 +46,49 @@ export function Screen({
   children,
   ...rest
 }: Props) {
+  const c = tones[tone];
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerStyle: { backgroundColor: c.surface0 },
+      headerTintColor: c.onSurface,
+      headerTitleStyle: { fontFamily: fonts.display, color: c.onSurface },
+      contentStyle: { backgroundColor: c.surface0 },
+    });
+  }, [navigation, c]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle(tone === 'light' ? 'dark' : 'light', true);
+    }, [tone]),
+  );
+
   return (
-    <View className={`flex-1 bg-noir-bg ${className}`} {...rest}>
-      <Image
-        source={paper}
-        resizeMode="cover"
-        className="absolute inset-0 h-full w-full opacity-[0.06]"
-        accessibilityIgnoresInvertColors
-        alt=""
-      />
+    <ToneView tone={tone} className={`flex-1 bg-cp-surface-0 ${className}`} {...rest}>
+      {tone === 'light' && appBar ? (
+        // El resplandor rojo arriba de CPAppShell en claro.
+        <LinearGradient
+          pointerEvents="none"
+          colors={['rgba(229,57,53,0.07)', 'rgba(229,57,53,0)']}
+          style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 320 }}
+        />
+      ) : null}
       <SafeAreaView edges={edges} style={{ flex: 1 }}>
+        {appBar ? <CPHeader /> : null}
         {scroll ? (
           <ScrollView
             contentContainerClassName={`px-4 pb-10 pt-4 gap-4 ${contentClassName}`}
             keyboardShouldPersistTaps="handled"
             refreshControl={
               onRefresh ? (
-                <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={noir.gold} />
+                <RefreshControl
+                  refreshing={!!refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={c.primary}
+                  colors={[c.primary]}
+                  progressBackgroundColor={c.surface1}
+                />
               ) : undefined
             }>
             {children}
@@ -58,6 +97,6 @@ export function Screen({
           <View className={`flex-1 px-4 pt-4 ${contentClassName}`}>{children}</View>
         )}
       </SafeAreaView>
-    </View>
+    </ToneView>
   );
 }

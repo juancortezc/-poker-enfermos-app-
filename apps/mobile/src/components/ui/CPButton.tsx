@@ -1,42 +1,40 @@
 /**
- * Botón Noir Jazz. Equivale a NoirButton de la web:
- * - primary: dorado sólido con texto oscuro (gradiente oro en la web)
- * - copper: acento cobre para acciones destacadas/destructivas
- * - outline: borde oro, fondo transparente
+ * Boton Clean Poker:
+ * - primary: rojo del club #E53935 con texto blanco (la accion de la pantalla)
+ * - outline: borde neutro, texto on-surface
  * - ghost: solo texto
+ * Radio de 5 px (`--cp-radius-md`), como los botones de la web.
  */
 import * as Haptics from 'expo-haptics';
 import { ActivityIndicator, Pressable, Text, View, type PressableProps } from 'react-native';
 
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
-export type NoirButtonVariant = 'primary' | 'copper' | 'outline' | 'ghost';
-export type NoirButtonSize = 'md' | 'lg';
+export type CPButtonVariant = 'primary' | 'outline' | 'ghost';
+export type CPButtonSize = 'md' | 'lg';
 
 type Props = Omit<PressableProps, 'children'> & {
   title: string;
-  variant?: NoirButtonVariant;
-  size?: NoirButtonSize;
+  variant?: CPButtonVariant;
+  size?: CPButtonSize;
   loading?: boolean;
   icon?: React.ReactNode;
   className?: string;
 };
 
-const containerByVariant: Record<NoirButtonVariant, string> = {
-  primary: 'bg-noir-gold border border-noir-gold',
-  copper: 'bg-noir-copper border border-noir-copper',
-  outline: 'bg-transparent border border-noir-gold/70',
+const containerByVariant: Record<CPButtonVariant, string> = {
+  primary: 'bg-cp-primary border border-cp-primary',
+  outline: 'bg-transparent border border-cp-outline',
   ghost: 'bg-transparent border border-transparent',
 };
 
-const textByVariant: Record<NoirButtonVariant, string> = {
-  primary: 'text-noir-bg',
-  copper: 'text-noir-text',
-  outline: 'text-noir-gold',
-  ghost: 'text-noir-muted',
+const textByVariant: Record<CPButtonVariant, string> = {
+  primary: 'text-cp-on-primary',
+  outline: 'text-cp-on-surface',
+  ghost: 'text-cp-on-surface-muted',
 };
 
-export function NoirButton({
+export function CPButton({
   title,
   variant = 'primary',
   size = 'md',
@@ -47,10 +45,11 @@ export function NoirButton({
   className = '',
   ...rest
 }: Props) {
+  const c = useCP();
   const isDisabled = disabled || loading;
-  const sizing = size === 'lg' ? 'min-h-[60px] px-6' : 'min-h-[48px] px-5';
-  const textSize = size === 'lg' ? 'text-lg' : 'text-base';
-  const spinnerColor = variant === 'primary' ? noir.bg : noir.gold;
+  const sizing = size === 'lg' ? 'min-h-[56px] px-6' : 'min-h-[48px] px-5';
+  const textSize = size === 'lg' ? 'text-base' : 'text-[15px]';
+  const spinnerColor = variant === 'primary' ? c.onPrimary : c.onSurface;
 
   return (
     <Pressable
@@ -61,7 +60,7 @@ export function NoirButton({
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
         onPress?.(e);
       }}
-      className={`flex-row items-center justify-center rounded-full ${sizing} ${containerByVariant[variant]} ${
+      className={`flex-row items-center justify-center rounded-cp ${sizing} ${containerByVariant[variant]} ${
         isDisabled ? 'opacity-50' : 'active:opacity-80'
       } ${className}`}
       {...rest}>
@@ -70,9 +69,7 @@ export function NoirButton({
       ) : (
         <View className="flex-row items-center gap-2">
           {icon}
-          <Text className={`font-cinzel-bold uppercase tracking-[2px] ${textSize} ${textByVariant[variant]}`}>
-            {title}
-          </Text>
+          <Text className={`font-inter-bold uppercase tracking-[0.5px] ${textSize} ${textByVariant[variant]}`}>{title}</Text>
         </View>
       )}
     </Pressable>

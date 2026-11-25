@@ -1,21 +1,23 @@
 /**
- * Estados de carga, error y vacío (CLAUDE.md > State Patterns), en Noir Jazz.
+ * Estados de carga, error, vacio y restringido, en Clean Poker:
+ * spinner rojo, error en rojo-texto, vacio con icono frio (informativo).
  */
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { ActivityIndicator, View } from 'react-native';
 
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Body, Muted } from '@/components/ui/Typography';
 import { ApiError } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 export function LoadingState({ message = 'Cargando…' }: { message?: string }) {
+  const c = useCP();
   return (
-    <NoirCard className="items-center gap-3 py-10">
-      <ActivityIndicator size="large" color={noir.gold} />
+    <CPCard className="items-center gap-3 py-10">
+      <ActivityIndicator size="large" color={c.primary} />
       <Muted>{message}</Muted>
-    </NoirCard>
+    </CPCard>
   );
 }
 
@@ -41,12 +43,13 @@ export function ErrorState({
   message?: string;
   onRetry?: () => void;
 }) {
+  const c = useCP();
   return (
-    <NoirCard className="items-center gap-3 border-noir-copper/60 py-8">
-      <Ionicons name="alert-circle-outline" size={36} color={noir.danger} />
+    <CPCard className="items-center gap-3 border-cp-primary/40 py-8">
+      <Ionicons name="alert-circle-outline" size={36} color={c.primaryLight} />
       <Body className="text-center">{message ?? describeError(error)}</Body>
-      {onRetry ? <NoirButton title="Reintentar" variant="outline" onPress={onRetry} /> : null}
-    </NoirCard>
+      {onRetry ? <CPButton title="Reintentar" variant="outline" onPress={onRetry} /> : null}
+    </CPCard>
   );
 }
 
@@ -61,20 +64,22 @@ export function EmptyState({
   actionTitle?: string;
   onAction?: () => void;
 }) {
+  const c = useCP();
   return (
-    <NoirCard className="items-center gap-3 py-8">
-      <Ionicons name={icon} size={36} color={noir.gold} />
+    <CPCard className="items-center gap-3 py-8">
+      <Ionicons name={icon} size={36} color={c.info} />
       <Muted className="text-center">{message}</Muted>
-      {actionTitle && onAction ? <NoirButton title={actionTitle} onPress={onAction} /> : null}
-    </NoirCard>
+      {actionTitle && onAction ? <CPButton title={actionTitle} onPress={onAction} /> : null}
+    </CPCard>
   );
 }
 
-/** Aviso de función restringida por rol (candado). */
+/** Aviso de funcion restringida por rol (candado). */
 export function RestrictedState({ message }: { message: string }) {
+  const c = useCP();
   return (
     <View className="flex-1 items-center justify-center gap-3 px-6">
-      <Ionicons name="lock-closed-outline" size={40} color={noir.gold} />
+      <Ionicons name="lock-closed-outline" size={40} color={c.onSurfaceVariant} />
       <Body className="text-center">{message}</Body>
     </View>
   );
