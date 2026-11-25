@@ -111,21 +111,21 @@ export default function PlayerCard({ player, canEdit, onPlayerDeactivated }: Pla
       <div className="flex items-center justify-between">
         {/* Left side - Avatar and info */}
         <div className="flex items-center space-x-3">
-          {/* Circular Avatar */}
-          <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-600 flex-shrink-0">
+          {/* Foto: 64 px (antes circulo de 48) */}
+          <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0" style={{ background: 'var(--cp-surface-3)' }}>
             {player.photoUrl && !imageError ? (
               <Image
                 src={player.photoUrl}
                 alt={`${player.firstName} ${player.lastName}`}
-                width={48}
-                height={48}
+                width={64}
+                height={64}
                 loading="lazy"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top"
                 onError={() => setImageError(true)}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <User className="w-6 h-6" />
+                <User className="w-7 h-7" />
               </div>
             )}
           </div>

@@ -468,7 +468,7 @@ function CPAwardCard({
           >
             {/* Avatar */}
             <div
-              className="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center shrink-0"
+              className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shrink-0"
               style={{
                 background: item.player.photoUrl ? 'transparent' : 'var(--cp-surface)',
                 border: '1px solid var(--cp-surface-border)',
@@ -478,9 +478,9 @@ function CPAwardCard({
                 <Image
                   src={item.player.photoUrl}
                   alt={`${item.player.firstName} ${item.player.lastName}`}
-                  width={32}
-                  height={32}
-                  className="object-cover w-full h-full"
+                  width={40}
+                  height={40}
+                  className="object-cover object-top w-full h-full"
                 />
               ) : (
                 <span
@@ -592,7 +592,7 @@ function CPParentChildCard({ relation }: CPParentChildCardProps) {
         {label}
       </span>
       <div
-        className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
+        className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center"
         style={{
           background: player.photoUrl ? 'transparent' : 'var(--cp-surface)',
           border: `2px solid ${color}`,
@@ -602,9 +602,9 @@ function CPParentChildCard({ relation }: CPParentChildCardProps) {
           <Image
             src={player.photoUrl}
             alt={`${player.firstName} ${player.lastName}`}
-            width={40}
-            height={40}
-            className="object-cover w-full h-full"
+            width={56}
+            height={56}
+            className="object-cover object-top w-full h-full"
           />
         ) : (
           <span

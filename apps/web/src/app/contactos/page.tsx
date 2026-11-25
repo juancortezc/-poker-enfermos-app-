@@ -11,7 +11,7 @@ import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
-import { HomeAvatar } from '@/components/clean-poker/HomeAvatar'
+import { CPPlayerPhoto } from '@/components/clean-poker/CPPlayerPhoto'
 
 interface Player {
   id: string
@@ -139,7 +139,7 @@ export default function ContactosPage() {
               return (
                 <HomeCard key={player.id}>
                   <div style={{ padding: 12, display: 'flex', gap: 12 }}>
-                    <HomeAvatar playerId={player.id} name={`${player.firstName} ${player.lastName}`} photoUrl={player.photoUrl} size={52} fontSize={18} />
+                    <CPPlayerPhoto src={player.photoUrl} name={`${player.firstName} ${player.lastName}`} size={64} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--cp-on-surface)' }}>
