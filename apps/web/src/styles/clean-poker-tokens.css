@@ -435,6 +435,8 @@
 }
 
 .cp-photo-viewer::backdrop {
+  /* Navegadores donde ::backdrop no hereda variables: la misma tinta, fija. */
+  background: rgba(29, 22, 21, 0.94);
   background: color-mix(in srgb, var(--cp-ink) 94%, transparent);
 }
 

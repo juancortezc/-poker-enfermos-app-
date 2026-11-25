@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { getInitials } from '@/lib/avatar-utils'
 
 /**
@@ -32,6 +33,11 @@ interface CPPlayerPhotoProps {
   priority?: boolean
   className?: string
   style?: React.CSSProperties
+  /**
+   * Si se pasa, la foto entera es un enlace (p. ej. `/players/<id>`), con el
+   * mismo anillo de foco que HomeAvatar. No lo uses si la fila ya navega.
+   */
+  href?: string
 }
 
 export function CPPlayerPhoto({
@@ -43,10 +49,11 @@ export function CPPlayerPhoto({
   priority,
   className,
   style,
+  href,
 }: CPPlayerPhotoProps) {
   const height = aspect === 'portrait' ? Math.round((size * 4) / 3) : size
 
-  return (
+  const photo = (
     <div
       className={className}
       style={{
@@ -86,6 +93,19 @@ export function CPPlayerPhoto({
         </span>
       )}
     </div>
+  )
+
+  if (!href) return photo
+
+  return (
+    <Link
+      href={href}
+      className="cp-foto-link"
+      aria-label={`Ver el perfil de ${name}`}
+      style={{ display: 'inline-flex', flexShrink: 0, borderRadius: radius, lineHeight: 0, verticalAlign: 'bottom' }}
+    >
+      {photo}
+    </Link>
   )
 }
 
