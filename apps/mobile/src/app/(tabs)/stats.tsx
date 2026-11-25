@@ -12,7 +12,7 @@ import { ParentChildTab } from '@/components/torneo/stats/ParentChildTab';
 import { PremiosTab } from '@/components/torneo/stats/PremiosTab';
 import { SinGanarTab } from '@/components/torneo/stats/SinGanarTab';
 import { TorneosTab } from '@/components/torneo/stats/TorneosTab';
-import { Header, Screen } from '@/components/ui';
+import { Screen } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { swrKeys } from '@/lib/swr';
 
@@ -53,11 +53,8 @@ export default function StatsScreen() {
   };
 
   return (
-    <Screen edges={['top']} refreshing={refreshing} onRefresh={onRefresh}>
-      <Header
-        overline={active?.tournament ? `Torneo ${active.tournament.number}` : 'Torneo'}
-        title="Estadísticas"
-      />
+    <Screen edges={['top']} tone="light" appBar refreshing={refreshing} onRefresh={onRefresh}>
+      {/* Como la web: sin título, la barra de arriba ya dice el torneo. */}
       <ChipTabs tabs={tabs} value={tab} onChange={setTab} />
 
       {tab === 'sin-ganar' ? <SinGanarTab tournamentId={active?.tournament?.id} /> : null}

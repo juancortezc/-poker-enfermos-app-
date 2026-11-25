@@ -17,9 +17,9 @@ import { ChipTabs } from '@/components/torneo/ChipTabs';
 import { ProposalCard } from '@/components/torneo/proposals/ProposalCard';
 import { ProposalForm } from '@/components/torneo/proposals/ProposalForm';
 import { proposalKeys, type Proposal, type ProposalsResponse } from '@/components/torneo/proposals/api';
-import { EmptyState, ErrorState, Header, LoadingState, Muted, NoirButton, Screen } from '@/components/ui';
+import { EmptyState, ErrorState, Header, LoadingState, Muted, CPButton, Screen } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
-import { noir } from '@/theme/colors';
+import { cp } from '@/theme/colors';
 
 type View_ = 'publicas' | 'mias' | 'comision';
 
@@ -90,10 +90,10 @@ export default function PropuestasV2Screen() {
         ) : null}
 
         {view === 'mias' ? (
-          <NoirButton
+          <CPButton
             title="Nueva propuesta"
             onPress={() => setCreating(true)}
-            icon={<Ionicons name="add" size={20} color={noir.bg} />}
+            icon={<Ionicons name="add" size={20} color={cp.onPrimary} />}
           />
         ) : null}
 

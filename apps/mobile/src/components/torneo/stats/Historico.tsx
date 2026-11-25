@@ -9,8 +9,9 @@ import { BarChart } from 'react-native-gifted-charts';
 import useSWR from 'swr';
 
 import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
-import { EmptyState, ErrorState, LoadingState, Muted, NoirCard, Overline } from '@/components/ui';
-import { fonts, noir } from '@/theme/colors';
+import { EmptyState, ErrorState, LoadingState, Muted, CPCard, Overline } from '@/components/ui';
+import { cp, fonts } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 import { playerLabel } from '@poker/shared';
 
 export type Jugador = {
@@ -31,10 +32,21 @@ type Fila = {
   detalle?: string;
 };
 
-type Paleta = { metales: [string, string, string] };
+/**
+ * `metales` rellenan y enmarcan (siempre el metal vivo); `tintas` son el mismo
+ * color COMO TEXTO en el tono de la pantalla: sobre papel el oro vivo no se
+ * lee, va su variante -on-light. Igual que PALETA_METAL / PALETA_ROSA de
+ * CPHistoricoTab en la web.
+ */
+export type Paleta = { metales: [string, string, string]; tintas: [string, string, string] };
 
-export const PALETA_METAL: Paleta = { metales: [noir.gold, '#C9C6C2', '#C08A54'] };
-export const PALETA_ROSA: Paleta = { metales: ['#D81B60', '#EC4899', '#F472B6'] };
+export function usePaletas(): { metal: Paleta; rosa: Paleta } {
+  const c = useCP();
+  return {
+    metal: { metales: [cp.gold, cp.silver, cp.bronze], tintas: [c.gold, c.silver, c.bronze] },
+    rosa: { metales: [cp.malazoDeep, cp.malazoBlock, cp.malazo], tintas: [c.malazoText, c.malazoText, c.malazoText] },
+  };
+}
 
 type Envelope<T> = { success: boolean; error?: string; data?: T };
 
@@ -44,21 +56,21 @@ function useHistorico<T>(key: string) {
   return { ...res, failed };
 }
 
-function TarjetaPodio({ fila, color, grande }: { fila: Fila; color: string; grande: boolean }) {
+function TarjetaPodio({ fila, color, tinta, grande }: { fila: Fila; color: string; tinta: string; grande: boolean }) {
   const w = grande ? 108 : 92;
   return (
     <View className="items-center" style={{ width: w + 8 }}>
       <PlayerAvatar {...avatarProps(fila.jugador)} size={w} height={grande ? 140 : 120} shape="card" ringColor={color} />
-      <Text numberOfLines={1} className="mt-2 font-inter-semibold text-sm text-noir-text">
+      <Text numberOfLines={1} className="mt-2 font-inter-semibold text-sm text-cp-on-surface">
         {playerLabel(fila.jugador)}
       </Text>
       <View className="mt-1 rounded-full px-3 py-0.5" style={{ backgroundColor: `${color}30` }}>
-        <Text style={{ color }} className="font-inter-bold text-lg">
+        <Text style={{ color: tinta, fontVariant: ['tabular-nums'] }} className="font-display text-lg">
           {fila.total}
         </Text>
       </View>
       {fila.pie ? (
-        <Text style={{ color }} className="mt-1 font-inter-semibold text-xs">
+        <Text style={{ color: tinta }} className="mt-1 font-inter-semibold text-xs">
           {fila.pie}
         </Text>
       ) : null}
@@ -79,36 +91,36 @@ function HistoricoList({ filas, paleta, vacio }: { filas: Fila[]; paleta: Paleta
   return (
     <View className="gap-4">
       <View className="flex-row items-end justify-center gap-2 py-2">
-        {segundo ? <TarjetaPodio fila={segundo} color={paleta.metales[1]} grande={false} /> : null}
-        {primero ? <TarjetaPodio fila={primero} color={paleta.metales[0]} grande /> : null}
-        {tercero ? <TarjetaPodio fila={tercero} color={paleta.metales[2]} grande={false} /> : null}
+        {segundo ? <TarjetaPodio fila={segundo} color={paleta.metales[1]} tinta={paleta.tintas[1]} grande={false} /> : null}
+        {primero ? <TarjetaPodio fila={primero} color={paleta.metales[0]} tinta={paleta.tintas[0]} grande /> : null}
+        {tercero ? <TarjetaPodio fila={tercero} color={paleta.metales[2]} tinta={paleta.tintas[2]} grande={false} /> : null}
       </View>
 
       {resto.length > 0 ? (
-        <NoirCard className="p-0">
+        <CPCard className="p-0">
           {resto.map((fila, i) => (
             <View
               key={fila.jugador.id}
-              className={`flex-row items-center gap-3 px-4 py-3 ${i < resto.length - 1 ? 'border-b border-noir-border' : ''} ${
+              className={`flex-row items-center gap-3 px-4 py-3 ${i < resto.length - 1 ? 'border-b border-cp-surface-border' : ''} ${
                 fila.jugador.isActive ? '' : 'opacity-60'
               }`}>
-              <Text className="w-6 text-center font-inter text-sm text-noir-muted">{i + 4}</Text>
+              <Text className="w-6 text-center font-inter text-sm text-cp-on-surface-muted">{i + 4}</Text>
               <PlayerAvatar {...avatarProps(fila.jugador)} size={40} />
               <View className="flex-1">
-                <Text numberOfLines={1} className="font-inter-semibold text-base text-noir-text">
+                <Text numberOfLines={1} className="font-inter-semibold text-base text-cp-on-surface">
                   {fila.jugador.firstName} {fila.jugador.lastName}
                 </Text>
                 {fila.jugador.aliases?.[0] ? <Muted className="text-xs">({fila.jugador.aliases[0]})</Muted> : null}
                 {fila.detalle ? <Muted className="text-xs">{fila.detalle}</Muted> : null}
               </View>
-              <View className="rounded-lg px-3 py-1" style={{ backgroundColor: `${paleta.metales[0]}22` }}>
-                <Text style={{ color: paleta.metales[0] }} className="font-inter-bold text-base">
+              <View className="rounded-cp px-3 py-1" style={{ backgroundColor: `${paleta.metales[0]}22` }}>
+                <Text style={{ color: paleta.tintas[0], fontVariant: ['tabular-nums'] }} className="font-display text-base">
                   {fila.total}
                 </Text>
               </View>
             </View>
           ))}
-        </NoirCard>
+        </CPCard>
       ) : null}
     </View>
   );
@@ -119,6 +131,7 @@ function HistoricoList({ filas, paleta, vacio }: { filas: Fila[]; paleta: Paleta
 type ChampionData = { player: Jugador; championshipsCount: number; tournamentNumbers: number[] };
 
 export function CampeonesTab() {
+  const paletas = usePaletas();
   const { data, failed, isLoading, mutate } = useHistorico<{ all: ChampionData[] }>('/api/tournaments/champions-stats');
   if (isLoading) return <LoadingState message="Cargando campeones…" />;
   if (failed) return <ErrorState message={data?.error ?? 'Error al cargar campeones'} onRetry={() => mutate()} />;
@@ -127,7 +140,7 @@ export function CampeonesTab() {
     total: c.championshipsCount,
     detalle: [...c.tournamentNumbers].sort((a, b) => b - a).map((t) => `T${t}`).join(' · '),
   }));
-  return <HistoricoList filas={filas} paleta={PALETA_METAL} vacio="No hay datos de campeones" />;
+  return <HistoricoList filas={filas} paleta={paletas.metal} vacio="No hay datos de campeones" />;
 }
 
 // ── Podios ──
@@ -140,10 +153,11 @@ type PodiumStat = {
   totalPodiums: number;
 };
 
-function PodiosChart({ stats }: { stats: PodiumStat[] }) {
+function PodiosChart({ stats, paleta }: { stats: PodiumStat[]; paleta: Paleta }) {
+  const c = useCP();
   const top = stats.filter((s) => s.player.isActive).slice(0, 8);
   if (top.length === 0) return null;
-  const [oro, plata, bronce] = PALETA_METAL.metales;
+  const [oro, plata, bronce] = paleta.metales;
   const stackData = top.map((s) => ({
     label: s.player.firstName.slice(0, 6),
     stacks: [
@@ -155,7 +169,7 @@ function PodiosChart({ stats }: { stats: PodiumStat[] }) {
   const max = Math.max(...top.map((s) => s.totalPodiums), 1);
 
   return (
-    <NoirCard className="gap-3">
+    <CPCard className="gap-3">
       <Overline>Top 8 en podios (activos)</Overline>
       <BarChart
         stackData={stackData}
@@ -168,11 +182,11 @@ function PodiosChart({ stats }: { stats: PodiumStat[] }) {
         stepValue={Math.ceil((max + 1) / Math.min(max + 1, 5))}
         barBorderTopLeftRadius={4}
         barBorderTopRightRadius={4}
-        yAxisColor={noir.border}
-        xAxisColor={noir.border}
-        rulesColor={`${noir.border}`}
-        yAxisTextStyle={{ color: noir.muted, fontFamily: fonts.body, fontSize: 11 }}
-        xAxisLabelTextStyle={{ color: noir.muted, fontFamily: fonts.body, fontSize: 10 }}
+        yAxisColor={c.surfaceBorder}
+        xAxisColor={c.surfaceBorder}
+        rulesColor={c.surfaceBorder}
+        yAxisTextStyle={{ color: c.onSurfaceVariant, fontFamily: fonts.body, fontSize: 11 }}
+        xAxisLabelTextStyle={{ color: c.onSurfaceVariant, fontFamily: fonts.body, fontSize: 10 }}
         disableScroll
         isAnimated
         animationDuration={220}
@@ -180,16 +194,17 @@ function PodiosChart({ stats }: { stats: PodiumStat[] }) {
       <View className="flex-row justify-center gap-4">
         {(['1º', '2º', '3º'] as const).map((l, i) => (
           <View key={l} className="flex-row items-center gap-1.5">
-            <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: PALETA_METAL.metales[i] }} />
+            <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: paleta.metales[i] }} />
             <Muted className="text-xs">{l}</Muted>
           </View>
         ))}
       </View>
-    </NoirCard>
+    </CPCard>
   );
 }
 
 export function PodiosTab() {
+  const paletas = usePaletas();
   const { data, failed, isLoading, mutate } = useHistorico<{ players: PodiumStat[] }>('/api/tournaments/podium-stats');
   if (isLoading) return <LoadingState message="Cargando podios…" />;
   if (failed) return <ErrorState message={data?.error ?? 'Error al cargar podios'} onRetry={() => mutate()} />;
@@ -202,8 +217,8 @@ export function PodiosTab() {
   }));
   return (
     <View className="gap-4">
-      <HistoricoList filas={filas} paleta={PALETA_METAL} vacio="No hay datos de podios" />
-      <PodiosChart stats={stats} />
+      <HistoricoList filas={filas} paleta={paletas.metal} vacio="No hay datos de podios" />
+      <PodiosChart stats={stats} paleta={paletas.metal} />
     </View>
   );
 }
@@ -228,15 +243,15 @@ const listaTorneos = (dos: number[], sietes: number[]) => {
   return [parte('2', dos), parte('7', sietes)].filter(Boolean).join('   ');
 };
 
-function Premio({ etiqueta, jugador }: { etiqueta: string; jugador: Jugador | null }) {
+function Premio({ etiqueta, jugador, paleta }: { etiqueta: string; jugador: Jugador | null; paleta: Paleta }) {
   if (!jugador) return <View className="flex-1" />;
   return (
     <View className="flex-1 flex-row items-center gap-2">
-      <Text style={{ color: PALETA_ROSA.metales[1] }} className="font-inter-bold text-sm">
+      <Text style={{ color: paleta.tintas[1] }} className="font-display text-sm">
         {etiqueta}
       </Text>
-      <PlayerAvatar {...avatarProps(jugador)} size={28} ringColor={PALETA_ROSA.metales[2]} />
-      <Text numberOfLines={1} className="flex-1 font-inter text-sm text-noir-text">
+      <PlayerAvatar {...avatarProps(jugador)} size={28} ringColor={paleta.metales[2]} />
+      <Text numberOfLines={1} className="flex-1 font-inter text-sm text-cp-on-surface">
         {playerLabel(jugador)}
       </Text>
     </View>
@@ -244,6 +259,8 @@ function Premio({ etiqueta, jugador }: { etiqueta: string; jugador: Jugador | nu
 }
 
 export function SieteTab() {
+  const paletas = usePaletas();
+  const rosa = paletas.rosa;
   const { data, failed, isLoading, mutate } = useHistorico<{ all: SieteFila[]; porTorneo: PorTorneo[] }>(
     '/api/tournaments/siete-stats'
   );
@@ -261,26 +278,26 @@ export function SieteTab() {
 
   return (
     <View className="gap-4">
-      <HistoricoList filas={filas} paleta={PALETA_ROSA} vacio="Todavía no hay 7/2 registrados" />
+      <HistoricoList filas={filas} paleta={rosa} vacio="Todavía no hay 7/2 registrados" />
       {datos?.porTorneo?.length ? (
-        <NoirCard className="p-0">
-          <View className="border-b border-noir-border px-4 py-3">
-            <Overline style={{ color: PALETA_ROSA.metales[1] }}>El 7/2 de cada torneo</Overline>
+        <CPCard className="p-0">
+          <View className="border-b border-cp-surface-border px-4 py-3">
+            <Overline style={{ color: rosa.tintas[0] }}>El 7/2 de cada torneo</Overline>
           </View>
           {datos.porTorneo.map((t, i) => (
             <View
               key={t.tournamentNumber}
-              className={`flex-row items-center gap-2 px-4 py-3 ${i < datos.porTorneo.length - 1 ? 'border-b border-noir-border' : ''}`}>
-              <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: `${PALETA_ROSA.metales[0]}33` }}>
-                <Text style={{ color: PALETA_ROSA.metales[2] }} className="font-inter-bold text-xs">
+              className={`flex-row items-center gap-2 px-4 py-3 ${i < datos.porTorneo.length - 1 ? 'border-b border-cp-surface-border' : ''}`}>
+              <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: `${rosa.metales[2]}24` }}>
+                <Text style={{ color: rosa.tintas[0] }} className="font-display text-xs">
                   T{t.tournamentNumber}
                 </Text>
               </View>
-              <Premio etiqueta="2" jugador={t.dos} />
-              <Premio etiqueta="7" jugador={t.siete} />
+              <Premio etiqueta="2" jugador={t.dos} paleta={rosa} />
+              <Premio etiqueta="7" jugador={t.siete} paleta={rosa} />
             </View>
           ))}
-        </NoirCard>
+        </CPCard>
       ) : null}
     </View>
   );

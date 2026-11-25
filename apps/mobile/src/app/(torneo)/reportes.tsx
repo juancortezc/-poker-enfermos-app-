@@ -12,10 +12,10 @@ import { View } from 'react-native';
 import { OptionPicker } from '@/components/torneo/OptionPicker';
 import { downloadWithAuth, shareFile } from '@/components/torneo/share/share';
 import { useTournamentOptions } from '@/components/torneo/stats/useTournamentOptions';
-import { Body, Header, Muted, NoirButton, NoirCard, Overline, RestrictedState, Screen } from '@/components/ui';
+import { Body, Header, Muted, CPButton, CPCard, Overline, RestrictedState, Screen } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { ApiError } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { cp } from '@/theme/colors';
 
 const INCLUYE = [
   'Resultados por fecha jugada: posición, eliminado por, puntos.',
@@ -37,7 +37,7 @@ export default function ReportesScreen() {
     return (
       <>
         <Stack.Screen options={{ title: 'Reportes' }} />
-        <Screen scroll={false}>
+        <Screen tone="light" scroll={false}>
           <RestrictedState message="Los reportes son solo para la Comisión." />
         </Screen>
       </>
@@ -72,7 +72,7 @@ export default function ReportesScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Reportes' }} />
-      <Screen>
+      <Screen tone="light">
         <Header
           overline="Comisión"
           title="Reportes"
@@ -92,27 +92,27 @@ export default function ReportesScreen() {
           </View>
         </View>
 
-        <NoirButton
+        <CPButton
           title={busy ? 'Generando…' : 'Descargar XLSX'}
           size="lg"
           loading={busy}
           disabled={!t.selected}
           onPress={download}
-          icon={<Ionicons name="download-outline" size={20} color={noir.bg} />}
+          icon={<Ionicons name="download-outline" size={20} color={cp.onPrimary} />}
         />
 
         {error ? (
-          <NoirCard className="border-noir-copper/60">
-            <Body className="text-base text-noir-danger">{error}</Body>
-          </NoirCard>
+          <CPCard className="border-cp-primary/60">
+            <Body className="text-base text-cp-primary-light">{error}</Body>
+          </CPCard>
         ) : null}
 
-        <NoirCard className="gap-2">
+        <CPCard className="gap-2">
           <Overline>Qué incluye el reporte</Overline>
           {INCLUYE.map((line) => (
             <Muted key={line}>· {line}</Muted>
           ))}
-        </NoirCard>
+        </CPCard>
       </Screen>
     </>
   );

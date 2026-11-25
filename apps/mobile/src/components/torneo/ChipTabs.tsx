@@ -1,6 +1,7 @@
 /**
- * Fila de chips desplazable para elegir subpestaña. Equivale a los chips de
- * /stats en la web, en Noir: el activo en oro, los demás en superficie.
+ * Fila de chips desplazable para elegir subpestaña: los chips de /stats en
+ * la web. El activo es una píldora roja sólida (#C62828) con texto blanco; los
+ * demás, superficie 2 con texto atenuado. Archivo 800.
  */
 import * as Haptics from 'expo-haptics';
 import { Pressable, ScrollView, Text } from 'react-native';
@@ -28,12 +29,12 @@ export function ChipTabs<T extends string>({ tabs, value, onChange }: Props<T>) 
               Haptics.selectionAsync().catch(() => {});
               onChange(tab.id);
             }}
-            className={`min-h-[44px] justify-center rounded-full border px-4 ${
-              active ? 'border-noir-gold bg-noir-gold' : 'border-noir-border bg-noir-surface active:opacity-80'
+            className={`min-h-[44px] justify-center rounded-full px-4 ${
+              active ? 'bg-cp-primary-variant' : 'bg-cp-surface-2 active:opacity-80'
             }`}>
             <Text
-              className={`font-cinzel-bold text-xs uppercase tracking-[1.5px] ${
-                active ? 'text-noir-bg' : 'text-noir-muted'
+              className={`font-display text-xs tracking-[0.5px] ${
+                active ? 'text-white' : 'text-cp-on-surface-muted'
               }`}>
               {tab.label}
             </Text>

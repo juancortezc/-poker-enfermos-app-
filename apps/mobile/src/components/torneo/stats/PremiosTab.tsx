@@ -12,8 +12,8 @@ import useSWR from 'swr';
 
 import { OptionPicker } from '@/components/torneo/OptionPicker';
 import { shareView } from '@/components/torneo/share/share';
-import { EmptyState, ErrorState, LoadingState, Muted, NoirButton, Title } from '@/components/ui';
-import { noir } from '@/theme/colors';
+import { EmptyState, ErrorState, LoadingState, Muted, CPButton, Title } from '@/components/ui';
+import { useCP } from '@/theme/tone';
 
 import { AwardCard, type AwardPlayer } from './AwardCard';
 import { useTournamentOptions } from './useTournamentOptions';
@@ -32,7 +32,12 @@ type AwardsResponse = {
   };
 };
 
+/**
+ * Un color por ROL, como CPPremiacionTab de la web: rojo = logro, naranja = lo
+ * que resta, oro/plata = podio, rosa = malazos, frio = informativo.
+ */
 export function PremiosTab() {
+  const c = useCP();
   const t = useTournamentOptions(28);
   const { data, error, isLoading, mutate } = useSWR<AwardsResponse>(
     t.selectedId ? `/api/stats/awards/${t.selectedId}` : null,
@@ -58,13 +63,13 @@ export function PremiosTab() {
     <View className="gap-4">
       <View className="flex-row items-center gap-2">
         <OptionPicker label="Torneo" value={t.selectedId} options={t.options} onChange={t.setSelectedId} placeholder="Torneo" />
-        <NoirButton
+        <CPButton
           title="Compartir"
           variant="outline"
           onPress={share}
           loading={sharing}
           disabled={!a}
-          icon={<Ionicons name="share-outline" size={16} color={noir.gold} />}
+          icon={<Ionicons name="share-outline" size={16} color={c.onSurface} />}
         />
       </View>
 
@@ -77,7 +82,7 @@ export function PremiosTab() {
       {a ? (
         // collapsable={false}: en Android una View sin estilos propios puede
         // aplanarse y view-shot no tendría qué capturar.
-        <View ref={captureRef} collapsable={false} className="gap-4 bg-noir-bg pb-2">
+        <View ref={captureRef} collapsable={false} className="gap-4 bg-cp-surface-0 pb-2">
           <View className="items-center pt-2">
             <Title>Premios · Torneo {data.tournament.number}</Title>
             <Muted>Poker Enfermos</Muted>
@@ -86,7 +91,7 @@ export function PremiosTab() {
             title="Varón del torneo"
             description="Mayor cantidad de eliminaciones"
             icon="trophy-outline"
-            accent="#E5735A"
+            accent={c.primaryLight}
             players={a.varon.map((v) => ({ player: v.player, value: v.eliminations }))}
             valueLabel="Elims"
           />
@@ -94,7 +99,7 @@ export function PremiosTab() {
             title="Gay del torneo"
             description="Menor cantidad de eliminaciones"
             icon="person-remove-outline"
-            accent="#D9783A"
+            accent={c.negative}
             players={a.gay.map((g) => ({ player: g.player, value: g.eliminations }))}
             valueLabel="Elims"
           />
@@ -102,7 +107,7 @@ export function PremiosTab() {
             title="Victorias"
             description="Mayor cantidad de 1er lugar"
             icon="medal-outline"
-            accent={noir.gold}
+            accent={c.gold}
             players={a.victorias.map((v) => ({ player: v.player, value: v.count }))}
             valueLabel="Wins"
           />
@@ -110,7 +115,7 @@ export function PremiosTab() {
             title="Podios"
             description="Mayor cantidad de Top 3"
             icon="podium-outline"
-            accent="#C9C6C2"
+            accent={c.silver}
             players={a.podios.map((p) => ({ player: p.player, value: p.count }))}
             valueLabel="Podios"
           />
@@ -118,7 +123,7 @@ export function PremiosTab() {
             title="7/2"
             description="Más veces último de la fecha"
             icon="skull-outline"
-            accent="#EC4899"
+            accent={c.malazoText}
             players={a.sieteYDos.map((s) => ({ player: s.player, value: s.count }))}
             valueLabel="Veces"
           />
@@ -126,7 +131,7 @@ export function PremiosTab() {
             title="Mesas finales"
             description="Mayor cantidad en Top 9"
             icon="people-outline"
-            accent={noir.copper}
+            accent={c.primaryLight}
             players={a.mesasFinales.map((m) => ({ player: m.player, value: m.count }))}
             valueLabel="Veces"
           />
@@ -134,14 +139,14 @@ export function PremiosTab() {
             title="Sin podio"
             description="Nunca en el Top 3"
             icon="close-circle-outline"
-            accent="#5BC8C0"
+            accent={c.info}
             players={a.sinPodio.map((p) => ({ player: p }))}
           />
           <AwardCard
             title="Faltas"
             description="Mayor cantidad de ausencias"
             icon="calendar-clear-outline"
-            accent="#D9783A"
+            accent={c.negative}
             players={a.faltas.map((f) => ({ player: f.player, value: f.count }))}
             valueLabel="Faltas"
           />

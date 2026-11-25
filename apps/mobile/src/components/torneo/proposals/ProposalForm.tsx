@@ -8,10 +8,11 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Muted, Overline, Title } from '@/components/ui/Typography';
-import { noir } from '@/theme/colors';
+import { cp } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { pickProposalImage, PROPOSAL_LIMITS, safeImageUri, saveProposal, type Proposal, type ProposalInput } from './api';
 
@@ -34,6 +35,7 @@ const FIELDS: { key: TextField; label: string; placeholder: string; multiline: b
 
 
 export function ProposalForm({ initial, onSaved, onCancel }: Props) {
+  const c = useCP();
   const editing = !!initial;
   const [form, setForm] = useState<Record<TextField, string>>({
     title: initial?.title ?? '',
@@ -90,7 +92,7 @@ export function ProposalForm({ initial, onSaved, onCancel }: Props) {
   };
 
   return (
-    <NoirCard accent className="gap-4">
+    <CPCard className="gap-4">
       <View className="gap-1">
         <Overline>{editing ? 'Editar' : 'Nueva'} propuesta</Overline>
         <Title className="text-xl">{editing ? initial?.title : 'Para el próximo torneo'}</Title>
@@ -111,10 +113,10 @@ export function ProposalForm({ initial, onSaved, onCancel }: Props) {
               value={value}
               onChangeText={(text) => setForm((prev) => ({ ...prev, [field.key]: text }))}
               placeholder={field.placeholder}
-              placeholderTextColor={`${noir.muted}80`}
+              placeholderTextColor={c.onSurfaceVariant}
               maxLength={limit}
               multiline={field.multiline}
-              className={`rounded-xl border border-noir-border bg-noir-bg px-3 py-2.5 font-inter text-base text-noir-text ${
+              className={`rounded-cp border border-cp-surface-3 bg-cp-surface-0 px-3 py-2.5 font-inter text-base text-cp-on-surface ${
                 field.multiline ? 'min-h-[96px]' : 'min-h-[48px]'
               }`}
               style={field.multiline ? { textAlignVertical: 'top' } : undefined}
@@ -129,7 +131,7 @@ export function ProposalForm({ initial, onSaved, onCancel }: Props) {
           <View>
             <Image
               source={{ uri: imageUrl }}
-              style={{ width: '100%', height: 180, borderRadius: 12, backgroundColor: noir.bg }}
+              style={{ width: '100%', height: 180, borderRadius: 5, backgroundColor: c.surface0 }}
               contentFit="contain"
             />
             <Pressable
@@ -137,32 +139,32 @@ export function ProposalForm({ initial, onSaved, onCancel }: Props) {
               accessibilityLabel="Quitar imagen"
               onPress={() => setImageUrl('')}
               className="absolute right-2 top-2 h-11 w-11 items-center justify-center rounded-full bg-black/70">
-              <Ionicons name="close" size={22} color={noir.text} />
+              <Ionicons name="close" size={22} color={cp.onSurface} />
             </Pressable>
           </View>
         ) : null}
-        <NoirButton
+        <CPButton
           title={imageUrl ? 'Cambiar imagen' : 'Elegir de la galería'}
           variant="outline"
           loading={picking}
           onPress={pick}
-          icon={<Ionicons name="image-outline" size={18} color={noir.gold} />}
+          icon={<Ionicons name="image-outline" size={18} color={c.onSurface} />}
         />
         <TextInput
           value={imageUrl}
           onChangeText={setImageUrl}
           placeholder="…o pegá una URL https://"
-          placeholderTextColor={`${noir.muted}80`}
+          placeholderTextColor={c.onSurfaceVariant}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
-          className="min-h-[48px] rounded-xl border border-noir-border bg-noir-bg px-3 font-inter text-base text-noir-text"
+          className="min-h-[48px] rounded-cp border border-cp-surface-3 bg-cp-surface-0 px-3 font-inter text-base text-cp-on-surface"
         />
       </View>
 
       <View className="flex-row gap-3">
-        <NoirButton title="Cancelar" variant="ghost" onPress={onCancel} className="flex-1" />
-        <NoirButton
+        <CPButton title="Cancelar" variant="ghost" onPress={onCancel} className="flex-1" />
+        <CPButton
           title={editing ? 'Guardar' : 'Publicar'}
           onPress={submit}
           loading={saving}
@@ -170,7 +172,7 @@ export function ProposalForm({ initial, onSaved, onCancel }: Props) {
           className="flex-1"
         />
       </View>
-      <Text className="font-inter text-xs text-noir-muted">* Obligatorio</Text>
-    </NoirCard>
+      <Text className="font-inter text-xs text-cp-on-surface-muted">* Obligatorio</Text>
+    </CPCard>
   );
 }

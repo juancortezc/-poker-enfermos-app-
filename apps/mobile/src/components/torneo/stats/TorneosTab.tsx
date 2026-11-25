@@ -9,12 +9,11 @@ import useSWR from 'swr';
 
 import { OptionPicker, type Option } from '@/components/torneo/OptionPicker';
 import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
-import { EmptyState, ErrorState, LoadingState, NoirButton, NoirCard, Overline, Title } from '@/components/ui';
+import { EmptyState, ErrorState, LoadingState, CPButton, CPCard, Overline, Title } from '@/components/ui';
 import { swrKeys } from '@/lib/swr';
-import { noir } from '@/theme/colors';
 import { playerLabel } from '@poker/shared';
 
-import { PALETA_METAL, PALETA_ROSA } from './Historico';
+import { usePaletas } from './Historico';
 
 type Player = {
   firstName: string;
@@ -47,18 +46,30 @@ function uniquePlayers(list: Player[]): Option<string>[] {
     .map(([key, p]) => ({ value: key, label: playerLabel(p) }));
 }
 
-function Puesto({ badge, color, player, malazo }: { badge: string; color: string; player?: Player; malazo?: boolean }) {
+function Puesto({
+  badge,
+  color,
+  tinta,
+  player,
+  malazo,
+}: {
+  badge: string;
+  color: string;
+  tinta: string;
+  player?: Player;
+  malazo?: boolean;
+}) {
   if (!player) return <View className="w-1/2" />;
   return (
     <View className="w-1/2 flex-row items-center gap-2 p-3">
       <View
         className="h-8 w-8 items-center justify-center rounded-full"
         style={{ backgroundColor: malazo ? color : `${color}33` }}>
-        <Text style={{ color: malazo ? '#fff' : color }} className="font-inter-bold text-sm">
+        <Text style={{ color: malazo ? '#fff' : tinta }} className="font-display text-sm">
           {badge}
         </Text>
       </View>
-      <Text numberOfLines={1} className="flex-1 font-inter text-sm text-noir-text">
+      <Text numberOfLines={1} className="flex-1 font-inter text-sm text-cp-on-surface">
         {playerLabel(player)}
       </Text>
     </View>
@@ -70,6 +81,7 @@ export function TorneosTab() {
     swrKeys.tournamentWinners()
   );
   const [filtro, setFiltro] = useState<Filtro>(null);
+  const { metal, rosa } = usePaletas();
 
   const torneos = useMemo(
     () => [...(data?.data ?? [])].sort((a, b) => b.tournamentNumber - a.tournamentNumber),
@@ -123,31 +135,31 @@ export function TorneosTab() {
           onChange={(v) => setFiltro({ tipo: 'jugador', valor: v })}
         />
       </View>
-      {filtro ? <NoirButton title="Ver todos" variant="ghost" onPress={() => setFiltro(null)} /> : null}
+      {filtro ? <CPButton title="Ver todos" variant="ghost" onPress={() => setFiltro(null)} /> : null}
 
       {filtrados.map((t) => (
-        <NoirCard key={t.tournamentNumber} className="p-0">
+        <CPCard key={t.tournamentNumber} className="p-0">
           <View className="flex-row items-center gap-4 p-4">
-            <PlayerAvatar {...avatarProps(t.champion)} size={72} shape="card" ringColor={noir.gold} />
+            <PlayerAvatar {...avatarProps(t.champion)} size={72} shape="card" ringColor={metal.metales[0]} />
             <View className="flex-1 gap-0.5">
-              <Overline>Campeón</Overline>
+              <Overline style={{ color: metal.tintas[0] }}>Campeón</Overline>
               <Title className="text-lg">{nombre(t.champion)}</Title>
               {t.champion.aliases?.[0] ? (
-                <Text className="font-inter text-sm text-noir-copper">({t.champion.aliases[0]})</Text>
+                <Text className="font-inter text-sm text-cp-on-surface-muted">({t.champion.aliases[0]})</Text>
               ) : null}
             </View>
             <View className="items-end">
-              <Text className="font-inter text-[10px] uppercase tracking-[2px] text-noir-muted">Torneo</Text>
-              <Text className="font-cinzel-bold text-3xl text-noir-text">{t.tournamentNumber}</Text>
+              <Overline>Torneo</Overline>
+              <Text className="font-display text-3xl text-cp-on-surface">{t.tournamentNumber}</Text>
             </View>
           </View>
-          <View className="flex-row flex-wrap border-t border-noir-border">
-            <Puesto badge="2" color={PALETA_METAL.metales[1]} player={t.runnerUp} />
-            <Puesto badge="3" color={PALETA_METAL.metales[2]} player={t.thirdPlace} />
-            <Puesto badge="7" color={PALETA_ROSA.metales[0]} player={t.siete} malazo />
-            <Puesto badge="2" color={PALETA_ROSA.metales[0]} player={t.dos} malazo />
+          <View className="flex-row flex-wrap border-t border-cp-surface-border">
+            <Puesto badge="2" color={metal.metales[1]} tinta={metal.tintas[1]} player={t.runnerUp} />
+            <Puesto badge="3" color={metal.metales[2]} tinta={metal.tintas[2]} player={t.thirdPlace} />
+            <Puesto badge="7" color={rosa.metales[0]} tinta={rosa.tintas[0]} player={t.siete} malazo />
+            <Puesto badge="2" color={rosa.metales[0]} tinta={rosa.tintas[0]} player={t.dos} malazo />
           </View>
-        </NoirCard>
+        </CPCard>
       ))}
     </View>
   );

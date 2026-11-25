@@ -13,10 +13,11 @@ import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import useSWR from 'swr';
 
 import { downloadWithAuth, shareFile } from '@/components/torneo/share/share';
-import { Header, Muted, NoirButton, NoirCard, RestrictedState, Screen, Title } from '@/components/ui';
+import { Header, Muted, CPButton, CPCard, RestrictedState, Screen, Title } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { ApiError } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { cp } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 type Pieza = {
   clave: 'ultima-fecha' | 'malazo-fecha' | 'lo-que-dejo' | 'podio-torneo' | 'malazos-torneo' | 'elimina' | 'acum';
@@ -107,6 +108,7 @@ function Tarjeta({ pieza }: { pieza: Pieza }) {
   const estado = uri && !cargando ? { uri } : null;
   const generar = () => mutate();
 
+  const c = useCP();
   const compartir = async () => {
     if (!estado) return;
     try {
@@ -117,23 +119,23 @@ function Tarjeta({ pieza }: { pieza: Pieza }) {
   };
 
   return (
-    <NoirCard className="gap-3">
+    <CPCard className="gap-3">
       <View className="flex-row items-start gap-3">
-        <Ionicons name={pieza.icono} size={22} color={noir.gold} />
+        <Ionicons name={pieza.icono} size={22} color={c.primaryLight} />
         <View className="flex-1 gap-0.5">
           <Title className="text-lg">{pieza.titulo}</Title>
           <Muted>{pieza.detalle}</Muted>
         </View>
       </View>
 
-      <View className="min-h-[140px] items-center justify-center overflow-hidden rounded-xl border border-noir-border bg-noir-bg">
+      <View className="min-h-[140px] items-center justify-center overflow-hidden rounded-cp border border-cp-surface-border bg-cp-surface-2">
         {cargando ? (
           <View className="items-center gap-2 p-6">
-            <ActivityIndicator color={noir.gold} />
+            <ActivityIndicator color={c.primary} />
             <Muted>Generando…</Muted>
           </View>
         ) : mensajeError ? (
-          <Text className="p-6 text-center font-inter text-sm text-noir-danger">{mensajeError}</Text>
+          <Text className="p-6 text-center font-inter text-sm text-cp-primary-light">{mensajeError}</Text>
         ) : estado ? (
           <Image
             source={{ uri: estado.uri }}
@@ -146,23 +148,23 @@ function Tarjeta({ pieza }: { pieza: Pieza }) {
       </View>
 
       <View className="flex-row gap-2">
-        <NoirButton
+        <CPButton
           title="Compartir"
           className="flex-1"
           disabled={!estado || cargando}
           onPress={compartir}
-          icon={<Ionicons name="share-social-outline" size={18} color={noir.bg} />}
+          icon={<Ionicons name="share-social-outline" size={18} color={cp.onPrimary} />}
         />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Regenerar ${pieza.titulo}`}
           disabled={cargando}
           onPress={generar}
-          className={`h-12 w-12 items-center justify-center rounded-full border border-noir-border ${cargando ? 'opacity-50' : 'active:opacity-80'}`}>
-          <Ionicons name="refresh" size={20} color={noir.muted} />
+          className={`h-12 w-12 items-center justify-center rounded-cp border border-cp-outline ${cargando ? 'opacity-50' : 'active:opacity-80'}`}>
+          <Ionicons name="refresh" size={20} color={c.onSurfaceMuted} />
         </Pressable>
       </View>
-    </NoirCard>
+    </CPCard>
   );
 }
 
@@ -174,11 +176,11 @@ export default function CompartirScreen() {
     <>
       <Stack.Screen options={{ title: 'Compartir' }} />
       {!can('tournaments') ? (
-        <Screen scroll={false}>
+        <Screen tone="light" scroll={false}>
           <RestrictedState message="Compartir al grupo es solo para la Comisión." />
         </Screen>
       ) : (
-        <Screen>
+        <Screen tone="light">
           <Header
             overline="Comisión"
             title="Compartir al grupo"

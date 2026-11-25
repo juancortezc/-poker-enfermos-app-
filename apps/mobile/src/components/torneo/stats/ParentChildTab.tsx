@@ -11,8 +11,8 @@ import useSWR from 'swr';
 
 import { OptionPicker } from '@/components/torneo/OptionPicker';
 import { avatarProps, PlayerAvatar, type AvatarPlayer } from '@/components/common/PlayerAvatar';
-import { EmptyState, ErrorState, LoadingState, Muted, NoirCard, Overline, Title } from '@/components/ui';
-import { noir } from '@/theme/colors';
+import { EmptyState, ErrorState, LoadingState, Muted, CPCard, Overline, Title } from '@/components/ui';
+import { useCP } from '@/theme/tone';
 import { playerLabel } from '@poker/shared';
 
 import { useTournamentOptions } from './useTournamentOptions';
@@ -43,33 +43,34 @@ const fmt = (value: string) => {
 };
 
 function RelationCard({ relation, onPress }: { relation: Relation; onPress: () => void }) {
+  const c = useCP();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${playerLabel(relation.parentPlayer)} eliminó ${relation.eliminationCount} veces a ${playerLabel(relation.childPlayer)}`}
       onPress={onPress}
       className="active:opacity-80">
-      <NoirCard className="flex-row items-center gap-3 p-4">
+      <CPCard className="flex-row items-center gap-3 p-4">
         <View className="items-center gap-1" style={{ width: 72 }}>
-          <PlayerAvatar {...avatarProps(relation.parentPlayer)} size={52} ringColor={noir.gold} />
-          <Text numberOfLines={1} className="font-inter-semibold text-xs text-noir-text">
+          <PlayerAvatar {...avatarProps(relation.parentPlayer)} size={52} ringColor={c.primary} />
+          <Text numberOfLines={1} className="font-inter-semibold text-xs text-cp-on-surface">
             {playerLabel(relation.parentPlayer)}
           </Text>
-          <Text className="font-inter text-[10px] uppercase tracking-[1px] text-noir-gold">Padre</Text>
+          <Text className="font-display text-[10px] uppercase tracking-[1px] text-cp-primary-light">Padre</Text>
         </View>
         <View className="flex-1 items-center gap-1">
-          <Text className="font-cinzel-bold text-3xl text-noir-text">{relation.eliminationCount}</Text>
-          <Ionicons name="arrow-forward" size={18} color={noir.copper} />
+          <Text className="font-display text-3xl text-cp-on-surface">{relation.eliminationCount}</Text>
+          <Ionicons name="arrow-forward" size={18} color={c.primaryLight} />
           <Muted className="text-[11px]">eliminaciones</Muted>
         </View>
         <View className="items-center gap-1" style={{ width: 72 }}>
-          <PlayerAvatar {...avatarProps(relation.childPlayer)} size={52} ringColor={noir.copper} />
-          <Text numberOfLines={1} className="font-inter-semibold text-xs text-noir-text">
+          <PlayerAvatar {...avatarProps(relation.childPlayer)} size={52} ringColor={c.outline} />
+          <Text numberOfLines={1} className="font-inter-semibold text-xs text-cp-on-surface">
             {playerLabel(relation.childPlayer)}
           </Text>
-          <Text className="font-inter text-[10px] uppercase tracking-[1px] text-noir-copper">Hijo</Text>
+          <Text className="font-display text-[10px] uppercase tracking-[1px] text-cp-on-surface-variant">Hijo</Text>
         </View>
-      </NoirCard>
+      </CPCard>
     </Pressable>
   );
 }
@@ -79,14 +80,15 @@ function DetailModal({ tournamentId, relationId, onClose }: { tournamentId: numb
     relationId ? `/api/stats/parent-child/${tournamentId}/${relationId}` : null
   );
   const rel = data?.relation;
+  const c = useCP();
 
   return (
     <Modal visible={relationId !== null} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: noir.bg }}>
+      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: c.surface0 }}>
         <View className="flex-row items-center justify-between px-4 py-2">
           <Overline>Padre e hijo</Overline>
           <Pressable accessibilityRole="button" accessibilityLabel="Cerrar" onPress={onClose} className="h-11 w-11 items-center justify-center">
-            <Ionicons name="close" size={24} color={noir.muted} />
+            <Ionicons name="close" size={24} color={c.onSurfaceMuted} />
           </Pressable>
         </View>
         {isLoading ? (
@@ -113,15 +115,15 @@ function DetailModal({ tournamentId, relationId, onClose }: { tournamentId: numb
               </View>
             }
             renderItem={({ item, index }) => (
-              <View className="flex-row items-center gap-3 rounded-xl border border-noir-border bg-noir-surface p-3">
-                <View className="h-9 w-9 items-center justify-center rounded-full bg-noir-copper/30">
-                  <Text className="font-inter-bold text-sm text-noir-text">{index + 1}</Text>
+              <View className="flex-row items-center gap-3 rounded-card border border-cp-surface-border bg-cp-surface-1 p-3">
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-cp-primary/15">
+                  <Text className="font-display text-sm text-cp-primary-light">{index + 1}</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="font-inter-semibold text-base text-noir-text">Fecha {item.dateNumber}</Text>
+                  <Text className="font-inter-semibold text-base text-cp-on-surface">Fecha {item.dateNumber}</Text>
                   <Muted className="text-xs">{fmt(item.scheduledDate)}</Muted>
                 </View>
-                <Text className="font-inter text-sm text-noir-muted">Salió {item.position}º</Text>
+                <Text className="font-inter text-sm text-cp-on-surface-muted">Salió {item.position}º</Text>
               </View>
             )}
             ListEmptyComponent={<EmptyState message="Sin eliminaciones registradas." />}

@@ -1,7 +1,8 @@
 /**
  * Días sin ganar. Equivale a SinGanarTab de la web: resumen por tramos, el
  * más cerca del hito de los 1000 días y la lista agrupada por tramo. Los
- * tramos y sus umbrales son los mismos; los colores pasan a la paleta Noir.
+ * tramos, umbrales y colores son los mismos (la pestaña va siempre en claro,
+ * así que los tramos usan las variantes legibles sobre papel).
  * Si el hito de 1000 días cae justo en una fecha del calendario, se marca.
  */
 import { useMemo } from 'react';
@@ -10,9 +11,11 @@ import { BarChart } from 'react-native-gifted-charts';
 import useSWR from 'swr';
 
 import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
-import { EmptyState, ErrorState, LoadingState, Muted, NoirCard, Overline } from '@/components/ui';
+import { EmptyState, ErrorState, LoadingState, Muted, CPCard, Overline } from '@/components/ui';
 import { swrKeys } from '@/lib/swr';
-import { fonts, noir } from '@/theme/colors';
+import { bento, cp, fonts } from '@/theme/colors';
+import { ToneView, useCP } from '@/theme/tone';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type PlayerWithVictoryData = {
   id: string;
@@ -29,12 +32,13 @@ type GameDate = { dateNumber: number; scheduledDate: string | null };
 type Match = { dateNumber: number };
 
 const TIERS = [
-  { key: 'club', min: 1000, label: 'Club 1000', color: '#E0457B' },
-  { key: 'danger', min: 900, label: 'Zona crítica', color: '#E5735A' },
-  { key: '2years', min: 730, label: '+ 2 años', color: '#D9783A' },
-  { key: '1year', min: 365, label: '+ 1 año', color: '#C99645' },
-  { key: '6months', min: 180, label: '+ 6 meses', color: noir.gold },
-  { key: 'recent', min: 0, label: 'Recientes', color: '#7FB77E' },
+  { key: 'club', min: 1000, label: 'Club 1000', color: cp.malazoDeep },
+  { key: 'danger', min: 900, label: 'Zona crítica', color: cp.magenta },
+  // #9A3412: el naranja oscuro del tramo en la web; no tiene token propio.
+  { key: '2years', min: 730, label: '+ 2 años', color: '#9A3412' },
+  { key: '1year', min: 365, label: '+ 1 año', color: cp.negativeOnLight },
+  { key: '6months', min: 180, label: '+ 6 meses', color: cp.goldOnLight },
+  { key: 'recent', min: 0, label: 'Recientes', color: cp.positiveOnLight },
 ] as const;
 type Tier = (typeof TIERS)[number];
 
@@ -70,13 +74,14 @@ function milestoneOf(last?: string | null): Date | null {
 
 function Meter({ value, color }: { value: number; color: string }) {
   return (
-    <View className="h-1.5 overflow-hidden rounded-full bg-noir-raised">
+    <View className="h-1.5 overflow-hidden rounded-full bg-cp-on-surface/15">
       <View style={{ width: `${Math.min(100, Math.max(0, value * 100))}%`, backgroundColor: color, height: '100%' }} />
     </View>
   );
 }
 
 function TierChart({ players }: { players: PlayerWithVictoryData[] }) {
+  const c = useCP();
   const data = TIERS.map((tier, i) => ({
     value: players.filter((p) => p.daysWithoutVictory >= tier.min && p.daysWithoutVictory < upperOf(i)).length,
     label: tier.label.replace('Zona crítica', 'Crítica').replace('Club 1000', '1000'),
@@ -84,7 +89,7 @@ function TierChart({ players }: { players: PlayerWithVictoryData[] }) {
   })).reverse();
   const max = Math.max(...data.map((d) => d.value), 1);
   return (
-    <NoirCard className="gap-3">
+    <CPCard className="gap-3">
       <Overline>Jugadores por tramo</Overline>
       <BarChart
         data={data}
@@ -97,41 +102,74 @@ function TierChart({ players }: { players: PlayerWithVictoryData[] }) {
         barBorderTopLeftRadius={4}
         barBorderTopRightRadius={4}
         showValuesAsTopLabel
-        topLabelTextStyle={{ color: noir.text, fontFamily: fonts.bodyBold, fontSize: 12 }}
-        yAxisColor={noir.border}
-        xAxisColor={noir.border}
-        rulesColor={noir.border}
-        yAxisTextStyle={{ color: noir.muted, fontFamily: fonts.body, fontSize: 11 }}
-        xAxisLabelTextStyle={{ color: noir.muted, fontFamily: fonts.body, fontSize: 9 }}
+        topLabelTextStyle={{ color: c.onSurface, fontFamily: fonts.display, fontSize: 12 }}
+        yAxisColor={c.surfaceBorder}
+        xAxisColor={c.surfaceBorder}
+        rulesColor={c.surfaceBorder}
+        yAxisTextStyle={{ color: c.onSurfaceVariant, fontFamily: fonts.body, fontSize: 11 }}
+        xAxisLabelTextStyle={{ color: c.onSurfaceVariant, fontFamily: fonts.body, fontSize: 9 }}
         disableScroll
         isAnimated
         animationDuration={220}
       />
-    </NoirCard>
+    </CPCard>
   );
 }
 
 function Hero({ player, milestone, match }: { player: PlayerWithVictoryData; milestone: Date | null; match: Match | null }) {
   const days = player.daysWithoutVictory;
   const past = days >= 1000;
-  const accent = past ? '#E0457B' : '#D9783A';
+  // Rosa = malazos (el club de los 1000); naranja = lo que resta.
+  const accent = past ? cp.malazoText : cp.negative;
+  const negro = bento.tile.negro;
+  // El bloque "negro" del bento de la web: el ancla oscura sobre el papel.
   return (
-    <NoirCard accent className="gap-3">
+    <ToneView
+      tone="dark"
+      className="gap-3 overflow-hidden rounded-tile p-4"
+      style={{
+        shadowColor: '#17120F',
+        shadowOpacity: 0.28,
+        shadowRadius: 15,
+        shadowOffset: { width: 0, height: 14 },
+        elevation: 6,
+      }}>
+      <LinearGradient
+        colors={[negro.from, negro.to]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.6, y: 1 }}
+        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+      />
+      <Text
+        aria-hidden
+        style={{
+          position: 'absolute',
+          right: -16,
+          top: -34,
+          fontFamily: fonts.display,
+          fontSize: 150,
+          lineHeight: 160,
+          color: 'rgba(255,255,255,0.05)',
+        }}>
+        {days}
+      </Text>
       <View className="flex-row items-start gap-4">
         <View className="flex-1 gap-1">
           <Overline style={{ color: accent }}>{past ? 'Miembro del Club 1000' : 'Más cerca del hito'}</Overline>
           <View className="flex-row items-baseline gap-2">
-            <Text className="font-cinzel-bold text-5xl text-noir-text">{days}</Text>
+            <Text className="font-display text-5xl text-white" style={{ fontVariant: ['tabular-nums'], letterSpacing: -1.4 }}>
+              {days}
+            </Text>
             <Muted>días</Muted>
           </View>
           {!past ? <Text style={{ color: accent }} className="font-inter-bold text-sm">Faltan {1000 - days} días</Text> : null}
           {milestone ? (
             <Muted>
               {past ? 'Cumplió el ' : 'Se cumple el '}
-              <Text className="font-inter-bold text-noir-text">{formatEs(milestone)}</Text>
+              <Text className="font-inter-bold text-white">{formatEs(milestone)}</Text>
             </Muted>
           ) : null}
-          {match ? <Text className="font-inter-bold text-xs uppercase tracking-[1px] text-noir-gold">Cae en la fecha {match.dateNumber}</Text> : null}
+          {match ? <Text className="font-inter-bold text-xs uppercase tracking-[1px] text-cp-primary-light">Cae en la fecha {match.dateNumber}</Text> : null}
           {player.hasNeverWon ? (
             <Text style={{ color: accent }} className="font-inter-bold text-xs uppercase tracking-[1px]">Nunca ha ganado</Text>
           ) : player.lastVictoryDate ? (
@@ -140,15 +178,15 @@ function Hero({ player, milestone, match }: { player: PlayerWithVictoryData; mil
         </View>
         <View className="items-center">
           <PlayerAvatar {...avatarProps(player)} size={64} ringColor={accent} />
-          <Text className="mt-1 font-inter-bold text-sm text-noir-text">{player.firstName}</Text>
+          <Text className="mt-1 font-inter-bold text-sm text-white">{player.firstName}</Text>
           <Muted className="text-xs">{player.lastName}</Muted>
         </View>
       </View>
       <Meter value={days / 1000} color={accent} />
-      <Text style={{ color: accent }} className="text-right font-inter-bold text-sm">
+      <Text style={{ color: accent }} className="text-right font-display text-sm">
         {Math.min(100, Math.round((days / 1000) * 100))}% de 1000
       </Text>
-    </NoirCard>
+    </ToneView>
   );
 }
 
@@ -156,17 +194,17 @@ function Row({ player, rank, milestone, match }: { player: PlayerWithVictoryData
   const days = player.daysWithoutVictory;
   const tier = tierOf(days);
   return (
-    <View className="flex-row items-center gap-3 rounded-2xl border border-noir-border bg-noir-surface p-3" style={{ borderLeftColor: tier.color, borderLeftWidth: 3 }}>
-      <Text className="w-5 text-center font-inter text-xs text-noir-muted">{rank}</Text>
+    <View className="flex-row items-center gap-3 rounded-card border border-cp-surface-border bg-cp-surface-1 p-3" style={{ borderLeftColor: tier.color, borderLeftWidth: 3 }}>
+      <Text className="w-5 text-center font-inter text-xs text-cp-on-surface-muted">{rank}</Text>
       <PlayerAvatar {...avatarProps(player)} size={38} ringColor={tier.color} />
       <View className="flex-1 gap-1.5">
         <View className="flex-row items-baseline justify-between gap-2">
-          <Text numberOfLines={1} className="flex-1 font-inter-bold text-sm text-noir-text">
-            {player.firstName} <Text className="font-inter text-noir-muted">{player.lastName}</Text>
+          <Text numberOfLines={1} className="flex-1 font-inter-bold text-sm text-cp-on-surface">
+            {player.firstName} <Text className="font-inter text-cp-on-surface-muted">{player.lastName}</Text>
           </Text>
-          <Text style={{ color: tier.color }} className="font-cinzel-bold text-lg">
+          <Text style={{ color: tier.color }} className="font-display text-lg">
             {days}
-            <Text className="font-inter text-xs text-noir-muted"> d</Text>
+            <Text className="font-inter text-xs text-cp-on-surface-muted"> d</Text>
           </Text>
         </View>
         <Meter value={days / 1000} color={tier.color} />
@@ -180,7 +218,7 @@ function Row({ player, rank, milestone, match }: { player: PlayerWithVictoryData
           )}
           {milestone ? (
             <Muted className="text-xs">
-              {match ? <Text className="font-inter-bold text-noir-gold">F{match.dateNumber} · </Text> : null}
+              {match ? <Text className="font-inter-bold text-cp-primary-light">F{match.dateNumber} · </Text> : null}
               {formatEs(milestone)}
             </Muted>
           ) : null}
@@ -235,7 +273,7 @@ export function SinGanarTab({ tournamentId }: { tournamentId?: number }) {
             <View style={{ width: 3, height: 15, borderRadius: 2, backgroundColor: tier.color }} />
             <Overline style={{ color: tier.color }}>{tier.label}</Overline>
             <Muted className="text-xs">×{entries.length}</Muted>
-            <View className="h-px flex-1 bg-noir-border" />
+            <View className="h-px flex-1 bg-cp-surface-border" />
           </View>
           {entries.map(({ player, meta: m, rank }) => (
             <Row key={player.id} player={player} rank={rank} milestone={m.milestone} match={m.match} />

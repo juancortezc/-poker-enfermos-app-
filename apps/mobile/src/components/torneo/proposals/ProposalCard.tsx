@@ -14,10 +14,11 @@ import { useState } from 'react';
 import { Alert, Modal, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPCard } from '@/components/ui/CPCard';
 import { Body, Muted, Overline, Title } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
-import { noir } from '@/theme/colors';
+import { cp } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { deleteProposal, formatProposalDate, safeImageUri, setVotingClosed, toggleProposal, type Proposal } from './api';
 
@@ -28,17 +29,17 @@ type Props = {
   onChanged?: () => void;
 };
 
-function Badge({ label, tone, icon }: { label: string; tone: 'muted' | 'gold' | 'copper'; icon?: 'lock-closed' }) {
+function Badge({ label, tone, icon }: { label: string; tone: 'muted' | 'primary'; icon?: 'lock-closed' }) {
+  const c = useCP();
   const styles = {
-    muted: 'border-noir-border bg-noir-raised',
-    gold: 'border-noir-gold/60 bg-noir-gold/15',
-    copper: 'border-noir-copper bg-noir-copper/25',
+    muted: 'border-cp-surface-border bg-cp-surface-2',
+    primary: 'border-cp-primary/60 bg-cp-primary/15',
   }[tone];
-  const color = tone === 'gold' ? noir.gold : noir.text;
+  const color = tone === 'primary' ? c.primaryLight : c.onSurfaceMuted;
   return (
     <View className={`flex-row items-center gap-1 rounded-full border px-2.5 py-1 ${styles}`}>
       {icon ? <Ionicons name={icon} size={11} color={color} /> : null}
-      <Text style={{ color }} className="font-inter-semibold text-[11px] uppercase tracking-[1.5px]">
+      <Text style={{ color }} className="font-display text-[11px] uppercase tracking-[1.2px]">
         {label}
       </Text>
     </View>
@@ -56,18 +57,20 @@ function ActionChip({
   icon: React.ComponentProps<typeof Ionicons>['name'];
   onPress: () => void;
   busy?: boolean;
-  tone?: 'default' | 'gold' | 'danger';
+  /** info: el color frío de las propuestas (votación); danger: eliminar. */
+  tone?: 'default' | 'info' | 'danger';
 }) {
-  const color = tone === 'gold' ? noir.gold : tone === 'danger' ? noir.danger : noir.muted;
+  const c = useCP();
+  const color = tone === 'info' ? c.info : tone === 'danger' ? c.primaryLight : c.onSurfaceMuted;
   return (
     <Pressable
       accessibilityRole="button"
       disabled={busy}
       onPress={onPress}
-      className={`min-h-[44px] flex-row items-center gap-2 rounded-full border px-4 ${busy ? 'opacity-50' : 'active:opacity-80'}`}
+      className={`min-h-[44px] flex-row items-center gap-2 rounded-cp border px-4 ${busy ? 'opacity-50' : 'active:opacity-80'}`}
       style={{ borderColor: `${color}80` }}>
       <Ionicons name={icon} size={16} color={color} />
-      <Text style={{ color }} className="font-inter-semibold text-xs uppercase tracking-[1.5px]">
+      <Text style={{ color }} className="font-inter-bold text-xs uppercase tracking-[0.5px]">
         {busy ? '…' : label}
       </Text>
     </Pressable>
@@ -75,6 +78,7 @@ function ActionChip({
 }
 
 export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
+  const c = useCP();
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState<'toggle' | 'voting' | 'delete' | null>(null);
@@ -124,7 +128,7 @@ export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
   const showActions = (canEdit && !!onEdit) || isComision;
 
   return (
-    <NoirCard accent={isActive && !closed} className={`gap-3 ${isActive ? '' : 'opacity-80'}`}>
+    <CPCard raised={isActive && !closed} className={`gap-3 ${isActive ? '' : 'opacity-80'}`}>
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded }}
@@ -133,11 +137,11 @@ export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
         className="gap-2">
         <View className="flex-row items-start gap-3">
           <Title className="flex-1 text-xl">{proposal.title}</Title>
-          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={noir.gold} />
+          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={20} color={c.onSurfaceVariant} />
         </View>
         <View className="flex-row flex-wrap items-center gap-2">
           {!isActive ? <Badge label="Inactiva" tone="muted" /> : null}
-          {closed ? <Badge label="Cerrada" tone="copper" icon="lock-closed" /> : null}
+          {closed ? <Badge label="Cerrada" tone="primary" icon="lock-closed" /> : null}
           {proposal.createdBy ? (
             <Muted>
               {proposal.createdBy.firstName} {proposal.createdBy.lastName} · {proposal.createdBy.role}
@@ -146,7 +150,7 @@ export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
           <Muted>· {formatProposalDate(proposal.createdAt)}</Muted>
         </View>
         {!expanded ? (
-          <Body className="text-base text-noir-muted" numberOfLines={2}>
+          <Body className="text-base text-cp-on-surface-muted" numberOfLines={2}>
             {proposal.objective}
           </Body>
         ) : null}
@@ -170,7 +174,7 @@ export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
             <Pressable accessibilityRole="imagebutton" accessibilityLabel="Ver imagen completa" onPress={() => setImageOpen(true)}>
               <Image
                 source={{ uri: image }}
-                style={{ width: '100%', height: 220, borderRadius: 12, backgroundColor: noir.bg }}
+                style={{ width: '100%', height: 220, borderRadius: 5, backgroundColor: c.surface0 }}
                 contentFit="contain"
                 transition={200}
               />
@@ -180,7 +184,7 @@ export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
       ) : null}
 
       {showActions ? (
-        <View className="flex-row flex-wrap gap-2 border-t border-noir-border pt-3">
+        <View className="flex-row flex-wrap gap-2 border-t border-cp-surface-border pt-3">
           {canEdit && onEdit ? (
             <>
               <ActionChip label="Editar" icon="create-outline" onPress={() => onEdit(proposal)} />
@@ -196,7 +200,7 @@ export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
             <ActionChip
               label={closed ? 'Reabrir votación' : 'Cerrar votación'}
               icon={closed ? 'lock-open-outline' : 'lock-closed-outline'}
-              tone="gold"
+              tone="info"
               busy={busy === 'voting'}
               onPress={confirmVoting}
             />
@@ -215,12 +219,12 @@ export function ProposalCard({ proposal, onEdit, onChanged }: Props) {
               accessibilityLabel="Cerrar imagen"
               onPress={() => setImageOpen(false)}
               className="min-h-[44px] items-end p-4">
-              <Ionicons name="close" size={28} color={noir.text} />
+              <Ionicons name="close" size={28} color={cp.onSurface} />
             </Pressable>
             <Image source={{ uri: image }} style={{ flex: 1 }} contentFit="contain" />
           </SafeAreaView>
         </Modal>
       ) : null}
-    </NoirCard>
+    </CPCard>
   );
 }
