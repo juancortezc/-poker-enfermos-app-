@@ -10,16 +10,14 @@
 import { googleCalendarUrl } from '@poker/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, View } from 'react-native';
+import { Linking } from 'react-native';
 
-import { PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { CelebrationsCard } from '@/components/jugador/home/CelebrationsCard';
 import { ClaveDebilBanner } from '@/components/jugador/home/ClaveDebilBanner';
 import { HomeLive } from '@/components/jugador/home/HomeLive';
 import { HomeTorneo } from '@/components/jugador/home/HomeTorneo';
 import { HomeUltimaFecha } from '@/components/jugador/home/HomeUltimaFecha';
 import { Segmented } from '@/components/jugador/Segmented';
-import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { useAuth } from '@/contexts/AuthContext';
@@ -101,19 +99,18 @@ export default function HomeScreen() {
     );
   })();
 
+  // Como la web: el home va en claro (papel); mientras se juega la fecha es
+  // el tablero de la mesa y va en oscuro.
+  const live = gameDateSwr.gameDate?.status === 'in_progress';
+
   return (
-    <Screen edges={['top']} refreshing={refreshing} onRefresh={onRefresh}>
-      <Header
-        overline={number ? `Torneo ${number}` : 'Poker Enfermos'}
-        title={user ? `Hola, ${user.firstName}` : 'Inicio'}
-        right={
-          user ? (
-            <View>
-              <PlayerAvatar name={`${user.firstName} ${user.lastName}`} photoUrl={user.photoUrl} size={48} playerId={user.id} linkToProfile />
-            </View>
-          ) : undefined
-        }
-      />
+    <Screen
+      edges={['top']}
+      tone={live ? 'dark' : 'light'}
+      appBar
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      contentClassName="gap-5 px-5 pt-5 pb-8">
       {body}
     </Screen>
   );

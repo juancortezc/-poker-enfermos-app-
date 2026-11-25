@@ -10,10 +10,10 @@ import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPCard } from '@/components/ui/CPCard';
 import { Body, Muted, Overline } from '@/components/ui/Typography';
 import { useCelebrations } from '@/hooks/useHomeExtras';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 const KEY = 'celebrations_dismissed';
 
@@ -30,6 +30,7 @@ function ecuadorToday(): string {
 const EMPTY: Dismissed = { birthdayIds: [], droughtIds: [], lastUpdated: '' };
 
 export function CelebrationsCard() {
+  const c = useCP();
   const { data } = useCelebrations();
   const [dismissed, setDismissed] = useState<Dismissed | null>(null);
 
@@ -58,9 +59,9 @@ export function CelebrationsCard() {
   return (
     <View className="gap-3">
       {birthdays.length > 0 ? (
-        <NoirCard className="gap-3" style={{ borderColor: `${noir.gold}66` }}>
+        <CPCard className="gap-3" style={{ borderColor: `${c.gold}66` }}>
           <View className="flex-row items-center gap-2">
-            <Ionicons name="gift-outline" size={18} color={noir.gold} />
+            <Ionicons name="gift-outline" size={18} color={c.gold} />
             <Overline className="flex-1">Cumpleaños</Overline>
             <DismissButton
               onPress={() =>
@@ -79,20 +80,20 @@ export function CelebrationsCard() {
                 <Body className="text-base">
                   {p.firstName} {p.lastName}
                 </Body>
-                <Muted className={p.isToday ? 'font-inter-semibold text-noir-gold' : ''}>
+                <Muted className={p.isToday ? 'font-inter-semibold text-cp-primary-light' : ''}>
                   {p.isToday ? '¡Hoy!' : p.daysUntil === 1 ? 'Mañana' : `En ${p.daysUntil} días`}
                 </Muted>
               </View>
               {p.isToday ? <Text style={{ fontSize: 20 }}>🎂</Text> : null}
             </View>
           ))}
-        </NoirCard>
+        </CPCard>
       ) : null}
 
       {droughts.length > 0 ? (
-        <NoirCard className="gap-3">
+        <CPCard className="gap-3">
           <View className="flex-row items-center gap-2">
-            <Ionicons name="trophy-outline" size={18} color={noir.copper} />
+            <Ionicons name="trophy-outline" size={18} color={c.primaryLight} />
             <Overline className="flex-1">1000+ días sin ganar</Overline>
             <DismissButton
               onPress={() =>
@@ -116,21 +117,22 @@ export function CelebrationsCard() {
               <Muted className="text-xs uppercase tracking-[1px]">Sequía</Muted>
             </View>
           ))}
-        </NoirCard>
+        </CPCard>
       ) : null}
     </View>
   );
 }
 
 function DismissButton({ onPress }: { onPress: () => void }) {
+  const c = useCP();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Descartar"
       onPress={onPress}
       hitSlop={12}
-      className="h-8 w-8 items-center justify-center rounded-full active:bg-noir-raised">
-      <Ionicons name="close" size={18} color={noir.muted} />
+      className="h-8 w-8 items-center justify-center rounded-full active:bg-cp-surface-2">
+      <Ionicons name="close" size={18} color={c.onSurfaceVariant} />
     </Pressable>
   );
 }
