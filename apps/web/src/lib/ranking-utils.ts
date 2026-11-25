@@ -1,7 +1,7 @@
 import { prisma } from './prisma';
 import {
   calculatePointsForPosition,
-  compareByTiebreak,
+  computeStandings,
   type PlayerRanking,
   type TournamentRankingData,
   type PlayerPositionDelta,
@@ -74,165 +74,19 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
     // Multas de puntos (Multas/Ajustes) registradas para este torneo
     const pointPenalties = await getPointPenaltiesByPlayer(tournamentId);
 
-    // Calcular puntos por jugador por fecha
-    const playerRankings = new Map<string, PlayerRanking>();
-
-    // Inicializar rankings para todos los jugadores registrados
-    registeredPlayers.forEach(player => {
-      playerRankings.set(player.id, {
-        position: 0, // Se calculará después
-        playerId: player.id,
-        playerName: player.name,
-        playerAlias: player.alias,
-        playerPhoto: player.photo ?? undefined,
-        totalPoints: 0,
-        datesPlayed: 0,
-        pointsByDate: {},
-        trend: 'same',
-        positionsChanged: 0,
-        eliminasActive: false,
-        pointPenalty: pointPenalties.get(player.id) ?? 0,
-        // Inicializar estadísticas de desempate
-        firstPlaces: 0,
-        secondPlaces: 0,
-        thirdPlaces: 0,
-        lastPlaces: 0,
-        secondToLastPlaces: 0,
-        absences: 0
-      });
-    });
-
-    /**
-     * Quienes siguen sentados en una fecha en curso. Se recolectan aqui y su
-     * proyeccion se calcula al final, cuando ya existe el puntaje real, para
-     * que la proyeccion nunca pueda contaminar la tabla de verdad.
-     */
-    const stillPlaying: Array<{
-      playerId: string;
-      dateNumber: number;
-      totalPlayersInDate: number;
-      eliminatedCount: number;
-    }> = [];
-
-    // Procesar cada fecha completada
-    tournament.gameDates.forEach(gameDate => {
-      const totalPlayersInDate = gameDate.playerIds.length;
-
-      // Calcular posiciones para esta fecha (necesario para estadísticas de desempate)
-      const datePositions = new Map<string, number>();
-
-      // Encontrar la posición más alta (primer eliminado = último lugar = 7/2)
-      const maxPosition = gameDate.eliminations.length > 0
-        ? Math.max(...gameDate.eliminations.map(e => e.position))
-        : totalPlayersInDate;
-
-      // Registrar puntos para jugadores que participaron
-      gameDate.playerIds.forEach(playerId => {
-        if (registeredPlayers.some(rp => rp.id === playerId)) {
-          const ranking = playerRankings.get(playerId)!;
-          ranking.datesPlayed += 1;
-
-          // Buscar si fue eliminado en esta fecha
-          const elimination = gameDate.eliminations.find(e => e.eliminatedPlayerId === playerId);
-
-          if (elimination) {
-            // Jugador fue eliminado, usar puntos guardados en la eliminación
-            ranking.pointsByDate[gameDate.dateNumber] = elimination.points;
-            ranking.totalPoints += elimination.points;
-
-            // Registrar posición para estadísticas de desempate
-            datePositions.set(playerId, elimination.position);
-
-            // Actualizar estadísticas de desempate
-            if (elimination.position === 1) ranking.firstPlaces++;  // Contar victorias
-            if (elimination.position === 2) ranking.secondPlaces++;
-            if (elimination.position === 3) ranking.thirdPlaces++;
-            if (elimination.position === maxPosition) ranking.lastPlaces++;  // Primer eliminado (7-2)
-            if (elimination.position === maxPosition - 1) ranking.secondToLastPlaces++;  // Segundo eliminado
-          } else {
-            // Jugador no fue eliminado
-            // Solo asignar puntos si es el único jugador restante (ganador) o la fecha está completada
-            const eliminatedCount = gameDate.eliminations.length;
-            const activePlayersCount = totalPlayersInDate - eliminatedCount;
-
-            // Se exige que quede UNO solo sin eliminacion. Antes bastaba con
-            // que la fecha estuviera cerrada, asi que si por un import parcial
-            // o un arreglo manual quedaban dos jugadores sin fila, a los dos se
-            // les acreditaban puntos de ganador y una victoria.
-            if (activePlayersCount === 1) {
-              // Es el ganador - calcular puntos
-              const secondPlace = gameDate.eliminations.find(e => e.position === 2);
-              const winnerPoints = secondPlace 
-                ? secondPlace.points + 3 
-                : calculatePointsForPosition(1, totalPlayersInDate);
-              
-              ranking.pointsByDate[gameDate.dateNumber] = winnerPoints;
-              ranking.totalPoints += winnerPoints;
-              
-              // Registrar como ganador (posición 1)
-              datePositions.set(playerId, 1);
-              ranking.firstPlaces++;
-            } else {
-              // Sigue en la mesa: la fecha NO tiene resultado todavia, asi que
-              // no se escribe nada en pointsByDate. Escribir un 0 aqui lo hacia
-              // indistinguible de haber sacado 0 y contaminaba toda la tabla.
-              // La proyeccion se calcula despues, aparte.
-              stillPlaying.push({
-                playerId,
-                dateNumber: gameDate.dateNumber,
-                totalPlayersInDate,
-                eliminatedCount,
-              });
-            }
-          }
-        }
-      });
-
-      // Para jugadores registrados que NO participaron en esta fecha: 0 puntos (ausencia)
-      registeredPlayers.forEach(player => {
-        if (!gameDate.playerIds.includes(player.id)) {
-          const ranking = playerRankings.get(player.id)!;
-          ranking.pointsByDate[gameDate.dateNumber] = 0;
-          ranking.absences++; // Contar como ausencia para desempate
-          // totalPoints no cambia (no suma ni resta)
-        }
-      });
-    });
-
-    // SISTEMA ELIMINA N: Calcular puntuación final eliminando las N peores fechas
-    // Configuración dinámica: totalDates (10-15) y datesToEliminate (2-3)
-    const totalDates = tournament.totalDates ?? 12;
-    const datesToEliminate = tournament.datesToEliminate ?? 2;
-    const eliminationThreshold = Math.ceil(totalDates / 2); // Aplicar a partir de la mitad de fechas
-
-    Array.from(playerRankings.values()).forEach(ranking => {
-      const dateNumbers = Object.keys(ranking.pointsByDate).map(Number).sort((a, b) => a - b);
-      const completedDatesCount = dateNumbers.length;
-
-      // Siempre calcular las N peores fechas para mostrar en tabla
-      if (completedDatesCount > 0) {
-        const allScores = dateNumbers.map(dateNumber => ranking.pointsByDate[dateNumber]);
-        const sortedScores = [...allScores].sort((a, b) => a - b);
-        const eliminatedScores = sortedScores.slice(0, datesToEliminate);
-        ranking.elimina1 = eliminatedScores[0];
-        ranking.elimina2 = eliminatedScores[1];
-        ranking.elimina3 = eliminatedScores[2];
-      }
-
-      // Aplicar al ranking (finalScore) solo a partir del threshold
-      if (completedDatesCount >= eliminationThreshold) {
-        ranking.eliminasActive = true;
-        const allScores = dateNumbers.map(dateNumber => ranking.pointsByDate[dateNumber]);
-        const sortedScores = [...allScores].sort((a, b) => a - b);
-        const eliminatedScores = sortedScores.slice(0, datesToEliminate);
-        const eliminatedSum = eliminatedScores.reduce((sum, s) => sum + s, 0);
-        ranking.finalScore = ranking.totalPoints - eliminatedSum - (ranking.pointPenalty ?? 0);
-      } else {
-        // Antes del threshold: puntaje final = total (eliminas solo informativas), menos multas de puntos
-        ranking.eliminasActive = false;
-        ranking.finalScore = ranking.totalPoints - (ranking.pointPenalty ?? 0);
-      }
-    });
+    // La tabla en si (puntos por fecha, desempates, ELIMINA N, multas y
+    // posiciones) vive en @poker/shared: el reporte de Excel la usa igual.
+    const {
+      rankings: sortedRankings,
+      stillPlaying,
+      datesToEliminate,
+      eliminationThreshold,
+    } = computeStandings(
+      registeredPlayers.map(p => ({ id: p.id, name: p.name, alias: p.alias, photo: p.photo ?? undefined })),
+      tournament.gameDates,
+      { totalDates: tournament.totalDates, datesToEliminate: tournament.datesToEliminate, pointPenalties }
+    );
+    const playerRankings = new Map(sortedRankings.map(r => [r.playerId, r]));
 
     /**
      * PROYECCION DE LA FECHA EN CURSO
@@ -274,26 +128,6 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
         elimina3: worst[2],
         eliminasActive,
       };
-    });
-
-    const compareRankings = (a: PlayerRanking, b: PlayerRanking): number =>
-      compareByTiebreak(a, b);
-
-    // Ordenar con criterios de desempate y asignar posiciones
-    const sortedRankings = Array.from(playerRankings.values())
-      .sort(compareRankings);
-
-    // Asignar posiciones (manejar empates verdaderos - muy raros después de los criterios)
-    let currentPosition = 1;
-    sortedRankings.forEach((ranking, index) => {
-      if (index > 0) {
-        const previous = sortedRankings[index - 1];
-        // Solo cambiar posición si son realmente diferentes según todos los criterios
-        if (compareRankings(previous, ranking) !== 0) {
-          currentPosition = index + 1;
-        }
-      }
-      ranking.position = currentPosition;
     });
 
     // CALCULAR TENDENCIA (TREND): Comparar posición actual vs fecha anterior
