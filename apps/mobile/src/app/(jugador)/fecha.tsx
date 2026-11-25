@@ -107,10 +107,10 @@ export default function FechaScreen() {
                       accessibilityRole="button"
                       onPress={() => router.push({ pathname: '/players/[id]', params: { id: e.eliminatedPlayer.id } })}
                       style={{ borderColor: accent ?? c.surfaceBorder }}
-                      className="min-h-[56px] flex-row items-center gap-3 rounded-cp border bg-cp-surface-1 px-3 py-2 active:opacity-80">
+                      className="min-h-[64px] flex-row items-center gap-3 rounded-cp border bg-cp-surface-1 px-3 py-2 active:opacity-80">
                       {accent ? <View style={{ backgroundColor: accent }} className="absolute bottom-2 left-0 top-2 w-[3px] rounded" /> : null}
                       <Score value={`#${e.position}`} size={14} color={accent ?? c.onSurfaceMuted} />
-                      <PlayerAvatar name={fullName(e.eliminatedPlayer)} photoUrl={e.eliminatedPlayer.photoUrl} role={e.eliminatedPlayer.role} size={34} />
+                      <PlayerAvatar name={fullName(e.eliminatedPlayer)} photoUrl={e.eliminatedPlayer.photoUrl} role={e.eliminatedPlayer.role} size={48} />
                       <Text numberOfLines={1} className="flex-1 font-inter-semibold text-sm text-cp-on-surface">
                         {fullName(e.eliminatedPlayer)}
                       </Text>
@@ -124,9 +124,9 @@ export default function FechaScreen() {
               <View className="gap-2">
                 {events.length === 0 ? <EmptyState icon="list-outline" message="No hay eliminaciones registradas." /> : null}
                 {events.map((e) => (
-                  <View key={e.id} className="min-h-[56px] flex-row items-center gap-3 rounded-cp border border-cp-surface-border bg-cp-surface-1 px-3 py-2">
+                  <View key={e.id} className="min-h-[64px] flex-row items-center gap-3 rounded-cp border border-cp-surface-border bg-cp-surface-1 px-3 py-2">
                     <Score value={`#${e.position}`} size={13} color={c.onSurfaceMuted} />
-                    <PlayerAvatar name={fullName(e.eliminatedPlayer)} photoUrl={e.eliminatedPlayer.photoUrl} role={e.eliminatedPlayer.role} size={32} />
+                    <PlayerAvatar name={fullName(e.eliminatedPlayer)} photoUrl={e.eliminatedPlayer.photoUrl} role={e.eliminatedPlayer.role} size={44} />
                     <View className="flex-1">
                       <Text className="font-inter-semibold text-sm text-cp-on-surface">{fullName(e.eliminatedPlayer)}</Text>
                       {e.eliminatorPlayer ? <Muted className="text-xs">eliminado por {playerLabel(e.eliminatorPlayer)}</Muted> : null}

@@ -103,7 +103,7 @@ function ContactCard({ player, isMe }: { player: DirectoryPlayer; isMe: boolean 
   return (
     <View className="gap-3 rounded-card border border-cp-surface-border bg-cp-surface-1 p-4">
       <View className="flex-row items-center gap-3">
-        <PlayerAvatar name={name} photoUrl={player.photoUrl} size={52} playerId={player.id} linkToProfile />
+        <PlayerAvatar name={name} photoUrl={player.photoUrl} size={64} playerId={player.id} linkToProfile />
         <View className="flex-1 gap-0.5">
           <View className="flex-row items-center gap-2">
             <Text numberOfLines={1} className="shrink font-inter-bold text-base text-cp-on-surface">

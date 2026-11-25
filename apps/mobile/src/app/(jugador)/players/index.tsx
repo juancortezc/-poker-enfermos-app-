@@ -107,7 +107,7 @@ function PlayerRow({ player, canEdit }: { player: DirectoryPlayer; canEdit: bool
       accessibilityLabel={`Ver el perfil de ${name}`}
       onPress={() => router.push({ pathname: '/players/[id]', params: { id: player.id } })}
       className="min-h-[64px] flex-row items-center gap-3 rounded-cp border border-cp-surface-border bg-cp-surface-1 px-4 py-3 active:bg-cp-surface-2">
-      <PlayerAvatar name={name} photoUrl={player.photoUrl} role={player.role} size={44} />
+      <PlayerAvatar name={name} photoUrl={player.photoUrl} role={player.role} size={56} />
       <View className="flex-1">
         <View className="flex-row items-center gap-2">
           <Text numberOfLines={1} className="shrink font-inter-semibold text-base text-cp-on-surface">
