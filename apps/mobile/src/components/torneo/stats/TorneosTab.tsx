@@ -12,7 +12,7 @@ import { avatarProps } from '@/components/common/PlayerAvatar';
 import { PlayerCard } from '@/components/common/PlayerCard';
 import { EmptyState, ErrorState, LoadingState, CPButton, CPCard, Overline, Title } from '@/components/ui';
 import { swrKeys } from '@/lib/swr';
-import { playerLabel } from '@poker/shared';
+import { photoForTournament, playerLabel } from '@poker/shared';
 
 import { usePaletas } from './Historico';
 
@@ -85,7 +85,10 @@ export function TorneosTab() {
   const { metal, rosa } = usePaletas();
 
   const torneos = useMemo(
-    () => [...(data ?? [])].sort((a, b) => b.tournamentNumber - a.tournamentNumber),
+    () =>
+      [...(data ?? [])]
+        .sort((a, b) => b.tournamentNumber - a.tournamentNumber)
+        .map((t) => withPhotosOf(t, t.tournamentNumber)),
     [data]
   );
 
@@ -164,4 +167,14 @@ export function TorneosTab() {
       ))}
     </View>
   );
+}
+
+/** Antes del T31 cada uno sale con la foto que tenía entonces, no con la tarjeta de lucha libre. */
+function withPhotosOf<T extends Record<string, unknown>>(t: T, n: number): T {
+  const out: Record<string, unknown> = { ...t };
+  for (const k of ['champion', 'runnerUp', 'thirdPlace', 'siete', 'dos']) {
+    const p = out[k] as { photoUrl?: string | null } | null | undefined;
+    if (p) out[k] = { ...p, photoUrl: photoForTournament(p.photoUrl, n) };
+  }
+  return out as T;
 }

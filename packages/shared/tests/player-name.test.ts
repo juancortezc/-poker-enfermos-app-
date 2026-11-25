@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { playerLabel, shortenFullName, fullName, playerCardUrl } from '../src/index'
+import { playerLabel, shortenFullName, fullName, playerCardUrl, photoForTournament } from '../src/index'
 
 test('playerLabel: alias, inicial en mayuscula y sin apellido', () => {
   assert.equal(playerLabel({ firstName: 'Juan', lastName: 'cortez' }), 'Juan C.')
@@ -34,4 +34,12 @@ test('playerCardUrl: tarjeta del T31 desde la foto de perfil, pato para invitado
   assert.equal(playerCardUrl('https://storage.googleapis.com/poker-enfermos/lulu.png'), null)
   assert.equal(playerCardUrl(null), null)
   assert.equal(playerCardUrl('cualquiera', 'Invitado'), `${base}/tarjetas/pato-1.webp`)
+})
+
+test('photoForTournament: antes del T31 la foto vieja, desde el T31 la actual', () => {
+  const lulu = 'https://storage.googleapis.com/poker-enfermos/t31/perfil/lulu.webp'
+  assert.equal(photoForTournament(lulu, 30), 'https://storage.googleapis.com/poker-enfermos/lulu.png')
+  assert.equal(photoForTournament(lulu, 31), lulu)
+  assert.equal(photoForTournament('https://x/otra.png', 28), 'https://x/otra.png')
+  assert.equal(photoForTournament(null, 28), null)
 })

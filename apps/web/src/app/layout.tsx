@@ -89,8 +89,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body className={`${inter.variable} ${archivo.variable} antialiased app-bg`}>
+    // Las variables de las fuentes van en <html>: los tokens --cp-font* se
+    // declaran en :root y ahi tienen que resolver (en <body> quedaban invalidas
+    // y todo lo que pedia Archivo salia en Inter).
+    <html lang="es" className={`${inter.variable} ${archivo.variable}`}>
+      <body className="antialiased app-bg">
         <SWRProvider>
           <AuthProvider>
             <PlayerSearchProvider>

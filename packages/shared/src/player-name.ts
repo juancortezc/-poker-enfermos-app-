@@ -64,3 +64,28 @@ export function playerCardUrl(photoUrl?: string | null, role?: string | null): s
   const m = src.match(/^(https:\/\/storage\.googleapis\.com\/poker-enfermos\/t\d+)\/perfil\/([^/]+\.webp)$/)
   return m ? `${m[1]}/tarjetas/${m[2]}` : null
 }
+
+/** Primer torneo con fotos de lucha libre (tarjetas en `t31/`). */
+export const FIRST_CARD_TOURNAMENT = 31
+
+/** Foto que tenia cada jugador hasta el T30, por el archivo nuevo del T31. */
+const T30_PHOTOS: Record<string, string> = {
+  charlie: 'charliec.png', minimi: 'juang.png', 'el-trampas': 'freddy.png', 'el-teta': 'rubi.png',
+  'la-dama-de-rosa': 'vela.png', 'el-pajarraco': 'pit.png', chiki: 'diegob.png', jackie: 'jac.png',
+  coqueta: 'coque.png', damiana: 'damian.png', mechesangas: 'meche.png', tramaco: 'tamayo.png',
+  'mango-tropical': 'jfo.png', frijolero: 'sean.png', rola: 'rola.png', lulu: 'lulu.png',
+  milton: 'milton.png', fer: 'fer.png', perro: 'perro.png', joto: 'joto.png', mono: 'mono.png',
+  'el-asesor': 'j%26p.png', felipao: 'fp.png', 'pato-1': 'pato.png',
+}
+
+/**
+ * Foto para mostrar a alguien en un torneo pasado: antes del T31 va la foto
+ * de entonces (la del T30), no la tarjeta de lucha libre. Si no hay foto
+ * vieja conocida, la actual.
+ */
+export function photoForTournament(photoUrl: string | null | undefined, tournamentNumber: number): string | null {
+  if (!photoUrl || tournamentNumber >= FIRST_CARD_TOURNAMENT) return photoUrl ?? null
+  const m = photoUrl.match(/^https:\/\/storage\.googleapis\.com\/poker-enfermos\/t31\/perfil\/([^/]+)\.webp$/)
+  const old = m ? T30_PHOTOS[m[1]] : undefined
+  return old ? `https://storage.googleapis.com/poker-enfermos/${old}` : photoUrl
+}

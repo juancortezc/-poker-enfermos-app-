@@ -12,7 +12,7 @@ import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
 import { EmptyState, ErrorState, LoadingState, Muted, CPCard, Overline } from '@/components/ui';
 import { cp, fonts } from '@/theme/colors';
 import { useCP } from '@/theme/tone';
-import { playerLabel } from '@poker/shared';
+import { photoForTournament, playerLabel } from '@poker/shared';
 
 export type Jugador = {
   id: string;
@@ -293,12 +293,17 @@ export function SieteTab() {
                   T{t.tournamentNumber}
                 </Text>
               </View>
-              <Premio etiqueta="2" jugador={t.dos} paleta={rosa} />
-              <Premio etiqueta="7" jugador={t.siete} paleta={rosa} />
+              <Premio etiqueta="2" jugador={fotoDe(t.dos, t.tournamentNumber)} paleta={rosa} />
+              <Premio etiqueta="7" jugador={fotoDe(t.siete, t.tournamentNumber)} paleta={rosa} />
             </View>
           ))}
         </CPCard>
       ) : null}
     </View>
   );
+}
+
+/** Antes del T31, la foto que tenía entonces. */
+function fotoDe(j: Jugador | null, n: number): Jugador | null {
+  return j ? { ...j, photoUrl: photoForTournament(j.photoUrl, n) } : null;
 }

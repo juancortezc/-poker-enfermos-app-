@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { photoForTournament } from '@poker/shared'
 import { readApiJson } from '@/lib/api-client'
 import { CPPlayerCard } from '@/components/clean-poker/CPPlayerCard'
 
@@ -48,7 +49,9 @@ export default function CPTorneosTab() {
 
       // Desenvuelto: la lista de ganadores con la API vieja y con la nueva.
       const result = await readApiJson<TournamentWinner[]>(response)
-      const sortedTournaments = [...result].sort((a, b) => b.tournamentNumber - a.tournamentNumber)
+      const sortedTournaments = [...result]
+        .sort((a, b) => b.tournamentNumber - a.tournamentNumber)
+        .map(withPhotosOf)
       setTournaments(sortedTournaments)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
@@ -422,4 +425,11 @@ function PositionCard({ badge, badgeColor, player, isMalazo }: PositionCardProps
       </div>
     </div>
   )
+}
+
+/** Antes del T31 cada uno sale con la foto que tenia entonces, no con la tarjeta de lucha libre. */
+function withPhotosOf(t: TournamentWinner): TournamentWinner {
+  const fix = <P extends { photoUrl?: string | null } | null | undefined>(p: P): P =>
+    p ? ({ ...p, photoUrl: photoForTournament(p.photoUrl, t.tournamentNumber) ?? undefined } as P) : p
+  return { ...t, champion: fix(t.champion), runnerUp: fix(t.runnerUp), thirdPlace: fix(t.thirdPlace), siete: fix(t.siete), dos: fix(t.dos) }
 }
