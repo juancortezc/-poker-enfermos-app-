@@ -18,5 +18,8 @@
     "@types/node": "^20",
     "tsx": "^4",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
   }
 }

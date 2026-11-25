@@ -3,6 +3,7 @@ import { prisma } from './prisma'
 import { UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { isValidPinForLogin, normalizePin } from './pin-utils'
+import { AppError, errorResponse } from './errors'
 
 export interface AuthenticatedUser {
   id: string
@@ -273,11 +274,16 @@ export async function validateApiAccess(req: NextRequest): Promise<Authenticated
   }
 }
 
-/** La validacion no se pudo completar. No dice nada sobre la credencial. */
-export class ValidacionNoDisponible extends Error {
+/**
+ * La validacion no se pudo completar. No dice nada sobre la credencial.
+ * Es un AppError 503 AUTH_UNAVAILABLE: si llega a `withErrorHandler` sale
+ * como tal, y el cliente NO cierra la sesion (eso solo lo hace un 401).
+ */
+export class ValidacionNoDisponible extends AppError {
   constructor() {
-    super('No se pudo validar la credencial')
+    super('No se pudo validar tu sesion, reintenta', 503, 'AUTH_UNAVAILABLE')
     this.name = 'ValidacionNoDisponible'
+    Object.setPrototypeOf(this, ValidacionNoDisponible.prototype)
   }
 }
 
@@ -290,11 +296,11 @@ async function resolverUsuario(
 ): Promise<{ user: AuthenticatedUser } | { respuesta: Response }> {
   try {
     const user = await validateApiAccess(req)
-    if (!user) return { respuesta: createAuthResponse('Acceso no autorizado') }
+    if (!user) return { respuesta: errorResponse(AppError.unauthorized('Acceso no autorizado'), req.url) }
     return { user }
   } catch (error) {
     if (error instanceof ValidacionNoDisponible) {
-      return { respuesta: createAuthResponse('No se pudo validar tu sesion, reintenta', 503) }
+      return { respuesta: errorResponse(error, req.url) }
     }
     throw error
   }
@@ -302,18 +308,6 @@ async function resolverUsuario(
 
 export function canModifyPlayers(userRole: UserRole): boolean {
   return userRole === UserRole.Comision
-}
-
-export function createAuthResponse(message: string, status: number = 401) {
-  return Response.json(
-    { error: message },
-    { 
-      status,
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    }
-  )
 }
 
 // Helper para validar acceso a rutas protegidas
@@ -331,6 +325,24 @@ export async function withAuth(
   return handler(req, user)
 }
 
+/**
+ * Variante que lanza en vez de devolver una respuesta, para usar dentro de
+ * `withErrorHandler`: 401 sin credencial valida, 503 si no se pudo validar.
+ */
+export async function requireUser(req: NextRequest): Promise<AuthenticatedUser> {
+  const user = await validateApiAccess(req)
+  if (!user) throw AppError.unauthorized('Acceso no autorizado')
+  updateUserActivity(user.id)
+  return user
+}
+
+/** Como `requireUser`, y ademas 403 si no es Comision. */
+export async function requireComision(req: NextRequest): Promise<AuthenticatedUser> {
+  const user = await requireUser(req)
+  if (!canModifyPlayers(user.role)) throw AppError.forbidden('Sin permisos suficientes')
+  return user
+}
+
 // Helper para validar acceso a rutas que requieren permisos de Comision
 export async function withComisionAuth(
   req: NextRequest,
@@ -341,7 +353,7 @@ export async function withComisionAuth(
   const user = r.user
 
   if (!canModifyPlayers(user.role)) {
-    return createAuthResponse('Sin permisos suficientes', 403)
+    return errorResponse(AppError.forbidden('Sin permisos suficientes'), req.url)
   }
 
   // Actualizar actividad del usuario (fire-and-forget)
