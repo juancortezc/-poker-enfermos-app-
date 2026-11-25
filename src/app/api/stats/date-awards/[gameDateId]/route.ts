@@ -141,7 +141,13 @@ export async function GET(
     const presentPlayerIds = new Set(gameDate.playerIds)
     const faltas = allEnfermosComision.filter(p => !presentPlayerIds.has(p.id))
 
-    return NextResponse.json({
+    // Este endpoint es publico: nunca debe salir el hash del PIN ni el adminKey
+    // de los jugadores (los findMany de arriba traen el Player entero).
+    const SENSITIVE = new Set(['pin', 'adminKey'])
+    const scrub = <T,>(value: T): T =>
+      JSON.parse(JSON.stringify(value, (key, v) => (SENSITIVE.has(key) ? undefined : v)))
+
+    return NextResponse.json(scrub({
       gameDate: {
         id: gameDate.id,
         dateNumber: gameDate.dateNumber,
@@ -156,7 +162,7 @@ export async function GET(
         sieteYDos,
         faltas
       }
-    })
+    }))
   } catch (error) {
     console.error('Error fetching date awards:', error)
     return NextResponse.json(
