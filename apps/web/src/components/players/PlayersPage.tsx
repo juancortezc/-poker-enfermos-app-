@@ -7,6 +7,7 @@ import { UserRole } from '@prisma/client'
 import PlayerList from './PlayerList'
 import PlayerForm from './PlayerForm'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -151,7 +152,7 @@ export default function PlayersPage() {
         headers: buildAuthHeaders()
       })
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         const deduped = dedupePlayers(data)
         setPlayers(deduped)
       }

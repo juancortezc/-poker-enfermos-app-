@@ -17,6 +17,7 @@ import {
   AlertCircle,
   Bell
 } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -94,7 +95,7 @@ export function BroadcastNotification() {
         throw new Error('Failed to load players')
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
       setPlayers(data.players || [])
     } catch (error) {
       console.error('Error loading players:', error)
@@ -172,7 +173,7 @@ export function BroadcastNotification() {
         body: JSON.stringify(requestBody)
       })
 
-      const data = await response.json()
+      const data = await readApiJson(response)
 
       if (!response.ok) {
         // Handle specific "no subscriptions" error more gracefully

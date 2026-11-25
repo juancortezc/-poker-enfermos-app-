@@ -19,6 +19,7 @@ import {
   Lock,
   Unlock
 } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 interface ProposalV2 {
   id: number
@@ -96,11 +97,11 @@ export function ProposalCard({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al cambiar estado')
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
       toast.success(data.message)
 
       if (onUpdate) {
@@ -127,7 +128,7 @@ export function ProposalCard({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al eliminar propuesta')
       }
 
@@ -159,11 +160,11 @@ export function ProposalCard({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || `Error al ${action} votación`)
       }
 
-      const data = await response.json()
+      const data = await readApiJson(response)
       toast.success(data.message)
 
       if (onUpdate) {

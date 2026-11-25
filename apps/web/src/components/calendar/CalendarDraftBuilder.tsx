@@ -12,6 +12,7 @@ import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 import { fetchCalendarDraft, saveCalendarDraft } from '@/lib/calendar-draft'
 import { CalendarDays, Check, AlertTriangle, Loader2 } from 'lucide-react'
 import { toast } from 'react-toastify'
+import { readApiJson } from '@/lib/api-client'
 
 interface GeneratedDate {
   dateNumber: number
@@ -94,7 +95,7 @@ export default function CalendarDraftBuilder() {
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setNextNumber(data.nextNumber)
         setCustomNumber(prev => prev ?? data.nextNumber)
         return data.nextNumber as number

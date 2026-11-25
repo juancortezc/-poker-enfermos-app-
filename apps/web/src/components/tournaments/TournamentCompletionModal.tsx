@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { X, Calendar, CheckCircle, Loader2 } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface Tournament {
   id: number
@@ -58,7 +59,7 @@ export default function TournamentCompletionModal({
         onClose()
         resetModal()
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al modificar fecha')
       }
     } catch (error) {
@@ -90,7 +91,7 @@ export default function TournamentCompletionModal({
         onClose()
         resetModal()
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al completar torneo')
       }
     } catch (error) {

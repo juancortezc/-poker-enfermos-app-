@@ -14,6 +14,7 @@ import PlayerSelector from './PlayerSelector'
 import GuestSelector from './GuestSelector'
 import GameDateSummary from './GameDateSummary'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -102,7 +103,7 @@ export default function GameDateForm() {
       })
 
       if (activeResponse.ok) {
-        const activeData = await activeResponse.json()
+        const activeData = await readApiJson(activeResponse)
         
         if (activeData && activeData.id) {
           setActiveDate(activeData)
@@ -118,7 +119,7 @@ export default function GameDateForm() {
       })
 
       if (availableResponse.ok) {
-        const availableData = await availableResponse.json()
+        const availableData = await readApiJson(availableResponse)
         setTournament(availableData.tournament)
         setAvailableDates(availableData.availableDates)
         setRegisteredPlayers(availableData.registeredPlayers)
@@ -134,7 +135,7 @@ export default function GameDateForm() {
         
         setCurrentStep('date-info')
       } else {
-        const errorData = await availableResponse.json()
+        const errorData = await readApiJson(availableResponse)
         setError(errorData.error || 'Error al cargar datos')
       }
     } catch (err) {
@@ -165,11 +166,11 @@ export default function GameDateForm() {
       })
 
       if (response.ok) {
-        const result = await response.json()
+        const result = await readApiJson(response)
         setCreatedGameDate(result.gameDate)
         setCurrentStep('summary')
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al configurar fecha')
       }
     } catch (err) {

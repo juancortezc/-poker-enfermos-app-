@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Play, Calendar, Users, Trophy, Clock, Target, Edit } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface GameDate {
   id: number
@@ -48,10 +49,10 @@ export default function GameDateConfirmPage() {
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setGameDate(data.gameDate)
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         toast.error(errorData.error || 'Error al cargar la fecha')
         router.push('/admin')
       }
@@ -79,7 +80,7 @@ export default function GameDateConfirmPage() {
         toast.success('¡Fecha iniciada exitosamente!')
         router.push('/registro')
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         toast.error(errorData.error || 'Error al iniciar la fecha')
       }
     } catch (error) {

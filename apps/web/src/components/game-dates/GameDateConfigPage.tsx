@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Loader2, Play, UserPlus, Calendar } from 'lucide-react'
 import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -128,7 +129,7 @@ export default function GameDateConfigPage() {
       console.log('📡 Active game date response:', activeResponse.status)
 
       if (activeResponse.ok) {
-        const activeData = await activeResponse.json()
+        const activeData = await readApiJson(activeResponse)
         console.log('📊 Active data:', activeData)
         if (activeData && activeData.activeDate) {
           console.log('✅ Found active game date, stopping here')
@@ -150,7 +151,7 @@ export default function GameDateConfigPage() {
       console.log('📡 Available dates response:', availableResponse.status)
 
       if (availableResponse.ok) {
-        const data = await availableResponse.json()
+        const data = await readApiJson(availableResponse)
         console.log('📋 Available dates data:', {
           tournament: data.tournament?.name,
           availableDatesCount: data.availableDates?.length,
@@ -225,7 +226,7 @@ export default function GameDateConfigPage() {
       })
       
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setGuests(data.externalGuests)
       }
     } catch (err) {
@@ -290,7 +291,7 @@ export default function GameDateConfigPage() {
       })
 
       if (response.ok) {
-        const result = await response.json()
+        const result = await readApiJson(response)
         setActiveGameDate(result.gameDate)
         // Don't reload initial data to preserve selections
         // Just update the available dates to reflect the change
@@ -298,7 +299,7 @@ export default function GameDateConfigPage() {
         // Show success message or redirect
         router.push(`/game-dates/${result.gameDate.id}/confirm`)
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al activar fecha')
       }
     } catch (err) {
@@ -343,7 +344,7 @@ export default function GameDateConfigPage() {
       })
 
       if (response.ok) {
-        const result = await response.json()
+        const result = await readApiJson(response)
         
         // Update local state
         setSelectedDate(new Date(newDateString + 'T12:00:00'))
@@ -358,7 +359,7 @@ export default function GameDateConfigPage() {
         // Clear any previous errors
         setError('')
       } else {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         setDateError(errorData.error || 'Error al actualizar fecha')
       }
     } catch (err) {

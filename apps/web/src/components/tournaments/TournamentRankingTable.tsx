@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { TrophyIcon } from 'lucide-react';
 import Link from 'next/link';
 import type { TournamentRankingData } from '@poker/shared';
+import { readApiJson } from '@/lib/api-client'
 
 interface TournamentRankingTableProps {
   tournamentId: number;
@@ -28,7 +29,7 @@ export default function TournamentRankingTable({
           throw new Error('Error al cargar el ranking');
         }
 
-        const data = await response.json();
+        const data = await readApiJson(response);
         setRankingData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido');

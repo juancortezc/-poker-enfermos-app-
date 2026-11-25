@@ -3,6 +3,7 @@ import { Edit2, Check, X } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { useSWRConfig } from 'swr'
 import { swrKeys } from '@/lib/swr-config'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -83,7 +84,7 @@ export function EliminationHistory({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al actualizar eliminación')
       }
 

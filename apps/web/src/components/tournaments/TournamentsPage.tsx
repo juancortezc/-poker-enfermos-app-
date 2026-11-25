@@ -10,6 +10,7 @@ import LoadingState, { CardSkeleton } from '@/components/ui/LoadingState'
 import { Plus, Trophy, Calendar, Users, Clock, CheckCircle } from 'lucide-react'
 import TournamentCompletionModal from './TournamentCompletionModal'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface Tournament {
   id: number
@@ -58,7 +59,7 @@ export default function TournamentsPage() {
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setTournaments(data)
       }
     } catch (error) {

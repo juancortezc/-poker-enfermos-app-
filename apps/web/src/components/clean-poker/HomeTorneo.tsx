@@ -22,10 +22,8 @@ interface WinnerPlayer {
   photoUrl: string | null
 }
 
-interface TournamentWinnersResponse {
-  success: boolean
-  data?: Array<{ tournamentNumber: number; champion: WinnerPlayer; runnerUp: WinnerPlayer; thirdPlace: WinnerPlayer }>
-}
+/** Ya desenvuelto por el fetcher global (formato viejo o nuevo). */
+type TournamentWinnersResponse = Array<{ tournamentNumber: number; champion: WinnerPlayer; runnerUp: WinnerPlayer; thirdPlace: WinnerPlayer }>
 
 interface NextDateInfo {
   dateNumber?: number
@@ -102,7 +100,7 @@ export function HomeTorneo({
     finished ? '/api/tournaments/winners' : null,
     { revalidateOnFocus: false }
   )
-  const finalWinner = winnersData?.data?.find(w => w.tournamentNumber === tournamentNumber)
+  const finalWinner = winnersData?.find(w => w.tournamentNumber === tournamentNumber)
 
   const myRanking = rankings.find(r => r.playerId === user.id)
   const leaderScore = rankings.length ? scoreOf(rankings[0]) : 0

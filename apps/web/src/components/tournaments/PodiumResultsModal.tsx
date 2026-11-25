@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { X, Trophy, Medal, Award, User } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string;
@@ -59,10 +60,11 @@ export default function PodiumResultsModal({ isOpen, onClose, playerId }: Podium
     setError(null);
     try {
       const response = await fetch(`/api/players/${playerId}/podium-details`);
-      const result = await response.json();
+      const result = await readApiJson(response);
 
-      if (result.success) {
-        setData(result.data);
+      // Desenvuelto: con la API vieja y la nueva `result` ya es el detalle.
+      if (response.ok) {
+        setData(result);
       } else {
         setError(result.error || 'Error al cargar detalles');
       }

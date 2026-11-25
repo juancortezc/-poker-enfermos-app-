@@ -10,6 +10,7 @@ import { toast } from 'react-toastify'
 import { Send, X, Image as ImageIcon, Upload } from 'lucide-react'
 import { isSafeImageUrl } from '@/lib/proposal-input'
 import { MAX_UPLOAD_BYTES } from '@/lib/image-upload'
+import { readApiJson } from '@/lib/api-client'
 
 interface ProposalData {
   id?: number
@@ -101,7 +102,7 @@ export function ProposalForm({
         headers: buildAuthHeaders(),
         body
       })
-      const data = await response.json().catch(() => ({}))
+      const data = await readApiJson(response).catch(() => ({}))
       if (!response.ok || typeof data.url !== 'string') {
         throw new Error(data.error || 'No se pudo subir la imagen')
       }
@@ -155,7 +156,7 @@ export function ProposalForm({
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al guardar propuesta')
       }
 

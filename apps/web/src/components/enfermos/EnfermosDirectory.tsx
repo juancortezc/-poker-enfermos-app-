@@ -7,6 +7,7 @@ import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { UserRole } from '@prisma/client'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -35,7 +36,7 @@ export default function EnfermosDirectory() {
         if (!response.ok) {
           throw new Error('No se pudo cargar jugadores')
         }
-        const data: Player[] = await response.json()
+        const data: Player[] = await readApiJson(response)
         setPlayers(data)
       } catch (error) {
         console.error('Error fetching players:', error)

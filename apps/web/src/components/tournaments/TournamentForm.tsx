@@ -19,6 +19,7 @@ import { toast } from 'react-toastify'
 import { buildAuthHeaders, getStoredAuthToken, getAuthHeaderValue } from '@/lib/client-auth'
 import { fetchCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
 import { playerLabel } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -149,7 +150,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
         headers: buildAuthHeaders()
       })
       if (response.ok) {
-        const tournament = await response.json()
+        const tournament = await readApiJson(response)
         setTournamentNumber(tournament.number)
         setFormData({
           tournamentNumber: tournament.number,
@@ -177,7 +178,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         const activePlayers = data.filter((p: Player) => p.isActive)
         setAvailablePlayers(activePlayers)
 
@@ -219,7 +220,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
         })
 
         if (response.ok) {
-          const data = await response.json()
+          const data = await readApiJson(response)
           setTournamentNumber(data.nextNumber)
           setFormData(prev => ({
             ...prev,
@@ -227,7 +228,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
           }))
         } else {
           console.error('API response not ok:', response.status, response.statusText)
-          const errorData = await response.json().catch(() => ({}))
+          const errorData = await readApiJson(response).catch(() => ({}))
           console.error('Error details:', errorData)
           const defaultNumber = 28
           setTournamentNumber(defaultNumber)
@@ -309,7 +310,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         const errorMessage = errorData.error || 'Error al guardar torneo'
 
         // Log detallado del error para debugging
@@ -358,7 +359,7 @@ export default function TournamentForm({ tournamentId, initialTournamentNumber, 
       })
 
       if (!response.ok) {
-        const error = await response.json()
+        const error = await readApiJson(response)
         throw new Error(error.error || 'Error al eliminar torneo')
       }
 

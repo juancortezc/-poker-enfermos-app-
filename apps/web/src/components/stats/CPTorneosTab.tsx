@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   firstName: string
@@ -43,16 +44,10 @@ export default function CPTorneosTab() {
         throw new Error('Error al cargar torneos')
       }
 
-      const result = await response.json()
-
-      if (result.success) {
-        const sortedTournaments = result.data.sort((a: TournamentWinner, b: TournamentWinner) =>
-          b.tournamentNumber - a.tournamentNumber
-        )
-        setTournaments(sortedTournaments)
-      } else {
-        throw new Error(result.error || 'Error desconocido')
-      }
+      // Desenvuelto: la lista de ganadores con la API vieja y con la nueva.
+      const result = await readApiJson<TournamentWinner[]>(response)
+      const sortedTournaments = [...result].sort((a, b) => b.tournamentNumber - a.tournamentNumber)
+      setTournaments(sortedTournaments)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {

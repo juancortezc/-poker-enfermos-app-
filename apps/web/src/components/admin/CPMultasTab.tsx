@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, Receipt, Hash, Coins, DollarSign, CheckCircle2, Circle } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import CPMultaForm from './CPMultaForm'
+import { readApiJson } from '@/lib/api-client'
 
 interface TournamentPlayer {
   playerId: string
@@ -47,7 +48,7 @@ export default function CPMultasTab({ tournamentId }: CPMultasTabProps) {
         headers: buildAuthHeaders()
       })
       if (response.ok) {
-        setMultas(await response.json())
+        setMultas(await readApiJson(response))
       }
     } catch (error) {
       console.error('Error fetching multas:', error)
@@ -61,7 +62,7 @@ export default function CPMultasTab({ tournamentId }: CPMultasTabProps) {
     try {
       const response = await fetch(`/api/tournaments/${tournamentId}/ranking`)
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         setPlayers(data.rankings.map((r: { playerId: string; playerName: string }) => ({
           playerId: r.playerId,
           playerName: r.playerName,

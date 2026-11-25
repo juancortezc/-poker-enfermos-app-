@@ -24,10 +24,9 @@ interface ChampionData {
   tournamentNumbers: number[]
 }
 
+/** `data` ya desenvuelto por el fetcher global (formato viejo o nuevo). */
 interface Respuesta {
-  success: boolean
-  error?: string
-  data?: { all: ChampionData[] }
+  all: ChampionData[]
 }
 
 export default function CPCampeonesTab() {
@@ -40,22 +39,22 @@ export default function CPCampeonesTab() {
 
   if (isLoading) return <CargandoHistorico texto="Cargando campeones..." />
 
-  if (error || (data && !data.success)) {
+  if (error) {
     return (
       <ErrorHistorico
-        mensaje={data?.error ?? 'Error al cargar campeones'}
+        mensaje={error.message || 'Error al cargar campeones'}
         paleta={PALETA_METAL}
         onReintentar={() => void mutate()}
       />
     )
   }
 
-  if (!data?.data) return null
+  if (!data) return null
 
   // `all` ya viene en orden; antes esta pestaña leia `top3` y `others` y los
   // volvia a pegar, o sea deshacia un corte que el endpoint hacia solo para
   // ella.
-  const filas: FilaHistorico[] = data.data.all.map(c => ({
+  const filas: FilaHistorico[] = data.all.map(c => ({
     jugador: c.player,
     total: c.championshipsCount,
   }))

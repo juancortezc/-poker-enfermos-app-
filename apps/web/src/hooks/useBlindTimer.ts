@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import useSWR from 'swr'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import type { TimerSnapshot } from '@/lib/timer-service'
+import { readApiJson } from '@/lib/api-client'
 
 /**
  * El timer visto desde el cliente.
@@ -130,12 +131,12 @@ export function useBlindTimer({ gameDateId, onAlert }: Options) {
         body: JSON.stringify({ action }),
       })
       if (!res.ok) {
-        const detalle = await res.json().catch(() => ({}))
+        const detalle = await readApiJson(res).catch(() => ({}))
         throw new Error(detalle?.error ?? 'No se pudo controlar el timer')
       }
       // La respuesta ya trae el estado resultante: se usa directo en vez de
       // volver a pedirlo.
-      await mutate(await res.json(), { revalidate: false })
+      await mutate(await readApiJson(res), { revalidate: false })
     },
     [gameDateId, mutate]
   )

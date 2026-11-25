@@ -11,6 +11,7 @@ import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 import { GUEST_PHOTO_URL } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -83,7 +84,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
       })
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         // Filtrar solo Enfermos y Comisión activos
         const enfermosData = data.filter((p: { role: UserRole; isActive: boolean }) => 
           (p.role === UserRole.Enfermo || p.role === UserRole.Comision) && p.isActive
@@ -114,7 +115,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
       })
 
       if (response.ok) {
-        const invitadoData = await response.json()
+        const invitadoData = await readApiJson(response)
         setFormData({
           firstName: invitadoData.firstName,
           lastName: invitadoData.lastName,
@@ -172,7 +173,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         throw new Error(errorData.error || 'Error al guardar invitado')
       }
 

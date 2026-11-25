@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import { toast } from 'react-toastify'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -85,7 +86,7 @@ export default function PlayerCard({ player, canEdit, onPlayerDeactivated }: Pla
       })
 
       if (!response.ok) {
-        const error = await response.json()
+        const error = await readApiJson(response)
         throw new Error(error.error || 'Error al desactivar jugador')
       }
 

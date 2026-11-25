@@ -1,4 +1,5 @@
 import { getAuthHeaderValue } from '@/lib/client-auth';
+import { readApiJson } from '@/lib/api-client'
 
 /**
  * Servicio central de notificaciones.
@@ -75,7 +76,7 @@ export class NotificationService {
       if (!vapidKey) {
         const response = await fetch('/api/notifications/vapid-key');
         if (response.ok) {
-          const data = await response.json();
+          const data = await readApiJson(response);
           vapidKey = data.publicKey;
         }
       }

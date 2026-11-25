@@ -1,4 +1,5 @@
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 export interface CalendarDraftEntry {
   dateNumber: number
@@ -27,7 +28,7 @@ export async function fetchCalendarDraft(): Promise<CalendarDraft | null> {
       return null
     }
 
-    const data = await response.json()
+    const data = await readApiJson(response)
     const draft = data?.draft
 
     if (!draft || !Array.isArray(draft.gameDates)) {
@@ -57,11 +58,11 @@ export async function saveCalendarDraft(draft: CalendarDraft): Promise<CalendarD
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
+      const errorData = await readApiJson(response).catch(() => ({}))
       throw new Error(errorData.error || 'Error guardando calendario')
     }
 
-    const data = await response.json()
+    const data = await readApiJson(response)
     return data?.draft as CalendarDraft
   } catch (error) {
     console.error('Error saving calendar draft:', error)

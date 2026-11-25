@@ -27,10 +27,9 @@ interface PodiumStat {
   totalPodiums: number
 }
 
+/** `data` ya desenvuelto por el fetcher global (formato viejo o nuevo). */
 interface Respuesta {
-  success: boolean
-  error?: string
-  data?: { players: PodiumStat[] }
+  players: PodiumStat[]
 }
 
 export default function CPPodiosTab() {
@@ -42,19 +41,19 @@ export default function CPPodiosTab() {
 
   if (isLoading) return <CargandoHistorico texto="Cargando podios..." />
 
-  if (error || (data && !data.success)) {
+  if (error) {
     return (
       <ErrorHistorico
-        mensaje={data?.error ?? 'Error al cargar podios'}
+        mensaje={error.message || 'Error al cargar podios'}
         paleta={PALETA_METAL}
         onReintentar={() => void mutate()}
       />
     )
   }
 
-  if (!data?.data) return null
+  if (!data) return null
 
-  const filas: FilaHistorico[] = data.data.players.map(s => ({
+  const filas: FilaHistorico[] = data.players.map(s => ({
     jugador: s.player,
     total: s.totalPodiums,
     pie: `${s.firstPlaces}·${s.secondPlaces}·${s.thirdPlaces}`,

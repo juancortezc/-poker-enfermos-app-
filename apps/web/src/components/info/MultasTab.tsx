@@ -3,6 +3,7 @@
 import { Receipt, Hash, Coins, DollarSign } from 'lucide-react'
 import useSWR from 'swr'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
+import { parseApiResponse } from '@/lib/api-client'
 
 interface Multa {
   id: number
@@ -23,7 +24,7 @@ export default function MultasTab() {
 
   const { data: multas, isLoading } = useSWR<Multa[]>(
     tournament?.id ? `/api/multas?tournamentId=${tournament.id}` : null,
-    (url: string) => fetch(url).then(res => res.json() as Promise<Multa[]>)
+    (url: string) => fetch(url).then(res => parseApiResponse<Multa[]>(res))
   )
 
   return (

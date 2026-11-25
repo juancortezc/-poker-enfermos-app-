@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { buildAuthHeaders } from '@/lib/client-auth'
 import CPPlayerForm from './CPPlayerForm'
 import { playerLabel } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 interface Player {
   id: string
@@ -141,7 +142,7 @@ export default function CPJugadoresTab() {
         headers: buildAuthHeaders()
       })
       if (response.ok) {
-        const data = await response.json()
+        const data = await readApiJson(response)
         const deduped = dedupePlayers(data)
         setPlayers(deduped)
       }

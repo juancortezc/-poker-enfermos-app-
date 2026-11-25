@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { useGameDates } from '@/hooks/useGameDates'
 import { tile, overline, SOBRE_COLOR } from '../clean-poker/bento'
 import { Score, Meter } from '../clean-poker/Score'
+import { readApiJson } from '@/lib/api-client'
 
 interface PlayerWithVictoryData {
   id: string
@@ -37,7 +38,7 @@ interface MatchingGameDate {
 const fetcher = async (url: string) => {
   const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } })
   if (!res.ok) throw new Error('Error fetching data')
-  return res.json()
+  return readApiJson(res)
 }
 
 // ── DATE UTILS ──

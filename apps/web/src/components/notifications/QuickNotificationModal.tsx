@@ -20,6 +20,7 @@ import {
   Target,
   Sparkles
 } from 'lucide-react'
+import { readApiJson } from '@/lib/api-client'
 
 interface QuickNotificationModalProps {
   isOpen: boolean
@@ -185,7 +186,7 @@ export function QuickNotificationModal({ isOpen, onClose }: QuickNotificationMod
         body: JSON.stringify(requestBody)
       })
 
-      const data = await response.json()
+      const data = await readApiJson(response)
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to send notification')

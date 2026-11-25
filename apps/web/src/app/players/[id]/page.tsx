@@ -26,9 +26,9 @@ interface ChampionData {
   player: ChampionPlayer | null
   championshipsCount: number
 }
+/** Ya desenvuelto por el fetcher global (formato viejo o nuevo). */
 interface ChampionStatsResponse {
-  success: boolean
-  data?: { all: ChampionData[] }
+  all: ChampionData[]
 }
 
 interface Multa {
@@ -114,7 +114,7 @@ export default function PlayerProfilePage() {
     { revalidateOnFocus: false }
   )
 
-  const playerChampionships = championStats?.data?.all?.find((c) => c.player?.id === playerId)
+  const playerChampionships = championStats?.all?.find((c) => c.player?.id === playerId)
   const myRankingEntry = rankingData?.rankings.find((r) => r.playerId === playerId)
   const avgPosition = rankingData ? averageNightlyPosition(rankingData.rankings, playerId) : null
   const avgPoints = myRankingEntry ? averagePointsPerDate(myRankingEntry) : null

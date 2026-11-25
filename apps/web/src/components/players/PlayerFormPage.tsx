@@ -16,6 +16,7 @@ import {
   PIN_MAX_LENGTH,
   PIN_RULE_TEXT,
 } from '@poker/shared'
+import { readApiJson } from '@/lib/api-client'
 
 
 interface Player {
@@ -110,7 +111,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
       })
 
       if (response.ok) {
-        const playerData = await response.json()
+        const playerData = await readApiJson(response)
         setPlayer(playerData)
         setFormData({
           firstName: playerData.firstName,
@@ -209,7 +210,7 @@ export default function PlayerFormPage({ playerId }: PlayerFormPageProps) {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await readApiJson(response)
         const errorMessage = errorData.error || 'Error al guardar jugador'
 
         // Resaltar errores de PIN duplicado

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Bell, BellOff, CheckCircle } from 'lucide-react'
 import { buildAuthHeaders } from '@/lib/client-auth'
+import { readApiJson } from '@/lib/api-client'
 
 interface NotificationPermissionButtonProps {
   className?: string
@@ -85,7 +86,7 @@ export function NotificationPermissionButton({ className }: NotificationPermissi
       if (!vapidResponse.ok) {
         throw new Error('Failed to get VAPID key')
       }
-      const { publicKey } = await vapidResponse.json()
+      const { publicKey } = await readApiJson(vapidResponse)
 
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({
