@@ -1,105 +1,87 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseParams } from '@/lib/http'
+import { parentChildRelationParamsSchema } from '@poker/shared'
 
 // GET /api/stats/parent-child/[tournamentId]/[relationId] - Detalle de eliminaciones de una relación P&H
-export async function GET(
-  req: NextRequest,
+export const GET = withErrorHandler(async (
+  _req: NextRequest,
   { params }: { params: Promise<{ tournamentId: string; relationId: string }> }
-) {
-  try {
-    const { tournamentId: tournamentIdStr, relationId: relationIdStr } = await params
-    const tournamentId = parseInt(tournamentIdStr)
-    const relationId = parseInt(relationIdStr)
+) => {
+  const { tournamentId, relationId } = parseParams(await params, parentChildRelationParamsSchema)
 
-    if (isNaN(tournamentId) || isNaN(relationId)) {
-      return NextResponse.json(
-        { error: 'IDs inválidos' },
-        { status: 400 }
-      )
-    }
-
-    // Obtener la relación P&H
-    const relation = await prisma.parentChildStats.findUnique({
-      where: { id: relationId },
-      include: {
-        parentPlayer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true
-          }
-        },
-        childPlayer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true
-          }
+  // Obtener la relación P&H
+  const relation = await prisma.parentChildStats.findUnique({
+    where: { id: relationId },
+    include: {
+      parentPlayer: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          photoUrl: true
+        }
+      },
+      childPlayer: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          photoUrl: true
         }
       }
-    })
-
-    if (!relation || relation.tournamentId !== tournamentId) {
-      return NextResponse.json(
-        { error: 'Relación no encontrada' },
-        { status: 404 }
-      )
     }
+  })
 
-    // Obtener todas las eliminaciones de esta relación
-    const eliminations = await prisma.elimination.findMany({
-      where: {
-        eliminatorPlayerId: relation.parentPlayerId,
-        eliminatedPlayerId: relation.childPlayerId,
-        // El ganador figura como su propio eliminador en la posicion 1. El
-        // contador de la tarjeta la excluye; esta lista no, y por eso el
-        // numero y el detalle podian no cuadrar.
-        position: { not: 1 },
-        gameDate: {
-          tournamentId
-        }
-      },
-      include: {
-        gameDate: {
-          select: {
-            id: true,
-            dateNumber: true,
-            scheduledDate: true
-          }
-        }
-      },
-      orderBy: {
-        gameDate: {
-          scheduledDate: 'asc'
-        }
-      }
-    })
-
-    return NextResponse.json({
-      relation: {
-        id: relation.id,
-        eliminationCount: relation.eliminationCount,
-        isActiveRelation: relation.isActiveRelation,
-        firstElimination: relation.firstElimination,
-        lastElimination: relation.lastElimination,
-        parentPlayer: relation.parentPlayer,
-        childPlayer: relation.childPlayer
-      },
-      eliminations: eliminations.map(e => ({
-        id: e.id,
-        position: e.position,
-        dateNumber: e.gameDate.dateNumber,
-        scheduledDate: e.gameDate.scheduledDate
-      }))
-    })
-
-  } catch (error) {
-    console.error('Error fetching P&H relation details:', error)
-    return NextResponse.json(
-      { error: 'Error al obtener detalles' },
-      { status: 500 }
-    )
+  if (!relation || relation.tournamentId !== tournamentId) {
+    throw AppError.notFound('Relación no encontrada')
   }
-}
+
+  // Obtener todas las eliminaciones de esta relación
+  const eliminations = await prisma.elimination.findMany({
+    where: {
+      eliminatorPlayerId: relation.parentPlayerId,
+      eliminatedPlayerId: relation.childPlayerId,
+      // El ganador figura como su propio eliminador en la posicion 1. El
+      // contador de la tarjeta la excluye; esta lista no, y por eso el
+      // numero y el detalle podian no cuadrar.
+      position: { not: 1 },
+      gameDate: {
+        tournamentId
+      }
+    },
+    include: {
+      gameDate: {
+        select: {
+          id: true,
+          dateNumber: true,
+          scheduledDate: true
+        }
+      }
+    },
+    orderBy: {
+      gameDate: {
+        scheduledDate: 'asc'
+      }
+    }
+  })
+
+  return ok({
+    relation: {
+      id: relation.id,
+      eliminationCount: relation.eliminationCount,
+      isActiveRelation: relation.isActiveRelation,
+      firstElimination: relation.firstElimination,
+      lastElimination: relation.lastElimination,
+      parentPlayer: relation.parentPlayer,
+      childPlayer: relation.childPlayer
+    },
+    eliminations: eliminations.map(e => ({
+      id: e.id,
+      position: e.position,
+      dateNumber: e.gameDate.dateNumber,
+      scheduledDate: e.gameDate.scheduledDate
+    }))
+  })
+})

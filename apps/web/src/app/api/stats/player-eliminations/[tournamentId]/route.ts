@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { withErrorHandler } from '@/lib/errors'
+import { ok, parseParams } from '@/lib/http'
+import { tournamentIdParamsSchema } from '@poker/shared'
 
 interface RouteParams {
   params: Promise<{
@@ -7,87 +10,71 @@ interface RouteParams {
   }>
 }
 
-export async function GET(
-  request: NextRequest,
+export const GET = withErrorHandler(async (
+  _request: NextRequest,
   context: RouteParams
-) {
-  try {
-    const { tournamentId } = await context.params
-    const tournamentIdNum = parseInt(tournamentId)
+) => {
+  const { tournamentId: tournamentIdNum } = parseParams(await context.params, tournamentIdParamsSchema)
 
-    if (isNaN(tournamentIdNum)) {
-      return NextResponse.json(
-        { error: 'ID de torneo inválido' },
-        { status: 400 }
-      )
-    }
-
-    // Get all eliminations for this tournament
-    // Exclude position 1 (winner) since the winner doesn't eliminate anyone
-    const eliminations = await prisma.elimination.findMany({
-      where: {
-        gameDate: {
-          tournamentId: tournamentIdNum
-        },
-        position: { not: 1 } // Winner doesn't count as an elimination
+  // Get all eliminations for this tournament
+  // Exclude position 1 (winner) since the winner doesn't eliminate anyone
+  const eliminations = await prisma.elimination.findMany({
+    where: {
+      gameDate: {
+        tournamentId: tournamentIdNum
       },
-      select: {
-        eliminatorPlayerId: true,
-        eliminatorPlayer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoUrl: true,
-            isActive: true
-          }
+      position: { not: 1 } // Winner doesn't count as an elimination
+    },
+    select: {
+      eliminatorPlayerId: true,
+      eliminatorPlayer: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          photoUrl: true,
+          isActive: true
         }
       }
-    })
+    }
+  })
 
-    // Count eliminations per player
-    const playerStatsMap = new Map<string, {
-      player: {
-        id: string
-        firstName: string
-        lastName: string
-        photoUrl: string | null
-      }
-      eliminationCount: number
-    }>()
+  // Count eliminations per player
+  const playerStatsMap = new Map<string, {
+    player: {
+      id: string
+      firstName: string
+      lastName: string
+      photoUrl: string | null
+    }
+    eliminationCount: number
+  }>()
 
-    eliminations.forEach((elim) => {
-      const playerId = elim.eliminatorPlayerId
+  eliminations.forEach((elim) => {
+    const playerId = elim.eliminatorPlayerId
 
-      if (!playerStatsMap.has(playerId)) {
-        playerStatsMap.set(playerId, {
-          player: {
-            id: elim.eliminatorPlayer.id,
-            firstName: elim.eliminatorPlayer.firstName,
-            lastName: elim.eliminatorPlayer.lastName,
-            photoUrl: elim.eliminatorPlayer.photoUrl
-          },
-          eliminationCount: 0
-        })
-      }
+    if (!playerStatsMap.has(playerId)) {
+      playerStatsMap.set(playerId, {
+        player: {
+          id: elim.eliminatorPlayer.id,
+          firstName: elim.eliminatorPlayer.firstName,
+          lastName: elim.eliminatorPlayer.lastName,
+          photoUrl: elim.eliminatorPlayer.photoUrl
+        },
+        eliminationCount: 0
+      })
+    }
 
-      const stats = playerStatsMap.get(playerId)!
-      stats.eliminationCount++
-    })
+    const stats = playerStatsMap.get(playerId)!
+    stats.eliminationCount++
+  })
 
-    // Convert to array and sort by elimination count (descending)
-    const playerStats = Array.from(playerStatsMap.values())
-      .sort((a, b) => b.eliminationCount - a.eliminationCount)
+  // Convert to array and sort by elimination count (descending)
+  const playerStats = Array.from(playerStatsMap.values())
+    .sort((a, b) => b.eliminationCount - a.eliminationCount)
 
-    return NextResponse.json({
-      players: playerStats,
-      totalPlayers: playerStats.length
-    })
-  } catch (error) {
-    console.error('Error fetching player elimination stats:', error)
-    return NextResponse.json(
-      { error: 'Error al obtener estadísticas de eliminaciones' },
-      { status: 500 }
-    )
-  }
-}
+  return ok({
+    players: playerStats,
+    totalPlayers: playerStats.length
+  })
+})
