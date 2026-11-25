@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { idParamsSchema } from '@poker/shared';
+import { withErrorHandler } from '@/lib/errors';
+import { ok, parseParams } from '@/lib/http';
 import { bootstrapInfrastructure } from '@/infrastructure/bootstrap';
 import { getGetEliminationsUseCase } from '@/infrastructure';
-import { handleEliminationError } from '@/infrastructure/http/errorHandler';
+import { toEliminationAppError } from '@/infrastructure/http/errorHandler';
 
 // Ensure dependencies are registered
 bootstrapInfrastructure();
@@ -12,27 +15,16 @@ bootstrapInfrastructure();
  * Gets all eliminations for a game date, ordered by position descending.
  * Public endpoint (no auth required).
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const gameDateId = parseInt(id);
+export const GET = withErrorHandler(
+  async (_request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id: gameDateId } = parseParams(await params, idParamsSchema);
 
-    if (isNaN(gameDateId)) {
-      return NextResponse.json(
-        { error: 'Invalid game date ID' },
-        { status: 400 }
-      );
+    try {
+      const useCase = getGetEliminationsUseCase();
+      const eliminations = await useCase.execute({ gameDateId });
+      return ok(eliminations);
+    } catch (error) {
+      throw toEliminationAppError(error);
     }
-
-    // Execute use case
-    const useCase = getGetEliminationsUseCase();
-    const eliminations = await useCase.execute({ gameDateId });
-
-    return NextResponse.json(eliminations);
-  } catch (error) {
-    return handleEliminationError(error);
   }
-}
+);

@@ -7,6 +7,7 @@ import {
   resumeTimer,
   restartLevel,
   advanceLevel,
+  TIMER_ACTION_VALUES,
   type TimerAnchor,
   type TimerView,
 } from '@poker/shared'
@@ -24,9 +25,10 @@ import {
  * `start` es idempotente: si el timer ya corre (o esta pausado) no lo toca.
  * Para volver al nivel 1 de verdad hay que pedir `reset` explicitamente.
  */
-export type TimerAction = 'start' | 'reset' | 'pause' | 'resume' | 'restart-level' | 'advance'
+export type TimerAction = (typeof TIMER_ACTION_VALUES)[number]
 
-export const TIMER_ACTIONS: TimerAction[] = ['start', 'reset', 'pause', 'resume', 'restart-level', 'advance']
+/** La lista vive en @poker/shared (la valida el esquema Zod del POST). */
+export const TIMER_ACTIONS: readonly TimerAction[] = TIMER_ACTION_VALUES
 
 /** Error con status HTTP y codigo estable para el cliente. */
 export class TimerError extends Error {

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { AppError } from '@/lib/errors';
 import { Prisma } from '@prisma/client';
 import {
   EliminationError,
@@ -17,12 +17,13 @@ import {
 } from '@/domain/elimination';
 
 /**
- * Maps domain errors to HTTP responses.
- *
- * Todo lo que no es un error de dominio sale como 500 con un mensaje fijo: los
- * mensajes de Prisma traen rutas internas y SQL, y no deben llegar al cliente.
+ * Traduce los errores de dominio de eliminaciones a AppError, conservando su
+ * status (404/409/400) y su `code` estable. La ruta lo lanza y
+ * `withErrorHandler` arma la respuesta. Lo que no es de dominio se devuelve
+ * tal cual: sale como 500 con mensaje fijo (los mensajes de Prisma traen
+ * rutas internas y SQL, y no deben llegar al cliente).
  */
-export function handleEliminationError(error: unknown): NextResponse {
+export function toEliminationAppError(error: unknown): unknown {
   // Dos altas a la vez chocaron contra los indices unicos de eliminations.
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
     error = new EliminationConflictError();
@@ -31,20 +32,10 @@ export function handleEliminationError(error: unknown): NextResponse {
   if (error instanceof EliminationError) {
     const statusCode = getStatusCodeForError(error);
     if (statusCode >= 500) console.error('[Elimination API Error]', error);
-    return NextResponse.json(
-      {
-        error: error.message,
-        code: error.code,
-      },
-      { status: statusCode }
-    );
+    return new AppError(error.message, statusCode, error.code);
   }
 
-  console.error('[Elimination API Error]', error);
-  return NextResponse.json(
-    { error: 'Error interno registrando la eliminación', code: 'INTERNAL_ERROR' },
-    { status: 500 }
-  );
+  return error;
 }
 
 function getStatusCodeForError(error: EliminationError): number {
