@@ -223,7 +223,7 @@ function WinnerMarquee({
 }) {
   const phrase = nightWinnerPhrase(name, dateNumber, wins);
   // Rótulo, cinta, titular de 2 líneas, fila de puntos y botón, paddings y separaciones.
-  const cardWidth = useHeroCardWidth(250);
+  const cardWidth = useHeroCardWidth(274);
   return (
     <Marquee pattern="ring">
       <MarqueeOverline icon="★">{`FUNCIÓN ESTELAR · FECHA ${dateNumber}`}</MarqueeOverline>
@@ -261,7 +261,7 @@ function Ribbon({ children }: { children: string }) {
   return (
     <View
       style={{
-        marginTop: -34,
+        marginTop: -10,
         transform: [{ rotate: '-3deg' }],
         backgroundColor: cp.gold,
         paddingHorizontal: 16,

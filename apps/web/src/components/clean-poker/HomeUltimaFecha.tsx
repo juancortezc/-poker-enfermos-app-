@@ -31,7 +31,7 @@ const CARD_WIDTH = 232
  * inferior 75 + respiro 8 + padding 36 + rotulo 19 + cinta 14 + titular ~80 +
  * fila de puntos 48 + 4 huecos de 12 + 12 del giro. Ver heroCardWidth.
  */
-const CARTEL_RESERVADO = 471
+const CARTEL_RESERVADO = 495
 /** Una columna del podio: el contenido mide como mucho 408 px (max-w-md menos el padding). */
 const PODIUM_SIZES = '(min-width: 448px) 130px, calc((100vw - 60px) / 3)'
 /** Media columna: los tiles 3:4 de dos en dos. */
@@ -287,7 +287,7 @@ function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: Cart
         aria-hidden
         style={{
           position: 'relative',
-          marginTop: -34,
+          marginTop: -10,
           transform: 'rotate(-3deg)',
           background: SOBRE_NEGRO.oro,
           color: SOBRE_NEGRO.tinta,
