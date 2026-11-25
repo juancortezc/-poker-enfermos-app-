@@ -76,11 +76,11 @@ export function heroCardWidth(reservado: number): string {
 /**
  * Tamano del titular de dos lineas: el mayor que deja cada linea en una sola
  * fila. Ancho util = columna (hasta 448 px) menos el padding de la pagina (40)
- * y del bloque (40). Archivo 900 condensada al 70 % mide ~0.42 em por letra.
+ * y del bloque (40). Archivo 900 condensada e italica al 70 % mide ~0.45 em por letra.
  */
 export function heroTitleSize(lines: readonly string[], max: number): string {
   const longest = Math.max(...lines.map(l => l.length), 1)
-  return `min(${max}px, calc((min(100vw, 448px) - 80px) / ${(longest * 0.42).toFixed(2)}))`
+  return `min(${max}px, calc((min(100vw, 448px) - 80px) / ${(longest * 0.45).toFixed(2)}))`
 }
 
 /** Velo para leer texto encima de una foto a sangre. */
