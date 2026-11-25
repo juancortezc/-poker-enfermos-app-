@@ -1,30 +1,17 @@
 'use client'
 
-import { useState } from 'react'
 import useSWR from 'swr'
 import { CalendarPlus } from 'lucide-react'
 import type { PlayerRanking, TournamentInsightsData } from '@poker/shared'
 import { playedDateNumbers, nightlyPosition, averagePointsPerDate, scoreOf, SCORE_LABELS } from '@poker/shared'
 import { Score, Meter } from './Score'
-import { HomeAvatar } from './HomeAvatar'
+import { HomeTorneoLucha } from './HomeTorneoLucha'
 import { LinkCta } from './LinkCta'
 import { tile, overline, BENTO, SOBRE_COLOR } from './bento'
 import { playerLabel, shortenFullName } from '@poker/shared'
 
 interface DaysWithoutVictoryResponse {
   players: Array<{ id: string; firstName: string; lastName: string; daysWithoutVictory: number; hasNeverWon: boolean }>
-}
-
-interface WinnerPlayer {
-  id: string
-  firstName: string
-  lastName: string
-  photoUrl: string | null
-}
-
-interface TournamentWinnersResponse {
-  success: boolean
-  data?: Array<{ tournamentNumber: number; champion: WinnerPlayer; runnerUp: WinnerPlayer; thirdPlace: WinnerPlayer }>
 }
 
 interface NextDateInfo {
@@ -36,8 +23,11 @@ interface HomeTorneoProps {
   user: { id: string }
   tournamentId: number
   tournamentNumber: number
-  /** Torneo FINALIZADO: podio final y "por anunciar" en vez de cuenta regresiva y calendario. */
+  /** Torneo FINALIZADO: el cinturon pasa a ser del campeon y no hay cuenta regresiva. */
   finished?: boolean
+  /** Numero de la ultima fecha jugada y total de fechas ("FECHA 14 DE 14"). */
+  lastDateNumber?: number
+  totalDates?: number
   rankings: PlayerRanking[]
   nextDate: NextDateInfo | null
   seasonHighlights?: TournamentInsightsData['seasonHighlights']
@@ -82,6 +72,8 @@ export function HomeTorneo({
   tournamentId,
   tournamentNumber,
   finished = false,
+  lastDateNumber,
+  totalDates,
   rankings,
   nextDate,
   seasonHighlights,
@@ -97,22 +89,10 @@ export function HomeTorneo({
 
   const droughtLeader = droughtData?.players.find(p => !p.hasNeverWon)
 
-  // Podio oficial del torneo terminado (el mismo registro que Stats > Torneos)
-  const { data: winnersData } = useSWR<TournamentWinnersResponse>(
-    finished ? '/api/tournaments/winners' : null,
-    { revalidateOnFocus: false }
-  )
-  const finalWinner = winnersData?.data?.find(w => w.tournamentNumber === tournamentNumber)
-
   const myRanking = rankings.find(r => r.playerId === user.id)
   const leaderScore = rankings.length ? scoreOf(rankings[0]) : 0
   const gapToLeader = myRanking ? leaderScore - scoreOf(myRanking) : null
 
-
-  // 7/2: los últimos 2 lugares de la tabla actual (no un dato de tendencia)
-  const bottom2 = rankings.length >= 2
-    ? [...rankings].sort((a, b) => b.position - a.position).slice(0, 2).reverse()
-    : []
 
   const sortedByPosition = [...rankings].sort((a, b) => a.position - b.position)
   const penultimate = sortedByPosition.length >= 2 ? sortedByPosition[sortedByPosition.length - 2] : null
@@ -178,17 +158,6 @@ export function HomeTorneo({
     }
   ].filter((c): c is NonNullable<typeof c> => Boolean(c))
 
-  const podio = sortedByPosition.slice(0, 3)
-
-  // Con el torneo terminado: el podio oficial; si la Comision todavia no lo
-  // cargo, el top 3 de la tabla.
-  const podioFinal = finalWinner
-    ? [finalWinner.champion, finalWinner.runnerUp, finalWinner.thirdPlace].map(p => ({
-        id: p.id, name: playerLabel(p), photoUrl: p.photoUrl
-      }))
-    : podio.map(p => ({ id: p.playerId, name: shortenFullName(p.playerName), photoUrl: p.playerPhoto ?? null }))
-  const [abierto, setAbierto] = useState<string | null>(null)
-
   const CICLO = 14
   const avance = days !== null ? Math.max(0, Math.min(1, 1 - days / CICLO)) : 0
   const R = 30
@@ -201,42 +170,15 @@ export function HomeTorneo({
   return (
     <div style={BENTO}>
 
-      {/* ── TORNEO FINALIZADO — reemplaza la cuenta regresiva ────────── */}
-      {finished && (
-        <section className="cp-rise" style={{ ...tile('oro'), animationDelay: '0ms', gap: 12 }}>
-          <div>
-            <span style={overline('#8A6508')}>temporada cerrada</span>
-            <div className="cp-display" style={{ fontSize: 22, fontWeight: 800, color: tinta, marginTop: 3, lineHeight: 1.1 }}>
-              T{tournamentNumber} finalizado
-            </div>
-          </div>
-
-          {podioFinal.length === 3 && (
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 12 }}>
-              {[1, 0, 2].map(idx => {
-                const p = podioFinal[idx]
-                const metal = ['#8A6508', '#6E6A67', '#8B5E2F'][idx]
-                const primero = idx === 0
-                return (
-                  <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: primero ? 12 : 0, minWidth: 0, flex: 1 }}>
-                    <div style={{ position: 'relative' }}>
-                      <HomeAvatar playerId={p.id} name={p.name} photoUrl={p.photoUrl} size={primero ? 106 : 78} fontSize={primero ? 27 : 20} linkToProfile />
-                      <span className="cp-score" style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 12, minWidth: 21, height: 21, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>{idx + 1}</span>
-                    </div>
-                    <div style={{ fontSize: primero ? 12.5 : 11.5, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>{p.name}</div>
-                    <div style={{ ...overline(metal), fontSize: 9.5 }}>{primero ? 'campeón' : `${idx + 1}º`}</div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid rgba(138,101,8,0.22)' }}>
-            <span style={{ fontSize: 12.5, color: suave }}>Próximo torneo</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#8A6508' }}>Por anunciar</span>
-          </div>
-        </section>
-      )}
+      {/* ── EL CINTURÓN, MANO A MANO, LA TABLA y LOS 7/2 (tema T31) ── */}
+      <HomeTorneoLucha
+        rankings={sortedByPosition}
+        tournamentNumber={tournamentNumber}
+        finished={finished}
+        lastDateNumber={lastDateNumber}
+        totalDates={totalDates}
+        onSeeTabla={onSeeTabla}
+      />
 
       {/* ── TU POSICIÓN — el ancla negra ──────────────────────────── */}
       {myRanking && (
@@ -320,94 +262,6 @@ export function HomeTorneo({
               <CalendarPlus size={16} />
             </button>
             <LinkCta onClick={onOpenCalendarPage} style={{ fontSize: 11, color: 'var(--cp-primary-light)' }}>T{tournamentNumber}</LinkCta>
-          </div>
-        </section>
-      )}
-
-      {/* ── EL PODIO — bloque ancho, en oro (terminado, ya esta arriba) ── */}
-      {!finished && podio.length === 3 && (
-        <section className="cp-rise" style={{ ...tile('oro'), animationDelay: '160ms' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-            <span style={overline('#8A6508')}>el podio</span>
-            <LinkCta onClick={onSeeTabla} style={{ color: '#C62828', fontSize: 11.5 }}>TABLA →</LinkCta>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 12, marginTop: 12 }}>
-            {[podio[1], podio[0], podio[2]].map((p) => {
-              const idx = podio.indexOf(p)
-              const metal = ['#8A6508', '#6E6A67', '#8B5E2F'][idx]
-              const primero = idx === 0
-              const tam = primero ? 106 : 78
-              const activo = abierto === p.playerId
-              return (
-                /* Dos destinos en el mismo podio: la FOTO abre el perfil del
-                   jugador (es la regla: toda foto lleva a su perfil) y el
-                   nombre con el puntaje sigue abriendo la comparacion de aca
-                   abajo. Antes todo era un solo boton; el enlace no puede
-                   anidarse dentro de el, asi que el contenedor pasa a div y
-                   cada parte se queda con el estilo que ya tenia. */
-                <div key={p.playerId}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: primero ? 12 : 0, minWidth: 0 }}>
-                  <div style={{ position: 'relative',
-                    transition: 'transform 200ms ease', transform: activo ? 'translateY(-3px)' : 'none' }}>
-                    <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={tam} fontSize={primero ? 27 : 20} linkToProfile />
-                    <span className="cp-score" style={{ position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)', background: metal, color: '#FFF', fontSize: 12, minWidth: 21, height: 21, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>{idx + 1}</span>
-                  </div>
-                  <button onClick={() => setAbierto(activo ? null : p.playerId)} aria-expanded={activo}
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                    <div style={{ fontSize: primero ? 12.5 : 11.5, fontWeight: 700, color: tinta, textAlign: 'center', lineHeight: 1.2, marginTop: 3 }}>{shortenFullName(p.playerName)}</div>
-                    <div className="cp-score" style={{ fontSize: primero ? 19 : 15, color: metal }}>{scoreOf(p)}</div>
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-
-          {abierto && (() => {
-            const p = podio.find(x => x.playerId === abierto)
-            if (!p) return null
-            const podios = p.firstPlaces + p.secondPlaces + p.thirdPlaces
-            return (
-              <div className="cp-rise" style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(138,101,8,0.22)', display: 'flex' }}>
-                {[
-                  { v: p.firstPlaces, l: 'victorias' },
-                  { v: podios, l: 'podios' },
-                  { v: p.totalPoints, l: 'acum.' },
-                  { v: scoreOf(p) - (myRanking ? scoreOf(myRanking) : 0), l: 'vs vos', signo: true }
-                ].map((m, k) => (
-                  <div key={m.l} style={{ flex: 1, minWidth: 0, paddingLeft: k === 0 ? 0 : 8, borderLeft: k === 0 ? 'none' : '1px solid rgba(138,101,8,0.22)' }}>
-                    <div className="cp-score" style={{ fontSize: 16, color: m.signo ? (m.v > 0 ? '#C2410C' : '#15803D') : tinta }}>
-                      {m.signo && m.v > 0 ? '+' : ''}{m.v}
-                    </div>
-                    <div style={{ fontSize: 10.5, color: '#7A6E69', marginTop: 1 }}>{m.l}</div>
-                  </div>
-                ))}
-              </div>
-            )
-          })()}
-        </section>
-      )}
-
-      {/* ── LOS MALAZOS — el bloque ROSA. No negociable, y ahora ancho ──
-          Compartia la fila con los CALIENTES. Al quedarse solo, los dos 7/2
-          van uno al lado del otro en vez de apilados: asi el rosa llena la
-          fila en lugar de estirarse medio vacio, y en 390px cada mitad
-          todavia tiene espacio para la foto y el nombre con inicial. */}
-      {bottom2.length > 0 && (
-        <section className="cp-rise" style={{ ...tile('rosa'), animationDelay: '220ms', gap: 12 }}>
-          <span style={overline(SOBRE_COLOR.suave)}>malazos 7/2</span>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 12 }}>
-            {bottom2.map((p, k) => (
-              <div key={p.playerId} style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, paddingLeft: k === 0 ? 0 : 12, borderLeft: k === 0 ? 'none' : SOBRE_COLOR.linea }}>
-                <div style={{ flexShrink: 0 }}>
-                  <HomeAvatar playerId={p.playerId} name={p.playerName} photoUrl={p.playerPhoto} size={52} fontSize={18} linkToProfile />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#FFF', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{shortenFullName(p.playerName)}</div>
-                  <div className="cp-score" style={{ fontSize: 16, color: '#FFF' }}>{scoreOf(p)}</div>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
       )}
