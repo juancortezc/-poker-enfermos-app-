@@ -5,7 +5,7 @@
 ### Stack
 - **Frontend**: React, TypeScript, Next.js, TailwindCSS
 - **Backend**: Node.js, Prisma ORM, PostgreSQL
-- **Design**: Noir Jazz Theme (Cinzel/Inter, amber & copper palette)
+- **Design**: Clean Poker (Archivo/Inter, rojo del club `#E53935`; tokens en `packages/design`)
 
 ### Core Commands
 ```bash
@@ -173,19 +173,18 @@ GET    /api/proposals/[id]/comments           # Get comments
 
 ---
 
-## 🎨 Noir Jazz UI System
+## 🎨 Clean Poker Design System
 
-- **Palette**: `#1F1410` background, accents `#E0B66C` (gold) & `#A9441C` (copper), text `#F3E6C5`, muted `#D7C59A`, borders `#3C2219`
-- **Typography**: Cinzel for headings/overlines, Inter for body copy (base 18px, generous letter spacing on labels)
-- **Textures**: `textures/paper.jpg` overlayed with `textures/noise.png` for aged-lounge feel
-- **Components**:
-  - `noir-card` gradient panels with radial highlights & deep shadows
-  - `NoirButton` gradient gold primary, ghost/outline secondaries
-  - `RankCard` podium frames (gold/silver/bronze SVG overlays)
-  - Bottom navigation with PNG icons (`public/icons/nav-*.png`) & Noir buttons
-  - T29 proposals: cards, voting buttons, modal lists restyled to Noir Jazz spec
-- **Assets**: favicon set (`favicon-64/192/512.png`), frame SVGs, watermark JD-5D (optional)
-- **Focus & Motion**: 200–220ms ease transitions, glow pulses for active nav, gold focus rings
+**Fuente única: `packages/design` (`@poker/design`).** Web y app leen de ahí; no se copian valores. `toCssVariables(tone)` genera las variables `--cp-*` con los nombres de la web, y `packages/design/tests/web-parity.test.ts` falla si se separan de `apps/web/src/styles/clean-poker-tokens.css`.
+
+- **Superficies 0–4:** oscuro `#000000` `#2B2120` `#382E2C` `#483E3C` `#584E4C`; claro (`.cp-light`) `#FAF7F2` `#FFFFFF` `#F3EDE4` `#E7DED2` `#CEC2B3`. Papel `#FBF7F2` con tinta `#1D1615` para bloques que celebran.
+- **Texto:** `#F5EFE6` / `#C9BFBA` / `#9A8F8B` sobre oscuro; `#17120F` / `#574C49` / `#786B66` en claro.
+- **Rojo del club `#E53935`:** rellenos, bordes, estados. Como texto no llega a 4.5:1: `primary-light` `#FF6B6B` sobre oscuro, `#C62828` sobre papel.
+- **Roles de color:** info `#5BC8C0` (frío, lo informativo); positivo `#6ECB71`; lo negativo en naranja `#E8863C`, nunca rojo; oro/plata/bronce `#E8C158` `#C9C6C2` `#C08A54` solo podio (sobre papel `#8A6508` `#6E6A67` `#8B5E2F`); rosa `#EC4899` solo malazos y 7/2.
+- **Tipografía:** Archivo 800 para display, títulos, rótulos y cifras (tracking negativo); Inter para el cuerpo. Piso de 12 px.
+- **Forma:** radio 5 px (botones, inputs), 18 en tarjetas claras, 20 en los bloques bento del home (papel, negro, rosa, verde, oro). Elevaciones 1 y 2 por tono.
+- **Tono:** casi toda la app va en claro (`tone="light"`); fecha en vivo, timer, registro y propuestas en oscuro.
+- **Movimiento:** 150/250 ms; entrada escalonada y cifras que cuentan en el home, siempre bajo `prefers-reduced-motion`.
 
 ---
 
@@ -288,79 +287,6 @@ GET    /api/proposals/[id]/comments           # Get comments
 - **Testing**: Automated tests passing
 - **Performance**: Mobile-optimized
 - **Security**: Role-based auth implemented
-
----
-
-## 🎨 PokerNew Design System
-
-### Color Palette
-**Layered Dark Backgrounds:**
-- Primary: `#201c30 → #1b1c2b → #131422` (main layouts)
-- Secondary: `#1b1d2f → #181a2c → #121321` (cards and panels)
-- Accents: Emerald (`#10b981`) and Rose (`#f43f5e`) variants
-
-**Hero CTA Gradient:**
-- `from-poker-red via-[#ff5d8f] to-[#ff9f6a]`
-- Shadow: `0 14px 30px rgba(255,93,143,0.35)`
-- Hover: `0 18px 40px rgba(255,93,143,0.45)`
-
-**Borders:**
-- Standard: `border-white/10` to `border-white/15`
-- Interactive: `border-white/20` with hover `border-white/35`
-- Accent: `border-poker-red/40` for highlights
-
-### Typography
-**Hierarchy:**
-- Titles: `text-xl/2xl font-semibold tracking-tight`
-- Section Labels: `text-xs uppercase tracking-[0.24em]` with accent colors
-- Body Text: `text-sm text-white/70` with `leading-relaxed`
-- Badges: `uppercase tracking-[0.16-0.2em]` for modern look
-
-### Button System
-**Primary CTAs:**
-- `variant="ghost"` with custom gradients
-- `rounded-full` with deep shadows
-- Hover: `hover:-translate-y-0.5` microanimation
-
-**Secondary Actions:**
-- `border border-white/15 text-white/70`
-- Hover: increased contrast and border opacity
-
-**States:**
-- Disabled: `from-neutral-700 to-neutral-700/70` no shadow
-- Loading: Spinner with `border-white/80`
-
-### Card System
-**Structure:**
-- Border: `border-white/12`
-- Background: Gradients with optional `backdrop-blur`
-- Shadow: `0 18px 40px rgba(11,12,32,0.35)`
-- Hover: `hover:-translate-y-1 hover:border-poker-red/60`
-
-**Content Layout:**
-- Minimal padding: `p-5` for content areas
-- Sections: `space-y-4` between elements
-- Headers: Gradient overlay `from-white/8`
-
-### Microanimations
-- Card hover: `hover:-translate-y-1` with shadow enhancement
-- Button hover: `hover:-translate-y-0.5` for CTAs
-- Vote buttons: Same translate effect on interaction
-- Loading states: Standard spinner with brand colors
-
-### State Patterns
-**Loading:**
-- Card with tinted gradient background
-- Spinner: `h-8 w-8 border-b-2 border-poker-red`
-
-**Error:**
-- Rose gradient: `from-rose-500/15 via-[#191a2c] to-[#10111b]`
-- Text: `text-rose-200`
-
-**Empty:**
-- Dark card with accent icon
-- Copy: `text-sm text-white/55`
-- CTA: Hero gradient button
 
 ---
 

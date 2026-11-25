@@ -14,12 +14,18 @@ Al empezar: `git fetch origin && git checkout -b <tu-rama> origin/feat/mobile-ex
 ## App móvil: lo que ya existe
 - Rutas placeholder por área: `(tabs)`, `(jugador)`, `(envivo)`, `(torneo)`, `(admin)`. Cada agente solo reemplaza las pantallas de su área.
 - `src/lib/api.ts` (`apiFetch`, `fetcher`; manda `Authorization: Bearer PIN:<clave>`), `src/lib/swr.tsx` (`swrKeys`, `mutateRelated`), `src/contexts/AuthContext.tsx` (`useAuth()` → `user`, `role`, `can(feature)`).
-- Componentes base: NoirButton, NoirCard, Screen, Header, Typography, estados Loading/Error/Empty/Restricted. Úsalos; no los modifiques. Si necesitas cambiar uno, dilo en tu reporte.
+- Componentes base (`src/components/ui`): CPButton, CPCard, CPHeader, Screen (con `tone` y `appBar`), Header, Typography, estados Loading/Error/Empty/Restricted. Úsalos; no los modifiques. Si necesitas cambiar uno, dilo en tu reporte.
 - Componentes nuevos de tu área van en `apps/mobile/src/components/<tu-area>/`.
 - Referencia de cada pantalla: su equivalente en `apps/web/src/app/<ruta>/page.tsx` y los componentes y hooks que usa. Mismos datos, mismos endpoints, mismas reglas por rol. La lógica pura va a `@poker/shared` si la web y la app la comparten (sin duplicar).
 
 ## Diseño
-Noir Jazz (ver CLAUDE.md): fondo `#1F1410`, oro `#E0B66C`, cobre `#A9441C`, texto `#F3E6C5`, muted `#D7C59A`, bordes `#3C2219`; Cinzel en títulos, Inter en el cuerpo. Mobile-first, áreas táctiles de 44 pt o más, transiciones de 200 ms.
+**Clean Poker**, el mismo diseño que la web en producción. La fuente única de los tokens es `packages/design` (`@poker/design`): colores (oscuro, claro `.cp-light` y papel `.cp-paper`), tipografía, radios, espaciado, elevaciones, movimiento y los bloques del home (`bento`). No copies valores: impórtalos.
+- **Paleta:** superficies 0–4 (`#000`, `#2B2120`, `#382E2C`, `#483E3C`, `#584E4C` en oscuro; `#FAF7F2`, `#FFFFFF`, `#F3EDE4`, `#E7DED2`, `#CEC2B3` en claro). Rojo del club `#E53935` para rellenos y estados; como texto, `primaryLight` (`#FF6B6B` sobre oscuro, `#C62828` sobre papel). Informativo turquesa, positivo verde, lo negativo en naranja (nunca rojo), oro/plata/bronce solo para el podio, rosa solo para los malazos y el 7/2. Hay variantes de texto distintas para oscuro y para papel: respétalas.
+- **Tipografía:** Archivo 800 (`font-display`, `fonts.display`) para títulos, rótulos y cifras; Inter para el cuerpo.
+- **Forma:** radio 5 px en botones e inputs, 18 en tarjetas (`CPCard`), 20 en los bloques del home.
+- **Tono por pantalla, como la web:** casi todo va en claro (`<Screen tone="light">`): Inicio, Tabla, Stats, Más, Podcast, perfil, jugador, fecha, calendario, contactos, multas, info, ayuda, reportes, compartir y Admin. En oscuro: la fecha en vivo, Timer, Registro, Propuestas, la lista de jugadores y los formularios de Comisión.
+- **En código:** clases NativeWind con el nombre de la variable web (`bg-cp-surface-1`, `text-cp-on-surface-muted`, `border-cp-surface-border`, `text-cp-primary-light`); cambian solas con el tono. Para colores por JS, `useCP()` (de `@/theme/tone`) dentro de componentes; en la pantalla que monta `Screen`, `cpLight`/`cp` de `@/theme/colors`.
+- Mobile-first, áreas táctiles de 44 pt o más, movimiento bajo "reducir movimiento" del sistema.
 
 ## Dependencias
 Instala solo con `npx expo install <pkg>` dentro de `apps/mobile`. Prefiere lo que ya está. Lista en tu reporte toda dependencia nueva.
