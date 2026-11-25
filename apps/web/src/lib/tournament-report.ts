@@ -3,6 +3,7 @@ import {
   buildTournamentReport,
   REPORT_SHEETS,
   scoreOf,
+  sieteDosDetail,
   tournamentSieteDos,
   type TournamentReportData,
   type TournamentReportSummaryResponse
@@ -267,7 +268,7 @@ export async function generateTournamentReportWorkbook(
       {
         title: '7/2',
         note: 'Veces entre los 2 primeros en salir de la noche. Desempata quien fue el 2 (primero en salir) más veces.',
-        list: awards.sieteYDos.map(s => ({ ...s, detail: `${s.dosCount} veces 2 · ${s.sieteCount} veces 7` }))
+        list: awards.sieteYDos.map(s => ({ ...s, detail: sieteDosDetail(s) }))
       },
       { title: 'SIN PODIO', note: 'Jugaron y nunca hicieron top 3.', list: awards.sinPodio.map(id => ({ playerId: id, count: 0 })) },
       { title: 'FALTAS', note: 'Fechas a las que no fueron.', list: awards.faltas },

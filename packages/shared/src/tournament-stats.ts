@@ -472,6 +472,11 @@ export function tiebreakReason(a: PlayerRanking, b: PlayerRanking): string {
 }
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** "3 veces 2 · 1 vez 7". */
+export function sieteDosDetail(s: { dosCount: number; sieteCount: number }): string {
+  return `${plural(s.dosCount, 'vez', 'veces')} 2 · ${plural(s.sieteCount, 'vez', 'veces')} 7`;
+}
 const datesLabel = (ds: number[]) => (ds.length === 1 ? `Fecha ${ds[0]}` : `Fechas ${ds.join(', ')}`);
 
 export function buildTournamentReport(input: TSInput): TournamentReportData {
@@ -668,7 +673,7 @@ export function buildTournamentReport(input: TSInput): TournamentReportData {
   if (topPairs.all.length) curiosities.push({ label: 'La rivalidad más repetida', value: plural(topPairs.best, 'eliminación', 'eliminaciones'), detail: topPairs.all.map(p => `${nameOf(p.eliminatorId)} → ${nameOf(p.eliminatedId)}`).join(', ') });
 
   const topSD = maxOf(awards.sieteYDos, s => s.count);
-  if (topSD.all.length) curiosities.push({ label: 'Más veces en el 7/2 de la noche', value: plural(topSD.best, 'vez', 'veces'), detail: topSD.all.map(s => `${nameOf(s.playerId)} (${s.dosCount} veces 2, ${s.sieteCount} veces 7)`).join(', ') });
+  if (topSD.all.length) curiosities.push({ label: 'Más veces en el 7/2 de la noche', value: plural(topSD.best, 'vez', 'veces'), detail: topSD.all.map(s => `${nameOf(s.playerId)} (${sieteDosDetail(s)})`).join(', ') });
 
   return {
     summary,
