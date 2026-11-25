@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
 import { ChevronDown } from 'lucide-react'
+import { CPPlayerCard } from '@/components/clean-poker/CPPlayerCard'
+
+const CHAMPION_CARD_WIDTH = 104
 
 interface Player {
   firstName: string
@@ -310,24 +312,15 @@ export default function CPTorneosTab() {
 
             {/* Champion Section */}
             <div className="flex items-center gap-4">
-              {/* Champion Photo */}
-              <div className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 border-yellow-500/50">
-                {tournament.champion.photoUrl ? (
-                  <Image
-                    src={tournament.champion.photoUrl}
-                    alt={formatPlayerName(tournament.champion)}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div
-                    className="w-full h-full flex items-center justify-center text-3xl"
-                    style={{ background: 'linear-gradient(135deg, #E8C158, #E8C158)' }}
-                  >
-                    🏆
-                  </div>
-                )}
-              </div>
+              {/* Campeon: tarjeta completa del T31 (antes foto de 80x80).
+                  Sin tarjeta cae a la foto 3:4; sin foto, iniciales. */}
+              <CPPlayerCard
+                photoUrl={tournament.champion.photoUrl}
+                name={formatPlayerName(tournament.champion)}
+                width={CHAMPION_CARD_WIDTH}
+                sizes={`${CHAMPION_CARD_WIDTH}px`}
+                zoomable
+              />
 
               {/* Champion Info */}
               <div className="flex-1">

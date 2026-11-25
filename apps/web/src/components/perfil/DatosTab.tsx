@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import Image from 'next/image'
+import { CPPlayerCard } from '@/components/clean-poker/CPPlayerCard'
 import { Phone, Mail, Cake, Eye, EyeOff, Save, Loader2 } from 'lucide-react'
 import { buildAuthHeaders, storePin } from '@/lib/client-auth'
 import { isValidPinForCreation, PIN_RULE_TEXT, PIN_MAX_LENGTH } from '@poker/shared'
@@ -163,7 +163,6 @@ export default function DatosTab() {
     )
   }
 
-  const initials = `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase()
 
   return (
     <div className="space-y-4">
@@ -175,29 +174,17 @@ export default function DatosTab() {
           border: '1px solid var(--cp-surface-border)',
         }}
       >
-        {/* Avatar */}
-        <div
-          className="relative w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, #E53935, #E8863C)',
-          }}
-        >
-          {profile.photoUrl ? (
-            <Image
-              src={profile.photoUrl}
-              alt={`${profile.firstName} ${profile.lastName}`}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <span
-              className="flex h-full w-full items-center justify-center text-xl font-bold"
-              style={{ color: 'white' }}
-            >
-              {initials || '??'}
-            </span>
-          )}
-        </div>
+        {/* Tu tarjeta del T31 (antes, circulo de 80 px). Toca para verla en
+            grande. Sin tarjeta, la foto 3:4; sin foto, tus iniciales. */}
+        <CPPlayerCard
+          photoUrl={profile.photoUrl}
+          role={profile.role}
+          name={`${profile.firstName} ${profile.lastName}`}
+          width="min(180px, 50vw)"
+          sizes="min(180px, 50vw)"
+          zoomable
+          style={{ margin: '0 auto 14px' }}
+        />
 
         {/* Name */}
         <h2
