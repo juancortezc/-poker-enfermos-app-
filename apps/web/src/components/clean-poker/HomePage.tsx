@@ -8,7 +8,6 @@ import { useTournamentRanking } from '@/hooks/useTournamentRanking'
 import { useTournamentInsights } from '@/hooks/useTournamentInsights'
 import useSWR from 'swr'
 import Image from 'next/image'
-import {  } from 'lucide-react'
 
 import { CPHeader } from './CPHeader'
 import { CPBottomNav } from './CPBottomNav'
@@ -130,6 +129,7 @@ export function HomePage() {
       tournamentNumber={activeTournament?.number ?? 29}
       tournamentId={activeTournament?.id || 0}
       finished={isFinished}
+      totalDates={progress?.total}
       rankings={rankings}
       lastCompletedDate={lastCompletedDate}
       nextDate={nextGameDateFromTournament ?? null}
@@ -369,6 +369,7 @@ interface HomeAuthenticatedProps {
   tournamentNumber: number
   tournamentId: number
   finished: boolean
+  totalDates?: number
   rankings: PlayerRanking[]
   lastCompletedDate: { id: number; dateNumber: number; scheduledDate: string | null } | null
   nextDate: { dateNumber: number; scheduledDate: string | null } | null
@@ -382,6 +383,7 @@ function HomeAuthenticated({
   tournamentNumber,
   tournamentId,
   finished,
+  totalDates,
   rankings,
   lastCompletedDate,
   nextDate,
@@ -432,14 +434,10 @@ function HomeAuthenticated({
 
         {view === 'ultimaFecha' && lastCompletedDate ? (
           <HomeUltimaFecha
-            user={user}
-            tournamentNumber={tournamentNumber}
             rankings={rankings}
             lastCompletedDate={lastCompletedDate}
-            onOpenProfile={() => router.push(`/players/${user.id}`)}
             onSeeAllResults={() => router.push('/fecha')}
             onSeeResultsTab={() => router.push('/fecha?tab=eliminaciones')}
-            onSeeTabla={() => router.push('/ranking')}
           />
         ) : (
           <HomeTorneo
@@ -447,6 +445,8 @@ function HomeAuthenticated({
             tournamentId={tournamentId}
             tournamentNumber={tournamentNumber}
             finished={finished}
+            lastDateNumber={lastCompletedDate?.dateNumber}
+            totalDates={totalDates}
             rankings={rankings}
             nextDate={nextDate}
             seasonHighlights={insights?.seasonHighlights}
