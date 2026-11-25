@@ -312,8 +312,8 @@ export default function PlayerDetailScreen() {
 
 function DateBadge({ n }: { n: number }) {
   return (
-    <View className="w-10 items-center">
-      <Text className="font-inter text-[10px] uppercase tracking-[1px] text-cp-on-surface-muted">Fecha</Text>
+    <View className="w-12 items-center">
+      <Text numberOfLines={1} className="font-inter text-[10px] uppercase tracking-[0.5px] text-cp-on-surface-muted">Fecha</Text>
       <Score value={n} size={16} />
     </View>
   );
