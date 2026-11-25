@@ -53,6 +53,8 @@ type Props = {
   cardOnly?: boolean;
   /** Borde de color (medalla). Sin él, la tarjeta no lleva borde. */
   ringColor?: string;
+  /** Grosor del borde (2 por defecto). */
+  ringWidth?: number;
   /** Sombra con la elevación del tono (por defecto 2; 0 sin sombra). */
   elevate?: 0 | 1 | 2;
   /** Tocar abre el visor a pantalla completa. */
@@ -95,6 +97,7 @@ export function PlayerCard({
   displayWidth,
   cardOnly = true,
   ringColor,
+  ringWidth = 2,
   elevate = 2,
   zoomable = false,
   onPress,
@@ -125,7 +128,7 @@ export function PlayerCard({
           borderRadius: CARD_RADIUS,
           overflow: 'hidden',
           backgroundColor: c.surface2,
-          borderWidth: ringColor ? 2 : 0,
+          borderWidth: ringColor ? ringWidth : 0,
           borderColor: ringColor,
           alignItems: 'center',
           justifyContent: 'center',

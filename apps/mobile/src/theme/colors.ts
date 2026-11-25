@@ -20,6 +20,8 @@ export { bento };
 export const fonts = {
   display: 'Archivo_800ExtraBold',
   displayBlack: 'Archivo_900Black',
+  /** Titulares de lucha libre del Inicio (T31). */
+  displayBlackItalic: 'Archivo_900Black_Italic',
   displayBold: 'Archivo_700Bold',
   body: 'Inter_400Regular',
   bodyMedium: 'Inter_500Medium',

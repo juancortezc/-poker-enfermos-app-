@@ -75,7 +75,7 @@ export function CelebrationsCard() {
           </View>
           {birthdays.map((p) => (
             <View key={p.id} className="flex-row items-center gap-3">
-              <PlayerAvatar name={`${p.firstName} ${p.lastName}`} photoUrl={p.photoUrl} size={44} playerId={p.id} linkToProfile />
+              <PlayerAvatar name={`${p.firstName} ${p.lastName}`} photoUrl={p.photoUrl} size={56} playerId={p.id} linkToProfile />
               <View className="flex-1">
                 <Body className="text-base">
                   {p.firstName} {p.lastName}
@@ -107,7 +107,7 @@ export function CelebrationsCard() {
           </View>
           {droughts.map((p) => (
             <View key={p.id} className="flex-row items-center gap-3">
-              <PlayerAvatar name={`${p.firstName} ${p.lastName}`} photoUrl={p.photoUrl} size={44} playerId={p.id} linkToProfile />
+              <PlayerAvatar name={`${p.firstName} ${p.lastName}`} photoUrl={p.photoUrl} size={56} playerId={p.id} linkToProfile />
               <View className="flex-1">
                 <Body className="text-base">
                   {p.firstName} {p.lastName}
