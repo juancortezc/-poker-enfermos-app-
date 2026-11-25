@@ -51,3 +51,16 @@ export function fullName(player: { firstName: string; lastName?: string | null }
 
 /** Foto unica de todos los invitados externos (el pato del torneo vigente). */
 export const GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/t31/perfil/pato-1.webp'
+
+/**
+ * Tarjeta completa (con marco y apodo) del torneo vigente, a partir de la foto
+ * de perfil: `t31/perfil/<apodo>.webp` -> `t31/tarjetas/<apodo>.webp`. Los
+ * invitados llevan la del pato. null si la foto no es de una temporada con
+ * tarjetas (entonces se muestra la foto normal).
+ */
+export function playerCardUrl(photoUrl?: string | null, role?: string | null): string | null {
+  const src = role === 'Invitado' ? GUEST_PHOTO_URL : photoUrl
+  if (!src) return null
+  const m = src.match(/^(https:\/\/storage\.googleapis\.com\/poker-enfermos\/t\d+)\/perfil\/([^/]+\.webp)$/)
+  return m ? `${m[1]}/tarjetas/${m[2]}` : null
+}
