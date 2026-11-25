@@ -12,7 +12,7 @@ import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
-import { HomeAvatar } from '@/components/clean-poker/HomeAvatar'
+import { CPPlayerPhoto } from '@/components/clean-poker/CPPlayerPhoto'
 import { LinkCta } from '@/components/clean-poker/LinkCta'
 import { swrKeys } from '@/lib/swr-config'
 
@@ -209,7 +209,7 @@ function FechaPageInner() {
                       <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 900, color: acentoTexto ?? 'var(--cp-on-surface-variant)' }}>
                         #{e.position}
                       </div>
-                      <HomeAvatar playerId={e.eliminatedPlayer.id} name={e.eliminatedPlayer.firstName} photoUrl={e.eliminatedPlayer.photoUrl} size={32} fontSize={12} />
+                      <CPPlayerPhoto src={e.eliminatedPlayer.photoUrl} name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`} size={44} />
                       <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: 'var(--cp-on-surface)' }}>
                         {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName}
                       </div>
@@ -230,7 +230,7 @@ function FechaPageInner() {
                   <HomeCard key={e.id}>
                     <div style={{ padding: 10, display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ width: 22, textAlign: 'center', fontSize: 13, fontWeight: 800, color: 'var(--cp-on-surface-variant)' }}>#{e.position}</div>
-                      <HomeAvatar playerId={e.eliminatedPlayer.id} name={e.eliminatedPlayer.firstName} photoUrl={e.eliminatedPlayer.photoUrl} size={30} fontSize={11} />
+                      <CPPlayerPhoto src={e.eliminatedPlayer.photoUrl} name={`${e.eliminatedPlayer.firstName} ${e.eliminatedPlayer.lastName}`} size={42} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--cp-on-surface)' }}>
                           {e.eliminatedPlayer.firstName} {e.eliminatedPlayer.lastName}

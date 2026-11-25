@@ -15,7 +15,8 @@ import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
 import { CPAppShell } from '@/components/clean-poker/CPAppShell'
 import { CPPageSkeleton } from '@/components/clean-poker/CPPageSkeleton'
 import { HomeCard } from '@/components/clean-poker/HomeCard'
-import { HomeAvatar } from '@/components/clean-poker/HomeAvatar'
+import { CPPlayerCard } from '@/components/clean-poker/CPPlayerCard'
+import { CPPlayerPhoto } from '@/components/clean-poker/CPPlayerPhoto'
 import { PlayerEvolutionChart } from '@/components/clean-poker/PlayerEvolutionChart'
 import { playerLabel, fullName } from '@poker/shared'
 
@@ -55,6 +56,8 @@ interface DatesGameDate {
   eliminations: EliminationDTO[]
 }
 
+/** Ancho maximo de la tarjeta del T31 en el perfil (antes, foto de 84 px). */
+const PROFILE_CARD_WIDTH = 220
 const CREAM_BG = '#F3E6D0'
 const CREAM_TEXT = '#2A1F14'
 const CREAM_MUTED = 'var(--cp-on-surface-variant)'
@@ -204,33 +207,18 @@ export default function PlayerProfilePage() {
 
         {/* HERO */}
         <div style={{ background: CREAM_BG, borderRadius: 18, padding: 18 }}>
+          {/* La tarjeta del T31 entera, arriba. NO enlaza (ya estas en este
+              perfil): al tocarla se abre en grande. */}
+          <CPPlayerCard
+            photoUrl={player.photoUrl}
+            name={fullName(player)}
+            width={`min(${PROFILE_CARD_WIDTH}px, 62vw)`}
+            sizes={`min(${PROFILE_CARD_WIDTH}px, 62vw)`}
+            priority
+            zoomable
+            style={{ margin: '0 auto 16px' }}
+          />
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            {/* Esta foto NO enlaza: es el jugador de esta misma pantalla, y un
-                enlace a la pagina en la que ya estas solo roba el toque. */}
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <HomeAvatar playerId={player.id} name={`${player.firstName} ${player.lastName}`} photoUrl={player.photoUrl} size={84} fontSize={28} />
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: -6,
-                  left: -6,
-                  minWidth: 26,
-                  height: 26,
-                  padding: '0 6px',
-                  borderRadius: 8,
-                  background: 'var(--cp-primary-light)',
-                  color: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 12,
-                  fontWeight: 900,
-                  border: `2px solid ${CREAM_BG}`
-                }}
-              >
-                #{currentStats.position}
-              </div>
-            </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 19, fontWeight: 900, color: CREAM_TEXT, lineHeight: 1.15 }}>
                 {player.firstName} {player.lastName}
@@ -303,7 +291,7 @@ export default function PlayerProfilePage() {
                 .map(({ player, tag }) => (
                   <HomeCard key={player.playerId}>
                     <div style={{ padding: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <HomeAvatar playerId={player.playerId} name={player.playerName} photoUrl={player.playerPhoto} size={44} fontSize={15} linkToProfile />
+                      <CPPlayerPhoto src={player.playerPhoto} name={player.playerName} size={56} href={`/players/${player.playerId}`} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--cp-on-surface-variant)', letterSpacing: '0.06em', background: 'var(--cp-surface-2)', padding: '2px 5px', borderRadius: 4 }}>
@@ -405,7 +393,7 @@ export default function PlayerProfilePage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {winner && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <HomeAvatar playerId={winner.eliminatedPlayer.id} name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={26} fontSize={10} linkToProfile />
+                            <CPPlayerPhoto src={winner.eliminatedPlayer.photoUrl} name={fullName(winner.eliminatedPlayer)} size={36} href={`/players/${winner.eliminatedPlayer.id}`} />
                             <div style={{ fontSize: 13, color: 'var(--cp-on-surface-variant)' }}>
                               Ganó <span style={{ color: 'var(--cp-on-surface)', fontWeight: 700 }}>{playerLabel(winner.eliminatedPlayer)}</span>
                             </div>

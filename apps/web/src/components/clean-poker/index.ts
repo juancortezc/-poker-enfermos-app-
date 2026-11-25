@@ -12,6 +12,11 @@ export { NextDateCard } from './NextDateCard'
 export { LiveDateBoard } from './LiveDateBoard'
 export { LeaderCard } from './LeaderCard'
 
+// Fotos de jugador
+export { CPPlayerPhoto } from './CPPlayerPhoto'
+export { CPPlayerCard } from './CPPlayerCard'
+export { CPPhotoViewer } from './CPPhotoViewer'
+
 // Pages
 export { HomePage } from './HomePage'
 

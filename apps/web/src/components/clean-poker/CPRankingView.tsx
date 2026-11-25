@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Download } from 'lucide-react'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
@@ -17,6 +16,8 @@ import {
 import type { PlayerRanking } from '@poker/shared'
 import { downloadCsv } from '@/lib/csv'
 import { tile, SOBRE_COLOR } from './bento'
+import { CPPlayerCard } from './CPPlayerCard'
+import { CPPlayerPhoto } from './CPPlayerPhoto'
 import { shortenFullName } from '@poker/shared'
 
 interface CPRankingViewProps {
@@ -77,20 +78,16 @@ function medalBadgeStyle(position: number) {
   return { background: '#382E2C', color: '#F5EFE6' }
 }
 
-function CircleAvatar({ photoUrl, name, size = 26 }: { photoUrl?: string; name: string; size?: number }) {
-  const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#333' }}>
-      {photoUrl ? (
-        <Image src={photoUrl} alt={name} width={size} height={size} className="object-cover w-full h-full" unoptimized />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center" style={{ fontSize: size * 0.35, fontWeight: 800, color: '#fff' }}>
-          {initials}
-        </div>
-      )}
-    </div>
-  )
-}
+/**
+ * Tamanos de foto (plan "Protagonistas", x1.4 sobre lo anterior):
+ * lider 112 px de ancho en tarjeta 2:3 (antes, franja recortada de fondo);
+ * #2/#3 56x75 en 3:4 (antes circulo de 40); filas 36 px en Resumen y 30 en
+ * las vistas con mas columnas (antes 26 / 22).
+ */
+const LEADER_CARD_WIDTH = 112
+const PODIUM_PHOTO_WIDTH = 56
+const ROW_PHOTO = 36
+const ROW_PHOTO_DENSE = 30
 
 export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }: CPRankingViewProps) {
   const router = useRouter()
@@ -270,33 +267,39 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
               minHeight: 118
             }}
           >
-            {leader.playerPhoto && (
-              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '38%' }}>
-                <Image src={leader.playerPhoto} alt={leader.playerName} fill className="object-cover object-top" unoptimized />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, #17120F 0%, rgba(23,18,15,0.55) 34%, transparent 70%)' }} />
-              </div>
-            )}
-            <div style={{ position: 'relative', zIndex: 1, maxWidth: leader.playerPhoto ? '62%' : '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: 13 }}>👑</span>
-                <span style={{ fontSize: 12, fontWeight: 800, color: GOLD, letterSpacing: '0.1em' }}>LÍDER DEL TORNEO</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-                <span className="cp-score" style={{ fontSize: 30, color: '#FFF' }}>#1</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: '#FFF' }}>{shortenFullName(leader.playerName)}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                <span className="cp-score" style={{ fontSize: 22, color: GOLD }}>{scoreOf(leader)}</span>
-                <span style={{ fontSize: 12, color: SOBRE_COLOR.tenue }}>{SCORE_LABELS.points}</span>
+            {/* La tarjeta del T31 es la protagonista: entera, sin degradado
+                encima. El bloque entero lleva al perfil, asi que la tarjeta
+                aqui no se amplia (el visor vive en el perfil). */}
+            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+              <CPPlayerCard
+                photoUrl={leader.playerPhoto}
+                name={leader.playerName}
+                width={LEADER_CARD_WIDTH}
+                sizes={`${LEADER_CARD_WIDTH}px`}
+                priority
+              />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 13 }}>👑</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: GOLD, letterSpacing: '0.1em' }}>LÍDER DEL TORNEO</span>
+                </div>
+                <div className="cp-score" style={{ fontSize: 30, color: '#FFF', marginTop: 6, lineHeight: 1 }}>#1</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#FFF', marginTop: 4, lineHeight: 1.2 }}>
+                  {shortenFullName(leader.playerName)}
+                </div>
+                {leader.playerAlias && (
+                  <div style={{ fontSize: 13, color: GOLD, fontStyle: 'italic', marginTop: 2 }}>&ldquo;{leader.playerAlias}&rdquo;</div>
+                )}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 8 }}>
+                  <span className="cp-score" style={{ fontSize: 26, color: GOLD }}>{scoreOf(leader)}</span>
+                  <span style={{ fontSize: 12, color: SOBRE_COLOR.tenue }}>{SCORE_LABELS.points}</span>
+                </div>
                 {delta !== 0 && (
-                  <span style={{ fontSize: 12, fontWeight: 800, color: delta > 0 ? GREEN_ON_DARK : ORANGE_ON_DARK, marginLeft: 4 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: delta > 0 ? GREEN_ON_DARK : ORANGE_ON_DARK, marginTop: 2 }}>
                     {delta > 0 ? `+${delta} ▲` : `${delta} ▼`} <span style={{ fontWeight: 500, color: SOBRE_COLOR.tenue }}>posiciones vs fecha anterior</span>
-                  </span>
+                  </div>
                 )}
               </div>
-              {leader.playerAlias && (
-                <div style={{ fontSize: 13, color: GOLD, fontStyle: 'italic', marginTop: 6 }}>&ldquo;{leader.playerAlias}&rdquo;</div>
-              )}
             </div>
             <div
               style={{
@@ -341,20 +344,20 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
                   ...tile('papel', 1),
                   borderRadius: 16,
                   border: `1px solid ${medal}`,
-                  padding: 12,
+                  padding: 10,
                   flexDirection: 'row',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10
                 }}
               >
-                <CircleAvatar photoUrl={player.playerPhoto} name={player.playerName} size={40} />
+                <CPPlayerPhoto src={player.playerPhoto} name={player.playerName} size={PODIUM_PHOTO_WIDTH} aspect="portrait" />
                 <div style={{ minWidth: 0 }}>
                   <div className="cp-score" style={{ fontSize: 13, color: medalTexto }}>#{player.position}</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--cp-on-surface)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {shortenFullName(player.playerName)}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', columnGap: 4 }}>
                     <span className="cp-score" style={{ fontSize: 15, color: 'var(--cp-on-surface)' }}>{scoreOf(player)}</span>
                     <span style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)' }}>{SCORE_LABELS.pointsShort}</span>
                     {delta !== 0 && (
@@ -494,7 +497,12 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
 
                     <td style={{ ...tdStyle, background: rowBg, textAlign: 'left' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: textColor }}>
-                        <CircleAvatar photoUrl={player.playerPhoto} name={player.playerName} size={view === 'resumen' ? 26 : 22} />
+                        <CPPlayerPhoto
+                          src={player.playerPhoto}
+                          name={player.playerName}
+                          size={view === 'resumen' ? ROW_PHOTO : ROW_PHOTO_DENSE}
+                          radius={6}
+                        />
                         <span style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'inherit' }}>
                           {view === 'resumen' ? player.playerName : shortenFullName(player.playerName)}
                           {isCurrentUser && ' (Tú)'}

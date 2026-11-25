@@ -146,14 +146,14 @@ function Premio({ etiqueta, jugador }: { etiqueta: string; jugador: Jugador | nu
       <span className="font-bold flex-shrink-0" style={{ fontSize: 12, color: PALETA_ROSA.pastillaTexto }}>
         {etiqueta}
       </span>
-      <div className="relative w-7 h-7 flex-shrink-0 overflow-hidden rounded-full border border-black/10">
+      <div className="relative w-10 h-10 flex-shrink-0 overflow-hidden rounded-full border border-black/10">
         {jugador.photoUrl ? (
-          <Image src={jugador.photoUrl} alt={jugador.firstName} fill sizes="28px" className="object-cover" />
+          <Image src={jugador.photoUrl} alt={jugador.firstName} fill sizes="40px" className="object-cover object-top" />
         ) : (
           // El rosa claro de la paleta: sobre el va texto blanco, no es texto.
           <div
             className="flex h-full w-full items-center justify-center font-semibold"
-            style={{ background: PALETA_ROSA.metales[2], color: 'white', fontSize: 10 }}
+            style={{ background: PALETA_ROSA.metales[2], color: 'white', fontSize: 13 }}
           >
             {jugador.firstName.charAt(0)}
             {jugador.lastName.charAt(0)}

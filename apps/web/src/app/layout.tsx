@@ -28,7 +28,12 @@ const inter = Inter({
  */
 const archivo = Archivo({
   subsets: ['latin'],
-  weight: ['600', '700', '800', '900'],
+  // Variable con el eje de ancho: los titulos del Inicio del T31 (cartel de
+  // lucha libre) van condensados e italicos con `font-stretch`. Cubre los
+  // mismos pesos 600-900 que antes.
+  weight: 'variable',
+  style: ['normal', 'italic'],
+  axes: ['wdth'],
   variable: '--font-display',
   display: 'swap'
 })

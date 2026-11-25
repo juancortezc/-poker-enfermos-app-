@@ -224,14 +224,14 @@ function Club1000Hero({ player, milestoneDate, matchingGameDate }: {
 
         <div style={{ flexShrink: 0, textAlign: 'center' }}>
           <div style={{
-            width: 62, height: 62, borderRadius: '50%', overflow: 'hidden',
+            width: 84, height: 84, borderRadius: '50%', overflow: 'hidden',
             border: `2px solid ${acento}`,
           }}>
             {player.photoUrl ? (
-              <Image src={player.photoUrl} alt={player.firstName} width={62} height={62} className="object-cover w-full h-full" unoptimized />
+              <Image src={player.photoUrl} alt={player.firstName} width={84} height={84} className="object-cover object-top w-full h-full" />
             ) : (
               <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                <span className="cp-score" style={{ fontSize: 17, color: acento }}>
+                <span className="cp-score" style={{ fontSize: 22, color: acento }}>
                   {player.firstName[0]}{player.lastName[0]}
                 </span>
               </div>
@@ -292,21 +292,20 @@ function PlayerRow({ player, rank, milestoneDate, matchingGameDate }: {
         </span>
 
         <div style={{
-          width: 38, height: 38, flexShrink: 0, borderRadius: '50%', overflow: 'hidden',
+          width: 52, height: 52, flexShrink: 0, borderRadius: '50%', overflow: 'hidden',
           border: `2px solid ${tier.color}`,
         }}>
           {player.photoUrl ? (
             <Image
               src={player.photoUrl}
               alt={`${player.firstName} ${player.lastName}`}
-              width={38} height={38}
-              className="object-cover w-full h-full"
+              width={52} height={52}
+              className="object-cover object-top w-full h-full"
               loading="lazy"
-              unoptimized
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center" style={{ background: 'var(--cp-surface-2)' }}>
-              <span className="cp-score" style={{ fontSize: 12, color: tier.color }}>
+              <span className="cp-score" style={{ fontSize: 15, color: tier.color }}>
                 {player.firstName[0]}{player.lastName[0]}
               </span>
             </div>

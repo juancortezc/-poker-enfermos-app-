@@ -5,24 +5,20 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useActiveTournament } from '@/hooks/useActiveTournament'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
-import { useTournamentInsights } from '@/hooks/useTournamentInsights'
 import useSWR from 'swr'
 import Image from 'next/image'
-import {  } from 'lucide-react'
 
 import { CPHeader } from './CPHeader'
 import { CPBottomNav } from './CPBottomNav'
 import { CPAppShell } from './CPAppShell'
 import { CPPageSkeleton } from './CPPageSkeleton'
 import { LiveDateBoard } from './LiveDateBoard'
-import { CelebrationsCard } from './CelebrationsCard'
 import { PushActivationBanner } from './PushActivationBanner'
 import { ClaveDebilBanner } from './ClaveDebilBanner'
 import { HomeViewToggle, type HomeView } from './HomeViewToggle'
 import { HomeUltimaFecha } from './HomeUltimaFecha'
-import { HomeTorneo } from './HomeTorneo'
-import { openAddToCalendar } from '@/lib/home-view'
-import type { PlayerRanking, TournamentInsightsData } from '@poker/shared'
+import { HomeTorneoLucha } from './HomeTorneoLucha'
+import type { PlayerRanking } from '@poker/shared'
 import { isValidPinForLogin } from '@poker/shared'
 
 // Logo URL
@@ -60,8 +56,6 @@ export function HomePage() {
   } = useTournamentRanking(activeTournament?.id || null, {
     refreshInterval: 300000 // 5 minutes
   })
-
-  const { insights } = useTournamentInsights(activeTournament?.id || null)
 
   // Fetch active game date
   const { data: activeGameDate } = useSWR<ActiveGameDate | null>(
@@ -128,12 +122,11 @@ export function HomePage() {
       user={user}
       isCommission={isCommission}
       tournamentNumber={activeTournament?.number ?? 29}
-      tournamentId={activeTournament?.id || 0}
+      rankingLoading={rankingLoading}
       finished={isFinished}
+      totalDates={progress?.total}
       rankings={rankings}
       lastCompletedDate={lastCompletedDate}
-      nextDate={nextGameDateFromTournament ?? null}
-      insights={insights}
       hasActiveDate={!!activeGameDate}
     />
   )
@@ -367,12 +360,11 @@ interface HomeAuthenticatedProps {
   }
   isCommission: boolean
   tournamentNumber: number
-  tournamentId: number
+  rankingLoading: boolean
   finished: boolean
+  totalDates?: number
   rankings: PlayerRanking[]
   lastCompletedDate: { id: number; dateNumber: number; scheduledDate: string | null } | null
-  nextDate: { dateNumber: number; scheduledDate: string | null } | null
-  insights?: TournamentInsightsData
   hasActiveDate: boolean
 }
 
@@ -380,12 +372,11 @@ function HomeAuthenticated({
   user,
   isCommission,
   tournamentNumber,
-  tournamentId,
+  rankingLoading,
   finished,
+  totalDates,
   rankings,
   lastCompletedDate,
-  nextDate,
-  insights,
   hasActiveDate,
 }: HomeAuthenticatedProps) {
   const router = useRouter()
@@ -419,9 +410,6 @@ function HomeAuthenticated({
 
       {/* Content */}
       <main className="pb-24 px-5 pt-5 space-y-5">
-        {/* Celebrations - Birthdays (first position, dismissible) */}
-        <CelebrationsCard />
-
         {/* Aviso de clave vieja - solo si la suya no cumple la regla actual */}
         <ClaveDebilBanner />
 
@@ -432,27 +420,19 @@ function HomeAuthenticated({
 
         {view === 'ultimaFecha' && lastCompletedDate ? (
           <HomeUltimaFecha
-            user={user}
-            tournamentNumber={tournamentNumber}
             rankings={rankings}
             lastCompletedDate={lastCompletedDate}
-            onOpenProfile={() => router.push(`/players/${user.id}`)}
             onSeeAllResults={() => router.push('/fecha')}
             onSeeResultsTab={() => router.push('/fecha?tab=eliminaciones')}
-            onSeeTabla={() => router.push('/ranking')}
           />
         ) : (
-          <HomeTorneo
-            user={user}
-            tournamentId={tournamentId}
+          <HomeTorneoLucha
+            rankings={[...rankings].sort((a, b) => a.position - b.position)}
             tournamentNumber={tournamentNumber}
             finished={finished}
-            rankings={rankings}
-            nextDate={nextDate}
-            seasonHighlights={insights?.seasonHighlights}
-            onOpenProfile={() => router.push(`/players/${user.id}`)}
-            onOpenCalendarPage={() => router.push('/calendario')}
-            onAddToPersonalCalendar={() => openAddToCalendar(nextDate?.dateNumber, nextDate?.scheduledDate)}
+            lastDateNumber={lastCompletedDate?.dateNumber}
+            totalDates={totalDates}
+            loading={rankingLoading}
             onSeeTabla={() => router.push('/ranking')}
           />
         )}
