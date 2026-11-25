@@ -36,8 +36,9 @@ const withPWA = withPWAInit({
 const monorepoRoot = path.join(__dirname, "..", "..");
 
 const nextConfig: NextConfig = {
-  // Logica pura compartida con la app movil. Se publica como fuente TS.
-  transpilePackages: ["@poker/shared"],
+  // Logica pura y tokens de diseno compartidos con la app movil. Se publican
+  // como fuente TS.
+  transpilePackages: ["@poker/shared", "@poker/design"],
   outputFileTracingRoot: monorepoRoot,
   // Next 16 arranca en Turbopack por defecto. El plugin de PWA inyecta un
   // config de `webpack`, y ver uno sin config de turbopack es un error duro:
