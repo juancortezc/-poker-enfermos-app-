@@ -8,15 +8,23 @@
  * en pantalla): se ve al instante mientras baja la grande. Con "reducir
  * movimiento" el visor aparece y se va sin animación.
  */
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { motion } from '@poker/design';
-import { Image } from 'expo-image';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Modal, PanResponder, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useReducedMotion } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { motion } from "@poker/design";
+import { Image } from "expo-image";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Animated,
+  Modal,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { alpha, cp } from '@/theme/colors';
+import { alpha, cp } from "@/theme/colors";
 
 type Props = {
   visible: boolean;
@@ -33,7 +41,14 @@ type Props = {
 const DISMISS_DISTANCE = 90;
 const DISMISS_VELOCITY = 1.2;
 
-export function PhotoViewer({ visible, uri, placeholderUri, aspect = 2 / 3, label, onClose }: Props) {
+export function PhotoViewer({
+  visible,
+  uri,
+  placeholderUri,
+  aspect = 2 / 3,
+  label,
+  onClose,
+}: Props) {
   const reduce = useReducedMotion();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
@@ -49,52 +64,76 @@ export function PhotoViewer({ visible, uri, placeholderUri, aspect = 2 / 3, labe
   const imgW = Math.min(maxW, maxH * aspect);
   const imgH = imgW / aspect;
 
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  const [pan] = useState(() =>
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dy) > 8 && Math.abs(g.dy) > Math.abs(g.dx),
-      onPanResponderMove: (_e, g) => dy.setValue(g.dy),
-      onPanResponderRelease: (_e, g) => {
-        if (Math.abs(g.dy) > DISMISS_DISTANCE || Math.abs(g.vy) > DISMISS_VELOCITY) {
-          onCloseRef.current();
-        } else {
-          Animated.timing(dy, { toValue: 0, duration: motion.fast, useNativeDriver: true }).start();
-        }
-      },
-      onPanResponderTerminate: () => dy.setValue(0),
-    }),
+  const pan = useMemo(
+    () =>
+      PanResponder.create({
+        onMoveShouldSetPanResponder: (_e, g) =>
+          Math.abs(g.dy) > 8 && Math.abs(g.dy) > Math.abs(g.dx),
+        onPanResponderMove: (_e, g) => dy.setValue(g.dy),
+        onPanResponderRelease: (_e, g) => {
+          if (
+            Math.abs(g.dy) > DISMISS_DISTANCE ||
+            Math.abs(g.vy) > DISMISS_VELOCITY
+          ) {
+            onClose();
+          } else {
+            Animated.timing(dy, {
+              toValue: 0,
+              duration: motion.fast,
+              useNativeDriver: true,
+            }).start();
+          }
+        },
+        onPanResponderTerminate: () => dy.setValue(0),
+      }),
+    [dy, onClose],
   );
 
-  const fade = dy.interpolate({ inputRange: [-300, 0, 300], outputRange: [0.4, 1, 0.4], extrapolate: 'clamp' });
+  const fade = dy.interpolate({
+    inputRange: [-300, 0, 300],
+    outputRange: [0.4, 1, 0.4],
+    extrapolate: "clamp",
+  });
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType={reduce ? 'none' : 'fade'}
+      animationType={reduce ? "none" : "fade"}
       statusBarTranslucent
       navigationBarTranslucent
-      supportedOrientations={['portrait', 'landscape']}
-      onRequestClose={onClose}>
-      <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: cp.surface0, opacity: fade }]} />
+      supportedOrientations={["portrait", "landscape"]}
+      onRequestClose={onClose}
+    >
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: cp.surface0, opacity: fade },
+        ]}
+      />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Cerrar"
         accessibilityHint="Toca o desliza para cerrar"
         onPress={onClose}
         style={StyleSheet.absoluteFill}
-        {...pan.panHandlers}>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Animated.View style={{ width: imgW, height: imgH, transform: [{ translateY: dy }] }}>
+        {...pan.panHandlers}
+      >
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Animated.View
+            style={{
+              width: imgW,
+              height: imgH,
+              transform: [{ translateY: dy }],
+            }}
+          >
             <Image
               source={{ uri }}
               placeholder={placeholderUri ? { uri: placeholderUri } : undefined}
               placeholderContentFit="contain"
-              style={{ width: '100%', height: '100%' }}
+              style={{ width: "100%", height: "100%" }}
               contentFit="contain"
               transition={reduce ? 0 : motion.normal}
               accessibilityLabel={label}
@@ -109,17 +148,18 @@ export function PhotoViewer({ visible, uri, placeholderUri, aspect = 2 / 3, labe
         onPress={onClose}
         hitSlop={8}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: insets.top + 8,
           right: 12,
           width: 44,
           height: 44,
           borderRadius: 22,
-          alignItems: 'center',
-          justifyContent: 'center',
+          alignItems: "center",
+          justifyContent: "center",
           backgroundColor: alpha(cp.surface2, 0.7),
         }}
-        className="active:opacity-70">
+        className="active:opacity-70"
+      >
         <Ionicons name="close" size={24} color={cp.onSurface} />
       </Pressable>
     </Modal>

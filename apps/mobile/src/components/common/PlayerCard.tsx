@@ -21,7 +21,7 @@
  * <PlayerCard name={name} photoUrl={url} cardOnly={false} width={64} />  // foto 3:4 sin marco
  * ```
  */
-import { elevation, radius } from '@poker/design';
+import { elevation } from '@poker/design';
 import { playerCardUrl } from '@poker/shared';
 import { Image } from 'expo-image';
 import { useState } from 'react';
