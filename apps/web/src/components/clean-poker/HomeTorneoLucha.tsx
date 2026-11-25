@@ -5,7 +5,7 @@ import useSWR from 'swr'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Crown } from 'lucide-react'
-import type { PlayerRanking } from '@poker/shared'
+import { tournamentSieteDos, type PlayerRanking } from '@poker/shared'
 import {
   leaderPhrase,
   nightlyPosition,
@@ -87,7 +87,9 @@ export function HomeTorneoLucha({ rankings, tournamentNumber, finished, lastDate
 
   const [leader, second] = rankings
   const contendientes = rankings.slice(1, 5)
-  const sieteDos = rankings.length >= 6 ? rankings.slice(-2) : []
+  // El 7 (penultimo) y el 2 (ultimo) de la tabla: misma regla que el reporte.
+  const ultimos = tournamentSieteDos(rankings)
+  const sieteDos = ultimos ? [ultimos.siete, ultimos.dos] : []
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28, minWidth: 0 }}>

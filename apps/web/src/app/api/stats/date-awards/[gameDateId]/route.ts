@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { PLAYER_PUBLIC_SELECT } from '@/lib/player-select'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseParams } from '@/lib/http'
-import { gameDateIdParamsSchema } from '@poker/shared'
+import { gameDateIdParamsSchema, nightSieteDos } from '@poker/shared'
 
 export const GET = withErrorHandler(async (
   _request: NextRequest,
@@ -30,8 +30,6 @@ export const GET = withErrorHandler(async (
   if (!gameDate) {
     throw AppError.notFound('Fecha no encontrada')
   }
-
-  const totalParticipants = gameDate.playerIds.length
 
   // 1. Varón de la Noche (most eliminations)
   // Exclude position 1 (winner) since the winner doesn't eliminate anyone
@@ -111,10 +109,10 @@ export const GET = withErrorHandler(async (
     mesaFinalPlayers.find(p => p.id === e.eliminatedPlayerId)!
   )
 
-  // 4. 7/2 (first 2 eliminated)
-  const lastTwoPositions = gameDate.eliminations
-    .filter(e => e.position >= totalParticipants - 1)
-    .sort((a, b) => b.position - a.position)
+  // 4. 7/2 de la noche: los dos primeros en salir, el 2 (primero) y luego el 7.
+  // Misma regla que el reporte y los premios (@poker/shared).
+  const { dos, siete } = nightSieteDos(gameDate.eliminations)
+  const lastTwoPositions = [dos, siete].filter((e): e is NonNullable<typeof e> => e !== null)
 
   const sieteYDosPlayerIds = lastTwoPositions.map(e => e.eliminatedPlayerId)
   const sieteYDosPlayers = await prisma.player.findMany({

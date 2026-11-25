@@ -24,7 +24,7 @@ type AwardsResponse = {
     varon: { player: AwardPlayer; eliminations: number }[];
     gay: { player: AwardPlayer; eliminations: number }[];
     podios: { player: AwardPlayer; count: number }[];
-    sieteYDos: { player: AwardPlayer; count: number }[];
+    sieteYDos: { player: AwardPlayer; count: number; sieteCount?: number; dosCount?: number }[];
     sinPodio: AwardPlayer[];
     faltas: { player: AwardPlayer; count: number }[];
     mesasFinales: { player: AwardPlayer; count: number }[];
@@ -121,7 +121,7 @@ export function PremiosTab() {
           />
           <AwardCard
             title="7/2"
-            description="Más veces último de la fecha"
+            description="Más veces entre los 2 primeros en salir de la noche"
             icon="skull-outline"
             accent={c.malazoText}
             players={a.sieteYDos.map((s) => ({ player: s.player, value: s.count }))}

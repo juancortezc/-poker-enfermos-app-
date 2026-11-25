@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { aggregateEliminationPairs, PARENT_CHILD_MIN } from '@poker/shared'
 
 /**
  * Actualiza las estadísticas padre-hijo cuando se crea una nueva eliminación
@@ -155,39 +156,12 @@ export async function recalculateAllStats(tournamentId: number) {
       }
     })
 
-    // Filtrar eliminaciones válidas
-    const validEliminations = eliminations.filter(elim => 
-      registeredPlayerIds.includes(elim.eliminatedPlayerId) &&
-      registeredPlayerIds.includes(elim.eliminatorPlayerId)
+    // Quien elimino a quien entre inscritos que no son invitados. La regla
+    // vive en @poker/shared y el reporte de Excel la usa igual.
+    const pairs = aggregateEliminationPairs(
+      eliminations.map(e => ({ ...e, date: e.gameDate.scheduledDate })),
+      new Set(registeredPlayerIds)
     )
-
-    // Agrupar por eliminador → eliminado
-    const statsMap = new Map<string, {
-      eliminatorId: string
-      eliminatedId: string
-      count: number
-      firstElimination: Date
-      lastElimination: Date
-    }>()
-
-    for (const elimination of validEliminations) {
-      const key = `${elimination.eliminatorPlayerId}-${elimination.eliminatedPlayerId}`
-      const date = elimination.gameDate.scheduledDate
-
-      if (statsMap.has(key)) {
-        const existing = statsMap.get(key)!
-        existing.count += 1
-        existing.lastElimination = date
-      } else {
-        statsMap.set(key, {
-          eliminatorId: elimination.eliminatorPlayerId,
-          eliminatedId: elimination.eliminatedPlayerId,
-          count: 1,
-          firstElimination: date,
-          lastElimination: date
-        })
-      }
-    }
 
     // Limpiar estadísticas existentes
     await prisma.parentChildStats.deleteMany({
@@ -195,14 +169,14 @@ export async function recalculateAllStats(tournamentId: number) {
     })
 
     // Crear nuevas estadísticas
-    const newStats = Array.from(statsMap.values()).map(stat => ({
+    const newStats = pairs.map(stat => ({
       tournamentId,
       parentPlayerId: stat.eliminatorId,
       childPlayerId: stat.eliminatedId,
       eliminationCount: stat.count,
-      isActiveRelation: stat.count >= 3,
-      firstElimination: stat.firstElimination,
-      lastElimination: stat.lastElimination
+      isActiveRelation: stat.count >= PARENT_CHILD_MIN,
+      firstElimination: stat.first,
+      lastElimination: stat.last
     }))
 
     if (newStats.length > 0) {

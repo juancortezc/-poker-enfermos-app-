@@ -26,7 +26,7 @@ interface AwardsResponse {
     varon: { player: AwardPlayer; eliminations: number }[]
     gay: { player: AwardPlayer; eliminations: number }[]
     podios: { player: AwardPlayer; count: number }[]
-    sieteYDos: { player: AwardPlayer; count: number }[]
+    sieteYDos: { player: AwardPlayer; count: number; sieteCount?: number; dosCount?: number }[]
     sinPodio: AwardPlayer[]
     faltas: { player: AwardPlayer; count: number }[]
     mesasFinales: { player: AwardPlayer; count: number }[]
@@ -279,10 +279,10 @@ export default function CPPremiacionTab({ tournamentId }: CPPremiacionTabProps) 
 
       {awards && activeSubTab === 'stats' && (
         <div className="space-y-3">
-          {/* Ultimos */}
+          {/* 7/2 de la noche: los dos primeros en salir */}
           <CPAwardCard
-            title="Ultimos"
-            description="Ultimo lugar"
+            title="7/2"
+            description="Más veces entre los 2 primeros en salir de la noche"
             icon={<Target size={20} />}
             accentColor="#EC4899"
             players={awards.sieteYDos.map(s => ({ player: s.player, value: s.count }))}
