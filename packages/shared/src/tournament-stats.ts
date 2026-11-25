@@ -102,6 +102,8 @@ export interface NightResult {
   /** Puesto de cada jugador esa noche (1 = ganador). */
   positions: Map<string, number>;
   points: Map<string, number>;
+  /** Quien saco a cada uno (sin el ganador). */
+  eliminatorOf: Map<string, string>;
   winnerId: string | null;
   secondId: string | null;
   thirdId: string | null;
@@ -119,9 +121,11 @@ export interface NightResult {
 export function nightResult(date: TSGameDate, registered: ReadonlySet<string>): NightResult {
   const positions = new Map<string, number>();
   const points = new Map<string, number>();
+  const eliminatorOf = new Map<string, string>();
   date.eliminations.forEach(e => {
     positions.set(e.eliminatedPlayerId, e.position);
     points.set(e.eliminatedPlayerId, e.points);
+    if (e.position !== 1) eliminatorOf.set(e.eliminatedPlayerId, e.eliminatorPlayerId);
   });
   const remaining = date.playerIds.filter(id => !positions.has(id));
   if (!date.eliminations.some(e => e.position === 1) && remaining.length === 1) {
@@ -153,6 +157,7 @@ export function nightResult(date: TSGameDate, registered: ReadonlySet<string>): 
     absentIds: [...registered].filter(id => !present.has(id)),
     positions,
     points,
+    eliminatorOf,
     winnerId: at(1),
     secondId: at(2),
     thirdId: at(3),
@@ -633,33 +638,37 @@ export function buildTournamentReport(input: TSInput): TournamentReportData {
     if (who.length) curiosities.push({ label: 'Lideró más fechas', value: who.join(', '), detail: `${plural(most, 'fecha', 'fechas')} de ${nights.length} como líder` });
   }
 
-  const rise = players.filter(p => p.biggestRise).sort((a, b) => b.biggestRise!.positions - a.biggestRise!.positions)[0];
-  if (rise) curiosities.push({ label: 'Mayor subida en una fecha', value: rise.name, detail: `+${rise.biggestRise!.positions} puestos en la Fecha ${rise.biggestRise!.dateNumber}` });
-  const drop = players.filter(p => p.biggestDrop).sort((a, b) => b.biggestDrop!.positions - a.biggestDrop!.positions)[0];
-  if (drop) curiosities.push({ label: 'Mayor caída en una fecha', value: drop.name, detail: `-${drop.biggestDrop!.positions} puestos en la Fecha ${drop.biggestDrop!.dateNumber}` });
+  // En los records se listan todos los empatados, no solo el primero.
+  const maxOf = <T>(xs: T[], val: (x: T) => number) => {
+    if (xs.length === 0) return { best: 0, all: [] as T[] };
+    const best = Math.max(...xs.map(val));
+    return { best, all: xs.filter(x => val(x) === best) };
+  };
 
-  let bestNight: { id: string; pts: number; date: number; players: number } | null = null;
-  nights.forEach(n => n.points.forEach((pts, id) => { if (!bestNight || pts > bestNight.pts) bestNight = { id, pts, date: n.dateNumber, players: n.players }; }));
-  if (bestNight) {
-    const b = bestNight as { id: string; pts: number; date: number; players: number };
-    curiosities.push({ label: 'Más puntos en una noche', value: nameOf(b.id), detail: `${b.pts} puntos en la Fecha ${b.date} (${b.players} jugadores)` });
-  }
-  let varonNight: { ids: string[]; count: number; date: number } | null = null;
-  nights.forEach(n => { if (n.varonCount > 0 && (!varonNight || n.varonCount > varonNight.count)) varonNight = { ids: n.varonIds, count: n.varonCount, date: n.dateNumber }; });
-  if (varonNight) {
-    const v = varonNight as { ids: string[]; count: number; date: number };
-    curiosities.push({ label: 'Más eliminaciones en una sola noche', value: v.ids.map(nameOf).join(', '), detail: `${v.count} en la Fecha ${v.date}` });
-  }
+  const rises = maxOf(players.filter(p => p.biggestRise), p => p.biggestRise!.positions);
+  if (rises.all.length) curiosities.push({ label: 'Mayor subida en una fecha', value: `+${rises.best} puestos`, detail: rises.all.map(p => `${p.name} (Fecha ${p.biggestRise!.dateNumber})`).join(', ') });
+  const drops = maxOf(players.filter(p => p.biggestDrop), p => p.biggestDrop!.positions);
+  if (drops.all.length) curiosities.push({ label: 'Mayor caída en una fecha', value: `-${drops.best} puestos`, detail: drops.all.map(p => `${p.name} (Fecha ${p.biggestDrop!.dateNumber})`).join(', ') });
+
+  const nightScores = nights.flatMap(n => [...n.points].map(([id, pts]) => ({ id, pts, date: n.dateNumber, players: n.players })));
+  const bestNights = maxOf(nightScores, x => x.pts);
+  if (bestNights.all.length) curiosities.push({ label: 'Más puntos en una noche', value: plural(bestNights.best, 'punto', 'puntos'), detail: bestNights.all.map(x => `${nameOf(x.id)} (Fecha ${x.date}, ${x.players} jugadores)`).join(', ') });
+
+  const varonNights = maxOf(nights.filter(n => n.varonCount > 0), n => n.varonCount);
+  if (varonNights.all.length) curiosities.push({ label: 'Más eliminaciones en una sola noche', value: plural(varonNights.best, 'eliminación', 'eliminaciones'), detail: varonNights.all.map(n => `${n.varonIds.map(nameOf).join(', ')} (Fecha ${n.dateNumber})`).join(', ') });
+
   const multiWinners = players.filter(p => p.wins >= 2).map(p => `${p.name} (${p.wins})`);
   curiosities.push({ label: 'Ganadores distintos', value: `${winners.length} en ${nights.length} fechas`, detail: multiWinners.length ? `Repitieron: ${multiWinners.join(', ')}` : 'Nadie repitió' });
   const guestWins = nights.filter(n => n.winnerId && !registered.has(n.winnerId));
   if (guestWins.length) curiosities.push({ label: 'Fechas ganadas por invitados', value: String(guestWins.length), detail: guestWins.map(n => `F${n.dateNumber} ${nameOf(n.winnerId)}`).join(', ') });
   const perfect = players.filter(p => p.absences === 0 && nights.length > 0).map(p => p.name);
   curiosities.push({ label: 'Asistencia perfecta', value: perfect.length ? plural(perfect.length, 'jugador', 'jugadores') : 'Nadie', detail: perfect.join(', ') || undefined });
-  const topPair = pairs[0];
-  if (topPair) curiosities.push({ label: 'La rivalidad más repetida', value: `${nameOf(topPair.eliminatorId)} → ${nameOf(topPair.eliminatedId)}`, detail: `${plural(topPair.count, 'eliminación', 'eliminaciones')}` });
-  const topSD = awards.sieteYDos[0];
-  if (topSD) curiosities.push({ label: 'Más veces en el 7/2 de la noche', value: nameOf(topSD.playerId), detail: `${topSD.count} (${topSD.dosCount} veces 2, ${topSD.sieteCount} veces 7)` });
+
+  const topPairs = maxOf(pairs, p => p.count);
+  if (topPairs.all.length) curiosities.push({ label: 'La rivalidad más repetida', value: plural(topPairs.best, 'eliminación', 'eliminaciones'), detail: topPairs.all.map(p => `${nameOf(p.eliminatorId)} → ${nameOf(p.eliminatedId)}`).join(', ') });
+
+  const topSD = maxOf(awards.sieteYDos, s => s.count);
+  if (topSD.all.length) curiosities.push({ label: 'Más veces en el 7/2 de la noche', value: plural(topSD.best, 'vez', 'veces'), detail: topSD.all.map(s => `${nameOf(s.playerId)} (${s.dosCount} veces 2, ${s.sieteCount} veces 7)`).join(', ') });
 
   return {
     summary,
