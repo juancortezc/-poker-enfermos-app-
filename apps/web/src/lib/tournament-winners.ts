@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
+import { tournamentSieteDos } from '@poker/shared'
 import { FALLBACK_TOURNAMENT_WINNERS } from './fallback-tournament-winners'
 
 type WinnerPlayer = {
@@ -176,13 +177,20 @@ export async function generateTournamentWinners(prisma: PrismaClient, tournament
       throw new Error(`Cannot generate winners: Tournament ${tournament.number} has insufficient players (${rankings.length}, minimum 7 required)`)
     }
 
-    // Extract winner positions based on final ranking
+    // Podio y 7/2 de la tabla final. El 7 es el PENULTIMO y el 2 el ULTIMO
+    // (tournamentSieteDos, la misma regla del Inicio y del reporte). Antes el
+    // 7 se tomaba de rankings[6], el septimo puesto: asi quedo mal guardado el
+    // 7 del T30 (ver scripts/fix-tournament-winners-siete.ts).
+    const ultimos = tournamentSieteDos(rankings)
+    if (!ultimos) {
+      throw new Error(`Cannot generate winners: Tournament ${tournament.number} has too few players for the 7/2`)
+    }
     const champions = {
       champion: rankings[0],         // 1st place
       runnerUp: rankings[1],         // 2nd place
       thirdPlace: rankings[2],       // 3rd place
-      siete: rankings[6],            // 7th place
-      dos: rankings[rankings.length - 1]  // Last place
+      siete: ultimos.siete,          // penultimo
+      dos: ultimos.dos               // ultimo
     }
 
     // Create TournamentWinners record

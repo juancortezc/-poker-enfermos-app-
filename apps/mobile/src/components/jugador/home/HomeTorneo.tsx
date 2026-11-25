@@ -21,6 +21,7 @@ import {
   SCORE_LABELS,
   scoreOf,
   shortenFullName,
+  tournamentSieteDos,
   type PlayerRanking,
 } from '@poker/shared';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -64,7 +65,9 @@ export function HomeTorneo({ tournamentNumber, finished = false, rankings, lastD
   const sorted = [...rankings].sort((a, b) => a.position - b.position);
   const [leader, second] = sorted;
   const contenders = sorted.slice(1, 5);
-  const bottom2 = sorted.length >= 4 ? sorted.slice(-2) : [];
+  // El 7 (penúltimo) y el 2 (último) de la tabla: misma regla que la web y el reporte.
+  const ultimos = tournamentSieteDos(sorted);
+  const bottom2 = ultimos ? [ultimos.siete, ultimos.dos] : [];
 
   let n = 0;
 
