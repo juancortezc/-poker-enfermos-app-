@@ -50,7 +50,7 @@ export function AwardCard({ title, description, icon, accent, players, valueLabe
           key={item.player.id}
           className={`flex-row items-center gap-3 px-4 py-2.5 ${i < shown.length - 1 ? 'border-b border-cp-surface-border' : ''}`}>
           <Text className="w-5 text-center font-inter text-xs text-cp-on-surface-muted">{i + 1}</Text>
-          <PlayerAvatar {...avatarProps(item.player)} size={32} ringColor={i === 0 ? accent : undefined} />
+          <PlayerAvatar {...avatarProps(item.player)} size={44} ringColor={i === 0 ? accent : undefined} />
           <Text numberOfLines={1} className="flex-1 font-inter text-base text-cp-on-surface">
             {item.player.firstName} {item.player.lastName}
           </Text>
