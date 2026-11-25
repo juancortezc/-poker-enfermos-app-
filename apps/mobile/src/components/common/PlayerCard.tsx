@@ -173,3 +173,17 @@ export function PlayerCard({
   }
   return frame;
 }
+
+/**
+ * La tarjeta como encabezado de una pantalla (ficha, perfil): centrada, casi a
+ * lo ancho (82%, tope 360) y con visor al tocarla.
+ */
+export function PlayerHeroCard({ name, photoUrl, role }: { name: string; photoUrl?: string | null; role?: string | null }) {
+  return (
+    <View className="items-center">
+      <View style={{ width: '82%', maxWidth: 360 }}>
+        <PlayerCard name={name} photoUrl={photoUrl} role={role} displayWidth={300} zoomable />
+      </View>
+    </View>
+  );
+}

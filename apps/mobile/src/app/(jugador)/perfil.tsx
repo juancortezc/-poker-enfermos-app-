@@ -14,7 +14,7 @@ import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, Switch, Text, TextInput, View, type TextInputProps } from 'react-native';
 
-import { PlayerAvatar } from '@/components/common/PlayerAvatar';
+import { PlayerHeroCard } from '@/components/common/PlayerCard';
 import { CPButton } from '@/components/ui/CPButton';
 import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
@@ -72,20 +72,22 @@ function PerfilContent() {
 
 function ProfileHero({ profile }: { profile: Profile }) {
   return (
-    <CPCard className="items-center gap-2">
-      <PlayerAvatar name={fullName(profile)} photoUrl={profile.photoUrl} size={88} />
-      <Title className="text-center text-xl">{fullName(profile)}</Title>
-      {profile.aliases?.[0] ? <Text className="font-inter text-sm italic text-cp-primary-light">“{profile.aliases[0]}”</Text> : null}
-      {profile.role === 'Comision' ? (
-        <Text className="overflow-hidden rounded bg-cp-primary/30 px-3 py-1 font-inter-semibold text-xs text-cp-on-surface">Comisión</Text>
-      ) : null}
-      <Pressable
-        accessibilityRole="link"
-        onPress={() => router.push({ pathname: '/players/[id]', params: { id: profile.id } })}
-        className="min-h-[44px] justify-center active:opacity-60">
-        <Text className="font-inter-bold text-xs uppercase tracking-[0.6px] text-cp-primary-light">Ver mi torneo →</Text>
-      </Pressable>
-    </CPCard>
+    <>
+      <PlayerHeroCard name={fullName(profile)} photoUrl={profile.photoUrl} role={profile.role} />
+      <CPCard className="items-center gap-2">
+        <Title className="text-center text-xl">{fullName(profile)}</Title>
+        {profile.aliases?.[0] ? <Text className="font-inter text-sm italic text-cp-primary-light">“{profile.aliases[0]}”</Text> : null}
+        {profile.role === 'Comision' ? (
+          <Text className="overflow-hidden rounded bg-cp-primary/30 px-3 py-1 font-inter-semibold text-xs text-cp-on-surface">Comisión</Text>
+        ) : null}
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => router.push({ pathname: '/players/[id]', params: { id: profile.id } })}
+          className="min-h-[44px] justify-center active:opacity-60">
+          <Text className="font-inter-bold text-xs uppercase tracking-[0.6px] text-cp-primary-light">Ver mi torneo →</Text>
+        </Pressable>
+      </CPCard>
+    </>
   );
 }
 
