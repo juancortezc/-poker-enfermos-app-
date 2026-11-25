@@ -6,14 +6,14 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import logo from '@/assets/icons/favicon-512.png';
-import { NoirButton } from '@/components/ui/NoirButton';
+import logo from '@/assets/icons/logo.png';
+import { CPButton } from '@/components/ui/CPButton';
 import { Screen } from '@/components/ui/Screen';
-import { Muted, Title } from '@/components/ui/Typography';
+import { Muted } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
-import { noir } from '@/theme/colors';
+import { cp, fonts } from '@/theme/colors';
 
 export default function UnlockScreen() {
   const { user, unlock, switchToPin, biometric } = useAuth();
@@ -41,8 +41,10 @@ export default function UnlockScreen() {
   return (
     <Screen edges={['top', 'bottom']} contentClassName="flex-grow justify-center gap-8">
       <View className="items-center gap-3">
-        <Image source={logo} style={{ width: 120, height: 120 }} contentFit="contain" alt="Poker Enfermos" />
-        <Title className="text-center">{user ? `Hola, ${user.firstName}` : 'Poker Enfermos'}</Title>
+        <Image source={logo} style={{ width: 140, height: 140, borderRadius: 70 }} contentFit="contain" alt="Poker Enfermos" />
+        <Text className="text-center text-cp-on-surface" style={{ fontFamily: fonts.display, fontSize: 24, letterSpacing: 1.2 }}>
+          {user ? `HOLA, ${user.firstName.toUpperCase()}` : 'POKER ENFERMOS'}
+        </Text>
         <Muted className="text-center">
           {failed ? `No se pudo verificar con ${biometric.label}.` : `Desbloqueá con ${biometric.label}.`}
         </Muted>
@@ -52,13 +54,13 @@ export default function UnlockScreen() {
         <Ionicons
           name={biometric.kind === 'faceid' ? 'scan-outline' : 'finger-print-outline'}
           size={72}
-          color={noir.gold}
+          color={cp.onSurfaceMuted}
         />
       </View>
 
       <View className="gap-3">
-        <NoirButton title={`Usar ${biometric.label}`} size="lg" onPress={tryUnlock} loading={busy} />
-        <NoirButton title="Usar clave" variant="ghost" onPress={switchToPin} disabled={busy} />
+        <CPButton title={`Usar ${biometric.label}`} size="lg" onPress={tryUnlock} loading={busy} />
+        <CPButton title="Usar clave" variant="ghost" onPress={switchToPin} disabled={busy} />
       </View>
     </Screen>
   );

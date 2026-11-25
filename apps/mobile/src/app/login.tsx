@@ -1,20 +1,23 @@
 /**
- * Login con clave. Equivale a src/components/LoginForm.tsx de la web, con un
+ * Login con clave. Equivale a la entrada sin sesión de la web (HomePage >
+ * HomeNotAuthenticated, Clean Poker oscuro): logo grande, "POKER ENFERMOS",
+ * campo de clave espaciado y el botón rojo LOGIN (gris hasta que la clave es
+ * válida). La app suma un
  * teclado numérico grande (y "ABC" para claves con letras). Tras el primer
  * login, si el teléfono tiene Face ID/huella, se ofrece activarla.
  */
 import { Image } from 'expo-image';
 import { useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 
-import logo from '@/assets/icons/favicon-512.png';
+import logo from '@/assets/icons/logo.png';
 import { PinPad } from '@/components/auth/PinPad';
-import { NoirButton } from '@/components/ui/NoirButton';
+import { CPButton } from '@/components/ui/CPButton';
 import { Screen } from '@/components/ui/Screen';
-import { Muted, Title } from '@/components/ui/Typography';
+import { Muted } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
 import { isValidPinForLogin, PIN_MAX_LENGTH } from '@poker/shared';
-import { fonts, noir } from '@/theme/colors';
+import { cp, fonts } from '@/theme/colors';
 
 export default function LoginScreen() {
   const { login, notice, clearNotice, shouldOfferBiometric, setBiometricEnabled, markBiometricOffered, biometric } =
@@ -63,16 +66,22 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
       <Screen edges={['top', 'bottom']} contentClassName="flex-grow justify-center gap-6 pt-8">
-        <View className="items-center gap-3">
-          <Image source={logo} style={{ width: 128, height: 128 }} contentFit="contain" alt="Poker Enfermos" />
-          <Title className="text-center text-3xl">Poker Enfermos</Title>
-          <Muted className="text-center">Ingresá tu clave de acceso para continuar</Muted>
+        <View className="items-center">
+          <Image source={logo} style={{ width: 140, height: 140, borderRadius: 70 }} contentFit="contain" alt="Poker Enfermos" />
+          <Text
+            className="mt-4 text-center text-cp-on-surface"
+            style={{ fontFamily: fonts.display, fontSize: 24, letterSpacing: 1.2 }}>
+            POKER ENFERMOS
+          </Text>
+          <Muted className="mt-1 text-center text-cp-on-surface-variant">Ingresá tu clave de acceso para continuar</Muted>
         </View>
 
         {/* Clave enmascarada: un punto por carácter */}
         <Pressable
           onPress={() => letters && inputRef.current?.focus()}
-          className="min-h-[56px] flex-row items-center justify-center gap-3 rounded-2xl border border-noir-border bg-noir-surface px-4">
+          className={`min-h-[52px] flex-row items-center justify-center gap-3 rounded-[12px] border bg-cp-surface-1 px-4 ${
+            error ? 'border-cp-primary' : 'border-cp-surface-border'
+          }`}>
           {letters ? (
             <TextInput
               ref={inputRef}
@@ -87,28 +96,30 @@ export default function LoginScreen() {
               spellCheck={false}
               maxLength={PIN_MAX_LENGTH}
               placeholder="Ingresá tu clave"
-              placeholderTextColor={noir.muted}
+              placeholderTextColor={cp.onSurfaceVariant}
               returnKeyType="go"
               editable={!loading}
-              style={{ flex: 1, color: noir.text, fontFamily: fonts.body, fontSize: 20, textAlign: 'center' }}
+              style={{ flex: 1, color: cp.onSurface, fontFamily: fonts.body, fontSize: 18, letterSpacing: 5, textAlign: 'center' }}
             />
           ) : pin.length === 0 ? (
-            <Muted>Tu clave</Muted>
+            <Muted className="text-cp-on-surface-variant">Ingresá tu clave</Muted>
           ) : (
             Array.from({ length: pin.length }).map((_, i) => (
-              <View key={i} className="h-3.5 w-3.5 rounded-full bg-noir-gold" />
+              <View key={i} className="h-3 w-3 rounded-full bg-cp-on-surface" />
             ))
           )}
         </Pressable>
 
         {notice || error ? (
-          <View className="rounded-xl border border-noir-copper/60 bg-noir-copper/15 p-3">
-            <Muted className="text-center text-noir-text">{error || notice}</Muted>
-          </View>
+          <Text
+            className="text-center"
+            style={{ fontFamily: fonts.body, fontSize: 13, color: error ? cp.primaryLight : cp.warning }}>
+            {error || notice}
+          </Text>
         ) : null}
 
         {letters ? (
-          <NoirButton title="Teclado numérico" variant="ghost" onPress={() => setLetters(false)} />
+          <CPButton title="Teclado numérico" variant="ghost" onPress={() => setLetters(false)} />
         ) : (
           <PinPad
             disabled={loading}
@@ -118,7 +129,21 @@ export default function LoginScreen() {
           />
         )}
 
-        <NoirButton title="Ingresar" size="lg" onPress={submit} disabled={!valid} loading={loading} />
+        {/* El LOGIN de la web: rojo con la clave válida, gris mientras tanto. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Ingresar"
+          accessibilityState={{ disabled: !valid || loading, busy: loading }}
+          disabled={!valid || loading}
+          onPress={submit}
+          className="min-h-[56px] items-center justify-center rounded-[12px] active:opacity-80"
+          style={{ backgroundColor: valid ? cp.primary : '#444444', opacity: loading || !valid ? 0.5 : 1 }}>
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 18, letterSpacing: 0.5, color: '#FFFFFF' }}>LOGIN</Text>
+          )}
+        </Pressable>
       </Screen>
     </KeyboardAvoidingView>
   );
