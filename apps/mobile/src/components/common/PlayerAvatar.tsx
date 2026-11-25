@@ -52,10 +52,22 @@ export function avatarProps(player: AvatarPlayer) {
   };
 }
 
-export function photoUri(photoUrl?: string | null, role?: string | null): string | null {
-  if (role === 'Invitado') return GUEST_PHOTO_URL;
-  if (!photoUrl) return null;
-  return apiUrl(photoUrl);
+// Anchos que acepta el optimizador de Next (imageSizes + deviceSizes por defecto).
+const NEXT_WIDTHS = [64, 96, 128, 256, 384, 640, 750, 828, 1080];
+const OPTIMIZABLE = /^https:\/\/storage\.googleapis\.com\/poker-enfermos(-media)?\//;
+
+/**
+ * Las fotos originales pesan ~3 MB (1086x1448). Las del bucket del club pasan
+ * por el optimizador de imagenes de la web (/_next/image, mismos remotePatterns
+ * que next.config) al ancho que se muestra x3: ~25 KB en vez de 3 MB.
+ */
+export function photoUri(photoUrl?: string | null, role?: string | null, displayWidth = 128): string | null {
+  const raw = role === 'Invitado' ? GUEST_PHOTO_URL : photoUrl;
+  if (!raw) return null;
+  const url = apiUrl(raw);
+  if (!OPTIMIZABLE.test(url)) return url;
+  const w = NEXT_WIDTHS.find((n) => n >= displayWidth * 3) ?? NEXT_WIDTHS[NEXT_WIDTHS.length - 1];
+  return apiUrl(`/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=75`);
 }
 
 /** Primera letra del primer y del último nombre ("Juan Antonio Cortez" → "JC"). */
@@ -80,7 +92,7 @@ export function PlayerAvatar({
 }: Props) {
   const c = useCP();
   const [failed, setFailed] = useState<string | null>(null);
-  const candidate = photoUri(photoUrl, role);
+  const candidate = photoUri(photoUrl, role, size);
   // Si la foto no carga, quedan las iniciales (antes quedaba un cuadro vacio).
   const uri = candidate && failed !== candidate ? candidate : null;
   const content = (

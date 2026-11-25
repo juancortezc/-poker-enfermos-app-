@@ -112,7 +112,7 @@ export function HomeUltimaFecha({
   ].filter((x): x is NonNullable<typeof x> => Boolean(x));
 
   const winnerName = winner ? `${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}` : '';
-  const winnerPhoto = winner ? photoUri(photoOf(winner.eliminatedPlayer)) : null;
+  const winnerPhoto = winner ? photoUri(photoOf(winner.eliminatedPlayer), null, 240) : null;
   let n = 0;
 
   return (
