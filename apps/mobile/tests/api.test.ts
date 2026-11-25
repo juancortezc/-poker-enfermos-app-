@@ -95,3 +95,71 @@ test('un 401 de la clave anterior no saca al usuario que entró después', async
   await assert.rejects(pending);
   assert.equal(calls, 0);
 });
+
+test('formato nuevo { success, data }: devuelve data', async () => {
+  respondWith(200, '{"success":true,"data":[1,2]}');
+  assert.deepEqual(await apiFetch('/api/x'), [1, 2]);
+  respondWith(200, '{"success":true,"data":null}');
+  assert.equal(await apiFetch('/api/x'), null);
+});
+
+test('formato viejo pasa tal cual (incluido el sobre que ya traían algunas rutas)', async () => {
+  respondWith(200, '{"tournament":{"id":3}}');
+  assert.deepEqual(await apiFetch('/api/x'), { tournament: { id: 3 } });
+  respondWith(200, '{"success":true,"data":{"all":[]},"total":0}');
+  assert.deepEqual(await apiFetch('/api/x'), { all: [] });
+  respondWith(200, '{"success":true}');
+  assert.deepEqual(await apiFetch('/api/x'), { success: true });
+});
+
+test('error formato nuevo: message, code, errorId, errors y details', async () => {
+  respondWith(
+    409,
+    JSON.stringify({
+      success: false,
+      error: {
+        code: 'POSITION_ALREADY_TAKEN',
+        message: 'La posición ya está registrada',
+        errors: [{ field: 'position', message: 'ocupada' }],
+        details: { hint: 'revisá la lista' },
+        errorId: 'abc',
+        timestamp: '2026-11-25T00:00:00.000Z',
+        path: '/api/eliminations',
+      },
+    })
+  );
+  await assert.rejects(apiFetch('/api/x'), (e: unknown) => {
+    assert.ok(e instanceof ApiError);
+    assert.equal(e.status, 409);
+    assert.equal(e.message, 'La posición ya está registrada');
+    assert.equal(e.code, 'POSITION_ALREADY_TAKEN');
+    assert.equal(e.errorId, 'abc');
+    assert.deepEqual(e.errors, [{ field: 'position', message: 'ocupada' }]);
+    assert.equal(e.details.hint, 'revisá la lista');
+    assert.ok(e.info.includes('POSITION_ALREADY_TAKEN'));
+    return true;
+  });
+});
+
+test('error formato viejo: code y extras en la raíz', async () => {
+  respondWith(409, '{"error":"Ya eliminado","code":"PLAYER_ALREADY_ELIMINATED","hint":"mirá"}');
+  await assert.rejects(apiFetch('/api/x'), (e: unknown) => {
+    assert.ok(e instanceof ApiError);
+    assert.equal(e.message, 'Ya eliminado');
+    assert.equal(e.code, 'PLAYER_ALREADY_ELIMINATED');
+    assert.equal(e.errorId, undefined);
+    assert.equal(e.details.hint, 'mirá');
+    return true;
+  });
+  respondWith(400, '{"message":"Email inválido"}');
+  await assert.rejects(apiFetch('/api/x'), /Email inválido/);
+});
+
+test('401 en formato nuevo también cierra sesión', async () => {
+  let calls = 0;
+  setUnauthorizedHandler(() => calls++);
+  setAuthPin('1234');
+  respondWith(401, '{"success":false,"error":{"code":"UNAUTHORIZED","message":"Acceso no autorizado","errorId":"x","timestamp":"","path":"/api/x"}}');
+  await assert.rejects(apiFetch('/api/x'), /Acceso no autorizado/);
+  assert.equal(calls, 1);
+});

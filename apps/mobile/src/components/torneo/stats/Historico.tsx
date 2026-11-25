@@ -48,12 +48,12 @@ export function usePaletas(): { metal: Paleta; rosa: Paleta } {
   };
 }
 
-type Envelope<T> = { success: boolean; error?: string; data?: T };
-
+/** `data` llega desenvuelto por apiFetch: con la API vieja (que ya traía el sobre) y con la nueva. */
 function useHistorico<T>(key: string) {
-  const res = useSWR<Envelope<T>>(key);
-  const failed = !!res.error || (res.data && !res.data.success);
-  return { ...res, failed };
+  const res = useSWR<T>(key);
+  const failed = !!res.error;
+  const errorMessage = res.error instanceof Error && res.error.message ? res.error.message : undefined;
+  return { ...res, failed, errorMessage };
 }
 
 function TarjetaPodio({ fila, color, tinta, grande }: { fila: Fila; color: string; tinta: string; grande: boolean }) {
@@ -132,10 +132,10 @@ type ChampionData = { player: Jugador; championshipsCount: number; tournamentNum
 
 export function CampeonesTab() {
   const paletas = usePaletas();
-  const { data, failed, isLoading, mutate } = useHistorico<{ all: ChampionData[] }>('/api/tournaments/champions-stats');
+  const { data, failed, errorMessage, isLoading, mutate } = useHistorico<{ all: ChampionData[] }>('/api/tournaments/champions-stats');
   if (isLoading) return <LoadingState message="Cargando campeones…" />;
-  if (failed) return <ErrorState message={data?.error ?? 'Error al cargar campeones'} onRetry={() => mutate()} />;
-  const filas: Fila[] = (data?.data?.all ?? []).map((c) => ({
+  if (failed) return <ErrorState message={errorMessage ?? 'Error al cargar campeones'} onRetry={() => mutate()} />;
+  const filas: Fila[] = (data?.all ?? []).map((c) => ({
     jugador: c.player,
     total: c.championshipsCount,
     detalle: [...c.tournamentNumbers].sort((a, b) => b - a).map((t) => `T${t}`).join(' · '),
@@ -205,10 +205,10 @@ function PodiosChart({ stats, paleta }: { stats: PodiumStat[]; paleta: Paleta })
 
 export function PodiosTab() {
   const paletas = usePaletas();
-  const { data, failed, isLoading, mutate } = useHistorico<{ players: PodiumStat[] }>('/api/tournaments/podium-stats');
+  const { data, failed, errorMessage, isLoading, mutate } = useHistorico<{ players: PodiumStat[] }>('/api/tournaments/podium-stats');
   if (isLoading) return <LoadingState message="Cargando podios…" />;
-  if (failed) return <ErrorState message={data?.error ?? 'Error al cargar podios'} onRetry={() => mutate()} />;
-  const stats = data?.data?.players ?? [];
+  if (failed) return <ErrorState message={errorMessage ?? 'Error al cargar podios'} onRetry={() => mutate()} />;
+  const stats = data?.players ?? [];
   const filas: Fila[] = stats.map((s) => ({
     jugador: s.player,
     total: s.totalPodiums,
@@ -261,12 +261,12 @@ function Premio({ etiqueta, jugador, paleta }: { etiqueta: string; jugador: Juga
 export function SieteTab() {
   const paletas = usePaletas();
   const rosa = paletas.rosa;
-  const { data, failed, isLoading, mutate } = useHistorico<{ all: SieteFila[]; porTorneo: PorTorneo[] }>(
+  const { data, failed, errorMessage, isLoading, mutate } = useHistorico<{ all: SieteFila[]; porTorneo: PorTorneo[] }>(
     '/api/tournaments/siete-stats'
   );
   if (isLoading) return <LoadingState message="Cargando el 7/2…" />;
-  if (failed) return <ErrorState message={data?.error ?? 'Error al cargar el 7/2'} onRetry={() => mutate()} />;
-  const datos = data?.data;
+  if (failed) return <ErrorState message={errorMessage ?? 'Error al cargar el 7/2'} onRetry={() => mutate()} />;
+  const datos = data;
   const filas: Fila[] = (datos?.all ?? [])
     .filter((f): f is SieteFila & { player: Jugador } => !!f.player)
     .map((f) => ({

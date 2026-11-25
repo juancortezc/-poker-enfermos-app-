@@ -44,13 +44,8 @@ export function useRefreshLive() {
  */
 export function eliminationErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
-    let code: string | undefined;
-    try {
-      code = (JSON.parse(error.info) as { code?: string }).code;
-    } catch {
-      code = undefined;
-    }
-    switch (code) {
+    // ApiError lee el code de los dos formatos (error.code nuevo, code viejo).
+    switch (error.code) {
       case 'PLAYER_ALREADY_ELIMINATED':
         return 'Ese jugador ya está eliminado en esta fecha.';
       case 'POSITION_ALREADY_TAKEN':

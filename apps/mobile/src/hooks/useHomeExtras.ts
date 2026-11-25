@@ -36,15 +36,15 @@ export function useDaysWithoutVictory(tournamentId: number | null | undefined) {
   return useSWR<DaysWithoutVictoryResponse>(tournamentId ? swrKeys.daysWithoutVictory(tournamentId) : null);
 }
 
+/** Ya desenvuelto por apiFetch (la API vieja y la nueva traen el mismo `data`). */
 interface ChampionStatsResponse {
-  success: boolean;
-  data?: { all: { player: { id: string } | null; championshipsCount: number }[] };
+  all: { player: { id: string } | null; championshipsCount: number }[];
 }
 
 /** Cuántos torneos ganó el jugador (0 si ninguno). */
 export function useChampionships(playerId: string | undefined) {
   const swr = useSWR<ChampionStatsResponse>('/api/tournaments/champions-stats');
-  const count = swr.data?.data?.all?.find((c) => c.player?.id === playerId)?.championshipsCount ?? 0;
+  const count = swr.data?.all?.find((c) => c.player?.id === playerId)?.championshipsCount ?? 0;
   return { ...swr, count };
 }
 
@@ -69,7 +69,7 @@ export interface WinnerPlayer {
   aliases: string[];
 }
 
-/** Una fila de GET /api/tournaments/winners (envuelto en `{ success, data, total }`). */
+/** Una fila de GET /api/tournaments/winners (apiFetch ya desenvuelve el `data`). */
 export interface TournamentWinner {
   id: number;
   tournamentNumber: number;
@@ -82,10 +82,10 @@ export interface TournamentWinner {
 
 /** Podio oficial de un torneo terminado; `null` mientras la Comisión no lo cargó. Sin número no pide nada. */
 export function useTournamentWinner(tournamentNumber: number | null | undefined) {
-  const swr = useSWR<{ success: boolean; data?: TournamentWinner[] }>(
+  const swr = useSWR<TournamentWinner[]>(
     tournamentNumber ? swrKeys.tournamentWinners() : null,
     { revalidateOnFocus: false }
   );
-  const winner = swr.data?.data?.find((w) => w.tournamentNumber === tournamentNumber) ?? null;
+  const winner = swr.data?.find((w) => w.tournamentNumber === tournamentNumber) ?? null;
   return { winner, isLoading: swr.isLoading, error: swr.error, mutate: swr.mutate };
 }

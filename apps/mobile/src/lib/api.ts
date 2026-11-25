@@ -36,29 +36,82 @@ export function setUnauthorizedHandler(handler: (() => void) | null): void {
   onUnauthorized = handler;
 }
 
+export interface ApiErrorDetail {
+  field: string;
+  message: string;
+  code?: string;
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * La API responde `{ success: true, data }` (formato nuevo) o el body a secas
+ * (formato viejo). Mientras convivan, se aceptan los dos: el nuevo se
+ * desenvuelve y el viejo pasa tal cual.
+ */
+export function unwrapApiBody<T = unknown>(body: unknown): T {
+  if (isObject(body) && body.success === true && 'data' in body) return body.data as T;
+  return body as T;
+}
+
+/**
+ * Error de la API. Lee los dos formatos de error:
+ * - nuevo: `{ success: false, error: { code, message, errors?, details?, errorId } }`
+ * - viejo: `{ error: "texto", code?, ...extras }`
+ * `details` junta los datos extra (p. ej. `hint`) de cualquiera de los dos.
+ */
 export class ApiError extends Error {
   status: number;
+  /** Texto crudo de la respuesta. */
   info: string;
+  code?: string;
+  errorId?: string;
+  errors?: ApiErrorDetail[];
+  details: Record<string, unknown>;
 
   constructor(status: number, info: string) {
-    super(ApiError.messageFrom(status, info));
+    const parsed = ApiError.parse(info);
+    super(parsed.message ?? `HTTP Error: ${status}`);
     this.name = 'ApiError';
     this.status = status;
     this.info = info;
+    this.code = parsed.code;
+    this.errorId = parsed.errorId;
+    this.errors = parsed.errors;
+    this.details = parsed.details;
   }
 
-  /** La API responde `{ error: "..." }` en español; se usa tal cual si viene. */
-  private static messageFrom(status: number, info: string): string {
+  private static parse(info: string): {
+    message?: string;
+    code?: string;
+    errorId?: string;
+    errors?: ApiErrorDetail[];
+    details: Record<string, unknown>;
+  } {
+    let body: unknown;
     try {
-      const parsed: unknown = JSON.parse(info);
-      if (parsed && typeof parsed === 'object' && 'error' in parsed) {
-        const msg = (parsed as { error: unknown }).error;
-        if (typeof msg === 'string' && msg) return msg;
-      }
+      body = JSON.parse(info);
     } catch {
-      // cuerpo no JSON
+      return { details: {} }; // cuerpo no JSON
     }
-    return `HTTP Error: ${status}`;
+    if (!isObject(body)) return { details: {} };
+    const str = (v: unknown) => (typeof v === 'string' && v ? v : undefined);
+
+    const err = body.error;
+    if (isObject(err)) {
+      return {
+        message: str(err.message),
+        code: str(err.code),
+        errorId: str(err.errorId),
+        errors: Array.isArray(err.errors) ? (err.errors as ApiErrorDetail[]) : undefined,
+        details: isObject(err.details) ? err.details : {},
+      };
+    }
+    // Formato viejo: los extras (hint, stuckDates...) van en la raíz.
+    const { error, code, message, ...rest } = body;
+    return { message: str(error) ?? str(message), code: str(code), details: rest };
   }
 }
 
@@ -102,7 +155,7 @@ export async function apiFetch<T = unknown>(path: string, init: ApiRequestInit =
 
   if (response.status === 204) return undefined as T;
   const text = await response.text();
-  return (text ? JSON.parse(text) : undefined) as T;
+  return unwrapApiBody<T>(text ? JSON.parse(text) : undefined);
 }
 
 /** Fetcher de SWR: la key es la ruta de la API, p.ej. `/api/tournaments/active`. */
