@@ -29,15 +29,22 @@ export const HERO_CARD_WIDTH = 232;
  * cartel lleva además de la tarjeta (`chrome`, en pt).
  */
 export function useHeroCardWidth(chrome: number) {
+  const cardHeight = useHeroAvailableHeight() - chrome;
+  return Math.round(Math.max(120, Math.min(HERO_CARD_WIDTH, (cardHeight * 2) / 3)));
+}
+
+/**
+ * Alto que le queda al primer bloque del Inicio para entrar entero sin scroll:
+ * la pantalla menos la cabecera, las pestañas, la barra inferior y un respiro.
+ */
+export function useHeroAvailableHeight() {
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const APP_BAR = 59; // CPHeader
   const TABS = 87; // pestañas + separaciones arriba y abajo
   const TAB_BAR = 56; // CPTabBar sin el borde seguro
   const AIR = 12; // que se vea el borde inferior del cartel
-  const available = height - insets.top - APP_BAR - TABS - TAB_BAR - insets.bottom - AIR;
-  const cardHeight = available - chrome;
-  return Math.round(Math.max(120, Math.min(HERO_CARD_WIDTH, (cardHeight * 2) / 3)));
+  return height - insets.top - APP_BAR - TABS - TAB_BAR - insets.bottom - AIR;
 }
 
 /** La tarjeta del cartel: rotada y con sombra profunda sobre el negro. */
@@ -336,7 +343,7 @@ export function TilePair({ children, style }: { children: React.ReactNode; style
 }
 
 /** Círculo rojo "VS" del mano a mano, entre los dos tiles. */
-export function VsBadge() {
+export function VsBadge({ size = 68, top = '38%', ringColor }: { size?: number; top?: `${number}%`; ringColor?: string }) {
   const c = useCP();
   return (
     <View
@@ -345,25 +352,25 @@ export function VsBadge() {
       style={{
         position: 'absolute',
         left: '50%',
-        top: '38%',
-        width: 68,
-        height: 68,
-        marginLeft: -34,
-        marginTop: -34,
-        borderRadius: 34,
+        top,
+        width: size,
+        height: size,
+        marginLeft: -size / 2,
+        marginTop: -size / 2,
+        borderRadius: size / 2,
         backgroundColor: cp.primary,
         borderWidth: 4,
-        borderColor: c.surface0,
+        borderColor: ringColor ?? c.surface0,
         alignItems: 'center',
         justifyContent: 'center',
         transform: [{ rotate: '-8deg' }],
         shadowColor: cp.surface0,
-        shadowOpacity: 0.35,
+        shadowOpacity: 0.4,
         shadowRadius: 9,
         shadowOffset: { width: 0, height: 8 },
         elevation: 6,
       }}>
-      <Text style={{ fontFamily: fonts.displayBlackItalic, fontSize: 28, color: cp.onPrimary }}>VS</Text>
+      <Text style={{ fontFamily: fonts.displayBlackItalic, fontSize: Math.round(size * 0.42), color: cp.onPrimary }}>VS</Text>
     </View>
   );
 }
