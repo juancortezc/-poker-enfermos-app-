@@ -6,7 +6,7 @@ import type { PlayerRanking } from '@poker/shared'
 import { leaderPhrase, nightlyPosition, playedDateNumbers, rivalryPhrase, scoreOf, shortenFullName } from '@poker/shared'
 import { CPPlayerCard } from './CPPlayerCard'
 import { CPPlayerPhoto } from './CPPlayerPhoto'
-import { DISPLAY_CONDENSADO, FUENTE_DISPLAY, MEDALLA, PhotoTile, SectionHead, SOBRE_NEGRO } from './HomeLucha'
+import { DISPLAY_CONDENSADO, FUENTE_DISPLAY, heroCardWidth, heroTitleSize, MEDALLA, PhotoTile, SectionHead, SOBRE_NEGRO } from './HomeLucha'
 
 interface HomeTorneoLuchaProps {
   /** Ordenado por posicion. */
@@ -15,10 +15,18 @@ interface HomeTorneoLuchaProps {
   finished: boolean
   lastDateNumber?: number
   totalDates?: number
+  loading?: boolean
   onSeeTabla: () => void
 }
 
 const CARD_WIDTH = 232
+/**
+ * Alto que el cinturon NO le da a la tarjeta: arriba 137 + barra 75 + respiro
+ * 8 + padding 36 + rotulo 19 + cinturon 18 (se monta 28 sobre la tarjeta) +
+ * titular ~90 + fila de cifras 56 + 5 huecos de 12 + 12 del giro. Ver
+ * heroCardWidth.
+ */
+const CINTURON_RESERVADO = 503
 const TILE_SIZES = '(min-width: 448px) 200px, calc((100vw - 52px) / 2)'
 /** Mismo umbral que la tabla (CPRankingView): mesa final = top 9 de la noche. */
 const MESA_FINAL = 9
@@ -29,17 +37,31 @@ const nombre = (p: PlayerRanking) => p.playerAlias || shortenFullName(p.playerNa
 /**
  * Inicio > Torneo, tema lucha libre (T31): el dueno del cinturon (lider), el
  * mano a mano #1 vs #2, la tabla (top 3) y los 7/2 del torneo (los dos ultimos
- * de la tabla). Va dentro de la grilla del home y ocupa las dos columnas.
+ * de la tabla).
  */
-export function HomeTorneoLucha({ rankings, tournamentNumber, finished, lastDateNumber, totalDates, onSeeTabla }: HomeTorneoLuchaProps) {
-  if (rankings.length === 0) return null
+export function HomeTorneoLucha({ rankings, tournamentNumber, finished, lastDateNumber, totalDates, loading, onSeeTabla }: HomeTorneoLuchaProps) {
+  if (rankings.length === 0) {
+    if (loading) {
+      return (
+        <div aria-busy="true" aria-label="Cargando el torneo" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="animate-pulse" style={{ height: 560, borderRadius: 20, background: 'var(--cp-surface-3)' }} />
+          <div className="animate-pulse" style={{ height: 240, borderRadius: 18, background: 'var(--cp-surface-2)' }} />
+        </div>
+      )
+    }
+    return (
+      <div style={{ padding: 24, textAlign: 'center', borderRadius: 18, background: 'var(--cp-surface-1)', border: '1px solid var(--cp-surface-border)' }}>
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--cp-on-surface-muted)' }}>Todavía no hay tabla del torneo {tournamentNumber}.</p>
+      </div>
+    )
+  }
 
   const [leader, second] = rankings
   const top3 = rankings.slice(0, 3)
   const sieteDos = rankings.length >= 4 ? rankings.slice(-2) : []
 
   return (
-    <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: 26, minWidth: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 26, minWidth: 0 }}>
       <Cinturon
         leader={leader}
         rankings={rankings}
@@ -208,8 +230,7 @@ function Cinturon({ leader, rankings, finished, tournamentNumber, lastDateNumber
   // Lider nuevo = no era #1 antes de la ultima fecha.
   const leaderChanged = leader.positionsChanged > 0
   const [l1, l2] = leaderPhrase(nombre(leader), fecha ?? 0, leaderChanged)
-  const longest = Math.max(l1.length, l2.length)
-  const size = Math.max(26, Math.min(46, Math.floor(290 / (longest * 0.42))))
+  const size = heroTitleSize([l1, l2], 36)
 
   const mesasFinales = played.filter(
     d => (leader.pointsByDate[d] ?? 0) > 0 && (nightlyPosition(rankings, d, leader.playerId) ?? 999) <= MESA_FINAL
@@ -233,11 +254,11 @@ function Cinturon({ leader, rankings, finished, tournamentNumber, lastDateNumber
         background: SOBRE_NEGRO.fondo,
         backgroundImage: `radial-gradient(circle at 50% 30%, color-mix(in srgb, ${SOBRE_NEGRO.oro} 22%, transparent) 0, transparent 60%)`,
         color: SOBRE_NEGRO.texto,
-        padding: '22px 20px 24px',
+        padding: '18px 20px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 14,
+        gap: 12,
       }}
     >
       <div
@@ -262,7 +283,7 @@ function Cinturon({ leader, rankings, finished, tournamentNumber, lastDateNumber
         <CPPlayerCard
           photoUrl={leader.playerPhoto}
           name={leader.playerName}
-          width={CARD_WIDTH}
+          width={heroCardWidth(CINTURON_RESERVADO)}
           sizes={`${CARD_WIDTH}px`}
           zoomable
           style={{ boxShadow: `0 18px 40px color-mix(in srgb, ${SOBRE_NEGRO.fondo} 60%, transparent), 0 0 0 3px ${SOBRE_NEGRO.oro}` }}
@@ -271,26 +292,26 @@ function Cinturon({ leader, rankings, finished, tournamentNumber, lastDateNumber
 
       <div
         style={{
-          marginTop: -30,
+          marginTop: -28,
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           width: 'min(300px, 100%)',
-          height: 54,
-          borderRadius: 27,
+          height: 46,
+          borderRadius: 23,
           background: SOBRE_NEGRO.oro,
           color: SOBRE_NEGRO.tinta,
           boxShadow: `0 8px 18px color-mix(in srgb, ${SOBRE_NEGRO.fondo} 55%, transparent), inset 0 0 0 3px ${SOBRE_NEGRO.oroOscuro}`,
           pointerEvents: 'none',
         }}
       >
-        <span style={{ fontFamily: FUENTE_DISPLAY, fontWeight: 900, fontSize: 30, letterSpacing: '0.03em', color: SOBRE_NEGRO.tinta }}>
+        <span style={{ fontFamily: FUENTE_DISPLAY, fontWeight: 900, fontSize: 26, letterSpacing: '0.03em', color: SOBRE_NEGRO.tinta }}>
           #1 · {scoreOf(leader)} PTS
         </span>
       </div>
 
-      <h2 id="h-cinturon" style={{ ...DISPLAY_CONDENSADO, margin: '4px 0 0', textAlign: 'center', fontSize: size, color: SOBRE_NEGRO.texto, overflowWrap: 'anywhere' }}>
+      <h2 id="h-cinturon" style={{ ...DISPLAY_CONDENSADO, margin: '4px 0 0', textAlign: 'center', fontSize: size, color: SOBRE_NEGRO.texto, whiteSpace: 'nowrap' }}>
         {l1}
         <br />
         <span style={{ color: SOBRE_NEGRO.oro }}>{l2}</span>
@@ -299,10 +320,11 @@ function Cinturon({ leader, rankings, finished, tournamentNumber, lastDateNumber
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          // MESAS FINALES es el rotulo largo: a 360 px no entra en un tercio.
+          gridTemplateColumns: '1.3fr 1fr 1fr',
           width: '100%',
           borderTop: `1px solid ${SOBRE_NEGRO.linea}`,
-          paddingTop: 14,
+          paddingTop: 10,
           textAlign: 'center',
         }}
       >
@@ -322,8 +344,8 @@ function Cinturon({ leader, rankings, finished, tournamentNumber, lastDateNumber
               minWidth: 0,
             }}
           >
-            <span style={{ fontFamily: FUENTE_DISPLAY, fontWeight: 900, fontSize: 26, color: SOBRE_NEGRO.texto }}>{m.v}</span>
-            <span style={{ fontSize: 12, color: SOBRE_NEGRO.textoSuave, letterSpacing: '0.06em' }}>{m.l}</span>
+            <span style={{ fontFamily: FUENTE_DISPLAY, fontWeight: 900, fontSize: 22, lineHeight: 1.1, color: SOBRE_NEGRO.texto }}>{m.v}</span>
+            <span style={{ fontSize: 12, color: SOBRE_NEGRO.textoSuave, letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>{m.l}</span>
           </div>
         ))}
       </div>

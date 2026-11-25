@@ -57,6 +57,32 @@ export const DISPLAY_CONDENSADO: React.CSSProperties = {
   lineHeight: 0.92,
 }
 
+/**
+ * El cartel y el cinturon tienen que verse ENTEROS en la primera pantalla del
+ * movil (390x844 y 360x740), sin que la barra inferior corte nada. La tarjeta
+ * es lo unico elastico: toma el alto que queda (viewport menos lo fijo) y de
+ * ahi sale su ancho, 2/3 del alto, con tope de 232 px (el tamano del diseno).
+ *
+ * `reservado` = lo que hay arriba del bloque (cabecera, pestanas: ~137 px),
+ * la barra inferior (~75), un respiro (8) y todo lo que el bloque lleva
+ * ademas de la tarjeta. Medido con Playwright; si cambia la cabecera o el
+ * bloque, hay que volver a medir. Es el mismo criterio que la app
+ * (useHeroCardWidth en apps/mobile/.../home/lucha.tsx).
+ */
+export function heroCardWidth(reservado: number): string {
+  return `clamp(140px, calc((100dvh - ${reservado}px) * 2 / 3), 232px)`
+}
+
+/**
+ * Tamano del titular de dos lineas: el mayor que deja cada linea en una sola
+ * fila. Ancho util = columna (hasta 448 px) menos el padding de la pagina (40)
+ * y del bloque (40). Archivo 900 condensada al 70 % mide ~0.42 em por letra.
+ */
+export function heroTitleSize(lines: readonly string[], max: number): string {
+  const longest = Math.max(...lines.map(l => l.length), 1)
+  return `min(${max}px, calc((min(100vw, 448px) - 80px) / ${(longest * 0.42).toFixed(2)}))`
+}
+
 /** Velo para leer texto encima de una foto a sangre. */
 const VELO = `linear-gradient(180deg, transparent 0%, color-mix(in srgb, ${SOBRE_NEGRO.fondo} 88%, transparent) 55%)`
 

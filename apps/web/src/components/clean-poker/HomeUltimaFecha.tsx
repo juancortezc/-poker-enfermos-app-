@@ -5,7 +5,7 @@ import { Star } from 'lucide-react'
 import type { PlayerRanking } from '@poker/shared'
 import { nightWinnerPhrase, playerLabel, shortenFullName } from '@poker/shared'
 import { CPPlayerCard } from './CPPlayerCard'
-import { DISPLAY_CONDENSADO, FUENTE_DISPLAY, PhotoTile, Podium, SectionHead, SOBRE_NEGRO } from './HomeLucha'
+import { DISPLAY_CONDENSADO, FUENTE_DISPLAY, heroCardWidth, heroTitleSize, PhotoTile, Podium, SectionHead, SOBRE_NEGRO } from './HomeLucha'
 
 interface EliminationDTO {
   id: number
@@ -24,22 +24,18 @@ interface HomeUltimaFechaProps {
   onSeeResultsTab: () => void
 }
 
-/** Ancho de la tarjeta del ganador en el cartel (2:3 → 348 de alto). */
+/** Ancho maximo de la tarjeta del ganador en el cartel (2:3 → 348 de alto). */
 const CARD_WIDTH = 232
+/**
+ * Alto que el cartel NO le da a la tarjeta: arriba del bloque 137 + barra
+ * inferior 75 + respiro 8 + padding 36 + rotulo 19 + cinta 14 + titular ~80 +
+ * fila de puntos 48 + 4 huecos de 12 + 12 del giro. Ver heroCardWidth.
+ */
+const CARTEL_RESERVADO = 471
 /** Una columna del podio: el contenido mide como mucho 408 px (max-w-md menos el padding). */
 const PODIUM_SIZES = '(min-width: 448px) 130px, calc((100vw - 60px) / 3)'
 /** Media columna: los tiles 3:4 de dos en dos. */
 const TILE_SIZES = '(min-width: 448px) 200px, calc((100vw - 52px) / 2)'
-
-/**
- * Achica el titulo si la frase es larga, para que cada linea entre en el
- * cartel a 360 px (unos 290 px utiles). Archivo 900 condensada al 70 % mide
- * cerca de 0.42 em por letra.
- */
-function titleSize(lines: readonly string[]): number {
-  const longest = Math.max(...lines.map(l => l.length))
-  return Math.max(26, Math.min(50, Math.floor(290 / (longest * 0.42))))
-}
 
 /**
  * Inicio > Ultima fecha, tema lucha libre (T31):
@@ -230,7 +226,7 @@ interface CartelProps {
 /** "FUNCIÓN ESTELAR": el ganador de la noche, como cartel de lucha libre. */
 function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: CartelProps) {
   const [l1, l2] = nightWinnerPhrase(name, dateNumber, wins)
-  const size = titleSize([l1, l2])
+  const size = heroTitleSize([l1, l2], 40)
   const fullName = `${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`
   const cuerda = `color-mix(in srgb, ${SOBRE_NEGRO.rojo} 55%, transparent)`
 
@@ -245,11 +241,11 @@ function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: Cart
         background: SOBRE_NEGRO.fondo,
         backgroundImage: `repeating-linear-gradient(135deg, color-mix(in srgb, ${SOBRE_NEGRO.rojo} 16%, transparent) 0 14px, transparent 14px 28px)`,
         color: SOBRE_NEGRO.texto,
-        padding: '22px 20px 24px',
+        padding: '18px 20px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 14,
+        gap: 12,
       }}
     >
       {/* Las tres cuerdas del ring, detras de la tarjeta. */}
@@ -280,7 +276,7 @@ function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: Cart
         <CPPlayerCard
           photoUrl={photoUrl}
           name={fullName}
-          width={CARD_WIDTH}
+          width={heroCardWidth(CARTEL_RESERVADO)}
           sizes={`${CARD_WIDTH}px`}
           priority
           zoomable
@@ -310,16 +306,19 @@ function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: Cart
 
       <h2
         id="h-cartel"
-        style={{ ...DISPLAY_CONDENSADO, position: 'relative', margin: '6px 0 0', textAlign: 'center', fontSize: size, color: SOBRE_NEGRO.texto, overflowWrap: 'anywhere' }}
+        style={{ ...DISPLAY_CONDENSADO, position: 'relative', margin: '4px 0 0', textAlign: 'center', fontSize: size, color: SOBRE_NEGRO.texto, whiteSpace: 'nowrap' }}
       >
         {l1}
         <br />
         <span style={{ color: SOBRE_NEGRO.rojoTexto }}>{l2}</span>
       </h2>
 
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'baseline', gap: 6, fontFamily: FUENTE_DISPLAY, fontWeight: 900 }}>
-        <span style={{ fontSize: 40, color: SOBRE_NEGRO.oro, lineHeight: 1 }}>{winner.points}</span>
-        <span style={{ fontSize: 14, letterSpacing: '0.14em', color: SOBRE_NEGRO.textoSuave }}>PUNTOS</span>
+      {/* Puntos a la izquierda y el boton a la derecha, en una fila: asi el
+          cartel entra entero en la primera pantalla. */}
+      <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, fontFamily: FUENTE_DISPLAY, fontWeight: 900 }}>
+        <span style={{ fontFamily: FUENTE_DISPLAY, fontWeight: 900, fontSize: 36, color: SOBRE_NEGRO.oro, lineHeight: 1 }}>{winner.points}</span>
+        <span style={{ fontSize: 13, letterSpacing: '0.08em', color: SOBRE_NEGRO.textoSuave }}>PUNTOS</span>
       </div>
 
       <button
@@ -328,7 +327,9 @@ function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: Cart
         style={{
           position: 'relative',
           minHeight: 48,
-          padding: '0 26px',
+          padding: '0 14px',
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
           borderRadius: 5,
           background: SOBRE_NEGRO.rojo,
           color: SOBRE_NEGRO.sobreRojo,
@@ -336,12 +337,13 @@ function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: Cart
           cursor: 'pointer',
           fontFamily: FUENTE_DISPLAY,
           fontWeight: 800,
-          fontSize: 15,
-          letterSpacing: '0.06em',
+          fontSize: 14,
+          letterSpacing: '0.04em',
         }}
       >
         VER RESULTADOS
       </button>
+      </div>
     </section>
   )
 }
