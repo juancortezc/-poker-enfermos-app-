@@ -10,7 +10,7 @@
  * 4. Lo que dejó la noche: Varón, Malazo, noche para olvidar y el más contento.
  * 5. Tu noche y tu lugar en el campeonato (si jugaste).
  */
-import { nightWinnerPhrase, playerLabel, scoreOf, shortenFullName, type PlayerRanking } from '@poker/shared';
+import { nightWinnerPhrase, playerLabel, shortenFullName, type PlayerRanking } from '@poker/shared';
 import { Text, View } from 'react-native';
 
 import { PlayerCard } from '@/components/common/PlayerCard';
@@ -20,7 +20,7 @@ import { ErrorState } from '@/components/ui/States';
 import { cp, fonts } from '@/theme/colors';
 import { useCP } from '@/theme/tone';
 
-import { BigScore, HashScore, ON_COLOR, Tile, TileLink, TileOverline, TileRow } from './bento';
+import { Tile } from './bento';
 import { HERO_CARD_STYLE, useHeroCardWidth, Headline, Marquee, MarqueeOverline, MedalPodium, PhotoTile, Rise, SectionTitle, TilePair } from './lucha';
 
 type Props = {
@@ -78,9 +78,6 @@ export function HomeUltimaFecha({ userId, rankings, lastCompletedDate, onOpenPro
   const olvidar = fallers.length ? fallers.reduce((m, r) => (r.positionsChanged < m.positionsChanged ? r : m)) : null;
   const contento = risers.length ? risers.reduce((m, r) => (r.positionsChanged > m.positionsChanged ? r : m)) : null;
 
-  const myNight = sorted.find((e) => e.eliminatedPlayer.id === userId);
-  const myRanking = byId.get(userId);
-  const gapToLeader = myRanking ? scoreOf(rankings[0]) - scoreOf(myRanking) : null;
 
   const insights = [
     varon && {
@@ -203,55 +200,6 @@ export function HomeUltimaFecha({ userId, rankings, lastCompletedDate, onOpenPro
         </Rise>
       ) : null}
 
-      {/* 5. Tu noche (rojo) + en el campeonato (papel) */}
-      {myRanking && myNight ? (
-        <TileRow>
-          <Tile tone="rojo" span={1} index={n++}>
-            {myNight.position === 1 ? (
-              <>
-                <TileOverline color={ON_COLOR.soft}>Tu noche</TileOverline>
-                <Text style={{ fontFamily: fonts.displayBlack, fontSize: 26, color: cp.onPrimary, marginTop: 2 }}>¡Ganaste!</Text>
-                <View className="mt-1 flex-row items-baseline" style={{ gap: 4 }}>
-                  <BigScore value={myNight.points} size={20} color={cp.onPrimary} />
-                  <TileOverline color={ON_COLOR.soft}>pts</TileOverline>
-                </View>
-              </>
-            ) : (
-              <>
-                <TileOverline color={ON_COLOR.soft}>Te eliminaron en</TileOverline>
-                <View style={{ marginTop: 4 }}>
-                  <HashScore value={myNight.position} size={50} color={cp.onPrimary} hashColor={ON_COLOR.soft} />
-                </View>
-                <View className="flex-row items-baseline" style={{ gap: 5 }}>
-                  <BigScore value={myNight.points} size={20} color={cp.onPrimary} />
-                  <TileOverline color={ON_COLOR.soft}>pts</TileOverline>
-                </View>
-                {myNight.eliminatorPlayer ? (
-                  <Text style={{ fontFamily: fonts.body, fontSize: 13, lineHeight: 17, color: ON_COLOR.soft, marginTop: 6 }}>
-                    Te eliminó {playerLabel(myNight.eliminatorPlayer)}
-                  </Text>
-                ) : null}
-              </>
-            )}
-          </Tile>
-          <Tile tone="papel" span={1} index={n++}>
-            <TileOverline>En el campeonato</TileOverline>
-            <View style={{ marginTop: 4 }}>
-              <HashScore value={myRanking.position} size={50} color={c.onSurface} hashColor={c.primary} />
-            </View>
-            <View className="flex-row items-baseline" style={{ gap: 5 }}>
-              <BigScore value={scoreOf(myRanking)} size={20} color={c.onSurface} />
-              <TileOverline>pts</TileOverline>
-            </View>
-            {gapToLeader !== null ? (
-              <Text style={{ fontFamily: fonts.body, fontSize: 13, color: c.onSurfaceMuted, marginTop: 6 }}>
-                {gapToLeader === 0 ? 'sos el líder' : `a ${gapToLeader} del líder`}
-              </Text>
-            ) : null}
-            <TileLink title="MI TORNEO" onPress={onOpenProfile} style={{ marginTop: 'auto', paddingTop: 12 }} />
-          </Tile>
-        </TileRow>
-      ) : null}
     </View>
   );
 }

@@ -7,10 +7,8 @@
  *   Última Fecha / Torneo. Última Fecha es la vista de entrada mientras haya
  *   una fecha jugada; al arrancar el torneo, Torneo.
  */
-import { googleCalendarUrl } from '@poker/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking } from 'react-native';
 
 import { CelebrationsCard } from '@/components/jugador/home/CelebrationsCard';
 import { ClaveDebilBanner } from '@/components/jugador/home/ClaveDebilBanner';
@@ -24,7 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useActiveGameDate } from '@/hooks/useActiveGameDate';
 import { useActiveTournament } from '@/hooks/useActiveTournament';
 import { useRefresh } from '@/hooks/useRefresh';
-import { useTournamentInsights, useTournamentRanking } from '@/hooks/useTournamentRanking';
+import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 
 type HomeView = 'ultimaFecha' | 'torneo';
 
@@ -33,11 +31,10 @@ export default function HomeScreen() {
   const active = useActiveTournament();
   const tournament = active.tournament;
   const rankingSwr = useTournamentRanking(tournament?.id, { refreshInterval: 300000 });
-  const insightsSwr = useTournamentInsights(tournament?.id);
   const gameDateSwr = useActiveGameDate();
   const [chosenView, setView] = useState<HomeView | null>(null);
 
-  const { refreshing, onRefresh } = useRefresh(active.mutate, rankingSwr.mutate, insightsSwr.mutate, gameDateSwr.mutate);
+  const { refreshing, onRefresh } = useRefresh(active.mutate, rankingSwr.mutate, gameDateSwr.mutate);
 
   const number = tournament?.number;
   const view: HomeView = chosenView ?? (active.lastCompletedDate ? 'ultimaFecha' : 'torneo');
@@ -77,21 +74,11 @@ export default function HomeScreen() {
           />
         ) : (
           <HomeTorneo
-            userId={user?.id ?? ''}
-            tournamentId={tournament.id}
             tournamentNumber={number ?? 0}
             finished={active.isFinished}
             rankings={rankings}
-            nextDate={active.nextDate}
             lastDateNumber={active.lastCompletedDate?.dateNumber ?? null}
             progress={active.progress}
-            seasonHighlights={insightsSwr.insights?.seasonHighlights}
-            onOpenProfile={openProfile}
-            onOpenCalendarPage={() => router.push('/calendario')}
-            onAddToPersonalCalendar={() => {
-              const d = active.nextDate;
-              if (d?.scheduledDate) Linking.openURL(googleCalendarUrl(d.dateNumber, d.scheduledDate)).catch(() => {});
-            }}
             onSeeTabla={() => router.push('/ranking')}
           />
         )}

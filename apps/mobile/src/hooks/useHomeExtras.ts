@@ -22,20 +22,6 @@ export function useCelebrations() {
   return useSWR<CelebrationsData>('/api/players/celebrations', { refreshInterval: 3600000 });
 }
 
-export interface DaysWithoutVictoryResponse {
-  players: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    daysWithoutVictory: number;
-    hasNeverWon: boolean;
-  }[];
-}
-
-export function useDaysWithoutVictory(tournamentId: number | null | undefined) {
-  return useSWR<DaysWithoutVictoryResponse>(tournamentId ? swrKeys.daysWithoutVictory(tournamentId) : null);
-}
-
 interface ChampionStatsResponse {
   success: boolean;
   data?: { all: { player: { id: string } | null; championshipsCount: number }[] };
