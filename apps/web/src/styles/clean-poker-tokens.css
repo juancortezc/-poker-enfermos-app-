@@ -394,3 +394,81 @@
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(229, 57, 53, 0.30);
 }
+
+/* === TARJETA QUE SE AMPLIA (CPPlayerCard zoomable) ===
+   Mismo anillo de foco que .cp-foto-link: es un boton que no parece boton. */
+.cp-photo-zoom {
+  cursor: zoom-in;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--cp-duration-fast) ease-out;
+}
+
+.cp-photo-zoom:active {
+  transform: scale(0.98);
+}
+
+.cp-photo-zoom:focus-visible {
+  outline: 2px solid var(--cp-primary-light);
+  outline-offset: 3px;
+}
+
+/* === VISOR A PANTALLA COMPLETA (CPPhotoViewer) ===
+   <dialog> nativo. El fondo es la tinta del papel casi opaca en los dos tonos:
+   la tarjeta ya trae su marco rojo y no necesita competir con nada. */
+.cp-photo-viewer {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: zoom-out;
+}
+
+.cp-photo-viewer[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cp-fade-in var(--cp-duration-normal) ease-out;
+}
+
+.cp-photo-viewer::backdrop {
+  background: color-mix(in srgb, var(--cp-ink) 94%, transparent);
+}
+
+.cp-photo-viewer__frame {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--cp-surface-3);
+}
+
+.cp-photo-viewer__close {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--cp-radius-full);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cp-paper);
+  color: var(--cp-ink);
+  box-shadow: var(--cp-elevation-2);
+  cursor: pointer;
+}
+
+.cp-photo-viewer__close:focus-visible {
+  outline: 2px solid var(--cp-primary-light);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-photo-zoom { transition: none; }
+  .cp-photo-zoom:active { transform: none; }
+  .cp-photo-viewer[open] { animation: none; }
+}
