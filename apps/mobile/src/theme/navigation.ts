@@ -1,27 +1,30 @@
 import { DarkTheme, type Theme } from 'expo-router';
 
-import { fonts, noir } from '@/theme/colors';
+import { cp, fonts } from '@/theme/colors';
 
-/** Tema de React Navigation con la paleta Noir (fondos entre transiciones, etc.). */
+/**
+ * Tema de React Navigation (fondos entre transiciones, etc.). Cada `Screen`
+ * ajusta la cabecera a su tono al montarse (ver components/ui/Screen.tsx).
+ */
 export const navTheme: Theme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    primary: noir.gold,
-    background: noir.bg,
-    card: noir.bg,
-    text: noir.text,
-    border: noir.border,
-    notification: noir.copper,
+    primary: cp.primary,
+    background: cp.surface0,
+    card: cp.surface0,
+    text: cp.onSurface,
+    border: cp.surfaceBorder,
+    notification: cp.primary,
   },
 };
 
-/** Cabecera nativa común a todos los stacks. */
+/** Cabecera nativa comun a todos los stacks. */
 export const stackScreenOptions = {
-  headerStyle: { backgroundColor: noir.bg },
-  headerTintColor: noir.gold,
-  headerTitleStyle: { fontFamily: fonts.heading, color: noir.text },
+  headerStyle: { backgroundColor: cp.surface0 },
+  headerTintColor: cp.onSurface,
+  headerTitleStyle: { fontFamily: fonts.display, color: cp.onSurface },
   headerShadowVisible: false,
   headerBackButtonDisplayMode: 'minimal' as const,
-  contentStyle: { backgroundColor: noir.bg },
+  contentStyle: { backgroundColor: cp.surface0 },
 };

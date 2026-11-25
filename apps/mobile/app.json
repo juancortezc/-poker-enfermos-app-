@@ -7,7 +7,7 @@
     "icon": "./assets/icons/favicon-512.png",
     "scheme": "pokerenfermos",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#1F1410",
+    "backgroundColor": "#000000",
     "ios": {
       "bundleIdentifier": "com.pokerenfermos.app",
       "supportsTablet": false,
@@ -19,7 +19,7 @@
     "android": {
       "package": "com.pokerenfermos.app",
       "adaptiveIcon": {
-        "backgroundColor": "#1F1410",
+        "backgroundColor": "#000000",
         "foregroundImage": "./assets/icons/favicon-512.png"
       },
       "predictiveBackGestureEnabled": false,
@@ -34,7 +34,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#1F1410",
+          "backgroundColor": "#000000",
           "image": "./assets/icons/favicon-512.png",
           "imageWidth": 200
         }
@@ -50,7 +50,7 @@
       [
         "expo-notifications",
         {
-          "color": "#E0B66C",
+          "color": "#E53935",
           "defaultChannel": "default",
           "sounds": ["./assets/sounds/timer_minuto.wav", "./assets/sounds/timer_cambio.wav"]
         }

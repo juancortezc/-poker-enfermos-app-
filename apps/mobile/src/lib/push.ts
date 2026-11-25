@@ -14,6 +14,7 @@ import { AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { apiFetch } from '@/lib/api';
+import { cp } from '@/theme/colors';
 
 /** Mismo id que EXPO_ANDROID_CHANNEL_ID en apps/web/src/lib/expo-push.ts. */
 const ANDROID_CHANNEL_ID = 'default';
@@ -51,7 +52,7 @@ async function ensureAndroidChannel(): Promise<void> {
     name: 'Poker Enfermos',
     importance: AndroidImportance.HIGH,
     vibrationPattern: [0, 250, 250, 250],
-    lightColor: '#E0B66C',
+    lightColor: cp.primary,
   });
 }
 
