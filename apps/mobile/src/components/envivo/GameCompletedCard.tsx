@@ -6,11 +6,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from 'react';
 import { Alert, Text } from 'react-native';
 
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Body, Title } from '@/components/ui/Typography';
 import { apiFetch, ApiError } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 export function GameCompletedCard({
   gameDateId,
@@ -21,6 +21,7 @@ export function GameCompletedCard({
   status: string;
   onClosed: () => void;
 }) {
+  const c = useCP();
   const [closing, setClosing] = useState(false);
   const [closed, setClosed] = useState(status === 'completed');
   const [error, setError] = useState<string | null>(null);
@@ -53,14 +54,14 @@ export function GameCompletedCard({
   };
 
   return (
-    <NoirCard accent className="items-center gap-3 py-8">
-      <Ionicons name={closed ? 'checkmark-circle' : 'trophy'} size={36} color={noir.gold} />
+    <CPCard className="items-center gap-3 py-8">
+      <Ionicons name={closed ? 'checkmark-circle' : 'trophy'} size={36} color={closed ? c.positive : c.gold} />
       <Title className="text-center">{closed ? 'Fecha completada' : 'Juego completado'}</Title>
-      <Body className="text-center text-noir-muted">
+      <Body className="text-center text-cp-on-surface-muted">
         {closed ? 'La fecha quedó cerrada.' : 'El torneo de hoy terminó. ¡Felicitaciones al ganador!'}
       </Body>
       {!closed && status === 'in_progress' ? (
-        <NoirButton
+        <CPButton
           title="Cerrar fecha"
           size="lg"
           loading={closing}
@@ -72,7 +73,7 @@ export function GameCompletedCard({
           }
         />
       ) : null}
-      {error ? <Text className="text-center font-inter text-sm text-noir-danger">{error}</Text> : null}
-    </NoirCard>
+      {error ? <Text className="text-center font-inter text-sm text-cp-primary-light">{error}</Text> : null}
+    </CPCard>
   );
 }

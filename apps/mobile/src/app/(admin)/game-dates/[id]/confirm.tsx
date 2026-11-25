@@ -23,8 +23,8 @@ import {
 } from '@/components/admin/api';
 import { FormError, Notice } from '@/components/admin/Form';
 import { Header } from '@/components/ui/Header';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline } from '@/components/ui/Typography';
@@ -132,15 +132,15 @@ function Body({ gameDate, players, onChanged }: { gameDate: GameDateDetail; play
 
       {created ? (
         <View className="gap-3">
-          <NoirButton title="Iniciar fecha" size="lg" loading={busy === 'start'} disabled={!!busy} onPress={start} />
+          <CPButton title="Iniciar fecha" size="lg" loading={busy === 'start'} disabled={!!busy} onPress={start} />
           <View className="flex-row gap-3">
-            <NoirButton
+            <CPButton
               title="Jugadores"
               variant="outline"
               className="flex-1"
               onPress={() => router.push({ pathname: '/game-dates/[id]/edit-players', params: { id: String(gameDate.id) } })}
             />
-            <NoirButton
+            <CPButton
               title="Invitados"
               variant="outline"
               className="flex-1"
@@ -150,8 +150,8 @@ function Body({ gameDate, players, onChanged }: { gameDate: GameDateDetail; play
         </View>
       ) : live ? (
         <View className="gap-3">
-          <NoirButton title="Ir al registro" size="lg" onPress={() => router.push('/registro')} />
-          <NoirButton
+          <CPButton title="Ir al registro" size="lg" onPress={() => router.push('/registro')} />
+          <CPButton
             title="Gestionar jugadores"
             variant="outline"
             onPress={() => router.push({ pathname: '/game-dates/[id]/manage-players', params: { id: String(gameDate.id) } })}
@@ -159,19 +159,19 @@ function Body({ gameDate, players, onChanged }: { gameDate: GameDateDetail; play
         </View>
       ) : null}
 
-      <NoirCard className="gap-2 p-4">
+      <CPCard className="gap-2 p-4">
         <Overline>Participantes ({players.length})</Overline>
         {players.length === 0 ? (
           <Muted>Sin jugadores.</Muted>
         ) : (
-          <Text className="font-inter text-sm leading-6 text-noir-text">
+          <Text className="font-inter text-sm leading-6 text-cp-on-surface">
             {players.map((p) => `${p.firstName} ${p.lastName}`.trim()).join(' · ')}
           </Text>
         )}
-      </NoirCard>
+      </CPCard>
 
       {created ? (
-        <NoirButton title="Eliminar fecha" variant="ghost" loading={busy === 'delete'} disabled={!!busy} onPress={remove} />
+        <CPButton title="Eliminar fecha" variant="ghost" loading={busy === 'delete'} disabled={!!busy} onPress={remove} />
       ) : null}
     </>
   );
@@ -179,9 +179,9 @@ function Body({ gameDate, players, onChanged }: { gameDate: GameDateDetail; play
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <NoirCard className="flex-1 items-center gap-1 p-3">
-      <Muted className="text-xs uppercase tracking-[2px]">{label}</Muted>
-      <Text className="font-inter-bold text-xl text-noir-gold">{value}</Text>
-    </NoirCard>
+    <CPCard className="flex-1 items-center gap-1 p-3">
+      <Muted className="text-xs uppercase tracking-[1.5px]">{label}</Muted>
+      <Text className="font-display text-xl text-cp-on-surface">{value}</Text>
+    </CPCard>
   );
 }

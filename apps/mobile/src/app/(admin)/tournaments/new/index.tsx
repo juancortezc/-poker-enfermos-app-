@@ -12,14 +12,16 @@ import useSWR from 'swr';
 import { useNextTournamentNumber, type TournamentListItem } from '@/components/admin/api';
 import { FormError, Notice } from '@/components/admin/Form';
 import { Header } from '@/components/ui/Header';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted } from '@/components/ui/Typography';
-import { fonts, noir } from '@/theme/colors';
+import { fonts } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 export default function NewTournamentScreen() {
+  const c = useCP();
   const next = useNextTournamentNumber();
   const all = useSWR<TournamentListItem[]>('/api/tournaments');
   const [text, setText] = useState<string | null>(null);
@@ -54,7 +56,7 @@ export default function NewTournamentScreen() {
     <Screen>
       {header}
       <Header overline="Comisión" title="Nuevo torneo" subtitle="Elegí el número y seguí con jugadores, fechas y blinds." />
-      <NoirCard accent className="items-center gap-3">
+      <CPCard className="items-center gap-3">
         <TextInput
           value={value}
           onChangeText={(t) => setText(t.replace(/[^0-9]/g, '').slice(0, 3))}
@@ -64,16 +66,17 @@ export default function NewTournamentScreen() {
           style={{
             width: '100%',
             textAlign: 'center',
-            fontFamily: fonts.headingBold,
+            fontFamily: fonts.display,
             fontSize: 64,
-            color: noir.gold,
+            color: c.onSurface,
+            letterSpacing: -2,
             paddingVertical: 12,
             borderBottomWidth: 1,
-            borderColor: noir.border,
+            borderColor: c.surfaceBorder,
           }}
         />
         {valid && number !== suggested ? <Muted>Número modificado (sugerido: {suggested})</Muted> : null}
-      </NoirCard>
+      </CPCard>
 
       {!valid ? <FormError message="El número debe estar entre 1 y 999." /> : null}
       {duplicate ? <FormError message={`Ya existe un torneo con el número ${number}.`} /> : null}
@@ -84,14 +87,14 @@ export default function NewTournamentScreen() {
       ) : null}
 
       <View className="gap-3">
-        <NoirButton
+        <CPButton
           title="Continuar"
           size="lg"
           disabled={!valid || duplicate}
           onPress={() => router.push({ pathname: '/tournaments/new/configure', params: { number: String(number) } })}
         />
         {active ? (
-          <NoirButton
+          <CPButton
             title={`Ir al Torneo ${active.number}`}
             variant="outline"
             onPress={() => router.push({ pathname: '/tournaments/[id]', params: { id: String(active.id) } })}

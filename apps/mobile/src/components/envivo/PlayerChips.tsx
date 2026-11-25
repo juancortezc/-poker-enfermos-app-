@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import type { DatePlayer } from './types';
 
@@ -21,19 +21,21 @@ export function PlayerChips({
   selectedId,
   onSelect,
   disabled = false,
-  accent = 'gold',
+  accent = 'primary',
 }: {
   players: DatePlayer[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   disabled?: boolean;
-  accent?: 'gold' | 'copper';
+  /** primary: rojo (quien elimina / gana); negative: naranja (quien sale). */
+  accent?: 'primary' | 'negative';
 }) {
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
   const visible = q ? players.filter((p) => playerName(p).toLowerCase().includes(q)) : players;
-  const selectedBg = accent === 'gold' ? 'bg-noir-gold border-noir-gold' : 'bg-noir-copper border-noir-copper';
-  const selectedText = accent === 'gold' ? 'text-noir-bg' : 'text-noir-text';
+  const c = useCP();
+  const selectedBg = accent === 'primary' ? 'bg-cp-primary border-cp-primary' : 'bg-cp-negative border-cp-negative';
+  const selectedText = accent === 'primary' ? 'text-cp-on-primary' : 'text-cp-surface-0';
 
   return (
     <View className="gap-2">
@@ -42,12 +44,12 @@ export function PlayerChips({
           value={query}
           onChangeText={setQuery}
           placeholder="Buscar…"
-          placeholderTextColor={noir.muted}
+          placeholderTextColor={c.onSurfaceVariant}
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="done"
           clearButtonMode="while-editing"
-          className="min-h-[44px] rounded-xl border border-noir-border bg-noir-bg px-3 font-inter text-base text-noir-text"
+          className="min-h-[44px] rounded-cp border border-cp-surface-border bg-cp-surface-1 px-3 font-inter text-base text-cp-on-surface"
         />
       ) : null}
       <View className="flex-row flex-wrap gap-2">
@@ -61,16 +63,16 @@ export function PlayerChips({
               disabled={disabled}
               onPress={() => onSelect(selected ? null : p.id)}
               className={`min-h-[44px] justify-center rounded-full border px-4 ${
-                selected ? selectedBg : 'border-noir-border bg-noir-raised'
+                selected ? selectedBg : 'border-cp-surface-border bg-cp-surface-2'
               } ${disabled ? 'opacity-50' : 'active:opacity-80'}`}>
-              <Text className={`font-inter-medium text-base ${selected ? selectedText : 'text-noir-text'}`}>
+              <Text className={`font-inter-medium text-base ${selected ? selectedText : 'text-cp-on-surface'}`}>
                 {playerName(p)}
               </Text>
             </Pressable>
           );
         })}
         {visible.length === 0 ? (
-          <Text className="font-inter text-sm text-noir-muted">Nadie con ese nombre.</Text>
+          <Text className="font-inter text-sm text-cp-on-surface-muted">Nadie con ese nombre.</Text>
         ) : null}
       </View>
     </View>

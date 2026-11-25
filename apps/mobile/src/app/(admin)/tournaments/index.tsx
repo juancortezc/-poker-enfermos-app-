@@ -11,14 +11,15 @@ import { Pressable, Text, View } from 'react-native';
 import { useTournaments, type TournamentListItem } from '@/components/admin/api';
 import { Pill } from '@/components/admin/Form';
 import { Segmented } from '@/components/jugador/Segmented';
-import { NoirButton } from '@/components/ui/NoirButton';
+import { CPButton } from '@/components/ui/CPButton';
 import { Screen } from '@/components/ui/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted } from '@/components/ui/Typography';
 import { useRefresh } from '@/hooks/useRefresh';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 export default function TournamentsScreen() {
+  const c = useCP();
   const [tab, setTab] = useState<'ACTIVO' | 'FINALIZADO'>('ACTIVO');
   const { data, error, isLoading, mutate } = useTournaments(tab);
   const { refreshing, onRefresh } = useRefresh(() => mutate());
@@ -35,7 +36,7 @@ export default function TournamentsScreen() {
               hitSlop={10}
               onPress={() => router.push('/tournaments/new')}
               className="h-11 w-11 items-center justify-center">
-              <Ionicons name="add" size={26} color={noir.gold} />
+              <Ionicons name="add" size={26} color={c.primaryLight} />
             </Pressable>
           ),
         }}
@@ -64,7 +65,7 @@ export default function TournamentsScreen() {
           data.map((t) => <TournamentRow key={t.id} t={t} />)
         )}
         {tab === 'ACTIVO' && data && data.length > 0 ? (
-          <NoirButton title="Nuevo torneo" variant="outline" onPress={() => router.push('/tournaments/new')} />
+          <CPButton title="Nuevo torneo" variant="outline" onPress={() => router.push('/tournaments/new')} />
         ) : null}
       </Screen>
     </>
@@ -72,6 +73,7 @@ export default function TournamentsScreen() {
 }
 
 function TournamentRow({ t }: { t: TournamentListItem }) {
+  const c = useCP();
   const completed = t.gameDates.filter((d) => d.status === 'completed').length;
   const total = t.gameDates.length || 12;
   const pct = Math.min(1, completed / total);
@@ -80,22 +82,22 @@ function TournamentRow({ t }: { t: TournamentListItem }) {
       accessibilityRole="button"
       accessibilityLabel={`Torneo ${t.number}`}
       onPress={() => router.push({ pathname: '/tournaments/[id]', params: { id: String(t.id) } })}
-      className="gap-3 rounded-2xl border border-noir-border bg-noir-surface p-4 active:bg-noir-raised">
+      className="gap-3 rounded-card border border-cp-surface-border bg-cp-surface-1 p-4 active:bg-cp-surface-2">
       <View className="flex-row items-center justify-between">
-        <Text className="font-cinzel-bold text-xl text-noir-text">Torneo {t.number}</Text>
+        <Text className="font-display text-xl text-cp-on-surface">Torneo {t.number}</Text>
         <Pill label={t.status === 'ACTIVO' ? 'Activo' : 'Finalizado'} tone={t.status === 'ACTIVO' ? 'ok' : 'muted'} />
       </View>
       {t.status === 'ACTIVO' ? (
-        <View className="h-2 overflow-hidden rounded-full bg-noir-raised">
-          <View className="h-2 rounded-full bg-noir-gold" style={{ width: `${pct * 100}%` }} />
+        <View className="h-2 overflow-hidden rounded-full bg-cp-surface-2">
+          <View className="h-2 rounded-full bg-cp-primary" style={{ width: `${pct * 100}%` }} />
         </View>
       ) : null}
       <View className="flex-row items-center gap-4">
         <Muted>
-          <Ionicons name="people-outline" size={13} color={noir.muted} /> {t._count.tournamentParticipants} jugadores
+          <Ionicons name="people-outline" size={13} color={c.onSurfaceVariant} /> {t._count.tournamentParticipants} jugadores
         </Muted>
         <Muted>
-          <Ionicons name="calendar-outline" size={13} color={noir.muted} /> {completed}/{total} fechas
+          <Ionicons name="calendar-outline" size={13} color={c.onSurfaceVariant} /> {completed}/{total} fechas
         </Muted>
       </View>
     </Pressable>

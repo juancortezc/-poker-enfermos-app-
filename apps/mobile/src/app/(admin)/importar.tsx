@@ -16,12 +16,12 @@ import { useSWRConfig } from 'swr';
 import { confirmAction, errorMessage } from '@/components/admin/api';
 import { FormError, Notice } from '@/components/admin/Form';
 import { Header } from '@/components/ui/Header';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { Muted, Overline } from '@/components/ui/Typography';
 import { apiFetch } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -62,6 +62,7 @@ interface ExecuteResponse {
 type Picked = { name: string; uri: string; size?: number; mimeType?: string };
 
 export default function ImportScreen() {
+  const c = useCP();
   const { mutate } = useSWRConfig();
   const [file, setFile] = useState<Picked | null>(null);
   const [preview, setPreview] = useState<ValidateResponse | null>(null);
@@ -162,26 +163,26 @@ export default function ImportScreen() {
       <Header overline="Comisión" title="Importar resultados" subtitle="Una fecha por archivo, con sus eliminaciones." />
 
       {!file ? (
-        <NoirCard className="gap-3 p-4">
+        <CPCard className="gap-3 p-4">
           <Overline>Formato</Overline>
-          <Text className="font-inter text-xs leading-5 text-noir-muted" selectable>
+          <Text className="font-inter text-xs leading-5 text-cp-on-surface-muted" selectable>
             torneo,fecha,date,posicion,eliminado,eliminador,puntos{'\n'}Torneo 28,1,2025-01-14,19,Juan Pérez,Diego Ruiz,1
           </Text>
           <Muted className="text-xs">Una fila por jugador, posiciones de 1 a N, fecha AAAA-MM-DD, puntos de 0 a 30. El ganador va sin eliminador.</Muted>
-        </NoirCard>
+        </CPCard>
       ) : (
-        <NoirCard className="flex-row items-center gap-3 p-4">
-          <Ionicons name="document-text-outline" size={28} color={noir.gold} />
+        <CPCard className="flex-row items-center gap-3 p-4">
+          <Ionicons name="document-text-outline" size={28} color={c.info} />
           <View className="flex-1">
-            <Text numberOfLines={1} className="font-inter-semibold text-base text-noir-text">
+            <Text numberOfLines={1} className="font-inter-semibold text-base text-cp-on-surface">
               {file.name}
             </Text>
             {file.size ? <Muted className="text-xs">{(file.size / 1024).toFixed(1)} KB</Muted> : null}
           </View>
-        </NoirCard>
+        </CPCard>
       )}
 
-      <NoirButton
+      <CPButton
         title={file ? 'Elegir otro archivo' : 'Elegir archivo CSV'}
         variant={file ? 'outline' : 'primary'}
         size="lg"
@@ -207,12 +208,12 @@ export default function ImportScreen() {
 
       {preview && !result ? (
         preview.valid ? (
-          <NoirButton title="Importar" size="lg" variant="copper" loading={busy === 'execute'} disabled={!!busy} onPress={execute} />
+          <CPButton title="Importar" size="lg" variant="primary" loading={busy === 'execute'} disabled={!!busy} onPress={execute} />
         ) : (
           <Notice tone="danger">Corregí los errores del archivo y volvé a elegirlo.</Notice>
         )
       ) : null}
-      {result ? <NoirButton title="Importar otro" variant="outline" onPress={reset} /> : null}
+      {result ? <CPButton title="Importar otro" variant="outline" onPress={reset} /> : null}
     </Screen>
   );
 }
@@ -222,45 +223,45 @@ function Preview({ data }: { data: ValidateResponse }) {
   const rows = [...data.eliminations].sort((a, b) => a.posicion - b.posicion);
   return (
     <>
-      <NoirCard accent className="gap-2 p-4">
+      <CPCard className="gap-2 p-4">
         <Overline>{data.valid ? 'Listo para importar' : 'Con errores'}</Overline>
-        <Text className="font-cinzel-bold text-lg text-noir-text">
+        <Text className="font-display text-lg text-cp-on-surface">
           {info.tournament} · Fecha {info.dateNumber}
         </Text>
         <Muted>
           {info.date} · {data.previewData.totalRecords} filas · {data.previewData.playerCount} jugadores
         </Muted>
-      </NoirCard>
+      </CPCard>
 
       {data.errors.length > 0 ? (
-        <NoirCard className="gap-1 border-noir-danger/50 p-4">
-          <Overline className="text-noir-danger">Errores ({data.errors.length})</Overline>
+        <CPCard className="gap-1 border-cp-primary/50 p-4">
+          <Overline className="text-cp-primary-light">Errores ({data.errors.length})</Overline>
           {data.errors.map((e) => (
-            <Text key={e} className="font-inter text-sm text-noir-danger">
+            <Text key={e} className="font-inter text-sm text-cp-primary-light">
               • {e}
             </Text>
           ))}
-        </NoirCard>
+        </CPCard>
       ) : null}
 
       {data.warnings.length + data.playerValidation.warnings.length > 0 ? (
-        <NoirCard className="gap-1 p-4">
+        <CPCard className="gap-1 p-4">
           <Overline>Avisos</Overline>
           {data.warnings.map((w) => (
-            <Text key={w} className="font-inter text-sm text-noir-gold">
+            <Text key={w} className="font-inter text-sm text-cp-warning">
               • {w}
             </Text>
           ))}
           {data.playerValidation.warnings.map((w) => (
-            <Text key={w.csvName + w.message} className="font-inter text-sm text-noir-gold">
+            <Text key={w.csvName + w.message} className="font-inter text-sm text-cp-warning">
               • {w.csvName}: {w.message}
             </Text>
           ))}
-        </NoirCard>
+        </CPCard>
       ) : null}
 
       {data.playerValidation.valid.some((v) => v.csvName !== v.dbName) ? (
-        <NoirCard className="gap-1 p-4">
+        <CPCard className="gap-1 p-4">
           <Overline>Nombres reconocidos</Overline>
           {data.playerValidation.valid
             .filter((v) => v.csvName !== v.dbName)
@@ -269,29 +270,29 @@ function Preview({ data }: { data: ValidateResponse }) {
                 {v.csvName} → {v.dbName}
               </Muted>
             ))}
-        </NoirCard>
+        </CPCard>
       ) : null}
 
-      <NoirCard className="gap-0 p-4">
+      <CPCard className="gap-0 p-4">
         <Overline className="pb-2">Filas</Overline>
         {rows.slice(0, 40).map((r) => (
-          <View key={`${r.posicion}-${r.eliminado}`} className="flex-row items-center gap-2 border-b border-noir-border py-1.5">
-            <Text className="w-7 text-right font-cinzel-bold text-sm text-noir-gold">{r.posicion}</Text>
+          <View key={`${r.posicion}-${r.eliminado}`} className="flex-row items-center gap-2 border-b border-cp-surface-border py-1.5">
+            <Text className="w-7 text-right font-display text-sm text-cp-on-surface">{r.posicion}</Text>
             <View className="flex-1">
-              <Text numberOfLines={1} className="font-inter text-sm text-noir-text">
+              <Text numberOfLines={1} className="font-inter text-sm text-cp-on-surface">
                 {r.eliminado}
               </Text>
               {r.eliminador ? (
-                <Text numberOfLines={1} className="font-inter text-[11px] text-noir-muted">
+                <Text numberOfLines={1} className="font-inter text-[11px] text-cp-on-surface-muted">
                   por {r.eliminador}
                 </Text>
               ) : null}
             </View>
-            <Text className="font-inter-bold text-sm text-noir-text">{r.puntos}</Text>
+            <Text className="font-inter-bold text-sm text-cp-on-surface">{r.puntos}</Text>
           </View>
         ))}
         {rows.length > 40 ? <Muted className="pt-2 text-xs">… y {rows.length - 40} filas más.</Muted> : null}
-      </NoirCard>
+      </CPCard>
     </>
   );
 }

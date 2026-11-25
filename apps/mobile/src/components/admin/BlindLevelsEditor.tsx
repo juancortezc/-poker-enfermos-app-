@@ -9,9 +9,10 @@ import { defaultBlindLevels, TOURNAMENT_PRESETS, validateBlindLevels, type Blind
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { OptionPicker } from '@/components/torneo/OptionPicker';
-import { NoirButton } from '@/components/ui/NoirButton';
+import { CPButton } from '@/components/ui/CPButton';
 import { Muted } from '@/components/ui/Typography';
-import { fonts, noir } from '@/theme/colors';
+import { fonts } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { confirmAction } from './api';
 import { toInt } from './Form';
@@ -25,6 +26,7 @@ type Props = {
 const renumber = (levels: BlindLevel[]) => levels.map((l, i) => ({ ...l, level: i + 1 }));
 
 export function BlindLevelsEditor({ levels, onChange, disabled = false }: Props) {
+  const c = useCP();
   const issues = validateBlindLevels(levels);
   const errors = issues.filter((i) => i.type === 'error');
   const warnings = issues.filter((i) => i.type === 'warning');
@@ -71,7 +73,7 @@ export function BlindLevelsEditor({ levels, onChange, disabled = false }: Props)
             if (ok) onChange(preset.blindLevels.map((l) => ({ ...l })));
           }}
         />
-        <NoirButton title="Estándar" variant="outline" onPress={restore} disabled={disabled} />
+        <CPButton title="Estándar" variant="outline" onPress={restore} disabled={disabled} />
       </View>
 
       <Muted className="text-xs">
@@ -90,7 +92,7 @@ export function BlindLevelsEditor({ levels, onChange, disabled = false }: Props)
         const rowError = errors.some((e) => e.field.startsWith(`blindLevel-${i}-`));
         return (
           <View key={i} className="flex-row items-center gap-2">
-            <Text className="text-center font-cinzel-bold text-sm text-noir-gold" style={{ width: 28 }}>
+            <Text className="text-center font-display text-sm text-cp-on-surface-variant" style={{ width: 28 }}>
               {l.level}
             </Text>
             <NumberCell value={l.smallBlind} onChange={(t) => update(i, 'smallBlind', t)} label={`Ciega chica nivel ${l.level}`} error={rowError} disabled={disabled} />
@@ -103,18 +105,18 @@ export function BlindLevelsEditor({ levels, onChange, disabled = false }: Props)
               onPress={() => remove(i)}
               hitSlop={6}
               className="h-11 w-9 items-center justify-center">
-              <Ionicons name="remove-circle-outline" size={20} color={noir.muted} />
+              <Ionicons name="remove-circle-outline" size={20} color={c.onSurfaceVariant} />
             </Pressable>
           </View>
         );
       })}
 
-      <NoirButton title="Agregar nivel" variant="ghost" onPress={add} disabled={disabled} />
+      <CPButton title="Agregar nivel" variant="ghost" onPress={add} disabled={disabled} />
 
       {errors.length > 0 ? (
         <View className="gap-1">
           {errors.slice(0, 4).map((e) => (
-            <Text key={e.field + e.message} className="font-inter text-xs text-noir-danger">
+            <Text key={e.field + e.message} className="font-inter text-xs text-cp-primary-light">
               • {e.message}
             </Text>
           ))}
@@ -123,7 +125,7 @@ export function BlindLevelsEditor({ levels, onChange, disabled = false }: Props)
       {warnings.length > 0 ? (
         <View className="gap-1">
           {warnings.slice(0, 3).map((w) => (
-            <Text key={w.field + w.message} className="font-inter text-xs text-noir-gold">
+            <Text key={w.field + w.message} className="font-inter text-xs text-cp-warning">
               • {w.message}
             </Text>
           ))}
@@ -136,7 +138,7 @@ export function BlindLevelsEditor({ levels, onChange, disabled = false }: Props)
 function HeadCell({ label, width, flex }: { label: string; width?: number; flex?: boolean }) {
   return (
     <Text
-      className="text-center font-inter-semibold text-[11px] uppercase tracking-[1px] text-noir-muted"
+      className="text-center font-inter-semibold text-[11px] uppercase tracking-[1px] text-cp-on-surface-muted"
       style={flex ? { flex: 1 } : { width }}>
       {label}
     </Text>
@@ -158,6 +160,7 @@ function NumberCell({
   error?: boolean;
   disabled?: boolean;
 }) {
+  const c = useCP();
   return (
     <TextInput
       value={String(value)}
@@ -169,14 +172,14 @@ function NumberCell({
       style={[
         {
           minHeight: 44,
-          borderRadius: 10,
+          borderRadius: 5,
           borderWidth: 1,
-          borderColor: error ? noir.danger : noir.border,
-          backgroundColor: noir.surface,
+          borderColor: error ? c.primary : c.surfaceBorder,
+          backgroundColor: c.surface1,
           textAlign: 'center',
           fontFamily: fonts.bodyMedium,
           fontSize: 15,
-          color: noir.text,
+          color: c.onSurface,
         },
         width ? { width } : { flex: 1 },
       ]}

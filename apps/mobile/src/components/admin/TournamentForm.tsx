@@ -21,11 +21,11 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Segmented } from '@/components/jugador/Segmented';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Muted, Overline } from '@/components/ui/Typography';
 import { apiFetch } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { errorMessage, statusLabel, useAdminRefresh, type AdminPlayer, type GameDateStatus, type TournamentDetail } from './api';
 import { BlindLevelsEditor } from './BlindLevelsEditor';
@@ -139,21 +139,21 @@ export function TournamentForm(props: Props) {
       />
 
       {tab === 'participantes' ? (
-        <NoirCard className="gap-3 p-4">
+        <CPCard className="gap-3 p-4">
           <Overline>Participantes del torneo</Overline>
           <PlayerPicker players={pickable} selected={participantIds} onChange={setParticipantIds} />
           {participantIds.length > 24 ? <Notice tone="danger">Máximo 24 participantes por torneo.</Notice> : null}
-        </NoirCard>
+        </CPCard>
       ) : null}
 
       {tab === 'fechas' ? (
         <View className="gap-3">
           {!editing ? (
-            <NoirCard className="gap-3 p-4">
+            <CPCard className="gap-3 p-4">
               <Overline>Formato</Overline>
               <Counter label="Fechas del torneo" value={totalDates} min={10} max={15} onChange={changeTotal} />
               <Counter label="Peores fechas que descarta" value={datesToEliminate} min={2} max={3} onChange={setDatesToEliminate} />
-            </NoirCard>
+            </CPCard>
           ) : null}
           <Muted className="text-xs">Martes cada 15 días. Cambiar una fecha recalcula las siguientes.</Muted>
           {pastDates.length > 0 ? (
@@ -164,9 +164,9 @@ export function TournamentForm(props: Props) {
           {dates.map((d, i) => {
             const locked = LOCKED.includes(d.status ?? 'pending');
             return (
-              <NoirCard key={d.dateNumber} className="gap-2 p-3">
+              <CPCard key={d.dateNumber} className="gap-2 p-3">
                 <View className="flex-row items-center justify-between">
-                  <Text className="font-cinzel-bold text-sm text-noir-gold">Fecha {d.dateNumber}</Text>
+                  <Text className="font-display text-sm text-cp-primary-light">Fecha {d.dateNumber}</Text>
                   {d.status && d.status !== 'pending' ? <Pill label={statusLabel[d.status]} tone={locked ? 'ok' : 'muted'} /> : null}
                 </View>
                 <DateStepper
@@ -176,11 +176,11 @@ export function TournamentForm(props: Props) {
                   disabled={locked}
                   onChange={(v) => setDates(rescheduleFrom(dates, i, v).map((row, j) => (j > i && LOCKED.includes(row.status ?? 'pending') ? dates[j] : row)))}
                 />
-              </NoirCard>
+              </CPCard>
             );
           })}
           {!editing ? (
-            <NoirButton
+            <CPButton
               title="Reiniciar calendario"
               variant="ghost"
               onPress={() => setDates(generateTournamentDates(undefined, totalDates))}
@@ -190,13 +190,13 @@ export function TournamentForm(props: Props) {
       ) : null}
 
       {tab === 'blinds' ? (
-        <NoirCard className="p-4">
+        <CPCard className="p-4">
           <BlindLevelsEditor levels={blinds} onChange={setBlinds} />
-        </NoirCard>
+        </CPCard>
       ) : null}
 
       <FormError message={error} />
-      <NoirButton
+      <CPButton
         title={editing ? 'Guardar cambios' : `Crear torneo ${number}`}
         size="lg"
         loading={saving}
@@ -222,10 +222,10 @@ function Counter({
 }) {
   return (
     <View className="flex-row items-center justify-between gap-3">
-      <Text className="flex-1 font-inter text-base text-noir-text">{label}</Text>
+      <Text className="flex-1 font-inter text-base text-cp-on-surface">{label}</Text>
       <View className="flex-row items-center gap-1">
         <CounterButton label={`${label}: menos`} text="−" disabled={value <= min} onPress={() => onChange(value - 1)} />
-        <Text className="w-10 text-center font-cinzel-bold text-xl text-noir-gold">{value}</Text>
+        <Text className="w-10 text-center font-display text-xl text-cp-on-surface">{value}</Text>
         <CounterButton label={`${label}: más`} text="+" disabled={value >= max} onPress={() => onChange(value + 1)} />
       </View>
     </View>
@@ -233,15 +233,16 @@ function Counter({
 }
 
 function CounterButton({ label, text, disabled, onPress }: { label: string; text: string; disabled: boolean; onPress: () => void }) {
+  const c = useCP();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled}
       onPress={onPress}
-      style={{ borderColor: noir.border }}
-      className={`h-11 w-11 items-center justify-center rounded-full border bg-noir-raised ${disabled ? 'opacity-40' : 'active:opacity-70'}`}>
-      <Text className="font-inter-bold text-xl text-noir-gold">{text}</Text>
+      style={{ borderColor: c.surfaceBorder }}
+      className={`h-11 w-11 items-center justify-center rounded-full border bg-cp-surface-2 ${disabled ? 'opacity-40' : 'active:opacity-70'}`}>
+      <Text className="font-inter-bold text-xl text-cp-on-surface">{text}</Text>
     </Pressable>
   );
 }

@@ -9,8 +9,8 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { OptionPicker } from '@/components/torneo/OptionPicker';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Overline } from '@/components/ui/Typography';
 import { apiFetch } from '@/lib/api';
 
@@ -90,7 +90,7 @@ export function InvitadoForm({ invitado }: { invitado?: EditableInvitado }) {
 
   return (
     <View className="gap-4">
-      <NoirCard className="gap-4 p-4">
+      <CPCard className="gap-4 p-4">
         <Field label="Nombre *" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
         <Field label="Apellido" value={lastName} onChangeText={setLastName} autoCapitalize="words" hint="Opcional: “Sobrino Diego” vale." />
         <View className="gap-1.5">
@@ -104,11 +104,11 @@ export function InvitadoForm({ invitado }: { invitado?: EditableInvitado }) {
           />
         </View>
         <Field label="Año" value={joinYear} onChangeText={(t) => setJoinYear(t.replace(/[^0-9]/g, '').slice(0, 4))} keyboardType="number-pad" />
-      </NoirCard>
+      </CPCard>
       <FormError message={error} />
-      <NoirButton title={editing ? 'Guardar cambios' : 'Crear invitado'} size="lg" loading={saving} onPress={save} />
+      <CPButton title={editing ? 'Guardar cambios' : 'Crear invitado'} size="lg" loading={saving} onPress={save} />
       {editing && invitado.isActive !== false ? (
-        <NoirButton title="Inactivar invitado" variant="ghost" disabled={saving} onPress={deactivate} />
+        <CPButton title="Inactivar invitado" variant="ghost" disabled={saving} onPress={deactivate} />
       ) : null}
     </View>
   );

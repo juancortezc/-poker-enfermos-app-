@@ -9,13 +9,13 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Switch, T
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { OptionPicker } from '@/components/torneo/OptionPicker';
-import { NoirButton } from '@/components/ui/NoirButton';
+import { CPButton } from '@/components/ui/CPButton';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline, Title } from '@/components/ui/Typography';
 import { useMultas, type Multa } from '@/hooks/useMultas';
 import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 import { apiFetch } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { confirmAction, errorMessage } from '../api';
 import { Field, FormError, Pill } from '../Form';
@@ -33,7 +33,7 @@ export function MultasTab({ tournamentId }: { tournamentId: number | undefined }
 
   return (
     <View className="gap-3">
-      <NoirButton title="Nueva multa" onPress={() => setEditing('new')} />
+      <CPButton title="Nueva multa" onPress={() => setEditing('new')} />
       {(multas ?? []).length === 0 ? (
         <EmptyState icon="hammer-outline" message="Sin multas en este torneo." />
       ) : (
@@ -43,15 +43,15 @@ export function MultasTab({ tournamentId }: { tournamentId: number | undefined }
             accessibilityRole="button"
             accessibilityLabel={`Editar multa de ${m.player.firstName}`}
             onPress={() => setEditing(m)}
-            className="gap-1 rounded-2xl border border-noir-border bg-noir-surface p-4 active:bg-noir-raised">
+            className="gap-1 rounded-card border border-cp-surface-border bg-cp-surface-1 p-4 active:bg-cp-surface-2">
             <View className="flex-row items-center justify-between gap-2">
-              <Text className="flex-1 font-inter-semibold text-base text-noir-text">
+              <Text className="flex-1 font-inter-semibold text-base text-cp-on-surface">
                 {m.player.firstName} {m.player.lastName}
               </Text>
-              <Pill label={m.paid ? 'Pagada' : 'Pendiente'} tone={m.paid ? 'ok' : 'copper'} />
+              <Pill label={m.paid ? 'Pagada' : 'Pendiente'} tone={m.paid ? 'ok' : 'negative'} />
             </View>
             <Muted>{m.reason}</Muted>
-            <Text className="font-inter text-xs text-noir-gold">
+            <Text className="font-inter text-xs text-cp-negative">
               {[
                 m.pointsPenalty ? `−${m.pointsPenalty} pts` : null,
                 m.chipsAmount ? `${m.chipsAmount} fichas` : null,
@@ -92,6 +92,7 @@ function MultaForm({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const c = useCP();
   const [playerId, setPlayerId] = useState<string | null>(multa?.player.id ?? null);
   const [reason, setReason] = useState(multa?.reason ?? '');
   const [points, setPoints] = useState(multa?.pointsPenalty ? String(multa.pointsPenalty) : '');
@@ -145,12 +146,12 @@ function MultaForm({
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 justify-end bg-black/60">
-        <View className="max-h-[90%] rounded-t-3xl border-t border-noir-border bg-noir-bg">
+        <View className="max-h-[90%] rounded-t-3xl border-t border-cp-surface-border bg-cp-surface-0">
           <SafeAreaView edges={['bottom']}>
             <View className="flex-row items-center justify-between px-5 pb-1 pt-4">
               <Title className="text-xl">{multa ? 'Editar multa' : 'Nueva multa'}</Title>
               <Pressable accessibilityRole="button" accessibilityLabel="Cerrar" onPress={onClose} className="h-11 w-11 items-center justify-center">
-                <Ionicons name="close" size={22} color={noir.muted} />
+                <Ionicons name="close" size={22} color={c.onSurfaceVariant} />
               </Pressable>
             </View>
             <ScrollView contentContainerClassName="gap-4 px-5 pb-6" keyboardShouldPersistTaps="handled">
@@ -171,12 +172,12 @@ function MultaForm({
                 </View>
               </View>
               <View className="min-h-[44px] flex-row items-center justify-between">
-                <Text className="font-inter text-base text-noir-text">Pagada</Text>
-                <Switch value={paid} onValueChange={setPaid} trackColor={{ true: noir.gold, false: noir.border }} thumbColor={noir.text} />
+                <Text className="font-inter text-base text-cp-on-surface">Pagada</Text>
+                <Switch value={paid} onValueChange={setPaid} trackColor={{ true: c.primary, false: c.surface3 }} thumbColor={c.onPrimary} />
               </View>
               <FormError message={error} />
-              <NoirButton title="Guardar" size="lg" loading={busy} onPress={save} />
-              {multa ? <NoirButton title="Eliminar multa" variant="ghost" disabled={busy} onPress={remove} /> : null}
+              <CPButton title="Guardar" size="lg" loading={busy} onPress={save} />
+              {multa ? <CPButton title="Eliminar multa" variant="ghost" disabled={busy} onPress={remove} /> : null}
             </ScrollView>
           </SafeAreaView>
         </View>

@@ -10,11 +10,11 @@ import { useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Muted, Overline, Title } from '@/components/ui/Typography';
 import { apiFetch } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { eliminationErrorMessage } from './live-data';
 import { PlayerChips, playerName } from './PlayerChips';
@@ -41,6 +41,7 @@ export function EliminationList({
   canUndo: boolean;
   onChanged: () => void;
 }) {
+  const c = useCP();
   const [editing, setEditing] = useState<Elimination | null>(null);
   const [undoing, setUndoing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +82,7 @@ export function EliminationList({
   };
 
   return (
-    <NoirCard className="gap-3">
+    <CPCard className="gap-3">
       <View className="flex-row items-center justify-between">
         <Overline>Eliminaciones</Overline>
         {canWrite && canUndo && latest.position !== 1 ? (
@@ -91,28 +92,28 @@ export function EliminationList({
             disabled={undoing}
             hitSlop={8}
             className="min-h-[44px] flex-row items-center gap-1 px-2 active:opacity-70">
-            <Ionicons name="arrow-undo" size={16} color={noir.gold} />
-            <Text className="font-inter-medium text-sm text-noir-gold">
+            <Ionicons name="arrow-undo" size={16} color={c.primaryLight} />
+            <Text className="font-inter-medium text-sm text-cp-primary-light">
               {undoing ? 'Deshaciendo…' : 'Deshacer última'}
             </Text>
           </Pressable>
         ) : null}
       </View>
 
-      {error ? <Text className="font-inter text-sm text-noir-danger">{error}</Text> : null}
+      {error ? <Text className="font-inter text-sm text-cp-primary-light">{error}</Text> : null}
 
       {sorted.map((e) => {
         const time = clock(e.eliminationTime);
         return (
-          <View key={e.id} className="min-h-[52px] flex-row items-center gap-3 border-b border-noir-border/60 py-2">
-            <Text className="w-8 text-center font-inter-bold text-lg text-noir-text">{e.position}</Text>
+          <View key={e.id} className="min-h-[52px] flex-row items-center gap-3 border-b border-cp-surface-border/60 py-2">
+            <Text className="w-8 text-center font-display text-lg text-cp-on-surface">{e.position}</Text>
             <View className="flex-1">
-              <Text className="font-inter-medium text-base text-noir-text" numberOfLines={1}>
+              <Text className="font-inter-medium text-base text-cp-on-surface" numberOfLines={1}>
                 {playerName(e.eliminatedPlayer)}
                 {e.position === 1 ? (
-                  <Text className="text-noir-gold"> · Ganador</Text>
+                  <Text className="text-cp-gold"> · Ganador</Text>
                 ) : (
-                  <Text className="text-noir-muted">
+                  <Text className="text-cp-on-surface-muted">
                     {' '}
                     vs {e.eliminatorPlayer ? playerName(e.eliminatorPlayer) : 'N/A'}
                   </Text>
@@ -120,7 +121,7 @@ export function EliminationList({
               </Text>
               {time ? <Muted className="text-xs">{time}</Muted> : null}
             </View>
-            <Text className="w-10 text-right font-inter-semibold text-base text-noir-text">{e.points}</Text>
+            <Text className="w-10 text-right font-display text-base text-cp-on-surface">{e.points}</Text>
             {canWrite ? (
               <Pressable
                 accessibilityRole="button"
@@ -128,7 +129,7 @@ export function EliminationList({
                 onPress={() => setEditing(e)}
                 hitSlop={8}
                 className="h-11 w-11 items-center justify-center active:opacity-70">
-                <Ionicons name="create-outline" size={20} color={noir.muted} />
+                <Ionicons name="create-outline" size={20} color={c.onSurfaceVariant} />
               </Pressable>
             ) : null}
           </View>
@@ -146,7 +147,7 @@ export function EliminationList({
           }}
         />
       ) : null}
-    </NoirCard>
+    </CPCard>
   );
 }
 
@@ -161,6 +162,7 @@ function EditEliminationModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const c = useCP();
   const [eliminatedId, setEliminatedId] = useState<string | null>(elimination.eliminatedPlayer.id);
   const [eliminatorId, setEliminatorId] = useState<string | null>(elimination.eliminatorPlayer?.id ?? null);
   const [saving, setSaving] = useState(false);
@@ -193,7 +195,7 @@ function EditEliminationModal({
 
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: noir.bg }}>
+      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: c.surface0 }}>
         <ScrollView contentContainerClassName="gap-5 p-4" keyboardShouldPersistTaps="handled">
           <View className="gap-1">
             <Overline>Editar eliminación</Overline>
@@ -203,7 +205,7 @@ function EditEliminationModal({
             <Muted>La posición y los puntos no cambian; solo quién salió y quién lo eliminó.</Muted>
           </View>
 
-          {error ? <Text className="font-inter text-sm text-noir-danger">{error}</Text> : null}
+          {error ? <Text className="font-inter text-sm text-cp-primary-light">{error}</Text> : null}
 
           <View className="gap-2">
             <Overline>{isWinner ? 'Ganador' : 'Sale'}</Overline>
@@ -211,7 +213,7 @@ function EditEliminationModal({
               players={players}
               selectedId={eliminatedId}
               onSelect={setEliminatedId}
-              accent="copper"
+              accent="negative"
               disabled={saving}
             />
           </View>
@@ -229,8 +231,8 @@ function EditEliminationModal({
           ) : null}
 
           <View className="flex-row gap-3">
-            <NoirButton title="Cancelar" variant="ghost" onPress={onClose} disabled={saving} className="flex-1" />
-            <NoirButton title="Guardar" onPress={save} loading={saving} disabled={!eliminatedId} className="flex-[2]" />
+            <CPButton title="Cancelar" variant="ghost" onPress={onClose} disabled={saving} className="flex-1" />
+            <CPButton title="Guardar" onPress={save} loading={saving} disabled={!eliminatedId} className="flex-[2]" />
           </View>
         </ScrollView>
       </SafeAreaView>

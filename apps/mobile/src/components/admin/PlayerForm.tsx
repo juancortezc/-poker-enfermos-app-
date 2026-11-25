@@ -21,12 +21,12 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Segmented } from '@/components/jugador/Segmented';
 import { PlayerAvatar, avatarProps } from '@/components/common/PlayerAvatar';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Overline } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/lib/api';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { confirmAction, errorMessage, useAdminRefresh } from './api';
 import { Field, FormError } from './Form';
@@ -48,6 +48,7 @@ export interface EditablePlayer {
 const ROLE_LABEL: Record<UserRole, string> = { Comision: 'Comisión', Enfermo: 'Enfermo', Invitado: 'Invitado' };
 
 export function PlayerForm({ player }: { player?: EditablePlayer }) {
+  const c = useCP();
   const { user } = useAuth();
   const refresh = useAdminRefresh();
   const currentYear = getEcuadorToday().year;
@@ -140,15 +141,15 @@ export function PlayerForm({ player }: { player?: EditablePlayer }) {
 
   return (
     <View className="gap-4">
-      <NoirCard className="flex-row items-center gap-4 p-4">
-        <PlayerAvatar {...avatarProps({ firstName: firstName || '?', lastName, photoUrl: photoUrl || null, role })} size={64} ringColor={noir.gold} />
+      <CPCard className="flex-row items-center gap-4 p-4">
+        <PlayerAvatar {...avatarProps({ firstName: firstName || '?', lastName, photoUrl: photoUrl || null, role })} size={64} ringColor={c.primary} />
         <View className="flex-1">
-          <Text className="font-cinzel-bold text-lg text-noir-text">{`${firstName} ${lastName}`.trim() || 'Nuevo jugador'}</Text>
-          <Text className="font-inter text-sm text-noir-muted">{ROLE_LABEL[role]}</Text>
+          <Text className="font-display text-lg text-cp-on-surface">{`${firstName} ${lastName}`.trim() || 'Nuevo jugador'}</Text>
+          <Text className="font-inter text-sm text-cp-on-surface-muted">{ROLE_LABEL[role]}</Text>
         </View>
-      </NoirCard>
+      </CPCard>
 
-      <NoirCard className="gap-4 p-4">
+      <CPCard className="gap-4 p-4">
         <Field label="Nombre *" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
         <Field label="Apellido *" value={lastName} onChangeText={setLastName} autoCapitalize="words" />
         <Field
@@ -193,34 +194,34 @@ export function PlayerForm({ player }: { player?: EditablePlayer }) {
                 />
               </View>
               {aliases.length > 1 ? (
-                <NoirButton title="Quitar" variant="ghost" onPress={() => setAliases(aliases.filter((_, j) => j !== i))} />
+                <CPButton title="Quitar" variant="ghost" onPress={() => setAliases(aliases.filter((_, j) => j !== i))} />
               ) : null}
             </View>
           ))}
-          <NoirButton title="Agregar alias" variant="ghost" onPress={() => setAliases([...aliases, ''])} />
+          <CPButton title="Agregar alias" variant="ghost" onPress={() => setAliases([...aliases, ''])} />
         </View>
-      </NoirCard>
+      </CPCard>
 
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ expanded: more }}
         onPress={() => setMore(!more)}
         className="min-h-[44px] justify-center">
-        <Text className="font-inter-semibold text-sm text-noir-gold">{more ? 'Ocultar información adicional' : 'Más información'}</Text>
+        <Text className="font-inter-semibold text-sm text-cp-primary-light">{more ? 'Ocultar información adicional' : 'Más información'}</Text>
       </Pressable>
       {more ? (
-        <NoirCard className="gap-4 p-4">
+        <CPCard className="gap-4 p-4">
           <Field label="Fecha de nacimiento" value={birthDate} onChangeText={setBirthDate} placeholder="AAAA-MM-DD" keyboardType="numbers-and-punctuation" />
           <Field label="Teléfono" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="0999123456" />
           <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholder="email@ejemplo.com" />
           <Field label="Enfermo desde" value={joinYear} onChangeText={(t) => setJoinYear(t.replace(/[^0-9]/g, '').slice(0, 4))} keyboardType="number-pad" />
-        </NoirCard>
+        </CPCard>
       ) : null}
 
       <FormError message={error} />
-      <NoirButton title={editing ? 'Guardar cambios' : 'Crear jugador'} size="lg" loading={saving} onPress={save} />
+      <CPButton title={editing ? 'Guardar cambios' : 'Crear jugador'} size="lg" loading={saving} onPress={save} />
       {editing && player.isActive !== false && !isSelf ? (
-        <NoirButton title="Inactivar jugador" variant="ghost" disabled={saving} onPress={deactivate} />
+        <CPButton title="Inactivar jugador" variant="ghost" disabled={saving} onPress={deactivate} />
       ) : null}
     </View>
   );

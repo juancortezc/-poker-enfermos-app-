@@ -25,14 +25,14 @@ import type { Elimination } from '@/components/envivo/types';
 import { SearchField } from '@/components/jugador/Bits';
 import { PlayerAvatar, avatarProps } from '@/components/common/PlayerAvatar';
 import { Header } from '@/components/ui/Header';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline } from '@/components/ui/Typography';
 import { useRefresh } from '@/hooks/useRefresh';
 import { apiFetch } from '@/lib/api';
 import { swrKeys } from '@/lib/swr';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 export default function ManagePlayersScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -149,23 +149,23 @@ export default function ManagePlayersScreen() {
       {message ? <Notice tone="ok">{message}</Notice> : null}
       <FormError message={error} />
 
-      <NoirCard className="gap-1 p-4">
+      <CPCard className="gap-1 p-4">
         <Overline className="pb-1">Jugando ({active.length})</Overline>
         {active.map((p) => (
           <PlayerRow key={p.id} player={p} action="remove" busy={busyId === p.id} disabled={!live || !!busyId} onPress={() => remove(p, false)} />
         ))}
-      </NoirCard>
+      </CPCard>
 
       {eliminated.length > 0 ? (
-        <NoirCard className="gap-1 p-4">
+        <CPCard className="gap-1 p-4">
           <Overline className="pb-1">Eliminados ({eliminated.length})</Overline>
           {eliminated.map((p) => (
             <PlayerRow key={p.id} player={p} action="remove" busy={busyId === p.id} disabled={!live || !!busyId} onPress={() => remove(p, true)} />
           ))}
-        </NoirCard>
+        </CPCard>
       ) : null}
 
-      <NoirCard className="gap-3 p-4">
+      <CPCard className="gap-3 p-4">
         <Overline>Agregar</Overline>
         <SearchField value={search} onChangeText={setSearch} />
         {everyone.isLoading && !everyone.data ? (
@@ -177,7 +177,7 @@ export default function ManagePlayersScreen() {
             <PlayerRow key={p.id} player={p} action="add" busy={busyId === p.id} disabled={!live || !!busyId} onPress={() => add(p)} />
           ))
         )}
-      </NoirCard>
+      </CPCard>
     </Screen>
   );
 }
@@ -195,21 +195,22 @@ function PlayerRow({
   disabled: boolean;
   onPress: () => void;
 }) {
+  const c = useCP();
   const name = fullName(player);
-  const color = action === 'add' ? noir.gold : noir.danger;
+  const color = action === 'add' ? c.positive : c.negative;
   return (
-    <View className="min-h-[52px] flex-row items-center gap-3 border-b border-noir-border py-1.5">
+    <View className="min-h-[52px] flex-row items-center gap-3 border-b border-cp-surface-border py-1.5">
       <PlayerAvatar {...avatarProps(player)} size={34} />
-      <Text numberOfLines={1} className="flex-1 font-inter text-base text-noir-text">
+      <Text numberOfLines={1} className="flex-1 font-inter text-base text-cp-on-surface">
         {name}
-        {player.role === 'Invitado' ? <Text className="text-noir-muted"> · invitado</Text> : null}
+        {player.role === 'Invitado' ? <Text className="text-cp-on-surface-muted"> · invitado</Text> : null}
       </Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${action === 'add' ? 'Agregar' : 'Quitar'} a ${name}`}
         disabled={disabled}
         onPress={onPress}
-        className={`h-11 w-11 items-center justify-center rounded-full ${disabled ? 'opacity-40' : 'active:bg-noir-raised'}`}>
+        className={`h-11 w-11 items-center justify-center rounded-full ${disabled ? 'opacity-40' : 'active:bg-cp-surface-2'}`}>
         <Ionicons name={busy ? 'hourglass-outline' : action === 'add' ? 'add-circle-outline' : 'remove-circle-outline'} size={24} color={color} />
       </Pressable>
     </View>

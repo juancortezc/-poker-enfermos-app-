@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
 
-import { NoirButton } from '@/components/ui/NoirButton';
+import { CPButton } from '@/components/ui/CPButton';
 import { Body, Muted, Title } from '@/components/ui/Typography';
 
 import { Field, FormError } from './Form';
@@ -35,12 +35,12 @@ export function TypedConfirm({ visible, title, message, word, confirmTitle, load
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
         <Pressable className="flex-1 justify-center bg-black/70 px-5" onPress={loading ? undefined : close} accessibilityLabel="Cerrar">
-          <Pressable onPress={() => {}} className="gap-4 rounded-3xl border border-noir-copper/60 bg-noir-bg p-5">
+          <Pressable onPress={() => {}} className="gap-4 rounded-card border border-cp-primary/60 bg-cp-surface-1 p-5">
             <Title className="text-xl">{title}</Title>
             <Body className="text-base">{message}</Body>
             {children}
             <Muted>
-              Para confirmar escribí <Muted className="font-inter-bold text-noir-danger">{word}</Muted>
+              Para confirmar escribí <Muted className="font-inter-bold text-cp-primary-light">{word}</Muted>
             </Muted>
             <Field
               label="Confirmación"
@@ -52,8 +52,8 @@ export function TypedConfirm({ visible, title, message, word, confirmTitle, load
             />
             <FormError message={error} />
             <View className="flex-row gap-3">
-              <NoirButton title="Volver" variant="outline" onPress={close} disabled={loading} className="flex-1" />
-              <NoirButton title={confirmTitle} variant="copper" onPress={onConfirm} disabled={!ok} loading={loading} className="flex-1" />
+              <CPButton title="Volver" variant="outline" onPress={close} disabled={loading} className="flex-1" />
+              <CPButton title={confirmTitle} variant="primary" onPress={onConfirm} disabled={!ok} loading={loading} className="flex-1" />
             </View>
           </Pressable>
         </Pressable>

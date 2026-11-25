@@ -8,7 +8,7 @@ import { addDaysToDateString } from '@poker/shared';
 import * as Haptics from 'expo-haptics';
 import { Pressable, Text, View } from 'react-native';
 
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { shortDate } from './api';
 
@@ -33,8 +33,8 @@ export function DateStepper({ value, onChange, label, disabled = false, step = 7
     <View className={`flex-row items-center gap-2 ${disabled ? 'opacity-50' : ''}`}>
       <StepButton icon="chevron-back" label={`${label ?? 'Fecha'}: una semana antes`} onPress={() => move(-1)} disabled={disabled} />
       <View className="flex-1 items-center">
-        <Text className={`font-cinzel-bold text-noir-text ${compact ? 'text-base' : 'text-lg'}`}>{shortDate(value)}</Text>
-        <Text className="font-inter text-xs capitalize text-noir-muted">{weekday}</Text>
+        <Text className={`font-display text-cp-on-surface ${compact ? 'text-base' : 'text-lg'}`}>{shortDate(value)}</Text>
+        <Text className="font-inter text-xs capitalize text-cp-on-surface-muted">{weekday}</Text>
       </View>
       <StepButton icon="chevron-forward" label={`${label ?? 'Fecha'}: una semana después`} onPress={() => move(1)} disabled={disabled} />
     </View>
@@ -52,14 +52,15 @@ function StepButton({
   onPress: () => void;
   disabled: boolean;
 }) {
+  const c = useCP();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled}
       onPress={onPress}
-      className="h-11 w-11 items-center justify-center rounded-full border border-noir-border bg-noir-raised active:opacity-70">
-      <Ionicons name={icon} size={20} color={noir.gold} />
+      className="h-11 w-11 items-center justify-center rounded-full border border-cp-surface-border bg-cp-surface-2 active:opacity-70">
+      <Ionicons name={icon} size={20} color={c.onSurface} />
     </Pressable>
   );
 }

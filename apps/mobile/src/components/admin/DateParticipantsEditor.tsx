@@ -18,8 +18,8 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import useSWR from 'swr';
 
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline } from '@/components/ui/Typography';
 import { apiFetch } from '@/lib/api';
@@ -157,34 +157,34 @@ function Editor({
 
       {mode === 'players' ? (
         <>
-          <NoirCard className="gap-3 p-4">
+          <CPCard className="gap-3 p-4">
             <Overline>Jugadores del torneo ({registered.length})</Overline>
             <PlayerPicker players={registered} selected={selected} onChange={setSelected} />
-          </NoirCard>
+          </CPCard>
           {additional.length > 0 ? (
-            <NoirCard className="gap-3 p-4">
+            <CPCard className="gap-3 p-4">
               <Overline>Del grupo, fuera del torneo</Overline>
               <PlayerPicker players={additional} selected={selected} onChange={setSelected} showBulk={false} />
-            </NoirCard>
+            </CPCard>
           ) : null}
         </>
       ) : (
-        <NoirCard className="gap-3 p-4">
+        <CPCard className="gap-3 p-4">
           <Overline>Invitados ({guests.length})</Overline>
           <PlayerPicker
             players={guests}
             selected={selected}
             onChange={setSelected}
             detail={guestDetail}
-            accent="#EC4899"
+            accent="info"
             emptyMessage="No hay invitados cargados. Crealos desde Jugadores."
           />
-          <NoirButton
+          <CPButton
             title="Crear invitado"
             variant="ghost"
             onPress={() => router.push({ pathname: '/players/new', params: { type: 'invitado' } })}
           />
-        </NoirCard>
+        </CPCard>
       )}
 
       {orphanIds.length > 0 ? (
@@ -194,7 +194,7 @@ function Editor({
       ) : null}
 
       <FormError message={error} />
-      <NoirButton
+      <CPButton
         title={`Guardar · ${finalIds.length} participantes`}
         size="lg"
         loading={saving}

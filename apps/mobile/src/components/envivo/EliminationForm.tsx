@@ -8,8 +8,8 @@ import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Muted, Overline } from '@/components/ui/Typography';
 import { apiFetch } from '@/lib/api';
 
@@ -94,15 +94,15 @@ export function EliminationForm({
   };
 
   return (
-    <NoirCard accent className="gap-4">
+    <CPCard className="gap-4">
       <View className="flex-row items-baseline justify-between">
-        <Text className="font-cinzel-bold text-2xl text-noir-text">Pos {nextPosition}</Text>
-        <Text className="font-inter-bold text-2xl text-noir-gold">{points} pts</Text>
+        <Text className="font-display text-2xl text-cp-on-surface">Pos {nextPosition}</Text>
+        <Text className="font-display text-2xl text-cp-primary-light">{points} pts</Text>
       </View>
 
       {error ? (
-        <View className="rounded-xl border border-noir-danger/50 bg-noir-danger/10 p-3">
-          <Text className="font-inter text-sm text-noir-danger">{error}</Text>
+        <View className="rounded-cp border border-cp-primary/50 bg-cp-primary/10 p-3">
+          <Text className="font-inter text-sm text-cp-primary-light">{error}</Text>
         </View>
       ) : null}
 
@@ -112,7 +112,7 @@ export function EliminationForm({
           players={activePlayers}
           selectedId={eliminatedId}
           disabled={submitting}
-          accent="copper"
+          accent="negative"
           onSelect={(id) => {
             setEliminatedId(id);
             if (id && id === eliminatorId) setEliminatorId(null);
@@ -137,15 +137,15 @@ export function EliminationForm({
       </View>
 
       {isFinal ? (
-        <View className="rounded-xl border border-noir-gold/40 bg-noir-gold/10 p-3">
-          <Muted className="text-noir-gold">Al registrar la posición 2 se declara automáticamente el ganador.</Muted>
+        <View className="rounded-cp border border-cp-info/40 bg-cp-info/10 p-3">
+          <Muted className="text-cp-info">Al registrar la posición 2 se declara automáticamente el ganador.</Muted>
         </View>
       ) : null}
 
       <View className="flex-row gap-3">
-        <NoirButton title="Limpiar" variant="ghost" onPress={reset} disabled={submitting} className="flex-1" />
-        <NoirButton title="Registrar" onPress={confirm} disabled={!valid} loading={submitting} className="flex-[2]" />
+        <CPButton title="Limpiar" variant="ghost" onPress={reset} disabled={submitting} className="flex-1" />
+        <CPButton title="Registrar" onPress={confirm} disabled={!valid} loading={submitting} className="flex-[2]" />
       </View>
-    </NoirCard>
+    </CPCard>
   );
 }

@@ -20,8 +20,8 @@ import { useActiveGameDate, type ActiveGameDate } from '@/hooks/useActiveGameDat
 import { useBlindTimer } from '@/components/envivo/useBlindTimer';
 import { useTimerAlerts } from '@/components/envivo/useTimerAlerts';
 import { Header } from '@/components/ui/Header';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { EmptyState, ErrorState, LoadingState, RestrictedState } from '@/components/ui/States';
 import { Muted } from '@/components/ui/Typography';
@@ -105,12 +105,12 @@ function StartDate({ gameDate, onStarted }: { gameDate: ActiveGameDate; onStarte
   return (
     <Screen>
       <Header overline={`Torneo ${gameDate.tournament.number}`} title={`Fecha ${gameDate.dateNumber}`} />
-      <NoirCard accent className="gap-4">
+      <CPCard className="gap-4">
         <Muted>
           {gameDate.playersCount} jugadores confirmados. Al iniciar arranca el timer en el nivel 1 para todos.
         </Muted>
-        {error ? <Text className="font-inter text-sm text-noir-danger">{error}</Text> : null}
-        <NoirButton
+        {error ? <Text className="font-inter text-sm text-cp-primary-light">{error}</Text> : null}
+        <CPButton
           title="Iniciar fecha"
           size="lg"
           loading={starting}
@@ -121,7 +121,7 @@ function StartDate({ gameDate, onStarted }: { gameDate: ActiveGameDate; onStarte
             ])
           }
         />
-      </NoirCard>
+      </CPCard>
     </Screen>
   );
 }
@@ -178,7 +178,7 @@ function LiveRegistro({ gameDate }: { gameDate: ActiveGameDate }) {
       </View>
 
       {role === 'Comision' && gameDate.status === 'in_progress' ? (
-        <NoirButton
+        <CPButton
           title="Gestionar jugadores"
           variant="outline"
           onPress={() => router.push({ pathname: '/game-dates/[id]/manage-players', params: { id: String(gameDate.id) } })}
@@ -212,9 +212,9 @@ function LiveRegistro({ gameDate }: { gameDate: ActiveGameDate }) {
 
 function Kpi({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
   return (
-    <NoirCard className="flex-1 items-center gap-1 p-3">
-      <Muted className="text-xs uppercase tracking-[2px]">{label}</Muted>
-      <Text className={`font-inter-bold text-2xl ${highlight ? 'text-noir-gold' : 'text-noir-text'}`}>{value}</Text>
-    </NoirCard>
+    <CPCard className="flex-1 items-center gap-1 p-3">
+      <Muted className="text-xs uppercase tracking-[1.5px]">{label}</Muted>
+      <Text className={`font-display text-2xl ${highlight ? 'text-cp-positive' : 'text-cp-on-surface'}`}>{value}</Text>
+    </CPCard>
   );
 }

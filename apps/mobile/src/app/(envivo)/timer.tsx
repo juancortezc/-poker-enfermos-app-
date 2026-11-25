@@ -8,7 +8,9 @@
  * noche y siempre muestra lo mismo que las demás.
  */
 import { useKeepAwake } from 'expo-keep-awake';
-import { Stack } from 'expo-router';
+import { Stack, useFocusEffect } from 'expo-router';
+import { setStatusBarStyle } from 'expo-status-bar';
+import { useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -21,16 +23,20 @@ import { useTimerAlerts } from '@/components/envivo/useTimerAlerts';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Screen } from '@/components/ui/Screen';
 import { useAuth } from '@/contexts/AuthContext';
-import { noir } from '@/theme/colors';
+import { cp, fonts } from '@/theme/colors';
 
+// Destellos a pantalla completa: los mismos fondos que el timer de la web
+// (apps/web/src/app/timer/page.tsx). Son exclusivos de esta pantalla.
 const FLASH_BG = {
   'one-minute': '#4A3708',
-  'level-change': '#6B1F0C',
+  'level-change': '#7F1D1D',
 } as const;
 
 export default function TimerScreen() {
   // Pantalla siempre encendida mientras el timer está visible.
   useKeepAwake('envivo-timer');
+  // Pantalla oscura: la barra de estado en claro aunque se llegue desde una clara.
+  useFocusEffect(useCallback(() => setStatusBarStyle('light', true), []));
 
   const { can } = useAuth();
   // El control del timer es gestión de la fecha: solo Comisión (la web
@@ -106,18 +112,19 @@ export default function TimerScreen() {
               ? `Sigue: ${formatChips(view.nextSmallBlind)}/${formatChips(view.nextBigBlind)}`
               : 'Último nivel';
 
-  const countdownColor = paused ? noir.gold : critical ? noir.danger : noir.text;
+  // Pausado en amarillo, ultimo minuto en rojo-texto, como la web.
+  const countdownColor = paused ? cp.warning : critical ? cp.primaryLight : '#FFFFFF';
 
   return (
     // Sin <Screen>: el fondo entero cambia de color con el destello.
-    <View className="flex-1" style={{ backgroundColor: flash ? FLASH_BG[flash.kind] : noir.bg }}>
+    <View className="flex-1" style={{ backgroundColor: flash ? FLASH_BG[flash.kind] : cp.surface0 }}>
       {header}
       <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
         <View className="flex-1 justify-center gap-4 px-4 pb-6 pt-4">
           {flash ? (
             <Text
               accessibilityLiveRegion="assertive"
-              className="text-center font-inter-bold text-4xl tracking-wide text-white"
+              className="text-center font-display-black text-4xl tracking-wide text-white"
               adjustsFontSizeToFit
               numberOfLines={1}>
               {flash.message}
@@ -125,13 +132,13 @@ export default function TimerScreen() {
           ) : null}
 
           <View className="items-center">
-            <Text className="font-cinzel text-sm uppercase tracking-[4px] text-noir-muted">
+            <Text className="font-inter-medium text-sm uppercase tracking-[3.4px] text-white/45">
               Fecha {gameDate.dateNumber} · Nivel {view?.level ?? 1}
             </Text>
 
             <Text
-              className="mt-2 font-inter-bold text-6xl text-noir-text"
-              style={{ fontVariant: ['tabular-nums'] }}
+              className="mt-2 text-6xl text-white"
+              style={{ fontFamily: fonts.displayBlack, fontVariant: ['tabular-nums'], letterSpacing: -1 }}
               adjustsFontSizeToFit
               numberOfLines={1}>
               {formatChips(view?.smallBlind)}/{formatChips(view?.bigBlind)}
@@ -141,8 +148,10 @@ export default function TimerScreen() {
               accessibilityLabel={
                 view?.isUnlimited ? 'Sin límite' : `Faltan ${formatRemaining(view?.remainingMs ?? 0)}`
               }
-              className={`font-inter-bold ${critical ? 'opacity-90' : ''}`}
+              className={critical ? 'opacity-90' : ''}
               style={{
+                fontFamily: fonts.displayBlack,
+                letterSpacing: -3,
                 fontSize: 112,
                 lineHeight: 124,
                 color: countdownColor,
@@ -154,12 +163,12 @@ export default function TimerScreen() {
             </Text>
 
             <Text
-              className={`mt-1 text-center font-inter-semibold text-lg ${dinner || paused ? 'text-noir-gold' : 'text-noir-muted'}`}>
+              className={`mt-1 text-center font-inter-semibold text-lg ${dinner || paused ? 'text-cp-warning' : 'text-white/50'}`}>
               {statusLine}
             </Text>
 
             {view?.status === 'active' && view.level === DINNER_AFTER_LEVEL && levels.length > DINNER_AFTER_LEVEL ? (
-              <Text className="mt-2 text-center font-inter text-sm text-noir-muted">
+              <Text className="mt-2 text-center font-inter text-sm text-white/50">
                 Al terminar este nivel: pausa de cena
               </Text>
             ) : null}

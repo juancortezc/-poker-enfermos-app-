@@ -13,8 +13,8 @@ import type { ActiveGameDate } from '@/hooks/useActiveGameDate';
 import { Segmented } from '@/components/jugador/Segmented';
 import { ParentChildTab } from '@/components/torneo/stats/ParentChildTab';
 import { PremiosTab as StatsPremios } from '@/components/torneo/stats/PremiosTab';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline, Title } from '@/components/ui/Typography';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,17 +30,17 @@ export function TorneoTab({ tournament }: { tournament: ActiveTournament | undef
   return (
     <View className="gap-3">
       {tournament ? (
-        <NoirCard accent className="gap-2">
+        <CPCard className="gap-2">
           <Overline>Torneo activo</Overline>
           <Title>Torneo {tournament.number}</Title>
           <Muted>
             {tournament.totalDates} fechas · {tournament.participantIds.length} jugadores
           </Muted>
-          <NoirButton
+          <CPButton
             title="Administrar torneo"
             onPress={() => router.push({ pathname: '/tournaments/[id]', params: { id: String(tournament.id) } })}
           />
-        </NoirCard>
+        </CPCard>
       ) : (
         <EmptyState icon="trophy-outline" message="No hay torneo activo." actionTitle="Crear torneo" onAction={() => router.push('/tournaments/new')} />
       )}
@@ -108,12 +108,12 @@ function BlindsEditorCard({
     <View className="gap-3">
       <Overline>Blinds del Torneo {number}</Overline>
       {inProgress ? <Notice>Hay una fecha en curso: lo que guardes cambia el timer al instante.</Notice> : null}
-      <NoirCard className="p-4">
+      <CPCard className="p-4">
         <BlindLevelsEditor levels={levels} onChange={(l) => (setLevels(l), setSaved(false))} />
-      </NoirCard>
+      </CPCard>
       <FormError message={error} />
       {saved ? <Notice tone="ok">Blinds guardados.</Notice> : null}
-      <NoirButton title="Guardar blinds" size="lg" loading={saving} disabled={!dirty} onPress={save} />
+      <CPButton title="Guardar blinds" size="lg" loading={saving} disabled={!dirty} onPress={save} />
     </View>
   );
 }

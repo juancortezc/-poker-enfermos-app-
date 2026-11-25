@@ -5,7 +5,7 @@
 import type { Edge } from 'react-native-safe-area-context';
 
 import { Header } from '@/components/ui/Header';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { Muted } from '@/components/ui/Typography';
 
@@ -20,9 +20,9 @@ export function PlaceholderScreen({ title, area, webPath, edges }: Props) {
   return (
     <Screen edges={edges}>
       <Header overline={area} title={title} />
-      <NoirCard accent>
+      <CPCard>
         <Muted>En construcción. Equivale a {webPath} en la web.</Muted>
-      </NoirCard>
+      </CPCard>
     </Screen>
   );
 }

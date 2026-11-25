@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Linking, Pressable, View } from 'react-native';
 
 import { Muted } from '@/components/ui/Typography';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { requestExactAlarms } from './timer-alerts';
 import type { AlertPermission } from './timer-alerts';
@@ -40,12 +40,13 @@ export function AlertHints({
 }
 
 function Hint({ text, onPress }: { text: string; onPress: () => void }) {
+  const c = useCP();
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      className="min-h-[44px] flex-row items-center gap-2 rounded-xl border border-noir-copper/60 px-3 py-2 active:opacity-80">
-      <Ionicons name="notifications-off-outline" size={18} color={noir.gold} />
+      className="min-h-[44px] flex-row items-center gap-2 rounded-cp border border-cp-warning/50 bg-cp-warning/10 px-3 py-2 active:opacity-80">
+      <Ionicons name="notifications-off-outline" size={18} color={c.warning} />
       <View className="flex-1">
         <Muted>{text}</Muted>
       </View>

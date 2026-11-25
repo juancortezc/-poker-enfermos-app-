@@ -19,8 +19,8 @@ import useSWR from 'swr';
 import type { ActiveGameDate } from '@/hooks/useActiveGameDate';
 import { Segmented } from '@/components/jugador/Segmented';
 import { OptionPicker } from '@/components/torneo/OptionPicker';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline, Title } from '@/components/ui/Typography';
 import { apiFetch, ApiError } from '@/lib/api';
@@ -71,7 +71,7 @@ export function ActivarTab() {
 function ActiveDateCard({ gameDate }: { gameDate: ActiveGameDate }) {
   const live = gameDate.status === 'in_progress';
   return (
-    <NoirCard accent className="gap-3">
+    <CPCard className="gap-3">
       <Overline>{live ? 'Fecha en curso' : 'Fecha configurada'}</Overline>
       <Title>
         Torneo {gameDate.tournament.number} · Fecha {gameDate.dateNumber}
@@ -79,14 +79,14 @@ function ActiveDateCard({ gameDate }: { gameDate: ActiveGameDate }) {
       <Muted>
         {shortDate(gameDate.scheduledDate)} · {gameDate.playersCount} participantes
       </Muted>
-      <NoirButton
+      <CPButton
         title={live ? 'Ver fecha' : 'Confirmar e iniciar'}
         onPress={() => router.push({ pathname: '/game-dates/[id]/confirm', params: { id: String(gameDate.id) } })}
       />
       {live ? (
         <View className="flex-row gap-3">
-          <NoirButton title="Registro" variant="outline" className="flex-1" onPress={() => router.push('/registro')} />
-          <NoirButton
+          <CPButton title="Registro" variant="outline" className="flex-1" onPress={() => router.push('/registro')} />
+          <CPButton
             title="Jugadores"
             variant="outline"
             className="flex-1"
@@ -94,7 +94,7 @@ function ActiveDateCard({ gameDate }: { gameDate: ActiveGameDate }) {
           />
         </View>
       ) : null}
-    </NoirCard>
+    </CPCard>
   );
 }
 
@@ -122,21 +122,21 @@ function BlockedCard({ data, onChanged }: { data: AvailableDatesResponse; onChan
   };
 
   return (
-    <NoirCard className="gap-3">
-      <Overline className="text-noir-danger">Bloqueado</Overline>
+    <CPCard className="gap-3">
+      <Overline className="text-cp-primary-light">Bloqueado</Overline>
       <Muted>{data.blockedReason ?? 'No se pueden crear fechas en este momento.'}</Muted>
       <FormError message={error} />
       {blocked ? (
-        <NoirButton
+        <CPButton
           title={`Abrir fecha ${blocked.dateNumber}`}
           variant="outline"
           onPress={() => router.push({ pathname: '/game-dates/[id]/confirm', params: { id: String(blocked.id) } })}
         />
       ) : null}
       {blocked?.status === 'CREATED' ? (
-        <NoirButton title={`Eliminar fecha ${blocked.dateNumber}`} variant="ghost" loading={busy} onPress={remove} />
+        <CPButton title={`Eliminar fecha ${blocked.dateNumber}`} variant="ghost" loading={busy} onPress={remove} />
       ) : null}
-    </NoirCard>
+    </CPCard>
   );
 }
 
@@ -163,15 +163,15 @@ function ActivateForm({ data }: { data: AvailableDatesResponse }) {
 
   if (!missing && data.availableDates.length === 0) {
     return (
-      <NoirCard className="gap-2">
+      <CPCard className="gap-2">
         <Overline>Torneo {tournament.number}</Overline>
         <Muted>No quedan fechas pendientes. Si el torneo terminó, finalizalo desde Torneos.</Muted>
-        <NoirButton
+        <CPButton
           title={`Ir al Torneo ${tournament.number}`}
           variant="outline"
           onPress={() => router.push({ pathname: '/tournaments/[id]', params: { id: String(tournament.id) } })}
         />
-      </NoirCard>
+      </CPCard>
     );
   }
 
@@ -225,7 +225,7 @@ function ActivateForm({ data }: { data: AvailableDatesResponse }) {
 
   return (
     <View className="gap-4">
-      <NoirCard accent className="gap-3 p-4">
+      <CPCard className="gap-3 p-4">
         <Overline>Torneo {tournament.number}</Overline>
         {missing ? (
           <Notice>La fecha {missing} fue eliminada y hay que volver a crearla.</Notice>
@@ -250,14 +250,14 @@ function ActivateForm({ data }: { data: AvailableDatesResponse }) {
         <DateStepper value={scheduled} onChange={setScheduled} label={`Fecha ${dateNumber ?? ''}`} />
         {dateChanged ? (
           <View className="flex-row gap-3">
-            <NoirButton title="Deshacer" variant="ghost" className="flex-1" onPress={() => setScheduled(selectedDate!.scheduledDate)} />
-            <NoirButton title="Guardar día" variant="outline" className="flex-1" loading={busy === 'date'} onPress={saveDate} />
+            <CPButton title="Deshacer" variant="ghost" className="flex-1" onPress={() => setScheduled(selectedDate!.scheduledDate)} />
+            <CPButton title="Guardar día" variant="outline" className="flex-1" loading={busy === 'date'} onPress={saveDate} />
           </View>
         ) : null}
         {missing ? (
           <Muted className="text-xs">Se propone el próximo martes; ajustalo de a una semana.</Muted>
         ) : null}
-      </NoirCard>
+      </CPCard>
 
       <Segmented
         options={[
@@ -268,7 +268,7 @@ function ActivateForm({ data }: { data: AvailableDatesResponse }) {
         onChange={setTab}
       />
 
-      <NoirCard className="gap-3 p-4">
+      <CPCard className="gap-3 p-4">
         {tab === 'enfermos' ? (
           <PlayerPicker
             players={members}
@@ -282,29 +282,29 @@ function ActivateForm({ data }: { data: AvailableDatesResponse }) {
               players={guests}
               selected={guestIds}
               onChange={setGuestIds}
-              accent="#EC4899"
+              accent="info"
               detail={(p) => (p.inviter ? `de ${fullName(p.inviter)}` : undefined)}
               emptyMessage={guestsSwr.isLoading ? 'Cargando invitados…' : 'No hay invitados cargados.'}
               showBulk={false}
             />
-            <NoirButton
+            <CPButton
               title="Crear invitado"
               variant="ghost"
               onPress={() => router.push({ pathname: '/players/new', params: { type: 'invitado' } })}
             />
           </>
         )}
-      </NoirCard>
+      </CPCard>
 
       <FormError message={error} />
-      <NoirButton
+      <CPButton
         title={missing ? `Crear fecha ${missing}` : `Activar fecha ${dateNumber ?? ''}`}
         size="lg"
         loading={busy === 'activate'}
         disabled={!!busy || players.length === 0 || !dateNumber}
         onPress={activate}
       />
-      <Text className="text-center font-inter text-xs text-noir-muted">
+      <Text className="text-center font-inter text-xs text-cp-on-surface-muted">
         Activar deja la fecha configurada. El timer arranca recién al iniciarla.
       </Text>
     </View>

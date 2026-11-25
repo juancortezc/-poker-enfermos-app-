@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 
 import { Muted } from '@/components/ui/Typography';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { formatChips, type TimerDisplay } from './timer-view';
 import type { TimerAction } from './types';
@@ -21,11 +21,12 @@ type Props = {
 };
 
 export function TimerLockNotice() {
+  const c = useCP();
   return (
     <View
-      className="flex-row items-center justify-center gap-2 rounded-full border border-noir-border px-4 py-2"
+      className="flex-row items-center justify-center gap-2 rounded-full border border-cp-surface-border px-4 py-2"
       accessibilityLabel="Solo la Comisión controla el timer">
-      <Ionicons name="lock-closed" size={14} color={noir.gold} />
+      <Ionicons name="lock-closed" size={14} color={c.onSurfaceVariant} />
       <Muted>Solo la Comisión controla el timer</Muted>
     </View>
   );
@@ -117,7 +118,7 @@ export function TimerControls({ view, canControl, onAction, compact = false }: P
           </>
         )}
       </View>
-      {error ? <Text className="text-center font-inter text-sm text-noir-danger">{error}</Text> : null}
+      {error ? <Text className="text-center font-inter text-sm text-cp-primary-light">{error}</Text> : null}
     </View>
   );
 }
@@ -139,9 +140,11 @@ function ControlButton({
   loading?: boolean;
   size: 'sm' | 'lg';
 }) {
+  const c = useCP();
   const isDisabled = disabled || loading;
-  const base = primary ? 'bg-noir-gold border-noir-gold' : 'bg-noir-raised border-noir-border';
-  const color = primary ? noir.bg : noir.text;
+  // Como el `Boton` del timer web: destacado rojo, el resto translucido.
+  const base = primary ? 'bg-cp-primary border-cp-primary' : 'bg-white/10 border-white/20';
+  const color = primary ? c.onPrimary : c.onSurface;
 
   if (size === 'sm') {
     return (
@@ -164,11 +167,11 @@ function ControlButton({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       onPress={onPress}
-      className={`min-h-[52px] flex-row items-center gap-2 rounded-full border px-5 ${base} ${
+      className={`min-h-[52px] flex-row items-center gap-2 rounded-[14px] border px-5 ${base} ${
         isDisabled ? 'opacity-50' : 'active:opacity-80'
       }`}>
       <Ionicons name={icon} size={20} color={color} />
-      <Text className={`font-inter-semibold text-base ${primary ? 'text-noir-bg' : 'text-noir-text'}`}>
+      <Text className={`font-inter-semibold text-base ${primary ? 'text-cp-on-primary' : 'text-cp-on-surface'}`}>
         {loading ? '…' : label}
       </Text>
     </Pressable>

@@ -12,7 +12,8 @@ import { Pressable, Text, View } from 'react-native';
 import { SearchField } from '@/components/jugador/Bits';
 import { PlayerAvatar, avatarProps } from '@/components/common/PlayerAvatar';
 import { Muted } from '@/components/ui/Typography';
-import { noir } from '@/theme/colors';
+import { alpha } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import type { AdminPlayer } from './api';
 
@@ -24,7 +25,8 @@ type Props = {
   detail?: (player: AdminPlayer) => string | undefined;
   /** Jugadores visibles pero bloqueados (p. ej. ya eliminados). */
   disabledIds?: ReadonlySet<string>;
-  accent?: string;
+  /** primary: Enfermos (rojo) · info: invitados (frio). */
+  accent?: 'primary' | 'info';
   emptyMessage?: string;
   showBulk?: boolean;
 };
@@ -45,10 +47,13 @@ export function PlayerPicker({
   onChange,
   detail,
   disabledIds,
-  accent = noir.gold,
+  accent = 'primary',
   emptyMessage = 'No hay jugadores para elegir.',
   showBulk = true,
 }: Props) {
+  const c = useCP();
+  // Enfermos en rojo, invitados en el frio (como CPActivarTab de la web).
+  const color = accent === 'info' ? c.info : c.primary;
   const [search, setSearch] = useState('');
   const visible = players.filter((p) => matches(p, search));
   const selectedSet = new Set(selected);
@@ -94,23 +99,23 @@ export function PlayerPicker({
                 accessibilityLabel={fullName(p)}
                 disabled={disabled}
                 onPress={() => toggle(p.id)}
-                style={{ width: '49%', borderColor: on ? accent : noir.border, backgroundColor: on ? `${accent}1A` : noir.surface }}
-                className={`min-h-[52px] flex-row items-center gap-2 rounded-xl border px-2 py-1.5 ${disabled ? 'opacity-40' : 'active:opacity-80'}`}>
-                <PlayerAvatar {...avatarProps(p)} size={30} ringColor={on ? accent : noir.border} />
+                style={{ width: '49%', borderColor: on ? color : c.surfaceBorder, backgroundColor: on ? alpha(color, 0.12) : c.surface1 }}
+                className={`min-h-[52px] flex-row items-center gap-2 rounded-cp border px-2 py-1.5 ${disabled ? 'opacity-40' : 'active:opacity-80'}`}>
+                <PlayerAvatar {...avatarProps(p)} size={30} ringColor={on ? color : c.surfaceBorder} />
                 <View className="flex-1">
-                  <Text numberOfLines={1} className="font-inter-semibold text-sm text-noir-text">
+                  <Text numberOfLines={1} className="font-inter-semibold text-sm text-cp-on-surface">
                     {fullName(p)}
                   </Text>
                   {sub ? (
-                    <Text numberOfLines={1} className="font-inter text-[11px] text-noir-muted">
+                    <Text numberOfLines={1} className="font-inter text-[11px] text-cp-on-surface-muted">
                       {sub}
                     </Text>
                   ) : null}
                 </View>
                 <View
                   className="h-5 w-5 items-center justify-center rounded-md border"
-                  style={{ borderColor: on ? accent : noir.muted, backgroundColor: on ? accent : 'transparent' }}>
-                  {on ? <Ionicons name="checkmark" size={14} color={noir.bg} /> : null}
+                  style={{ borderColor: on ? color : c.onSurfaceVariant, backgroundColor: on ? color : 'transparent' }}>
+                  {on ? <Ionicons name="checkmark" size={14} color={c.onPrimary} /> : null}
                 </View>
               </Pressable>
             );
@@ -127,8 +132,8 @@ function BulkButton({ label, onPress }: { label: string; onPress: () => void }) 
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
-      className="min-h-[44px] justify-center rounded-full px-3 active:bg-noir-raised">
-      <Text className="font-inter-semibold text-xs uppercase tracking-[1px] text-noir-gold">{label}</Text>
+      className="min-h-[44px] justify-center rounded-full px-3 active:bg-cp-surface-2">
+      <Text className="font-inter-semibold text-xs uppercase tracking-[1px] text-cp-primary-light">{label}</Text>
     </Pressable>
   );
 }

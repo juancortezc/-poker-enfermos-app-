@@ -5,9 +5,9 @@
  */
 import { Text, View } from 'react-native';
 
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPCard } from '@/components/ui/CPCard';
 import { Muted } from '@/components/ui/Typography';
-import { noir } from '@/theme/colors';
+import { useCP } from '@/theme/tone';
 
 import { TimerControls } from './TimerControls';
 import { formatChips, formatRemaining, isDinnerBreak, type TimerDisplay } from './timer-view';
@@ -25,6 +25,7 @@ export function TimerStrip({
   canControl: boolean;
   onAction: (a: TimerAction) => Promise<void>;
 }) {
+  const c = useCP();
   const paused = view?.status === 'paused';
   const critical = view?.status === 'active' && !view.isUnlimited && view.remainingMs <= 60_000 && view.remainingMs > 0;
   const time = view?.isUnlimited ? 'SIN LÍMITE' : formatRemaining(view?.remainingMs ?? 0);
@@ -33,9 +34,10 @@ export function TimerStrip({
     <View className="gap-2">
       {flash ? (
         <View
-          className="rounded-2xl px-4 py-3"
+          className="rounded-cp px-4 py-3"
           style={{
-            backgroundColor: flash.kind === 'level-change' ? noir.copper : '#8A6A1F',
+            // Los fondos de destello del timer web: cambio de nivel rojo, aviso ambar.
+            backgroundColor: flash.kind === 'level-change' ? '#7F1D1D' : '#4A3708',
           }}>
           <Text
             accessibilityLiveRegion="assertive"
@@ -44,24 +46,21 @@ export function TimerStrip({
           </Text>
         </View>
       ) : null}
-      <NoirCard className="gap-3 p-3">
+      <CPCard className="gap-3 p-3">
         <View className="flex-row items-center justify-around gap-2">
           <View className="items-center">
             <Muted className="text-xs">Nivel {view?.level ?? '—'}</Muted>
-            <Text className="font-inter-bold text-lg text-noir-text">
+            <Text className="font-display text-lg text-cp-on-surface" style={{ fontVariant: ['tabular-nums'] }}>
               {formatChips(view?.smallBlind)}/{formatChips(view?.bigBlind)}
             </Text>
           </View>
           <View
-            className="items-center rounded-xl px-3 py-1"
-            style={{
-              backgroundColor: paused ? 'rgba(224,182,108,0.15)' : 'rgba(169,68,28,0.18)',
-            }}>
+            className={`items-center rounded-cp px-3 py-1 ${paused ? 'bg-cp-warning/15' : 'bg-cp-primary/15'}`}>
             <Muted className="text-xs">{view && isDinnerBreak(view) ? 'Cena' : paused ? 'Pausado' : 'Tiempo'}</Muted>
             <Text
-              className="font-inter-bold text-2xl"
+              className="font-display text-2xl"
               style={{
-                color: paused ? noir.gold : critical ? noir.danger : noir.text,
+                color: paused ? c.warning : critical ? c.primaryLight : c.onSurface,
                 fontVariant: ['tabular-nums'],
               }}>
               {time}
@@ -69,7 +68,7 @@ export function TimerStrip({
           </View>
         </View>
         <TimerControls view={view} canControl={canControl} onAction={onAction} compact />
-      </NoirCard>
+      </CPCard>
     </View>
   );
 }

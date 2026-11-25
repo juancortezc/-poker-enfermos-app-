@@ -51,7 +51,7 @@ export default function AdminScreen() {
   };
 
   return (
-    <Screen refreshing={refreshing} onRefresh={onRefresh}>
+    <Screen tone="light" refreshing={refreshing} onRefresh={onRefresh}>
       <Stack.Screen options={{ title: 'Comisión' }} />
       <Header overline={tournament ? `Torneo ${tournament.number}` : 'Comisión'} title="Configuración" />
       <ChipTabs tabs={TABS} value={tab} onChange={setTab} />

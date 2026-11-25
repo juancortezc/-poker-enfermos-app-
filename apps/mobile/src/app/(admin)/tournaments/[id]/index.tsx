@@ -24,8 +24,8 @@ import { DateStepper } from '@/components/admin/DateStepper';
 import { FormError, Notice, Pill } from '@/components/admin/Form';
 import { TypedConfirm } from '@/components/admin/TypedConfirm';
 import { Header } from '@/components/ui/Header';
-import { NoirButton } from '@/components/ui/NoirButton';
-import { NoirCard } from '@/components/ui/NoirCard';
+import { CPButton } from '@/components/ui/CPButton';
+import { CPCard } from '@/components/ui/CPCard';
 import { Screen } from '@/components/ui/Screen';
 import { ErrorState, LoadingState } from '@/components/ui/States';
 import { Muted, Overline } from '@/components/ui/Typography';
@@ -124,22 +124,22 @@ function Detail({ t, onChanged }: { t: TournamentDetail; onChanged: () => void }
         subtitle={`${t.tournamentParticipants.length} jugadores · ${completed}/${t.gameDates.length} fechas · ${t.blindLevels.length} niveles`}
       />
 
-      <NoirButton
+      <CPButton
         title="Editar torneo"
         variant="outline"
         onPress={() => router.push({ pathname: '/tournaments/[id]/edit', params: { id: String(t.id) } })}
       />
 
-      <NoirCard className="gap-1 p-4">
+      <CPCard className="gap-1 p-4">
         <Overline className="pb-2">Fechas</Overline>
         {t.gameDates.map((d) => {
           const actionable = d.status === 'CREATED' || d.status === 'in_progress';
           const row = (
-            <View className="min-h-[44px] flex-row items-center gap-3 border-b border-noir-border py-2">
-              <Text className="w-16 font-cinzel-bold text-sm text-noir-gold">Fecha {d.dateNumber}</Text>
-              <Text className="flex-1 font-inter text-sm text-noir-text">{shortDate(d.scheduledDate)}</Text>
+            <View className="min-h-[44px] flex-row items-center gap-3 border-b border-cp-surface-border py-2">
+              <Text className="w-16 font-display text-sm text-cp-on-surface">Fecha {d.dateNumber}</Text>
+              <Text className="flex-1 font-inter text-sm text-cp-on-surface">{shortDate(d.scheduledDate)}</Text>
               {d.status !== 'pending' ? (
-                <Pill label={statusLabel[d.status]} tone={d.status === 'completed' ? 'muted' : actionable ? 'gold' : 'copper'} />
+                <Pill label={statusLabel[d.status]} tone={d.status === 'completed' ? 'muted' : actionable ? 'info' : 'negative'} />
               ) : null}
             </View>
           );
@@ -156,26 +156,26 @@ function Detail({ t, onChanged }: { t: TournamentDetail; onChanged: () => void }
             <View key={d.id}>{row}</View>
           );
         })}
-      </NoirCard>
+      </CPCard>
 
       {isActive ? (
         <>
           {last ? (
-            <NoirCard className="gap-3 p-4">
+            <CPCard className="gap-3 p-4">
               <Overline>Fecha final</Overline>
               <Muted className="text-xs">Mueve solo la fecha {last.dateNumber}.</Muted>
               <DateStepper value={endDate} onChange={setEndDate} label="Fecha final" disabled={busy} />
               {endMsg ? <Muted>{endMsg}</Muted> : null}
-              <NoirButton
+              <CPButton
                 title="Guardar fecha final"
                 variant="outline"
                 disabled={busy || endDate === last.scheduledDate.split('T')[0]}
                 onPress={moveEnd}
               />
-            </NoirCard>
+            </CPCard>
           ) : null}
 
-          <NoirCard className="gap-3 p-4">
+          <CPCard className="gap-3 p-4">
             <Overline>Terminar</Overline>
             {open.length > 0 ? (
               <Notice tone="danger">
@@ -185,20 +185,20 @@ function Detail({ t, onChanged }: { t: TournamentDetail; onChanged: () => void }
             ) : completed < t.gameDates.length ? (
               <Notice>Quedan {t.gameDates.length - completed} fechas sin jugar: se terminaría anticipadamente.</Notice>
             ) : null}
-            <NoirButton
+            <CPButton
               title={completed === t.gameDates.length ? 'Terminar torneo' : 'Terminar anticipadamente'}
-              variant="copper"
+              variant="primary"
               disabled={open.length > 0}
               onPress={() => {
                 setError(null);
                 setModal('complete');
               }}
             />
-          </NoirCard>
+          </CPCard>
         </>
       ) : null}
 
-      <NoirButton
+      <CPButton
         title="Cancelar torneo"
         variant="ghost"
         onPress={() => {
