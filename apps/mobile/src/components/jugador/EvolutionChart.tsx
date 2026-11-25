@@ -29,7 +29,9 @@ export function EvolutionChart({ evolution }: { evolution: RankingEvolutionPoint
     dataPointText: String(e.position),
   }));
   const initialSpacing = 16;
-  const spacing = sorted.length > 1 ? Math.max(28, (width - initialSpacing * 2 - 8) / (sorted.length - 1)) : 40;
+  // Todas las fechas entran en el ancho: sin scroll horizontal, que en iOS se
+  // quedaba con el gesto y la pantalla no bajaba. 14 fechas caben de sobra.
+  const spacing = sorted.length > 1 ? Math.max(14, (width - initialSpacing * 2 - 8) / (sorted.length - 1)) : 40;
 
   return (
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)} accessibilityLabel={`Evolución: ${sorted.map((d) => `fecha ${d.dateNumber}, puesto ${d.position}`).join('; ')}`}>
@@ -57,8 +59,8 @@ export function EvolutionChart({ evolution }: { evolution: RankingEvolutionPoint
           textFontSize={12}
           textShiftY={-8}
           textShiftX={-3}
-          xAxisLabelTextStyle={{ color: c.onSurfaceVariant, fontFamily: fonts.body, fontSize: 12 }}
-          disableScroll={width > 0 && spacing * (sorted.length - 1) + initialSpacing * 2 <= width}
+          xAxisLabelTextStyle={{ color: c.onSurfaceVariant, fontFamily: fonts.body, fontSize: sorted.length > 12 ? 10 : 12 }}
+          disableScroll
           isAnimated
           animationDuration={600}
         />

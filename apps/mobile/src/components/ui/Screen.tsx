@@ -7,7 +7,8 @@
  * - `appBar`: la barra de arriba de la web (CPHeader) — para las pestañas,
  *   que no tienen cabecera nativa.
  * - En pantallas con cabecera nativa (stack) usar `edges={['bottom']}` (por
- *   defecto). En tabs, `edges={['top']}`.
+ *   defecto). En tabs, `edges={['top']}`. Si la pantalla tiene la barra
+ *   inferior debajo (CPTabBar), el borde de abajo se ignora: lo reserva ella.
  */
 import { useFocusEffect, useNavigation } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,6 +17,7 @@ import { useCallback, useLayoutEffect } from 'react';
 import { RefreshControl, ScrollView, View, type ViewProps } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
+import { useHasTabBar } from '@/components/navigation/CPTabBar';
 import { CPHeader } from '@/components/ui/CPHeader';
 import { fonts } from '@/theme/colors';
 import { ToneView, type Tone } from '@/theme/tone';
@@ -48,6 +50,9 @@ export function Screen({
 }: Props) {
   const c = tones[tone];
   const navigation = useNavigation();
+  // Con la barra inferior debajo, el borde seguro de abajo ya lo reserva ella.
+  const hasTabBar = useHasTabBar();
+  const safeEdges = hasTabBar ? edges.filter((e) => e !== 'bottom') : edges;
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -74,7 +79,7 @@ export function Screen({
           style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 320 }}
         />
       ) : null}
-      <SafeAreaView edges={edges} style={{ flex: 1 }}>
+      <SafeAreaView edges={safeEdges} style={{ flex: 1 }}>
         {appBar ? <CPHeader /> : null}
         {scroll ? (
           <ScrollView
