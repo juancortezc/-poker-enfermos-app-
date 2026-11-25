@@ -3,7 +3,8 @@
  */
 
 // URL de la imagen del pato para invitados
-export const GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/pato.png'
+export { GUEST_PHOTO_URL } from '@poker/shared'
+import { GUEST_PHOTO_URL } from '@poker/shared'
 
 /**
  * Returns the appropriate photo URL for a player.

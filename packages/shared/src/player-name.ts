@@ -48,3 +48,6 @@ export function shortenFullName(fullName: string | null | undefined): string {
 export function fullName(player: { firstName: string; lastName?: string | null }): string {
   return [player.firstName, player.lastName].filter(Boolean).join(' ').trim()
 }
+
+/** Foto unica de todos los invitados externos (el pato del torneo vigente). */
+export const GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/t31/perfil/pato-1.webp'

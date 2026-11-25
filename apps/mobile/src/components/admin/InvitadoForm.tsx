@@ -3,7 +3,7 @@
  * nombre, apellido opcional (se registran como "Sobrino Diego"), el Enfermo
  * que lo invita y el año. Sin clave: los invitados no entran a la app.
  */
-import { fullName, getEcuadorToday } from '@poker/shared';
+import { fullName, getEcuadorToday, GUEST_PHOTO_URL } from '@poker/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -17,7 +17,6 @@ import { apiFetch } from '@/lib/api';
 import { confirmAction, errorMessage, useAdminRefresh, useMembers } from './api';
 import { Field, FormError } from './Form';
 
-const GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/pato.png';
 
 export interface EditableInvitado {
   id: string;

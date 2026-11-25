@@ -5,6 +5,7 @@ import { UserRole } from '@prisma/client'
 import { withComisionAuth, validateApiAccess, ValidacionNoDisponible } from '@/lib/api-auth'
 import { playerSelectForRole, PLAYER_ADMIN_SELECT } from '@/lib/player-select'
 import { validateAndHashPin } from '@/lib/pin-utils'
+import { GUEST_PHOTO_URL } from '@poker/shared'
 
 // GET /api/players - Directorio de jugadores.
 // Exige sesión: trae teléfono, email y cumpleaños de los socios. Lo que se
@@ -188,7 +189,7 @@ export async function POST(req: NextRequest) {
     // Para invitados, asignar foto genérica si no se proporciona
     let finalPhotoUrl = photoUrl
     if (isInvitado && !photoUrl) {
-      finalPhotoUrl = 'https://storage.googleapis.com/poker-enfermos/pato.png'
+      finalPhotoUrl = GUEST_PHOTO_URL
     }
 
     // Generar adminKey para usuarios Comision

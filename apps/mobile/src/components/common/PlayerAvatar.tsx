@@ -16,8 +16,8 @@ import { Pressable, Text, View } from 'react-native';
 import { apiUrl } from '@/lib/api';
 import { fonts } from '@/theme/colors';
 import { useCP } from '@/theme/tone';
+import { GUEST_PHOTO_URL } from '@poker/shared';
 
-const GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/pato.png';
 
 /** Forma mínima de un jugador para sacar sus props de avatar. */
 export type AvatarPlayer = {

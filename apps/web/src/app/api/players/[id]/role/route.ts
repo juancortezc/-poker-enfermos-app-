@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
 import { withComisionAuth, invalidatePlayerTokens } from '@/lib/api-auth'
 import { PLAYER_ADMIN_SELECT } from '@/lib/player-select'
+import { GUEST_PHOTO_URL } from '@poker/shared'
 
 // PATCH /api/players/:id/role - Cambiar rol de jugador (solo Comisión)
 export async function PATCH(
@@ -55,7 +56,7 @@ export async function PATCH(
       updateData.inviterId = inviterId
       // Asignar foto genérica si no tiene
       if (!existingPlayer.photoUrl) {
-        updateData.photoUrl = 'https://storage.googleapis.com/poker-enfermos/pato.png'
+        updateData.photoUrl = GUEST_PHOTO_URL
       }
     } else {
       // Si deja de ser Invitado, quitar invitador

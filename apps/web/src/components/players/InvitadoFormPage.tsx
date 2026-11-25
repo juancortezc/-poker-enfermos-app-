@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
+import { GUEST_PHOTO_URL } from '@poker/shared'
 
 interface Player {
   id: string
@@ -157,7 +158,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
         role: UserRole.Invitado,
         aliases: [],
         inviterId: formData.inviterId,
-        photoUrl: 'https://storage.googleapis.com/poker-enfermos/pato.png', // Imagen genérica de pato
+        photoUrl: GUEST_PHOTO_URL, // Imagen genérica de pato
         joinYear: year
       }
 
@@ -223,7 +224,7 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
             <div className="relative w-32 h-32 rounded-full overflow-hidden bg-poker-card border-2 border-white/10">
               {!imageError ? (
                 <Image
-                  src="https://storage.googleapis.com/poker-enfermos/pato.png"
+                  src={GUEST_PHOTO_URL}
                   alt="Invitado"
                   width={128}
                   height={128}
