@@ -51,8 +51,8 @@ function RelationCard({ relation, onPress }: { relation: Relation; onPress: () =
       onPress={onPress}
       className="active:opacity-80">
       <CPCard className="flex-row items-center gap-3 p-4">
-        <View className="items-center gap-1" style={{ width: 72 }}>
-          <PlayerAvatar {...avatarProps(relation.parentPlayer)} size={52} ringColor={c.primary} />
+        <View className="items-center gap-1" style={{ width: 84 }}>
+          <PlayerAvatar {...avatarProps(relation.parentPlayer)} size={64} ringColor={c.primary} />
           <Text numberOfLines={1} className="font-inter-semibold text-xs text-cp-on-surface">
             {playerLabel(relation.parentPlayer)}
           </Text>
@@ -63,8 +63,8 @@ function RelationCard({ relation, onPress }: { relation: Relation; onPress: () =
           <Ionicons name="arrow-forward" size={18} color={c.primaryLight} />
           <Muted className="text-[11px]">eliminaciones</Muted>
         </View>
-        <View className="items-center gap-1" style={{ width: 72 }}>
-          <PlayerAvatar {...avatarProps(relation.childPlayer)} size={52} ringColor={c.outline} />
+        <View className="items-center gap-1" style={{ width: 84 }}>
+          <PlayerAvatar {...avatarProps(relation.childPlayer)} size={64} ringColor={c.outline} />
           <Text numberOfLines={1} className="font-inter-semibold text-xs text-cp-on-surface">
             {playerLabel(relation.childPlayer)}
           </Text>

@@ -69,13 +69,11 @@ export default function HomeScreen() {
         ) : view === 'ultimaFecha' && active.lastCompletedDate ? (
           <HomeUltimaFecha
             userId={user?.id ?? ''}
-            tournamentNumber={number ?? 0}
             rankings={rankings}
             lastCompletedDate={active.lastCompletedDate}
             onOpenProfile={openProfile}
             onSeeAllResults={() => router.push('/fecha')}
             onSeeResultsTab={() => router.push({ pathname: '/fecha', params: { tab: 'eliminaciones' } })}
-            onSeeTabla={() => router.push('/ranking')}
           />
         ) : (
           <HomeTorneo
@@ -85,6 +83,8 @@ export default function HomeScreen() {
             finished={active.isFinished}
             rankings={rankings}
             nextDate={active.nextDate}
+            lastDateNumber={active.lastCompletedDate?.dateNumber ?? null}
+            progress={active.progress}
             seasonHighlights={insightsSwr.insights?.seasonHighlights}
             onOpenProfile={openProfile}
             onOpenCalendarPage={() => router.push('/calendario')}

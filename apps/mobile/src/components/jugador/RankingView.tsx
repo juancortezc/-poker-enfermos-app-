@@ -29,6 +29,7 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View, type TextStyle } from 'react-native';
 
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
+import { PlayerCard } from '@/components/common/PlayerCard';
 import { Delta, Score, StatRow, useMedals } from '@/components/jugador/Bits';
 import { Segmented } from '@/components/jugador/Segmented';
 import { CPCard } from '@/components/ui/CPCard';
@@ -184,7 +185,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
     return [];
   })();
   const fixedWidth = W.pos + W.points + extraCols.reduce((s, c) => s + c.width, 0);
-  const nameWidth = Math.max(view === 'resumen' ? 150 : 118, tableWidth - fixedWidth);
+  const nameWidth = Math.max(view === 'resumen' ? 170 : 130, tableWidth - fixedWidth);
 
   const cell: TextStyle = { fontFamily: fonts.body, fontSize: 13, color: c.onSurface, textAlign: 'center' };
   const head: TextStyle = { fontFamily: fonts.display, fontSize: 12, letterSpacing: 0.4, color: cp.onSurface, textAlign: 'center' };
@@ -200,25 +201,28 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{ padding: 14, gap: 12 }}>
-            <View className="flex-row items-center gap-4">
-              <View className="flex-1 gap-1">
-                <Text style={{ fontFamily: fonts.display, fontSize: 12, letterSpacing: 1.2, color: cp.gold }}>👑 LÍDER DEL TORNEO</Text>
-                <View className="flex-row items-baseline gap-2">
-                  <Score value="#1" size={30} color="#FFFFFF" />
-                  <Text numberOfLines={1} className="flex-1 font-inter-bold text-base text-white">
-                    {shortenFullName(leader.playerName)}
-                  </Text>
-                </View>
-                <View className="flex-row flex-wrap items-baseline gap-2">
-                  <Score value={scoreOf(leader)} size={22} color={cp.gold} />
-                  <Text style={{ fontFamily: fonts.body, fontSize: 12, color: bento.onColor.faint }}>{SCORE_LABELS.points}</Text>
-                  {leader.positionsChanged !== 0 ? <Delta value={leader.positionsChanged} size={12} /> : null}
-                </View>
-                {leader.playerAlias ? (
-                  <Text style={{ color: cp.gold }} className="font-inter text-sm italic">“{leader.playerAlias}”</Text>
-                ) : null}
+            <View className="flex-row items-stretch gap-4">
+              {/* La tarjeta del T31 es la protagonista: ~45% del bloque. */}
+              <View style={{ width: '46%' }}>
+                <PlayerCard name={leader.playerName} photoUrl={leader.playerPhoto} displayWidth={170} ringColor={cp.gold} elevate={0} />
               </View>
-              <PlayerAvatar name={leader.playerName} photoUrl={leader.playerPhoto} size={84} />
+              <View className="flex-1 justify-center gap-2">
+                <Text style={{ fontFamily: fonts.display, fontSize: 12, letterSpacing: 1.2, color: cp.gold }}>👑 LÍDER DEL TORNEO</Text>
+                <Score value="#1" size={34} color="#FFFFFF" />
+                <Text numberOfLines={2} className="font-inter-bold text-base leading-tight text-white">
+                  {shortenFullName(leader.playerName)}
+                </Text>
+                {leader.playerAlias ? (
+                  <Text numberOfLines={2} style={{ color: cp.gold }} className="font-inter text-sm italic">“{leader.playerAlias}”</Text>
+                ) : null}
+                <View className="gap-0.5">
+                  <Score value={scoreOf(leader)} size={28} color={cp.gold} />
+                  <View className="flex-row flex-wrap items-center gap-2">
+                    <Text style={{ fontFamily: fonts.body, fontSize: 12, color: bento.onColor.faint }}>{SCORE_LABELS.points}</Text>
+                    {leader.positionsChanged !== 0 ? <Delta value={leader.positionsChanged} size={12} /> : null}
+                  </View>
+                </View>
+              </View>
             </View>
             <View className="border-t pt-3" style={{ borderColor: bento.onColor.line }}>
               <StatRow
@@ -244,8 +248,8 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
               onPress={() => goToPlayer(p.playerId)}
               className="flex-1 active:opacity-80">
               <CPCard className="flex-row items-center gap-3 p-3" style={{ borderColor: p.position === 2 ? cp.silver : cp.bronze }}>
-                <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={40} />
-                <View className="min-w-0 flex-1">
+                <PlayerCard name={p.playerName} photoUrl={p.playerPhoto} cardOnly={false} width={60} elevate={0} />
+                <View className="min-w-0 flex-1 gap-0.5">
                   <Score value={`#${p.position}`} size={13} color={medals[p.position - 1]} />
                   <Text numberOfLines={1} className="font-inter-semibold text-sm text-cp-on-surface">
                     {shortenFullName(p.playerName)}
@@ -367,7 +371,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                   accessibilityLabel={`${posicion}. ${player.playerName}, ${points} puntos`}
                   onPress={() => goToPlayer(player.playerId)}
                   style={{ backgroundColor: rowBg }}
-                  className="min-h-[48px] flex-row items-center border-b border-cp-surface-border/60 active:opacity-70">
+                  className="min-h-[56px] flex-row items-center border-b py-1.5 border-cp-surface-border/60 active:opacity-70">
                   <View style={{ width: W.pos }} className="items-center">
                     {isMalazo ? (
                       <Text style={{ fontSize: 15 }}>💀</Text>
@@ -388,7 +392,7 @@ export function RankingView({ data, tournamentNumber, currentUserId }: Props) {
                     )}
                   </View>
                   <View style={{ width: nameWidth }} className="flex-row items-center gap-2 pr-2">
-                    <PlayerAvatar name={player.playerName} photoUrl={player.playerPhoto} size={view === 'resumen' ? 28 : 24} />
+                    <PlayerAvatar name={player.playerName} photoUrl={player.playerPhoto} size={view === 'resumen' ? 44 : 36} />
                     <Text numberOfLines={1} style={{ color: textColor }} className="flex-1 font-inter-semibold text-sm">
                       {view === 'resumen' ? player.playerName : shortenFullName(player.playerName)}
                       {isMe ? ' (Tú)' : ''}

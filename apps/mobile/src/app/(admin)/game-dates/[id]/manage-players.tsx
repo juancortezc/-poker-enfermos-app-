@@ -200,7 +200,7 @@ function PlayerRow({
   const color = action === 'add' ? c.positive : c.negative;
   return (
     <View className="min-h-[52px] flex-row items-center gap-3 border-b border-cp-surface-border py-1.5">
-      <PlayerAvatar {...avatarProps(player)} size={34} />
+      <PlayerAvatar {...avatarProps(player)} size={40} />
       <Text numberOfLines={1} className="flex-1 font-inter text-base text-cp-on-surface">
         {name}
         {player.role === 'Invitado' ? <Text className="text-cp-on-surface-muted"> · invitado</Text> : null}

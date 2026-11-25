@@ -48,7 +48,7 @@ export function FechaTimelineItem({ date: gd, isNext, isLast, currentUserId, bir
       <View className="flex-1">
         {done && winner ? (
           <View className="flex-row items-center gap-2">
-            <PlayerAvatar name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={40} />
+            <PlayerAvatar name={fullName(winner.eliminatedPlayer)} photoUrl={winner.eliminatedPlayer.photoUrl} size={56} />
             <View>
               <Text style={{ color: c.positive }} className="font-inter-bold text-[11px] tracking-[1px]">
                 GANADOR

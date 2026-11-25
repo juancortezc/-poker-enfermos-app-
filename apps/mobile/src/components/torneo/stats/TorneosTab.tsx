@@ -8,7 +8,8 @@ import { Text, View } from 'react-native';
 import useSWR from 'swr';
 
 import { OptionPicker, type Option } from '@/components/torneo/OptionPicker';
-import { avatarProps, PlayerAvatar } from '@/components/common/PlayerAvatar';
+import { avatarProps } from '@/components/common/PlayerAvatar';
+import { PlayerCard } from '@/components/common/PlayerCard';
 import { EmptyState, ErrorState, LoadingState, CPButton, CPCard, Overline, Title } from '@/components/ui';
 import { swrKeys } from '@/lib/swr';
 import { playerLabel } from '@poker/shared';
@@ -140,7 +141,7 @@ export function TorneosTab() {
       {filtrados.map((t) => (
         <CPCard key={t.tournamentNumber} className="p-0">
           <View className="flex-row items-center gap-4 p-4">
-            <PlayerAvatar {...avatarProps(t.champion)} size={72} shape="card" ringColor={metal.metales[0]} />
+            <PlayerCard {...avatarProps(t.champion)} width={104} ringColor={metal.metales[0]} elevate={1} zoomable />
             <View className="flex-1 gap-0.5">
               <Overline style={{ color: metal.tintas[0] }}>Campeón</Overline>
               <Title className="text-lg">{nombre(t.champion)}</Title>

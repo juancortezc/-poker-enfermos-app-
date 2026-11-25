@@ -3,6 +3,7 @@ import '../global.css';
 import { Archivo_700Bold } from '@expo-google-fonts/archivo/700Bold';
 import { Archivo_800ExtraBold } from '@expo-google-fonts/archivo/800ExtraBold';
 import { Archivo_900Black } from '@expo-google-fonts/archivo/900Black';
+import { Archivo_900Black_Italic } from '@expo-google-fonts/archivo/900Black_Italic';
 import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular';
 import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium';
 import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold';
@@ -26,6 +27,7 @@ export default function RootLayout() {
     Archivo_700Bold,
     Archivo_800ExtraBold,
     Archivo_900Black,
+    Archivo_900Black_Italic,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,

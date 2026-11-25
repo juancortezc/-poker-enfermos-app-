@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
+import { PlayerHeroCard } from '@/components/common/PlayerCard';
 import { Delta, KeyValue, Score, StatRow } from '@/components/jugador/Bits';
 import { EvolutionChart } from '@/components/jugador/EvolutionChart';
 import { CPButton } from '@/components/ui/CPButton';
@@ -71,10 +72,10 @@ export default function PlayerDetailScreen() {
       return (
         <>
           {p ? (
-            <CPCard className="flex-row items-center gap-4">
-              <PlayerAvatar name={fullName(p)} photoUrl={p.photoUrl} size={72} />
-              <Title className="flex-1">{fullName(p)}</Title>
-            </CPCard>
+            <>
+              <PlayerHeroCard name={fullName(p)} photoUrl={p.photoUrl} />
+              <Title className="text-center text-xl">{fullName(p)}</Title>
+            </>
           ) : null}
           <EmptyState icon="person-outline" message="Este jugador no figura en la tabla del torneo activo." />
         </>
@@ -94,15 +95,10 @@ export default function PlayerDetailScreen() {
 
     return (
       <>
-        {/* HERO */}
+        {/* HERO: la tarjeta del T31 arriba; tocarla la abre en grande. */}
+        <PlayerHeroCard name={fullName(player)} photoUrl={player.photoUrl} />
         <CPCard className="gap-4">
           <View className="flex-row items-center gap-4">
-            <View>
-              <PlayerAvatar name={fullName(player)} photoUrl={player.photoUrl} size={84} />
-              <View className="absolute -bottom-1 -left-1 rounded-cp border-2 border-cp-surface-1 bg-cp-primary px-1.5 py-0.5">
-                <Text className="font-display text-xs text-white">#{currentStats.position}</Text>
-              </View>
-            </View>
             <View className="flex-1 gap-1">
               <Title className="text-xl leading-tight">{fullName(player)}</Title>
               {player.aliases.length > 0 ? <Text className="font-inter text-sm italic text-cp-primary-light">“{player.aliases[0]}”</Text> : null}
@@ -115,7 +111,7 @@ export default function PlayerDetailScreen() {
             </View>
             <View className="items-end">
               <Muted className="text-[10px] uppercase tracking-[1px]">{isOwn ? 'Tu posición' : 'Posición'}</Muted>
-              <Score value={`#${currentStats.position}`} size={26} />
+              <Score value={`#${currentStats.position}`} size={30} />
               {myEntry ? <Delta value={myEntry.positionsChanged} /> : null}
             </View>
           </View>
@@ -146,7 +142,7 @@ export default function PlayerDetailScreen() {
                   onPress={() => router.push({ pathname: '/players/[id]', params: { id: p.playerId } })}
                   className="active:opacity-80">
                   <CPCard className="flex-row items-center gap-3 p-3">
-                    <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={44} />
+                    <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={56} />
                     <View className="flex-1">
                       <View className="flex-row items-center gap-2">
                         <Text className="rounded bg-cp-surface-2 px-1.5 py-0.5 font-inter-bold text-[10px] tracking-[1px] text-cp-on-surface-muted">
@@ -223,7 +219,7 @@ export default function PlayerDetailScreen() {
                         <PlayerAvatar
                           name={fullName(winner.eliminatedPlayer)}
                           photoUrl={winner.eliminatedPlayer.photoUrl}
-                          size={28}
+                          size={40}
                           playerId={winner.eliminatedPlayer.id}
                           linkToProfile
                         />
@@ -318,3 +314,4 @@ function DateBadge({ n }: { n: number }) {
     </View>
   );
 }
+

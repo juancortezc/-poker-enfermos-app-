@@ -57,10 +57,10 @@ function useHistorico<T>(key: string) {
 }
 
 function TarjetaPodio({ fila, color, tinta, grande }: { fila: Fila; color: string; tinta: string; grande: boolean }) {
-  const w = grande ? 108 : 92;
+  const w = grande ? 116 : 96;
   return (
     <View className="items-center" style={{ width: w + 8 }}>
-      <PlayerAvatar {...avatarProps(fila.jugador)} size={w} height={grande ? 140 : 120} shape="card" ringColor={color} />
+      <PlayerAvatar {...avatarProps(fila.jugador)} size={w} height={Math.round((w * 4) / 3)} shape="card" ringColor={color} />
       <Text numberOfLines={1} className="mt-2 font-inter-semibold text-sm text-cp-on-surface">
         {playerLabel(fila.jugador)}
       </Text>
@@ -105,7 +105,7 @@ function HistoricoList({ filas, paleta, vacio }: { filas: Fila[]; paleta: Paleta
                 fila.jugador.isActive ? '' : 'opacity-60'
               }`}>
               <Text className="w-6 text-center font-inter text-sm text-cp-on-surface-muted">{i + 4}</Text>
-              <PlayerAvatar {...avatarProps(fila.jugador)} size={40} />
+              <PlayerAvatar {...avatarProps(fila.jugador)} size={56} />
               <View className="flex-1">
                 <Text numberOfLines={1} className="font-inter-semibold text-base text-cp-on-surface">
                   {fila.jugador.firstName} {fila.jugador.lastName}
@@ -250,7 +250,7 @@ function Premio({ etiqueta, jugador, paleta }: { etiqueta: string; jugador: Juga
       <Text style={{ color: paleta.tintas[1] }} className="font-display text-sm">
         {etiqueta}
       </Text>
-      <PlayerAvatar {...avatarProps(jugador)} size={28} ringColor={paleta.metales[2]} />
+      <PlayerAvatar {...avatarProps(jugador)} size={40} ringColor={paleta.metales[2]} />
       <Text numberOfLines={1} className="flex-1 font-inter text-sm text-cp-on-surface">
         {playerLabel(jugador)}
       </Text>

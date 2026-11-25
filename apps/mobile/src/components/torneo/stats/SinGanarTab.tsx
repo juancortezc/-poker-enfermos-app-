@@ -177,7 +177,7 @@ function Hero({ player, milestone, match }: { player: PlayerWithVictoryData; mil
           ) : null}
         </View>
         <View className="items-center">
-          <PlayerAvatar {...avatarProps(player)} size={64} ringColor={accent} />
+          <PlayerAvatar {...avatarProps(player)} size={84} ringColor={accent} />
           <Text className="mt-1 font-inter-bold text-sm text-white">{player.firstName}</Text>
           <Muted className="text-xs">{player.lastName}</Muted>
         </View>
@@ -196,7 +196,7 @@ function Row({ player, rank, milestone, match }: { player: PlayerWithVictoryData
   return (
     <View className="flex-row items-center gap-3 rounded-card border border-cp-surface-border bg-cp-surface-1 p-3" style={{ borderLeftColor: tier.color, borderLeftWidth: 3 }}>
       <Text className="w-5 text-center font-inter text-xs text-cp-on-surface-muted">{rank}</Text>
-      <PlayerAvatar {...avatarProps(player)} size={38} ringColor={tier.color} />
+      <PlayerAvatar {...avatarProps(player)} size={52} ringColor={tier.color} />
       <View className="flex-1 gap-1.5">
         <View className="flex-row items-baseline justify-between gap-2">
           <Text numberOfLines={1} className="flex-1 font-inter-bold text-sm text-cp-on-surface">
