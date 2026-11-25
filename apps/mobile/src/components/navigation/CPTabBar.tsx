@@ -46,6 +46,8 @@ export function CPTabBar({ active, onSelect }: Props) {
       accessibilityRole="tablist"
       style={{
         flexDirection: 'row',
+        alignSelf: 'stretch',
+        width: '100%',
         backgroundColor: cpLight.surface0,
         borderTopWidth: 1,
         borderTopColor: cpLight.surfaceBorder,
@@ -57,38 +59,41 @@ export function CPTabBar({ active, onSelect }: Props) {
         const on = item.key === active;
         const color = on ? cpLight.onSurface : cpLight.onSurfaceMuted;
         return (
+          // Estilos fijos: NativeWind descarta el `style` como funcion en Pressable.
           <Pressable
             key={item.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: on }}
             accessibilityLabel={item.title}
             onPress={() => onSelect(item.key)}
-            style={({ pressed }) => [
-              {
-                flex: 1,
-                minHeight: 50,
-                marginHorizontal: 1,
-                borderRadius: 18,
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 3,
-                opacity: pressed ? 0.7 : 1,
-              },
-              on
-                ? {
-                    backgroundColor: cpLight.surface1,
-                    shadowColor: '#17120F', // sombra de la pildora, igual que la web
-                    shadowOpacity: 0.1,
-                    shadowRadius: 10,
-                    shadowOffset: { width: 0, height: 3 },
-                    elevation: 3,
-                  }
-                : null,
-            ]}>
-            <Ionicons name={item.icon} color={color} size={22} />
-            <Text style={{ fontFamily: fonts.bodyMedium, fontSize: 11.5, color }} numberOfLines={1}>
-              {item.title}
-            </Text>
+            className="active:opacity-70"
+            style={{ flex: 1, marginHorizontal: 1 }}>
+            <View
+              style={[
+                {
+                  flex: 1,
+                  minHeight: 50,
+                  borderRadius: 18,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 3,
+                },
+                on
+                  ? {
+                      backgroundColor: cpLight.surface1,
+                      shadowColor: '#17120F', // sombra de la pildora, igual que la web
+                      shadowOpacity: 0.1,
+                      shadowRadius: 10,
+                      shadowOffset: { width: 0, height: 3 },
+                      elevation: 3,
+                    }
+                  : null,
+              ]}>
+              <Ionicons name={item.icon} color={color} size={22} />
+              <Text style={{ fontFamily: fonts.bodyMedium, fontSize: 11.5, color }} numberOfLines={1}>
+                {item.title}
+              </Text>
+            </View>
           </Pressable>
         );
       })}
