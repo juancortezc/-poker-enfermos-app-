@@ -1,233 +1,150 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
-import { withAuth, withComisionAuth } from '@/lib/api-auth'
+import {
+  addTournamentParticipantSchema,
+  idParamsSchema,
+  removeTournamentParticipantQuerySchema,
+} from '@poker/shared'
+import { requireComision, requireUser } from '@/lib/api-auth'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseBody, parseParams, parseQuery } from '@/lib/http'
+
+type Ctx = { params: Promise<{ id: string }> }
 import { PLAYER_PUBLIC_SELECT } from '@/lib/player-select'
 
 // GET /api/tournaments/[id]/participants - Obtener participantes de un torneo
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  return withAuth(req, async (req) => {
-    try {
-      const { id } = await params
-      const tournamentId = parseInt(id)
+export const GET = withErrorHandler(async (req: NextRequest, { params }: Ctx) => {
+  await requireUser(req)
+  const { id: tournamentId } = parseParams(await params, idParamsSchema)
 
-      if (isNaN(tournamentId)) {
-        return NextResponse.json(
-          { error: 'ID de torneo inválido' },
-          { status: 400 }
-        )
-      }
-
-      const participants = await prisma.tournamentParticipant.findMany({
-        where: { tournamentId },
-        include: {
-          player: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              role: true,
-              photoUrl: true,
-              aliases: true,
-              isActive: true
-            }
-          }
-        },
-        orderBy: {
-          player: {
-            firstName: 'asc'
-          }
+  const participants = await prisma.tournamentParticipant.findMany({
+    where: { tournamentId },
+    include: {
+      player: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          photoUrl: true,
+          aliases: true,
+          isActive: true
         }
-      })
-
-      return NextResponse.json(participants)
-    } catch (error) {
-      console.error('Error fetching tournament participants:', error)
-      return NextResponse.json(
-        { error: 'Error al obtener participantes del torneo' },
-        { status: 500 }
-      )
+      }
+    },
+    orderBy: {
+      player: {
+        firstName: 'asc'
+      }
     }
   })
-}
+
+  return ok(participants)
+})
 
 // POST /api/tournaments/[id]/participants - Agregar participante al torneo
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  return withComisionAuth(req, async (req) => {
-    try {
-      const { id } = await params
-      const tournamentId = parseInt(id)
-      const data = await req.json()
+export const POST = withErrorHandler(async (req: NextRequest, { params }: Ctx) => {
+  await requireComision(req)
+  const { id: tournamentId } = parseParams(await params, idParamsSchema)
+  const { playerId } = await parseBody(req, addTournamentParticipantSchema)
 
-      if (isNaN(tournamentId)) {
-        return NextResponse.json(
-          { error: 'ID de torneo inválido' },
-          { status: 400 }
-        )
+  // Verificar que el torneo existe
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: tournamentId }
+  })
+
+  if (!tournament) {
+    throw AppError.notFound('Torneo no encontrado', 'TOURNAMENT_NOT_FOUND')
+  }
+
+  // Verificar que el jugador existe y es Enfermo o Comisión
+  const player = await prisma.player.findUnique({
+    where: { id: playerId },
+    select: PLAYER_PUBLIC_SELECT
+  })
+
+  if (!player) {
+    throw AppError.notFound('Jugador no encontrado', 'PLAYER_NOT_FOUND')
+  }
+
+  if (player.role === UserRole.Invitado) {
+    throw AppError.badRequest(
+      'Los Invitados no pueden participar en torneos (solo pueden jugar fechas individuales)',
+      'GUEST_NOT_ALLOWED'
+    )
+  }
+
+  if (!player.isActive) {
+    throw AppError.badRequest('El jugador no está activo', 'PLAYER_INACTIVE')
+  }
+
+  // Verificar que no esté ya participando
+  const existingParticipant = await prisma.tournamentParticipant.findUnique({
+    where: {
+      tournamentId_playerId: {
+        tournamentId,
+        playerId
       }
-
-      const { playerId } = data
-
-      if (!playerId) {
-        return NextResponse.json(
-          { error: 'ID del jugador es obligatorio' },
-          { status: 400 }
-        )
-      }
-
-      // Verificar que el torneo existe
-      const tournament = await prisma.tournament.findUnique({
-        where: { id: tournamentId }
-      })
-
-      if (!tournament) {
-        return NextResponse.json(
-          { error: 'Torneo no encontrado' },
-          { status: 404 }
-        )
-      }
-
-      // Verificar que el jugador existe y es Enfermo o Comisión
-      const player = await prisma.player.findUnique({
-        where: { id: playerId },
-        select: PLAYER_PUBLIC_SELECT
-      })
-
-      if (!player) {
-        return NextResponse.json(
-          { error: 'Jugador no encontrado' },
-          { status: 404 }
-        )
-      }
-
-      if (player.role === UserRole.Invitado) {
-        return NextResponse.json(
-          { error: 'Los Invitados no pueden participar en torneos (solo pueden jugar fechas individuales)' },
-          { status: 400 }
-        )
-      }
-
-      if (!player.isActive) {
-        return NextResponse.json(
-          { error: 'El jugador no está activo' },
-          { status: 400 }
-        )
-      }
-
-      // Verificar que no esté ya participando
-      const existingParticipant = await prisma.tournamentParticipant.findUnique({
-        where: {
-          tournamentId_playerId: {
-            tournamentId,
-            playerId
-          }
-        }
-      })
-
-      if (existingParticipant) {
-        return NextResponse.json(
-          { error: 'El jugador ya está participando en este torneo' },
-          { status: 400 }
-        )
-      }
-
-      const participant = await prisma.tournamentParticipant.create({
-        data: {
-          tournamentId,
-          playerId,
-          confirmed: false
-        },
-        include: {
-          player: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              role: true,
-              photoUrl: true,
-              aliases: true
-            }
-          }
-        }
-      })
-
-      return NextResponse.json(participant, { status: 201 })
-    } catch (error) {
-      console.error('Error adding tournament participant:', error)
-      return NextResponse.json(
-        { error: 'Error al agregar participante al torneo' },
-        { status: 500 }
-      )
     }
   })
-}
+
+  if (existingParticipant) {
+    throw AppError.badRequest('El jugador ya está participando en este torneo', 'ALREADY_PARTICIPANT')
+  }
+
+  const participant = await prisma.tournamentParticipant.create({
+    data: {
+      tournamentId,
+      playerId,
+      confirmed: false
+    },
+    include: {
+      player: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          photoUrl: true,
+          aliases: true
+        }
+      }
+    }
+  })
+
+  return ok(participant, 201)
+})
 
 // DELETE /api/tournaments/[id]/participants - Remover participante del torneo
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  return withComisionAuth(req, async (req) => {
-    try {
-      const { id } = await params
-      const tournamentId = parseInt(id)
-      const { searchParams } = new URL(req.url)
-      const playerId = searchParams.get('playerId')
+export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Ctx) => {
+  await requireComision(req)
+  const { id: tournamentId } = parseParams(await params, idParamsSchema)
+  const { playerId } = parseQuery(req, removeTournamentParticipantQuerySchema)
 
-      if (isNaN(tournamentId)) {
-        return NextResponse.json(
-          { error: 'ID de torneo inválido' },
-          { status: 400 }
-        )
+  const existingParticipant = await prisma.tournamentParticipant.findUnique({
+    where: {
+      tournamentId_playerId: {
+        tournamentId,
+        playerId
       }
-
-      if (!playerId) {
-        return NextResponse.json(
-          { error: 'ID del jugador es obligatorio' },
-          { status: 400 }
-        )
-      }
-
-      const existingParticipant = await prisma.tournamentParticipant.findUnique({
-        where: {
-          tournamentId_playerId: {
-            tournamentId,
-            playerId
-          }
-        }
-      })
-
-      if (!existingParticipant) {
-        return NextResponse.json(
-          { error: 'El jugador no está participando en este torneo' },
-          { status: 404 }
-        )
-      }
-
-      await prisma.tournamentParticipant.delete({
-        where: {
-          tournamentId_playerId: {
-            tournamentId,
-            playerId
-          }
-        }
-      })
-
-      return NextResponse.json({
-        message: 'Participante removido del torneo correctamente'
-      })
-    } catch (error) {
-      console.error('Error removing tournament participant:', error)
-      return NextResponse.json(
-        { error: 'Error al remover participante del torneo' },
-        { status: 500 }
-      )
     }
   })
-}
+
+  if (!existingParticipant) {
+    throw AppError.notFound('El jugador no está participando en este torneo', 'NOT_A_PARTICIPANT')
+  }
+
+  await prisma.tournamentParticipant.delete({
+    where: {
+      tournamentId_playerId: {
+        tournamentId,
+        playerId
+      }
+    }
+  })
+
+  return ok({
+    message: 'Participante removido del torneo correctamente'
+  })
+})

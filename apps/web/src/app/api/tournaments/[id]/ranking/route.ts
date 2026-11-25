@@ -1,4 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { idParamsSchema } from '@poker/shared';
+import { AppError, withErrorHandler } from '@/lib/errors';
+import { ok, parseParams } from '@/lib/http';
 import { calculateTournamentRanking } from '@/lib/ranking-utils';
 
 /**
@@ -23,27 +26,16 @@ import { calculateTournamentRanking } from '@/lib/ranking-utils';
  * gente venia por aqui y no los recibia. Si hay que cambiar como se calcula el
  * ranking, se cambia en lib y punto.
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const tournamentId = parseInt(id);
-
-    if (isNaN(tournamentId)) {
-      return NextResponse.json({ error: 'Invalid tournament ID' }, { status: 400 });
-    }
+export const GET = withErrorHandler(
+  async (_request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    const { id: tournamentId } = parseParams(await params, idParamsSchema);
 
     const rankingData = await calculateTournamentRanking(tournamentId);
 
     if (!rankingData) {
-      return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
+      throw AppError.notFound('Torneo no encontrado', 'TOURNAMENT_NOT_FOUND');
     }
 
-    return NextResponse.json(rankingData);
-  } catch (error) {
-    console.error('Error calculando el ranking del torneo:', error);
-    return NextResponse.json({ error: 'Error calculando el ranking' }, { status: 500 });
+    return ok(rankingData);
   }
-}
+);
