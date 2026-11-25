@@ -1,35 +1,45 @@
 /**
- * Home, vista "Torneo". Port de HomeTorneo de la web, en bloques: tu posición
- * (negro), el anillo de cuenta regresiva y la próxima fecha (papel, media
- * columna cada uno), el podio escalonado con su comparación (oro), malazos 7/2
- * (rosa), tu carrera y lo destacado de la temporada.
+ * Home, vista "Torneo" del T31 (lucha libre):
+ *
+ * 1. Dueño del cinturón: la tarjeta del líder rotada, el cinturón oro con sus
+ *    puntos, la frase (`leaderPhrase`) y mesas finales / podios / victorias.
+ * 2. Mano a mano: #1 contra #2 y la distancia (`rivalryPhrase`).
+ * 3. La tabla: el top 3 y el enlace a la completa.
+ * 4. Los 7/2 del torneo: los dos últimos de la tabla, en rosa.
+ * 5. Lo de antes, debajo: tu posición, la próxima fecha, tu carrera y lo
+ *    destacado de la temporada.
+ *
  * Con el torneo FINALIZADO, la tarjeta final (podio oficial y "próximo torneo:
- * por anunciar") reemplaza la cuenta regresiva, el calendario y el podio.
+ * por anunciar") reemplaza el cinturón, el mano a mano y la cuenta regresiva.
  */
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   averagePointsPerDate,
+  leaderPhrase,
   nightlyPosition,
   playedDateNumbers,
   playerLabel,
+  rivalryPhrase,
   SCORE_LABELS,
   scoreOf,
   shortenFullName,
   type PlayerRanking,
   type TournamentInsightsData,
 } from '@poker/shared';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { Easing, useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 
+import { PlayerAvatar } from '@/components/common/PlayerAvatar';
+import { PlayerCard } from '@/components/common/PlayerCard';
 import { useDaysWithoutVictory } from '@/hooks/useHomeExtras';
 import { daysUntil } from '@/lib/dates';
-import { fonts } from '@/theme/colors';
+import { cp, fonts } from '@/theme/colors';
 import { useCP } from '@/theme/tone';
 
-import { Bento, BigScore, GOLD_RULE, HashScore, METAL, ON_COLOR, Tile, TileLink, TileOverline, TileRow, useReduceMotion } from './bento';
-import { MalazosTile, PodiumRow, rankingPodium } from './shared';
+import { Bento, BigScore, HashScore, ON_COLOR, Tile, TileLink, TileOverline, TileRow, useReduceMotion } from './bento';
+import { HERO_CARD_STYLE, HERO_CARD_WIDTH, Headline, Marquee, MarqueeOverline, MEDALS, openPlayer, PhotoTile, Rise, SectionTitle, TilePair, VsBadge } from './lucha';
 import { TorneoFinalizadoCard } from './TorneoFinalizadoCard';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -42,6 +52,10 @@ type Props = {
   finished?: boolean;
   rankings: PlayerRanking[];
   nextDate: { dateNumber?: number; scheduledDate: string | null } | null;
+  /** Número de la última fecha jugada (semilla de la frase del líder). */
+  lastDateNumber?: number | null;
+  /** Fechas jugadas / planificadas ("FECHA N DE M"). */
+  progress?: { completed: number; total: number } | null;
   seasonHighlights?: TournamentInsightsData['seasonHighlights'];
   onOpenProfile: () => void;
   onOpenCalendarPage: () => void;
@@ -55,6 +69,8 @@ function formatDate(dateStr: string | null) {
 }
 
 const CICLO = 14;
+/** Puesto máximo de una mesa final (como la Tabla). */
+const MESA_FINAL_MAX = 9;
 const R = 30;
 const CIRC = 2 * Math.PI * R;
 
@@ -65,6 +81,8 @@ export function HomeTorneo({
   finished = false,
   rankings,
   nextDate,
+  lastDateNumber,
+  progress,
   seasonHighlights,
   onOpenProfile,
   onOpenCalendarPage,
@@ -73,7 +91,6 @@ export function HomeTorneo({
 }: Props) {
   const c = useCP();
   const { data: drought } = useDaysWithoutVictory(tournamentId);
-  const [abierto, setAbierto] = useState<string | null>(null);
 
   const droughtLeader = drought?.players.find((p) => !p.hasNeverWon);
   const myRanking = rankings.find((r) => r.playerId === userId);
@@ -98,8 +115,10 @@ export function HomeTorneo({
   const days = daysUntil(nextDate?.scheduledDate ?? null);
   const avance = days !== null ? Math.max(0, Math.min(1, 1 - days / CICLO)) : 0;
 
-  const podio = sortedByPosition.slice(0, 3);
-  const abiertoP = podio.find((p) => p.playerId === abierto);
+  const top3 = sortedByPosition.slice(0, 3);
+  const [leader, second] = sortedByPosition;
+  const bottom2 = sortedByPosition.length >= 4 ? sortedByPosition.slice(-2) : [];
+  const nick = (r: PlayerRanking) => r.playerAlias || shortenFullName(r.playerName);
 
   const highlights: { key: string; icon: React.ReactNode; text: React.ReactNode }[] = [];
   if (droughtLeader)
@@ -146,6 +165,98 @@ export function HomeTorneo({
   return (
     <Bento>
       {finished ? <TorneoFinalizadoCard tournamentNumber={tournamentNumber} rankings={rankings} index={n++} /> : null}
+
+      {/* 1. Dueño del cinturón */}
+      {!finished && leader ? (
+        <Rise index={n++}>
+          <BeltMarquee leader={leader} rankings={rankings} name={nick(leader)} lastDateNumber={lastDateNumber ?? 0} progress={progress ?? null} />
+        </Rise>
+      ) : null}
+
+      {/* 2. Mano a mano */}
+      {!finished && leader && second ? (
+        <Rise index={n++} style={{ gap: 14, marginTop: 12 }}>
+          <SectionTitle title="MANO A MANO" />
+          <View>
+            <TilePair style={{ gap: 10 }}>
+              {[leader, second].map((p, i) => (
+                <PhotoTile
+                  key={p.playerId}
+                  playerId={p.playerId}
+                  name={nick(p)}
+                  photoUrl={p.playerPhoto}
+                  top={`#${p.position}`}
+                  topColor={MEDALS[i]}
+                  big={scoreOf(p)}
+                  align={i === 0 ? 'left' : 'right'}
+                />
+              ))}
+            </TilePair>
+            <VsBadge />
+          </View>
+          <Text style={{ fontFamily: fonts.displayBlack, fontSize: 22, letterSpacing: 1, color: c.primaryLight, textAlign: 'center' }}>
+            {rivalryPhrase(scoreOf(leader) - scoreOf(second))}
+          </Text>
+        </Rise>
+      ) : null}
+
+      {/* 3. La tabla: top 3 */}
+      {top3.length > 0 ? (
+        <Rise index={n++} style={{ gap: 10, marginTop: 12 }}>
+          <SectionTitle title="LA TABLA" link="COMPLETA" onLink={onSeeTabla} />
+          <View className="overflow-hidden rounded-card border border-cp-surface-border bg-cp-surface-1">
+            {top3.map((p, i) => (
+              <Pressable
+                key={p.playerId}
+                accessibilityRole="button"
+                accessibilityLabel={`${p.position}. ${p.playerName}, ${scoreOf(p)} puntos. Ver su ficha`}
+                onPress={() => openPlayer(p.playerId)}
+                className="flex-row items-center active:opacity-70"
+                style={{ gap: 12, paddingHorizontal: 14, paddingVertical: 10, borderTopWidth: i ? 1 : 0, borderTopColor: c.surface2 }}>
+                <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: MEDALS[i], alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontFamily: fonts.displayBlack, fontSize: 14, color: cp.ink }}>{p.position}</Text>
+                </View>
+                <PlayerAvatar name={p.playerName} photoUrl={p.playerPhoto} size={56} />
+                <View className="min-w-0 flex-1">
+                  <Text numberOfLines={1} style={{ fontFamily: fonts.bodySemibold, fontSize: 16, color: c.onSurface }}>
+                    {p.playerName}
+                  </Text>
+                  {p.playerAlias ? (
+                    <Text numberOfLines={1} style={{ fontFamily: fonts.body, fontSize: 13, color: c.onSurfaceVariant }}>
+                      {p.playerAlias}
+                    </Text>
+                  ) : null}
+                </View>
+                <Text style={{ fontFamily: fonts.displayBlack, fontSize: 22, color: c.onSurface }}>{scoreOf(p)}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Rise>
+      ) : null}
+
+      {/* 4. Los 7/2 del torneo */}
+      {bottom2.length === 2 ? (
+        <Rise index={n++} style={{ gap: 14, marginTop: 12 }}>
+          <SectionTitle title="LOS 7/2 DEL TORNEO" />
+          <TilePair>
+            {bottom2.map((p) => (
+              <PhotoTile
+                key={p.playerId}
+                playerId={p.playerId}
+                name={nick(p)}
+                photoUrl={p.playerPhoto}
+                tag="7/2"
+                tagColor={cp.malazo}
+                tagText={cp.ink}
+                ringColor={cp.malazo}
+                detail={`#${p.position} · ${scoreOf(p)} ${SCORE_LABELS.pointsShort}`}
+              />
+            ))}
+          </TilePair>
+        </Rise>
+      ) : null}
+
+      <View style={{ height: 12 }} />
 
       {/* Tu posición — el ancla negra */}
       {myRanking ? (
@@ -229,44 +340,6 @@ export function HomeTorneo({
           </Tile>
         </TileRow>
       ) : null}
-
-      {/* El podio — bloque oro (terminado, ya está arriba) */}
-      {!finished && podio.length === 3 ? (
-        <Tile tone="oro" index={n++}>
-          <View className="flex-row items-baseline justify-between">
-            <TileOverline color={METAL[0]}>El podio</TileOverline>
-            <TileLink title="TABLA" onPress={onSeeTabla} />
-          </View>
-          <View className="mt-3">
-            <PodiumRow podium={rankingPodium(podio)} selectedId={abierto} onPressName={(id) => setAbierto(abierto === id ? null : id)} />
-          </View>
-          {abiertoP ? (
-            <View className="mt-3 flex-row pt-3" style={{ borderTopWidth: 1, borderTopColor: GOLD_RULE }}>
-              {[
-                { v: abiertoP.firstPlaces, l: 'victorias' },
-                { v: abiertoP.firstPlaces + abiertoP.secondPlaces + abiertoP.thirdPlaces, l: 'podios' },
-                { v: abiertoP.totalPoints, l: 'acum.' },
-                { v: scoreOf(abiertoP) - (myRanking ? scoreOf(myRanking) : 0), l: 'vs vos', signed: true },
-              ].map((m, k) => (
-                <View key={m.l} className="min-w-0 flex-1" style={{ paddingLeft: k ? 8 : 0, borderLeftWidth: k ? 1 : 0, borderLeftColor: GOLD_RULE }}>
-                  <Text
-                    style={{
-                      fontFamily: fonts.display,
-                      fontSize: 17,
-                      color: m.signed ? (m.v > 0 ? c.negative : c.positive) : c.onSurface,
-                    }}>
-                    {m.signed && m.v > 0 ? '+' : ''}
-                    {m.v}
-                  </Text>
-                  <Text style={{ fontFamily: fonts.body, fontSize: 11.5, color: '#7A6E69', marginTop: 1 }}>{m.l}</Text>
-                </View>
-              ))}
-            </View>
-          ) : null}
-        </Tile>
-      ) : null}
-
-      <MalazosTile rankings={rankings} index={n++} />
 
       {/* Tu carrera */}
       {myRanking ? (
@@ -361,5 +434,91 @@ function Meter({ label, value, right, color, rightColor }: { label: string; valu
         <View style={{ width: `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`, height: '100%', borderRadius: 8, backgroundColor: color }} />
       </View>
     </View>
+  );
+}
+
+/** El cartel del líder: tarjeta rotada, cinturón oro, frase y sus números. */
+function BeltMarquee({
+  leader,
+  rankings,
+  name,
+  lastDateNumber,
+  progress,
+}: {
+  leader: PlayerRanking;
+  rankings: PlayerRanking[];
+  name: string;
+  lastDateNumber: number;
+  progress: { completed: number; total: number } | null;
+}) {
+  // Líder nuevo: no era #1 antes de esta fecha (subió puestos para llegar).
+  const phrase = leaderPhrase(name, lastDateNumber, leader.positionsChanged > 0);
+  const mesasFinales = playedDateNumbers(rankings).filter(
+    (d) => (leader.pointsByDate[d] ?? 0) > 0 && (nightlyPosition(rankings, d, leader.playerId) ?? 999) <= MESA_FINAL_MAX
+  ).length;
+  const podios = leader.firstPlaces + leader.secondPlaces + leader.thirdPlaces;
+  const stats = [
+    { v: mesasFinales, l: mesasFinales === 1 ? 'MESA FINAL' : 'MESAS FINALES' },
+    { v: podios, l: podios === 1 ? 'PODIO' : 'PODIOS' },
+    { v: leader.firstPlaces, l: leader.firstPlaces === 1 ? 'VICTORIA' : 'VICTORIAS' },
+  ];
+  return (
+    <Marquee pattern="glow">
+      <MarqueeOverline icon="👑">
+        {progress ? `DUEÑO DEL CINTURÓN · FECHA ${progress.completed} DE ${progress.total}` : 'DUEÑO DEL CINTURÓN'}
+      </MarqueeOverline>
+      <View style={{ alignItems: 'center' }}>
+        <PlayerCard
+          name={leader.playerName}
+          photoUrl={leader.playerPhoto}
+          width={HERO_CARD_WIDTH}
+          ringColor={cp.gold}
+          ringWidth={3}
+          elevate={0}
+          zoomable
+          accessibilityLabel={`Tarjeta de ${name}, líder del torneo. Ver en grande`}
+          style={HERO_CARD_STYLE(3)}
+        />
+        <View
+          accessible
+          accessibilityLabel={`Primero con ${scoreOf(leader)} puntos`}
+          style={{
+            marginTop: -30,
+            minWidth: 260,
+            maxWidth: '100%',
+            height: 54,
+            paddingHorizontal: 24,
+            borderRadius: 27,
+            backgroundColor: cp.gold,
+            borderWidth: 3,
+            borderColor: cp.goldOnLight,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: cp.surface0,
+            shadowOpacity: 0.55,
+            shadowRadius: 9,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: 14,
+          }}>
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6} style={{ fontFamily: fonts.displayBlack, fontSize: 30, letterSpacing: 1, color: cp.ink }}>
+            #1 · {scoreOf(leader)} {SCORE_LABELS.pointsShort.toUpperCase()}
+          </Text>
+        </View>
+      </View>
+      <Headline lines={phrase} accent={cp.gold} />
+      <View className="w-full flex-row pt-3.5" style={{ borderTopWidth: 1, borderTopColor: cp.surfaceBorder }}>
+        {stats.map((m, k) => (
+          <View
+            key={m.l}
+            className="flex-1 items-center"
+            style={{ gap: 2, borderLeftWidth: k ? 1 : 0, borderLeftColor: cp.surfaceBorder }}>
+            <Text style={{ fontFamily: fonts.displayBlack, fontSize: 26, color: cp.onSurface }}>{m.v}</Text>
+            <Text numberOfLines={1} style={{ fontFamily: fonts.body, fontSize: 12, letterSpacing: 1, color: cp.onSurfaceMuted }}>
+              {m.l}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </Marquee>
   );
 }
