@@ -68,7 +68,7 @@ function updateUserActivity(userId: string): void {
 }
 
 // Limpieza periódica del cache (cada 10 minutos)
-setInterval(() => {
+const limpiezaCache = setInterval(() => {
   const now = Date.now()
   for (const [token, cached] of tokenCache.entries()) {
     if (now > cached.expiry) {
@@ -76,6 +76,8 @@ setInterval(() => {
     }
   }
 }, 10 * 60 * 1000)
+// Que el intervalo no mantenga vivo el proceso (pruebas, scripts).
+limpiezaCache.unref?.()
 
 /**
  * Invalida el cache completo de tokens
