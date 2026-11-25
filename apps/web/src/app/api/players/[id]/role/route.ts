@@ -1,95 +1,69 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
-import { withComisionAuth, invalidatePlayerTokens } from '@/lib/api-auth'
+import { requireComision, invalidatePlayerTokens } from '@/lib/api-auth'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseBody, parseParams } from '@/lib/http'
 import { PLAYER_ADMIN_SELECT } from '@/lib/player-select'
-import { GUEST_PHOTO_URL } from '@poker/shared'
+import { GUEST_PHOTO_URL, changePlayerRoleSchema, playerIdParamsSchema } from '@poker/shared'
 
 // PATCH /api/players/:id/role - Cambiar rol de jugador (solo Comisión)
-export async function PATCH(
-  req: NextRequest,
+export const PATCH = withErrorHandler(async (
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
-  return withComisionAuth(req, async (request, user) => {
-    try {
-      const { id } = await params
-      const { newRole, inviterId } = await request.json()
+) => {
+  const user = await requireComision(request)
+  const { id } = parseParams(await params, playerIdParamsSchema)
+  // Rol valido; un Invitado necesita quien lo invite (422 si falta).
+  const { newRole, inviterId } = await parseBody(request, changePlayerRoleSchema)
 
-    if (!newRole || !Object.values(UserRole).includes(newRole)) {
-      return NextResponse.json(
-        { error: 'Rol inválido' },
-        { status: 400 }
-      )
+  if (id === user.id && newRole !== UserRole.Comision) {
+    throw AppError.forbidden('No puedes quitarte el rol Comisión a ti mismo', 'SELF_DEMOTION')
+  }
+
+  const existingPlayer = await prisma.player.findUnique({
+    where: { id },
+    select: { id: true, photoUrl: true }
+  })
+
+  if (!existingPlayer) {
+    throw AppError.notFound('Jugador no encontrado', 'PLAYER_NOT_FOUND')
+  }
+
+  const updateData: Record<string, unknown> = {
+    role: newRole
+  }
+
+  if (newRole === UserRole.Invitado) {
+    updateData.inviterId = inviterId
+    // Asignar foto genérica si no tiene
+    if (!existingPlayer.photoUrl) {
+      updateData.photoUrl = GUEST_PHOTO_URL
     }
+  } else {
+    // Si deja de ser Invitado, quitar invitador
+    updateData.inviterId = null
+  }
 
-    if (id === user.id && newRole !== UserRole.Comision) {
-      return NextResponse.json(
-        { error: 'No puedes quitarte el rol Comisión a ti mismo', code: 'SELF_DEMOTION' },
-        { status: 403 }
-      )
-    }
-
-    const existingPlayer = await prisma.player.findUnique({
-      where: { id },
-      select: { id: true, photoUrl: true }
-    })
-
-    if (!existingPlayer) {
-      return NextResponse.json(
-        { error: 'Jugador no encontrado' },
-        { status: 404 }
-      )
-    }
-
-    const updateData: Record<string, unknown> = {
-      role: newRole
-    }
-
-    // Si cambia a Invitado, debe tener un invitador
-    if (newRole === UserRole.Invitado) {
-      if (!inviterId) {
-        return NextResponse.json(
-          { error: 'Los invitados deben tener un Enfermo que los invite' },
-          { status: 400 }
-        )
-      }
-      updateData.inviterId = inviterId
-      // Asignar foto genérica si no tiene
-      if (!existingPlayer.photoUrl) {
-        updateData.photoUrl = GUEST_PHOTO_URL
-      }
-    } else {
-      // Si deja de ser Invitado, quitar invitador
-      updateData.inviterId = null
-    }
-
-    const updatedPlayer = await prisma.player.update({
-      where: { id },
-      data: updateData,
-      select: {
-        ...PLAYER_ADMIN_SELECT,
-        inviter: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
+  const updatedPlayer = await prisma.player.update({
+    where: { id },
+    data: updateData,
+    select: {
+      ...PLAYER_ADMIN_SELECT,
+      inviter: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true
         }
       }
-    })
-
-      invalidatePlayerTokens(id)
-
-      return NextResponse.json({
-        message: `Rol cambiado exitosamente a ${newRole}`,
-        player: updatedPlayer
-      })
-    } catch (error) {
-      console.error('Error changing player role:', error)
-      return NextResponse.json(
-        { error: 'Error al cambiar rol del jugador' },
-        { status: 500 }
-      )
     }
   })
-}
+
+  invalidatePlayerTokens(id)
+
+  return ok({
+    message: `Rol cambiado exitosamente a ${newRole}`,
+    player: updatedPlayer
+  })
+})

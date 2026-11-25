@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { withErrorHandler } from '@/lib/errors'
+import { ok } from '@/lib/http'
 import { prisma } from '@/lib/prisma'
 import { createUTCNoonDate, getEcuadorToday } from '@/lib/date-utils'
 
@@ -22,133 +23,125 @@ interface DroughtPlayer {
   isOver1000Days: boolean
 }
 
-export async function GET() {
-  try {
-    // Hora de Ecuador, no la del servidor: en Vercel el proceso corre en UTC y
-    // a partir de las 19:00 de Ecuador ya sería el día siguiente, así que el
-    // cumpleaños de hoy desaparecía justo en el horario de juego.
-    const { year: todayYear, month: todayMonth, day: todayDay } = getEcuadorToday()
-    const today = createUTCNoonDate(todayYear, todayMonth - 1, todayDay)
+export const GET = withErrorHandler(async () => {
+  // Hora de Ecuador, no la del servidor: en Vercel el proceso corre en UTC y
+  // a partir de las 19:00 de Ecuador ya sería el día siguiente, así que el
+  // cumpleaños de hoy desaparecía justo en el horario de juego.
+  const { year: todayYear, month: todayMonth, day: todayDay } = getEcuadorToday()
+  const today = createUTCNoonDate(todayYear, todayMonth - 1, todayDay)
 
-    // Get all active players with birthDate or lastVictoryDate
-    const players = await prisma.player.findMany({
-      where: {
-        isActive: true,
-        role: { in: ['Comision', 'Enfermo'] }
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        photoUrl: true,
-        birthDate: true,
-        lastVictoryDate: true
-      }
-    })
+  // Get all active players with birthDate or lastVictoryDate
+  const players = await prisma.player.findMany({
+    where: {
+      isActive: true,
+      role: { in: ['Comision', 'Enfermo'] }
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      photoUrl: true,
+      birthDate: true,
+      lastVictoryDate: true
+    }
+  })
 
-    // Process birthdays
-    const birthdays: BirthdayPlayer[] = []
+  // Process birthdays
+  const birthdays: BirthdayPlayer[] = []
 
-    for (const player of players) {
-      if (!player.birthDate) continue
+  for (const player of players) {
+    if (!player.birthDate) continue
 
-      // Parse birthDate - expected format: "YYYY-MM-DD" or "MM-DD"
-      const parts = player.birthDate.split('-')
-      let birthMonth: number
-      let birthDay: number
+    // Parse birthDate - expected format: "YYYY-MM-DD" or "MM-DD"
+    const parts = player.birthDate.split('-')
+    let birthMonth: number
+    let birthDay: number
 
-      if (parts.length === 3) {
-        // YYYY-MM-DD format
-        birthMonth = parseInt(parts[1], 10)
-        birthDay = parseInt(parts[2], 10)
-      } else if (parts.length === 2) {
-        // MM-DD format
-        birthMonth = parseInt(parts[0], 10)
-        birthDay = parseInt(parts[1], 10)
-      } else {
-        continue // Invalid format
-      }
-
-      if (isNaN(birthMonth) || isNaN(birthDay)) continue
-
-      const isToday = birthMonth === todayMonth && birthDay === todayDay
-
-      // Calculate days until birthday
-      const thisYearBirthday = createUTCNoonDate(todayYear, birthMonth - 1, birthDay)
-      let nextBirthday = thisYearBirthday
-
-      if (thisYearBirthday < today && !isToday) {
-        // Birthday already passed this year, get next year's
-        nextBirthday = createUTCNoonDate(todayYear + 1, birthMonth - 1, birthDay)
-      }
-
-      const daysUntil = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-
-      // Include if birthday is today or within next 7 days
-      if (isToday || (daysUntil > 0 && daysUntil <= 7)) {
-        birthdays.push({
-          id: player.id,
-          firstName: player.firstName,
-          lastName: player.lastName,
-          photoUrl: player.photoUrl,
-          birthDate: player.birthDate,
-          isToday,
-          daysUntil: isToday ? 0 : daysUntil
-        })
-      }
+    if (parts.length === 3) {
+      // YYYY-MM-DD format
+      birthMonth = parseInt(parts[1], 10)
+      birthDay = parseInt(parts[2], 10)
+    } else if (parts.length === 2) {
+      // MM-DD format
+      birthMonth = parseInt(parts[0], 10)
+      birthDay = parseInt(parts[1], 10)
+    } else {
+      continue // Invalid format
     }
 
-    // Sort birthdays: today first, then by daysUntil
-    birthdays.sort((a, b) => {
-      if (a.isToday && !b.isToday) return -1
-      if (!a.isToday && b.isToday) return 1
-      return a.daysUntil - b.daysUntil
-    })
+    if (isNaN(birthMonth) || isNaN(birthDay)) continue
 
-    // Process victory droughts (1000+ days without winning)
-    const droughts: DroughtPlayer[] = []
+    const isToday = birthMonth === todayMonth && birthDay === todayDay
 
-    for (const player of players) {
+    // Calculate days until birthday
+    const thisYearBirthday = createUTCNoonDate(todayYear, birthMonth - 1, birthDay)
+    let nextBirthday = thisYearBirthday
 
-      if (!player.lastVictoryDate) {
-        // Never won - calculate from join date or a default
-        // For now, skip players who never won (or we could include them as infinite drought)
-        continue
-      }
-
-      // Parse lastVictoryDate - expected format: "YYYY-MM-DD"
-      const victoryDate = new Date(player.lastVictoryDate)
-      if (isNaN(victoryDate.getTime())) continue
-
-      const daysSinceVictory = Math.floor((today.getTime() - victoryDate.getTime()) / (1000 * 60 * 60 * 24))
-
-      // Only include if >= 1000 days
-      if (daysSinceVictory >= 1000) {
-        droughts.push({
-          id: player.id,
-          firstName: player.firstName,
-          lastName: player.lastName,
-          photoUrl: player.photoUrl,
-          lastVictoryDate: player.lastVictoryDate,
-          daysSinceVictory,
-          isOver1000Days: true
-        })
-      }
+    if (thisYearBirthday < today && !isToday) {
+      // Birthday already passed this year, get next year's
+      nextBirthday = createUTCNoonDate(todayYear + 1, birthMonth - 1, birthDay)
     }
 
-    // Sort droughts by daysSinceVictory descending (longest drought first)
-    droughts.sort((a, b) => b.daysSinceVictory - a.daysSinceVictory)
+    const daysUntil = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
-    return NextResponse.json({
-      birthdays,
-      droughts,
-      timestamp: new Date().toISOString()
-    })
-  } catch (error) {
-    console.error('Error fetching celebrations:', error)
-    return NextResponse.json(
-      { error: 'Error al obtener celebraciones' },
-      { status: 500 }
-    )
+    // Include if birthday is today or within next 7 days
+    if (isToday || (daysUntil > 0 && daysUntil <= 7)) {
+      birthdays.push({
+        id: player.id,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        photoUrl: player.photoUrl,
+        birthDate: player.birthDate,
+        isToday,
+        daysUntil: isToday ? 0 : daysUntil
+      })
+    }
   }
-}
+
+  // Sort birthdays: today first, then by daysUntil
+  birthdays.sort((a, b) => {
+    if (a.isToday && !b.isToday) return -1
+    if (!a.isToday && b.isToday) return 1
+    return a.daysUntil - b.daysUntil
+  })
+
+  // Process victory droughts (1000+ days without winning)
+  const droughts: DroughtPlayer[] = []
+
+  for (const player of players) {
+
+    if (!player.lastVictoryDate) {
+      // Never won - calculate from join date or a default
+      // For now, skip players who never won (or we could include them as infinite drought)
+      continue
+    }
+
+    // Parse lastVictoryDate - expected format: "YYYY-MM-DD"
+    const victoryDate = new Date(player.lastVictoryDate)
+    if (isNaN(victoryDate.getTime())) continue
+
+    const daysSinceVictory = Math.floor((today.getTime() - victoryDate.getTime()) / (1000 * 60 * 60 * 24))
+
+    // Only include if >= 1000 days
+    if (daysSinceVictory >= 1000) {
+      droughts.push({
+        id: player.id,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        photoUrl: player.photoUrl,
+        lastVictoryDate: player.lastVictoryDate,
+        daysSinceVictory,
+        isOver1000Days: true
+      })
+    }
+  }
+
+  // Sort droughts by daysSinceVictory descending (longest drought first)
+  droughts.sort((a, b) => b.daysSinceVictory - a.daysSinceVictory)
+
+  return ok({
+    birthdays,
+    droughts,
+    timestamp: new Date().toISOString()
+  })
+})

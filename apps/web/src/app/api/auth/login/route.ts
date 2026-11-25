@@ -1,89 +1,79 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { authenticateUserByPin, authenticateUser } from '@/lib/auth'
 import { isValidPinForLogin, PIN_RULE_TEXT } from '@/lib/pin-utils'
 import { checkLoginAttempt, recordFailedLogin, clearLoginAttempts, throttleKey } from '@/lib/login-throttle'
+import { AppError, errorResponse, withErrorHandler } from '@/lib/errors'
+import { ok, readJson } from '@/lib/http'
+import { loginSchema } from '@poker/shared'
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json()
-    const { adminKey, pin } = body
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  const body = await readJson(req)
 
-    // El tope aplica al origen, no a la clave probada: así un atacante no gana
-    // nada rotando claves, que es justo lo que hace la fuerza bruta.
-    const key = throttleKey(
-      req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-      req.headers.get('x-real-ip')
+  // El tope aplica al origen, no a la clave probada: así un atacante no gana
+  // nada rotando claves, que es justo lo que hace la fuerza bruta.
+  const key = throttleKey(
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    req.headers.get('x-real-ip')
+  )
+  const gate = checkLoginAttempt(key)
+  if (!gate.allowed) {
+    const retryAfter = gate.retryAfterSeconds ?? 900
+    const response = errorResponse(
+      AppError.tooManyRequests(
+        `Demasiados intentos. Probá de nuevo en ${Math.ceil((gate.retryAfterSeconds ?? 0) / 60)} minutos.`,
+        'TOO_MANY_ATTEMPTS',
+        { retryAfterSeconds: retryAfter }
+      ),
+      req.url
     )
-    const gate = checkLoginAttempt(key)
-    if (!gate.allowed) {
-      return NextResponse.json(
-        { error: `Demasiados intentos. Probá de nuevo en ${Math.ceil((gate.retryAfterSeconds ?? 0) / 60)} minutos.` },
-        { status: 429, headers: { 'Retry-After': String(gate.retryAfterSeconds ?? 900) } }
+    response.headers.set('Retry-After', String(retryAfter))
+    return response
+  }
+
+  // Una forma invalida (pin que no es texto...) cuenta como intento fallido.
+  const parsed = loginSchema.safeParse(body)
+  if (!parsed.success) {
+    recordFailedLogin(key)
+    throw parsed.error
+  }
+  const { adminKey, pin } = parsed.data
+
+  // Nuevo sistema: autenticación por PIN
+  if (pin) {
+    if (!isValidPinForLogin(pin)) {
+      recordFailedLogin(key)
+      throw AppError.badRequest(`Clave inválida. ${PIN_RULE_TEXT}.`, 'INVALID_PIN')
+    }
+
+    const user = await authenticateUserByPin(pin)
+
+    if (!user) {
+      const after = recordFailedLogin(key)
+      throw AppError.unauthorized(
+        after.remaining > 0 && after.remaining <= 3
+          ? `Clave incorrecta. Te ${after.remaining === 1 ? 'queda 1 intento' : `quedan ${after.remaining} intentos`}.`
+          : 'Clave incorrecta',
+        'INVALID_CREDENTIALS'
       )
     }
 
-    // Nuevo sistema: autenticación por PIN
-    if (pin) {
-      if (typeof pin !== 'string' || !isValidPinForLogin(pin)) {
-        recordFailedLogin(key)
-        return NextResponse.json(
-          { error: `Clave inválida. ${PIN_RULE_TEXT}.` },
-          { status: 400 }
-        )
-      }
-
-      const user = await authenticateUserByPin(pin)
-
-      if (!user) {
-        const after = recordFailedLogin(key)
-        return NextResponse.json(
-          {
-            error: after.remaining > 0 && after.remaining <= 3
-              ? `Clave incorrecta. Te ${after.remaining === 1 ? 'queda 1 intento' : `quedan ${after.remaining} intentos`}.`
-              : 'Clave incorrecta'
-          },
-          { status: 401 }
-        )
-      }
-
-      clearLoginAttempts(key)
-      return NextResponse.json(user)
-    }
-
-    // Sistema legacy: adminKey (para rollback temporal)
-    if (adminKey) {
-      if (typeof adminKey !== 'string') {
-        return NextResponse.json(
-          { error: 'Admin key is required' },
-          { status: 400 }
-        )
-      }
-
-      const user = await authenticateUser(adminKey)
-
-      if (!user) {
-        recordFailedLogin(key)
-        return NextResponse.json(
-          { error: 'Invalid admin key' },
-          { status: 401 }
-        )
-      }
-
-      clearLoginAttempts(key)
-      return NextResponse.json(user)
-    }
-
-    // No se proporcionó ni PIN ni adminKey
-    return NextResponse.json(
-      { error: 'PIN o admin key requerido' },
-      { status: 400 }
-    )
-
-  } catch (error) {
-    console.error('Login API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    clearLoginAttempts(key)
+    return ok(user)
   }
-}
+
+  // Sistema legacy: adminKey (para rollback temporal)
+  if (adminKey) {
+    const user = await authenticateUser(adminKey)
+
+    if (!user) {
+      recordFailedLogin(key)
+      throw AppError.unauthorized('Admin key inválida', 'INVALID_CREDENTIALS')
+    }
+
+    clearLoginAttempts(key)
+    return ok(user)
+  }
+
+  // No se proporcionó ni PIN ni adminKey
+  throw AppError.badRequest('PIN o admin key requerido', 'CREDENTIALS_REQUIRED')
+})

@@ -1,240 +1,183 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getEcuadorToday } from '@/lib/date-utils'
 import { UserRole } from '@prisma/client'
-import { withComisionAuth, validateApiAccess, ValidacionNoDisponible } from '@/lib/api-auth'
+import { requireComision, validateApiAccess } from '@/lib/api-auth'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseBody, parseQuery } from '@/lib/http'
 import { playerSelectForRole, PLAYER_ADMIN_SELECT } from '@/lib/player-select'
 import { validateAndHashPin } from '@/lib/pin-utils'
-import { GUEST_PHOTO_URL } from '@poker/shared'
+import { GUEST_PHOTO_URL, createPlayerSchema, playersQuerySchema } from '@poker/shared'
 
 // GET /api/players - Directorio de jugadores.
 // Exige sesión: trae teléfono, email y cumpleaños de los socios. Lo que se
 // devuelve depende de quién pregunta (ver player-select.ts). Nunca incluye
 // `pin` ni `adminKey`.
-export async function GET(req: NextRequest) {
-  try {
-    // `validateApiAccess` lanza `ValidacionNoDisponible` cuando no pudo
-    // comprobar la credencial (base caida, arranque en frio). Sin este caso la
-    // excepcion caia en el catch de abajo y el directorio respondia 500, que
-    // el cliente no distingue de un fallo real; y un 401 ahi habria cerrado la
-    // sesion del usuario por un tropiezo pasajero del servidor.
-    let requester
-    try {
-      requester = await validateApiAccess(req)
-    } catch (error) {
-      if (error instanceof ValidacionNoDisponible) {
-        return NextResponse.json(
-          { error: 'No se pudo validar tu sesion, reintenta' },
-          { status: 503 }
-        )
-      }
-      throw error
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  // `validateApiAccess` lanza `ValidacionNoDisponible` (AppError 503) cuando
+  // no pudo comprobar la credencial (base caida, arranque en frio): sale como
+  // 503 y no como 401, que habria cerrado la sesion por un tropiezo pasajero.
+  const requester = await validateApiAccess(req)
+
+  if (!requester) {
+    throw AppError.unauthorized('Debes iniciar sesión para ver el directorio')
+  }
+  const { role: roles, search, includeInactive } = parseQuery(req, playersQuerySchema)
+
+  const where: Record<string, unknown> = {}
+
+  if (roles) {
+    // Varios roles separados por coma
+    if (roles.length === 1) {
+      where.role = roles[0]
+    } else {
+      where.role = { in: roles }
     }
+  }
 
-    if (!requester) {
-      return NextResponse.json(
-        { error: 'Debes iniciar sesión para ver el directorio' },
-        { status: 401 }
-      )
-    }
-    const { searchParams } = new URL(req.url)
-    const roleParam = searchParams.get('role')
-    const search = searchParams.get('search')
-    const includeInactive = searchParams.get('includeInactive') === 'true'
+  if (!includeInactive) {
+    where.isActive = true
+  }
 
-    const where: Record<string, unknown> = {}
-
-    if (roleParam) {
-      // Handle multiple roles separated by comma
-      const roles = roleParam.split(',').map(r => r.trim() as UserRole)
-      if (roles.length === 1) {
-        where.role = roles[0]
-      } else {
-        where.role = { in: roles }
-      }
-    }
-
-    if (!includeInactive) {
-      where.isActive = true
-    }
-
-    if (search) {
-      where.OR = [
-        {
-          firstName: {
-            contains: search,
-            mode: 'insensitive'
-          }
-        },
-        {
-          lastName: {
-            contains: search,
-            mode: 'insensitive'
-          }
-        },
-        {
-          aliases: {
-            has: search
-          }
-        }
-      ]
-    }
-
-    const players = await prisma.player.findMany({
-      where,
-      select: {
-        ...playerSelectForRole(requester.role),
-        inviter: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
-        },
-        _count: {
-          select: {
-            invitees: true
-          }
+  if (search) {
+    where.OR = [
+      {
+        firstName: {
+          contains: search,
+          mode: 'insensitive'
         }
       },
-      orderBy: [
-        { role: 'asc' },
-        { firstName: 'asc' }
-      ]
-    })
-
-    return NextResponse.json(players)
-  } catch (error) {
-    console.error('Error fetching players:', error)
-    return NextResponse.json(
-      { error: 'Error al obtener jugadores' },
-      { status: 500 }
-    )
+      {
+        lastName: {
+          contains: search,
+          mode: 'insensitive'
+        }
+      },
+      {
+        aliases: {
+          has: search
+        }
+      }
+    ]
   }
-}
+
+  const players = await prisma.player.findMany({
+    where,
+    select: {
+      ...playerSelectForRole(requester.role),
+      inviter: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true
+        }
+      },
+      _count: {
+        select: {
+          invitees: true
+        }
+      }
+    },
+    orderBy: [
+      { role: 'asc' },
+      { firstName: 'asc' }
+    ]
+  })
+
+  return ok(players)
+})
 
 // POST /api/players - Crear nuevo jugador
-export async function POST(req: NextRequest) {
-  return withComisionAuth(req, async (req) => {
-  try {
-    const data = await req.json()
-    
-    const {
+export const POST = withErrorHandler(async (request: NextRequest) => {
+  await requireComision(request)
+  const {
+    firstName,
+    lastName,
+    role,
+    aliases,
+    pin,
+    birthDate,
+    phone,
+    email,
+    inviterId,
+    photoUrl,
+    joinYear
+  } = await parseBody(request, createPlayerSchema)
+
+  const isInvitado = role === UserRole.Invitado
+
+  // Los invitados suelen registrarse con un nombre de referencia incompleto
+  // ("Sobrino Diego", "Carlos jr"), por eso el apellido es opcional para ellos
+  // (lo valida createPlayerSchema).
+  const finalLastName = lastName ?? ''
+
+  // Evitar invitados duplicados: el formulario se reintenta con frecuencia
+  if (isInvitado) {
+    const duplicate = await prisma.player.findFirst({
+      where: {
+        role: UserRole.Invitado,
+        firstName: { equals: firstName, mode: 'insensitive' },
+        lastName: { equals: finalLastName, mode: 'insensitive' }
+      },
+      select: { id: true }
+    })
+
+    if (duplicate) {
+      throw AppError.conflict('Ya existe un invitado con ese nombre', 'DUPLICATE_GUEST')
+    }
+  }
+
+  // Validar y hashear PIN si se proporciona
+  let hashedPin: string | null = null
+  if (pin) {
+    const pinValidation = await validateAndHashPin(pin)
+    if (!pinValidation.success) {
+      throw AppError.badRequest(pinValidation.error, 'INVALID_PIN')
+    }
+    hashedPin = pinValidation.hashedPin
+  }
+
+  // Para invitados, asignar foto genérica si no se proporciona
+  let finalPhotoUrl = photoUrl
+  if (isInvitado && !photoUrl) {
+    finalPhotoUrl = GUEST_PHOTO_URL
+  }
+
+  // Generar adminKey para usuarios Comision
+  let adminKey = null
+  if (role === UserRole.Comision) {
+    adminKey = `admin_${firstName.toLowerCase()}_${Math.random().toString(36).substring(2, 15)}`
+  }
+
+  const newPlayer = await prisma.player.create({
+    data: {
       firstName,
-      lastName,
+      lastName: finalLastName,
+      joinDate: (joinYear || getEcuadorToday().year).toString(),
+      joinYear: joinYear || getEcuadorToday().year,
       role,
-      aliases = [],
-      pin,
+      aliases,
+      pin: hashedPin,
       birthDate,
       phone,
       email,
-      inviterId,
-      photoUrl,
-      joinYear
-    } = data
-
-    const isInvitado = role === UserRole.Invitado
-
-    // Validaciones básicas.
-    // Los invitados suelen registrarse con un nombre de referencia incompleto
-    // ("Sobrino Diego", "Carlos jr"), por eso el apellido es opcional para ellos.
-    if (!firstName || !role) {
-      return NextResponse.json(
-        { error: 'Nombre y rol son obligatorios' },
-        { status: 400 }
-      )
-    }
-
-    if (!isInvitado && !lastName) {
-      return NextResponse.json(
-        { error: 'El apellido es obligatorio' },
-        { status: 400 }
-      )
-    }
-
-    const finalLastName = typeof lastName === 'string' ? lastName.trim() : ''
-
-    // Evitar invitados duplicados: el formulario se reintenta con frecuencia
-    if (isInvitado) {
-      const duplicate = await prisma.player.findFirst({
-        where: {
-          role: UserRole.Invitado,
-          firstName: { equals: firstName.trim(), mode: 'insensitive' },
-          lastName: { equals: finalLastName, mode: 'insensitive' }
-        },
-        select: { id: true }
-      })
-
-      if (duplicate) {
-        return NextResponse.json(
-          { error: 'Ya existe un invitado con ese nombre' },
-          { status: 409 }
-        )
-      }
-    }
-
-    // Validar y hashear PIN si se proporciona
-    let hashedPin: string | null = null
-    if (pin) {
-      const pinValidation = await validateAndHashPin(pin)
-      if (!pinValidation.success) {
-        return NextResponse.json(
-          { error: pinValidation.error },
-          { status: 400 }
-        )
-      }
-      hashedPin = pinValidation.hashedPin
-    }
-
-    // Para invitados, asignar foto genérica si no se proporciona
-    let finalPhotoUrl = photoUrl
-    if (isInvitado && !photoUrl) {
-      finalPhotoUrl = GUEST_PHOTO_URL
-    }
-
-    // Generar adminKey para usuarios Comision
-    let adminKey = null
-    if (role === UserRole.Comision) {
-      adminKey = `admin_${firstName.toLowerCase()}_${Math.random().toString(36).substring(2, 15)}`
-    }
-
-    const newPlayer = await prisma.player.create({
-      data: {
-        firstName: firstName.trim(),
-        lastName: finalLastName,
-        joinDate: (joinYear || getEcuadorToday().year).toString(),
-        joinYear: joinYear || getEcuadorToday().year,
-        role,
-        aliases,
-        pin: hashedPin,
-        birthDate,
-        phone,
-        email,
-        inviterId: isInvitado ? inviterId : null,
-        photoUrl: finalPhotoUrl,
-        adminKey: adminKey,
-        isActive: true
-      },
-      // select, nunca include: include devolvia el hash del pin y el adminKey.
-      select: {
-        ...PLAYER_ADMIN_SELECT,
-        inviter: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true
-          }
+      inviterId: isInvitado ? inviterId : null,
+      photoUrl: finalPhotoUrl,
+      adminKey: adminKey,
+      isActive: true
+    },
+    // select, nunca include: include devolvia el hash del pin y el adminKey.
+    select: {
+      ...PLAYER_ADMIN_SELECT,
+      inviter: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true
         }
       }
-    })
-
-    return NextResponse.json(newPlayer, { status: 201 })
-  } catch (error) {
-    console.error('Error creating player:', error)
-    return NextResponse.json(
-      { error: 'Error al crear jugador' },
-      { status: 500 }
-    )
-  }
+    }
   })
-}
+
+  return ok(newPlayer, 201)
+})

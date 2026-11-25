@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok } from '@/lib/http'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,32 +21,24 @@ interface SpotifyOEmbedResponse {
 }
 
 // GET /api/podcast - Get podcast info and embed
-export async function GET() {
-  try {
-    // Use Spotify oEmbed to get podcast info
-    const oembedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(SPOTIFY_SHOW_URL)}`
+export const GET = withErrorHandler(async () => {
+  // Use Spotify oEmbed to get podcast info
+  const oembedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(SPOTIFY_SHOW_URL)}`
 
-    const response = await fetch(oembedUrl)
+  const response = await fetch(oembedUrl)
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch podcast info from Spotify')
-    }
-
-    const data: SpotifyOEmbedResponse = await response.json()
-
-    return NextResponse.json({
-      showId: SPOTIFY_SHOW_ID,
-      title: data.title,
-      thumbnailUrl: data.thumbnail_url,
-      spotifyUrl: SPOTIFY_SHOW_URL,
-      embedHtml: data.html,
-      provider: data.provider_name
-    })
-  } catch (error) {
-    console.error('Error fetching podcast info:', error)
-    return NextResponse.json(
-      { error: 'Error fetching podcast info' },
-      { status: 500 }
-    )
+  if (!response.ok) {
+    throw AppError.internal('No se pudo obtener el podcast de Spotify', 'PODCAST_UNAVAILABLE')
   }
-}
+
+  const data: SpotifyOEmbedResponse = await response.json()
+
+  return ok({
+    showId: SPOTIFY_SHOW_ID,
+    title: data.title,
+    thumbnailUrl: data.thumbnail_url,
+    spotifyUrl: SPOTIFY_SHOW_URL,
+    embedHtml: data.html,
+    provider: data.provider_name
+  })
+})
