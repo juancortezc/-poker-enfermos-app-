@@ -21,7 +21,7 @@ import { cp, fonts } from '@/theme/colors';
 import { useCP } from '@/theme/tone';
 
 import { BigScore, HashScore, ON_COLOR, Tile, TileLink, TileOverline, TileRow } from './bento';
-import { HERO_CARD_STYLE, HERO_CARD_WIDTH, Headline, Marquee, MarqueeOverline, MedalPodium, PhotoTile, Rise, SectionTitle, TilePair } from './lucha';
+import { HERO_CARD_STYLE, useHeroCardWidth, Headline, Marquee, MarqueeOverline, MedalPodium, PhotoTile, Rise, SectionTitle, TilePair } from './lucha';
 
 type Props = {
   userId: string;
@@ -274,6 +274,8 @@ function WinnerMarquee({
   onSeeResults: () => void;
 }) {
   const phrase = nightWinnerPhrase(name, dateNumber, wins);
+  // Rótulo, cinta, titular de 2 líneas, fila de puntos y botón, paddings y separaciones.
+  const cardWidth = useHeroCardWidth(250);
   return (
     <Marquee pattern="ring">
       <MarqueeOverline icon="★">{`FUNCIÓN ESTELAR · FECHA ${dateNumber}`}</MarqueeOverline>
@@ -282,7 +284,7 @@ function WinnerMarquee({
           name={`${winner.firstName} ${winner.lastName}`}
           photoUrl={photoUrl}
           role={winner.role}
-          width={HERO_CARD_WIDTH}
+          width={cardWidth}
           ringColor={cp.gold}
           ringWidth={3}
           elevate={0}
@@ -293,13 +295,15 @@ function WinnerMarquee({
         <Ribbon>CAMPEÓN DE LA NOCHE</Ribbon>
       </View>
       <Headline lines={phrase} accent={cp.primaryLight} />
-      <View className="flex-row items-baseline" style={{ gap: 6 }}>
-        <Text style={{ fontFamily: fonts.displayBlack, fontSize: 40, color: cp.gold }}>{points}</Text>
-        <Text style={{ fontFamily: fonts.displayBlack, fontSize: 14, letterSpacing: 2, color: cp.onSurfaceMuted }}>
-          {points === 1 ? 'PUNTO' : 'PUNTOS'}
-        </Text>
+      <View className="w-full flex-row items-center justify-between" style={{ gap: 12 }}>
+        <View className="flex-row items-baseline" style={{ gap: 6 }}>
+          <Text style={{ fontFamily: fonts.displayBlack, fontSize: 40, color: cp.gold }}>{points}</Text>
+          <Text style={{ fontFamily: fonts.displayBlack, fontSize: 14, letterSpacing: 2, color: cp.onSurfaceMuted }}>
+            {points === 1 ? 'PUNTO' : 'PUNTOS'}
+          </Text>
+        </View>
+        <CPButton title="VER RESULTADOS" onPress={onSeeResults} />
       </View>
-      <CPButton title="VER RESULTADOS" onPress={onSeeResults} />
     </Marquee>
   );
 }

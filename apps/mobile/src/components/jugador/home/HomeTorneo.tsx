@@ -39,7 +39,7 @@ import { cp, fonts } from '@/theme/colors';
 import { useCP } from '@/theme/tone';
 
 import { Bento, BigScore, HashScore, ON_COLOR, Tile, TileLink, TileOverline, TileRow, useReduceMotion } from './bento';
-import { HERO_CARD_STYLE, HERO_CARD_WIDTH, Headline, Marquee, MarqueeOverline, MEDALS, openPlayer, PhotoTile, Rise, SectionTitle, TilePair, VsBadge } from './lucha';
+import { HERO_CARD_STYLE, Headline, useHeroCardWidth, Marquee, MarqueeOverline, MEDALS, openPlayer, PhotoTile, Rise, SectionTitle, TilePair, VsBadge } from './lucha';
 import { TorneoFinalizadoCard } from './TorneoFinalizadoCard';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -462,6 +462,8 @@ function BeltMarquee({
     { v: podios, l: podios === 1 ? 'PODIO' : 'PODIOS' },
     { v: leader.firstPlaces, l: leader.firstPlaces === 1 ? 'VICTORIA' : 'VICTORIAS' },
   ];
+  // Rótulo, cinturón, titular de 2 líneas, fila de números, paddings y separaciones.
+  const cardWidth = useHeroCardWidth(290);
   return (
     <Marquee pattern="glow">
       <MarqueeOverline icon="👑">
@@ -471,7 +473,7 @@ function BeltMarquee({
         <PlayerCard
           name={leader.playerName}
           photoUrl={leader.playerPhoto}
-          width={HERO_CARD_WIDTH}
+          width={cardWidth}
           ringColor={cp.gold}
           ringWidth={3}
           elevate={0}

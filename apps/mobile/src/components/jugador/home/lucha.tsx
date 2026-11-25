@@ -10,6 +10,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pressable, Text, useWindowDimensions, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { Easing, FadeInDown, ReduceMotion, useReducedMotion } from 'react-native-reanimated';
 import Svg, { Defs, Pattern, RadialGradient, Rect, Stop } from 'react-native-svg';
@@ -18,8 +19,26 @@ import { initialsOf, photoUri } from '@/components/common/PlayerAvatar';
 import { alpha, cp, fonts } from '@/theme/colors';
 import { useCP } from '@/theme/tone';
 
-/** Ancho de la tarjeta protagonista del cartel y del cinturón. */
+/** Ancho máximo de la tarjeta protagonista del cartel y del cinturón. */
 export const HERO_CARD_WIDTH = 232;
+
+/**
+ * Ancho de la tarjeta (2:3) para que el cartel entero, botón incluido, entre
+ * en la primera pantalla sin scroll: alto de la ventana menos la barra de
+ * arriba, las pestañas Última fecha/Torneo, la barra inferior y lo que el
+ * cartel lleva además de la tarjeta (`chrome`, en pt).
+ */
+export function useHeroCardWidth(chrome: number) {
+  const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const APP_BAR = 59; // CPHeader
+  const TABS = 87; // pestañas + separaciones arriba y abajo
+  const TAB_BAR = 56; // CPTabBar sin el borde seguro
+  const AIR = 12; // que se vea el borde inferior del cartel
+  const available = height - insets.top - APP_BAR - TABS - TAB_BAR - insets.bottom - AIR;
+  const cardHeight = available - chrome;
+  return Math.round(Math.max(120, Math.min(HERO_CARD_WIDTH, (cardHeight * 2) / 3)));
+}
 
 /** La tarjeta del cartel: rotada y con sombra profunda sobre el negro. */
 export const HERO_CARD_STYLE = (deg: number) => ({
@@ -117,10 +136,13 @@ export function Headline({ lines, accent, max = 46 }: { lines: readonly [string,
   const { width } = useWindowDimensions();
   const available = width - 40 - 40; // padding de la pantalla (20+20) y del cartel (20+20)
   const longest = Math.max(lines[0].length, lines[1].length);
-  const size = Math.round(Math.max(28, Math.min(max, available / (longest * 0.6))));
+  const size = Math.round(Math.max(20, Math.min(max, available / (longest * 0.62))));
   return (
     <Text
       accessibilityRole="header"
+      numberOfLines={2}
+      adjustsFontSizeToFit
+      minimumFontScale={0.6}
       style={{
         fontFamily: fonts.displayBlackItalic,
         fontSize: size,
