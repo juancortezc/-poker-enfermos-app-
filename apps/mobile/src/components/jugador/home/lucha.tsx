@@ -81,11 +81,16 @@ export function SectionTitle({ title, link, onLink }: { title: string; link?: st
   const c = useCP();
   return (
     <View className="flex-row items-center justify-between">
-      <Text accessibilityRole="header" style={{ fontFamily: fonts.displayBlack, fontSize: 26, letterSpacing: 0.5, color: c.onSurface }}>
+      <Text
+        accessibilityRole="header"
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+        style={{ flex: 1, fontFamily: fonts.displayBlack, fontSize: 26, letterSpacing: 0.5, color: c.onSurface }}>
         {title}
       </Text>
       {link && onLink ? (
-        <Pressable accessibilityRole="link" onPress={onLink} hitSlop={12} className="min-h-[44px] justify-center active:opacity-60">
+        <Pressable accessibilityRole="link" onPress={onLink} hitSlop={12} className="min-h-[44px] justify-center pl-3 active:opacity-60">
           <Text style={{ fontFamily: fonts.display, fontSize: 13, letterSpacing: 1.5, color: c.primaryLight }}>{link} →</Text>
         </Pressable>
       ) : null}
