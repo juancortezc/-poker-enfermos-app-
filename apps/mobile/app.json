@@ -4,7 +4,7 @@
     "slug": "poker-enfermos",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icons/favicon-512.png",
+    "icon": "./assets/app/icon.png",
     "scheme": "pokerenfermos",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#000000",
@@ -20,10 +20,12 @@
       "package": "com.pokerenfermos.app",
       "adaptiveIcon": {
         "backgroundColor": "#000000",
-        "foregroundImage": "./assets/icons/favicon-512.png"
+        "foregroundImage": "./assets/app/adaptive-foreground.png",
+        "monochromeImage": "./assets/app/adaptive-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"]
+      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"],
+      "blockedPermissions": ["android.permission.SYSTEM_ALERT_WINDOW"]
     },
     "web": {
       "output": "single",
@@ -35,8 +37,13 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#000000",
-          "image": "./assets/icons/favicon-512.png",
-          "imageWidth": 200
+          "image": "./assets/app/splash-logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#000000",
+            "image": "./assets/app/splash-logo.png"
+          }
         }
       ],
       "expo-secure-store",
