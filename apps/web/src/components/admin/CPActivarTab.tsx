@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { UserRole } from '@prisma/client'
 import { Play, Loader2, UserPlus, Calendar, Users, ChevronDown, Trash2, Trophy, Check, ChevronRight } from 'lucide-react'
 import TournamentCompletionModal from '@/components/tournaments/TournamentCompletionModal'
-import { formatDateForInput, validateTuesdayDate } from '@/lib/date-utils'
+import { formatDateForInput, parseToUTCNoon, validateTuesdayDate } from '@/lib/date-utils'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 import { playerLabel } from '@poker/shared'
 import { readApiJson } from '@/lib/api-client'
@@ -159,6 +159,7 @@ export default function CPActivarTab() {
         setAdditionalPlayers(data.additionalPlayers || [])
 
         // Check for missing dates (deleted dates that need to be recreated)
+        setMissingDate(null)
         if (data.missingDate) {
           setMissingDate(data.missingDate)
           // Set default to next Tuesday
@@ -177,7 +178,7 @@ export default function CPActivarTab() {
         } else if (data.availableDates.length > 0) {
           const firstDate = data.availableDates[0]
           setSelectedDateId(firstDate.id)
-          setSelectedDate(new Date(firstDate.scheduledDate))
+          setSelectedDate(parseToUTCNoon(firstDate.scheduledDate))
           setSelectedPlayers(data.registeredPlayers.map((p: Player) => p.id))
         }
 
@@ -216,7 +217,7 @@ export default function CPActivarTab() {
     if (!selectedDateData) return
 
     setSelectedDateId(dateId)
-    setSelectedDate(new Date(selectedDateData.scheduledDate))
+    setSelectedDate(parseToUTCNoon(selectedDateData.scheduledDate))
     setSelectedPlayers(registeredPlayers.map(p => p.id))
     setSelectedGuests([])
     setActiveTab('enfermos')
@@ -257,7 +258,7 @@ export default function CPActivarTab() {
             tournamentId: tournament.id,
             dateNumber: missingDate,
             scheduledDate: missingDateScheduled,
-            playerIds: [...selectedPlayers, ...selectedGuests]
+            playerIds: [...new Set([...selectedPlayers, ...selectedGuests])]
           })
         })
 
@@ -294,8 +295,10 @@ export default function CPActivarTab() {
         body: JSON.stringify({
           tournamentId: tournament.id,
           dateNumber: availableDates.find(d => d.id === selectedDateId)?.dateNumber,
-          scheduledDate: selectedDate.toISOString(),
-          playerIds: [...selectedPlayers, ...selectedGuests]
+          // El día calendario, no un instante: toISOString() de un Date a
+          // las 00:00 UTC era el día anterior en Ecuador.
+          scheduledDate: formatDateForInput(selectedDate),
+          playerIds: [...new Set([...selectedPlayers, ...selectedGuests])]
         })
       })
 
@@ -342,29 +345,13 @@ export default function CPActivarTab() {
       })
 
       if (response.ok) {
-        // Si era una fecha bloqueada, limpiar el estado y recargar
-        if (blockedDate && blockedDate.id === targetId) {
-          setBlockedDate(null)
-          setError('')
-          loadInitialData() // Recargar para obtener fechas disponibles
-          return
-        }
-
-        // Remover la fecha eliminada de la lista
-        const updatedDates = availableDates.filter(d => d.id !== targetId)
-        setAvailableDates(updatedDates)
-
-        // Seleccionar la siguiente fecha disponible
-        if (updatedDates.length > 0) {
-          setSelectedDateId(updatedDates[0].id)
-          setSelectedDate(new Date(updatedDates[0].scheduledDate))
-        } else {
-          setSelectedDateId(null)
-          setSelectedDate(undefined)
-        }
-
-        setSelectedPlayers([])
+        // Recargar: la fecha borrada vuelve como `missingDate` para recrearla
+        // con otro día, y si era la bloqueada se libera la pestaña.
+        setBlockedDate(null)
+        setSelectedDateId(null)
+        setSelectedDate(undefined)
         setSelectedGuests([])
+        await loadInitialData()
       } else {
         const errorData = await readApiJson(response)
         setError(errorData.error || 'Error al eliminar fecha')
@@ -399,7 +386,7 @@ export default function CPActivarTab() {
       })
 
       if (response.ok) {
-        setSelectedDate(new Date(newDateString + 'T12:00:00'))
+        setSelectedDate(parseToUTCNoon(newDateString))
         setAvailableDates(prev => prev.map(date =>
           date.id === selectedDateId
             ? { ...date, scheduledDate: newDateString }
