@@ -86,7 +86,7 @@ export function CPHeader() {
         <View className="flex-row items-baseline" style={{ gap: 6 }}>
           <Text style={{ fontFamily: fonts.display, fontSize: 13, letterSpacing: 2.4, color: c.primaryLight }}>TORNEO</Text>
           {number ? (
-            <Text style={{ fontFamily: fonts.displayBlack, fontSize: 22, lineHeight: 24, color: light ? 'rgba(23,18,15,0.12)' : '#FFFFFF' }}>
+            <Text style={{ fontFamily: fonts.displayBlack, fontSize: 22, lineHeight: 24, color: c.onSurface }}>
               {number}
             </Text>
           ) : null}

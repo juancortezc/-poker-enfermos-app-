@@ -35,6 +35,12 @@ export interface TournamentDateRef {
   status?: string;
 }
 
+/** Una fecha jugada con el torneo al que pertenece. */
+export interface LastPlayedDate extends TournamentDateRef {
+  tournamentId: number;
+  tournamentNumber: number;
+}
+
 /**
  * Sin ningún torneo en la base la API responde `{ tournament: null }`, sin
  * `stats`. `nextDate` falta cuando no quedan fechas por jugar (torneo
@@ -47,6 +53,8 @@ interface ActiveTournamentResponse {
     totalDates: number;
     nextDate?: TournamentDateRef;
     lastCompletedDate: TournamentDateRef | null;
+    /** Última fecha jugada del grupo, aunque sea del torneo anterior (al arrancar uno). Falta en APIs viejas. */
+    lastPlayedDate?: LastPlayedDate | null;
     startDate?: string;
     endDate?: string;
     isCompleted: boolean;
@@ -72,6 +80,13 @@ export function useActiveTournament(options: { refreshInterval?: number } = {}) 
       : null,
     nextDate: data?.stats?.nextDate ?? null,
     lastCompletedDate: data?.stats?.lastCompletedDate ?? null,
+    // Del torneo activo o, si todavía no jugó ninguna, del anterior. Con una
+    // API que no la manda, la del torneo activo.
+    lastPlayedDate:
+      data?.stats?.lastPlayedDate ??
+      (data?.stats?.lastCompletedDate && tournament
+        ? { ...data.stats.lastCompletedDate, tournamentId: tournament.id, tournamentNumber: tournament.number }
+        : null),
     seasonStartDate: data?.stats?.startDate ?? null,
     seasonEndDate: data?.stats?.endDate ?? null,
     isFinished: tournament?.status === 'FINALIZADO',

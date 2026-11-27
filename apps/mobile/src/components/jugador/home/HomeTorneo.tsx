@@ -11,7 +11,8 @@
  * 4. Los 7/2 del torneo: los dos últimos de la tabla en el bloque rosa.
  *
  * Con el torneo FINALIZADO, la tarjeta final (podio oficial y "próximo torneo:
- * por anunciar") reemplaza el campeón y la cartelera.
+ * por anunciar") reemplaza el campeón y la cartelera. Sin ninguna fecha jugada
+ * (todos en 0, en el orden de inscripción) va el afiche del torneo que arranca.
  */
 import {
   leaderPhrase,
@@ -21,6 +22,7 @@ import {
   SCORE_LABELS,
   scoreOf,
   shortenFullName,
+  tournamentHasResults,
   tournamentSieteDos,
   type PlayerRanking,
 } from '@poker/shared';
@@ -32,6 +34,7 @@ import Svg, { ClipPath, Defs, Image as SvgImage, Line, Polygon, RadialGradient, 
 import { photoUri } from '@/components/common/PlayerAvatar';
 import { PlayerCard, playerCardSources } from '@/components/common/PlayerCard';
 import { PhotoViewer } from '@/components/common/PhotoViewer';
+import { TournamentPoster } from '@/components/jugador/TournamentPoster';
 import { alpha, cp, fonts } from '@/theme/colors';
 import { ToneView, useCP } from '@/theme/tone';
 
@@ -48,6 +51,9 @@ type Props = {
   lastDateNumber?: number | null;
   /** Fechas jugadas / planificadas ("FECHA N DE M"). */
   progress?: { completed: number; total: number } | null;
+  /** Próxima fecha y cantidad de inscritos: el afiche del torneo que arranca. */
+  nextDate?: { dateNumber: number; scheduledDate?: string | null } | null;
+  registeredCount?: number;
   onSeeTabla: () => void;
 };
 
@@ -61,7 +67,19 @@ const HERO_MIN = 420;
 
 const nick = (r: PlayerRanking) => r.playerAlias || shortenFullName(r.playerName);
 
-export function HomeTorneo({ tournamentNumber, finished = false, rankings, lastDateNumber, progress, onSeeTabla }: Props) {
+export function HomeTorneo({ tournamentNumber, finished = false, rankings, lastDateNumber, progress, nextDate, registeredCount, onSeeTabla }: Props) {
+  if (!finished && !tournamentHasResults(rankings)) {
+    return (
+      <Rise index={0}>
+        <TournamentPoster
+          tournamentNumber={tournamentNumber}
+          nextDate={nextDate}
+          registeredCount={registeredCount ?? (rankings.length || undefined)}
+        />
+      </Rise>
+    );
+  }
+
   const sorted = [...rankings].sort((a, b) => a.position - b.position);
   const [leader, second] = sorted;
   const contenders = sorted.slice(1, 5);
