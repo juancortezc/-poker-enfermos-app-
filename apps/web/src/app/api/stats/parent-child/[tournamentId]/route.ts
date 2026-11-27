@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseParams } from '@/lib/http'
-import { tournamentIdParamsSchema } from '@poker/shared'
+import { tournamentIdParamsSchema, withTournamentPhotos } from '@poker/shared'
 
 // GET /api/stats/parent-child/[tournamentId] - Obtener estadísticas Padre-Hijo (público)
 export const GET = withErrorHandler(async (
@@ -58,9 +58,10 @@ export const GET = withErrorHandler(async (
     stat.parentPlayer.role !== 'Invitado' && stat.childPlayer.role !== 'Invitado'
   )
 
-  return ok({
+  // Fotos del torneo: en uno anterior al T31, las de entonces.
+  return ok(withTournamentPhotos({
     tournament,
     parentChildRelations: filteredStats,
     totalRelations: filteredStats.length
-  })
+  }, tournament.number))
 })

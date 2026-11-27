@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { computeTournamentAwards } from '@/lib/awards-utils'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseParams } from '@/lib/http'
-import { tournamentIdParamsSchema } from '@poker/shared'
+import { tournamentIdParamsSchema, withTournamentPhotos } from '@poker/shared'
 
 export const GET = withErrorHandler(async (
   _request: NextRequest,
@@ -15,5 +15,6 @@ export const GET = withErrorHandler(async (
     throw AppError.notFound('Torneo no encontrado')
   }
 
-  return ok(response)
+  // Fotos del torneo: en uno anterior al T31, las de entonces.
+  return ok(withTournamentPhotos(response, response.tournament.number))
 })

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { idParamsSchema, updateTournamentSchema } from '@poker/shared'
+import { idParamsSchema, updateTournamentSchema, withTournamentPhotos } from '@poker/shared'
 import { requireComision } from '@/lib/api-auth'
 import { parseToUTCNoon } from '@/lib/date-utils'
 import { AppError, withErrorHandler } from '@/lib/errors'
@@ -55,7 +55,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, { params }: Ctx) =
     throw AppError.notFound('Torneo no encontrado', 'TOURNAMENT_NOT_FOUND')
   }
 
-  return ok(tournament)
+  // Fotos del torneo: en uno anterior al T31, las de entonces.
+  return ok(withTournamentPhotos(tournament, tournament.number))
 })
 
 // PUT /api/tournaments/[id] - Actualizar torneo

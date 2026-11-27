@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseParams } from '@/lib/http'
+import { withPhotosOfTournament } from '@/lib/tournament-photos'
 import { parentChildRelationParamsSchema } from '@poker/shared'
 
 // GET /api/stats/parent-child/[tournamentId]/[relationId] - Detalle de eliminaciones de una relación P&H
@@ -67,7 +68,8 @@ export const GET = withErrorHandler(async (
     }
   })
 
-  return ok({
+  // Fotos del torneo: en uno anterior al T31, las de entonces.
+  return ok(await withPhotosOfTournament({
     relation: {
       id: relation.id,
       eliminationCount: relation.eliminationCount,
@@ -83,5 +85,5 @@ export const GET = withErrorHandler(async (
       dateNumber: e.gameDate.dateNumber,
       scheduledDate: e.gameDate.scheduledDate
     }))
-  })
+  }, tournamentId))
 })
