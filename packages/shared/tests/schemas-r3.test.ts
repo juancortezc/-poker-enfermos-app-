@@ -70,7 +70,8 @@ test('active-users: days por defecto 7, entero entre 1 y 365', () => {
 })
 
 test('import execute: filas del CSV validado', () => {
-  const fila = { torneo: 'Torneo 28', fecha: 1, date: '2025-01-14', posicion: 2, eliminado: 'Juan', eliminador: 'Pedro', puntos: 25 }
+  // Una sola fila es un CSV de 1 jugador: posición 1 y el punto que da la tabla (T36).
+  const fila = { torneo: 'Torneo 28', fecha: 1, date: '2025-01-14', posicion: 1, eliminado: 'Juan', eliminador: 'Pedro', puntos: 1 }
   assert.deepEqual(importExecuteSchema.parse({ eliminations: [fila] }).eliminations[0], fila)
   assert.equal(importExecuteSchema.parse({ eliminations: [{ ...fila, eliminador: undefined }] }).eliminations[0].eliminador, '')
   for (const bad of [
@@ -78,7 +79,8 @@ test('import execute: filas del CSV validado', () => {
     { eliminations: [] },
     { eliminations: 'x' },
     { eliminations: [{ ...fila, puntos: null }] },
-    { eliminations: [{ ...fila, puntos: 31 }] },
+    { eliminations: [{ ...fila, puntos: 32 }] },
+    { eliminations: [{ ...fila, puntos: 25 }] },
     { eliminations: [{ ...fila, posicion: '2' }] },
     { eliminations: [{ ...fila, date: '14/01/2025' }] },
     { eliminations: [{ ...fila, eliminado: ' ' }] },
