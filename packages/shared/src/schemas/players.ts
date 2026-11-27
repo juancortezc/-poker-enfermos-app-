@@ -1,5 +1,6 @@
 /** Esquemas de entrada de la API: jugadores (/api/players). */
 import { z, userRoleSchema, queryBooleanSchema, queryIdSchema, playerIdSchema } from './common'
+import { GUEST_GENERIC_NAME_MESSAGE, isGenericGuestName } from '../guests'
 
 /** Texto opcional que se guarda tal cual (null o ausente = sin dato). */
 const optionalText = z.string({ error: 'Debe ser texto' }).max(500, 'Texto demasiado largo').nullish()
@@ -86,6 +87,32 @@ export const changePlayerRoleSchema = z
     }
   })
 export type ChangePlayerRoleInput = z.infer<typeof changePlayerRoleSchema>
+
+/** Nombre o apellido real de un invitado: recortado, 2+ letras, nada de "Invitado" o "Sobrino X". */
+function guestNamePart(label: string) {
+  return z
+    .string({ error: `${label} es obligatorio` })
+    .trim()
+    .min(2, `${label} debe tener al menos 2 letras`)
+    .max(100, `${label} es demasiado largo`)
+    .refine((v) => !isGenericGuestName(v), GUEST_GENERIC_NAME_MESSAGE)
+}
+
+/**
+ * POST /api/players/guests: alta rapida de un invitado externo desde el
+ * selector de la fecha. Nombre y apellido reales y quien lo invita (un
+ * Enfermo o Comision activo, eso lo comprueba el servidor).
+ */
+export const createGuestSchema = z.object({
+  firstName: guestNamePart('El nombre'),
+  lastName: guestNamePart('El apellido'),
+  inviterId: z
+    .string({ error: 'Elige quién lo invita' })
+    .trim()
+    .min(1, 'Elige quién lo invita')
+    .max(64, 'Id de jugador inválido'),
+})
+export type CreateGuestInput = z.infer<typeof createGuestSchema>
 
 /** `?tournamentId=3` (opcional) de GET /api/players/available-guests. */
 export const availableGuestsQuerySchema = z.object({
