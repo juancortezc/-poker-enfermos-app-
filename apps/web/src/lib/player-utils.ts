@@ -4,7 +4,7 @@
 
 // URL de la imagen del pato para invitados
 export { GUEST_PHOTO_URL } from '@poker/shared'
-import { GUEST_PHOTO_URL } from '@poker/shared'
+import { displayPhoto } from '@poker/shared'
 
 /**
  * Returns the appropriate photo URL for a player.
@@ -18,12 +18,8 @@ export function getPlayerPhotoUrl(
   photoUrl: string | null | undefined,
   role: string | null | undefined
 ): string | undefined {
-  // Guests always get the duck photo
-  if (role === 'Invitado') {
-    return GUEST_PHOTO_URL
-  }
-
-  return photoUrl || undefined
+  // Guests get the duck photo (the old one in a tournament before the T31)
+  return displayPhoto(photoUrl, role) || undefined
 }
 
 /**

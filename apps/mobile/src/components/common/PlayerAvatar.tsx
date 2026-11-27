@@ -16,7 +16,7 @@ import { Pressable, Text, View } from 'react-native';
 import { apiUrl } from '@/lib/api';
 import { fonts } from '@/theme/colors';
 import { useCP } from '@/theme/tone';
-import { GUEST_PHOTO_URL } from '@poker/shared';
+import { displayPhoto } from '@poker/shared';
 
 
 /** Forma mínima de un jugador para sacar sus props de avatar. */
@@ -62,7 +62,7 @@ const OPTIMIZABLE = /^https:\/\/storage\.googleapis\.com\/poker-enfermos(-media)
  * que next.config) al ancho que se muestra x3: ~25 KB en vez de 3 MB.
  */
 export function photoUri(photoUrl?: string | null, role?: string | null, displayWidth = 128): string | null {
-  const raw = role === 'Invitado' ? GUEST_PHOTO_URL : photoUrl;
+  const raw = displayPhoto(photoUrl, role);
   if (!raw) return null;
   const url = apiUrl(raw);
   if (!OPTIMIZABLE.test(url)) return url;
