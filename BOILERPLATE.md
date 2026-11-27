@@ -1,99 +1,164 @@
-# Next.js Clean Architecture Boilerplate
+# Boilerplate de Poker Enfermos
 
-Este documento describe la arquitectura completa de un proyecto Next.js con Clean Architecture y Domain-Driven Design. Usa este prompt para recrear la estructura en futuros proyectos.
+Arquitectura y convenciones de este repo. **Es obligatorio leerlo antes de planificar, escribir un brief o tocar código**, sea una persona o un agente. Si algo de lo que vas a hacer se aparta de lo que dice aquí, dilo explícitamente en el plan o en el reporte (qué, por qué y qué haría falta para alinearlo). No se salta en silencio.
+
+Hay dos niveles:
+
+1. **Lo vigente** (secciones 1 a 6): lo que el código ya cumple. Todo cambio nuevo lo sigue.
+2. **Pendiente / diferido** (sección 7): el objetivo que todavía no se aplica, con su estado actual. No se migra a escondidas dentro de otra tarea; cada punto es una tarea propia y se decide con el usuario.
+
+El anexo guarda las plantillas del objetivo para cuando toque cada migración.
 
 ---
 
-## Prompt para Crear el Boilerplate
+## 1. Monorepo
+
+npm workspaces (`apps/*`, `packages/*`), un solo `package-lock.json` en la raíz. React fijado a 19.3.0 con `overrides` en el `package.json` raíz.
 
 ```
-Crea un proyecto Next.js 16+ con las siguientes características y arquitectura:
-
-## Stack Tecnológico
-
-- Next.js 16+ (App Router)
-- TypeScript 5
-- PostgreSQL con Prisma 7
-- NextAuth.js 5 (beta) con Google OAuth y Credentials
-- Zod 4 para validación
-- React Hook Form 7
-- Tailwind CSS 4
-- Lucide React para iconos
-- pnpm como gestor de paquetes
-- UUIDs v7 para todos los IDs (time-sortable)
-
-## Estructura de Carpetas
-
-```
-proyecto/
-├── app/                          # Next.js App Router
-│   ├── api/                      # API endpoints (RESTful)
-│   │   ├── auth/[...nextauth]/   # NextAuth handlers
-│   │   └── [module]/             # Rutas por módulo
-│   ├── login/                    # Página de login
-│   ├── (dashboard)/              # Route group protegido
-│   │   ├── layout.tsx            # Layout con sidebar y header
-│   │   ├── dashboard/page.tsx    # Página principal
-│   │   └── [module]/             # Páginas por módulo
-│   ├── layout.tsx                # Root layout (providers)
-│   └── page.tsx                  # Landing page
-│
-├── src/
-│   ├── config/
-│   │   └── env.ts                # Validación de environment con Zod
-│   │
-│   ├── lib/
-│   │   ├── prisma/
-│   │   │   └── client.ts         # Prisma client singleton
-│   │   ├── auth/
-│   │   │   ├── auth.config.ts    # Configuración NextAuth
-│   │   │   ├── auth.ts           # Instancia NextAuth
-│   │   │   ├── prisma-adapter.ts # Adapter personalizado con UUID
-│   │   │   └── password.ts       # Utilidades bcrypt
-│   │   └── errors/
-│   │       ├── types.ts          # Interfaces ErrorResponse
-│   │       ├── app-error.ts      # Clase AppError
-│   │       └── error-handler.ts  # withErrorHandler wrapper
-│   │
-│   ├── components/
-│   │   ├── layout/               # Sidebar, Header, LogoutButton
-│   │   ├── providers/            # ThemeProvider
-│   │   └── ui/                   # Button, Card, Input, Modal, Table, etc.
-│   │
-│   └── modules/                  # Módulos de dominio
-│       └── [module]/
-│           ├── domain/
-│           │   ├── entities/     # Interfaces puras TypeScript
-│           │   └── repositories/ # Contratos de repositorio
-│           ├── application/
-│           │   ├── dto/          # Schemas Zod de validación
-│           │   └── use-cases/    # Lógica de negocio
-│           └── infrastructure/
-│               └── repositories/ # Implementaciones Prisma
-│
-├── prisma/
-│   ├── schema.prisma             # Esquema de base de datos
-│   ├── migrations/               # Migraciones
-│   └── seed.ts                   # Datos iniciales
-│
-├── prisma.config.ts              # Configuración Prisma (en raíz)
-├── middleware.ts                 # Protección de rutas NextAuth
-├── next.config.ts
-├── tsconfig.json
-└── .env.example
+poker2027/
+├── apps/
+│   ├── web/                  # Next.js 16 (App Router): la web y TODA la API (/api)
+│   │   ├── prisma/           # schema.prisma (Prisma 6, PostgreSQL en Neon)
+│   │   ├── src/app/          # páginas y rutas /api/**/route.ts
+│   │   ├── src/lib/          # prisma, api-auth, errors/, http.ts, api-client.ts...
+│   │   ├── src/proxy.ts      # CORS (en Next 16 `middleware` se llama `proxy`)
+│   │   └── src/{domain,application,infrastructure}/  # capas parciales (ver 7.4)
+│   └── mobile/               # Expo SDK 58, RN 0.88, Expo Router (src/app), NativeWind 4, SWR
+├── packages/
+│   ├── shared/               # @poker/shared: lógica pura y esquemas Zod
+│   └── design/               # @poker/design: tokens Clean Poker
+└── package.json              # workspaces y scripts de la raíz
 ```
 
-## Configuración de TypeScript
+Scripts de la raíz: `npm run dev:web`, `build:web`, `lint:web`, `test` (todos los workspaces), `typecheck` (todos los workspaces). Las dependencias de la app móvil se instalan con `npx expo install <pkg>` dentro de `apps/mobile`.
 
-tsconfig.json debe incluir:
-- Path alias: "@/*" → "./src/*"
-- Strict mode habilitado
-- Target: ES2017
+### `@poker/shared` (`packages/shared`)
+Lógica pura compartida por la web y la app: sin Next, sin React, sin DOM, sin Prisma. Se importa desde `@poker/shared`.
+- `src/schemas/`: esquemas Zod de entrada (body y query) de la API, por área (`auth`, `players`, `tournaments`, `game-dates`, `eliminations`, `timer`, `proposals`, `multas`, `stats`, `push`, ...). La API los usa para validar y la app para sus formularios.
+- Reglas de negocio: `standings`, `tournament-stats`, `ranking`, `scoring`, `points`, `blinds` (única fuente de los niveles), `timer-engine`, `permissions`, `pin-rules`, `phrases`, `player-name`, `player-details`, `game-dates`, `tournament-validation`, `csv`, `ics`, `birthday`, `types`.
 
-## Validación de Environment (src/config/env.ts)
+### `@poker/design` (`packages/design`)
+Tokens Clean Poker (colores por tono oscuro/claro/papel, tipografía, escala, radios, elevaciones, movimiento, bloques `bento` del home). `toCssVariables(tone)` / `cssVariableMap(tone)` generan las variables `--cp-*` con los nombres de la web. `packages/design/tests/web-parity.test.ts` falla si se separan de `apps/web/src/styles/clean-poker-tokens.css`.
 
+---
+
+## 2. Regla de reparto: nada se duplica entre web y app
+
+- **Lógica y validación compartidas van en `@poker/shared`.** Si la web y la app calculan o validan lo mismo (puntos, tabla, estadísticas, reglas de PIN, nombres, frases, esquemas de entrada), vive en `packages/shared` y ambas lo importan. No se copia una función de `apps/web` a `apps/mobile` ni al revés: así no pueden divergir.
+- **Los tokens de diseño se leen de `@poker/design`.** Ni la web ni la app copian valores de color, radio o tipografía. Si falta un token, se agrega al paquete.
+- Lo que depende de Prisma, Next o React Native se queda en su app.
+
+---
+
+## 3. Convenciones de la API (vigentes)
+
+Todas las rutas viven en `apps/web/src/app/api/**/route.ts`.
+
+### Errores: `AppError` + `withErrorHandler`
+Carpeta `apps/web/src/lib/errors/` (se importa de `@/lib/errors`):
+- `app-error.ts`: clase `AppError` (status, `code` estable, `errors[]`, `details`, `errorId`). Fábricas: `badRequest`, `unauthorized`, `forbidden`, `notFound`, `conflict`, `validation`, `tooManyRequests`, `internal`, `unavailable`.
+- `error-handler.ts`: `withErrorHandler(handler)` y `errorResponse(error, url)`. Convierte `AppError` en su status; `ZodError` en 422 `VALIDATION_ERROR` con `errors[]`; Prisma `P2025` en 404 y `P2002` en 409 `DUPLICATE`; cualquier otra cosa en 500 con mensaje fijo (el detalle solo va en `debug` y solo en development). Es genérico en el contexto, así conserva el tipo de `params` de Next 16.
+- `types.ts`: `ErrorDetail`, `ErrorResponse`, `SuccessResponse<T>`.
+
+**Toda ruta exporta sus handlers envueltos en `withErrorHandler`** (hoy, las 74). Los errores se lanzan, no se devuelven a mano.
+
+### Formato de respuesta
+- Correcta: `{ success: true, data }`.
+- Error: `{ success: false, error: { code, message, errors?, details?, errorId, timestamp, path } }`. `code` es estable (los clientes deciden con él), `message` va en español y se puede mostrar, `errorId` sirve para buscar en los logs.
+
+### Helpers de ruta (`apps/web/src/lib/http.ts`)
+- `ok(data, status | init)`: respuesta correcta.
+- `parseBody(request, schema)`, `parseQuery(request, schema)`, `parseParams(await params, schema)`: validan con Zod (body no JSON: 400 `INVALID_JSON`).
+
+### Validación
+Esquemas Zod 4 en `packages/shared/src/schemas/`, mensajes en español. Nada de validar a mano lo que puede validar un esquema.
+
+### Autenticación (actual)
+`Authorization: Bearer PIN:<clave>` (o la adminKey), validado en `apps/web/src/lib/api-auth.ts` (bcrypt con caché en memoria). Al inicio de cada handler: `requireUser(request)` o `requireComision(request)` (lanzan `AppError` 401/403). `withAuth` / `withComisionAuth` siguen existiendo y se combinan por dentro con `withErrorHandler`.
+
+### Plantilla de ruta
 ```typescript
-import { z } from "zod/v4";
+import { NextRequest } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { requireComision } from '@/lib/api-auth'
+import { AppError, withErrorHandler } from '@/lib/errors'
+import { ok, parseBody, parseParams } from '@/lib/http'
+import { idParamsSchema, entityInputSchema } from '@poker/shared' // entityInputSchema: el de tu área
+
+export const PATCH = withErrorHandler(
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+    await requireComision(request)
+    const { id } = parseParams(await params, idParamsSchema)
+    const input = await parseBody(request, entityInputSchema)
+
+    const entity = await prisma.entity.findUnique({ where: { id } })
+    if (!entity) throw AppError.notFound('No existe', 'ENTITY_NOT_FOUND')
+
+    return ok(await prisma.entity.update({ where: { id }, data: input }))
+  }
+)
+```
+
+### Clientes: siempre por el desenvolvedor
+Ningún cliente hace `await res.json()` a pelo sobre la API: pasa por el desenvolvedor, que entiende el formato nuevo y el viejo mientras convivan.
+- Web: `apps/web/src/lib/api-client.ts` → `readApiJson(res)` (reemplazo de `res.json()`, no lanza; el error sale aplanado con `error` como texto), `parseApiResponse(res)` y `apiFetch(url)` (lanzan `ApiError`), `unwrapApiBody(body)`.
+- Móvil: `apps/mobile/src/lib/api.ts` → `apiFetch(path, init)` (manda la credencial, desenvuelve `data`, lanza `ApiError` con `code`, `errorId`, `errors`, `details`; 401 cierra sesión, 403 no) y `fetcher` para SWR.
+
+---
+
+## 4. Orden de despliegue cuando cambia el formato de respuesta
+
+**Primero la app móvil, después la API.** La web se despliega junto con la API (mismo Vercel) y no tiene ese problema; la app instalada en los teléfonos sí. Por eso:
+
+1. Publicar la versión de la app cuyo cliente (`apiFetch`) acepta el formato viejo y el nuevo, y esperar a que esté instalada.
+2. Recién entonces desplegar la API con el formato nuevo.
+3. Quitar la compatibilidad con el formato viejo solo cuando ninguna versión en uso lo necesite.
+
+---
+
+## 5. Diseño
+
+Clean Poker. Fuente única: `@poker/design`. Detalle de paleta, tipografía, forma y tono por pantalla en `CLAUDE.md` y `docs/mobile/AGENT-BRIEF.md`. Web: variables `--cp-*` de `clean-poker-tokens.css`. App: clases NativeWind con el mismo nombre de variable y `useCP()` para colores por JS.
+
+---
+
+## 6. Convenciones generales
+
+1. **Errores**: `AppError` y `withErrorHandler` en todas las rutas.
+2. **Validación**: Zod para la entrada, esquemas en `@poker/shared`, mensajes en español.
+3. **Respuestas API**: `{ success: true, data }` o `ErrorResponse`.
+4. **Compartido**: lógica pura y validación en `@poker/shared`; tokens en `@poker/design`.
+5. **Base de datos**: Prisma; snake_case para columnas nuevas con `@map`, camelCase en TypeScript. Cambios de esquema solo aditivos y probados primero en la rama Neon de QA (nunca contra producción).
+6. **Autenticación**: verificar sesión al inicio de cada handler; **autorización**: verificar rol cuando haga falta.
+7. **Componentes web**: `"use client"` solo cuando sea necesario.
+8. **TypeScript estricto**; alias `@/*` → `./src/*` en cada app.
+9. **Antes de reportar**: `npm run typecheck`, `npm test`, `npm run lint:web` en verde (y lo que pida el brief del área).
+
+---
+
+## 7. Pendiente / diferido
+
+Objetivo del boilerplate que **aún no se aplica**. Decisión del usuario: primero Zod + errores + formato (hecho); lo demás queda para después. Cada punto es una tarea propia. Mientras tanto, el código nuevo sigue el estado actual y no introduce una tercera forma.
+
+| # | Objetivo | Estado actual |
+|---|----------|---------------|
+| 7.1 | **NextAuth.js 5** (Google OAuth + Credentials, sesión JWT, usuarios pre-registrados) | PIN propio: `Bearer PIN:<clave>` / adminKey validados en `apps/web/src/lib/api-auth.ts`; la app guarda la clave en SecureStore. |
+| 7.2 | **UUID v7** para todos los IDs (ordenables por tiempo) | `Player` usa `cuid()`; el resto de tablas, `Int autoincrement()`. `errorId` usa `crypto.randomUUID()` (v4). No hay dependencia `uuid`. |
+| 7.3 | **Prisma 7** con `@prisma/adapter-pg` y `prisma.config.ts` | Prisma 6.15, `apps/web/prisma/schema.prisma`, cliente en `apps/web/src/lib/prisma.ts`. |
+| 7.4 | **Módulos Clean Architecture** (`src/modules/<módulo>/{domain,application,infrastructure}`, repositorios y casos de uso) | Parcial: `apps/web/src/{domain,application,infrastructure}` para player, tournament y elimination, usado solo por las rutas de eliminaciones. El resto de rutas usa Prisma directo + `src/lib`; la lógica pura está en `@poker/shared`. |
+| 7.5 | **`src/config/env.ts`**: validar el entorno con Zod al arrancar | No existe; se lee `process.env` directamente (la app, `EXPO_PUBLIC_API_URL`). |
+| 7.6 | **pnpm** como gestor | npm workspaces con `package-lock.json`. |
+
+---
+
+## Anexo: plantillas del objetivo
+
+Referencia para cuando se haga cada migración de la sección 7. No es el estado actual del repo.
+
+### env.ts (7.5)
+```typescript
+import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z.url(),
@@ -102,8 +167,6 @@ const envSchema = z.object({
   NEXTAUTH_SECRET: z.string().min(32),
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
-  ADMIN_EMAIL: z.email().optional(),
-  ADMIN_PASSWORD: z.string().min(8).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -111,8 +174,7 @@ export type Env = z.infer<typeof envSchema>;
 export function validateEnv(): Env {
   const result = envSchema.safeParse(process.env);
   if (!result.success) {
-    console.error("❌ Invalid environment variables:");
-    console.error(result.error.format());
+    console.error("Variables de entorno inválidas:", result.error.issues);
     throw new Error("Invalid environment variables");
   }
   return result.data;
@@ -121,196 +183,14 @@ export function validateEnv(): Env {
 export const env = validateEnv();
 ```
 
-## Sistema de Errores (src/lib/errors/)
-
-### types.ts
-```typescript
-export interface ErrorDetail {
-  field: string;
-  message: string;
-  code?: string;
-}
-
-export interface ErrorResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    errors?: ErrorDetail[];
-    errorId: string;
-    timestamp: string;
-    path: string;
-  };
-  debug?: {
-    description: string;
-    stack?: string;
-    context?: Record<string, unknown>;
-  };
-}
-```
-
-### app-error.ts
-```typescript
-import { v7 as uuidv7 } from "uuid";
-import { ErrorDetail } from "./types";
-
-export class AppError extends Error {
-  public readonly statusCode: number;
-  public readonly code: string;
-  public readonly errors?: ErrorDetail[];
-  public readonly errorId: string;
-  public readonly isOperational: boolean;
-
-  constructor(
-    message: string,
-    statusCode: number,
-    code: string,
-    errors?: ErrorDetail[]
-  ) {
-    super(message);
-    this.statusCode = statusCode;
-    this.code = code;
-    this.errors = errors;
-    this.errorId = uuidv7();
-    this.isOperational = true;
-    Object.setPrototypeOf(this, AppError.prototype);
-  }
-
-  static badRequest(message: string, code = "BAD_REQUEST") {
-    return new AppError(message, 400, code);
-  }
-
-  static unauthorized(message: string, code = "UNAUTHORIZED") {
-    return new AppError(message, 401, code);
-  }
-
-  static forbidden(message: string, code = "FORBIDDEN") {
-    return new AppError(message, 403, code);
-  }
-
-  static notFound(message: string, code = "NOT_FOUND") {
-    return new AppError(message, 404, code);
-  }
-
-  static conflict(message: string, code = "CONFLICT") {
-    return new AppError(message, 409, code);
-  }
-
-  static validation(errors: ErrorDetail[], message = "Validation failed") {
-    return new AppError(message, 422, "VALIDATION_ERROR", errors);
-  }
-
-  static internal(message: string, code = "INTERNAL_ERROR") {
-    return new AppError(message, 500, code);
-  }
-}
-```
-
-### error-handler.ts
-```typescript
-import { NextResponse } from "next/server";
-import { ZodError } from "zod/v4";
-import { AppError } from "./app-error";
-import { ErrorResponse } from "./types";
-import { env } from "@/config/env";
-import { v7 as uuidv7 } from "uuid";
-
-type Handler = (request: Request, context?: unknown) => Promise<Response>;
-
-export function withErrorHandler(handler: Handler): Handler {
-  return async (request: Request, context?: unknown) => {
-    try {
-      return await handler(request, context);
-    } catch (error) {
-      return createErrorResponse(error, request.url);
-    }
-  };
-}
-
-function createErrorResponse(error: unknown, url: string): NextResponse {
-  const path = new URL(url).pathname;
-  const isDev = env.NODE_ENV === "development";
-
-  if (error instanceof AppError) {
-    const response: ErrorResponse = {
-      success: false,
-      error: {
-        code: error.code,
-        message: error.message,
-        errors: error.errors,
-        errorId: error.errorId,
-        timestamp: new Date().toISOString(),
-        path,
-      },
-    };
-
-    if (isDev) {
-      response.debug = {
-        description: error.message,
-        stack: error.stack,
-      };
-    }
-
-    return NextResponse.json(response, { status: error.statusCode });
-  }
-
-  if (error instanceof ZodError) {
-    const errors = error.issues.map((issue) => ({
-      field: issue.path.join("."),
-      message: issue.message,
-      code: issue.code,
-    }));
-
-    const response: ErrorResponse = {
-      success: false,
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "Validation failed",
-        errors,
-        errorId: uuidv7(),
-        timestamp: new Date().toISOString(),
-        path,
-      },
-    };
-
-    return NextResponse.json(response, { status: 422 });
-  }
-
-  // Unknown error
-  const response: ErrorResponse = {
-    success: false,
-    error: {
-      code: "INTERNAL_ERROR",
-      message: "An unexpected error occurred",
-      errorId: uuidv7(),
-      timestamp: new Date().toISOString(),
-      path,
-    },
-  };
-
-  if (isDev && error instanceof Error) {
-    response.debug = {
-      description: error.message,
-      stack: error.stack,
-    };
-  }
-
-  console.error("Unhandled error:", error);
-  return NextResponse.json(response, { status: 500 });
-}
-```
-
-## Prisma Client Singleton (src/lib/prisma/client.ts)
-
+### Prisma 7 client singleton (7.3)
 ```typescript
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { env } from "@/config/env";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
 const pool = new Pool({ connectionString: env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -319,497 +199,79 @@ export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter,
-    log: env.NODE_ENV === "development"
-      ? ["query", "error", "warn"]
-      : ["error"],
+    log: env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
-if (env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
 
-## Autenticación NextAuth (src/lib/auth/)
-
-### auth.config.ts
+### NextAuth 5 (7.1)
 ```typescript
+// src/lib/auth/auth.config.ts
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { env } from "@/config/env";
-import { verifyPassword } from "./password";
+import { verifyPassword } from "./password"; // bcrypt.compare, SALT_ROUNDS = 12
 import { prisma } from "@/lib/prisma";
 
 export const authConfig: NextAuthConfig = {
   providers: [
-    Google({
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
+    Google({ clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }),
     Credentials({
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
+      credentials: { email: { type: "email" }, password: { type: "password" } },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        });
-        if (!user || !user.password) return null;
-        const isValid = await verifyPassword(
-          credentials.password as string,
-          user.password
-        );
-        if (!isValid) return null;
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-          status: user.status,
-        };
+        if (!credentials?.email || !credentials?.password) return null;
+        const user = await prisma.user.findUnique({ where: { email: credentials.email as string } });
+        if (!user?.password) return null;
+        if (!(await verifyPassword(credentials.password as string, user.password))) return null;
+        return { id: user.id, email: user.email, name: user.name, role: user.role, status: user.status };
       },
     }),
   ],
-  pages: {
-    signIn: "/login",
-  },
+  pages: { signIn: "/login" },
   callbacks: {
-    async signIn({ user, account }) {
-      // Verificar que el usuario existe y está activo
-      const dbUser = await prisma.user.findUnique({
-        where: { email: user.email! },
-      });
-      if (!dbUser) return false;
-      if (dbUser.status !== "ACTIVE") return false;
-      return true;
+    // Solo usuarios pre-registrados y activos
+    async signIn({ user }) {
+      const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
+      return !!dbUser && dbUser.status === "ACTIVE";
     },
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.status = user.status;
-      }
+      if (user) Object.assign(token, { id: user.id, role: user.role, status: user.status });
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
-        session.user.status = token.status as string;
-      }
+      if (session.user) Object.assign(session.user, { id: token.id, role: token.role, status: token.status });
       return session;
     },
   },
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
 };
 ```
+La protección de páginas va en `src/proxy.ts` (Next 16), no en `middleware.ts`. La app móvil necesitará un flujo propio (token para la API), a definir en esa tarea. El esquema Prisma necesitará los modelos de NextAuth (`User`, `Account`, `Session`, `VerificationToken`) con IDs UUID v7 y columnas `@map` en snake_case.
 
-### password.ts
-```typescript
-import bcrypt from "bcryptjs";
-
-const SALT_ROUNDS = 12;
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, SALT_ROUNDS);
-}
-
-export async function verifyPassword(
-  password: string,
-  hashedPassword: string
-): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword);
-}
+### Módulo Clean Architecture (7.4)
 ```
-
-## Middleware de Protección (middleware.ts)
-
-```typescript
-import { auth } from "@/lib/auth";
-import { NextResponse } from "next/server";
-
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
-  const isOnDashboard = req.nextUrl.pathname.startsWith("/dashboard") ||
-    req.nextUrl.pathname.startsWith("/people") ||
-    req.nextUrl.pathname.startsWith("/tribes");
-  const isOnLogin = req.nextUrl.pathname.startsWith("/login");
-
-  if (isOnDashboard && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  if (isOnLogin && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
-
-  return NextResponse.next();
-});
-
-export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-};
+src/modules/<módulo>/
+├── domain/
+│   ├── entities/        # interfaces puras TypeScript
+│   └── repositories/    # contratos (IEntityRepository)
+├── application/
+│   ├── dto/             # re-exporta o extiende esquemas de @poker/shared
+│   └── use-cases/       # lógica que necesita repositorio; lanza AppError
+└── infrastructure/
+    └── repositories/    # implementaciones Prisma (id: uuidv7())
 ```
-
-## Estructura de Módulo (Clean Architecture)
-
-### domain/entities/[entity].entity.ts
 ```typescript
-export enum EntityStatus {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-}
-
-export interface Entity {
-  id: string;
-  name: string;
-  status: EntityStatus;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CreateEntityInput {
-  name: string;
-}
-
-export interface UpdateEntityInput {
-  name?: string;
-  status?: EntityStatus;
-}
-```
-
-### domain/repositories/[entity].repository.ts
-```typescript
-import { Entity, CreateEntityInput, UpdateEntityInput } from "../entities";
-
-export interface IEntityRepository {
-  findById(id: string): Promise<Entity | null>;
-  findByName(name: string): Promise<Entity | null>;
-  findAll(): Promise<Entity[]>;
-  create(input: CreateEntityInput): Promise<Entity>;
-  update(id: string, input: UpdateEntityInput): Promise<Entity>;
-  delete(id: string): Promise<void>;
-}
-```
-
-### application/dto/[entity].dto.ts
-```typescript
-import { z } from "zod/v4";
-
-export const createEntityDto = z.object({
-  name: z.string().min(1, "El nombre es requerido").max(100),
-});
-
-export const updateEntityDto = z.object({
-  name: z.string().min(1).max(100).optional(),
-  status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
-});
-
-export type CreateEntityDto = z.infer<typeof createEntityDto>;
-export type UpdateEntityDto = z.infer<typeof updateEntityDto>;
-```
-
-### application/use-cases/create-[entity].use-case.ts
-```typescript
-import { IEntityRepository } from "../../domain/repositories";
-import { Entity } from "../../domain/entities";
-import { CreateEntityDto } from "../dto";
-import { AppError } from "@/lib/errors";
-
 export class CreateEntityUseCase {
   constructor(private readonly repository: IEntityRepository) {}
 
   async execute(dto: CreateEntityDto): Promise<Entity> {
-    const existing = await this.repository.findByName(dto.name);
-    if (existing) {
+    if (await this.repository.findByName(dto.name)) {
       throw AppError.conflict("Ya existe una entidad con este nombre", "ENTITY_EXISTS");
     }
-
     return this.repository.create(dto);
   }
 }
 ```
-
-### infrastructure/repositories/prisma-[entity].repository.ts
-```typescript
-import { v7 as uuidv7 } from "uuid";
-import { prisma } from "@/lib/prisma";
-import { IEntityRepository } from "../../domain/repositories";
-import { Entity, CreateEntityInput, UpdateEntityInput } from "../../domain/entities";
-
-export class PrismaEntityRepository implements IEntityRepository {
-  async findById(id: string): Promise<Entity | null> {
-    return prisma.entity.findUnique({ where: { id } });
-  }
-
-  async findByName(name: string): Promise<Entity | null> {
-    return prisma.entity.findFirst({ where: { name } });
-  }
-
-  async findAll(): Promise<Entity[]> {
-    return prisma.entity.findMany({ orderBy: { createdAt: "desc" } });
-  }
-
-  async create(input: CreateEntityInput): Promise<Entity> {
-    return prisma.entity.create({
-      data: {
-        id: uuidv7(),
-        ...input,
-      },
-    });
-  }
-
-  async update(id: string, input: UpdateEntityInput): Promise<Entity> {
-    return prisma.entity.update({
-      where: { id },
-      data: input,
-    });
-  }
-
-  async delete(id: string): Promise<void> {
-    await prisma.entity.delete({ where: { id } });
-  }
-}
-```
-
-### index.ts (exportaciones)
-```typescript
-// src/modules/[module]/index.ts
-export * from "./domain";
-export * from "./application";
-export * from "./infrastructure";
-
-// src/modules/[module]/domain/index.ts
-export * from "./entities";
-export * from "./repositories";
-
-// src/modules/[module]/application/index.ts
-export * from "./dto";
-export * from "./use-cases";
-
-// src/modules/[module]/infrastructure/index.ts
-export * from "./repositories";
-```
-
-## Patrón de API Routes
-
-```typescript
-import { NextResponse } from "next/server";
-import { withErrorHandler, AppError } from "@/lib/errors";
-import { auth } from "@/lib/auth";
-import { createEntityDto } from "@/modules/entities";
-import { CreateEntityUseCase } from "@/modules/entities";
-import { PrismaEntityRepository } from "@/modules/entities";
-
-// GET /api/entities
-export const GET = withErrorHandler(async (request: Request) => {
-  const session = await auth();
-  if (!session?.user) {
-    throw AppError.unauthorized("No autenticado", "UNAUTHENTICATED");
-  }
-
-  const repository = new PrismaEntityRepository();
-  const entities = await repository.findAll();
-
-  return NextResponse.json({ success: true, data: entities });
-});
-
-// POST /api/entities
-export const POST = withErrorHandler(async (request: Request) => {
-  const session = await auth();
-  if (!session?.user) {
-    throw AppError.unauthorized("No autenticado", "UNAUTHENTICATED");
-  }
-
-  if (session.user.role !== "SUPER_ADMIN") {
-    throw AppError.forbidden("No autorizado", "FORBIDDEN");
-  }
-
-  const body = await request.json();
-  const dto = createEntityDto.parse(body);
-
-  const repository = new PrismaEntityRepository();
-  const useCase = new CreateEntityUseCase(repository);
-  const entity = await useCase.execute(dto);
-
-  return NextResponse.json({ success: true, data: entity }, { status: 201 });
-});
-```
-
-## Esquema Prisma Base
-
-```prisma
-generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-
-  @@map("user_status")
-}
-
-enum UserRole {
-  SUPER_ADMIN
-  USER
-
-  @@map("user_role")
-}
-
-model User {
-  id            String     @id @default(uuid()) @map("id")
-  email         String     @unique @map("email")
-  name          String?    @map("name")
-  password      String?    @map("password")
-  image         String?    @map("image")
-  status        UserStatus @default(ACTIVE) @map("status")
-  role          UserRole   @default(USER) @map("role")
-  emailVerified DateTime?  @map("email_verified")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-
-  accounts Account[]
-  sessions Session[]
-
-  @@map("users")
-}
-
-model Account {
-  id                String  @id @default(uuid()) @map("id")
-  userId            String  @map("user_id")
-  type              String  @map("type")
-  provider          String  @map("provider")
-  providerAccountId String  @map("provider_account_id")
-  refresh_token     String? @map("refresh_token")
-  access_token      String? @map("access_token")
-  expires_at        Int?    @map("expires_at")
-  token_type        String? @map("token_type")
-  scope             String? @map("scope")
-  id_token          String? @map("id_token")
-  session_state     String? @map("session_state")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
-}
-
-model Session {
-  id           String   @id @default(uuid()) @map("id")
-  sessionToken String   @unique @map("session_token")
-  userId       String   @map("user_id")
-  expires      DateTime @map("expires")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-}
-
-model VerificationToken {
-  identifier String   @map("identifier")
-  token      String   @unique @map("token")
-  expires    DateTime @map("expires")
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
-}
-```
-
-## Scripts package.json
-
-```json
-{
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
-  }
-}
-```
-
-## Dependencias Principales
-
-```json
-{
-  "dependencies": {
-    "next": "^16.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@prisma/client": "^7.0.0",
-    "@prisma/adapter-pg": "^7.0.0",
-    "pg": "^8.16.0",
-    "next-auth": "^5.0.0-beta.30",
-    "@auth/prisma-adapter": "^3.0.0",
-    "zod": "^4.0.0",
-    "react-hook-form": "^7.0.0",
-    "@hookform/resolvers": "^5.0.0",
-    "bcryptjs": "^3.0.0",
-    "uuid": "^13.0.0",
-    "lucide-react": "^0.400.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/bcryptjs": "^3.0.0",
-    "@types/pg": "^8.0.0",
-    "@types/uuid": "^10.0.0",
-    "typescript": "^5.0.0",
-    "prisma": "^7.0.0",
-    "tailwindcss": "^4.0.0",
-    "tsx": "^4.0.0"
-  }
-}
-```
-```
-
----
-
-## Checklist para Nuevo Proyecto
-
-1. [ ] Crear proyecto: `pnpm create next-app@latest`
-2. [ ] Instalar dependencias listadas
-3. [ ] Configurar TypeScript con path alias
-4. [ ] Crear estructura de carpetas
-5. [ ] Configurar validación de environment
-6. [ ] Crear sistema de errores
-7. [ ] Configurar Prisma con PostgreSQL
-8. [ ] Configurar NextAuth con providers
-9. [ ] Crear middleware de protección
-10. [ ] Crear componentes UI base
-11. [ ] Crear primer módulo siguiendo Clean Architecture
-12. [ ] Agregar seed de usuario admin
-
----
-
-## Convenciones Importantes
-
-1. **IDs**: Siempre UUID v7 (time-sortable)
-2. **Base de datos**: snake_case para columnas, camelCase en TypeScript
-3. **Errores**: Usar `AppError` y `withErrorHandler` en todas las rutas
-4. **Validación**: Zod para DTOs con mensajes en español
-5. **Respuestas API**: Formato `{ success: true, data: ... }` o `ErrorResponse`
-6. **Usuarios**: Pre-registrados antes de OAuth
-7. **Módulos**: Separación estricta domain/application/infrastructure
-8. **Componentes**: "use client" solo cuando sea necesario
-9. **Autenticación**: Verificar sesión al inicio de cada handler
-10. **Autorización**: Verificar rol cuando sea necesario
+La ruta queda igual que la plantilla de la sección 3, pero llama al caso de uso en lugar de a Prisma. La lógica pura sigue yendo a `@poker/shared`; el módulo solo agrega lo que depende de la base.

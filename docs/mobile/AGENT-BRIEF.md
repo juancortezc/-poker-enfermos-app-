@@ -2,6 +2,9 @@
 
 Léelo entero antes de empezar. También `docs/mobile/PLAN.md` y `CLAUDE.md`.
 
+## Paso 0, obligatorio: `BOILERPLATE.md`
+Antes de planificar o escribir código, lee `BOILERPLATE.md` (raíz del repo) y síguelo: `withErrorHandler` + `AppError` en toda ruta, respuestas `{ success, data }`, validación con los esquemas Zod de `@poker/shared`, clientes por `readApiJson`/`parseApiResponse` (web) o `apiFetch` (app), lógica compartida en `@poker/shared` y tokens en `@poker/design`. No adelantes lo que está en su sección "Pendiente / diferido". Toda desviación se declara explícitamente en el reporte (qué, por qué y cómo se alinearía); una desviación no declarada cuenta como error.
+
 ## Repo
 - Monorepo npm en `/Users/jac/Apps/JAC/Poker/poker2027`, rama de integración `feat/mobile-expo` (en GitHub `origin`).
 - `apps/web`: Next.js 16 (web + las 71 rutas de `/api`). Antes de tocar config de Next, lee `node_modules/next/dist/docs/`.
@@ -44,4 +47,4 @@ Pequeños, en español, al estilo de `git log --oneline -15`, terminando con:
 Nunca commitees `.env*`, `apps/web/public/sw.js`, `AGENTS.md` de la raíz, `docs/mobile/tracker/*`, `NUEVOS_PINS_POKER_ENFERMOS.txt` ni `enfermos.json`.
 
 ## Reporte final (español, breve)
-Qué quedó hecho, por pantalla o endpoint; resultado de cada verificación; tu rama y commits (sha + mensaje); dependencias nuevas; problemas y decisiones para el coordinador.
+Qué quedó hecho, por pantalla o endpoint; resultado de cada verificación; tu rama y commits (sha + mensaje); dependencias nuevas; desviaciones de `BOILERPLATE.md` (o "ninguna"); problemas y decisiones para el coordinador.
