@@ -1,5 +1,6 @@
 /** Esquemas de entrada de la API: torneos. */
 import { z, intIdSchema, playerIdSchema, dateStringSchema, tournamentStatusSchema } from './common'
+import { MAX_TOURNAMENT_DATES, MIN_TOURNAMENT_DATES } from '../tournament-edit'
 
 const blindLevelSchema = z.object({
   level: z.number().int().positive(),
@@ -46,23 +47,49 @@ export const createTournamentSchema = z
   })
 export type CreateTournamentBody = z.input<typeof createTournamentSchema>
 
-/** PUT /api/tournaments/[id]: todo opcional. */
-export const updateTournamentSchema = z.object({
-  name: z.string().trim().min(1, 'El nombre no puede quedar vacío').optional(),
-  status: tournamentStatusSchema.optional(),
-  gameDates: z
-    .array(
-      z.object({
-        id: intIdSchema,
-        scheduledDate: dateStringSchema,
-        playersMin: z.number().int().positive().nullish(),
-        playersMax: z.number().int().positive().nullish(),
+/**
+ * PUT /api/tournaments/[id]: todo opcional. Las reglas de jugadores y
+ * calendario están en tournament-edit.ts (planCalendarEdit,
+ * planParticipantsEdit).
+ */
+export const updateTournamentSchema = z
+  .object({
+    name: z.string().trim().min(1, 'El nombre no puede quedar vacío').max(80, 'El nombre es demasiado largo').optional(),
+    status: tournamentStatusSchema.optional(),
+    /** Formato viejo: solo cambia el día de fechas existentes (por id). */
+    gameDates: z
+      .array(
+        z.object({
+          id: intIdSchema,
+          scheduledDate: dateStringSchema,
+          playersMin: z.number().int().positive().nullish(),
+          playersMax: z.number().int().positive().nullish(),
+        })
+      )
+      .optional(),
+    /**
+     * El calendario completo, en orden: con id, una fecha existente; sin id,
+     * una nueva. Las que faltan se borran. El número de cada fecha es su
+     * posición y totalDates pasa a ser el largo.
+     */
+    calendar: z
+      .array(z.object({ id: intIdSchema.nullish(), scheduledDate: dateStringSchema }), {
+        error: 'El calendario debe ser una lista de fechas',
       })
-    )
-    .optional(),
-  participantIds: z.array(playerIdSchema).optional(),
-  blindLevels: z.array(blindLevelSchema).optional(),
-})
+      .min(MIN_TOURNAMENT_DATES, `El torneo debe tener entre ${MIN_TOURNAMENT_DATES} y ${MAX_TOURNAMENT_DATES} fechas`)
+      .max(MAX_TOURNAMENT_DATES, `El torneo debe tener entre ${MIN_TOURNAMENT_DATES} y ${MAX_TOURNAMENT_DATES} fechas`)
+      .optional(),
+    /** La lista completa de inscritos. */
+    participantIds: z
+      .array(playerIdSchema)
+      .min(1, 'El torneo debe tener al menos un jugador inscrito')
+      .optional(),
+    blindLevels: z.array(blindLevelSchema).optional(),
+  })
+  .refine((t) => !(t.calendar && t.gameDates), {
+    message: 'Envía calendar o gameDates, no ambos',
+    path: ['calendar'],
+  })
 export type UpdateTournamentBody = z.input<typeof updateTournamentSchema>
 
 /** POST /api/tournaments/[id]/participants */
