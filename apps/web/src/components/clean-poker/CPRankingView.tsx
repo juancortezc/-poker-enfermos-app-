@@ -11,19 +11,23 @@ import {
   eliminatedDateNumbers,
   scoreOf,
   compareByTiebreak,
-  SCORE_LABELS
+  SCORE_LABELS,
+  tournamentHasResults
 } from '@poker/shared'
 import type { PlayerRanking } from '@poker/shared'
 import { downloadCsv } from '@/lib/csv'
 import { tile, SOBRE_COLOR } from './bento'
 import { CPPlayerCard } from './CPPlayerCard'
 import { CPPlayerPhoto } from './CPPlayerPhoto'
+import { CPTournamentPoster } from './CPTournamentPoster'
 import { shortenFullName } from '@poker/shared'
 
 interface CPRankingViewProps {
   tournamentId: number
   tournamentNumber: number
   currentUserId?: string | null
+  /** Proxima fecha: el afiche del torneo que arranca la muestra. */
+  nextDate?: { dateNumber: number; scheduledDate?: string | null } | null
 }
 
 const GRID = '#000'
@@ -89,7 +93,7 @@ const PODIUM_PHOTO_WIDTH = 56
 const ROW_PHOTO = 36
 const ROW_PHOTO_DENSE = 30
 
-export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }: CPRankingViewProps) {
+export function CPRankingView({ tournamentId, tournamentNumber, currentUserId, nextDate }: CPRankingViewProps) {
   const router = useRouter()
   const goToPlayer = (playerId: string) => router.push(`/players/${playerId}`)
   const [view, setView] = useState<TableView>('resumen')
@@ -124,6 +128,22 @@ export function CPRankingView({ tournamentId, tournamentNumber, currentUserId }:
     return (
       <div className="p-6 text-center rounded-2xl" style={{ background: 'var(--cp-surface)', border: '1px solid rgba(255,255,255,0.06)' }}>
         <p style={{ fontSize: 14, color: '#9A8F8B' }}>No hay datos de tabla disponibles.</p>
+      </div>
+    )
+  }
+
+  // Torneo recien creado: todos en 0 y en el orden de inscripcion. Una tabla
+  // asi parece un resultado; en su lugar, el afiche del torneo que arranca.
+  if (!tournamentHasResults(rankingData.rankings)) {
+    return (
+      <div className="pt-4">
+        <CPTournamentPoster
+          tournamentNumber={tournamentNumber}
+          nextDate={nextDate}
+          registeredCount={rankingData.rankings.length}
+          sizes="(min-width: 448px) 416px, calc(100vw - 32px)"
+          preload
+        />
       </div>
     )
   }

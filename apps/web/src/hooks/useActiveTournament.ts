@@ -9,6 +9,8 @@ interface Tournament {
   startDate?: string
   endDate?: string
   participantCount?: number
+  /** Jugadores inscritos (columna del torneo). */
+  participantIds?: string[]
   completedDates?: number
   totalDates?: number
   /** Cuantas peores fechas descarta el ELIMINA. El API ya lo devolvia; faltaba
@@ -23,6 +25,15 @@ interface GameDate {
   status: string
 }
 
+/** Una fecha jugada con el torneo al que pertenece. */
+interface LastPlayedDate {
+  id: number
+  dateNumber: number
+  scheduledDate: string | null
+  tournamentId: number
+  tournamentNumber: number
+}
+
 interface ActiveTournamentResponse {
   tournament: Tournament
   stats: {
@@ -30,6 +41,8 @@ interface ActiveTournamentResponse {
     totalDates: number
     nextDate?: GameDate
     lastCompletedDate?: { id: number; dateNumber: number; scheduledDate: string | null } | null
+    /** Ultima fecha jugada del grupo, aunque sea del torneo anterior (al arrancar uno). */
+    lastPlayedDate?: LastPlayedDate | null
     startDate?: string
     endDate?: string
     isCompleted: boolean
@@ -135,6 +148,13 @@ export function useActiveTournament(options: UseActiveTournamentOptions = {}) {
     // Last completed date (for the "Última Fecha" recap view)
     lastCompletedDate: swrResponse.data?.stats.lastCompletedDate || null,
 
+    // Ultima fecha jugada, del torneo activo o (si todavia no jugo ninguna) del
+    // anterior. La API vieja no la manda: entonces, la del torneo activo.
+    lastPlayedDate: swrResponse.data?.stats.lastPlayedDate
+      ?? (swrResponse.data?.stats.lastCompletedDate && tournamentData
+        ? { ...swrResponse.data.stats.lastCompletedDate, tournamentId: tournamentData.id, tournamentNumber: tournamentData.number }
+        : null),
+
     // Season start/end dates (for the calendar page)
     seasonStartDate: swrResponse.data?.stats.startDate || null,
     seasonEndDate: swrResponse.data?.stats.endDate || null
@@ -169,4 +189,4 @@ export function useTournament(tournamentId: number | null, options: UseActiveTou
 }
 
 // Export types
-export type { Tournament, UseActiveTournamentOptions }
+export type { Tournament, UseActiveTournamentOptions, LastPlayedDate }

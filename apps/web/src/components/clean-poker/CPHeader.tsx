@@ -35,7 +35,7 @@ export function CPHeader({
           : 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%)',
       }}
     >
-      {/* Ghost "30" watermark */}
+      {/* Numero del torneo de marca de agua */}
       <span
         aria-hidden
         style={{
@@ -66,7 +66,8 @@ export function CPHeader({
           <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--cp-primary-light)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
             Torneo
           </span>
-          <span style={{ fontSize: '22px', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.01em', lineHeight: 1 }}>
+          {/* Tinta del tono: blanco fijo era invisible sobre el encabezado claro. */}
+          <span style={{ fontSize: '22px', fontWeight: 900, color: 'var(--cp-on-surface)', letterSpacing: '-0.01em', lineHeight: 1 }}>
             {tournamentNumber}
           </span>
         </div>

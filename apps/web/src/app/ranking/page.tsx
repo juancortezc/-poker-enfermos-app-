@@ -16,7 +16,8 @@ export default function RankingPage() {
   const {
     tournament: activeTournament,
     isLoading: tournamentLoading,
-    isNotFound
+    isNotFound,
+    nextDate
   } = useActiveTournament({ refreshInterval: 300000 }) // 5 minutes
 
   const { hasActiveGameDate } = useActiveGameDate()
@@ -132,7 +133,7 @@ export default function RankingPage() {
 
       {/* Content */}
       <main className="pb-20 px-4">
-        <CPRankingView tournamentId={activeTournament.id} tournamentNumber={tournamentNumber} currentUserId={user.id} />
+        <CPRankingView tournamentId={activeTournament.id} tournamentNumber={tournamentNumber} currentUserId={user.id} nextDate={nextDate} />
       </main>
 
       {/* Bottom Nav */}
