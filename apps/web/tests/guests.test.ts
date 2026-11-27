@@ -9,7 +9,7 @@ import { NextRequest } from 'next/server'
 import { createGuestSchema } from '@poker/shared'
 import { withErrorHandler } from '../src/lib/errors'
 import { ok, parseBody } from '../src/lib/http'
-import { createGuest, withLastPlayed, type GameDateDb, type GuestDb } from '../src/lib/guests'
+import { assertNoDuplicateGuest, createGuest, withLastPlayed, type GameDateDb, type GuestDb } from '../src/lib/guests'
 import { POST } from '../src/app/api/players/guests/route'
 
 type Row = { id: string; firstName: string; lastName: string; role: string; isActive: boolean; inviterId?: string | null }
@@ -126,4 +126,10 @@ test('withLastPlayed: dia de la fecha mas reciente de cada invitado', async () =
     { id: 'c', lastPlayedAt: null },
   ])
   assert.deepEqual(await withLastPlayed(db, []), [])
+})
+
+test('POST /api/players (rol Invitado) usa el mismo control de duplicados', async () => {
+  const { db } = fakeDb(ROWS.map((r) => ({ ...r })))
+  await assert.rejects(assertNoDuplicateGuest(db, 'agustin', 'GUERRERO'), (e: { statusCode: number; code: string }) => e.statusCode === 409 && e.code === 'DUPLICATE_GUEST')
+  await assertNoDuplicateGuest(db, 'Carlos', 'Inactivo')
 })

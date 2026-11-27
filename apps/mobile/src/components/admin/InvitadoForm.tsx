@@ -1,7 +1,7 @@
 /**
  * Alta y edición de invitados. Paridad con InvitadoFormPage de la web:
- * nombre, apellido opcional (se registran como "Sobrino Diego"), el Enfermo
- * que lo invita y el año. Sin clave: los invitados no entran a la app.
+ * nombre y apellido reales (la API rechaza "Invitado", "S/N", "Sobrino X"),
+ * el Enfermo que lo invita y el año. Sin clave: los invitados no entran a la app.
  */
 import { fullName, getEcuadorToday, GUEST_PHOTO_URL } from '@poker/shared';
 import { router } from 'expo-router';
@@ -91,7 +91,7 @@ export function InvitadoForm({ invitado }: { invitado?: EditableInvitado }) {
     <View className="gap-4">
       <CPCard className="gap-4 p-4">
         <Field label="Nombre *" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
-        <Field label="Apellido" value={lastName} onChangeText={setLastName} autoCapitalize="words" hint="Opcional: “Sobrino Diego” vale." />
+        <Field label="Apellido *" value={lastName} onChangeText={setLastName} autoCapitalize="words" hint="Nombre y apellido reales: “Invitado”, “S/N” o “Sobrino X” no valen." />
         <View className="gap-1.5">
           <Overline className="text-[11px]">Invitado por *</Overline>
           <OptionPicker

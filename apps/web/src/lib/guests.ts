@@ -26,6 +26,29 @@ export const GUEST_SELECT = {
 } as const
 
 /**
+ * 409 `DUPLICATE_GUEST` si ya hay un invitado activo con el mismo nombre y
+ * apellido (sin importar tildes, mayusculas ni espacios). `details.existingGuest`
+ * trae ese invitado para elegirlo en su lugar. Lo usan el alta rapida y
+ * POST /api/players con rol Invitado.
+ */
+export async function assertNoDuplicateGuest(db: GuestDb, firstName: string, lastName: string) {
+  const key = guestNameKey(firstName, lastName)
+  const activeGuests = await db.player.findMany({
+    where: { role: 'Invitado', isActive: true },
+    select: GUEST_SELECT,
+  })
+  const existing = activeGuests.find((g) => guestNameKey(g.firstName, g.lastName) === key)
+  if (existing) {
+    const by = existing.inviter ? ` (invitado por ${fullName(existing.inviter)})` : ''
+    throw AppError.conflict(
+      `Ya existe el invitado ${fullName(existing)}${by}. Elígelo de la lista en vez de crearlo otra vez.`,
+      'DUPLICATE_GUEST',
+      { existingGuest: existing }
+    )
+  }
+}
+
+/**
  * Crea un invitado con nombre real. Exige que quien invita sea un Enfermo o
  * Comision activo y rechaza con 409 `DUPLICATE_GUEST` si ya hay un invitado
  * activo con el mismo nombre y apellido (sin importar tildes ni mayusculas):
@@ -43,20 +66,7 @@ export async function createGuest(db: GuestDb, input: CreateGuestInput) {
     )
   }
 
-  const key = guestNameKey(input.firstName, input.lastName)
-  const activeGuests = await db.player.findMany({
-    where: { role: 'Invitado', isActive: true },
-    select: GUEST_SELECT,
-  })
-  const existing = activeGuests.find((g) => guestNameKey(g.firstName, g.lastName) === key)
-  if (existing) {
-    const by = existing.inviter ? ` (invitado por ${fullName(existing.inviter)})` : ''
-    throw AppError.conflict(
-      `Ya existe el invitado ${fullName(existing)}${by}. Elígelo de la lista en vez de crearlo otra vez.`,
-      'DUPLICATE_GUEST',
-      { existingGuest: existing }
-    )
-  }
+  await assertNoDuplicateGuest(db, input.firstName, input.lastName)
 
   const year = getEcuadorToday().year
   const guest = await db.player.create({
