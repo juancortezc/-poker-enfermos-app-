@@ -45,3 +45,5 @@ next-env.d.ts
 # Datos sensibles de jugadores (PINs, admin keys, contactos): solo locales
 NUEVOS_PINS_POKER_ENFERMOS.txt
 enfermos.json
+
+.claude/worktrees
