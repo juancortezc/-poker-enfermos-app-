@@ -5,7 +5,7 @@ import useSWR from 'swr'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Crown } from 'lucide-react'
-import { tournamentSieteDos, type PlayerRanking } from '@poker/shared'
+import { tournamentHasResults, tournamentSieteDos, type PlayerRanking } from '@poker/shared'
 import {
   leaderPhrase,
   nightlyPosition,
@@ -18,6 +18,7 @@ import {
 } from '@poker/shared'
 import { CPPlayerCard } from './CPPlayerCard'
 import { CPPhotoViewer } from './CPPhotoViewer'
+import { CPTournamentPoster } from './CPTournamentPoster'
 import {
   DISPLAY_CONDENSADO,
   FUENTE_DISPLAY,
@@ -36,6 +37,10 @@ interface HomeTorneoLuchaProps {
   lastDateNumber?: number
   totalDates?: number
   loading?: boolean
+  /** Proxima fecha: el afiche del torneo que arranca la muestra. */
+  nextDate?: { dateNumber: number; scheduledDate?: string | null } | null
+  /** Inscritos en el torneo (afiche del torneo que arranca). */
+  registeredCount?: number
   onSeeTabla: () => void
 }
 
@@ -67,15 +72,27 @@ const velo = (pct: number) => `color-mix(in srgb, ${SOBRE_NEGRO.fondo} ${pct}%, 
  * 3. Los contendientes: tarjetas del #2 al #5 en fila deslizable.
  * 4. Los 7/2 del torneo: los dos ultimos de la tabla, en el bloque rosa.
  * Con el torneo FINALIZADO, 1 y 2 se reemplazan por la tarjeta del campeon.
+ * Sin ninguna fecha jugada no hay tabla que contar (todos en 0, en el orden de
+ * inscripcion): va el afiche del torneo que arranca.
  */
-export function HomeTorneoLucha({ rankings, tournamentNumber, finished, lastDateNumber, totalDates, loading, onSeeTabla }: HomeTorneoLuchaProps) {
-  if (rankings.length === 0) {
-    if (loading) {
+export function HomeTorneoLucha({ rankings, tournamentNumber, finished, lastDateNumber, totalDates, loading, nextDate, registeredCount, onSeeTabla }: HomeTorneoLuchaProps) {
+  if (rankings.length === 0 || !tournamentHasResults(rankings)) {
+    if (loading && rankings.length === 0) {
       return (
         <div aria-busy="true" aria-label="Cargando el torneo" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="animate-pulse" style={{ height: 520, borderRadius: 20, background: 'var(--cp-surface-3)' }} />
           <div className="animate-pulse" style={{ height: 240, borderRadius: 18, background: 'var(--cp-surface-2)' }} />
         </div>
+      )
+    }
+    if (!finished) {
+      return (
+        <CPTournamentPoster
+          tournamentNumber={tournamentNumber}
+          nextDate={nextDate}
+          registeredCount={registeredCount ?? (rankings.length || undefined)}
+          preload
+        />
       )
     }
     return (

@@ -27,6 +27,8 @@ type Props = {
   userId: string;
   rankings: PlayerRanking[];
   lastCompletedDate: { id: number; dateNumber: number };
+  /** Solo si la fecha es de otro torneo (el anterior, al arrancar uno): "T30 · FECHA 14". */
+  tournamentNumber?: number;
   onOpenProfile: () => void;
   onSeeAllResults: () => void;
   onSeeResultsTab: () => void;
@@ -34,7 +36,7 @@ type Props = {
 
 type Person = { id: string; firstName: string; lastName: string; photoUrl?: string | null; role?: string | null };
 
-export function HomeUltimaFecha({ userId, rankings, lastCompletedDate, onOpenProfile, onSeeAllResults, onSeeResultsTab }: Props) {
+export function HomeUltimaFecha({ userId, rankings, lastCompletedDate, tournamentNumber, onOpenProfile, onSeeAllResults, onSeeResultsTab }: Props) {
   const c = useCP();
   const { data: eliminations, error, mutate } = useGameDateEliminations(lastCompletedDate.id);
 
@@ -137,6 +139,7 @@ export function HomeUltimaFecha({ userId, rankings, lastCompletedDate, onOpenPro
             photoUrl={photoOf(winner.eliminatedPlayer)}
             points={winner.points}
             dateNumber={lastCompletedDate.dateNumber}
+            tournamentNumber={tournamentNumber}
             wins={byId.get(winner.eliminatedPlayer.id)?.firstPlaces}
             onSeeResults={onSeeAllResults}
           />
@@ -210,6 +213,7 @@ function WinnerMarquee({
   photoUrl,
   points,
   dateNumber,
+  tournamentNumber,
   wins,
   onSeeResults,
 }: {
@@ -218,6 +222,7 @@ function WinnerMarquee({
   photoUrl?: string | null;
   points: number;
   dateNumber: number;
+  tournamentNumber?: number;
   wins?: number;
   onSeeResults: () => void;
 }) {
@@ -226,7 +231,7 @@ function WinnerMarquee({
   const cardWidth = useHeroCardWidth(274);
   return (
     <Marquee pattern="ring">
-      <MarqueeOverline icon="★">{`FUNCIÓN ESTELAR · FECHA ${dateNumber}`}</MarqueeOverline>
+      <MarqueeOverline icon="★">{`FUNCIÓN ESTELAR · ${tournamentNumber ? `T${tournamentNumber} · ` : ''}FECHA ${dateNumber}`}</MarqueeOverline>
       <View style={{ alignItems: 'center' }}>
         <PlayerCard
           name={`${winner.firstName} ${winner.lastName}`}

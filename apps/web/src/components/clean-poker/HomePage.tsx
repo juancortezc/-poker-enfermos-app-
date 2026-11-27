@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { useActiveTournament } from '@/hooks/useActiveTournament'
+import { useActiveTournament, type LastPlayedDate } from '@/hooks/useActiveTournament'
 import { useTournamentRanking } from '@/hooks/useTournamentRanking'
 import useSWR from 'swr'
 import Image from 'next/image'
@@ -19,7 +19,7 @@ import { HomeViewToggle, type HomeView } from './HomeViewToggle'
 import { HomeUltimaFecha } from './HomeUltimaFecha'
 import { HomeTorneoLucha } from './HomeTorneoLucha'
 import type { PlayerRanking } from '@poker/shared'
-import { isValidPinForLogin } from '@poker/shared'
+import { isValidPinForLogin, tournamentHasResults } from '@poker/shared'
 
 // Logo URL
 const LOGO_URL = 'https://storage.googleapis.com/poker-enfermos/logo.png'
@@ -47,6 +47,7 @@ export function HomePage() {
     progress,
     nextDate: nextGameDateFromTournament,
     lastCompletedDate,
+    lastPlayedDate,
     isFinished
   } = useActiveTournament({ refreshInterval: 300000 }) // 5 minutes
 
@@ -55,6 +56,17 @@ export function HomePage() {
     isLoading: rankingLoading
   } = useTournamentRanking(activeTournament?.id || null, {
     refreshInterval: 300000 // 5 minutes
+  })
+
+  // Al arrancar un torneo, "Ultima Fecha" es la ultima noche del torneo
+  // anterior: su recap necesita la tabla de ESE torneo (apodos, victorias,
+  // quien subio y quien bajo), no la del que arranca, que esta en 0.
+  const previousTournamentId =
+    lastPlayedDate && activeTournament && lastPlayedDate.tournamentId !== activeTournament.id
+      ? lastPlayedDate.tournamentId
+      : null
+  const { ranking: previousRankingData } = useTournamentRanking(previousTournamentId, {
+    refreshInterval: 0
   })
 
   // Fetch active game date
@@ -91,7 +103,7 @@ export function HomePage() {
   if (!user) {
     return (
       <HomeNotAuthenticated
-        leader={rankingData?.rankings?.[0]}
+        leader={rankingData && tournamentHasResults(rankingData.rankings) ? rankingData.rankings[0] : undefined}
         nextLabel={isFinished ? 'Proximo Torneo' : 'Proxima Fecha'}
         nextDate={isFinished ? 'Por anunciar' : formatNextDateSimple(nextGameDateFromTournament?.dateNumber, nextGameDateFromTournament?.scheduledDate ?? null)}
         tournamentNumber={activeTournament?.number ?? 29}
@@ -127,6 +139,10 @@ export function HomePage() {
       totalDates={progress?.total}
       rankings={rankings}
       lastCompletedDate={lastCompletedDate}
+      lastPlayedDate={lastPlayedDate}
+      lastPlayedRankings={previousTournamentId ? previousRankingData?.rankings ?? [] : rankings}
+      nextDate={nextGameDateFromTournament}
+      registeredCount={activeTournament?.participantIds?.length}
       hasActiveDate={!!activeGameDate}
     />
   )
@@ -365,6 +381,12 @@ interface HomeAuthenticatedProps {
   totalDates?: number
   rankings: PlayerRanking[]
   lastCompletedDate: { id: number; dateNumber: number; scheduledDate: string | null } | null
+  /** Ultima fecha jugada, del torneo activo o del anterior si este no jugo ninguna. */
+  lastPlayedDate: LastPlayedDate | null
+  /** Tabla del torneo de `lastPlayedDate`. */
+  lastPlayedRankings: PlayerRanking[]
+  nextDate: { dateNumber: number; scheduledDate: string | null } | null
+  registeredCount?: number
   hasActiveDate: boolean
 }
 
@@ -377,6 +399,10 @@ function HomeAuthenticated({
   totalDates,
   rankings,
   lastCompletedDate,
+  lastPlayedDate,
+  lastPlayedRankings,
+  nextDate,
+  registeredCount,
   hasActiveDate,
 }: HomeAuthenticatedProps) {
   const router = useRouter()
@@ -390,10 +416,14 @@ function HomeAuthenticated({
    * recap se mostraba solo unas horas despues de la fecha y luego la home
    * cambiaba sola a Torneo. Eso hacia que la misma pantalla te recibiera
    * distinto segun el dia, sin que hubieras tocado nada.
-   * El unico caso que cae en Torneo es el arranque del torneo, cuando todavia
-   * no hay fecha jugada — ahi el toggle de Ultima Fecha va deshabilitado.
+   * Al arrancar un torneo, sin fecha jugada, Ultima Fecha es la ultima noche
+   * del torneo anterior (y Torneo, el afiche del que arranca). Solo sin
+   * ninguna fecha jugada en la historia cae en Torneo, con el toggle de
+   * Ultima Fecha deshabilitado.
    */
-  const defaultView: HomeView = lastCompletedDate ? 'ultimaFecha' : 'torneo'
+  const defaultView: HomeView = lastPlayedDate ? 'ultimaFecha' : 'torneo'
+  const fromPreviousTournament = !!lastPlayedDate && lastPlayedDate.tournamentNumber !== tournamentNumber
+  const fechaHref = fromPreviousTournament && lastPlayedDate ? `/fecha?torneo=${lastPlayedDate.tournamentId}` : '/fecha'
   const [view, setView] = useState<HomeView>(defaultView)
 
   return (
@@ -416,14 +446,15 @@ function HomeAuthenticated({
         {/* Push opt-in - solo aparece si el usuario no tiene suscripción activa */}
         <PushActivationBanner />
 
-        <HomeViewToggle value={view} onChange={setView} ultimaFechaDisabled={!lastCompletedDate} />
+        <HomeViewToggle value={view} onChange={setView} ultimaFechaDisabled={!lastPlayedDate} />
 
-        {view === 'ultimaFecha' && lastCompletedDate ? (
+        {view === 'ultimaFecha' && lastPlayedDate ? (
           <HomeUltimaFecha
-            rankings={rankings}
-            lastCompletedDate={lastCompletedDate}
-            onSeeAllResults={() => router.push('/fecha')}
-            onSeeResultsTab={() => router.push('/fecha?tab=eliminaciones')}
+            rankings={lastPlayedRankings}
+            lastCompletedDate={lastPlayedDate}
+            tournamentNumber={fromPreviousTournament ? lastPlayedDate.tournamentNumber : undefined}
+            onSeeAllResults={() => router.push(fechaHref)}
+            onSeeResultsTab={() => router.push(`${fechaHref}${fechaHref.includes('?') ? '&' : '?'}tab=eliminaciones`)}
           />
         ) : (
           <HomeTorneoLucha
@@ -433,6 +464,8 @@ function HomeAuthenticated({
             lastDateNumber={lastCompletedDate?.dateNumber}
             totalDates={totalDates}
             loading={rankingLoading}
+            nextDate={nextDate}
+            registeredCount={registeredCount}
             onSeeTabla={() => router.push('/ranking')}
           />
         )}

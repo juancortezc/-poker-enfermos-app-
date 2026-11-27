@@ -20,6 +20,11 @@ interface EliminationDTO {
 interface HomeUltimaFechaProps {
   rankings: PlayerRanking[]
   lastCompletedDate: { id: number; dateNumber: number }
+  /**
+   * Solo si la fecha es de OTRO torneo (el anterior, mientras el activo no
+   * jugo ninguna): el cartel dice de que torneo es, "T30 · FECHA 14".
+   */
+  tournamentNumber?: number
   onSeeAllResults: () => void
   onSeeResultsTab: () => void
 }
@@ -44,7 +49,7 @@ const TILE_SIZES = '(min-width: 448px) 200px, calc((100vw - 52px) / 2)'
  * 3. Los 7/2 de la noche: los dos primeros eliminados, en rosa.
  * 4. Lo que dejo la noche: Varon, Malazo, la peor caida y la mejor subida.
  */
-export function HomeUltimaFecha({ rankings, lastCompletedDate, onSeeAllResults, onSeeResultsTab }: HomeUltimaFechaProps) {
+export function HomeUltimaFecha({ rankings, lastCompletedDate, tournamentNumber, onSeeAllResults, onSeeResultsTab }: HomeUltimaFechaProps) {
   const { data: eliminations, error } = useSWR<EliminationDTO[]>(
     `/api/eliminations/game-date/${lastCompletedDate.id}`,
     { revalidateOnFocus: false }
@@ -149,6 +154,7 @@ export function HomeUltimaFecha({ rankings, lastCompletedDate, onSeeAllResults, 
           photoUrl={photoOf(winner.eliminatedPlayer)}
           wins={byId.get(winner.eliminatedPlayer.id)?.firstPlaces}
           dateNumber={lastCompletedDate.dateNumber}
+          tournamentNumber={tournamentNumber}
           onSeeResults={onSeeAllResults}
         />
       )}
@@ -220,11 +226,12 @@ interface CartelProps {
   photoUrl: string | null
   wins?: number
   dateNumber: number
+  tournamentNumber?: number
   onSeeResults: () => void
 }
 
 /** "FUNCIÓN ESTELAR": el ganador de la noche, como cartel de lucha libre. */
-function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: CartelProps) {
+function Cartel({ winner, name, photoUrl, wins, dateNumber, tournamentNumber, onSeeResults }: CartelProps) {
   const [l1, l2] = nightWinnerPhrase(name, dateNumber, wins)
   const size = heroTitleSize([l1, l2], 40)
   const fullName = `${winner.eliminatedPlayer.firstName} ${winner.eliminatedPlayer.lastName}`
@@ -268,7 +275,7 @@ function Cartel({ winner, name, photoUrl, wins, dateNumber, onSeeResults }: Cart
         }}
       >
         <Star size={12} fill={SOBRE_NEGRO.oro} stroke="none" aria-hidden />
-        FUNCIÓN ESTELAR · FECHA {dateNumber}
+        FUNCIÓN ESTELAR · {tournamentNumber ? `T${tournamentNumber} · ` : ''}FECHA {dateNumber}
         <Star size={12} fill={SOBRE_NEGRO.oro} stroke="none" aria-hidden />
       </div>
 

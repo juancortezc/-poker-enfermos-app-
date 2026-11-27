@@ -31,14 +31,20 @@ export default function HomeScreen() {
   const active = useActiveTournament();
   const tournament = active.tournament;
   const rankingSwr = useTournamentRanking(tournament?.id, { refreshInterval: 300000 });
+  // Al arrancar un torneo, "Última Fecha" es la última noche del anterior: su
+  // recap necesita la tabla de ESE torneo, no la del que arranca (en 0).
+  const lastPlayed = active.lastPlayedDate;
+  const fromPrevious = !!lastPlayed && !!tournament && lastPlayed.tournamentId !== tournament.id;
+  const previousRankingSwr = useTournamentRanking(fromPrevious ? lastPlayed.tournamentId : undefined, { refreshInterval: 0 });
   const gameDateSwr = useActiveGameDate();
   const [chosenView, setView] = useState<HomeView | null>(null);
 
   const { refreshing, onRefresh } = useRefresh(active.mutate, rankingSwr.mutate, gameDateSwr.mutate);
 
   const number = tournament?.number;
-  const view: HomeView = chosenView ?? (active.lastCompletedDate ? 'ultimaFecha' : 'torneo');
+  const view: HomeView = chosenView ?? (lastPlayed ? 'ultimaFecha' : 'torneo');
   const rankings = rankingSwr.ranking?.rankings ?? [];
+  const fechaParams = fromPrevious && lastPlayed ? { torneo: String(lastPlayed.tournamentId) } : {};
   const openProfile = () => user && router.push({ pathname: '/players/[id]', params: { id: user.id } });
 
   const body = (() => {
@@ -55,7 +61,7 @@ export default function HomeScreen() {
         <ClaveDebilBanner />
         <Segmented
           options={[
-            { id: 'ultimaFecha', label: 'Última Fecha', disabled: !active.lastCompletedDate },
+            { id: 'ultimaFecha', label: 'Última Fecha', disabled: !lastPlayed },
             { id: 'torneo', label: 'Torneo' },
           ]}
           value={view}
@@ -63,14 +69,15 @@ export default function HomeScreen() {
         />
         {rankingSwr.isLoading ? (
           <LoadingState />
-        ) : view === 'ultimaFecha' && active.lastCompletedDate ? (
+        ) : view === 'ultimaFecha' && lastPlayed ? (
           <HomeUltimaFecha
             userId={user?.id ?? ''}
-            rankings={rankings}
-            lastCompletedDate={active.lastCompletedDate}
+            rankings={fromPrevious ? (previousRankingSwr.ranking?.rankings ?? []) : rankings}
+            lastCompletedDate={lastPlayed}
+            tournamentNumber={fromPrevious ? lastPlayed.tournamentNumber : undefined}
             onOpenProfile={openProfile}
-            onSeeAllResults={() => router.push('/fecha')}
-            onSeeResultsTab={() => router.push({ pathname: '/fecha', params: { tab: 'eliminaciones' } })}
+            onSeeAllResults={() => router.push({ pathname: '/fecha', params: fechaParams })}
+            onSeeResultsTab={() => router.push({ pathname: '/fecha', params: { ...fechaParams, tab: 'eliminaciones' } })}
           />
         ) : (
           <HomeTorneo
@@ -79,6 +86,8 @@ export default function HomeScreen() {
             rankings={rankings}
             lastDateNumber={active.lastCompletedDate?.dateNumber ?? null}
             progress={active.progress}
+            nextDate={active.nextDate}
+            registeredCount={tournament.participantIds?.length}
             onSeeTabla={() => router.push('/ranking')}
           />
         )}

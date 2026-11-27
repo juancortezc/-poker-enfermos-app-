@@ -5,7 +5,10 @@
  */
 import type { Edge } from 'react-native-safe-area-context';
 
+import { tournamentHasResults } from '@poker/shared';
+
 import { RankingView } from '@/components/jugador/RankingView';
+import { TournamentPoster } from '@/components/jugador/TournamentPoster';
 import { Header } from '@/components/ui/Header';
 import { Screen } from '@/components/ui/Screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
@@ -32,6 +35,16 @@ export function RankingScreenContent({ edges, showHeader }: { edges?: Edge[]; sh
     if (rankingSwr.error) return <ErrorState error={rankingSwr.error} onRetry={() => rankingSwr.mutate()} />;
     if (!rankingSwr.ranking || rankingSwr.ranking.rankings.length === 0)
       return <EmptyState icon="list-outline" message="Todavía no hay datos de tabla." />;
+    // Torneo recién creado: todos en 0 y en el orden de inscripción. En vez de
+    // esa lista, el afiche del torneo que arranca.
+    if (!tournamentHasResults(rankingSwr.ranking.rankings))
+      return (
+        <TournamentPoster
+          tournamentNumber={number ?? 0}
+          nextDate={active.nextDate}
+          registeredCount={rankingSwr.ranking.rankings.length}
+        />
+      );
     return <RankingView data={rankingSwr.ranking} tournamentNumber={number ?? 0} currentUserId={user?.id} />;
   })();
 

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import { ChevronRight } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useActiveTournament } from '@/hooks/useActiveTournament'
+import { useActiveTournament, useTournament } from '@/hooks/useActiveTournament'
 import { useActiveGameDate } from '@/hooks/useActiveGameDate'
 import { CPHeader } from '@/components/clean-poker/CPHeader'
 import { CPBottomNav } from '@/components/clean-poker/CPBottomNav'
@@ -54,7 +54,12 @@ function FechaPageInner() {
   const { user, loading: authLoading } = useAuth()
   const { tournament: activeTournament, isLoading: tournamentLoading } = useActiveTournament({ refreshInterval: 300000 })
   const { hasActiveGameDate } = useActiveGameDate()
-  const tournamentId = activeTournament?.id ?? 0
+  // `?torneo=<id>`: las fechas de otro torneo. El Inicio lo usa al arrancar un
+  // torneo, cuando "Ultima Fecha" es la ultima noche del anterior.
+  const otherTournamentId = Number(searchParams.get('torneo')) || null
+  const viewingOther = otherTournamentId !== null && otherTournamentId !== activeTournament?.id
+  const { tournament: otherTournament } = useTournament(viewingOther ? otherTournamentId : null)
+  const tournamentId = (viewingOther ? otherTournamentId : activeTournament?.id) ?? 0
 
   const { data: dates } = useSWR<DatesGameDate[]>(
     tournamentId ? swrKeys.gameDatesDetailed(tournamentId) : null,
@@ -84,6 +89,7 @@ function FechaPageInner() {
 
   const userInitials = user.firstName && user.lastName ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 'PE'
   const tournamentNumber = activeTournament?.number ?? 29
+  const shownTournamentNumber = viewingOther ? otherTournament?.number : tournamentNumber
   const isComision = user.role === 'Comision'
 
   const eliminations = selectedDate?.eliminations ?? []
@@ -104,7 +110,7 @@ function FechaPageInner() {
       <main className="pb-24 px-4 pt-4 space-y-4">
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--cp-on-surface)', letterSpacing: '-0.01em' }}>FECHA</div>
-          <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)', marginTop: 2 }}>Torneo {tournamentNumber}</div>
+          <div style={{ fontSize: 12, color: 'var(--cp-on-surface-variant)', marginTop: 2 }}>{shownTournamentNumber ? `Torneo ${shownTournamentNumber}` : 'Torneo'}</div>
         </div>
 
         {/* Selector de fecha */}

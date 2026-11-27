@@ -2,11 +2,14 @@
  * Resultados por fecha (web: /fecha). Selector de fecha, y para las jugadas
  * las pestañas Posiciones (podio en metal, malazos en rosa) y Eliminaciones
  * (quién eliminó a quién). Acepta `?tab=eliminaciones` como la web y además
- * `?id=` para abrir una fecha concreta desde el calendario.
+ * `?id=` para abrir una fecha concreta desde el calendario, y `?torneo=<id>`
+ * para las fechas de otro torneo (el Inicio, al arrancar un torneo, enlaza la
+ * última noche del anterior).
  */
 import { fullName, playerLabel } from '@poker/shared';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import useSWR from 'swr';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { PlayerAvatar } from '@/components/common/PlayerAvatar';
@@ -20,6 +23,7 @@ import { Body, Muted } from '@/components/ui/Typography';
 import { useActiveTournament } from '@/hooks/useActiveTournament';
 import { useRefresh } from '@/hooks/useRefresh';
 import { useTournamentDates, type EliminationDTO } from '@/hooks/useTournamentDates';
+import { swrKeys } from '@/lib/swr';
 import { cpLight as c } from '@/theme/colors';
 
 type Tab = 'posiciones' | 'eliminaciones';
@@ -27,9 +31,12 @@ type Tab = 'posiciones' | 'eliminaciones';
 const pointsLabel = (e: EliminationDTO) => (e.eliminatedPlayer.role === 'Invitado' ? '—' : `${e.points} pts`);
 
 export default function FechaScreen() {
-  const params = useLocalSearchParams<{ tab?: string; id?: string }>();
+  const params = useLocalSearchParams<{ tab?: string; id?: string; torneo?: string }>();
   const active = useActiveTournament();
-  const datesSwr = useTournamentDates(active.tournament?.id);
+  const otherId = Number(params.torneo) || null;
+  const viewingOther = otherId !== null && otherId !== active.tournament?.id;
+  const { data: other } = useSWR<{ number: number }>(viewingOther && otherId ? swrKeys.tournament(otherId) : null);
+  const datesSwr = useTournamentDates(viewingOther ? otherId : active.tournament?.id);
   const { refreshing, onRefresh } = useRefresh(active.mutate, datesSwr.mutate);
 
   const [selectedId, setSelectedId] = useState<number | null>(params.id ? Number(params.id) : null);
@@ -145,7 +152,11 @@ export default function FechaScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: selected ? `Fecha ${selected.dateNumber}` : 'Fecha' }} />
+      <Stack.Screen
+        options={{
+          title: `${viewingOther && other ? `T${other.number} · ` : ''}${selected ? `Fecha ${selected.dateNumber}` : 'Fecha'}`,
+        }}
+      />
       <Screen tone="light" refreshing={refreshing} onRefresh={onRefresh}>
         {body}
       </Screen>
