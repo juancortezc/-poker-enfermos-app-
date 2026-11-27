@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createGameDateSchema } from '@poker/shared'
+import { createGameDateSchema, gameDateParticipantIds } from '@poker/shared'
+import { assertPlayersExist } from '@/lib/data-integrity'
+import { parseToUTCNoon } from '@/lib/date-utils'
 import { requireComision } from '@/lib/api-auth'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseBody } from '@/lib/http'
@@ -17,6 +19,11 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     guestIds
   } = await parseBody(request, createGameDateSchema)
 
+  // Sin repetidos (el esquema ya rechaza los de una misma lista) y todos
+  // existentes: un id repetido o inventado inflaba el conteo y los puntos.
+  const participantIds = gameDateParticipantIds(playerIds, guestIds)
+  await assertPlayersExist(prisma, participantIds)
+
   // Verificar que existe la fecha para actualizar
   const existingDate = await prisma.gameDate.findFirst({
     where: {
@@ -26,22 +33,24 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   })
 
   // Calcular puntos para el ganador basado en número de participantes
-  const totalParticipants = playerIds.length + guestIds.length
+  const totalParticipants = participantIds.length
   const pointsForWinner = calculateWinnerPoints(totalParticipants)
 
   let gameDate
 
   if (!existingDate) {
     // Date doesn't exist - recreate it (was deleted)
-    // Parse the scheduled date properly
-    const parsedDate = new Date(scheduledDate.length === 10 ? scheduledDate + 'T12:00:00.000Z' : scheduledDate)
+    // Mediodía UTC del día calendario recibido, venga 'YYYY-MM-DD' o ISO:
+    // un ISO a las 00:00 UTC se guardaba tal cual y en Ecuador era el día
+    // anterior.
+    const parsedDate = parseToUTCNoon(scheduledDate)
 
     gameDate = await prisma.gameDate.create({
       data: {
         tournamentId,
         dateNumber,
         scheduledDate: parsedDate,
-        playerIds: playerIds,
+        playerIds: participantIds,
         status: 'CREATED',
         playersMin: Math.min(9, totalParticipants),
         playersMax: Math.max(24, totalParticipants)
@@ -70,7 +79,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
         id: existingDate.id
       },
       data: {
-        playerIds: playerIds,
+        playerIds: participantIds,
         status: 'CREATED', // Configurada y lista para usar
         playersMin: Math.min(9, totalParticipants),
         playersMax: Math.max(24, totalParticipants)
