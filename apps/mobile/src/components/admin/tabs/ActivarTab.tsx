@@ -10,7 +10,7 @@
  * - Borrar solo se ofrece para la fecha configurada; la API no borra
  *   pendientes y el tacho de la web fallaba.
  */
-import { formatDateForInput, fullName, getNextTuesday } from '@poker/shared';
+import { formatDateForInput, getNextTuesday } from '@poker/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
@@ -40,6 +40,7 @@ import {
 } from '../api';
 import { DateStepper } from '../DateStepper';
 import { FormError, Notice } from '../Form';
+import { ExternalGuestPicker } from '../ExternalGuestPicker';
 import { PlayerPicker } from '../PlayerPicker';
 
 export function ActivarTab() {
@@ -278,19 +279,12 @@ function ActivateForm({ data }: { data: AvailableDatesResponse }) {
           />
         ) : (
           <>
-            <PlayerPicker
-              players={guests}
+            <ExternalGuestPicker
+              guests={guests}
               selected={guestIds}
               onChange={setGuestIds}
-              accent="info"
-              detail={(p) => (p.inviter ? `de ${fullName(p.inviter)}` : undefined)}
-              emptyMessage={guestsSwr.isLoading ? 'Cargando invitados…' : 'No hay invitados cargados.'}
-              showBulk={false}
-            />
-            <CPButton
-              title="Crear invitado"
-              variant="ghost"
-              onPress={() => router.push({ pathname: '/players/new', params: { type: 'invitado' } })}
+              playingIds={players}
+              loading={guestsSwr.isLoading}
             />
           </>
         )}

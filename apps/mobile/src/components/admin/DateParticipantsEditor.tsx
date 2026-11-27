@@ -12,7 +12,6 @@
  * La API solo acepta cambios con la fecha CREATED; en curso se usa
  * "Gestionar jugadores".
  */
-import { fullName } from '@poker/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -38,6 +37,7 @@ import {
   type AvailableGuestsResponse,
 } from './api';
 import { FormError, Notice } from './Form';
+import { ExternalGuestPicker } from './ExternalGuestPicker';
 import { PlayerPicker } from './PlayerPicker';
 
 type Props = { gameDateId: number; mode: 'players' | 'guests' };
@@ -140,8 +140,6 @@ function Editor({
     }
   };
 
-  const guestDetail = (p: AdminPlayer) => (p.inviter ? `de ${fullName(p.inviter)}` : undefined);
-
   return (
     <View className="gap-4">
       <Muted>
@@ -171,19 +169,7 @@ function Editor({
       ) : (
         <CPCard className="gap-3 p-4">
           <Overline>Invitados ({guests.length})</Overline>
-          <PlayerPicker
-            players={guests}
-            selected={selected}
-            onChange={setSelected}
-            detail={guestDetail}
-            accent="info"
-            emptyMessage="No hay invitados cargados. Crealos desde Jugadores."
-          />
-          <CPButton
-            title="Crear invitado"
-            variant="ghost"
-            onPress={() => router.push({ pathname: '/players/new', params: { type: 'invitado' } })}
-          />
+          <ExternalGuestPicker guests={guests} selected={selected} onChange={setSelected} playingIds={currentOthers} />
         </CPCard>
       )}
 
