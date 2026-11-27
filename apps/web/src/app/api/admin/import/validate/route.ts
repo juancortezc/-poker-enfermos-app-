@@ -3,16 +3,7 @@ import { validateCSVPlayerNames } from '@/lib/csv-import';
 import { requireComision } from '@/lib/api-auth';
 import { AppError, withErrorHandler } from '@/lib/errors';
 import { ok } from '@/lib/http';
-
-interface CSVElimination {
-  torneo: string;
-  fecha: number;
-  date: string;
-  posicion: number;
-  eliminado: string;
-  eliminador: string;
-  puntos: number;
-}
+import { importRowsProblems, type CsvElimination as CSVElimination } from '@poker/shared';
 
 /**
  * Parse CSV content to elimination records
@@ -78,26 +69,11 @@ async function validateCSVData(eliminations: CSVElimination[]): Promise<{
     errors.push(`Formato de torneo incorrecto: ${firstRecord.torneo} (esperado: "Torneo X")`);
   }
 
-  // 2. Validate positions are sequential (1 to N)
-  const positions = eliminations.map(e => e.posicion).sort((a, b) => a - b);
-  const expectedLength = positions.length;
-  
-  console.log(`🔍 Debug positions: [${positions.join(', ')}]`);
-  console.log(`🔍 Expected length: ${expectedLength}`);
-  
-  for (let i = 0; i < expectedLength; i++) {
-    if (positions[i] !== i + 1) {
-      console.log(`❌ Position check failed at index ${i}: got ${positions[i]}, expected ${i + 1}`);
-      errors.push(`Posiciones no secuenciales: falta posición ${i + 1}`);
-      break;
-    }
-  }
-
-  // Check for duplicates
-  const uniquePositions = [...new Set(positions)];
-  if (uniquePositions.length !== positions.length) {
-    console.log(`❌ Duplicates: unique ${uniquePositions.length} vs total ${positions.length}`);
-    errors.push('Posiciones duplicadas encontradas');
+  // 2. Reglas del CSV completo, las mismas que aplica /execute: misma
+  // fecha en todas las filas, posiciones 1..N sin repetir, nadie eliminado
+  // dos veces y puntos según la tabla oficial para N jugadores.
+  for (const problem of importRowsProblems(eliminations)) {
+    errors.push(problem.message);
   }
 
   // 3. Validate players
@@ -123,12 +99,6 @@ async function validateCSVData(eliminations: CSVElimination[]): Promise<{
   // 5. Validate date format
   if (!firstRecord.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
     errors.push(`Formato de fecha incorrecto: ${firstRecord.date} (esperado: YYYY-MM-DD)`);
-  }
-
-  // 6. Validate points are reasonable
-  const invalidPoints = eliminations.filter(e => e.puntos < 0 || e.puntos > 30);
-  if (invalidPoints.length > 0) {
-    errors.push(`Puntos inválidos encontrados (deben estar entre 0-30): ${invalidPoints.map(e => `Pos ${e.posicion}: ${e.puntos} pts`).join(', ')}`);
   }
 
   return {

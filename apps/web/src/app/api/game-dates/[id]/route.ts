@@ -1,6 +1,13 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { idParamsSchema, updateGameDateSchema } from '@poker/shared'
+import {
+  EDITABLE_GAME_DATE_STATUSES,
+  gameDateParticipantIds,
+  idParamsSchema,
+  isGameDateEditable,
+  updateGameDateSchema,
+} from '@poker/shared'
+import { assertPlayersExist } from '@/lib/data-integrity'
 import { requireComision } from '@/lib/api-auth'
 import { parseToUTCNoon, validateTuesdayDate} from '@/lib/date-utils'
 import { AppError, withErrorHandler } from '@/lib/errors'
@@ -147,7 +154,7 @@ export const PUT = withErrorHandler(async (request: NextRequest, { params }: Ctx
 
   // Handle update action
   if (action === 'update' && (playerIds || scheduledDate)) {
-    // Verificar que la fecha existe y está en estado CREATED
+    // Verificar que la fecha existe y todavía no se jugó (pending o CREATED)
     const existingDate = await prisma.gameDate.findUnique({
       where: { id: gameDateId },
       include: {
@@ -165,10 +172,12 @@ export const PUT = withErrorHandler(async (request: NextRequest, { params }: Ctx
       throw AppError.notFound('Fecha no encontrada', 'GAME_DATE_NOT_FOUND')
     }
 
-    if (existingDate.status !== 'CREATED') {
+    // Antes solo CREATED: la pestaña Activar cambia el día de la próxima
+    // fecha, que todavía está pendiente, y siempre fallaba.
+    if (!isGameDateEditable(existingDate.status)) {
       throw AppError.badRequest(
-        `Solo se pueden actualizar fechas configuradas (estado actual: ${existingDate.status})`,
-        'GAME_DATE_NOT_CREATED'
+        `Solo se pueden actualizar fechas pendientes o configuradas (estado actual: ${existingDate.status})`,
+        'GAME_DATE_NOT_EDITABLE'
       )
     }
 
@@ -185,10 +194,12 @@ export const PUT = withErrorHandler(async (request: NextRequest, { params }: Ctx
     
     // Actualizar participantes si se proporcionan
     if (playerIds) {
-      const totalParticipants = playerIds.length + (guestIds?.length || 0)
+      const participantIds = gameDateParticipantIds(playerIds, guestIds)
+      await assertPlayersExist(prisma, participantIds)
+      const totalParticipants = participantIds.length
       updateData = {
         ...updateData,
-        playerIds: playerIds,
+        playerIds: participantIds,
         playersMin: Math.min(9, totalParticipants),
         playersMax: Math.max(24, totalParticipants)
       }
@@ -220,7 +231,7 @@ export const PUT = withErrorHandler(async (request: NextRequest, { params }: Ctx
     return ok({
       gameDate: {
         ...updatedGameDate,
-        totalParticipants: playerIds ? (playerIds.length + (guestIds?.length || 0)) : updatedGameDate.playerIds.length,
+        totalParticipants: updatedGameDate.playerIds.length,
         playersCount: updatedGameDate.playerIds.length,
         guestIds: guestIds || []
       }
@@ -230,7 +241,8 @@ export const PUT = withErrorHandler(async (request: NextRequest, { params }: Ctx
   throw AppError.badRequest('Acción no válida: update requiere playerIds o scheduledDate', 'INVALID_ACTION')
 })
 
-// DELETE - Eliminar una fecha en estado CREATED
+// DELETE - Eliminar una fecha que todavía no se jugó (pending o CREATED).
+// Al borrarla, /available-dates la ofrece como `missingDate` para recrearla.
 export const DELETE = withErrorHandler(async (request: NextRequest, { params }: Ctx) => {
   const user = await requireComision(request)
   const { id: gameDateId } = parseParams(await params, idParamsSchema)
@@ -244,18 +256,21 @@ export const DELETE = withErrorHandler(async (request: NextRequest, { params }: 
     throw AppError.notFound('Fecha no encontrada', 'GAME_DATE_NOT_FOUND')
   }
 
-  // Solo permitir eliminar fechas en estado CREATED
-  if (existingDate.status !== 'CREATED') {
+  if (!isGameDateEditable(existingDate.status)) {
     throw AppError.badRequest(
-      `Solo se pueden eliminar fechas en estado CREATED (estado actual: ${existingDate.status})`,
-      'GAME_DATE_NOT_CREATED'
+      `Solo se pueden eliminar fechas pendientes o configuradas (estado actual: ${existingDate.status})`,
+      'GAME_DATE_NOT_EDITABLE'
     )
   }
 
-  // Eliminar la fecha
-  await prisma.gameDate.delete({
-    where: { id: gameDateId }
+  // Borrado condicionado al estado: si entre la lectura y aquí alguien la
+  // inició, no se borra una fecha en curso.
+  const { count } = await prisma.gameDate.deleteMany({
+    where: { id: gameDateId, status: { in: [...EDITABLE_GAME_DATE_STATUSES] } }
   })
+  if (count === 0) {
+    throw AppError.conflict('La fecha cambió de estado y ya no se puede eliminar', 'GAME_DATE_NOT_EDITABLE')
+  }
 
   console.log(`[GAME DATE API] Game date ${gameDateId} deleted successfully by user ${user.id}`)
 

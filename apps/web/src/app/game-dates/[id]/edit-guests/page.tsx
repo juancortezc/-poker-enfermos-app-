@@ -84,7 +84,9 @@ export default function EditGuestsPage() {
       setSaving(true)
       
       // Combine players and guests for the API
-      const allPlayerIds = [...selectedPlayers, ...selectedGuests]
+      // selectedPlayers ya trae a los invitados actuales (vienen en
+      // playerIds): sin el Set se mandaban repetidos y la API los rechaza.
+      const allPlayerIds = [...new Set([...selectedPlayers, ...selectedGuests])]
       
       const response = await fetch(`/api/game-dates/${gameDateId}`, {
         method: 'PUT',

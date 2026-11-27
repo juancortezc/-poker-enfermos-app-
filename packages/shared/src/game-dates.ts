@@ -162,3 +162,31 @@ export function validateTuesdayDate(dateString: string): { valid: boolean; messa
     }
   }
 }
+
+/** Estados en que una fecha ya está cerrada: no bloquea finalizar el torneo. */
+export const CLOSED_GAME_DATE_STATUSES = ['completed', 'cancelled'] as const
+
+/**
+ * Estados en que una fecha todavía no se jugó: se le puede cambiar el día o
+ * los jugadores y se puede borrar (al borrarla, Activar ofrece recrearla).
+ */
+export const EDITABLE_GAME_DATE_STATUSES = ['pending', 'CREATED'] as const
+
+export function isGameDateEditable(status: string): boolean {
+  return (EDITABLE_GAME_DATE_STATUSES as readonly string[]).includes(status)
+}
+
+/** Números de las fechas que no están completadas ni canceladas, en orden. */
+export function openGameDateNumbers(dates: ReadonlyArray<{ dateNumber: number; status: string }>): number[] {
+  return dates
+    .filter((d) => !(CLOSED_GAME_DATE_STATUSES as readonly string[]).includes(d.status))
+    .map((d) => d.dateNumber)
+    .sort((a, b) => a - b)
+}
+
+/** Mensaje para el 409 al finalizar un torneo con fechas abiertas. */
+export function openDatesMessage(tournamentNumber: number, numbers: readonly number[]): string {
+  const list = numbers.join(', ')
+  const which = numbers.length === 1 ? `la fecha ${list} sigue abierta` : `las fechas ${list} siguen abiertas`
+  return `No se puede finalizar el Torneo ${tournamentNumber}: ${which}. Completa, cancela o borra esas fechas primero.`
+}

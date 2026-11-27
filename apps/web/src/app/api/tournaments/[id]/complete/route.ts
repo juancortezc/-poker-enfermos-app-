@@ -5,6 +5,8 @@ import { requireComision } from '@/lib/api-auth'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseBody, parseParams } from '@/lib/http'
 import { generateTournamentWinners } from '@/lib/tournament-winners'
+import { assertCanFinalize } from '@/lib/data-integrity'
+import { parseToUTCNoon } from '@/lib/date-utils'
 import { sendNotificationIfEnabled } from '@/lib/notification-config'
 
 // POST /api/tournaments/[id]/complete - Completar torneo activo
@@ -41,7 +43,10 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: { para
     if (lastGameDate) {
       await prisma.gameDate.update({
         where: { id: lastGameDate.id },
-        data: { scheduledDate: new Date(endDate) }
+        // Mediodía UTC del día elegido, como toda fecha de juego: con
+        // new Date('YYYY-MM-DD') quedaba a las 00:00 UTC, el día anterior
+        // en Ecuador.
+        data: { scheduledDate: parseToUTCNoon(endDate) }
       })
     }
 
@@ -49,6 +54,10 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: { para
       message: 'Fecha final actualizada correctamente'
     })
   } else if (action === 'complete_tournament') {
+    // 409 TOURNAMENT_HAS_OPEN_DATES si queda alguna fecha sin completar ni
+    // cancelar: colgada, bloquearía crear las fechas del torneo siguiente.
+    await assertCanFinalize(prisma, tournament)
+
     // Completar torneo (cambiar status a FINALIZADO)
     const updatedTournament = await prisma.tournament.update({
       where: { id: tournamentId },

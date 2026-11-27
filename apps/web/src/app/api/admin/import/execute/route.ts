@@ -4,79 +4,12 @@ import { findPlayerByCSVName } from '@/lib/csv-import';
 import { requireComision } from '@/lib/api-auth';
 import { AppError, withErrorHandler } from '@/lib/errors';
 import { ok, parseBody } from '@/lib/http';
-import { importExecuteSchema, type CsvElimination as CSVElimination } from '@poker/shared';
-
-/**
- * Import eliminations to database
- */
-async function importEliminationsToDatabase(
-  eliminations: CSVElimination[],
-  gameDateId: number
-): Promise<void> {
-  console.log(`📝 Importando ${eliminations.length} eliminaciones...`);
-
-  // Import in transaction
-  await prisma.$transaction(async (tx) => {
-    // Sort eliminations by position (descending - last to first)
-    const sortedEliminations = eliminations.sort((a, b) => b.posicion - a.posicion);
-
-    for (let i = 0; i < sortedEliminations.length; i++) {
-      const elim = sortedEliminations[i];
-      
-      // Find players
-      const eliminatedPlayer = await findPlayerByCSVName(elim.eliminado);
-      
-      if (!eliminatedPlayer?.found) {
-        throw AppError.badRequest(`Jugador eliminado no encontrado: ${elim.eliminado}`, 'PLAYER_NOT_FOUND');
-      }
-
-      let eliminatorPlayerId = eliminatedPlayer.id; // Default to self-elimination
-      
-      if (elim.eliminador && elim.eliminador.trim() !== '') {
-        const eliminatorPlayer = await findPlayerByCSVName(elim.eliminador);
-        if (eliminatorPlayer?.found) {
-          eliminatorPlayerId = eliminatorPlayer.id;
-        } else {
-          console.warn(`⚠️  Eliminador no encontrado: ${elim.eliminador}, usando auto-eliminación`);
-        }
-      }
-
-      // Calculate elimination time (spaced by 30 seconds)
-      const baseTime = new Date(`${elim.date}T19:00:00-05:00`); // 7 PM Ecuador time
-      const eliminationTime = new Date(baseTime.getTime() + (i * 30 * 1000)); // 30 sec intervals
-
-      await tx.elimination.create({
-        data: {
-          position: elim.posicion,
-          points: elim.puntos,
-          eliminatedPlayerId: eliminatedPlayer.id,
-          eliminatorPlayerId: eliminatorPlayerId,
-          eliminationTime: eliminationTime.toISOString(),
-          gameDateId: gameDateId
-        }
-      });
-
-      console.log(`  ✅ Pos ${elim.posicion}: ${elim.eliminado} (${elim.puntos} pts)`);
-    }
-  });
-}
-
-/**
- * Update GameDate status after import
- */
-async function updateGameDateStatus(gameDateId: number, date: string): Promise<void> {
-  const startTime = new Date(`${date}T19:00:00-05:00`); // 7 PM Ecuador time
-  
-  await prisma.gameDate.update({
-    where: { id: gameDateId },
-    data: {
-      status: 'completed',
-      startTime: startTime
-    }
-  });
-  
-  console.log('✅ GameDate actualizada a status: completed');
-}
+import { importExecuteSchema } from '@poker/shared';
+import {
+  assertImportableStatus,
+  buildEliminationRows,
+  replaceGameDateEliminations,
+} from '@/lib/import-eliminations';
 
 /**
  * Find or suggest GameDate for import
@@ -89,6 +22,7 @@ async function findGameDateForImport(tournamentName: string, dateNumber: number)
   gameDate: {
     id: number;
     dateNumber: number;
+    status: string;
     eliminations: Array<{ id: number }>;
     tournament: { number: number };
   } | null;
@@ -148,7 +82,9 @@ async function findGameDateForImport(tournamentName: string, dateNumber: number)
 }
 
 /**
- * Errores: 422 si el body no tiene la forma de /validate; 404
+ * Errores: 422 si el body no tiene la forma de /validate o el CSV no cumple
+ * las reglas (`importRowsProblems`: misma fecha, posiciones 1..N, puntos de
+ * la tabla oficial); 409 GAME_DATE_IN_PROGRESS si la fecha se está jugando; 404
  * GAME_DATE_NOT_FOUND (con `details.suggestions`); 400 PLAYER_NOT_FOUND /
  * INVALID_TOURNAMENT si una fila no se puede importar (antes eran 500).
  */
@@ -172,19 +108,19 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   console.log(`📅 GameDate encontrada (ID: ${gameDate.id})`);
 
-  // Clear existing eliminations if any
-  if (gameDate.eliminations.length > 0) {
-    console.log(`🗑️  Eliminando ${gameDate.eliminations.length} eliminaciones existentes...`);
-    await prisma.elimination.deleteMany({
-      where: { gameDateId: gameDate.id }
-    });
-  }
+  // Falla rápido; la transacción vuelve a comprobarlo por si cambió.
+  assertImportableStatus(gameDate.status);
 
-  // Import eliminations
-  await importEliminationsToDatabase(eliminations, gameDate.id);
+  // Los jugadores se resuelven antes de abrir la transacción: un nombre
+  // desconocido corta aquí, sin haber tocado la base.
+  const rows = await buildEliminationRows(eliminations, async (name) => {
+    const player = await findPlayerByCSVName(name);
+    return player?.found ? player.id : null;
+  });
 
-  // Update GameDate status
-  await updateGameDateStatus(gameDate.id, firstRecord.date);
+  // Borrar, crear y completar la fecha: todo o nada.
+  const { deleted } = await replaceGameDateEliminations(prisma, gameDate.id, firstRecord.date, rows);
+  console.log(`📝 Importadas ${rows.length} eliminaciones (reemplazadas ${deleted})`);
 
   console.log('\n🎉 IMPORTACIÓN COMPLETADA EXITOSAMENTE');
   

@@ -5,6 +5,7 @@ import { requireComision } from '@/lib/api-auth'
 import { parseToUTCNoon } from '@/lib/date-utils'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseBody, parseParams } from '@/lib/http'
+import { assertCanFinalize, assertNoOtherActiveTournament } from '@/lib/data-integrity'
 
 type Ctx = { params: Promise<{ id: string }> }
 
@@ -76,6 +77,15 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: Ctx) =>
 
   if (!existingTournament) {
     throw AppError.notFound('Torneo no encontrado', 'TOURNAMENT_NOT_FOUND')
+  }
+
+  // Cambio de estado: las mismas reglas que /complete. Activar con otro
+  // torneo ACTIVO o finalizar con fechas abiertas es 409.
+  if (status === 'ACTIVO' && existingTournament.status !== 'ACTIVO') {
+    await assertNoOtherActiveTournament(prisma, tournamentId)
+  }
+  if (status === 'FINALIZADO' && existingTournament.status !== 'FINALIZADO') {
+    await assertCanFinalize(prisma, existingTournament)
   }
 
   // Preparar datos de actualización
