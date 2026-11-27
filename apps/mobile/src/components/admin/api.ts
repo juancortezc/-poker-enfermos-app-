@@ -22,6 +22,8 @@ export interface AdminPlayer {
   isActive?: boolean;
   aliases?: string[];
   inviter?: { id?: string; firstName: string; lastName: string } | null;
+  /** Solo invitados externos de available-guests: día de su última fecha. */
+  lastPlayedAt?: string | null;
 }
 
 export interface TournamentGameDate {

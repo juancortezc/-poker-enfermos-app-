@@ -7,6 +7,7 @@ import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseBody, parseQuery } from '@/lib/http'
 import { playerSelectForRole, PLAYER_ADMIN_SELECT } from '@/lib/player-select'
 import { validateAndHashPin } from '@/lib/pin-utils'
+import { assertNoDuplicateGuest } from '@/lib/guests'
 import { GUEST_PHOTO_URL, createPlayerSchema, playersQuerySchema } from '@poker/shared'
 
 // GET /api/players - Directorio de jugadores.
@@ -106,25 +107,13 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
   const isInvitado = role === UserRole.Invitado
 
-  // Los invitados suelen registrarse con un nombre de referencia incompleto
-  // ("Sobrino Diego", "Carlos jr"), por eso el apellido es opcional para ellos
-  // (lo valida createPlayerSchema).
+  // Los invitados llevan nombre y apellido reales (lo valida createPlayerSchema
+  // con las mismas reglas que el alta rapida) y no se duplican: 409
+  // DUPLICATE_GUEST con el existente si ya hay uno activo con ese nombre.
   const finalLastName = lastName ?? ''
 
-  // Evitar invitados duplicados: el formulario se reintenta con frecuencia
   if (isInvitado) {
-    const duplicate = await prisma.player.findFirst({
-      where: {
-        role: UserRole.Invitado,
-        firstName: { equals: firstName, mode: 'insensitive' },
-        lastName: { equals: finalLastName, mode: 'insensitive' }
-      },
-      select: { id: true }
-    })
-
-    if (duplicate) {
-      throw AppError.conflict('Ya existe un invitado con ese nombre', 'DUPLICATE_GUEST')
-    }
+    await assertNoDuplicateGuest(prisma, firstName, finalLastName)
   }
 
   // Validar y hashear PIN si se proporciona

@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { UserPlus, ChevronLeft, ChevronRight, Users, ExternalLink } from 'lucide-react'
+import { UserPlus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { UserRole } from '@prisma/client'
 import { useAuth } from '@/contexts/AuthContext'
-import Link from 'next/link'
+import ExternalGuestPicker, { type PickerGuest } from './ExternalGuestPicker'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 import { readApiJson } from '@/lib/api-client'
 
@@ -16,11 +16,12 @@ interface Player {
   lastName: string
   role: UserRole
   photoUrl?: string
+  lastPlayedAt?: string | null
   inviter?: {
-    id: string
+    id?: string
     firstName: string
     lastName: string
-  }
+  } | null
 }
 
 interface GuestSelectorProps {
@@ -96,6 +97,12 @@ export default function GuestSelector({
     } finally {
       setLoading(false)
     }
+  }
+
+  // Alta rapida desde el selector: el invitado se suma a la lista y queda elegido.
+  const addAndSelectGuest = (guest: PickerGuest) => {
+    setExternalGuests(prev => (prev.some(g => g.id === guest.id) ? prev : [guest as Player, ...prev]))
+    if (!selectedGuests.includes(guest.id)) onGuestsChange([...selectedGuests, guest.id])
   }
 
   const toggleGuest = (guestId: string) => {
@@ -184,54 +191,18 @@ export default function GuestSelector({
           </div>
         )}
 
-        {/* Invitados Externos */}
+        {/* Invitados Externos: por participacion reciente, con alta rapida */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-white">
-              Externos ({getAvailableInvitados(externalGuests).length} de {externalGuests.length})
-            </h3>
-            <Link href="/players/new?type=invitado&returnTo=/game-dates/config" target="_blank" rel="noopener noreferrer">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-pink-400/30 text-pink-400 hover:bg-pink-400/10"
-              >
-                <UserPlus className="w-3 h-3 mr-1" />
-                Nuevo
-              </Button>
-            </Link>
-          </div>
-
-          {getAvailableInvitados(externalGuests).length > 0 ? (
-            <div className="bg-poker-dark/30 rounded-lg overflow-hidden">
-              <div className="grid grid-cols-2 gap-px bg-white/10">
-                {getAvailableInvitados(externalGuests).map((guest) => (
-                  <label
-                    key={guest.id}
-                    className="flex items-center px-2 py-1 cursor-pointer transition-all bg-poker-dark/50 hover:bg-poker-dark/70"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedGuests.includes(guest.id)}
-                      onChange={() => toggleGuest(guest.id)}
-                      className="mr-2 rounded-sm border-gray-400 text-pink-400 focus:ring-pink-400 w-3 h-3 accent-pink-400"
-                    />
-                    <span className="text-white text-xs truncate">
-                      {guest.firstName} {guest.lastName}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-4 text-poker-muted">
-              <p className="text-sm">
-                {externalGuests.length === 0 
-                  ? 'No hay externos registrados' 
-                  : 'No hay invitados disponibles (sus invitadores no están confirmados)'}
-              </p>
-            </div>
-          )}
+          <h3 className="text-sm font-medium text-white">
+            Externos ({externalGuests.length})
+          </h3>
+          <ExternalGuestPicker
+            guests={externalGuests}
+            selected={selectedGuests}
+            onToggle={toggleGuest}
+            onAddAndSelect={addAndSelectGuest}
+            playingIds={selectedPlayers}
+          />
         </div>
 
         <div className="flex space-x-4 pt-4">

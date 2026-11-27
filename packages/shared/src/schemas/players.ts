@@ -1,5 +1,6 @@
 /** Esquemas de entrada de la API: jugadores (/api/players). */
 import { z, userRoleSchema, queryBooleanSchema, queryIdSchema, playerIdSchema } from './common'
+import { GUEST_GENERIC_NAME_MESSAGE, isGenericGuestName } from '../guests'
 
 /** Texto opcional que se guarda tal cual (null o ausente = sin dato). */
 const optionalText = z.string({ error: 'Debe ser texto' }).max(500, 'Texto demasiado largo').nullish()
@@ -23,10 +24,21 @@ export const playersQuerySchema = z.object({
 })
 export type PlayersQuery = z.infer<typeof playersQuerySchema>
 
+/** Nombre o apellido real de un invitado: recortado, 2+ letras, nada de "Invitado" o "Sobrino X". */
+function guestNamePart(label: string) {
+  return z
+    .string({ error: `${label} es obligatorio` })
+    .trim()
+    .min(2, `${label} debe tener al menos 2 letras`)
+    .max(100, `${label} es demasiado largo`)
+    .refine((v) => !isGenericGuestName(v), GUEST_GENERIC_NAME_MESSAGE)
+}
+
 /**
- * POST /api/players. El apellido es opcional solo para invitados: se
- * registran con un nombre de referencia ("Sobrino Diego"). La clave, si
- * viene, se valida (formato y unicidad) en el servidor.
+ * POST /api/players. El apellido es obligatorio para todos. Los invitados
+ * siguen ademas las reglas de createGuestSchema: nombre y apellido reales de
+ * 2+ letras, nada de "Invitado", "S/N" o "Sobrino X". La clave, si viene, se
+ * valida (formato y unicidad) en el servidor.
  */
 export const createPlayerSchema = z
   .object({
@@ -43,7 +55,12 @@ export const createPlayerSchema = z
     joinYear: joinYearSchema.nullish(),
   })
   .superRefine((v, ctx) => {
-    if (v.role !== 'Invitado' && !v.lastName) {
+    if (v.role === 'Invitado') {
+      for (const [field, value] of [['firstName', v.firstName], ['lastName', v.lastName ?? '']] as const) {
+        const r = guestNamePart(field === 'firstName' ? 'El nombre' : 'El apellido').safeParse(value)
+        if (!r.success) ctx.addIssue({ code: 'custom', path: [field], message: r.error.issues[0].message })
+      }
+    } else if (!v.lastName) {
       ctx.addIssue({ code: 'custom', path: ['lastName'], message: 'El apellido es obligatorio' })
     }
   })
@@ -86,6 +103,22 @@ export const changePlayerRoleSchema = z
     }
   })
 export type ChangePlayerRoleInput = z.infer<typeof changePlayerRoleSchema>
+
+/**
+ * POST /api/players/guests: alta rapida de un invitado externo desde el
+ * selector de la fecha. Nombre y apellido reales y quien lo invita (un
+ * Enfermo o Comision activo, eso lo comprueba el servidor).
+ */
+export const createGuestSchema = z.object({
+  firstName: guestNamePart('El nombre'),
+  lastName: guestNamePart('El apellido'),
+  inviterId: z
+    .string({ error: 'Elige quién lo invita' })
+    .trim()
+    .min(1, 'Elige quién lo invita')
+    .max(64, 'Id de jugador inválido'),
+})
+export type CreateGuestInput = z.infer<typeof createGuestSchema>
 
 /** `?tournamentId=3` (opcional) de GET /api/players/available-guests. */
 export const availableGuestsQuerySchema = z.object({

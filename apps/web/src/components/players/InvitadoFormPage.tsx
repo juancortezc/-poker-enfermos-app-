@@ -265,8 +265,8 @@ export default function InvitadoFormPage({ invitadoId }: InvitadoFormPageProps) 
               </div>
             </div>
             <p className="text-xs text-poker-muted">
-              Si no conoces el apellido, deja el campo vacío y usa el nombre de
-              referencia con el que se lo identifica (ej. &quot;Sobrino Diego&quot;, &quot;Carlos jr&quot;).
+              Nombre y apellido reales del invitado. No se aceptan nombres de
+              referencia como &quot;Invitado&quot;, &quot;S/N&quot; o &quot;Sobrino Diego&quot;.
             </p>
 
             {/* Enfermo que invita */}

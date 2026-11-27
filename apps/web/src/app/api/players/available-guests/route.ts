@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { withAuth } from '@/lib/api-auth'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseQuery } from '@/lib/http'
-import { availableGuestsQuerySchema } from '@poker/shared'
+import { availableGuestsQuerySchema, compareGuestsByRecency } from '@poker/shared'
+import { GUEST_SELECT, withLastPlayed } from '@/lib/guests'
 
 export const GET = withErrorHandler(async (request: NextRequest) => {
   return withAuth(request, async (req) => {
@@ -62,29 +63,16 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
       ]
     })
 
-    // Obtener invitados externos
-    const externalGuests = await prisma.player.findMany({
+    // Invitados externos, por participacion mas reciente (lastPlayedAt). Los
+    // comodines "Invitado 1 S/N" los separa el cliente (groupExternalGuests).
+    const externalRows = await prisma.player.findMany({
       where: {
         role: 'Invitado',
         isActive: true
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        photoUrl: true,
-        inviter: {
-          select: {
-            firstName: true,
-            lastName: true
-          }
-        }
-      },
-      orderBy: [
-        { firstName: 'asc' }
-      ]
+      select: GUEST_SELECT
     })
+    const externalGuests = (await withLastPlayed(prisma, externalRows)).sort(compareGuestsByRecency)
 
     return ok({
       groupMembers,

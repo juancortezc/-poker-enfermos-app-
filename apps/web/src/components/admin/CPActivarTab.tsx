@@ -11,6 +11,7 @@ import { formatDateForInput, parseToUTCNoon, validateTuesdayDate } from '@/lib/d
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 import { playerLabel } from '@poker/shared'
 import { readApiJson } from '@/lib/api-client'
+import ExternalGuestPicker, { type PickerGuest } from '@/components/game-dates/ExternalGuestPicker'
 
 const RED = '#E53935'
 const PINK = '#E8863C'
@@ -38,6 +39,8 @@ interface Player {
   photoUrl?: string
   isActive: boolean
   aliases?: string[]
+  inviter?: { id?: string; firstName: string; lastName: string } | null
+  lastPlayedAt?: string | null
 }
 
 interface Tournament {
@@ -318,8 +321,10 @@ export default function CPActivarTab() {
     }
   }
 
-  const handleCreateGuest = () => {
-    router.push('/players/new?type=invitado&returnTo=/admin')
+  // Alta rapida desde el selector: el invitado se suma a la lista y queda elegido.
+  const addAndSelectGuest = (guest: PickerGuest) => {
+    setGuests(prev => (prev.some(g => g.id === guest.id) ? prev : [{ ...guest, isActive: true } as Player, ...prev]))
+    setSelectedGuests(prev => (prev.includes(guest.id) ? prev : [...prev, guest.id]))
   }
 
   const handleDeleteDate = async (dateIdToDelete?: number) => {
@@ -406,9 +411,10 @@ export default function CPActivarTab() {
 
   const getDisplayName = (player: Player) => playerLabel(player)
 
+  // Los invitados externos los dibuja ExternalGuestPicker (orden y alta rapida).
   const currentPlayers = activeTab === 'enfermos'
     ? [...registeredPlayers, ...additionalPlayers]
-    : guests
+    : []
 
   const totalEnfermos = registeredPlayers.length + additionalPlayers.length
   const totalInvitados = guests.length
@@ -685,23 +691,16 @@ export default function CPActivarTab() {
               })}
             </div>
 
-            {/* Create Guest Button */}
+            {/* Invitados externos: por participacion reciente, con alta rapida */}
             {activeTab === 'invitados' && (
-              <button
-                onClick={handleCreateGuest}
-                className="w-full mt-3 py-2 flex items-center justify-center gap-2"
-                style={{
-                  background: 'rgba(91, 200, 192, 0.15)',
-                  border: '1px solid rgba(91, 200, 192, 0.3)',
-                  color: PINK,
-                  borderRadius: 100,
-                  fontSize: 'var(--cp-caption-size)',
-                  fontWeight: 600,
-                }}
-              >
-                <UserPlus size={14} />
-                CREAR INVITADO
-              </button>
+              <ExternalGuestPicker
+                guests={guests}
+                selected={selectedGuests}
+                onToggle={togglePlayer}
+                onAddAndSelect={addAndSelectGuest}
+                playingIds={selectedPlayers}
+                accent={PINK}
+              />
             )}
           </div>
         </div>
@@ -945,23 +944,16 @@ export default function CPActivarTab() {
             })}
           </div>
 
-          {/* Create Guest Button */}
+          {/* Invitados externos: por participacion reciente, con alta rapida */}
           {activeTab === 'invitados' && (
-            <button
-              onClick={handleCreateGuest}
-              className="w-full mt-3 py-2 flex items-center justify-center gap-2"
-              style={{
-                background: 'rgba(91, 200, 192, 0.15)',
-                border: '1px solid rgba(91, 200, 192, 0.3)',
-                color: PINK,
-                borderRadius: 100,
-                fontSize: 'var(--cp-caption-size)',
-                fontWeight: 600,
-              }}
-            >
-              <UserPlus size={14} />
-              CREAR INVITADO
-            </button>
+            <ExternalGuestPicker
+              guests={guests}
+              selected={selectedGuests}
+              onToggle={togglePlayer}
+              onAddAndSelect={addAndSelectGuest}
+              playingIds={selectedPlayers}
+              accent={PINK}
+            />
           )}
         </div>
       </div>
