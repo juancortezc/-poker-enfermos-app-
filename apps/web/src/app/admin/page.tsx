@@ -164,7 +164,7 @@ export default function AdminNewPage() {
         {/* Content */}
         <div className="px-4 pt-4">
           {activeTab === 'activar' && <CPActivarTab />}
-          {activeTab === 'torneo' && <CPCrearTorneoTab />}
+          {activeTab === 'torneo' && <CPCrearTorneoTab activeTournament={activeTournament} />}
           {activeTab === 'blinds' && <CPBlindsTab tournamentId={activeTournament?.id} />}
           {activeTab === 'jugadores' && <CPJugadoresTab />}
           {activeTab === 'premiacion' && <CPPremiacionTab tournamentId={activeTournament?.id} />}

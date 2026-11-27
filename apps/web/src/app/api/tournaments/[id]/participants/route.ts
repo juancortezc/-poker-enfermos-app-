@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { UserRole } from '@prisma/client'
 import {
   addTournamentParticipantSchema,
   idParamsSchema,
@@ -11,7 +10,7 @@ import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseBody, parseParams, parseQuery } from '@/lib/http'
 
 type Ctx = { params: Promise<{ id: string }> }
-import { PLAYER_PUBLIC_SELECT } from '@/lib/player-select'
+import { applyParticipantsEdit } from '@/lib/tournament-edit'
 
 // GET /api/tournaments/[id]/participants - Obtener participantes de un torneo
 export const GET = withErrorHandler(async (req: NextRequest, { params }: Ctx) => {
@@ -58,27 +57,6 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: Ctx) =
     throw AppError.notFound('Torneo no encontrado', 'TOURNAMENT_NOT_FOUND')
   }
 
-  // Verificar que el jugador existe y es Enfermo o Comisión
-  const player = await prisma.player.findUnique({
-    where: { id: playerId },
-    select: PLAYER_PUBLIC_SELECT
-  })
-
-  if (!player) {
-    throw AppError.notFound('Jugador no encontrado', 'PLAYER_NOT_FOUND')
-  }
-
-  if (player.role === UserRole.Invitado) {
-    throw AppError.badRequest(
-      'Los Invitados no pueden participar en torneos (solo pueden jugar fechas individuales)',
-      'GUEST_NOT_ALLOWED'
-    )
-  }
-
-  if (!player.isActive) {
-    throw AppError.badRequest('El jugador no está activo', 'PLAYER_INACTIVE')
-  }
-
   // Verificar que no esté ya participando
   const existingParticipant = await prisma.tournamentParticipant.findUnique({
     where: {
@@ -93,12 +71,15 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: Ctx) =
     throw AppError.badRequest('El jugador ya está participando en este torneo', 'ALREADY_PARTICIPANT')
   }
 
-  const participant = await prisma.tournamentParticipant.create({
-    data: {
-      tournamentId,
-      playerId,
-      confirmed: false
-    },
+  // Mismas reglas que editar el torneo (Invitados e inactivos no; torneo
+  // abierto) y participantIds queda igual que TournamentParticipant.
+  await prisma.$transaction(async (tx) => {
+    const current = await tx.tournamentParticipant.findMany({ where: { tournamentId }, select: { playerId: true } })
+    await applyParticipantsEdit(tx, tournament, [...current.map((p) => p.playerId), playerId])
+  })
+
+  const participant = await prisma.tournamentParticipant.findUniqueOrThrow({
+    where: { tournamentId_playerId: { tournamentId, playerId } },
     include: {
       player: {
         select: {
@@ -135,13 +116,19 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Ctx)
     throw AppError.notFound('El jugador no está participando en este torneo', 'NOT_A_PARTICIPANT')
   }
 
-  await prisma.tournamentParticipant.delete({
-    where: {
-      tournamentId_playerId: {
-        tournamentId,
-        playerId
-      }
-    }
+  const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } })
+  if (!tournament) {
+    throw AppError.notFound('Torneo no encontrado', 'TOURNAMENT_NOT_FOUND')
+  }
+
+  // Solo se quita a quien no jugó ninguna fecha del torneo.
+  await prisma.$transaction(async (tx) => {
+    const current = await tx.tournamentParticipant.findMany({ where: { tournamentId }, select: { playerId: true } })
+    await applyParticipantsEdit(
+      tx,
+      tournament,
+      current.map((p) => p.playerId).filter((id) => id !== playerId)
+    )
   })
 
   return ok({

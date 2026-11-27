@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { idParamsSchema, updateTournamentSchema, withTournamentPhotos } from '@poker/shared'
 import { requireComision } from '@/lib/api-auth'
-import { parseToUTCNoon } from '@/lib/date-utils'
+import { applyCalendarEdit, applyParticipantsEdit } from '@/lib/tournament-edit'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseBody, parseParams } from '@/lib/http'
 import { assertCanFinalize, assertNoOtherActiveTournament } from '@/lib/data-integrity'
@@ -59,7 +59,10 @@ export const GET = withErrorHandler(async (_req: NextRequest, { params }: Ctx) =
   return ok(withTournamentPhotos(tournament, tournament.number))
 })
 
-// PUT /api/tournaments/[id] - Actualizar torneo
+// PUT /api/tournaments/[id] - Actualizar torneo (Comisión).
+// Jugadores (`participantIds`, lista completa) y calendario (`calendar`, lista
+// completa; o `gameDates`, formato viejo) siguen las reglas de
+// @poker/shared/tournament-edit: lo jugado no se toca. Todo en una transacción.
 export const PUT = withErrorHandler(async (req: NextRequest, { params }: Ctx) => {
   await requireComision(req)
   const { id: tournamentId } = parseParams(await params, idParamsSchema)
@@ -67,6 +70,7 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: Ctx) =>
     name,
     status,
     gameDates,
+    calendar,
     participantIds,
     blindLevels
   } = await parseBody(req, updateTournamentSchema)
@@ -89,17 +93,41 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: Ctx) =>
     await assertCanFinalize(prisma, existingTournament)
   }
 
-  // Preparar datos de actualización
-  const updateData: Record<string, unknown> = {}
-  
-  if (name !== undefined) updateData.name = name
-  if (status !== undefined) updateData.status = status
-  if (participantIds !== undefined) updateData.participantIds = participantIds
+  await prisma.$transaction(async (tx) => {
+    // Jugadores y calendario se validan con el estado de antes del cambio.
+    if (participantIds !== undefined) {
+      await applyParticipantsEdit(tx, existingTournament, participantIds)
+    }
+    if (calendar !== undefined || gameDates !== undefined) {
+      await applyCalendarEdit(tx, existingTournament, { calendar, gameDatesPatch: gameDates })
+    }
 
-  // Actualizar torneo
-  const updatedTournament = await prisma.tournament.update({
+    if (name !== undefined || status !== undefined) {
+      await tx.tournament.update({
+        where: { id: tournamentId },
+        data: {
+          ...(name !== undefined ? { name } : {}),
+          ...(status !== undefined ? { status } : {})
+        }
+      })
+    }
+
+    if (blindLevels) {
+      await tx.blindLevel.deleteMany({ where: { tournamentId } })
+      await tx.blindLevel.createMany({
+        data: blindLevels.map((blind) => ({
+          tournamentId,
+          level: blind.level,
+          smallBlind: blind.smallBlind,
+          bigBlind: blind.bigBlind,
+          duration: blind.duration
+        }))
+      })
+    }
+  }, { timeout: 15000 })
+
+  const updatedTournament = await prisma.tournament.findUnique({
     where: { id: tournamentId },
-    data: updateData,
     include: {
       gameDates: {
         orderBy: { dateNumber: 'asc' }
@@ -122,61 +150,6 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: Ctx) =>
       }
     }
   })
-
-  // Actualizar fechas si se proporcionaron
-  if (gameDates && Array.isArray(gameDates)) {
-    await Promise.all(
-      gameDates.map((gameDate) =>
-        prisma.gameDate.update({
-          where: {
-            id: gameDate.id,
-            tournamentId: tournamentId
-          },
-          data: {
-            scheduledDate: parseToUTCNoon(gameDate.scheduledDate),
-            playersMin: gameDate.playersMin || 9,
-            playersMax: gameDate.playersMax || 24
-          }
-        })
-      )
-    )
-  }
-
-  // Actualizar participantes si se proporcionaron
-  if (participantIds && Array.isArray(participantIds)) {
-    // Eliminar participantes actuales
-    await prisma.tournamentParticipant.deleteMany({
-      where: { tournamentId }
-    })
-    
-    // Crear nuevos participantes
-    await prisma.tournamentParticipant.createMany({
-      data: participantIds.map((playerId) => ({
-        tournamentId,
-        playerId,
-        confirmed: false
-      }))
-    })
-  }
-
-  // Actualizar blinds si se proporcionaron
-  if (blindLevels && Array.isArray(blindLevels)) {
-    // Eliminar blinds actuales
-    await prisma.blindLevel.deleteMany({
-      where: { tournamentId }
-    })
-    
-    // Crear nuevos blinds
-    await prisma.blindLevel.createMany({
-      data: blindLevels.map((blind) => ({
-        tournamentId,
-        level: blind.level,
-        smallBlind: blind.smallBlind,
-        bigBlind: blind.bigBlind,
-        duration: blind.duration
-      }))
-    })
-  }
 
   return ok(updatedTournament)
 })

@@ -1,5 +1,5 @@
 /**
- * Editar torneo: participantes, fechas pendientes y blinds (TournamentForm de
+ * Editar torneo: inscritos, calendario (fechas sin empezar) y blinds (TournamentForm de
  * la web en /tournaments/[id]/edit). Terminar y cancelar están en la ficha.
  */
 import { Stack, useLocalSearchParams } from 'expo-router';
@@ -30,7 +30,7 @@ export default function EditTournamentScreen() {
         <ErrorState error={error} onRetry={() => (t.mutate(), m.mutate())} />
       ) : t.data ? (
         <>
-          {t.data.status === 'FINALIZADO' ? <Notice>Este torneo ya terminó: los cambios reescriben su historia.</Notice> : null}
+          {t.data.status === 'FINALIZADO' ? <Notice>Este torneo ya terminó: solo se pueden cambiar sus blinds.</Notice> : null}
           {/* key: si llega una versión nueva del torneo el formulario arranca de cero con ella. */}
           <TournamentForm key={t.data.id} mode="edit" tournament={t.data} members={m.members ?? []} />
         </>

@@ -4,14 +4,26 @@
  * cada 15 días (cambiar una fecha recalcula las siguientes) y blinds.
  *
  * Al crear se elige además cuántas fechas (10-15) y cuántas descarta el
- * ELIMINA (2-3), como en el paso Config de la web. Al editar, las fechas ya
- * jugadas o en curso quedan fijas: la API las reescribiría sin preguntar.
+ * ELIMINA (2-3), como en el paso Config de la web. Al editar rigen las reglas
+ * de @poker/shared/tournament-edit (la API las vuelve a aplicar): las fechas
+ * en curso, jugadas o canceladas quedan fijas; las pendientes se mueven,
+ * agregan al final o quitan (10 a 15). Se inscribe tarde, pero no se quita a
+ * quien ya jugó. Con el torneo finalizado solo se guardan los blinds.
  */
 import {
+  MAX_TOURNAMENT_DATES,
+  MIN_TOURNAMENT_DATES,
+  calendarDay,
   defaultBlindLevels,
+  fullName,
   generateTournamentDates,
   getEcuadorTodayString,
+  isGameDateEditable,
+  nextCalendarDay,
   parseToUTCNoon,
+  planCalendarEdit,
+  planParticipantsEdit,
+  playedDatesByPlayer,
   rescheduleFrom,
   validateTournamentForm,
   type BlindLevel,
@@ -33,14 +45,16 @@ import { DateStepper } from './DateStepper';
 import { FormError, Notice, Pill } from './Form';
 import { PlayerPicker } from './PlayerPicker';
 
-type DateRow = { id?: number; dateNumber: number; scheduledDate: string; status?: GameDateStatus };
+type DateRow = { key: string; id?: number; dateNumber: number; scheduledDate: string; status?: GameDateStatus };
 type Tab = 'participantes' | 'fechas' | 'blinds';
 
 type Props =
   | { mode: 'create'; number: number; members: AdminPlayer[] }
   | { mode: 'edit'; tournament: TournamentDetail; members: AdminPlayer[] };
 
-const LOCKED: GameDateStatus[] = ['completed', 'in_progress', 'CREATED'];
+const isLocked = (d: DateRow) => !isGameDateEditable(d.status ?? 'pending');
+const withKeys = (dates: { dateNumber: number; scheduledDate: string }[]): DateRow[] =>
+  dates.map((d) => ({ ...d, key: `n-${d.dateNumber}` }));
 
 export function TournamentForm(props: Props) {
   const refresh = useAdminRefresh();
@@ -55,8 +69,14 @@ export function TournamentForm(props: Props) {
   const [datesToEliminate, setDatesToEliminate] = useState(editing?.datesToEliminate ?? 2);
   const [dates, setDates] = useState<DateRow[]>(() =>
     editing
-      ? editing.gameDates.map((d) => ({ id: d.id, dateNumber: d.dateNumber, scheduledDate: d.scheduledDate.split('T')[0], status: d.status }))
-      : generateTournamentDates(undefined, 12)
+      ? editing.gameDates.map((d) => ({
+          key: `id-${d.id}`,
+          id: d.id,
+          dateNumber: d.dateNumber,
+          scheduledDate: calendarDay(d.scheduledDate),
+          status: d.status,
+        }))
+      : withKeys(generateTournamentDates(undefined, 12))
   );
   const [blinds, setBlinds] = useState<BlindLevel[]>(() =>
     editing && editing.blindLevels.length > 0
@@ -72,21 +92,43 @@ export function TournamentForm(props: Props) {
     ? editing.tournamentParticipants.map((tp) => tp.player).filter((p) => !props.members.some((m) => m.id === p.id))
     : [];
   const pickable = [...props.members, ...extra];
+  const finished = editing?.status === 'FINALIZADO';
+  const currentIds = editing ? editing.tournamentParticipants.map((tp) => tp.player.id) : [];
+  const played = editing ? playedDatesByPlayer(editing.gameDates) : {};
+  // Quien ya jugó y sigue inscrito no se puede destildar.
+  const fixedIds = new Set(currentIds.filter((id) => (played[id]?.length ?? 0) > 0 && participantIds.includes(id)));
+  const participantsPlan = editing
+    ? planParticipantsEdit({
+        current: currentIds,
+        next: participantIds,
+        played,
+        players: pickable.map((p) => ({ id: p.id, name: fullName(p), role: p.role, isActive: p.isActive !== false })),
+      })
+    : null;
+  const calendarPlan = editing
+    ? planCalendarEdit(editing.gameDates, dates.map((d) => ({ id: d.id, scheduledDate: d.scheduledDate })))
+    : null;
+  const editProblem = finished
+    ? null
+    : (participantsPlan && !participantsPlan.ok && participantsPlan.error.message) ||
+      (calendarPlan && !calendarPlan.ok && calendarPlan.error.message) ||
+      null;
 
   const validation = validateTournamentForm({ tournamentNumber: number, gameDates: dates, participantIds, blindLevels: blinds });
   const today = getEcuadorTodayString();
-  const pastDates = dates.filter((d) => !LOCKED.includes(d.status ?? 'pending') && d.scheduledDate < today);
+  const pastDates = dates.filter((d) => !isLocked(d) && d.scheduledDate < today);
 
   const changeTotal = (n: number) => {
     if (n < 10 || n > 15) return;
     setTotalDates(n);
-    setDates(generateTournamentDates(parseToUTCNoon(dates[0]?.scheduledDate ?? today), n));
+    setDates(withKeys(generateTournamentDates(parseToUTCNoon(dates[0]?.scheduledDate ?? today), n)));
   };
 
   const save = async () => {
     setError(null);
     if (participantIds.length === 0) return setError('Elegí al menos un participante.');
     if (!validation.isValid) return setError(validation.errors[0]?.message ?? 'Revisá los blinds.');
+    if (editProblem) return setError(editProblem);
     if (!editing && dates.length !== totalDates) return setError(`Debe programar las ${totalDates} fechas.`);
 
     setSaving(true);
@@ -94,13 +136,14 @@ export function TournamentForm(props: Props) {
       if (editing) {
         await apiFetch(`/api/tournaments/${editing.id}`, {
           method: 'PUT',
-          json: {
-            gameDates: dates
-              .filter((d) => !LOCKED.includes(d.status ?? 'pending'))
-              .map((d) => ({ id: d.id, dateNumber: d.dateNumber, scheduledDate: d.scheduledDate })),
-            participantIds,
-            blindLevels: blinds,
-          },
+          // Finalizado: solo blinds (jugadores y calendario quedan como están).
+          json: finished
+            ? { blindLevels: blinds }
+            : {
+                calendar: dates.map((d) => ({ id: d.id ?? null, scheduledDate: d.scheduledDate })),
+                ...(participantsPlan?.ok && participantsPlan.value.changed ? { participantIds } : {}),
+                blindLevels: blinds,
+              },
         });
         refresh.tournaments(editing.id);
         router.back();
@@ -141,7 +184,20 @@ export function TournamentForm(props: Props) {
       {tab === 'participantes' ? (
         <CPCard className="gap-3 p-4">
           <Overline>Participantes del torneo</Overline>
-          <PlayerPicker players={pickable} selected={participantIds} onChange={setParticipantIds} />
+          {editing && !finished ? <Muted className="text-xs">Se puede inscribir tarde. Quien ya jugó una fecha no se quita.</Muted> : null}
+          <PlayerPicker
+            players={pickable}
+            selected={participantIds}
+            onChange={setParticipantIds}
+            disabledIds={finished ? new Set(pickable.map((p) => p.id)) : fixedIds}
+            detail={(p) => {
+              const n = played[p.id];
+              if (n?.length && currentIds.includes(p.id)) return n.length === 1 ? `Jugó la fecha ${n[0]}` : `Jugó ${n.length} fechas`;
+              if (editing && participantIds.includes(p.id) && !currentIds.includes(p.id)) return 'Se inscribe al guardar';
+              if (editing && !participantIds.includes(p.id) && currentIds.includes(p.id)) return 'Sale al guardar';
+              return undefined;
+            }}
+          />
           {participantIds.length > 24 ? <Notice tone="danger">Máximo 24 participantes por torneo.</Notice> : null}
         </CPCard>
       ) : null}
@@ -161,29 +217,67 @@ export function TournamentForm(props: Props) {
               {pastDates.length === 1 ? `La fecha ${pastDates[0].dateNumber} quedó` : `${pastDates.length} fechas quedaron`} en el pasado.
             </Notice>
           ) : null}
+          {finished ? <Notice>El torneo terminó: el calendario queda como está.</Notice> : null}
           {dates.map((d, i) => {
-            const locked = LOCKED.includes(d.status ?? 'pending');
+            const locked = finished || isLocked(d);
+            const canRemove = !!editing && !locked && dates.length > MIN_TOURNAMENT_DATES;
             return (
-              <CPCard key={d.dateNumber} className="gap-2 p-3">
-                <View className="flex-row items-center justify-between">
-                  <Text className="font-display text-sm text-cp-primary-light">Fecha {d.dateNumber}</Text>
-                  {d.status && d.status !== 'pending' ? <Pill label={statusLabel[d.status]} tone={locked ? 'ok' : 'muted'} /> : null}
+              <CPCard key={d.key} className="gap-2 p-3">
+                <View className="flex-row items-center justify-between gap-2">
+                  <Text className="font-display text-sm text-cp-primary-light">Fecha {i + 1}</Text>
+                  <View className="flex-row items-center gap-2">
+                    {editing && !d.id ? <Pill label="Nueva" tone="ok" /> : null}
+                    {d.status && d.status !== 'pending' ? <Pill label={statusLabel[d.status]} tone={locked ? 'ok' : 'muted'} /> : null}
+                    {canRemove ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Quitar la fecha ${i + 1}`}
+                        hitSlop={8}
+                        onPress={() => setDates(dates.filter((_, j) => j !== i).map((row, j) => ({ ...row, dateNumber: j + 1 })))}
+                        className="min-h-[44px] justify-center px-2 active:opacity-70">
+                        <Text className="font-inter-semibold text-xs uppercase tracking-[1px] text-cp-negative">Quitar</Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
                 </View>
                 <DateStepper
                   value={d.scheduledDate}
-                  label={`Fecha ${d.dateNumber}`}
+                  label={`Fecha ${i + 1}`}
                   compact
                   disabled={locked}
-                  onChange={(v) => setDates(rescheduleFrom(dates, i, v).map((row, j) => (j > i && LOCKED.includes(row.status ?? 'pending') ? dates[j] : row)))}
+                  onChange={(v) => setDates(rescheduleFrom(dates, i, v).map((row, j) => (j > i && isLocked(row) ? dates[j] : row)))}
                 />
               </CPCard>
             );
           })}
+          {editing && !finished ? (
+            <CPButton
+              title="Agregar fecha al final"
+              variant="outline"
+              disabled={dates.length >= MAX_TOURNAMENT_DATES}
+              onPress={() =>
+                setDates([
+                  ...dates,
+                  {
+                    key: `new-${Date.now()}`,
+                    dateNumber: dates.length + 1,
+                    scheduledDate: nextCalendarDay(dates.map((d) => d.scheduledDate)),
+                    status: 'pending',
+                  },
+                ])
+              }
+            />
+          ) : null}
+          {editing ? (
+            <Muted className="text-xs">
+              {dates.length} fechas · entre {MIN_TOURNAMENT_DATES} y {MAX_TOURNAMENT_DATES}
+            </Muted>
+          ) : null}
           {!editing ? (
             <CPButton
               title="Reiniciar calendario"
               variant="ghost"
-              onPress={() => setDates(generateTournamentDates(undefined, totalDates))}
+              onPress={() => setDates(withKeys(generateTournamentDates(undefined, totalDates)))}
             />
           ) : null}
         </View>
@@ -195,12 +289,12 @@ export function TournamentForm(props: Props) {
         </CPCard>
       ) : null}
 
-      <FormError message={error} />
+      <FormError message={error ?? editProblem} />
       <CPButton
         title={editing ? 'Guardar cambios' : `Crear torneo ${number}`}
         size="lg"
         loading={saving}
-        disabled={!validation.isValid || participantIds.length === 0}
+        disabled={!validation.isValid || participantIds.length === 0 || !!editProblem}
         onPress={save}
       />
     </View>
