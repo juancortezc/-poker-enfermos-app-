@@ -31,6 +31,8 @@ export interface TournamentGameDate {
   dateNumber: number;
   scheduledDate: string;
   status: GameDateStatus;
+  /** Jugadores de la fecha (lo trae GET /api/tournaments/[id]). */
+  playerIds?: string[];
 }
 
 /** GET /api/tournaments?status=… */

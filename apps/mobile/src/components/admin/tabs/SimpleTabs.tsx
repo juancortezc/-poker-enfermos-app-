@@ -37,7 +37,12 @@ export function TorneoTab({ tournament }: { tournament: ActiveTournament | undef
             {tournament.totalDates} fechas · {tournament.participantIds.length} jugadores
           </Muted>
           <CPButton
+            title="Editar torneo"
+            onPress={() => router.push({ pathname: '/tournaments/[id]/edit', params: { id: String(tournament.id) } })}
+          />
+          <CPButton
             title="Administrar torneo"
+            variant="outline"
             onPress={() => router.push({ pathname: '/tournaments/[id]', params: { id: String(tournament.id) } })}
           />
         </CPCard>
