@@ -1,0 +1,68 @@
+# Lo que EAS sube para compilar apps/mobile. Si existe, EAS ignora el
+# .gitignore y usa solo este archivo, así que repite sus reglas.
+#
+# Estrategia: excluir todo y volver a incluir lo mínimo del monorepo:
+#   - package.json y package-lock.json de la raíz (npm workspaces)
+#   - apps/mobile y packages/* (@poker/shared, @poker/design)
+#   - apps/web/package.json y apps/web/prisma/schema.prisma: apps/web es un
+#     workspace, npm ci lo instala y su postinstall corre `prisma generate`.
+#     El resto de la web no hace falta para la app.
+#
+# Ojo: EAS compara rutas sin barra final ("apps", no "apps/"), así que las
+# reglas de carpetas van sin "/" al final o no se aplican.
+
+/*
+!/package.json
+!/package-lock.json
+!/apps
+!/packages
+
+/apps/*
+!/apps/mobile
+!/apps/web
+
+/apps/web/*
+!/apps/web/package.json
+!/apps/web/prisma
+/apps/web/prisma/*
+!/apps/web/prisma/schema.prisma
+
+# Reglas del .gitignore (aplican dentro de lo incluido)
+node_modules
+.pnp
+.pnp.*
+.yarn
+coverage
+.next
+out
+build
+.DS_Store
+*.pem
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env*
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+NUEVOS_PINS_POKER_ENFERMOS.txt
+enfermos.json
+
+# Artefactos locales de Expo y de builds nativos (EAS hace su propio prebuild)
+.expo
+dist
+web-build
+/apps/mobile/ios
+/apps/mobile/android
+*.apk
+*.aab
+*.ipa
+
+# Herramientas y archivos sueltos que el build no necesita
+.claude
+.vscode
+.idea
+AGENTS.md
+/apps/mobile/tests
+/packages/*/tests
