@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Loader2, AlertCircle, Check, Calendar, Users, Settings, ChevronDown } from 'lucide-react'
+import Link from 'next/link'
+import { Loader2, AlertCircle, Check, Calendar, Users, Settings, ChevronDown, Pencil } from 'lucide-react'
 import { buildAuthHeaders, getStoredAuthToken } from '@/lib/client-auth'
 import { generateTournamentDates } from '@/lib/date-utils'
 import { fetchCalendarDraft, saveCalendarDraft, clearCalendarDraft } from '@/lib/calendar-draft'
@@ -35,7 +36,14 @@ const STEPS: { id: Step; label: string; icon: React.ReactNode }[] = [
   { id: 'configuracion', label: 'Config', icon: <Settings size={16} /> },
 ]
 
-export default function CPCrearTorneoTab() {
+interface ActiveTournamentSummary {
+  id: number
+  number: number
+  participantIds?: string[]
+  totalDates?: number
+}
+
+export default function CPCrearTorneoTab({ activeTournament }: { activeTournament?: ActiveTournamentSummary | null } = {}) {
   // State
   const [currentStep, setCurrentStep] = useState<Step>('calendario')
   const [loading, setLoading] = useState(true)
@@ -323,6 +331,8 @@ export default function CPCrearTorneoTab() {
 
   return (
     <div className="space-y-4">
+      {activeTournament ? <EditActiveTournamentCard tournament={activeTournament} /> : null}
+
       {/* Tournament Number Header */}
       <div
         className="flex items-center justify-between p-3"
@@ -463,6 +473,36 @@ export default function CPCrearTorneoTab() {
           canCreate={canProceed('configuracion')}
         />
       )}
+    </div>
+  )
+}
+
+// Torneo activo: entrada a editar inscritos y calendario.
+function EditActiveTournamentCard({ tournament }: { tournament: ActiveTournamentSummary }) {
+  const players = tournament.participantIds?.length
+  return (
+    <div
+      className="flex items-center justify-between gap-3 p-4"
+      style={{ background: 'var(--cp-surface)', border: '1px solid var(--cp-surface-border)', borderRadius: 18 }}
+    >
+      <div className="min-w-0">
+        <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--cp-on-surface-muted)' }}>
+          Torneo activo
+        </p>
+        <p style={{ fontFamily: 'var(--cp-font-display)', fontWeight: 800, fontSize: 22, color: 'var(--cp-on-surface)', lineHeight: 1.15 }}>
+          Torneo {tournament.number}
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--cp-on-surface-muted)' }}>
+          {players ?? 0} inscritos · {tournament.totalDates ?? 12} fechas
+        </p>
+      </div>
+      <Link
+        href={`/tournaments/${tournament.id}/edit`}
+        className="flex min-h-[44px] shrink-0 items-center gap-2 px-4"
+        style={{ background: 'var(--cp-primary)', color: 'var(--cp-on-primary)', borderRadius: 5, fontWeight: 700, fontSize: 14 }}
+      >
+        <Pencil size={16} /> Editar torneo
+      </Link>
     </div>
   )
 }
