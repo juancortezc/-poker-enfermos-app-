@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { TournamentStatus } from '@prisma/client'
 import { requireComision } from '@/lib/api-auth'
 import { parseToUTCNoon } from '@/lib/date-utils'
-import { createTournamentSchema, defaultBlindLevels, tournamentListQuerySchema } from '@poker/shared'
+import { createTournamentSchema, defaultBlindLevels, tournamentListQuerySchema, withTournamentPhotos } from '@poker/shared'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseBody, parseQuery } from '@/lib/http'
 
@@ -48,7 +48,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     orderBy: { number: 'desc' }
   })
 
-  return ok(tournaments)
+  // Cada torneo con sus fotos: antes del T31, las de entonces.
+  return ok(tournaments.map(t => withTournamentPhotos(t, t.number)))
 })
 
 // POST /api/tournaments - Crear nuevo torneo

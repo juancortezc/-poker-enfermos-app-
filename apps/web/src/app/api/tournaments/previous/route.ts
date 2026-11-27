@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok } from '@/lib/http'
+import { withTournamentPhotos } from '@poker/shared'
 
 /**
  * GET /api/tournaments/previous
@@ -52,7 +53,8 @@ export const GET = withErrorHandler(async () => {
   ).length
 
   return ok({
-    tournament: previousTournament,
+    // Fotos del torneo: en uno anterior al T31, las de entonces.
+    tournament: withTournamentPhotos(previousTournament, previousTournament.number),
     stats: {
       completedDates,
       totalDates: previousTournament.gameDates.length,

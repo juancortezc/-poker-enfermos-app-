@@ -52,6 +52,18 @@ export function fullName(player: { firstName: string; lastName?: string | null }
 /** Foto unica de todos los invitados externos (el pato del torneo vigente). */
 export const GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/t31/perfil/pato-1.webp'
 
+/** El pato de los invitados hasta el T30. */
+export const T30_GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/pato.png'
+
+/**
+ * Foto con la que se muestra a alguien: los invitados llevan el pato. Si la API
+ * ya mando el pato viejo (una fecha de un torneo anterior al T31), se respeta.
+ */
+export function displayPhoto(photoUrl?: string | null, role?: string | null): string | null {
+  if (role === 'Invitado') return photoUrl === T30_GUEST_PHOTO_URL ? photoUrl : GUEST_PHOTO_URL
+  return photoUrl ?? null
+}
+
 /**
  * Tarjeta completa (con marco y apodo) del torneo vigente, a partir de la foto
  * de perfil: `t31/perfil/<apodo>.webp` -> `t31/tarjetas/<apodo>.webp`. Los
@@ -59,7 +71,7 @@ export const GUEST_PHOTO_URL = 'https://storage.googleapis.com/poker-enfermos/t3
  * tarjetas (entonces se muestra la foto normal).
  */
 export function playerCardUrl(photoUrl?: string | null, role?: string | null): string | null {
-  const src = role === 'Invitado' ? GUEST_PHOTO_URL : photoUrl
+  const src = displayPhoto(photoUrl, role)
   if (!src) return null
   const m = src.match(/^(https:\/\/storage\.googleapis\.com\/poker-enfermos\/t\d+)\/perfil\/([^/]+\.webp)$/)
   return m ? `${m[1]}/tarjetas/${m[2]}` : null
@@ -88,4 +100,31 @@ export function photoForTournament(photoUrl: string | null | undefined, tourname
   const m = photoUrl.match(/^https:\/\/storage\.googleapis\.com\/poker-enfermos\/t31\/perfil\/([^/]+)\.webp$/)
   const old = m ? T30_PHOTOS[m[1]] : undefined
   return old ? `https://storage.googleapis.com/poker-enfermos/${old}` : photoUrl
+}
+
+const T31_PROFILE_PHOTO = /^https:\/\/storage\.googleapis\.com\/poker-enfermos\/t31\/perfil\/[^/]+\.webp$/
+
+/**
+ * Lo mismo que photoForTournament, pero sobre una respuesta entera: recorre
+ * objetos y arreglos y cambia toda foto de perfil del T31 por la que la persona
+ * tenia en ese torneo. Es el punto unico de la API para lo que pertenece a un
+ * torneo (fechas, eliminaciones, tabla, estadisticas): asi ninguna pantalla
+ * tiene que acordarse. Desde el T31 (o sin numero) devuelve lo mismo. Es
+ * idempotente y no toca fechas ni otros objetos que no sean planos.
+ */
+export function withTournamentPhotos<T>(data: T, tournamentNumber: number | null | undefined): T {
+  if (tournamentNumber == null || tournamentNumber >= FIRST_CARD_TOURNAMENT) return data
+  const walk = (value: unknown): unknown => {
+    if (typeof value === 'string') {
+      return T31_PROFILE_PHOTO.test(value) ? photoForTournament(value, tournamentNumber) : value
+    }
+    if (Array.isArray(value)) return value.map(walk)
+    if (value && typeof value === 'object') {
+      const proto = Object.getPrototypeOf(value)
+      if (proto !== Object.prototype && proto !== null) return value
+      return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, walk(v)]))
+    }
+    return value
+  }
+  return walk(data) as T
 }

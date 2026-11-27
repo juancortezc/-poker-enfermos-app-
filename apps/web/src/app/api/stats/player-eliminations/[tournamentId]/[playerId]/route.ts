@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { AppError, withErrorHandler } from '@/lib/errors'
 import { ok, parseParams } from '@/lib/http'
+import { withPhotosOfTournament } from '@/lib/tournament-photos'
 import { tournamentPlayerParamsSchema } from '@poker/shared'
 
 interface RouteParams {
@@ -101,9 +102,10 @@ export const GET = withErrorHandler(async (
   // Convert map to array and sort by count (descending)
   const victims = Array.from(victimsMap.values()).sort((a, b) => b.count - a.count)
 
-  return ok({
+  // Fotos del torneo: en uno anterior al T31, las de entonces.
+  return ok(await withPhotosOfTournament({
     eliminator,
     totalEliminations: eliminations.length,
     victims
-  })
+  }, tournamentIdNum))
 })

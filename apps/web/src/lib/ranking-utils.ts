@@ -6,6 +6,8 @@ import {
   type TournamentRankingData,
   type PlayerPositionDelta,
   type TournamentInsightsData,
+  photoForTournament,
+  withTournamentPhotos,
 } from '@poker/shared';
 import { getPlayerPhotoUrl } from './player-utils';
 import { getPointPenaltiesByPlayer } from './player-adjustments';
@@ -247,7 +249,8 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       });
     }
 
-    return {
+    // Fotos del torneo: antes del T31, la de entonces (no la de lucha libre).
+    return withTournamentPhotos({
       tournament: {
         id: tournament.id,
         name: tournament.name,
@@ -258,7 +261,7 @@ export async function calculateTournamentRanking(tournamentId: number): Promise<
       },
       rankings: sortedRankings,
       lastUpdated: new Date()
-    };
+    }, tournament.number);
 
   } catch (error) {
     console.error('Error calculating tournament ranking:', error);
@@ -425,7 +428,8 @@ export async function calculateTournamentInsights(tournamentId: number): Promise
     const registeredPlayers = tournament.tournamentParticipants.map(tp => ({
       id: tp.player.id,
       name: `${tp.player.firstName} ${tp.player.lastName}`,
-      photo: getPlayerPhotoUrl(tp.player.photoUrl, tp.player.role) || undefined
+      // Foto del torneo: antes del T31, la de entonces.
+      photo: photoForTournament(getPlayerPhotoUrl(tp.player.photoUrl, tp.player.role), tournament.number) || undefined
     }));
     const registeredPlayerIds = registeredPlayers.map(p => p.id);
     const playerById = new Map(registeredPlayers.map(p => [p.id, p]));

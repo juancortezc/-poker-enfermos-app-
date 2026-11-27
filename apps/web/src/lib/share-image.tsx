@@ -35,6 +35,7 @@ import {
   shortenFullName,
   type Phrase,
   type PlayerRanking,
+  withTournamentPhotos,
 } from '@poker/shared'
 import { getPlayerPhotoUrl } from '@/lib/player-utils'
 import { getAvatarColor, getInitials } from '@/lib/avatar-utils'
@@ -1248,10 +1249,13 @@ export async function buildAcumImage(): Promise<Response> {
 
 /* ── La noche ────────────────────────────────────────────────────────── */
 
-/** La ultima fecha cerrada del torneo activo, con todo lo que hace falta. */
-async function ultimaFechaCerrada(torneoId: number) {
-  return prisma.gameDate.findFirst({
-    where: { tournamentId: torneoId, status: 'completed' },
+/**
+ * La ultima fecha cerrada del torneo activo, con todo lo que hace falta. Las
+ * fotos son las de ese torneo (antes del T31, las de entonces).
+ */
+async function ultimaFechaCerrada(torneo: { id: number; number: number }) {
+  const fecha = await prisma.gameDate.findFirst({
+    where: { tournamentId: torneo.id, status: 'completed' },
     orderBy: { dateNumber: 'desc' },
     select: {
       dateNumber: true,
@@ -1269,6 +1273,13 @@ async function ultimaFechaCerrada(torneoId: number) {
       },
     },
   })
+  return withTournamentPhotos(fecha, torneo.number)
+}
+
+/** Un jugador con la foto que tenia en ese torneo. */
+async function jugadorDelTorneo(id: string, numeroTorneo: number) {
+  const jugador = await prisma.player.findUnique({ where: { id }, select: PLAYER_PUBLIC_SELECT })
+  return withTournamentPhotos(jugador, numeroTorneo)
 }
 
 type JugadorFecha = {
@@ -1382,7 +1393,7 @@ export async function buildUltimaFechaImage(): Promise<Response> {
   const torneo = await torneoActivo()
   if (!torneo) return new Response('No hay torneo activo', { status: 404 })
 
-  const fecha = await ultimaFechaCerrada(torneo.id)
+  const fecha = await ultimaFechaCerrada(torneo)
   if (!fecha || fecha.eliminations.length === 0) {
     return new Response('No hay fecha completada', { status: 404 })
   }
@@ -1393,7 +1404,7 @@ export async function buildUltimaFechaImage(): Promise<Response> {
 
   const varon = varonDeLaNoche(fecha.eliminations)
   const [jugadorVaron, victorias] = await Promise.all([
-    varon ? prisma.player.findUnique({ where: { id: varon.id }, select: PLAYER_PUBLIC_SELECT }) : null,
+    varon ? jugadorDelTorneo(varon.id, torneo.number) : null,
     // Victorias del ganador en el torneo, contando esta: elige el banco de la
     // frase (primera victoria / repite), igual que el Inicio con firstPlaces.
     prisma.elimination.count({
@@ -1719,7 +1730,7 @@ export async function buildMalazoFechaImage(): Promise<Response> {
   const torneo = await torneoActivo()
   if (!torneo) return new Response('No hay torneo activo', { status: 404 })
 
-  const fecha = await ultimaFechaCerrada(torneo.id)
+  const fecha = await ultimaFechaCerrada(torneo)
   if (!fecha || fecha.eliminations.length === 0) {
     return new Response('No hay fecha completada', { status: 404 })
   }
@@ -1729,10 +1740,7 @@ export async function buildMalazoFechaImage(): Promise<Response> {
   const malazo = fecha.eliminations[fecha.eliminations.length - 1]
   const segundo = fecha.eliminations.length > 1 ? fecha.eliminations[fecha.eliminations.length - 2] : null
 
-  const verdugo = await prisma.player.findUnique({
-    where: { id: malazo.eliminatorPlayerId },
-    select: PLAYER_PUBLIC_SELECT,
-  })
+  const verdugo = await jugadorDelTorneo(malazo.eliminatorPlayerId, torneo.number)
 
   const [caras, caraVerdugo] = await Promise.all([
     fotosDe(
@@ -1835,7 +1843,7 @@ export async function buildLoQueDejoImage(): Promise<Response> {
   const torneo = await torneoActivo()
   if (!torneo) return new Response('No hay torneo activo', { status: 404 })
 
-  const fecha = await ultimaFechaCerrada(torneo.id)
+  const fecha = await ultimaFechaCerrada(torneo)
   if (!fecha || fecha.eliminations.length === 0) {
     return new Response('No hay fecha completada', { status: 404 })
   }
@@ -1857,10 +1865,7 @@ export async function buildLoQueDejoImage(): Promise<Response> {
 
   const varon = varonDeLaNoche(fecha.eliminations)
   if (varon) {
-    const jugador = await prisma.player.findUnique({
-      where: { id: varon.id },
-      select: PLAYER_PUBLIC_SELECT,
-    })
+    const jugador = await jugadorDelTorneo(varon.id, torneo.number)
     if (jugador) {
       tarjetas.push({
         etiqueta: 'EL VARÓN',

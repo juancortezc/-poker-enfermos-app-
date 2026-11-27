@@ -1,6 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { playerLabel, shortenFullName, fullName, playerCardUrl, photoForTournament } from '../src/index'
+import {
+  playerLabel, shortenFullName, fullName, playerCardUrl, photoForTournament, displayPhoto, withTournamentPhotos,
+  GUEST_PHOTO_URL, T30_GUEST_PHOTO_URL,
+} from '../src/index'
 
 test('playerLabel: alias, inicial en mayuscula y sin apellido', () => {
   assert.equal(playerLabel({ firstName: 'Juan', lastName: 'cortez' }), 'Juan C.')
@@ -42,4 +45,32 @@ test('photoForTournament: antes del T31 la foto vieja, desde el T31 la actual', 
   assert.equal(photoForTournament(lulu, 31), lulu)
   assert.equal(photoForTournament('https://x/otra.png', 28), 'https://x/otra.png')
   assert.equal(photoForTournament(null, 28), null)
+})
+
+test('displayPhoto: invitados con el pato vigente, salvo que ya venga el pato viejo', () => {
+  assert.equal(displayPhoto('https://x/cualquiera.png', 'Invitado'), GUEST_PHOTO_URL)
+  assert.equal(displayPhoto(T30_GUEST_PHOTO_URL, 'Invitado'), T30_GUEST_PHOTO_URL)
+  assert.equal(displayPhoto('https://x/a.png', 'Enfermo'), 'https://x/a.png')
+  assert.equal(displayPhoto(undefined, 'Enfermo'), null)
+  // tarjeta: el pato viejo no tiene tarjeta, el vigente si
+  assert.equal(playerCardUrl(T30_GUEST_PHOTO_URL, 'Invitado'), null)
+})
+
+test('withTournamentPhotos: cambia toda foto del T31 en una respuesta de un torneo anterior', () => {
+  const lulu = 'https://storage.googleapis.com/poker-enfermos/t31/perfil/lulu.webp'
+  const cuando = new Date('2026-11-01T00:00:00Z')
+  const data = {
+    rankings: [{ playerPhoto: lulu, name: 'Lulu' }],
+    elim: { eliminatedPlayer: { photoUrl: GUEST_PHOTO_URL }, at: cuando },
+    otra: 'https://x/otra.png',
+  }
+  const old = withTournamentPhotos(data, 30)
+  assert.equal(old.rankings[0].playerPhoto, 'https://storage.googleapis.com/poker-enfermos/lulu.png')
+  assert.equal(old.elim.eliminatedPlayer.photoUrl, T30_GUEST_PHOTO_URL)
+  assert.equal(old.elim.at, cuando)
+  assert.equal(old.otra, 'https://x/otra.png')
+  assert.equal(data.rankings[0].playerPhoto, lulu, 'no muta la entrada')
+  assert.equal(withTournamentPhotos(data, 31), data)
+  assert.equal(withTournamentPhotos(data, undefined), data)
+  assert.deepEqual(withTournamentPhotos(old, 30), old)
 })

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createTournamentDateSchema, idParamsSchema } from '@poker/shared'
+import { createTournamentDateSchema, idParamsSchema, withTournamentPhotos } from '@poker/shared'
 import { requireComision, requireUser } from '@/lib/api-auth'
 import { parseToUTCNoon } from '@/lib/date-utils'
 import { AppError, withErrorHandler } from '@/lib/errors'
@@ -13,7 +13,7 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: Ctx) =>
   await requireUser(req)
   const { id: tournamentId } = parseParams(await params, idParamsSchema)
 
-  const gameDates = await prisma.gameDate.findMany({
+  const [gameDates, tournament] = await Promise.all([prisma.gameDate.findMany({
     where: { tournamentId },
     orderBy: { dateNumber: 'asc' },
     include: {
@@ -51,9 +51,10 @@ export const GET = withErrorHandler(async (req: NextRequest, { params }: Ctx) =>
         }
       }
     }
-  })
+  }), prisma.tournament.findUnique({ where: { id: tournamentId }, select: { number: true } })])
 
-  return ok(gameDates)
+  // Fotos del torneo: en uno anterior al T31, las de entonces.
+  return ok(withTournamentPhotos(gameDates, tournament?.number))
 })
 
 // POST /api/tournaments/[id]/dates - Crear nueva fecha
